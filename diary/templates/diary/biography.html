@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Biography | DiaryVault</title>
+  <meta name="theme-color" content="#0ea5e9" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="{% static 'css/output.css' %}" rel="stylesheet" />
+  <link href="{% static 'diary/css/custom.css' %}" rel="stylesheet" />
+
+  <!-- Favicons -->
+  <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon" />
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'apple-touch-icon.png' %}">
+  <link rel="icon" type="image/png" sizes="96x96" href="{% static 'favicon-96x96.png' %}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{% static 'web-app-manifest-192x192.png' %}">
+  <link rel="icon" type="image/png" sizes="512x512" href="{% static 'web-app-manifest-512x512.png' %}">
+  <link rel="manifest" href="{% static 'site.webmanifest' %}">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .blinking-cursor::after {
+      content: '|';
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body class="bg-[#f0f9ff] text-gray-800 min-h-screen flex flex-col">
+
+  <!-- 💡 Header -->
+  <header class="w-full shadow bg-white py-4 px-6 sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-extrabold text-sky-600">DiaryVault</h1>
+      <a href="{% url 'home' %}" class="text-sm text-sky-600 hover:underline transition">
+        ← Back to Diary
+      </a>
+    </div>
+  </header>
+
+  <!-- 📖 Biography Content -->
+  <main class="flex-1 w-full max-w-5xl mx-auto px-6 py-8 overflow-y-auto">
+    <div class="text-center mb-10">
+      <h2 class="text-4xl font-extrabold text-sky-600">Your Biography</h2>
+      <p class="text-sm text-gray-500 mt-2">A reflective narrative based on your journal entries.</p>
+    </div>
+
+    <div class="bg-white shadow-xl rounded-xl p-6 md:p-8 max-h-[80vh] overflow-y-auto prose leading-relaxed">
+      <div id="bio-text" class="whitespace-pre-line blinking-cursor">
+        {{ biography|linebreaks }}
+      </div>
+    </div>
+
+    <div class="text-center mt-10 flex flex-col sm:flex-row justify-center gap-4">
+      <button onclick="regenerateBiography()" class="text-sm text-gray-500 hover:text-sky-600 hover:underline transition">
+        🔁 Regenerate Biography
+      </button>
+    </div>
+  </main>
+
+  <script>
+    function regenerateBiography() {
+      const bioBox = document.getElementById("bio-text");
+      bioBox.textContent = "";
+      bioBox.classList.add("blinking-cursor");
+
+      fetch("/stream-biography/")
+        .then(response => {
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder("utf-8");
+
+          function read() {
+            reader.read().then(({ done, value }) => {
+              if (done) {
+                bioBox.classList.remove("blinking-cursor");
+                return;
+              }
+              const chunk = decoder.decode(value, { stream: true });
+              bioBox.textContent += chunk;
+              read();
+            });
+          }
+
+          read();
+        })
+        .catch(() => {
+          bioBox.classList.remove("blinking-cursor");
+          bioBox.textContent = "Something went wrong while generating your biography.";
+        });
+    }
+  </script>
+</body>
+</html>

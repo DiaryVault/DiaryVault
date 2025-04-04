@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DiaryVault</title>
+  <meta name="theme-color" content="#0ea5e9" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="{% static 'css/output.css' %}" rel="stylesheet" />
+  <link href="{% static 'diary/css/custom.css' %}" rel="stylesheet" />
+  <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon" />
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'apple-touch-icon.png' %}">
+  <link rel="icon" type="image/png" sizes="96x96" href="{% static 'favicon-96x96.png' %}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{% static 'web-app-manifest-192x192.png' %}">
+  <link rel="icon" type="image/png" sizes="512x512" href="{% static 'web-app-manifest-512x512.png' %}">
+  <link rel="manifest" href="{% static 'site.webmanifest' %}">
+</head>
+<body class="h-screen flex flex-col bg-[#f0f9ff] text-gray-900">
+
+  <!-- 🌟 Navbar -->
+  <header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+      <h1 class="text-2xl font-extrabold text-sky-600 tracking-tight">DiaryVault</h1>
+      <button id="sidebarToggle" class="md:hidden text-sky-600 focus:outline-none">☰</button>
+      <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
+        <a href="{% url 'home' %}" class="text-gray-700 hover:text-sky-600 transition">Home</a>
+        <a href="{% url 'biography' %}" class="text-gray-700 hover:text-sky-600 transition">My Biography</a>
+        <form method="post" action="{% url 'logout' %}" class="inline">
+          {% csrf_token %}
+          <button type="submit" class="text-gray-700 hover:text-red-500 transition">Logout</button>
+        </form>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 📱 Mobile Sidebar Overlay -->
+  <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden" onclick="toggleSidebar()"></div>
+
+  <!-- 🧭 Layout -->
+  <div class="flex flex-1 h-full overflow-hidden relative">
+
+    <!-- 📚 Sidebar -->
+    <aside id="sidebar" class="bg-white border-r border-gray-200 p-6 overflow-y-auto transition-transform transform md:translate-x-0 -translate-x-full md:static fixed top-0 left-0 bottom-0 w-64 z-40 md:z-auto md:block">
+      <div class="flex justify-between items-center mb-4 md:hidden">
+        <h2 class="text-lg font-semibold text-sky-600">📘 Chronicle</h2>
+        <button onclick="toggleSidebar()" class="text-sky-600 text-xl">✕</button>
+      </div>
+      <h2 class="hidden md:block text-lg font-semibold text-sky-600 mb-4">📘 Chronicle</h2>
+
+      <!-- 🏷 Filter by Tag -->
+      <div class="mb-6">
+        <h3 class="text-sm font-semibold text-gray-600 mb-2">Filter by Tag</h3>
+        <div id="tagFilters" class="flex flex-wrap gap-2 text-xs">
+          {% for tag in tags %}
+            <button onclick="filterByTag('{{ tag.name }}')" class="tag-filter px-3 py-1 border border-sky-200 rounded-full text-sky-700 hover:bg-sky-100 transition" data-tag="{{ tag.name }}">{{ tag.name }}</button>
+          {% endfor %}
+          <button onclick="clearTagFilter()" class="text-gray-400 hover:text-gray-600 ml-auto">Clear</button>
+        </div>
+      </div>
+
+      <!-- 🔍 Search -->
+      <div class="mb-4">
+        <input type="text" id="searchInput" oninput="filterEntries()" placeholder="Search entries..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-300 text-sm" />
+      </div>
+
+      <!-- 📑 Entry List (NEWEST FIRST) -->
+      <ul id="entryList" class="space-y-3 text-sm">
+        {% for entry in entries %}
+          <li onclick="scrollToEntry({{ entry.id }})" class="p-3 rounded-lg hover:bg-sky-50 transition border border-gray-100 cursor-pointer">
+            <div class="font-semibold text-gray-800">{{ entry.title }}</div>
+            <div class="text-xs text-gray-500">{{ entry.created_at|date:"M d, Y H:i" }}</div>
+          </li>
+        {% endfor %}
+      </ul>
+    </aside>
+
+    <!-- 💬 Main Chat Area -->
+    <main class="flex-1 flex flex-col h-full">
+      <div id="chat-container" class="flex-1 overflow-y-auto px-6 py-6 max-w-3xl w-full mx-auto space-y-6">
+        {% for entry in entries %}
+          <div id="entry-{{ entry.id }}">
+            <!-- 📝 Entry -->
+            <div class="flex justify-end">
+              <div class="bg-gradient-to-br from-sky-500 to-sky-700 text-white p-4 rounded-3xl shadow-xl max-w-[75%] text-sm leading-relaxed whitespace-pre-line">
+                <div class="font-semibold mb-1">{{ entry.title }}</div>
+                <div class="mb-2 flex flex-wrap gap-1">
+                  {% for tag in entry.tags.all %}
+                    <span class="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full tag-label" data-tag="{{ tag.name }}">{{ tag.name }}</span>
+                  {% endfor %}
+                </div>
+                <div>{{ entry.content }}</div>
+              </div>
+            </div>
+
+            <!-- 🤖 AI Summary -->
+            <div class="flex justify-start">
+              <div class="bg-white border border-gray-200 p-5 rounded-3xl shadow-md max-w-[75%] text-sm leading-relaxed whitespace-pre-line">
+                <div class="font-semibold text-gray-800 mb-1">AI Summary</div>
+                <div id="summary-{{ entry.id }}" class="blinking-cursor">
+                  {% if entry.summary %}{{ entry.summary }}{% else %}No summary yet.{% endif %}
+                </div>
+                <button class="mt-2 text-xs text-sky-600 hover:underline" onclick="regenerateSummary({{ entry.id }})">🔁 Regenerate Summary</button>
+                <div id="spinner-{{ entry.id }}" class="hidden text-sm text-gray-400 mt-1">
+                  <span>Thinking</span><span class="dots">.</span>
+                </div>
+                {% if entry.versions.exists %}
+                  <details class="mt-4 text-xs text-gray-500">
+                    <summary class="cursor-pointer hover:text-sky-600">🕰 View previous summaries ({{ entry.versions.count }})</summary>
+                    <ul class="mt-2 space-y-2 list-disc list-inside">
+                      {% for version in entry.versions.all %}
+                        <li>
+                          <div class="text-gray-600 whitespace-pre-line">{{ version.summary }}</div>
+                          <div class="text-[10px] text-gray-400">{{ version.created_at|date:"M d, Y H:i" }}</div>
+                          <button onclick="restoreVersion({{ version.id }}, {{ entry.id }})" class="mt-1 text-sky-600 text-xs hover:underline">↩️ Restore this version</button>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </details>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- 📝 Input Form -->
+      <form method="post" class="w-full max-w-3xl mx-auto p-4 border-t border-gray-200 bg-white flex gap-3 sticky bottom-0 z-50">
+        {% csrf_token %}
+        <div class="flex-1">
+          <input type="text" name="title" id="id_title" placeholder="Title" class="w-full mb-2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none" required autofocus />
+          <textarea name="content" id="id_content" placeholder="Write your thoughts here..." rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-sky-400 focus:outline-none" required></textarea>
+        </div>
+        <div class="flex flex-col gap-2">
+          <button type="submit" class="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-500 transition">Save Entry</button>
+          <button type="button" onclick="generateAI()" class="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition">✨ AI Help</button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="{% static 'diary/js/home.js' %}"></script>
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.toggle('-translate-x-full');
+      overlay.classList.toggle('hidden');
+    }
+  </script>
+</body>
+</html>
