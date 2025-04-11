@@ -1,0 +1,360 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!-- Favicon and App Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="msapplication-config" content="/static/browserconfig.xml">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DiaryVault</title>
+  <meta name="theme-color" content="#0ea5e9" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&family=Caveat:wght@400;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .book-title {
+      font-family: 'Libre Baskerville', serif;
+    }
+    .handwritten {
+      font-family: 'Caveat', cursive;
+    }
+    .book {
+      transition: all 0.3s ease;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+    .book:hover {
+      transform: rotateY(-15deg) translateY(-10px);
+      z-index: 10;
+    }
+    .book-spine {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 30px;
+      background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0));
+    }
+    @keyframes rotate3d {
+      0% {
+        transform: rotateY(0deg);
+      }
+      50% {
+        transform: rotateY(-15deg);
+      }
+      100% {
+        transform: rotateY(0deg);
+      }
+    }
+    .featured-book {
+      animation: rotate3d 5s infinite;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-sky-50 to-indigo-50 text-gray-900">
+
+  <!-- Navbar -->
+  <header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+      <div class="flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <h1 class="text-2xl font-extrabold text-sky-600 tracking-tight">DiaryVault</h1>
+      </div>
+      <nav class="hidden md:flex gap-6 items-center">
+        <a href="#features" class="text-gray-700 hover:text-sky-600 transition text-sm font-medium">Features</a>
+        <a href="#how-it-works" class="text-gray-700 hover:text-sky-600 transition text-sm font-medium">How It Works</a>
+        <a href="#testimonials" class="text-gray-700 hover:text-sky-600 transition text-sm font-medium">Testimonials</a>
+        <a href="{% url 'login' %}" class="text-gray-700 hover:text-sky-600 transition text-sm font-medium">Login</a>
+        <a href="{% url 'signup' %}" class="bg-sky-600 text-white px-4 py-2 rounded-md hover:bg-sky-500 transition text-sm font-medium">Get Started</a>
+      </nav>
+      <button class="md:hidden text-gray-700" id="mobile-menu-button">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="md:hidden hidden bg-white border-t border-gray-100 px-6 py-4">
+      <nav class="flex flex-col gap-4">
+        <a href="#features" class="text-gray-700 hover:text-sky-600 transition">Features</a>
+        <a href="#how-it-works" class="text-gray-700 hover:text-sky-600 transition">How It Works</a>
+        <a href="#testimonials" class="text-gray-700 hover:text-sky-600 transition">Testimonials</a>
+        <a href="{% url 'login' %}" class="text-gray-700 hover:text-sky-600 transition">Login</a>
+        <a href="{% url 'signup' %}" class="bg-sky-600 text-white px-4 py-2 rounded-md hover:bg-sky-500 transition text-center">Get Started</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="py-20 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12">
+      <div class="lg:w-1/2">
+        <h2 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">Turn Your Daily Thoughts into Your Life Story</h2>
+        <p class="text-xl text-gray-600 mb-8">DiaryVault uses AI to transform your everyday journal entries into a beautifully crafted biography. Capture moments, reflect on memories, and watch your life story unfold.</p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="{% url 'signup' %}" class="bg-sky-600 text-white px-6 py-3 rounded-lg hover:bg-sky-500 transition text-center font-medium">Start Your Journey</a>
+          <a href="#demo" class="border border-sky-600 text-sky-600 px-6 py-3 rounded-lg hover:bg-sky-50 transition text-center font-medium">See Demo</a>
+        </div>
+      </div>
+      <div class="lg:w-1/2 relative">
+        <div class="w-full h-96 relative perspective">
+          <div class="absolute -top-8 -left-10 w-64 h-80 bg-blue-700 rounded-lg shadow-xl book featured-book" style="transform: rotate(-10deg);">
+            <div class="absolute inset-1 bg-white rounded-lg px-5 pt-10 flex flex-col items-center">
+              <div class="book-title text-center text-lg font-bold text-gray-800">My Life Journey</div>
+              <div class="text-xs text-gray-500 mb-4">2023-2025</div>
+              <div class="handwritten text-sm text-gray-800 leading-relaxed">
+                As I reflect on these past two years, I'm amazed at how much has changed...
+              </div>
+            </div>
+            <div class="book-spine"></div>
+          </div>
+
+          <div class="absolute top-20 left-32 w-80 h-96 bg-sky-600 rounded-lg shadow-xl book">
+            <div class="absolute inset-1 bg-white rounded-lg px-6 pt-12 flex flex-col items-center">
+              <div class="book-title text-center text-xl font-bold text-gray-800 mb-2">The DiaryVault Experience</div>
+              <div class="bg-sky-50 p-4 rounded-lg w-full">
+                <p class="handwritten text-sm text-gray-700 mb-3">Today I started using DiaryVault. I wasn't sure what to expect at first...</p>
+                <p class="handwritten text-sm text-gray-700">The AI summary was surprisingly insightful! It picked up on patterns I hadn't noticed in my own writing.</p>
+              </div>
+              <div class="mt-4 bg-indigo-50 p-4 rounded-lg w-full">
+                <div class="text-sm font-medium text-indigo-800 mb-2">AI Summary</div>
+                <p class="text-xs text-gray-600">You seem excited about this new journaling tool, with particular interest in the AI-powered insights...</p>
+              </div>
+            </div>
+            <div class="book-spine"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-16 px-6 bg-white">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl font-bold text-center text-gray-900 mb-16">Transform Your Journaling Experience</h2>
+
+      <div class="grid md:grid-cols-3 gap-10">
+        <!-- Feature 1 -->
+        <div class="flex flex-col items-center text-center">
+          <div class="bg-sky-100 p-4 rounded-full mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Beautiful Digital Library</h3>
+          <p class="text-gray-600">Organize your journals in a visually stunning virtual bookshelf. Browse through different periods of your life as if flipping through real books.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="flex flex-col items-center text-center">
+          <div class="bg-indigo-100 p-4 rounded-full mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">AI-Powered Insights</h3>
+          <p class="text-gray-600">Our AI analyzes your entries to provide personalized insights, identify patterns, and highlight meaningful moments in your life journey.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="flex flex-col items-center text-center">
+          <div class="bg-emerald-100 p-4 rounded-full mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Automated Biography</h3>
+          <p class="text-gray-600">Transform your collection of entries into a cohesive life story. Create chapters, highlight key moments, and share your journey with loved ones.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section id="how-it-works" class="py-16 px-6">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl font-bold text-center text-gray-900 mb-16">How DiaryVault Works</h2>
+
+      <div class="grid md:grid-cols-4 gap-6">
+        <!-- Step 1 -->
+        <div class="bg-white rounded-xl p-6 shadow-md">
+          <div class="w-12 h-12 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4">1</div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-3">Write Daily Entries</h3>
+          <p class="text-gray-600 text-sm">Capture your thoughts, experiences, and reflections in your digital journal. Add tags to organize your entries.</p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="bg-white rounded-xl p-6 shadow-md">
+          <div class="w-12 h-12 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4">2</div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-3">Receive AI Insights</h3>
+          <p class="text-gray-600 text-sm">Our AI analyzes each entry to provide meaningful summaries, identify patterns, and offer reflective questions.</p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bg-white rounded-xl p-6 shadow-md">
+          <div class="w-12 h-12 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4">3</div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-3">Browse Your Collection</h3>
+          <p class="text-gray-600 text-sm">Revisit past entries through your virtual bookshelf, organized by time periods, themes, or life chapters.</p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="bg-white rounded-xl p-6 shadow-md">
+          <div class="w-12 h-12 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4">4</div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-3">Create Your Biography</h3>
+          <p class="text-gray-600 text-sm">Generate a beautifully formatted biography that weaves your individual entries into a coherent narrative.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section id="testimonials" class="py-16 px-6 bg-gray-900 text-white">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl font-bold text-center mb-16">What Our Users Say</h2>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Testimonial 1 -->
+        <div class="bg-gray-800 rounded-xl p-6">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">S</div>
+            <div>
+              <div class="font-semibold">Sarah K.</div>
+              <div class="text-gray-400 text-sm">Using for 6 months</div>
+            </div>
+          </div>
+          <p class="text-gray-300">"DiaryVault has completely transformed how I journal. The AI insights helped me recognize patterns in my thinking I never noticed before. The biography feature is like having a personal historian!"</p>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="bg-gray-800 rounded-xl p-6">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">M</div>
+            <div>
+              <div class="font-semibold">Michael T.</div>
+              <div class="text-gray-400 text-sm">Using for 1 year</div>
+            </div>
+          </div>
+          <p class="text-gray-300">"I've tried many journaling apps, but the book collection interface makes DiaryVault special. I can literally see my life organized on a shelf, and flipping through past chapters is both intuitive and emotional."</p>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="bg-gray-800 rounded-xl p-6">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">J</div>
+            <div>
+              <div class="font-semibold">Jennifer L.</div>
+              <div class="text-gray-400 text-sm">Using for 8 months</div>
+            </div>
+          </div>
+          <p class="text-gray-300">"I started journaling to process a difficult time in my life. DiaryVault's AI not only helped me track my emotional journey but also created a meaningful narrative of growth that I can share with my therapist."</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section id="signup" class="py-20 px-6 bg-gradient-to-r from-sky-600 to-indigo-600 text-white">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-6">Start Your Journey Today</h2>
+      <p class="text-xl opacity-90 mb-8">Join thousands of others who are preserving their memories and creating their life story.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="{% url 'login' %}" class="bg-white text-sky-600 px-6 py-3 rounded-lg font-medium hover:bg-sky-50 transition">Log In</a>
+        <a href="{% url 'signup' %}" class="bg-transparent border-2 border-white text-white px-6 py-3 rounded-lg font-medium hover:bg-white/10 transition">Sign Up</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-100 py-12 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid md:grid-cols-4 gap-8">
+        <div>
+          <div class="flex items-center gap-2 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <h3 class="text-lg font-bold text-sky-600">DiaryVault</h3>
+          </div>
+          <p class="text-sm text-gray-600">Transforming your daily thoughts into a lasting legacy.</p>
+        </div>
+
+        <div>
+          <h4 class="font-semibold text-gray-900 mb-4">Product</h4>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li><a href="#features" class="hover:text-sky-600 transition">Features</a></li>
+            <li><a href="#how-it-works" class="hover:text-sky-600 transition">How It Works</a></li>
+            <li><a href="#" class="hover:text-sky-600 transition">FAQ</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-semibold text-gray-900 mb-4">Connect</h4>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li><a href="#" class="hover:text-sky-600 transition">About</a></li>
+            <li><a href="#" class="hover:text-sky-600 transition">Contact</a></li>
+            <li><a href="#" class="hover:text-sky-600 transition">Support</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-semibold text-gray-900 mb-4">Legal</h4>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li><a href="#" class="hover:text-sky-600 transition">Privacy</a></li>
+            <li><a href="#" class="hover:text-sky-600 transition">Terms</a></li>
+            <li><a href="#" class="hover:text-sky-600 transition">Security</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-12 pt-8 border-t border-gray-200 text-sm text-gray-500 text-center">
+        © 2025 DiaryVault. All rights reserved.
+      </div>
+      <div class="flex justify-center gap-4 text-sm mt-1">
+        <a href="https://crene.com" target="_blank" class="text-blue-500 hover:underline font-medium">Crene</a>
+        <a href="https://euphorie.com" target="_blank" class="text-blue-500 hover:underline font-medium">Euphorie</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-button').addEventListener('click', function() {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+          window.scrollTo({
+            top: targetElement.offsetTop - 100,
+            behavior: 'smooth'
+          });
+
+          // Close mobile menu if open
+          document.getElementById('mobile-menu').classList.add('hidden');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

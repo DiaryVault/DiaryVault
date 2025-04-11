@@ -1,15 +1,33 @@
-from django.contrib.auth import views as auth_views
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
+    # Authentication
     path('', views.home, name='home'),
     path('signup/', views.signup, name='signup'),
-    path('login/', auth_views.LoginView.as_view(template_name='auth/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+    path('login/', auth_views.LoginView.as_view(template_name='diary/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+
+    # Dashboard
+    path('dashboard/', views.dashboard, name='dashboard'),
+
+    # Entries
+    path('entry/new/', views.new_entry, name='new_entry'),
+    path('entry/<int:entry_id>/', views.entry_detail, name='entry_detail'),
+    path('entry/<int:entry_id>/edit/', views.edit_entry, name='edit_entry'),
+    path('entry/<int:entry_id>/delete/', views.delete_entry, name='delete_entry'),
+
+    # Chapters
+    path('chapters/', views.manage_chapters, name='manage_chapters'),
+    path('chapters/<int:chapter_id>/edit/', views.edit_chapter, name='edit_chapter'),
+    path('chapters/<int:chapter_id>/delete/', views.delete_chapter, name='delete_chapter'),
+    path('entry/<int:entry_id>/assign-chapters/', views.assign_to_chapter, name='assign_to_chapter'),
+
+    # Biography and Insights
     path('biography/', views.biography, name='biography'),
-    path('regenerate-summary/<int:entry_id>/', views.regenerate_summary, name='regenerate_summary'),
-    path('restore-summary/<int:version_id>/', views.restore_summary, name='restore_summary'),
-    path('ai-entry/', views.generate_ai_entry, name='ai_entry'),
-    path('stream-summary/<int:entry_id>/', views.stream_summary, name='stream_summary'),
+    path('insights/', views.insights, name='insights'),
+
+    # AJAX endpoints
+    path('api/entry/<int:entry_id>/regenerate-summary/', views.regenerate_summary_ajax, name='regenerate_summary_ajax'),
 ]

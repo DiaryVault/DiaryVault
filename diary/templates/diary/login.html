@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- Favicon and App Icons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+  <link rel="shortcut icon" href="/static/favicon.ico">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="msapplication-config" content="/static/browserconfig.xml">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - DiaryVault</title>
+  <meta name="theme-color" content="#0ea5e9" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+    }
+    .diary-font {
+      font-family: 'Merriweather', serif;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-sky-50 to-indigo-50 min-h-screen flex items-center justify-center p-6">
+  <div class="max-w-md w-full bg-white rounded-xl shadow-xl overflow-hidden">
+    <div class="bg-gradient-to-r from-sky-600 to-indigo-600 py-6 px-6 flex justify-center">
+      <div class="flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <h1 class="text-2xl font-bold text-white">DiaryVault</h1>
+      </div>
+    </div>
+
+    <div class="p-8">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Welcome Back</h2>
+
+      {% if form.errors %}
+      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6 text-sm">
+        <p>Your username and password didn't match. Please try again.</p>
+      </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div class="mb-6">
+          <label for="id_username" class="block text-gray-700 text-sm font-medium mb-2">Username</label>
+          <input type="text" name="username" id="id_username" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none" placeholder="Your username">
+        </div>
+        <div class="mb-6">
+          <label for="id_password" class="block text-gray-700 text-sm font-medium mb-2">Password</label>
+          <input type="password" name="password" id="id_password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none" placeholder="Your password">
+        </div>
+        <button type="submit" class="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-500 transition font-medium">Log In</button>
+        <input type="hidden" name="next" value="{{ next }}">
+      </form>
+
+      <div class="mt-8 text-center">
+        <p class="text-gray-600 text-sm">Don't have an account?</p>
+        <a href="{% url 'signup' %}" class="text-sky-600 font-medium hover:underline text-sm">Sign up</a>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-gray-200 text-center">
+        <a href="{% url 'home' %}" class="text-gray-500 text-sm hover:text-sky-600 flex items-center justify-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to home
+        </a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

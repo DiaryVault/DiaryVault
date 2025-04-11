@@ -1,153 +1,708 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  {% load static %}
+
+  <!-- Favicon and App Icons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+  <link rel="shortcut icon" href="/static/favicon.ico">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="msapplication-config" content="/static/browserconfig.xml">
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DiaryVault</title>
   <meta name="theme-color" content="#0ea5e9" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link href="{% static 'css/output.css' %}" rel="stylesheet" />
-  <link href="{% static 'diary/css/custom.css' %}" rel="stylesheet" />
-  <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon" />
-  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'apple-touch-icon.png' %}">
-  <link rel="icon" type="image/png" sizes="96x96" href="{% static 'favicon-96x96.png' %}">
-  <link rel="icon" type="image/png" sizes="192x192" href="{% static 'web-app-manifest-192x192.png' %}">
-  <link rel="icon" type="image/png" sizes="512x512" href="{% static 'web-app-manifest-512x512.png' %}">
-  <link rel="manifest" href="{% static 'site.webmanifest' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&family=Caveat:wght@400;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+    }
+    .diary-font {
+      font-family: 'Merriweather', serif;
+    }
+    .book-title {
+      font-family: 'Libre Baskerville', serif;
+    }
+    .handwritten {
+      font-family: 'Caveat', cursive;
+    }
+    .book {
+      transition: all 0.3s ease;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+    .book:hover {
+      transform: rotateY(-15deg) translateY(-10px);
+      z-index: 10;
+    }
+    .book-spine {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 30px;
+      background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0));
+    }
+    .book-shelf {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="20" viewBox="0 0 100 20" fill="none"><rect width="100" height="20" fill="%23D1BAA1"/><path d="M0 0 L100 0 L100 2 L0 2 Z" fill="%23A58768"/><path d="M0 18 L100 18 L100 20 L0 20 Z" fill="%237A6348"/></svg>');
+      background-repeat: repeat-x;
+      background-position: bottom;
+    }
+    .book-collection {
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .book-collection::-webkit-scrollbar {
+      display: none;
+    }
+    .page-flip {
+      transition: all 0.5s ease-in-out;
+    }
+    .page-flip:hover {
+      transform: perspective(1000px) rotateY(-7deg);
+    }
+    .page-curl {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 30px;
+      width: 30px;
+      background: linear-gradient(135deg, transparent 50%, rgba(230,230,230,0.7) 50%);
+    }
+    .page-texture {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.5) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(255,255,255,0.5) 2px, transparent 2px);
+      background-size: 40px 40px;
+      background-color: #f8f5f0;
+    }
+    .diary-highlight {
+      box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+    }
+    @keyframes rotate3d {
+      0% {
+        transform: rotateY(0deg);
+      }
+      50% {
+        transform: rotateY(-15deg);
+      }
+      100% {
+        transform: rotateY(0deg);
+      }
+    }
+    .featured-book {
+      animation: rotate3d 5s infinite;
+    }
+    .timeline-entry::before {
+      content: '';
+      position: absolute;
+      left: -29px;
+      top: 0;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #0ea5e9;
+      border: 2px solid white;
+      z-index: 1;
+    }
+    .timeline-line {
+      position: absolute;
+      left: -24px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: #e2e8f0;
+    }
+    .tabs-container button.active {
+      color: #0ea5e9;
+      border-color: #0ea5e9;
+    }
+  </style>
 </head>
-<body class="h-screen flex flex-col bg-[#f0f9ff] text-gray-900">
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f0f9ff] to-[#e6f7ff] text-gray-900">
 
-  <!-- 🌟 Navbar -->
+  <!-- Navbar -->
   <header class="bg-white shadow sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-      <h1 class="text-2xl font-extrabold text-sky-600 tracking-tight">DiaryVault</h1>
-      <button id="sidebarToggle" class="md:hidden text-sky-600 focus:outline-none">☰</button>
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
+      <div class="flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <h1 class="text-2xl font-extrabold text-sky-600 tracking-tight">DiaryVault</h1>
+      </div>
+
+      <!-- Main Navigation -->
       <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
-        <a href="{% url 'home' %}" class="text-gray-700 hover:text-sky-600 transition">Home</a>
-        <a href="{% url 'biography' %}" class="text-gray-700 hover:text-sky-600 transition">My Biography</a>
-        <form method="post" action="{% url 'logout' %}" class="inline">
-          {% csrf_token %}
-          <button type="submit" class="text-gray-700 hover:text-red-500 transition">Logout</button>
-        </form>
+        <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+          </svg>
+          Library
+        </a>
+        <a href="{% url 'new_entry' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+          Journal
+        </a>
+        <a href="{% url 'biography' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Biography
+        </a>
+        <a href="{% url 'insights' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Insights
+        </a>
+
+        <div class="w-px h-6 bg-gray-200"></div>
+
+        <div class="flex items-center gap-3">
+          <div class="h-8 w-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold text-sm">
+            {{ request.user.username|first|upper }}
+          </div>
+          <span class="text-sm text-gray-700">{{ request.user.username }}</span>
+        </div>
       </nav>
+
+      <!-- Mobile menu button -->
+      <button class="md:hidden text-gray-700 hover:text-sky-600" onclick="toggleMobileMenu()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
     </div>
   </header>
 
-  <!-- 📱 Mobile Sidebar Overlay -->
-  <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden" onclick="toggleSidebar()"></div>
-
-  <!-- 🧭 Layout -->
-  <div class="flex flex-1 h-full overflow-hidden relative">
-
-    <!-- 📚 Sidebar -->
-    <aside id="sidebar" class="bg-white border-r border-gray-200 p-6 overflow-y-auto transition-transform transform md:translate-x-0 -translate-x-full md:static fixed top-0 left-0 bottom-0 w-64 z-40 md:z-auto md:block">
-      <div class="flex justify-between items-center mb-4 md:hidden">
-        <h2 class="text-lg font-semibold text-sky-600">📘 Chronicle</h2>
-        <button onclick="toggleSidebar()" class="text-sky-600 text-xl">✕</button>
+  <!-- Mobile Menu Overlay -->
+  <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden">
+    <div class="absolute right-0 top-0 bottom-0 w-64 bg-white p-6 overflow-y-auto">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="font-bold text-lg">Menu</h2>
+        <button onclick="toggleMobileMenu()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-      <h2 class="hidden md:block text-lg font-semibold text-sky-600 mb-4">📘 Chronicle</h2>
+      <nav class="flex flex-col gap-4">
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-2 p-2 hover:bg-sky-50 rounded">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+          </svg>
+          Library
+        </a>
+        <a href="{% url 'new_entry' %}" class="flex items-center gap-2 p-2 hover:bg-sky-50 rounded">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+          Journal
+        </a>
+        <a href="{% url 'biography' %}" class="flex items-center gap-2 p-2 hover:bg-sky-50 rounded">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Biography
+        </a>
+        <a href="{% url 'insights' %}" class="flex items-center gap-2 p-2 hover:bg-sky-50 rounded">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Insights
+        </a>
+        <div class="border-t border-gray-200 my-2 pt-2">
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="flex items-center gap-2 p-2 hover:bg-red-50 rounded text-red-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Logout
+            </button>
+          </form>
+        </div>
+      </nav>
+    </div>
+  </div>
 
-      <!-- 🏷 Filter by Tag -->
-      <div class="mb-6">
-        <h3 class="text-sm font-semibold text-gray-600 mb-2">Filter by Tag</h3>
-        <div id="tagFilters" class="flex flex-wrap gap-2 text-xs">
-          {% for tag in tags %}
-            <button onclick="filterByTag('{{ tag.name }}')" class="tag-filter px-3 py-1 border border-sky-200 rounded-full text-sky-700 hover:bg-sky-100 transition" data-tag="{{ tag.name }}">{{ tag.name }}</button>
-          {% endfor %}
-          <button onclick="clearTagFilter()" class="text-gray-400 hover:text-gray-600 ml-auto">Clear</button>
+  <!-- Main Content -->
+  <div class="flex-1 p-6 lg:p-8">
+    <div class="max-w-7xl mx-auto">
+      <!-- Welcome & Stats Section -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
+        <div>
+          <h2 class="text-3xl font-bold text-gray-900 mb-1">Welcome back, {{ request.user.username }}</h2>
+          <p class="text-gray-600">Continue your journey or explore past memories</p>
+        </div>
+        <div class="flex gap-6 mt-4 md:mt-0">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-sky-600">{{ total_entries }}</div>
+            <div class="text-sm text-gray-500">Total Entries</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-emerald-600">{{ streak }}</div>
+            <div class="text-sm text-gray-500">Days Streak</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-indigo-600">{{ completion_percentage }}%</div>
+            <div class="text-sm text-gray-500">Biography</div>
+          </div>
         </div>
       </div>
 
-      <!-- 🔍 Search -->
-      <div class="mb-4">
-        <input type="text" id="searchInput" oninput="filterEntries()" placeholder="Search entries..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-300 text-sm" />
+      <!-- Quick Actions -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+        <a href="{% url 'new_entry' %}" class="bg-white rounded-xl p-5 shadow-md hover:shadow-lg transition flex items-center gap-4">
+          <div class="bg-sky-100 p-3 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-800">New Entry</h3>
+            <p class="text-sm text-gray-600">Record today's thoughts</p>
+          </div>
+        </a>
+
+        <a href="{% url 'biography' %}" class="bg-white rounded-xl p-5 shadow-md hover:shadow-lg transition flex items-center gap-4">
+          <div class="bg-indigo-100 p-3 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-800">View Biography</h3>
+            <p class="text-sm text-gray-600">Read your life story</p>
+          </div>
+        </a>
+
+        <a href="{% url 'insights' %}" class="bg-white rounded-xl p-5 shadow-md hover:shadow-lg transition flex items-center gap-4">
+          <div class="bg-emerald-100 p-3 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-800">AI Insights</h3>
+            <p class="text-sm text-gray-600">Discover patterns</p>
+          </div>
+        </a>
       </div>
 
-      <!-- 📑 Entry List (NEWEST FIRST) -->
-      <ul id="entryList" class="space-y-3 text-sm">
-        {% for entry in entries %}
-          <li onclick="scrollToEntry({{ entry.id }})" class="p-3 rounded-lg hover:bg-sky-50 transition border border-gray-100 cursor-pointer">
-            <div class="font-semibold text-gray-800">{{ entry.title }}</div>
-            <div class="text-xs text-gray-500">{{ entry.created_at|date:"M d, Y H:i" }}</div>
-          </li>
-        {% endfor %}
-      </ul>
-    </aside>
+      <!-- Tabs Container -->
+      <div class="mb-8">
+        <div class="tabs-container flex border-b border-gray-200">
+          <button onclick="switchTab('library')" class="pb-3 px-6 text-gray-600 border-b-2 border-transparent active">Library</button>
+          <button onclick="switchTab('recent')" class="pb-3 px-6 text-gray-600 border-b-2 border-transparent">Recent Entries</button>
+          <button onclick="switchTab('insights')" class="pb-3 px-6 text-gray-600 border-b-2 border-transparent">AI Insights</button>
+        </div>
+      </div>
 
-    <!-- 💬 Main Chat Area -->
-    <main class="flex-1 flex flex-col h-full">
-      <div id="chat-container" class="flex-1 overflow-y-auto px-6 py-6 max-w-3xl w-full mx-auto space-y-6">
-        {% for entry in entries %}
-          <div id="entry-{{ entry.id }}">
-            <!-- 📝 Entry -->
-            <div class="flex justify-end">
-              <div class="bg-gradient-to-br from-sky-500 to-sky-700 text-white p-4 rounded-3xl shadow-xl max-w-[75%] text-sm leading-relaxed whitespace-pre-line">
-                <div class="font-semibold mb-1">{{ entry.title }}</div>
-                <div class="mb-2 flex flex-wrap gap-1">
-                  {% for tag in entry.tags.all %}
-                    <span class="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full tag-label" data-tag="{{ tag.name }}">{{ tag.name }}</span>
-                  {% endfor %}
-                </div>
-                <div>{{ entry.content }}</div>
-              </div>
+      <!-- Tab Contents -->
+      <div id="tabContents">
+        <!-- Library Tab Content (visible by default) -->
+        <div id="library-tab">
+          <!-- Time Period Collection -->
+          <div class="mb-16">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-xl font-semibold text-gray-800">Time Periods</h3>
+              <button class="text-sm text-sky-600 hover:underline">View all</button>
             </div>
 
-            <!-- 🤖 AI Summary -->
-            <div class="flex justify-start">
-              <div class="bg-white border border-gray-200 p-5 rounded-3xl shadow-md max-w-[75%] text-sm leading-relaxed whitespace-pre-line">
-                <div class="font-semibold text-gray-800 mb-1">AI Summary</div>
-                <div id="summary-{{ entry.id }}" class="blinking-cursor">
-                  {% if entry.summary %}{{ entry.summary }}{% else %}No summary yet.{% endif %}
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {% for period in time_periods %}
+              <a href="#" class="block">
+                <div class="h-64 bg-{{ period.color }} rounded-lg shadow-lg book group relative">
+                  <div class="absolute inset-1 bg-white rounded-lg p-4 flex flex-col justify-between">
+                    <div>
+                      <div class="book-title text-center font-bold text-gray-800">{{ period.period }}</div>
+                      <div class="text-xs text-center text-gray-500 mb-3">
+                        {% if 'Q1' in period.period %}Jan - Mar{% endif %}
+                        {% if 'Q2' in period.period %}Apr - Jun{% endif %}
+                        {% if 'Q3' in period.period %}Jul - Sep{% endif %}
+                        {% if 'Q4' in period.period %}Oct - Dec{% endif %}
+                      </div>
+                      <div class="h-24 overflow-hidden">
+                        <div class="handwritten text-xs text-gray-600 leading-relaxed">
+                          {% if period.first_entry %}
+                            {{ period.first_entry.content|truncatechars:180 }}
+                          {% else %}
+                            Start adding entries to this time period...
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-xs text-center text-{{ period.color }}">{{ period.count }} entries</div>
+                  </div>
+                  <div class="book-spine"></div>
+                  <div class="absolute inset-0 rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-10 transition pointer-events-none"></div>
                 </div>
-                <button class="mt-2 text-xs text-sky-600 hover:underline" onclick="regenerateSummary({{ entry.id }})">🔁 Regenerate Summary</button>
-                <div id="spinner-{{ entry.id }}" class="hidden text-sm text-gray-400 mt-1">
-                  <span>Thinking</span><span class="dots">.</span>
+              </a>
+              {% empty %}
+              <p class="col-span-full text-gray-500 text-center py-8">
+                You haven't created any entries yet. Start journaling to build your library!
+              </p>
+              {% endfor %}
+
+              <!-- Add New -->
+              <a href="#" class="block">
+                <div class="h-64 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center hover:bg-gray-50 transition">
+                  <div class="text-center">
+                    <div class="h-12 w-12 bg-gray-200 mx-auto rounded-full flex items-center justify-center mb-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                    </div>
+                    <div class="text-sm text-gray-600">Create New</div>
+                  </div>
                 </div>
-                {% if entry.versions.exists %}
-                  <details class="mt-4 text-xs text-gray-500">
-                    <summary class="cursor-pointer hover:text-sky-600">🕰 View previous summaries ({{ entry.versions.count }})</summary>
-                    <ul class="mt-2 space-y-2 list-disc list-inside">
-                      {% for version in entry.versions.all %}
-                        <li>
-                          <div class="text-gray-600 whitespace-pre-line">{{ version.summary }}</div>
-                          <div class="text-[10px] text-gray-400">{{ version.created_at|date:"M d, Y H:i" }}</div>
-                          <button onclick="restoreVersion({{ version.id }}, {{ entry.id }})" class="mt-1 text-sky-600 text-xs hover:underline">↩️ Restore this version</button>
-                        </li>
-                      {% endfor %}
-                    </ul>
-                  </details>
-                {% endif %}
+              </a>
+            </div>
+          </div>
+
+          <!-- Life Chapters Collection -->
+          <div class="mb-16">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-xl font-semibold text-gray-800">Life Chapters</h3>
+              <button class="text-sm text-sky-600 hover:underline">Manage chapters</button>
+            </div>
+
+            <!-- Book Shelf -->
+            <div class="h-80 relative book-shelf mb-6">
+              <div class="overflow-x-auto h-full book-collection">
+                <div class="flex gap-8 px-4 py-2 min-w-max h-full items-end">
+                  <!-- Book 1 -->
+                  <div class="h-64 w-40 bg-purple-700 rounded-lg shadow-xl book">
+                    <div class="absolute inset-1 bg-white rounded-lg p-4 flex flex-col items-center">
+                      <div class="book-title text-center font-bold text-gray-800 mb-2">Career Journey</div>
+                      <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
+                        From first internship to leadership role, the professional path that shaped who I am today.
+                      </div>
+                    </div>
+                    <div class="book-spine"></div>
+                  </div>
+
+                  <!-- Book 2 -->
+                  <div class="h-56 w-40 bg-sky-600 rounded-lg shadow-xl book">
+                    <div class="absolute inset-1 bg-white rounded-lg p-4 flex flex-col items-center">
+                      <div class="book-title text-center font-bold text-gray-800 mb-2">Travels & Adventures</div>
+                      <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
+                        Exploring new places and cultures that shaped my worldview and perspective.
+                      </div>
+                    </div>
+                    <div class="book-spine"></div>
+                  </div>
+
+                  <!-- Book 3 -->
+                  <div class="h-60 w-40 bg-emerald-600 rounded-lg shadow-xl book">
+                    <div class="absolute inset-1 bg-white rounded-lg p-4 flex flex-col items-center">
+                      <div class="book-title text-center font-bold text-gray-800 mb-2">Relationships</div>
+                      <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
+                        The people who've made the biggest impact on my journey through life.
+                      </div>
+                    </div>
+                    <div class="book-spine"></div>
+                  </div>
+
+                  <!-- Book 4 -->
+                  <div class="h-52 w-40 bg-amber-600 rounded-lg shadow-xl book">
+                    <div class="absolute inset-1 bg-white rounded-lg p-4 flex flex-col items-center">
+                      <div class="book-title text-center font-bold text-gray-800 mb-2">Personal Growth</div>
+                      <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
+                        Lessons learned and wisdom gained through challenges and triumphs.
+                      </div>
+                    </div>
+                    <div class="book-spine"></div>
+                  </div>
+
+                  <!-- Book 5 -->
+                  <div class="h-64 w-40 bg-red-600 rounded-lg shadow-xl book">
+                    <div class="absolute inset-1 bg-white rounded-lg p-4 flex flex-col items-center">
+                      <div class="book-title text-center font-bold text-gray-800 mb-2">Creative Projects</div>
+                      <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
+                        Artistic endeavors and creative expressions that fulfill my passion.
+                      </div>
+                    </div>
+                    <div class="book-spine"></div>
+                  </div>
+
+                  <!-- Add New -->
+                  <div class="h-40 w-32 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:text-sky-600 hover:border-sky-300 transition cursor-pointer">
+                    <div class="text-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      <span class="text-xs font-medium">Create Chapter</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        {% endfor %}
-      </div>
 
-      <!-- 📝 Input Form -->
-      <form method="post" class="w-full max-w-3xl mx-auto p-4 border-t border-gray-200 bg-white flex gap-3 sticky bottom-0 z-50">
-        {% csrf_token %}
-        <div class="flex-1">
-          <input type="text" name="title" id="id_title" placeholder="Title" class="w-full mb-2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none" required autofocus />
-          <textarea name="content" id="id_content" placeholder="Write your thoughts here..." rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-sky-400 focus:outline-none" required></textarea>
+          <!-- Biography Preview -->
+          <div class="bg-gradient-to-r from-sky-50 to-indigo-50 rounded-xl p-6 border border-indigo-100 shadow-md mb-10">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Biography Preview
+              </h3>
+              <div class="text-xs text-gray-500">Updated today</div>
+            </div>
+            <div class="mb-4">
+              <div class="flex justify-between text-xs text-gray-600 mb-1">
+                <span>202 entries processed</span>
+                <span>65% complete</span>
+              </div>
+              <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-indigo-600 rounded-full" style="width: 65%"></div>
+              </div>
+            </div>
+            <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
+              <div class="handwritten text-lg text-gray-800 leading-relaxed">
+                <p>In the spring of 2025, I find myself at an interesting crossroads in both my professional and personal life. The new leadership role at work marks a significant milestone in my career journey, one that I've been working toward for some time...</p>
+              </div>
+              <div class="mt-3 text-right">
+                <a href="#" class="text-sm text-indigo-600 hover:underline inline-flex items-center gap-1">
+                  Continue reading
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="flex flex-col gap-2">
-          <button type="submit" class="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-500 transition">Save Entry</button>
-          <button type="button" onclick="generateAI()" class="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition">✨ AI Help</button>
+
+        <!-- Recent Entries Tab (Hidden) -->
+        <div id="recent-tab" class="hidden">
+          <div class="mb-8">
+            <div class="text-right mb-4">
+              <div class="relative inline-block">
+                <select class="pl-3 pr-8 py-1.5 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 appearance-none">
+                  <option>All entries</option>
+                  <option>Work</option>
+                  <option>Personal</option>
+                  <option>Goals</option>
+                </select>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute right-2 top-2 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Recent Entries Timeline -->
+            <div class="relative pl-8">
+              <!-- Timeline line -->
+              <div class="timeline-line"></div>
+
+              <!-- Timeline entries -->
+              <div class="space-y-6">
+                <!-- Entry -->
+                <div class="timeline-entry relative">
+                  <div class="bg-white rounded-xl shadow p-5 mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                      <h3 class="font-semibold text-gray-800">New project kickoff</h3>
+                      <div class="text-xs text-gray-500">Apr 11, 2025</div>
+                    </div>
+                    <div class="text-sm text-gray-600 diary-font">
+                      <p>Today was the kickoff meeting for our new project at work. The team seems excited about the challenge, although there are some concerns about the tight deadline...</p>
+                    </div>
+                    <div class="mt-3 flex justify-between items-center">
+                      <div class="flex gap-1">
+                        <span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">work</span>
+                      </div>
+                      <button class="text-sky-600 text-xs hover:underline">Read more</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Entry -->
+                <div class="timeline-entry relative">
+                  <div class="bg-white rounded-xl shadow p-5 mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                      <h3 class="font-semibold text-gray-800">Found a new coffee shop</h3>
+                      <div class="text-xs text-gray-500">Apr 10, 2025</div>
+                    </div>
+                    <div class="text-sm text-gray-600 diary-font">
+                      <p>While walking home, I stumbled upon this cozy little coffee shop called "Bean There". The atmosphere was perfect for getting some work done...</p>
+                    </div>
+                    <div class="mt-3 flex justify-between items-center">
+                      <div class="flex gap-1">
+                        <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">personal</span>
+                      </div>
+                      <button class="text-sky-600 text-xs hover:underline">Read more</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Entry -->
+                <div class="timeline-entry relative">
+                  <div class="bg-white rounded-xl shadow p-5 mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                      <h3 class="font-semibold text-gray-800">Monthly goals review</h3>
+                      <div class="text-xs text-gray-500">Apr 9, 2025</div>
+                    </div>
+                    <div class="text-sm text-gray-600 diary-font">
+                      <p>Took some time today to review my monthly goals. I've made good progress on most of them, particularly the fitness ones...</p>
+                    </div>
+                    <div class="mt-3 flex justify-between items-center">
+                      <div class="flex gap-1">
+                        <span class="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full">goals</span>
+                      </div>
+                      <button class="text-sky-600 text-xs hover:underline">Read more</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </form>
-    </main>
+
+        <!-- AI Insights Tab (Hidden) -->
+        <div id="insights-tab" class="hidden">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Mood Analysis -->
+            <div class="bg-white rounded-xl shadow p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Mood Analysis
+              </h3>
+              <div class="aspect-w-16 aspect-h-9 mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
+                <img src="/api/placeholder/400/320" alt="Mood chart" />
+              </div>
+              <p class="text-sm text-gray-600">Your entries show a generally positive mood trend over the past month, with occasional dips typically associated with work stress.</p>
+            </div>
+
+            <!-- Topic Distribution -->
+            <div class="bg-white rounded-xl shadow p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+                Topic Distribution
+              </h3>
+              <div class="aspect-w-16 aspect-h-9 mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
+                <img src="/api/placeholder/400/320" alt="Topic distribution" />
+              </div>
+              <p class="text-sm text-gray-600">Work-related topics dominate your entries (42%), followed by personal growth (28%), and relationships (15%).</p>
+            </div>
+
+            <!-- Common Patterns -->
+            <div class="bg-white rounded-xl shadow p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Recurring Patterns
+              </h3>
+              <ul class="space-y-3">
+                <li class="flex items-start gap-3 p-3 bg-emerald-50 rounded-lg">
+                  <div class="bg-emerald-100 text-emerald-700 p-1 rounded-md flex-shrink-0 mt-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-800">Work-Life Balance</h4>
+                    <p class="text-xs text-gray-600 mt-1">You frequently mention feeling torn between work responsibilities and personal time.</p>
+                  </div>
+                </li>
+                <li class="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg">
+                  <div class="bg-yellow-100 text-yellow-700 p-1 rounded-md flex-shrink-0 mt-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-800">Morning Productivity</h4>
+                    <p class="text-xs text-gray-600 mt-1">You consistently report higher productivity on days when you start work before 8:00 AM.</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Growth Opportunities -->
+            <div class="bg-white rounded-xl shadow p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Growth Opportunities
+              </h3>
+              <div class="space-y-3">
+                <div class="p-3 border border-purple-100 rounded-lg">
+                  <h4 class="text-sm font-medium text-purple-800 mb-1">Mindfulness Practice</h4>
+                  <p class="text-xs text-gray-600">Based on your entries about stress management, incorporating a regular mindfulness practice could help balance your work intensity.</p>
+                  <div class="mt-2 text-xs">
+                    <button class="text-purple-600 hover:underline">Add to goals</button>
+                  </div>
+                </div>
+                <div class="p-3 border border-purple-100 rounded-lg">
+                  <h4 class="text-sm font-medium text-purple-800 mb-1">Creative Expression</h4>
+                  <p class="text-xs text-gray-600">You mention enjoyment from creative activities but rarely make time for them. Schedule dedicated creative time each week.</p>
+                  <div class="mt-2 text-xs">
+                    <button class="text-purple-600 hover:underline">Add to goals</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script src="{% static 'diary/js/home.js' %}"></script>
+  <!-- Quick Entry Button -->
+  <button class="fixed bottom-6 right-6 bg-sky-600 text-white p-4 rounded-full shadow-lg hover:bg-sky-500 transition">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+    </svg>
+  </button>
+
   <script>
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('overlay');
-      sidebar.classList.toggle('-translate-x-full');
-      overlay.classList.toggle('hidden');
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      menu.classList.toggle('hidden');
     }
+
+    // Tab switching
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.getElementById('library-tab').classList.add('hidden');
+      document.getElementById('recent-tab').classList.add('hidden');
+      document.getElementById('insights-tab').classList.add('hidden');
+
+      // Show selected tab
+      document.getElementById(tabName + '-tab').classList.remove('hidden');
+
+      // Update active state on buttons
+      const buttons = document.querySelector('.tabs-container').querySelectorAll('button');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set library tab as active by default
+      document.querySelector('.tabs-container button').classList.add('active');
+    });
   </script>
 </body>
 </html>

@@ -1,172 +1,304 @@
-from .models import DiaryEntry, SummaryVersion, Tag
-from .forms import DiaryEntryForm
-from django.http import JsonResponse, StreamingHttpResponse
-from django.contrib.auth import login
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.http import require_POST
-import subprocess, requests
-from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.http import JsonResponse
+from django.utils import timezone
+from datetime import timedelta
 
+from .models import Entry, Tag, SummaryVersion, LifeChapter, Biography, UserInsight
+from .forms import EntryForm, SignUpForm, LifeChapterForm
+from .ai_services import AIService
 
-
-def call_mistral(prompt):
-    try:
-        result = subprocess.run(
-            ["ollama", "run", "mistral"],
-            input=prompt,
-            capture_output=True,
-            text=True,
-            check=True
-        )
-        return result.stdout.strip()
-    except subprocess.CalledProcessError as e:
-        return f"Error: {e.stderr.strip()}"
-
-
-@login_required
 def home(request):
-    if request.method == 'POST':
-        form = DiaryEntryForm(request.POST)
-        if form.is_valid():
-            entry = form.save(commit=False)
-            entry.user = request.user
+    """Landing page for non-logged in users"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
 
-            prompt = f"Summarize this diary entry in 2-3 reflective sentences:\n\nTitle: {entry.title}\n\n{entry.content}"
-            summary = call_mistral(prompt)
-            entry.summary = summary if not summary.startswith("Error") else "AI summary unavailable at the moment."
-
-            entry.save()
-            form.save_m2m()
-            return redirect('home')
-    else:
-        form = DiaryEntryForm()
-
-    entries = DiaryEntry.objects.filter(user=request.user).order_by('-created_at')
-    tags = Tag.objects.all()
-    return render(request, 'diary/home.html', {
-        'form': form,
-        'entries': entries,
-        'tags': tags
-    })
-
-
-def generate_ai_entry(request):
-    prompt = "Write a reflective journal entry for someone who had a meaningful but emotionally mixed day."
-    content = call_mistral(prompt)
-    if content.startswith("Error"):
-        return JsonResponse({'error': content}, status=500)
-    return JsonResponse({'content': content})
-
+    return render(request, 'diary/landing.html')
 
 def signup(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=password)
             login(request, user)
-            return redirect('home')
-    else:
-        form = UserCreationForm()
-    return render(request, 'auth/signup.html', {'form': form})
 
+            # Create default tags and chapters for new user
+            default_tags = ['personal', 'work', 'goals', 'ideas', 'memories']
+            for tag_name in default_tags:
+                Tag.objects.create(name=tag_name, user=user)
+
+            default_chapters = [
+                {'title': 'Personal Growth', 'color': 'amber-600', 'description': 'Lessons learned and wisdom gained through challenges'},
+                {'title': 'Career Journey', 'color': 'purple-700', 'description': 'Professional development and work experiences'},
+            ]
+            for chapter in default_chapters:
+                LifeChapter.objects.create(user=user, **chapter)
+
+            return redirect('dashboard')
+    else:
+        form = SignUpForm()
+
+    return render(request, 'diary/signup.html', {'form': form})
+
+@login_required
+def dashboard(request):
+    """Main dashboard with books and recent entries"""
+    # Get time periods
+    entries = Entry.objects.filter(user=request.user)
+    time_periods = {}
+
+    # Group entries by quarter/year
+    for entry in entries:
+        period = entry.get_time_period()
+        if period not in time_periods:
+            time_periods[period] = {
+                'period': period,
+                'count': 0,
+                'entries': [],
+                'first_entry': None,
+                'color': 'sky-700'  # Default color
+            }
+
+        time_periods[period]['count'] += 1
+        time_periods[period]['entries'].append(entry)
+
+        # Keep track of first entry for preview
+        if time_periods[period]['first_entry'] is None or entry.created_at < time_periods[period]['first_entry'].created_at:
+            time_periods[period]['first_entry'] = entry
+
+    # Assign different colors to time periods
+    colors = ['sky-700', 'indigo-600', 'emerald-600', 'amber-600', 'rose-600']
+    for i, period_key in enumerate(time_periods.keys()):
+        time_periods[period_key]['color'] = colors[i % len(colors)]
+
+    # Sort time periods by most recent first
+    sorted_periods = sorted(time_periods.values(), key=lambda x: x['period'], reverse=True)
+
+    # Get life chapters
+    chapters = LifeChapter.objects.filter(user=request.user)
+
+    # Get recent entries
+    recent_entries = entries.order_by('-created_at')[:5]
+
+    # Get biography
+    biography = Biography.objects.filter(user=request.user).first()
+
+    # Get insights
+    insights = UserInsight.objects.filter(user=request.user)
+
+    # Calculate streak
+    streak = 0
+    today = timezone.now().date()
+
+    # Check entries for consecutive days
+    for i in range(365):  # Check up to a year back
+        check_date = today - timedelta(days=i)
+        if entries.filter(created_at__date=check_date).exists():
+            if i == 0 or streak > 0:  # Today or continuing streak
+                streak += 1
+            else:
+                break  # Streak broken
+        elif streak > 0:  # No entry for this day, streak ends
+            break
+
+    context = {
+        'time_periods': sorted_periods[:5],  # Show top 5 most recent periods
+        'chapters': chapters,
+        'recent_entries': recent_entries,
+        'biography': biography,
+        'insights': insights,
+        'streak': streak,
+        'total_entries': entries.count(),
+        'completion_percentage': biography.completion_percentage() if biography else 0
+    }
+
+    return render(request, 'diary/dashboard.html', context)
+
+@login_required
+def new_entry(request):
+    """Create a new diary entry"""
+    if request.method == 'POST':
+        form = EntryForm(request.POST)
+        if form.is_valid():
+            entry = form.save(commit=True, user=request.user)
+
+            # Generate AI summary
+            AIService.generate_entry_summary(entry)
+
+            messages.success(request, 'Entry saved successfully!')
+
+            # If there are enough entries, regenerate insights
+            entry_count = Entry.objects.filter(user=request.user).count()
+            if entry_count % 5 == 0:  # Every 5 entries, update insights
+                AIService.generate_insights(request.user)
+
+            return redirect('entry_detail', entry_id=entry.id)
+    else:
+        form = EntryForm()
+
+    return render(request, 'diary/new_entry.html', {'form': form})
+
+@login_required
+def entry_detail(request, entry_id):
+    """View a single diary entry"""
+    entry = get_object_or_404(Entry, id=entry_id, user=request.user)
+
+    if request.method == 'POST':
+        if 'regenerate_summary' in request.POST:
+            # Regenerate AI summary
+            AIService.generate_entry_summary(entry)
+            messages.success(request, 'Summary regenerated!')
+            return redirect('entry_detail', entry_id=entry.id)
+
+        elif 'restore_version' in request.POST:
+            version_id = request.POST.get('version_id')
+            version = get_object_or_404(SummaryVersion, id=version_id, entry=entry)
+
+            # Store current summary as a version
+            if entry.summary:
+                SummaryVersion.objects.create(
+                    entry=entry,
+                    summary=entry.summary
+                )
+
+            # Restore old version
+            entry.summary = version.summary
+            entry.save()
+
+            messages.success(request, 'Summary version restored!')
+            return redirect('entry_detail', entry_id=entry.id)
+
+    # Get related entries (same tags)
+    related_entries = Entry.objects.filter(
+        user=request.user,
+        tags__in=entry.tags.all()
+    ).exclude(id=entry.id).distinct()[:3]
+
+    context = {
+        'entry': entry,
+        'summary_versions': entry.versions.all(),
+        'related_entries': related_entries,
+    }
+
+    return render(request, 'diary/entry_detail.html', context)
 
 @login_required
 def biography(request):
-    entries = DiaryEntry.objects.filter(user=request.user).order_by('created_at')
+    """View and generate biography"""
+    biography = Biography.objects.filter(user=request.user).first()
 
-    if not entries.exists():
-        return render(request, 'diary/biography.html', {
-            'biography': "You haven't written any diary entries yet. Start writing to generate your story!"
-        })
+    if request.method == 'POST':
+        if 'generate_biography' in request.POST:
+            # Generate new biography
+            biography = AIService.generate_biography(request.user)
+            messages.success(request, 'Biography generated successfully!')
+            return redirect('biography')
 
-    diary_text = "\n\n".join([f"{entry.created_at.date()} - {entry.title}\n{entry.content}" for entry in entries])
-    prompt = f"""Based on the following diary entries, write a compelling, emotional, and reflective personal biography for the user.\n\nDiary Entries:\n{diary_text}"""
+    entries_by_chapter = {}
+    chapters = LifeChapter.objects.filter(user=request.user)
 
-    bio_text = call_mistral(prompt)
-    if bio_text.startswith("Error"):
-        bio_text = f"An error occurred while generating your biography: {bio_text}"
+    for chapter in chapters:
+        entries_by_chapter[chapter] = Entry.objects.filter(
+            chapters=chapter
+        ).order_by('-created_at')[:5]
 
-    return render(request, 'diary/biography.html', {
-        'biography': bio_text
-    })
+    context = {
+        'biography': biography,
+        'entries_by_chapter': entries_by_chapter,
+        'total_entries': Entry.objects.filter(user=request.user).count()
+    }
 
+    return render(request, 'diary/biography.html', context)
 
 @login_required
-def regenerate_summary(request, entry_id):
-    entry = DiaryEntry.objects.filter(id=entry_id, user=request.user).first()
-    if not entry:
-        return JsonResponse({"error": "Entry not found."}, status=404)
+def insights(request):
+    """View AI-generated insights"""
+    insights = UserInsight.objects.filter(user=request.user)
 
-    if entry.summary:
-        SummaryVersion.objects.create(entry=entry, summary=entry.summary)
+    if request.method == 'POST':
+        if 'regenerate_insights' in request.POST:
+            # Regenerate insights
+            AIService.generate_insights(request.user)
+            messages.success(request, 'Insights regenerated!')
+            return redirect('insights')
 
-    prompt = f"Summarize this diary entry in 2-3 reflective sentences:\n\nTitle: {entry.title}\n\n{entry.content}"
-    summary = call_mistral(prompt)
-    entry.summary = summary if not summary.startswith("Error") else entry.summary
-    entry.save()
+    patterns = insights.filter(insight_type='pattern')
+    suggestions = insights.filter(insight_type='suggestion')
+    mood = insights.filter(insight_type='mood').first()
 
-    if summary.startswith("Error"):
-        return JsonResponse({"error": summary}, status=500)
+    # Group entries by tag for topic distribution
+    tags = Tag.objects.filter(user=request.user)
+    tag_counts = []
 
-    return JsonResponse({"summary": entry.summary})
+    for tag in tags:
+        count = Entry.objects.filter(user=request.user, tags=tag).count()
+        if count > 0:
+            tag_counts.append({
+                'name': tag.name,
+                'count': count
+            })
 
+    # Sort by count
+    tag_counts.sort(key=lambda x: x['count'], reverse=True)
 
-@require_POST
+    # Calculate percentages for top tags
+    total_tagged = sum(item['count'] for item in tag_counts)
+    if total_tagged > 0:
+        for item in tag_counts:
+            item['percentage'] = int((item['count'] / total_tagged) * 100)
+
+    context = {
+        'patterns': patterns,
+        'suggestions': suggestions,
+        'mood_analysis': mood,
+        'tag_distribution': tag_counts[:5]  # Top 5 tags
+    }
+
+    return render(request, 'diary/insights.html', context)
+
+# Placeholder for the remaining views that would be needed
+# These are just simple implementations to make the URLs work
 @login_required
-def restore_summary(request, version_id):
-    version = get_object_or_404(SummaryVersion, id=version_id, entry__user=request.user)
-    entry = version.entry
-    entry.summary = version.summary
-    entry.save()
-    return JsonResponse({'summary': entry.summary})
+def edit_entry(request, entry_id):
+    entry = get_object_or_404(Entry, id=entry_id, user=request.user)
+    return render(request, 'diary/edit_entry.html', {'entry': entry})
 
-@csrf_exempt
 @login_required
-def stream_summary(request, entry_id):
-    entry = DiaryEntry.objects.filter(id=entry_id, user=request.user).first()
-    if not entry:
-        return JsonResponse({"error": "Entry not found."}, status=404)
+def delete_entry(request, entry_id):
+    entry = get_object_or_404(Entry, id=entry_id, user=request.user)
+    return render(request, 'diary/delete_entry.html', {'entry': entry})
 
-    # Save the old summary as versioned
-    if entry.summary:
-        SummaryVersion.objects.create(entry=entry, summary=entry.summary)
+@login_required
+def manage_chapters(request):
+    chapters = LifeChapter.objects.filter(user=request.user)
+    return render(request, 'diary/manage_chapters.html', {'chapters': chapters})
 
-    prompt = f"Summarize this diary entry in 2-3 reflective sentences:\n\nTitle: {entry.title}\n\n{entry.content}"
+@login_required
+def edit_chapter(request, chapter_id):
+    chapter = get_object_or_404(LifeChapter, id=chapter_id, user=request.user)
+    return render(request, 'diary/edit_chapter.html', {'chapter': chapter})
 
-    def generate():
-        try:
-            response = requests.post(
-                "http://localhost:11434/api/chat",
-                json={
-                    "model": "mistral",
-                    "messages": [{"role": "user", "content": prompt}],
-                    "stream": True
-                },
-                stream=True
-            )
+@login_required
+def delete_chapter(request, chapter_id):
+    chapter = get_object_or_404(LifeChapter, id=chapter_id, user=request.user)
+    return render(request, 'diary/delete_chapter.html', {'chapter': chapter})
 
-            buffer = ""
-            for line in response.iter_lines(decode_unicode=True):
-                if line.strip() == "":
-                    continue
-                if line.startswith("data: "):
-                    line = line[6:]
-                try:
-                    chunk = json.loads(line)
-                    token = chunk.get("message", {}).get("content", "")
-                    buffer += token
-                    yield token
-                except Exception as e:
-                    print("Error parsing chunk:", e)
-                    continue
+@login_required
+def assign_to_chapter(request, entry_id):
+    entry = get_object_or_404(Entry, id=entry_id, user=request.user)
+    chapters = LifeChapter.objects.filter(user=request.user)
+    return render(request, 'diary/assign_to_chapter.html', {'entry': entry, 'chapters': chapters})
 
-            # Save final summary
-            entry.summary = buffer.strip()
-            entry.save()
-
-        except Exception as e:
-            yield "\n[Error generating summary]"
-
-    return StreamingHttpResponse(generate(), content_type="text/plain")
+@login_required
+def regenerate_summary_ajax(request, entry_id):
+    """AJAX view to regenerate an entry summary"""
+    if request.method == 'POST':
+        entry = get_object_or_404(Entry, id=entry_id, user=request.user)
+        summary = AIService.generate_entry_summary(entry)
+        return JsonResponse({'success': True, 'summary': summary})
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
