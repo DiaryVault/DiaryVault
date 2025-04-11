@@ -120,7 +120,7 @@ def dashboard(request):
     return render(request, 'diary/dashboard.html', context)
 
 @login_required
-def new_entry(request):
+def journal(request):
     """Create a new diary entry"""
     if request.method == 'POST':
         form = EntryForm(request.POST)
@@ -141,7 +141,7 @@ def new_entry(request):
     else:
         form = EntryForm()
 
-    return render(request, 'diary/new_entry.html', {'form': form})
+    return render(request, 'diary/journal.html', {'form': form})
 
 @login_required
 def entry_detail(request, entry_id):
@@ -204,7 +204,8 @@ def biography(request):
 
     for chapter in chapters:
         entries_by_chapter[chapter] = Entry.objects.filter(
-            chapters=chapter
+            user=request.user
+            # chapters=chapter
         ).order_by('-created_at')[:5]
 
     context = {
@@ -302,3 +303,165 @@ def regenerate_summary_ajax(request, entry_id):
         summary = AIService.generate_entry_summary(entry)
         return JsonResponse({'success': True, 'summary': summary})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+@login_required
+def library(request):
+    """Library view with tabs for different ways to browse entries"""
+    # Get user entries
+    entries = Entry.objects.filter(user=request.user).order_by('-created_at')
+
+    # Get time periods (same code as in dashboard)
+    time_periods = {}
+    # Group entries by quarter/year
+    for entry in entries:
+        period = entry.get_time_period()
+        if period not in time_periods:
+            time_periods[period] = {
+                'period': period,
+                'count': 0,
+                'entries': [],
+                'first_entry': None,
+                'color': 'sky-700'  # Default color
+            }
+
+        time_periods[period]['count'] += 1
+        time_periods[period]['entries'].append(entry)
+
+        # Keep track of first entry for preview
+        if time_periods[period]['first_entry'] is None or entry.created_at < time_periods[period]['first_entry'].created_at:
+            time_periods[period]['first_entry'] = entry
+
+    # Assign different colors to time periods
+    colors = ['sky-700', 'indigo-600', 'emerald-600', 'amber-600', 'rose-600']
+    for i, period_key in enumerate(time_periods.keys()):
+        time_periods[period_key]['color'] = colors[i % len(colors)]
+
+    # Sort time periods by most recent first
+    sorted_periods = sorted(time_periods.values(), key=lambda x: x['period'], reverse=True)
+
+    # Get tags with counts
+    tags = []
+    for tag in Tag.objects.filter(user=request.user):
+        count = entries.filter(tags=tag).count()
+        if count > 0:
+            tags.append({
+                'name': tag.name,
+                'count': count
+            })
+
+    # Sort tags by count
+    tags.sort(key=lambda x: x['count'], reverse=True)
+
+    # Get moods with counts (this depends on your model structure)
+    moods = []
+    # Example: If you store moods as strings in Entry model
+    mood_counts = {}
+    for entry in entries:
+        if entry.mood:
+            if entry.mood not in mood_counts:
+                mood_counts[entry.mood] = {
+                    'name': entry.mood,
+                    'count': 0,
+                    'emoji': '😊'  # Default emoji, you might want to map these
+                }
+            mood_counts[entry.mood]['count'] += 1
+
+    moods = list(mood_counts.values())
+    moods.sort(key=lambda x: x['count'], reverse=True)
+
+    context = {
+        'time_periods': sorted_periods,
+        'tags': tags,
+        'moods': moods,
+        'entries': entries,
+        'total_entries': entries.count(),
+    }
+
+    return render(request, 'diary/library.html', context)
+
+@login_required
+def time_period_view(request, period):
+    """View entries for a specific time period"""
+    entries = Entry.objects.filter(
+        user=request.user
+    ).order_by('-created_at')
+
+    # Filter to just this period
+    period_entries = [entry for entry in entries if entry.get_time_period() == period]
+
+    return render(request, 'diary/time_period.html', {
+        'period': period,
+        'entries': period_entries,
+        'total_entries': len(period_entries)
+    })
+
+@login_required
+def account_settings(request):
+    # Handle form submission
+    if request.method == 'POST':
+        # Get form data
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        name = request.POST.get('name')
+
+        # Update user information
+        user = request.user
+
+        # Only update if values changed
+        if username and username != user.username:
+            user.username = username
+
+        if email and email != user.email:
+            user.email = email
+
+        # Handle name (split into first_name and last_name)
+        if name:
+            name_parts = name.split()
+            if len(name_parts) > 0:
+                user.first_name = name_parts[0]
+                if len(name_parts) > 1:
+                    user.last_name = ' '.join(name_parts[1:])
+
+        user.save()
+
+        messages.success(request, "Your account settings have been updated!")
+        return redirect('account_settings')
+
+    # Get basic statistics (without requiring additional models or functions)
+    from django.db.models import Count
+    from django.utils import timezone
+    from datetime import timedelta
+
+    # Get total entries (if you have an Entry model)
+    try:
+        from .models import Entry
+        total_entries = Entry.objects.filter(user=request.user).count()
+    except (ImportError, AttributeError):
+        total_entries = 0
+
+    # Calculate join date
+    join_date = request.user.date_joined
+
+    # Simple placeholder for streak (you can implement proper streak calculation later)
+    streak = 0
+    longest_streak = 0
+
+    # Try to get some basic streak information if Entry model exists
+    try:
+        from .models import Entry
+        # Count entries in the last 7 days as a simple "streak" placeholder
+        recent_entries = Entry.objects.filter(
+            user=request.user,
+            created_at__gte=timezone.now() - timedelta(days=7)
+        ).count()
+        streak = min(recent_entries, 7)  # Cap at 7 for now
+        longest_streak = streak  # Simplified version
+    except (ImportError, AttributeError):
+        pass
+
+    return render(request, 'diary/account_settings.html', {
+        'total_entries': total_entries,
+        'join_date': join_date,
+        'streak': streak,
+        'longest_streak': longest_streak,
+    })

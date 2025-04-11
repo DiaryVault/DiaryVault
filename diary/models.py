@@ -10,6 +10,19 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+class LifeChapter(models.Model):
+    """Represents a custom chapter or category of a user's life"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='life_chapters')
+    title = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    color = models.CharField(max_length=50, default="sky-600")  # CSS color class
+
+    def __str__(self):
+        return self.title
+
+    def entry_count(self):
+        return self.entries.count()
+
 class Entry(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='entries')
     title = models.CharField(max_length=200)
@@ -17,8 +30,9 @@ class Entry(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag, related_name='entries', blank=True)
+    mood = models.CharField(max_length=50, blank=True, null=True)
     summary = models.TextField(blank=True, null=True)
-
+    chapter = models.ForeignKey(LifeChapter, on_delete=models.SET_NULL, null=True, blank=True, related_name='entries')
     class Meta:
         ordering = ['-created_at']
         verbose_name_plural = 'entries'
@@ -47,19 +61,6 @@ class SummaryVersion(models.Model):
 
     def __str__(self):
         return f"Summary version for {self.entry.title} - {self.created_at}"
-
-class LifeChapter(models.Model):
-    """Represents a custom chapter or category of a user's life"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='life_chapters')
-    title = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
-    color = models.CharField(max_length=50, default="sky-600")  # CSS color class
-
-    def __str__(self):
-        return self.title
-
-    def entry_count(self):
-        return self.entries.count()
 
 class Biography(models.Model):
     """Generated user biography from multiple entries"""

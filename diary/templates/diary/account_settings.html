@@ -2,19 +2,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Favicon and App Icons -->
-  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
-  <link rel="shortcut icon" href="/static/favicon.ico">
-  <link rel="manifest" href="/static/manifest.json">
-  <meta name="msapplication-config" content="/static/browserconfig.xml">
+    <!-- Favicon and App Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="msapplication-config" content="/static/browserconfig.xml">
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Your Biography | DiaryVault</title>
+  <title>Account Settings - DiaryVault</title>
   <meta name="theme-color" content="#0ea5e9" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&family=Caveat:wght@400;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
@@ -37,28 +37,6 @@
     }
     .handwritten {
       font-family: 'Caveat', cursive;
-    }
-    .blinking-cursor::after {
-      content: '|';
-      animation: blink 1s step-end infinite;
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    .book-page {
-      background-color: #f8f5f0;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      position: relative;
-    }
-    .book-page::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 30px;
-      background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
     }
     @media (max-width: 640px) {
       .mobile-menu-slide {
@@ -110,7 +88,7 @@
           </svg>
           Journal
         </a>
-        <a href="{% url 'biography' %}" class="text-sky-600 border-b-2 border-sky-600 pb-1 flex items-center gap-1">
+        <a href="{% url 'biography' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
@@ -125,13 +103,12 @@
 
         <div class="w-px h-6 bg-gray-200"></div>
 
-        <!-- Updated user profile section with clickable username -->
         <div class="flex items-center gap-3">
-          <a href="{% url 'account_settings' %}" class="flex items-center gap-3 hover:opacity-80 transition">
+          <a href="{% url 'account_settings' %}" class="flex items-center gap-3 text-sky-600 border-b-2 border-sky-600 pb-1">
             <div class="h-8 w-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold text-sm">
               {{ request.user.username|first|upper }}
             </div>
-            <span class="text-sm text-gray-700">{{ request.user.username }}</span>
+            <span class="text-sm">{{ request.user.username }}</span>
           </a>
         </div>
 
@@ -162,18 +139,16 @@
         </button>
       </div>
 
-      <!-- User info in mobile menu - Make this clickable too -->
-      <a href="{% url 'account_settings' %}" class="block">
-        <div class="flex items-center gap-3 p-3 bg-sky-50 rounded-lg mb-6 hover:bg-sky-100 transition">
-          <div class="h-10 w-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold">
-            {{ request.user.username|first|upper }}
-          </div>
-          <div>
-            <div class="font-medium">{{ request.user.username }}</div>
-            <div class="text-xs text-gray-500">Biography</div>
-          </div>
+      <!-- User info in mobile menu -->
+      <div class="flex items-center gap-3 p-3 bg-sky-50 rounded-lg mb-6">
+        <div class="h-10 w-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold">
+          {{ request.user.username|first|upper }}
         </div>
-      </a>
+        <div>
+          <div class="font-medium">{{ request.user.username }}</div>
+          <div class="text-xs text-gray-500">Account Settings</div>
+        </div>
+      </div>
 
       <nav class="flex flex-col gap-1">
         <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
@@ -194,7 +169,7 @@
           </svg>
           <span>Journal</span>
         </a>
-        <a href="{% url 'biography' %}" class="flex items-center gap-3 p-3 bg-sky-50 rounded-lg text-sky-600">
+        <a href="{% url 'biography' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
@@ -206,7 +181,7 @@
           </svg>
           <span>Insights</span>
         </a>
-        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
+        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 bg-sky-50 rounded-lg text-sky-600">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -229,95 +204,120 @@
   </div>
 
   <!-- Main Content -->
-  <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-8">
+  <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-6">
     <div class="max-w-4xl mx-auto">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <div>
-          <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Your AI-Generated Biography</h2>
-          <p class="text-gray-600">Based on {{ entry_count }} journal entries spanning {{ date_range }}</p>
-        </div>
 
-        <div class="mt-4 md:mt-0 space-x-2">
-          <button id="regenerateBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition flex items-center gap-1 text-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Regenerate
-          </button>
-          <button id="printBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition flex items-center gap-1 text-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-            </svg>
-            Print
-          </button>
-        </div>
-      </div>
-
-      <!-- Biography Chapters Tabs -->
-      <div class="bg-white rounded-lg shadow-md mb-6 p-4">
-        <div class="flex overflow-x-auto scrollbar-hide space-x-2 mb-4">
-          <button class="px-4 py-2 rounded-md bg-indigo-100 text-indigo-800 font-medium whitespace-nowrap text-sm">Childhood</button>
-          <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 whitespace-nowrap text-sm">Education</button>
-          <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 whitespace-nowrap text-sm">Career</button>
-          <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 whitespace-nowrap text-sm">Relationships</button>
-          <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 whitespace-nowrap text-sm">Personal Growth</button>
-          <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 whitespace-nowrap text-sm">Recent Years</button>
-        </div>
-
-        <div class="flex justify-between items-center mb-2">
-          <h3 class="font-semibold text-lg text-gray-900">Childhood</h3>
-          <span class="text-xs text-gray-500">1990-2003</span>
-        </div>
-      </div>
-
-      <!-- Biography Content -->
-      <div class="mb-8">
-        <div class="book-page rounded-xl overflow-hidden">
-          <div class="relative p-8 sm:p-10 diary-font">
-            <div id="bio-text" class="prose prose-indigo max-w-none text-gray-800 leading-relaxed whitespace-pre-line">
-              {{ biography|linebreaks }}
+      {% if messages %}
+        <div class="mb-6">
+          {% for message in messages %}
+            <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% elif message.tags == 'success' %}bg-green-100 border-green-400 text-green-700{% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} px-4 py-3 rounded border mb-4">
+              {{ message }}
             </div>
+          {% endfor %}
+        </div>
+      {% endif %}
 
-            <!-- Loading State -->
-            <div id="loading-indicator" class="hidden">
-              <div class="flex justify-center items-center py-20">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Account Settings</h2>
+      </div>
+
+      <!-- Settings Tabs -->
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+        <div class="flex border-b border-gray-200">
+          <button class="px-6 py-3 font-medium text-sky-600 border-b-2 border-sky-600">Profile</button>
+          <button class="px-6 py-3 font-medium text-gray-700 hover:text-sky-600 transition">Password</button>
+          <button class="px-6 py-3 font-medium text-gray-700 hover:text-sky-600 transition">Preferences</button>
+          <button class="px-6 py-3 font-medium text-gray-700 hover:text-sky-600 transition">Privacy</button>
+        </div>
+
+        <!-- Profile Settings Section -->
+        <div class="p-6">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="flex flex-col md:flex-row gap-6 mb-8">
+              <div class="md:w-1/3 flex flex-col items-center">
+                <div class="h-32 w-32 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold text-5xl mb-4">
+                  {{ request.user.username|first|upper }}
+                </div>
+                <button type="button" class="text-sky-600 text-sm hover:underline">Change Profile Picture</button>
+              </div>
+
+              <div class="md:w-2/3">
+                <div class="mb-6">
+                  <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                  <input type="text" id="username" name="username" value="{{ request.user.username }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                </div>
+
+                <div class="mb-6">
+                  <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                  <input type="email" id="email" name="email" value="{{ request.user.email }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                </div>
+
+                <div class="mb-6">
+                  <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+                  <input type="text" id="name" name="name" value="{{ request.user.first_name }} {{ request.user.last_name }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                  <p class="text-xs text-gray-500 mt-1">This name will be displayed on your biography.</p>
+                </div>
+
+                <div class="mb-6">
+                  <label for="bio" class="block text-sm font-medium text-gray-700 mb-1">About Me</label>
+                  <textarea id="bio" name="bio" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">{{ request.user.bio|default:"" }}</textarea>
+                  <p class="text-xs text-gray-500 mt-1">A short bio that will be shown at the beginning of your biography.</p>
+                </div>
               </div>
             </div>
-          </div>
+
+            <div class="border-t border-gray-200 pt-6">
+              <button type="submit" class="px-6 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-500 transition">Save Changes</button>
+            </div>
+          </form>
         </div>
       </div>
 
-      <!-- Sharing Options -->
+      <!-- Account Stats -->
       <div class="bg-white rounded-xl p-6 shadow-md">
-        <h3 class="font-semibold text-lg text-gray-900 mb-4">Share Your Story</h3>
+        <h3 class="font-semibold text-lg text-gray-900 mb-4">Account Statistics</h3>
 
-        <div class="grid sm:grid-cols-3 gap-4">
-          <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition text-center cursor-pointer">
-            <div class="text-indigo-600 mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-              </svg>
-            </div>
-            <div class="font-medium text-sm">Download as PDF</div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="text-center p-4 bg-gray-50 rounded-lg">
+            <div class="text-2xl font-bold text-sky-600">{{ total_entries|default:"0" }}</div>
+            <div class="text-xs text-gray-500">Total Entries</div>
           </div>
 
-          <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition text-center cursor-pointer">
-            <div class="text-indigo-600 mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <div class="font-medium text-sm">Email to Yourself</div>
+          <div class="text-center p-4 bg-gray-50 rounded-lg">
+            <div class="text-2xl font-bold text-sky-600">{{ join_date|date:"M Y"|default:"Jan 2025" }}</div>
+            <div class="text-xs text-gray-500">Member Since</div>
           </div>
 
-          <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition text-center cursor-pointer">
-            <div class="text-indigo-600 mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          <div class="text-center p-4 bg-gray-50 rounded-lg">
+            <div class="text-2xl font-bold text-sky-600">{{ streak|default:"0" }}</div>
+            <div class="text-xs text-gray-500">Current Streak</div>
+          </div>
+
+          <div class="text-center p-4 bg-gray-50 rounded-lg">
+            <div class="text-2xl font-bold text-sky-600">{{ longest_streak|default:"0" }}</div>
+            <div class="text-xs text-gray-500">Longest Streak</div>
+          </div>
+        </div>
+
+        <div class="mt-6 border-t border-gray-200 pt-6">
+          <h4 class="font-medium text-gray-800 mb-3">Data & Privacy</h4>
+
+          <div class="space-y-3">
+            <a href="#" class="flex items-center gap-2 text-sm text-sky-600 hover:underline">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
-            </div>
-            <div class="font-medium text-sm">Print Physical Copy</div>
+              Download your data
+            </a>
+
+            <a href="#" class="flex items-center gap-2 text-sm text-red-600 hover:underline">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Delete account
+            </a>
           </div>
         </div>
       </div>
@@ -326,7 +326,7 @@
 
   <!-- Mobile Bottom Navigation -->
   <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 mobile-bottom-nav z-30">
-    <div class="grid grid-cols-5 items-center text-xs text-gray-600">
+    <div class="grid grid-cols-4 items-center text-xs text-gray-600">
       <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-3">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
@@ -345,13 +345,7 @@
         </svg>
         <span>Journal</span>
       </a>
-      <a href="{% url 'biography' %}" class="flex flex-col items-center justify-center py-3 text-indigo-600">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <span>Bio</span>
-      </a>
-      <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-3">
+      <a href="{% url 'insights' %}" class="flex flex-col items-center justify-center py-3">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -383,49 +377,6 @@
         }, 300);
       }
     }
-
-    // Regenerate biography
-    document.getElementById('regenerateBtn').addEventListener('click', function() {
-      const bioText = document.getElementById('bio-text');
-      const loadingIndicator = document.getElementById('loading-indicator');
-
-      // Show loading state
-      bioText.classList.add('hidden');
-      loadingIndicator.classList.remove('hidden');
-
-      fetch("/stream-biography/")
-        .then(response => {
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder("utf-8");
-          let result = '';
-
-          function read() {
-            reader.read().then(({ done, value }) => {
-              if (done) {
-                bioText.innerHTML = result;
-                bioText.classList.remove('hidden');
-                loadingIndicator.classList.add('hidden');
-                return;
-              }
-              const chunk = decoder.decode(value, { stream: true });
-              result += chunk;
-              read();
-            });
-          }
-
-          read();
-        })
-        .catch(() => {
-          bioText.innerHTML = "Something went wrong while generating your biography. Please try again.";
-          bioText.classList.remove('hidden');
-          loadingIndicator.classList.add('hidden');
-        });
-    });
-
-    // Print functionality
-    document.getElementById('printBtn').addEventListener('click', function() {
-      window.print();
-    });
   </script>
 </body>
 </html>
