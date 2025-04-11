@@ -3,10 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DiaryVault</title>
+  <title>DiaryVault - AI-Powered Journaling That's Actually Fun</title>
+  <meta name="description" content="DiaryVault uses AI to transform your daily journaling into a beautiful life story. Make recording your life easy, insightful, and fun." />
   <meta name="theme-color" content="#0ea5e9" />
+
+  <!-- Favicon and App Icons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+  <link rel="shortcut icon" href="/static/favicon.ico">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="msapplication-config" content="/static/browserconfig.xml">
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&family=Caveat:wght@400;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:wght@300;400;700&family=Caveat:wght@400;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
   <style>
     html, body {
       overflow-x: hidden;
@@ -55,16 +67,63 @@
     .featured-book {
       animation: rotate3d 5s infinite;
     }
+    .floating {
+      animation: floating 3s ease-in-out infinite;
+    }
+    @keyframes floating {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    .ai-assistant-bubble {
+      position: relative;
+    }
+    .ai-assistant-bubble:after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 20px;
+      border-width: 10px 10px 0;
+      border-style: solid;
+      border-color: #e0f2fe transparent;
+    }
     @media (max-width: 640px) {
-      .book-cover {
-        position: absolute !important;
+      .mobile-full {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
       }
-      .book-display {
-        transform: scale(0.9);
-        transform-origin: center;
+      .mobile-center {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
       }
-      .featured-book {
-        animation: none;
+      .mobile-stack {
+        flex-direction: column !important;
+      }
+      .mobile-px-4 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+      }
+      .mobile-py-8 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+      }
+      .mobile-mt-6 {
+        margin-top: 1.5rem !important;
+      }
+      .mobile-mb-8 {
+        margin-bottom: 2rem !important;
+      }
+      .mobile-h-auto {
+        height: auto !important;
+      }
+      .mobile-grid-cols-1 {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+      }
+      .mobile-gap-6 {
+        gap: 1.5rem !important;
       }
     }
   </style>
@@ -87,7 +146,7 @@
         <a href="#" class="text-gray-700 hover:text-sky-600 transition text-sm font-medium">Login</a>
         <a href="#" class="bg-sky-600 text-white px-4 py-2 rounded-md hover:bg-sky-500 transition text-sm font-medium">Get Started</a>
       </nav>
-      <button class="md:hidden text-gray-700 p-1" id="mobile-menu-button">
+      <button class="md:hidden text-gray-700 p-1" id="mobile-menu-button" aria-label="Menu">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
@@ -108,17 +167,29 @@
   <!-- Hero Section -->
   <section class="py-10 sm:py-16 md:py-20 px-4 sm:px-6 overflow-hidden">
     <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-      <div class="lg:w-1/2">
-        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4 sm:mb-6">Turn Your Daily Thoughts into Your Life Story</h2>
-        <p class="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">DiaryVault uses advanced AI to transform your everyday journal entries into a beautifully crafted biography. Our intelligent assistant makes journaling fun, insightful, and effortless—helping you capture your life's journey with minimal effort.</p>
+      <div class="lg:w-1/2 mobile-center">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4 sm:mb-6">Make Recording Your Life Story Actually Fun</h2>
+        <p class="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8">DiaryVault's friendly AI assistant turns brief thoughts into meaningful journals—making it effortless and enjoyable to capture your journey. It's like having a personal biographer who makes sure your story is recorded, even when you're too busy.</p>
         <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          <a href="#" class="bg-sky-600 text-white px-6 py-3 rounded-lg hover:bg-sky-500 transition text-center font-medium">Start Your Journey</a>
+          <a href="#" class="bg-sky-600 text-white px-6 py-3 rounded-lg hover:bg-sky-500 transition text-center font-medium">Start Your Story</a>
           <a href="#demo" class="border border-sky-600 text-sky-600 px-6 py-3 rounded-lg hover:bg-sky-50 transition text-center font-medium">See Demo</a>
         </div>
       </div>
 
-      <div class="lg:w-1/2 relative w-full">
+      <div class="lg:w-1/2 relative w-full mt-10 lg:mt-0">
         <div class="book-display relative mx-auto" style="height: 400px; max-width: 320px;">
+          <!-- AI Assistant Icon -->
+          <div class="absolute -top-16 right-0 z-10 floating">
+            <div class="bg-sky-100 p-3 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+              </svg>
+            </div>
+            <div class="ml-4 ai-assistant-bubble bg-sky-100 p-3 rounded-lg mt-2 max-w-xs">
+              <p class="handwritten text-sm text-sky-800">I see you're feeling excited about your new job! Let me help you capture this moment...</p>
+            </div>
+          </div>
+
           <!-- Blue/Journey Book -->
           <div class="absolute book-cover rounded-lg shadow-xl" style="width: 220px; height: 280px; top: 20px; right: 20px; z-index: 1; background-color: #1d4ed8; transform: rotate(15deg);">
             <div class="absolute inset-1 bg-white rounded-lg p-4 flex flex-col">
@@ -131,15 +202,125 @@
           </div>
 
           <!-- Sky/Experience Book -->
-          <div class="absolute book-cover rounded-lg shadow-xl" style="width: 260px; height: 340px; top: 60px; left: 40px; z-index: 2; background-color: #0284c7;">
+          <div class="absolute book-cover rounded-lg shadow-xl featured-book" style="width: 260px; height: 340px; top: 60px; left: 40px; z-index: 2; background-color: #0284c7;">
             <div class="absolute inset-1 bg-white rounded-lg p-4 flex flex-col">
               <div class="book-title text-center text-xl font-bold text-gray-800 mb-2">The DiaryVault Experience</div>
               <div class="bg-sky-50 p-3 rounded-lg w-full mb-3">
-                <p class="handwritten text-sm text-gray-700">Today I started using DiaryVault. The AI summarized my entry and highlighted patterns I hadn't noticed!</p>
+                <p class="handwritten text-sm text-gray-700">Today I started using DiaryVault. Just wrote a quick note about my day, and the AI turned it into this amazing entry!</p>
               </div>
               <div class="bg-indigo-50 p-3 rounded-lg w-full">
-                <div class="text-sm font-medium text-indigo-800 mb-1">AI Summary</div>
-                <p class="text-xs text-gray-600">You seem excited about this new AI journaling tool, with particular interest in how it analyzes your writing style and emotional patterns...</p>
+                <div class="text-sm font-medium text-indigo-800 mb-1">AI Enhancement</div>
+                <p class="text-xs text-gray-600">It looks like today was a milestone in your journey! I've added context about how this connects to your goals from last month...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI Fun Feature Showcase -->
+  <section class="py-12 sm:py-16 px-4 sm:px-6 bg-white">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4">Journaling That's Actually Fun</h2>
+      <p class="text-center text-gray-600 max-w-3xl mx-auto mb-10">Our AI makes recording your life story something you'll actually look forward to</p>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Left Side - Screenshot -->
+        <div class="bg-gray-50 p-6 rounded-xl shadow-md order-2 md:order-1">
+          <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <!-- App Header Mockup -->
+            <div class="bg-sky-600 text-white p-3 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span class="font-semibold">DiaryVault</span>
+              </div>
+              <div class="text-sm">April 11, 2025</div>
+            </div>
+
+            <!-- Journal Entry -->
+            <div class="p-4">
+              <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                <p class="handwritten text-gray-800 mb-2">Exhausted today. Work was crazy.</p>
+                <p class="text-xs text-gray-500 italic">Your entry (12:42 PM)</p>
+              </div>
+
+              <!-- AI Assistant Response -->
+              <div class="flex items-start gap-3 mb-4">
+                <div class="bg-sky-100 p-2 rounded-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="bg-sky-50 p-3 rounded-lg">
+                    <p class="text-sm text-gray-700 mb-2">Sounds like a tough day! I noticed this is the third stressful workday this week. Would you like to share what specifically made it crazy?</p>
+                    <div class="flex gap-2 mt-3">
+                      <button class="bg-sky-100 hover:bg-sky-200 text-sky-700 text-xs px-3 py-1 rounded-full transition">The client meeting</button>
+                      <button class="bg-sky-100 hover:bg-sky-200 text-sky-700 text-xs px-3 py-1 rounded-full transition">Too many deadlines</button>
+                      <button class="bg-sky-100 hover:bg-sky-200 text-sky-700 text-xs px-3 py-1 rounded-full transition">Office politics</button>
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">DiaryVault AI (12:43 PM)</p>
+                </div>
+              </div>
+
+              <!-- Enhanced Entry -->
+              <div class="border-t border-gray-200 pt-4 mt-4">
+                <h3 class="text-sm font-medium text-gray-900 mb-2">Your Enhanced Entry</h3>
+                <div class="bg-indigo-50 p-3 rounded-lg">
+                  <p class="text-sm text-gray-700">Work was particularly demanding today, continuing a pattern of high-stress days this week. Despite the exhaustion, I managed to complete the quarterly report ahead of schedule, which is worth celebrating. This relates to my goal of maintaining better work-life balance while still delivering quality results.</p>
+                  <div class="flex items-center gap-2 mt-3">
+                    <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">Stress</span>
+                    <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">Work</span>
+                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Achievement</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side - Feature list -->
+        <div class="order-1 md:order-2 flex flex-col justify-center mobile-center">
+          <h3 class="text-2xl font-bold text-gray-900 mb-6">Your AI Writing Partner</h3>
+
+          <div class="space-y-6">
+            <div class="flex items-start gap-4">
+              <div class="bg-sky-100 p-2 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-lg font-semibold text-gray-900 mb-1">Turn One Sentence Into a Full Entry</h4>
+                <p class="text-gray-600">No time to write? Just jot down a quick thought, and our AI transforms it into a meaningful, detailed journal entry that captures what you meant to say.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-4">
+              <div class="bg-indigo-100 p-2 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-lg font-semibold text-gray-900 mb-1">Fun Conversations, Not Blank Pages</h4>
+                <p class="text-gray-600">Our AI asks just the right questions to spark your memory and help you dive deeper—turning journaling into an engaging conversation rather than a chore.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-4">
+              <div class="bg-emerald-100 p-2 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-lg font-semibold text-gray-900 mb-1">Automatic Mood Tracking</h4>
+                <p class="text-gray-600">The AI recognizes your emotions and tracks patterns over time, helping you gain insights about your wellbeing without any extra effort.</p>
               </div>
             </div>
           </div>
@@ -149,15 +330,15 @@
   </section>
 
   <!-- Features Section -->
-  <section id="features" class="py-12 sm:py-16 px-4 sm:px-6 bg-white">
+  <section id="features" class="py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-br from-sky-50 to-indigo-50">
     <div class="max-w-6xl mx-auto">
       <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4 sm:mb-6">Transform Your Journaling Experience</h2>
-      <p class="text-center text-gray-600 max-w-3xl mx-auto mb-10 sm:mb-16">Powered by advanced large language models that understand context, emotion, and personal growth</p>
+      <p class="text-center text-gray-600 max-w-3xl mx-auto mb-10 sm:mb-16">Powered by advanced AI that understands context, emotion, and personal growth</p>
 
-      <div class="grid md:grid-cols-3 gap-8 sm:gap-10">
+      <div class="grid md:grid-cols-3 gap-8 sm:gap-10 mobile-grid-cols-1 mobile-gap-6">
         <!-- Feature 1 -->
-        <div class="flex flex-col items-center text-center">
-          <div class="bg-sky-100 p-4 rounded-full mb-5 sm:mb-6">
+        <div class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition">
+          <div class="bg-sky-100 p-4 rounded-full mb-5 sm:mb-6 w-16 h-16 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
@@ -167,8 +348,8 @@
         </div>
 
         <!-- Feature 2 -->
-        <div class="flex flex-col items-center text-center">
-          <div class="bg-indigo-100 p-4 rounded-full mb-5 sm:mb-6">
+        <div class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition">
+          <div class="bg-indigo-100 p-4 rounded-full mb-5 sm:mb-6 w-16 h-16 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -178,52 +359,81 @@
         </div>
 
         <!-- Feature 3 -->
-        <div class="flex flex-col items-center text-center">
-          <div class="bg-emerald-100 p-4 rounded-full mb-5 sm:mb-6">
+        <div class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition">
+          <div class="bg-emerald-100 p-4 rounded-full mb-5 sm:mb-6 w-16 h-16 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
           <h3 class="text-xl font-semibold text-gray-900 mb-3">AI-Written Biography</h3>
-          <p class="text-gray-600">Our advanced LLM transforms your scattered entries into a beautifully cohesive narrative. The AI identifies themes, creates chapters, and crafts a flowing story that reads like a professional memoir—with your unique voice.</p>
+          <p class="text-gray-600">Our advanced AI transforms your scattered entries into a beautifully cohesive narrative. The AI identifies themes, creates chapters, and crafts a flowing story that reads like a professional memoir—with your unique voice.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- How It Works -->
-  <section id="how-it-works" class="py-12 sm:py-16 px-4 sm:px-6">
+  <section id="how-it-works" class="py-12 sm:py-16 px-4 sm:px-6 bg-white">
     <div class="max-w-6xl mx-auto">
       <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4 sm:mb-6">How DiaryVault Works</h2>
       <p class="text-center text-gray-600 max-w-3xl mx-auto mb-10 sm:mb-16">Our AI makes journaling effortless, meaningful, and surprisingly fun</p>
 
-      <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+      <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mobile-grid-cols-1 mobile-gap-6">
         <!-- Step 1 -->
-        <div class="bg-white rounded-xl p-5 sm:p-6 shadow-md">
+        <div class="bg-white rounded-xl p-5 sm:p-6 shadow-md hover:shadow-lg transition">
           <div class="w-12 h-12 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4">1</div>
           <h3 class="text-lg font-semibold text-gray-900 mb-2 sm:mb-3">Write Quick, Easy Entries</h3>
           <p class="text-gray-600 text-sm">Just jot down a few thoughts—our AI will ask follow-up questions, expand on your ideas, and help you capture deeper reflections with minimal effort. Even a short note becomes meaningful.</p>
         </div>
 
         <!-- Step 2 -->
-        <div class="bg-white rounded-xl p-5 sm:p-6 shadow-md">
+        <div class="bg-white rounded-xl p-5 sm:p-6 shadow-md hover:shadow-lg transition">
           <div class="w-12 h-12 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4">2</div>
           <h3 class="text-lg font-semibold text-gray-900 mb-2 sm:mb-3">Receive AI Insights</h3>
           <p class="text-gray-600 text-sm">Our AI companion analyzes each entry, uncovering hidden patterns in your thinking, summarizing key thoughts, and offering meaningful reflection prompts that deepen your self-awareness.</p>
         </div>
 
         <!-- Step 3 -->
-        <div class="bg-white rounded-xl p-5 sm:p-6 shadow-md">
+        <div class="bg-white rounded-xl p-5 sm:p-6 shadow-md hover:shadow-lg transition">
           <div class="w-12 h-12 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4">3</div>
           <h3 class="text-lg font-semibold text-gray-900 mb-2 sm:mb-3">Browse Your Collection</h3>
           <p class="text-gray-600 text-sm">Our AI organizes everything automatically—discovering themes, creating chapters, and categorizing entries. Search by emotion, life event, or relationship and receive intelligent suggestions for related memories.</p>
         </div>
 
         <!-- Step 4 -->
-        <div class="bg-white rounded-xl p-5 sm:p-6 shadow-md">
+        <div class="bg-white rounded-xl p-5 sm:p-6 shadow-md hover:shadow-lg transition">
           <div class="w-12 h-12 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4">4</div>
           <h3 class="text-lg font-semibold text-gray-900 mb-2 sm:mb-3">Get Your AI-Crafted Biography</h3>
-          <p class="text-gray-600 text-sm">With one click, our advanced language model transforms your entries into a beautifully written biography that captures your unique voice, journey, and growth—creating a meaningful narrative you'll treasure.</p>
+          <p class="text-gray-600 text-sm">With one click, our advanced AI transforms your entries into a beautifully written biography that captures your unique voice, journey, and growth—creating a meaningful narrative you'll treasure.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo Section -->
+  <section id="demo" class="py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-br from-sky-50 to-indigo-50">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4">See DiaryVault in Action</h2>
+      <p class="text-center text-gray-600 max-w-3xl mx-auto mb-10">Watch how our AI transforms simple notes into meaningful memories</p>
+
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto">
+        <div class="bg-gray-900 p-3 flex items-center">
+          <div class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+          <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+          <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+          <div class="mx-auto text-white text-sm font-medium">DiaryVault Demo</div>
+        </div>
+        <!-- Placeholder for actual video/demo -->
+        <div class="aspect-video bg-gray-100 flex items-center justify-center">
+          <div class="text-center p-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-sky-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Watch the Demo</h3>
+            <p class="text-gray-600 mb-6">See how DiaryVault's AI transforms daily thoughts into a beautiful life story</p>
+            <button class="bg-sky-600 text-white px-6 py-3 rounded-lg hover:bg-sky-500 transition font-medium">Play Video</button>
+          </div>
         </div>
       </div>
     </div>
@@ -235,7 +445,7 @@
       <h2 class="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">What Our Users Say</h2>
       <p class="text-center text-gray-300 max-w-3xl mx-auto mb-10 sm:mb-16">Our AI-powered approach has changed how people think about journaling</p>
 
-      <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+      <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 mobile-grid-cols-1 mobile-gap-6">
         <!-- Testimonial 1 -->
         <div class="bg-gray-800 rounded-xl p-5 sm:p-6">
           <div class="flex items-center mb-4">
@@ -269,7 +479,7 @@
               <div class="text-gray-400 text-sm">Using for 8 months</div>
             </div>
           </div>
-          <p class="text-gray-300 text-sm sm:text-base">"I started journaling to process grief. DiaryVault's LLM technology was like having a compassionate guide—asking just the right questions, highlighting my growth over time, and connecting dots I couldn't see. The AI-generated insights were so profound that my actual therapist asked what app I was using!"</p>
+          <p class="text-gray-300 text-sm sm:text-base">"I started journaling to process grief. DiaryVault's AI was like having a compassionate guide—asking just the right questions, highlighting my growth over time, and connecting dots I couldn't see. The AI-generated insights were so profound that my actual therapist asked what app I was using!"</p>
         </div>
       </div>
     </div>
@@ -279,10 +489,10 @@
   <section id="signup" class="py-14 sm:py-20 px-4 sm:px-6 bg-gradient-to-r from-sky-600 to-indigo-600 text-white">
     <div class="max-w-4xl mx-auto text-center">
       <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">Start Your Journey Today</h2>
-      <p class="text-lg sm:text-xl opacity-90 mb-6 sm:mb-8">Join thousands of others who are preserving their memories and creating their life story.</p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <p class="text-lg sm:text-xl opacity-90 mb-6 sm:mb-8">Join thousands of others who are preserving their memories and creating their life story—with an AI that makes it fun!</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center mobile-stack">
         <a href="#" class="bg-white text-sky-600 px-6 py-3 rounded-lg font-medium hover:bg-sky-50 transition">Log In</a>
-        <a href="#" class="bg-transparent border-2 border-white text-white px-6 py-3 rounded-lg font-medium hover:bg-white/10 transition">Sign Up</a>
+        <a href="#" class="bg-transparent border-2 border-white text-white px-6 py-3 rounded-lg font-medium hover:bg-white/10 transition">Sign Up Free</a>
       </div>
     </div>
   </section>
@@ -290,7 +500,7 @@
   <!-- Footer -->
   <footer class="bg-gray-100 py-10 sm:py-12 px-4 sm:px-6">
     <div class="max-w-6xl mx-auto">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mobile-grid-cols-1">
         <div>
           <div class="flex items-center gap-2 mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
