@@ -11,6 +11,12 @@
     body {
       font-family: 'Inter', sans-serif;
       background-color: #f8fafc;
+      width: 100%;
+      overflow-x: hidden; /* Prevent horizontal scrolling */
+      position: relative;
+    }
+    html {
+      overflow-x: hidden; /* Double protection against horizontal scrolling */
     }
     .diary-font {
       font-family: 'Merriweather', serif;
@@ -42,11 +48,13 @@
       background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="20" viewBox="0 0 100 20" fill="none"><rect width="100" height="20" fill="%23D1BAA1"/><path d="M0 0 L100 0 L100 2 L0 2 Z" fill="%23A58768"/><path d="M0 18 L100 18 L100 20 L0 20 Z" fill="%237A6348"/></svg>');
       background-repeat: repeat-x;
       background-position: bottom;
+      overflow: hidden; /* Contain child overflow */
     }
     .book-collection {
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
+      -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     }
     .book-collection::-webkit-scrollbar {
       display: none;
@@ -137,6 +145,7 @@
         overflow-x: auto;
         scrollbar-width: none;
         -ms-overflow-style: none;
+        -webkit-overflow-scrolling: touch;
       }
       .mobile-tabs::-webkit-scrollbar {
         display: none;
@@ -210,7 +219,7 @@
 
   <!-- Mobile Menu Overlay -->
   <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden">
-    <div class="absolute right-0 top-0 bottom-0 w-72 bg-white p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed">
+    <div class="absolute right-0 top-0 bottom-0 w-72 bg-white p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
       <div class="flex justify-between items-center mb-8">
         <h2 class="font-bold text-lg">Menu</h2>
         <button onclick="toggleMobileMenu()" class="p-1">
@@ -271,10 +280,10 @@
   </div>
 
   <!-- Main Content -->
-  <div class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-6">
-    <div class="max-w-7xl mx-auto">
+  <div class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-6 max-w-full overflow-hidden">
+    <div class="max-w-7xl mx-auto overflow-hidden">
       <!-- Welcome & Stats Section -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-10">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-10 overflow-hidden">
         <div class="mb-4 md:mb-0">
           <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Welcome back, username</h2>
           <p class="text-gray-600 text-sm sm:text-base">Continue your journey or explore past memories</p>
@@ -335,11 +344,11 @@
       </div>
 
       <!-- Tabs Container -->
-      <div class="mb-6 sm:mb-8">
-        <div class="tabs-container flex border-b border-gray-200 mobile-tabs overflow-x-auto">
-          <button onclick="switchTab('library')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base text-gray-600 border-b-2 border-transparent whitespace-nowrap active">Library</button>
-          <button onclick="switchTab('recent')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base text-gray-600 border-b-2 border-transparent whitespace-nowrap">Recent Entries</button>
-          <button onclick="switchTab('insights')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base text-gray-600 border-b-2 border-transparent whitespace-nowrap">AI Insights</button>
+      <div class="mb-6 sm:mb-8 max-w-full">
+        <div class="tabs-container flex border-b border-gray-200 mobile-tabs overflow-x-auto touch-pan-x scrollbar-hide w-full">
+          <button onclick="switchTab('library')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base text-gray-600 border-b-2 border-transparent whitespace-nowrap flex-shrink-0 active">Library</button>
+          <button onclick="switchTab('recent')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base text-gray-600 border-b-2 border-transparent whitespace-nowrap flex-shrink-0">Recent Entries</button>
+          <button onclick="switchTab('insights')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base text-gray-600 border-b-2 border-transparent whitespace-nowrap flex-shrink-0">AI Insights</button>
         </div>
       </div>
 
@@ -444,12 +453,12 @@
               <button class="text-xs sm:text-sm text-sky-600 hover:underline">Manage chapters</button>
             </div>
 
-            <!-- Book Shelf -->
+            <!-- Book Shelf - Fixed for Mobile -->
             <div class="h-60 sm:h-80 relative book-shelf mb-6">
-              <div class="overflow-x-auto h-full book-collection">
-                <div class="flex gap-4 sm:gap-8 px-4 py-2 min-w-max h-full items-end">
+              <div class="overflow-x-auto h-full book-collection touch-pan-x pb-2 pr-2 max-w-full">
+                <div class="flex gap-4 sm:gap-8 px-4 py-2 h-full items-end w-max">
                   <!-- Book 1 -->
-                  <div class="h-48 sm:h-64 w-32 sm:w-40 bg-purple-700 rounded-lg shadow-xl book">
+                  <div class="h-48 sm:h-64 w-32 sm:w-40 bg-purple-700 rounded-lg shadow-xl book flex-shrink-0">
                     <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col items-center">
                       <div class="book-title text-center font-bold text-gray-800 mb-2 text-sm sm:text-base">Career Journey</div>
                       <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
@@ -460,7 +469,7 @@
                   </div>
 
                   <!-- Book 2 -->
-                  <div class="h-44 sm:h-56 w-32 sm:w-40 bg-sky-600 rounded-lg shadow-xl book">
+                  <div class="h-44 sm:h-56 w-32 sm:w-40 bg-sky-600 rounded-lg shadow-xl book flex-shrink-0">
                     <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col items-center">
                       <div class="book-title text-center font-bold text-gray-800 mb-2 text-sm sm:text-base">Travels</div>
                       <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
@@ -471,7 +480,7 @@
                   </div>
 
                   <!-- Book 3 -->
-                  <div class="h-46 sm:h-60 w-32 sm:w-40 bg-emerald-600 rounded-lg shadow-xl book">
+                  <div class="h-48 sm:h-60 w-32 sm:w-40 bg-emerald-600 rounded-lg shadow-xl book flex-shrink-0">
                     <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col items-center">
                       <div class="book-title text-center font-bold text-gray-800 mb-2 text-sm sm:text-base">Relationships</div>
                       <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
@@ -482,7 +491,7 @@
                   </div>
 
                   <!-- Book 4 -->
-                  <div class="h-40 sm:h-52 w-32 sm:w-40 bg-amber-600 rounded-lg shadow-xl book">
+                  <div class="h-40 sm:h-52 w-32 sm:w-40 bg-amber-600 rounded-lg shadow-xl book flex-shrink-0">
                     <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col items-center">
                       <div class="book-title text-center font-bold text-gray-800 mb-2 text-sm sm:text-base">Growth</div>
                       <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
@@ -493,7 +502,7 @@
                   </div>
 
                   <!-- Add New -->
-                  <div class="h-32 sm:h-40 w-24 sm:w-32 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:text-sky-600 hover:border-sky-300 transition cursor-pointer">
+                  <div class="h-32 sm:h-40 w-24 sm:w-32 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:text-sky-600 hover:border-sky-300 transition cursor-pointer flex-shrink-0">
                     <div class="text-center">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
