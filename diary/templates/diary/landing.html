@@ -53,6 +53,14 @@
       }
     </script>
     <style>
+      .personalization-badge {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.7rem;
+        vertical-align: middle;
+      }
+    </style>
+    <style>
       body {
         font-family: 'Poppins', sans-serif;
         background-color: #f8fafc;
@@ -178,6 +186,35 @@
         0% { transform: translateY(0px); }
         50% { transform: translateY(-10px); }
         100% { transform: translateY(0px); }
+      }
+      .scale-in {
+        animation: scaleIn 0.5s ease forwards;
+        transform: scale(0.95);
+        opacity: 0;
+      }
+      @keyframes scaleIn {
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .fade-in {
+        animation: fadeIn 0.5s ease forwards;
+        opacity: 0;
+      }
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
+      }
+      .loading-dots:after {
+        content: '';
+        animation: dots 1.5s infinite;
+      }
+      @keyframes dots {
+        0%, 20% { content: '.'; }
+        40% { content: '..'; }
+        60%, 100% { content: '...'; }
       }
       @media (max-width: 640px) {
         .mobile-menu-slide {
@@ -360,11 +397,7 @@
         </span>
       </div>
       <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2">
-        {% if user.is_authenticated %}
-          Hello <span class="gradient-text">{{ user.username }}</span>, what's on your mind today?
-        {% else %}
-          What's on your mind today?
-        {% endif %}
+        What's on your mind today?
       </h2>
       <p class="text-gray-600 text-sm max-w-md mx-auto">Capture your thoughts, feelings and experiences - our AI will transform them into meaningful journal entries.</p>
     </div>
@@ -396,64 +429,145 @@
       </div>
     </div>
 
-    <!-- Main input form -->
-    <form method="post" action="{% url 'new_entry' %}" class="w-full relative z-10">
-      {% csrf_token %}
-      <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-white transition-all hover:shadow-2xl card-hover">
-        <div class="p-5 sm:p-6">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="font-semibold text-gray-800 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd" />
-              </svg>
-              Share your day
-            </h3>
-            <div class="text-xs font-medium bg-gray-100 px-3 py-1 rounded-full text-gray-500 flex items-center gap-1 shadow-inner">
-              <span id="charCount">0</span>
-              <span>characters</span>
+      <!-- Main input form -->
+      <form id="demoForm" class="w-full relative z-10">
+        {% csrf_token %}
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-white transition-all hover:shadow-2xl card-hover">
+          <div class="p-5 sm:p-6">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd" />
+                </svg>
+                Share your day
+              </h3>
+              <div class="text-xs font-medium bg-gray-100 px-3 py-1 rounded-full text-gray-500 flex items-center gap-1 shadow-inner">
+                <span id="charCount">0</span>
+                <span>characters</span>
+              </div>
+            </div>
+
+            <textarea
+              id="journalInput"
+              name="journal_content"
+              class="input-area w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition diary-font shadow-inner bg-gray-50/50"
+              placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am, worked on the project until 5pm, then went out for dinner with friends..."
+              oninput="countChars()"></textarea>
+
+            <div class="mt-4">
+              <div class="text-xs font-medium text-gray-600 mb-2">Suggested topics:</div>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestions-pill bg-secondary-50 hover:bg-secondary-100 text-secondary-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-secondary-200/50">Today I accomplished</button>
+                <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-emerald-200/50">I felt happy when</button>
+                <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-indigo-200/50">I learned that</button>
+                <button type="button" onclick="addSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50">I met with</button>
+                <button type="button" onclick="addSuggestion('I'm grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50">I'm grateful for</button>
+              </div>
+            </div>
+
+            <!-- Personalization toggle -->
+            <div class="mt-4 border-t border-gray-200 pt-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center">
+                  <input type="checkbox" id="personalizationToggle" class="h-4 w-4 text-secondary-600 focus:ring-secondary-400 border-gray-300 rounded">
+                  <label for="personalizationToggle" class="ml-2 text-sm font-medium text-gray-700 flex items-center">
+                    <span>Use personalized style</span>
+                    {% if user.is_authenticated %}
+                      <span class="ml-1 text-xs text-secondary-600">(based on your preferences)</span>
+                      <a href="{% url 'preferences' %}" class="ml-2 text-xs text-secondary-700 hover:text-secondary-900 underline">
+                        Edit preferences
+                      </a>
+                    {% else %}
+                      <span class="ml-1 text-xs text-secondary-600">(login to customize)</span>
+                    {% endif %}
+                  </label>
+                </div>
+
+                {% if not user.is_authenticated %}
+                <a href="{% url 'login' %}" class="text-xs text-secondary-600 hover:underline">
+                  Login for personalization
+                </a>
+                {% endif %}
+              </div>
+
+              <!-- Personalization Options (initially hidden) -->
+              <div id="personalizationOptions" class="hidden bg-gray-50 p-4 rounded-lg">
+                {% if user.is_authenticated %}
+                  <div class="text-sm text-gray-700 mb-2">
+                    Your personalization settings:
+                  </div>
+                  <div class="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                    <div>
+                      <span class="font-medium">Writing Style:</span>
+                      <span class="capitalize">{{ user.journal_preferences.get_writing_style_display }}</span>
+                    </div>
+                    <div>
+                      <span class="font-medium">Tone:</span>
+                      <span class="capitalize">{{ user.journal_preferences.get_tone_display }}</span>
+                    </div>
+                    {% if user.journal_preferences.focus_areas %}
+                    <div class="col-span-2">
+                      <span class="font-medium">Focus Areas:</span>
+                      <span>{{ user.journal_preferences.focus_areas }}</span>
+                    </div>
+                    {% endif %}
+                  </div>
+                  <div class="text-xs text-right mt-2">
+                    <a href="{% url 'preferences' %}" class="text-secondary-600 hover:text-secondary-900">
+                      Edit preferences →
+                    </a>
+                  </div>
+                {% else %}
+                  <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-700">
+                      <p>Login or create an account to personalize your journal entries.</p>
+                    </div>
+                    <div>
+                      <a href="{% url 'login' %}" class="text-xs bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-3 py-1 rounded-full">
+                        Login
+                      </a>
+                      <a href="{% url 'signup' %}" class="text-xs ml-2 bg-secondary-600 hover:bg-secondary-700 text-white px-3 py-1 rounded-full">
+                        Sign up
+                      </a>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
             </div>
           </div>
 
-          <textarea
-            id="journalInput"
-            name="journal_content"
-            class="input-area w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition diary-font shadow-inner bg-gray-50/50"
-            placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am, worked on the project until 5pm, then went out for dinner with friends..."
-            oninput="countChars()"></textarea>
-
-          <div class="mt-4">
-            <div class="text-xs font-medium text-gray-600 mb-2">Suggested topics:</div>
-            <div class="flex flex-wrap gap-2">
-              <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestions-pill bg-secondary-50 hover:bg-secondary-100 text-secondary-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-secondary-200/50">Today I accomplished</button>
-              <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-emerald-200/50">I felt happy when</button>
-              <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-indigo-200/50">I learned that</button>
-              <button type="button" onclick="addSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50">I met with</button>
-              <button type="button" onclick="addSuggestion('I'm grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50">I'm grateful for</button>
+          <div class="bg-gradient-to-r from-secondary-50 to-primary-50 px-5 sm:px-6 py-4 flex justify-between items-center border-t border-white">
+            <div class="text-xs text-gray-600 flex items-center gap-2">
+              <span class="h-6 w-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-600" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                </svg>
+              </span>
+              <span>Try for free - no account needed</span>
+            </div>
+            <div class="action-container flex items-center">
+              <button type="button" id="demoButton" onclick="generateDemo()" class="btn-gradient text-white px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-2 shadow-md">
+                <span>Generate Entry</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
+      </form>
 
-        <div class="bg-gradient-to-r from-secondary-50 to-primary-50 px-5 sm:px-6 py-4 flex justify-between items-center border-t border-white">
-          <div class="text-xs text-gray-600 flex items-center gap-2">
-            <span class="h-6 w-6 bg-white rounded-full flex items-center justify-center shadow-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-600" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
-              </svg>
-            </span>
-            AI-powered journal creation
-          </div>
-          <button type="submit" class="btn-gradient text-white px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-2 shadow-md">
-            <span>Create Entry</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </button>
-        </div>
+    <!-- Loading indicator (initially hidden) -->
+    <div id="loadingIndicator" class="mt-12 hidden">
+      <div class="flex flex-col items-center justify-center p-8">
+        <div class="w-16 h-16 border-4 border-secondary-200 border-t-secondary-600 rounded-full animate-spin mb-4"></div>
+        <p class="text-center text-gray-600 handwritten text-xl">Crafting your journal entry<span class="loading-dots"></span></p>
+        <p class="text-center text-gray-500 text-sm mt-2">This takes just a moment</p>
       </div>
-    </form>
+    </div>
 
-    <!-- Results preview (would show after submission) -->
-    <div id="resultPreview" class="mt-12 bg-white rounded-2xl shadow-xl overflow-hidden border border-white card-hover {% if not show_result %}hidden{% endif %}">
+    <!-- Results preview -->
+    <div id="resultPreview" class="mt-12 bg-white rounded-2xl shadow-xl overflow-hidden border border-white card-hover hidden scale-in">
       <div class="p-6 border-b border-gray-100 flex items-center justify-between">
         <div>
           <h3 class="font-bold text-gray-800 text-lg mb-1 diary-font">Your Journal Entry</h3>
@@ -467,34 +581,36 @@
       </div>
 
       <div class="p-6 bg-gradient-to-br from-white to-gray-50">
-        <div class="handwritten text-xl text-gray-800 leading-relaxed">
-          {% if journal_entry %}
-            {{ journal_entry|linebreaks }}
-          {% else %}
-            <!-- This would be populated with the AI-generated entry -->
-            <p class="italic text-gray-400">Your journal entry will appear here...</p>
-          {% endif %}
+        <div id="journalEntry" class="handwritten text-xl text-gray-800 leading-relaxed">
+          <!-- This will be populated with the demo AI-generated entry via JavaScript -->
         </div>
       </div>
 
+      <!-- Update the result preview section in your HTML template -->
       <div class="bg-gradient-to-r from-secondary-50 to-primary-50 p-6 flex justify-between items-center border-t border-white">
         <div class="text-gray-600 text-sm diary-font">
           <span class="text-secondary-600 font-medium">Title:</span>
-          <span id="entryTitle">{% if entry_title %}{{ entry_title }}{% else %}My Day - {{ current_date|default:"Today" }}{% endif %}</span>
+          <span id="entryTitle">My Day - {{ current_date|default:"Today" }}</span>
         </div>
         <div class="flex gap-2">
-          <button type="button" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-full text-sm transition shadow-sm flex items-center gap-1">
+          <button type="button" onclick="editJournalEntry()" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-full text-sm transition shadow-sm flex items-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
             Edit
           </button>
-          <button type="button" class="btn-gradient text-white px-4 py-2 rounded-full text-sm font-medium shadow-md flex items-center gap-1">
+          <button type="button" onclick="restartDemo()" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-full text-sm transition shadow-sm flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Try Again
+          </button>
+          <a href="{% url 'signup' %}" class="btn-gradient text-white px-4 py-2 rounded-full text-sm font-medium shadow-md flex items-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
             </svg>
-            Save to Journal
-          </button>
+            Sign Up to Save
+          </a>
         </div>
       </div>
     </div>
@@ -532,9 +648,8 @@
       </div>
     </div>
 
-    <!-- If not logged in, show a subtle sign-up prompt -->
-    {% if not user.is_authenticated %}
-    <div class="mt-12 text-center bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-white relative overflow-hidden">
+    <!-- Sign-up prompt -->
+    <div id="signupPrompt" class="mt-12 text-center bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-white relative overflow-hidden fade-in">
       <div class="absolute inset-0 bg-gradient-to-r from-secondary-100/50 to-primary-100/50 opacity-60"></div>
 
       <div class="relative z-10">
@@ -546,55 +661,11 @@
         </div>
       </div>
     </div>
-    {% endif %}
   </div>
 </main>
 
-<!-- Mobile Bottom Navigation (only shown if logged in) -->
-{% if user.is_authenticated %}
-<div class="md:hidden fixed bottom-0 left-0 right-0 border-t border-white/20 glass-effect mobile-bottom-nav z-30">
-  <div class="grid grid-cols-5 items-center text-xs font-medium text-gray-600">
-    <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-3 hover:text-secondary-600 transition">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-      </svg>
-      <span>Dashboard</span>
-    </a>
-    <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-3 hover:text-secondary-600 transition">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-      </svg>
-      <span>Library</span>
-    </a>
-    <a href="{% url 'home' %}" class="flex flex-col items-center justify-center py-3 text-secondary-600 relative">
-      <div class="absolute -top-5 gradient-bg w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-        </svg>
-      </div>
-      <div class="mt-5">
-        <span>Journal</span>
-      </div>
-    </a>
-    <a href="{% url 'insights' %}" class="flex flex-col items-center justify-center py-3 hover:text-secondary-600 transition">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
-      <span>Insights</span>
-    </a>
-    <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-3 hover:text-secondary-600 transition">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-      <span>Account</span>
-    </a>
-  </div>
-</div>
-{% endif %}
-
 <!-- Footer with links to other platforms -->
-<footer class="py-6 mt-12 bg-white/80 backdrop-blur-sm border-t border-white/30">
+<footer class="py-3 mt-12 bg-white/80 backdrop-blur-sm border-t border-white/30">
   <div class="w-full max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center">
     <div class="mb-4 sm:mb-0 text-center sm:text-left">
       <a href="{% url 'home' %}" class="flex items-center justify-center sm:justify-start mb-2">
@@ -626,6 +697,115 @@
 </footer>
 
 <script>
+    // Client-side caching for journal entries
+  const journalCache = {
+    // Initialize with localStorage if available
+    init: function() {
+        if (typeof localStorage !== 'undefined') {
+            // Load cache from localStorage if it exists
+            try {
+                const storedCache = localStorage.getItem('diaryVaultCache');
+                if (storedCache) {
+                    const parsedCache = JSON.parse(storedCache);
+                    this.entries = parsedCache.entries || {};
+                    this.cacheTime = parsedCache.cacheTime || Date.now();
+
+                    // Clear cache if older than 24 hours
+                    const oneDayMs = 24 * 60 * 60 * 1000;
+                    if (Date.now() - this.cacheTime > oneDayMs) {
+                        this.clear();
+                    }
+
+                    console.log('Cache loaded with', Object.keys(this.entries).length, 'entries');
+                    return;
+                }
+            } catch (e) {
+                console.error('Error loading cache:', e);
+            }
+        }
+
+        // Initialize empty cache if loading failed
+        this.entries = {};
+        this.cacheTime = Date.now();
+    },
+
+    // Save current cache to localStorage
+    save: function() {
+        if (typeof localStorage !== 'undefined') {
+            try {
+                const cacheData = {
+                    entries: this.entries,
+                    cacheTime: this.cacheTime
+                };
+                localStorage.setItem('diaryVaultCache', JSON.stringify(cacheData));
+            } catch (e) {
+                console.error('Error saving cache:', e);
+            }
+        }
+    },
+
+    // Generate a simple hash for the content
+    hashContent: function(content) {
+        let hash = 0;
+        for (let i = 0; i < content.length; i++) {
+            const char = content.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return hash.toString();
+    },
+
+    // Get a cached entry
+    get: function(content) {
+        const key = this.hashContent(content);
+        return this.entries[key];
+    },
+
+    // Save an entry to cache
+    set: function(content, data) {
+        const key = this.hashContent(content);
+        this.entries[key] = {
+            ...data,
+            timestamp: Date.now()
+        };
+        this.save();
+    },
+
+    // Clear the entire cache
+    clear: function() {
+        this.entries = {};
+        this.cacheTime = Date.now();
+        this.save();
+        console.log('Cache cleared');
+    }
+  };
+
+  // Initialize cache on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    journalCache.init();
+  });
+
+  // Helper function to display journal entry
+  function displayJournalEntry(data) {
+    // Display the content
+    document.getElementById('journalEntry').innerHTML = data.entry.replace(/\n/g, '');
+
+    // Make sure we have a title, fallback if not
+    const title = data.title || "My Journal Entry";
+    document.getElementById('entryTitle').textContent = title;
+
+    // Show the result preview
+    document.getElementById('resultPreview').classList.remove('hidden');
+
+    // Scroll to the result
+    setTimeout(() => {
+        document.getElementById('resultPreview').scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+
+    // Enable the button
+    document.getElementById('demoButton').disabled = false;
+  }
+
   // Mobile menu toggle
   function toggleMobileMenu() {
     const menu = document.getElementById('mobileMenu');
@@ -654,7 +834,9 @@
   function countChars() {
     const textArea = document.getElementById('journalInput');
     const charCount = document.getElementById('charCount');
-    charCount.textContent = textArea.value.length;
+    if (textArea && charCount) {
+      charCount.textContent = textArea.value.length;
+    }
   }
 
   // Add suggestion to textarea
@@ -662,7 +844,7 @@
     const textArea = document.getElementById('journalInput');
     let currentText = textArea.value;
 
-    // Add a line break if there's already content
+    // Add a space if there's already content and it doesn't end with space or newline
     if (currentText && !currentText.endsWith('\n') && !currentText.endsWith(' ')) {
       currentText += ' ';
     }
@@ -677,7 +859,163 @@
     textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
   }
 
-  // Add some animations for a more modern feel
+  // Function to reset the form to its initial state
+  function resetFormState() {
+    // If in edit mode, restore the original button
+    if (document.getElementById('demoForm').classList.contains('edit-mode')) {
+      const demoButton = document.getElementById('demoButton');
+      demoButton.innerHTML = `
+        <span>Generate Entry</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      `;
+
+      // Hide the save button if it exists
+      const saveButton = document.getElementById('saveButton');
+      if (saveButton) {
+        saveButton.style.display = 'none';
+      }
+
+      // Remove the edit mode flag
+      document.getElementById('demoForm').classList.remove('edit-mode');
+    }
+  }
+
+  // Demo entry generation with API call
+  function generateDemo() {
+    // Reset form state
+    resetFormState();
+
+    const journalContent = document.getElementById('journalInput').value.trim();
+
+    // Validate input
+    if (journalContent.length < 10) {
+        alert('Please share a bit more about your day (at least 10 characters)');
+        return;
+    }
+
+    // Check cache first
+    const cachedEntry = journalCache.get(journalContent);
+    if (cachedEntry) {
+        console.log('Entry served from client cache');
+        displayJournalEntry(cachedEntry);
+        return;
+    }
+
+    // Show loading indicator
+    document.getElementById('loadingIndicator').classList.remove('hidden');
+    document.getElementById('demoButton').disabled = true;
+    document.getElementById('signupPrompt').classList.add('hidden');
+
+    // Get CSRF token for Django
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Call backend API
+    fetch('/api/demo-journal/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({ journal_content: journalContent })
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 429) {
+                throw new Error('Rate limit exceeded. Please wait a moment before trying again.');
+            }
+            throw new Error('Server error: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Hide loading indicator
+        document.getElementById('loadingIndicator').classList.add('hidden');
+
+        if (data.error) {
+            alert('Error: ' + data.error);
+            restartDemo();
+            return;
+        }
+
+        // Cache the successful response
+        journalCache.set(journalContent, data);
+
+        // Display the journal entry
+        displayJournalEntry(data);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert(error.message || 'Sorry, we encountered an error. Please try again later.');
+        document.getElementById('loadingIndicator').classList.add('hidden');
+        document.getElementById('demoButton').disabled = false;
+    });
+}
+
+  // Edit journal entry
+  function editJournalEntry() {
+    // Get the current generated entry
+    const generatedEntry = document.getElementById('journalEntry').innerHTML;
+    const entryTitle = document.getElementById('entryTitle').textContent;
+
+    // Convert HTML breaks to newlines for textarea
+    const cleanedEntry = generatedEntry.replace(/<br\s*\/?>/gi, '\n');
+
+    // Put the generated content back into the input field for editing
+    const journalInput = document.getElementById('journalInput');
+    journalInput.value = cleanedEntry;
+
+    // Hide the result preview
+    document.getElementById('resultPreview').classList.add('hidden');
+
+    // Enable the generate button
+    document.getElementById('demoButton').disabled = false;
+
+    // Show the sign-up prompt
+    document.getElementById('signupPrompt').classList.remove('hidden');
+
+    // Set edit mode flag
+    document.getElementById('demoForm').classList.add('edit-mode');
+
+    // Change the generate button text and show the sign-up button
+    const demoButton = document.getElementById('demoButton');
+    demoButton.innerHTML = `
+      <span>Update Entry</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+      </svg>
+    `;
+
+    // Show the save button (if it doesn't exist, we'll create it)
+    const actionContainer = document.querySelector('.action-container');
+    if (!document.getElementById('saveButton')) {
+      const saveButton = document.createElement('a');
+      saveButton.id = 'saveButton';
+      saveButton.href = "{% url 'signup' %}";
+      saveButton.className = 'bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-2 shadow-md transition ml-2';
+      saveButton.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+        </svg>
+        <span>Save Entry</span>
+      `;
+      actionContainer.appendChild(saveButton);
+    } else {
+      document.getElementById('saveButton').style.display = 'flex';
+    }
+
+    // Update character count
+    countChars();
+
+    // Scroll back to the form
+    document.getElementById('demoForm').scrollIntoView({ behavior: 'smooth' });
+
+    // Focus on the input field
+    journalInput.focus();
+  }
+
+  // Page load animations
   document.addEventListener('DOMContentLoaded', function() {
     // Add a small animation to the main form on page load
     const mainForm = document.querySelector('form');
@@ -687,6 +1025,9 @@
         mainForm.classList.add('translate-y-0');
       }, 300);
     }
+
+    // Initialize character counter
+    countChars();
   });
 </script>
 </body>

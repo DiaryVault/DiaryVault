@@ -107,3 +107,55 @@ class UserInsight(models.Model):
 
     def __str__(self):
         return self.title
+
+class UserPreference(models.Model):
+    """Store user personalization preferences for journal generation"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='journal_preferences')
+    writing_style = models.CharField(max_length=30, default='reflective',
+                                    choices=[
+                                        ('reflective', 'Reflective'),
+                                        ('analytical', 'Analytical'),
+                                        ('creative', 'Creative'),
+                                        ('concise', 'Concise'),
+                                        ('detailed', 'Detailed'),
+                                        ('poetic', 'Poetic'),
+                                        ('humorous', 'Humorous'),
+                                    ])
+    tone = models.CharField(max_length=30, default='balanced',
+                           choices=[
+                               ('positive', 'Mostly Positive'),
+                               ('balanced', 'Balanced'),
+                               ('realistic', 'Realistic'),
+                               ('growth', 'Growth-focused'),
+                           ])
+    focus_areas = models.CharField(max_length=255, blank=True,
+                                  help_text="Comma-separated areas to emphasize (e.g., personal growth,relationships)")
+    language_complexity = models.CharField(max_length=20, default='moderate',
+                                         choices=[
+                                             ('simple', 'Simple'),
+                                             ('moderate', 'Moderate'),
+                                             ('advanced', 'Advanced'),
+                                         ])
+    include_questions = models.BooleanField(default=True,
+                                          help_text="Include reflective questions at the end of entries")
+    metaphor_frequency = models.CharField(max_length=20, default='occasional',
+                                        choices=[
+                                            ('minimal', 'Minimal'),
+                                            ('occasional', 'Occasional'),
+                                            ('frequent', 'Frequent'),
+                                        ])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Preferences for {self.user.username}"
+
+    def get_focus_areas_list(self):
+        """Return focus areas as a list"""
+        if not self.focus_areas:
+            return []
+        return [area.strip() for area in self.focus_areas.split(',')]
+
+    class Meta:
+        verbose_name = "User Preference"
+        verbose_name_plural = "User Preferences"

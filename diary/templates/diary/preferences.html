@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Journal Preferences | DiaryVault{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-8">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2">Personalize Your Journal</h1>
+    <p class="text-gray-600">Customize how your journal entries are generated to match your personal style and preferences.</p>
+  </div>
+
+  <form method="POST" class="bg-white rounded-2xl shadow-lg p-6 mb-10">
+    {% csrf_token %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Writing Style -->
+      <div>
+        <label for="writing_style" class="block font-medium text-gray-700 mb-2">Writing Style</label>
+        <select name="writing_style" id="writing_style" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400">
+          <option value="reflective" {% if preferences.writing_style == 'reflective' %}selected{% endif %}>Reflective - Thoughtful and introspective</option>
+          <option value="analytical" {% if preferences.writing_style == 'analytical' %}selected{% endif %}>Analytical - Logical and pattern-focused</option>
+          <option value="creative" {% if preferences.writing_style == 'creative' %}selected{% endif %}>Creative - Expressive with vivid imagery</option>
+          <option value="concise" {% if preferences.writing_style == 'concise' %}selected{% endif %}>Concise - Brief and to the point</option>
+          <option value="detailed" {% if preferences.writing_style == 'detailed' %}selected{% endif %}>Detailed - Rich with specifics</option>
+          <option value="poetic" {% if preferences.writing_style == 'poetic' %}selected{% endif %}>Poetic - Lyrical and expressive</option>
+          <option value="humorous" {% if preferences.writing_style == 'humorous' %}selected{% endif %}>Humorous - Lighthearted with touches of humor</option>
+        </select>
+      </div>
+
+      <!-- Emotional Tone -->
+      <div>
+        <label for="tone" class="block font-medium text-gray-700 mb-2">Emotional Tone</label>
+        <select name="tone" id="tone" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400">
+          <option value="positive" {% if preferences.tone == 'positive' %}selected{% endif %}>Mostly Positive - Focus on the bright side</option>
+          <option value="balanced" {% if preferences.tone == 'balanced' %}selected{% endif %}>Balanced - Equal attention to positives and negatives</option>
+          <option value="realistic" {% if preferences.tone == 'realistic' %}selected{% endif %}>Realistic - Pragmatic and straightforward</option>
+          <option value="growth" {% if preferences.tone == 'growth' %}selected{% endif %}>Growth-focused - Emphasis on learning and improvement</option>
+        </select>
+      </div>
+
+      <!-- Focus Areas -->
+      <div class="md:col-span-2">
+        <label for="focus_areas" class="block font-medium text-gray-700 mb-2">Focus Areas (comma-separated)</label>
+        <input type="text" name="focus_areas" id="focus_areas" value="{{ preferences.focus_areas }}"
+               placeholder="e.g., personal growth, relationships, health, career goals"
+               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400">
+        <p class="text-xs text-gray-500 mt-1">Topics you'd like your journal entries to emphasize when relevant</p>
+      </div>
+
+      <!-- Language Complexity -->
+      <div>
+        <label for="language_complexity" class="block font-medium text-gray-700 mb-2">Language Complexity</label>
+        <select name="language_complexity" id="language_complexity" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400">
+          <option value="simple" {% if preferences.language_complexity == 'simple' %}selected{% endif %}>Simple - Clear, straightforward vocabulary</option>
+          <option value="moderate" {% if preferences.language_complexity == 'moderate' %}selected{% endif %}>Moderate - Balanced complexity</option>
+          <option value="advanced" {% if preferences.language_complexity == 'advanced' %}selected{% endif %}>Advanced - Rich, sophisticated vocabulary</option>
+        </select>
+      </div>
+
+      <!-- Metaphor Frequency -->
+      <div>
+        <label for="metaphor_frequency" class="block font-medium text-gray-700 mb-2">Metaphor & Imagery Usage</label>
+        <select name="metaphor_frequency" id="metaphor_frequency" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400">
+          <option value="minimal" {% if preferences.metaphor_frequency == 'minimal' %}selected{% endif %}>Minimal - Straightforward language</option>
+          <option value="occasional" {% if preferences.metaphor_frequency == 'occasional' %}selected{% endif %}>Occasional - Some metaphors and imagery</option>
+          <option value="frequent" {% if preferences.metaphor_frequency == 'frequent' %}selected{% endif %}>Frequent - Rich with metaphors and imagery</option>
+        </select>
+      </div>
+
+      <!-- Include Questions Toggle -->
+      <div class="md:col-span-2 flex items-center">
+        <input type="checkbox" name="include_questions" id="include_questions"
+               {% if preferences.include_questions %}checked{% endif %}
+               class="h-5 w-5 text-secondary-600 focus:ring-secondary-400 border-gray-300 rounded">
+        <label for="include_questions" class="ml-2 block text-gray-700">
+          Include reflective questions at the end of entries
+        </label>
+      </div>
+    </div>
+
+    <div class="mt-8 border-t border-gray-200 pt-6 flex justify-between items-center">
+      <div>
+        <p class="text-sm text-gray-600">Preferences will be applied to all future journal entries</p>
+      </div>
+      <div class="flex gap-3">
+        <a href="{% url 'dashboard' %}" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-5 py-2 rounded-full text-sm transition shadow-sm">
+          Cancel
+        </a>
+        <button type="submit" class="btn-gradient text-white px-5 py-2 rounded-full text-sm font-medium shadow-md">
+          Save Preferences
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Preview Section -->
+  <div class="bg-white rounded-2xl shadow-lg p-6">
+    <h2 class="text-xl font-bold text-gray-800 diary-font mb-4">Example Journal Style</h2>
+    <div class="p-6 bg-gray-50 rounded-xl handwritten text-lg text-gray-800 leading-relaxed">
+      <p>Today, I attended the quarterly team meeting at work. As we discussed our recent project outcomes, I felt a sense of pride in how far we've come. The presentation I gave on the new client acquisition strategy was well-received, especially the data analysis portion showing our growth trajectory.</p>
+
+      <p>After work, I met with Sarah for coffee. Our conversation about her upcoming gallery showing reminded me how important it is to support friends in their creative pursuits. The way her eyes lit up when talking about her paintings made me reflect on my own neglected hobbies.</p>
+
+      <p>On my way home, the sunset painted the sky in vibrant oranges and purples, a beautiful end to a productive day. I'm grateful for these moments of natural beauty that remind me to pause and appreciate the world around me.</p>
+
+      <p>What other creative pursuits might I want to reconnect with? How can I better balance work achievements with personal fulfillment?</p>
+    </div>
+    <p class="text-sm text-gray-500 mt-3">This is an example of a journal entry with the "reflective" style, "balanced" tone, with occasional metaphors and reflective questions.</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Live preview update simulation (would need AJAX implementation)
+  document.addEventListener('DOMContentLoaded', function() {
+    const styleSelectors = document.querySelectorAll('select, input[type="checkbox"]');
+    styleSelectors.forEach(selector => {
+      selector.addEventListener('change', function() {
+        // In a real implementation, you would send these values to your backend
+        // and get a generated preview based on the selected preferences
+
+        // For now, we'll just show a notification that changes were made
+        const notification = document.createElement('div');
+        notification.className = 'fixed bottom-4 right-4 bg-secondary-600 text-white px-4 py-2 rounded-lg shadow-lg';
+        notification.textContent = 'Style updated! Save to apply these changes.';
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          notification.remove();
+        }, 3000);
+      });
+    });
+  });
+</script>
+{% endblock %}
