@@ -745,6 +745,51 @@
   </div>
 </footer>
 
+
+
+
+<!-- Add this just before your closing </body> tag -->
+{% if user.is_authenticated %}
+<nav class="mobile-bottom-nav md:hidden px-2 py-2 flex justify-around">
+  <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'dashboard' %}text-secondary-600{% else %}text-gray-500{% endif %}">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+    </svg>
+    <span class="text-xs mt-1">Home</span>
+  </a>
+  <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'library' %}text-secondary-600{% else %}text-gray-500{% endif %}">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+    </svg>
+    <span class="text-xs mt-1">Library</span>
+  </a>
+  <div class="flex flex-col items-center justify-center py-1 px-3 opacity-0">
+    <div class="h-6 w-6"></div>
+    <span class="text-xs mt-1">New</span>
+  </div>
+  <a href="{% url 'insights' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'insights' %}text-secondary-600{% else %}text-gray-500{% endif %}">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+    </svg>
+    <span class="text-xs mt-1">Insights</span>
+  </a>
+  <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'account_settings' %}text-secondary-600{% else %}text-gray-500{% endif %}">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    </svg>
+    <span class="text-xs mt-1">Profile</span>
+  </a>
+</nav>
+
+<!-- Floating Action Button for creating new entries -->
+<a href="{% url 'new_entry' %}" class="mobile-fab md:hidden btn-gradient shadow-lg p-4 rounded-full text-white">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+  </svg>
+</a>
+{% endif %}
+
+
 <script>
     // Client-side caching for journal entries
   const journalCache = {
@@ -907,6 +952,34 @@
     // Move cursor to end
     textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
   }
+
+    // Add this function to your JavaScript code
+    function restartDemo() {
+      // Clear the input field
+      document.getElementById('journalInput').value = '';
+
+      // Hide the result preview
+      document.getElementById('resultPreview').classList.add('hidden');
+
+      // Show the sign-up prompt if it exists
+      const signupPrompt = document.getElementById('signupPrompt');
+      if (signupPrompt) {
+        signupPrompt.classList.remove('hidden');
+      }
+
+      // Reset character count
+      countChars();
+
+      // Reset form state
+      resetFormState();
+
+      // Enable the generate button
+      document.getElementById('demoButton').disabled = false;
+
+      // Scroll back to the form
+      document.getElementById('demoForm').scrollIntoView({ behavior: 'smooth' });
+    }
+
 
   // Function to reset the form to its initial state
   function resetFormState() {
@@ -1079,47 +1152,6 @@
     countChars();
   });
 </script>
-
-<!-- Add this just before your closing </body> tag -->
-{% if user.is_authenticated %}
-<nav class="mobile-bottom-nav md:hidden px-2 py-2 flex justify-around">
-  <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'dashboard' %}text-secondary-600{% else %}text-gray-500{% endif %}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-    </svg>
-    <span class="text-xs mt-1">Home</span>
-  </a>
-  <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'library' %}text-secondary-600{% else %}text-gray-500{% endif %}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-    </svg>
-    <span class="text-xs mt-1">Library</span>
-  </a>
-  <div class="flex flex-col items-center justify-center py-1 px-3 opacity-0">
-    <div class="h-6 w-6"></div>
-    <span class="text-xs mt-1">New</span>
-  </div>
-  <a href="{% url 'insights' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'insights' %}text-secondary-600{% else %}text-gray-500{% endif %}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-    </svg>
-    <span class="text-xs mt-1">Insights</span>
-  </a>
-  <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'account_settings' %}text-secondary-600{% else %}text-gray-500{% endif %}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-    </svg>
-    <span class="text-xs mt-1">Profile</span>
-  </a>
-</nav>
-
-<!-- Floating Action Button for creating new entries -->
-<a href="{% url 'new_entry' %}" class="mobile-fab md:hidden btn-gradient shadow-lg p-4 rounded-full text-white">
-  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-  </svg>
-</a>
-{% endif %}
 
 </body>
 </html>
