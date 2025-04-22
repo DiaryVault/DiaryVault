@@ -12,498 +12,682 @@
     <link rel="manifest" href="/static/manifest.json">
     <meta name="msapplication-config" content="/static/browserconfig.xml">
 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DiaryVault - Your Daily Journal</title>
-  <meta name="theme-color" content="#0ea5e9" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&family=Caveat:wght@400;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f8fafc;
-      width: 100%;
-      overflow-x: hidden;
-      position: relative;
-    }
-    html {
-      overflow-x: hidden;
-    }
-    .diary-font {
-      font-family: 'Merriweather', serif;
-    }
-    .book-title {
-      font-family: 'Libre Baskerville', serif;
-    }
-    .handwritten {
-      font-family: 'Caveat', cursive;
-    }
-    .input-area {
-      min-height: 180px;
-      resize: none;
-    }
-    .suggestions-pill {
-      transition: all 0.2s ease;
-    }
-    .suggestions-pill:hover {
-      transform: translateY(-3px);
-    }
-    .chat-bubble {
-      border-radius: 1.15rem;
-      padding: 1rem 1.25rem;
-      position: relative;
-    }
-    .chat-bubble.ai {
-      background-color: #f1f5f9;
-      margin-right: 2rem;
-    }
-    .chat-bubble.user {
-      background-color: #e0f2fe;
-      margin-left: 2rem;
-    }
-    .chat-bubble.ai::before {
-      content: '';
-      position: absolute;
-      left: -0.5rem;
-      bottom: 1rem;
-      width: 1rem;
-      height: 1rem;
-      background-color: #f1f5f9;
-      clip-path: polygon(100% 0, 0 100%, 100% 100%);
-      transform: rotate(135deg);
-    }
-    .chat-bubble.user::after {
-      content: '';
-      position: absolute;
-      right: -0.5rem;
-      bottom: 1rem;
-      width: 1rem;
-      height: 1rem;
-      background-color: #e0f2fe;
-      clip-path: polygon(100% 0, 0 100%, 100% 100%);
-      transform: rotate(-45deg);
-    }
-    .gradient-text {
-      background: linear-gradient(to right, #0ea5e9, #6366f1);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    @media (max-width: 640px) {
-      .mobile-menu-slide {
-        transition: transform 0.3s ease-in-out;
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>DiaryVault - Your Daily Journal</title>
+    <meta name="theme-color" content="#6366f1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Poppins:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: '#f5f3ff',
+                100: '#ede9fe',
+                200: '#ddd6fe',
+                300: '#c4b5fd',
+                400: '#a78bfa',
+                500: '#8b5cf6',
+                600: '#7c3aed',
+                700: '#6d28d9',
+                800: '#5b21b6',
+                900: '#4c1d95',
+              },
+              secondary: {
+                50: '#eef2ff',
+                100: '#e0e7ff',
+                200: '#c7d2fe',
+                300: '#a5b4fc',
+                400: '#818cf8',
+                500: '#6366f1',
+                600: '#4f46e5',
+                700: '#4338ca',
+                800: '#3730a3',
+                900: '#312e81',
+              },
+            },
+          },
+        },
       }
-      .mobile-menu-open {
-        transform: translateX(0);
+    </script>
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8fafc;
+        width: 100%;
+        overflow-x: hidden;
+        position: relative;
       }
-      .mobile-menu-closed {
-        transform: translateX(100%);
+      html {
+        overflow-x: hidden;
+        scroll-behavior: smooth;
       }
-      .mobile-bottom-nav {
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      .diary-font {
+        font-family: 'Playfair Display', serif;
       }
-    }
-  </style>
+      .book-title {
+        font-family: 'Playfair Display', serif;
+      }
+      .handwritten {
+        font-family: 'Caveat', cursive;
+      }
+      .input-area {
+        min-height: 180px;
+        resize: none;
+      }
+      .suggestions-pill {
+        transition: all 0.3s ease;
+      }
+      .suggestions-pill:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+      .chat-bubble {
+        border-radius: 1.5rem;
+        padding: 1rem 1.25rem;
+        position: relative;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      }
+      .chat-bubble.ai {
+        background-color: #f1f5f9;
+        margin-right: 2rem;
+        border-bottom-left-radius: 0.25rem;
+      }
+      .chat-bubble.user {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        margin-left: 2rem;
+        border-bottom-right-radius: 0.25rem;
+      }
+      .chat-bubble.ai::before {
+        content: '';
+        position: absolute;
+        left: -0.5rem;
+        bottom: 0;
+        width: 1rem;
+        height: 1rem;
+        background-color: #f1f5f9;
+        clip-path: polygon(100% 0, 0 100%, 100% 100%);
+        transform: rotate(135deg);
+      }
+      .chat-bubble.user::after {
+        content: '';
+        position: absolute;
+        right: -0.5rem;
+        bottom: 0;
+        width: 1rem;
+        height: 1rem;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        clip-path: polygon(100% 0, 0 100%, 100% 100%);
+        transform: rotate(-45deg);
+      }
+      .gradient-bg {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      }
+      .gradient-text {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .btn-gradient {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        transition: all 0.3s ease;
+      }
+      .btn-gradient:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
+      }
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+      .circle-pattern {
+        background-image: radial-gradient(#6366f120 1px, transparent 1px);
+        background-size: 20px 20px;
+      }
+      .floating {
+        animation: floating 3s infinite ease-in-out;
+      }
+      @keyframes floating {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+      }
+      @media (max-width: 640px) {
+        .mobile-menu-slide {
+          transition: transform 0.3s ease-in-out;
+        }
+        .mobile-menu-open {
+          transform: translateX(0);
+        }
+        .mobile-menu-closed {
+          transform: translateX(100%);
+        }
+        .mobile-bottom-nav {
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+      }
+    </style>
 </head>
-<body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f0f9ff] to-[#e6f7ff] text-gray-900">
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f5f3ff] to-[#eef2ff] text-gray-800 custom-scrollbar circle-pattern">
 
 <!-- Navbar -->
-<header class="bg-white shadow sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
-      <div class="flex items-center gap-2">
-        <a href="{% url 'home' %}" class="flex items-center gap-2 hover:opacity-80 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<header class="glass-effect sticky top-0 z-50 border-b border-white/20">
+  <div class="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
+    <div class="flex items-center gap-3">
+      <a href="{% url 'home' %}" class="flex items-center gap-2 hover:opacity-80 transition">
+        <div class="bg-white p-1.5 rounded-lg shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-7 sm:w-7 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
           </svg>
-          <h1 class="text-xl sm:text-2xl font-extrabold text-sky-600 tracking-tight">DiaryVault</h1>
-        </a>
-      </div>
-
-      <!-- Main Navigation (only shown if logged in) -->
-      {% if user.is_authenticated %}
-      <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
-        <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-          </svg>
-          Dashboard
-        </a>
-        <a href="{% url 'library' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-          </svg>
-          Library
-        </a>
-        <a href="{% url 'insights' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          Insights
-        </a>
-
-        <div class="w-px h-6 bg-gray-200"></div>
-
-        <!-- User profile section when logged in -->
-        <div class="flex items-center gap-3">
-          <a href="{% url 'account_settings' %}" class="flex items-center gap-3 hover:opacity-80 transition">
-            <div class="h-8 w-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold text-sm">
-              {{ user.username|first|upper }}
-            </div>
-            <span class="text-sm text-gray-700">{{ user.username }}</span>
-          </a>
         </div>
-
-        <form method="post" action="{% url 'logout' %}" class="inline">
-          {% csrf_token %}
-          <button type="submit" class="text-gray-700 hover:text-red-500 transition">Logout</button>
-        </form>
-      </nav>
-      {% else %}
-      <!-- Auth buttons if not logged in -->
-      <div class="flex gap-4 items-center">
-        <a href="{% url 'login' %}" class="text-sky-600 hover:text-sky-800 text-sm font-medium transition">Log in</a>
-        <a href="{% url 'signup' %}" class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-sky-700 transition">Sign up</a>
-      </div>
-      {% endif %}
-
-      <!-- Mobile menu button (only shown if logged in) -->
-      {% if user.is_authenticated %}
-      <button class="md:hidden text-gray-700 hover:text-sky-600 p-1" onclick="toggleMobileMenu()">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-      {% endif %}
+        <h1 class="text-xl sm:text-2xl font-extrabold gradient-text tracking-tight">DiaryVault</h1>
+      </a>
     </div>
-  </header>
 
-  <!-- Mobile Menu Overlay (only shown if logged in) -->
-  {% if user.is_authenticated %}
-  <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden">
-    <div class="absolute right-0 top-0 bottom-0 w-72 bg-white p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
-      <div class="flex justify-between items-center mb-8">
-        <h2 class="font-bold text-lg">Menu</h2>
-        <button onclick="toggleMobileMenu()" class="p-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <!-- User info in mobile menu -->
-      <a href="{% url 'account_settings' %}" class="block">
-        <div class="flex items-center gap-3 p-3 bg-sky-50 rounded-lg mb-6 hover:bg-sky-100 transition">
-          <div class="h-10 w-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold">
-            {{ user.username|first|upper }}
-          </div>
-          <div>
-            <div class="font-medium">{{ user.username }}</div>
-            <div class="text-xs text-gray-500">{{ total_entries|default:'0' }} entries</div>
-          </div>
-        </div>
+    <!-- Main Navigation (only shown if logged in) -->
+    {% if user.is_authenticated %}
+    <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
+      <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+        </svg>
+        Dashboard
+      </a>
+      <a href="{% url 'library' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+        </svg>
+        Library
+      </a>
+      <a href="{% url 'insights' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        Insights
       </a>
 
-      <nav class="flex flex-col gap-1">
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-          </svg>
-          <span>Dashboard</span>
-        </a>
-        <a href="{% url 'library' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-          </svg>
-          <span>Library</span>
-        </a>
-        <a href="{% url 'new_entry' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-          <span>Journal</span>
-        </a>
-        <a href="{% url 'insights' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          <span>Insights</span>
-        </a>
-        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span>Account</span>
-        </a>
-        <div class="border-t border-gray-200 my-3 pt-2">
-          <form method="post" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="flex items-center gap-3 p-3 w-full hover:bg-red-50 rounded-lg text-red-600">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              <span>Logout</span>
-            </button>
-          </form>
-        </div>
-      </nav>
-    </div>
-  </div>
-  {% endif %}
+      <div class="w-px h-6 bg-gray-200"></div>
 
-  <!-- Main Content -->
-  <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-6 flex flex-col items-center">
-    <div class="max-w-3xl w-full mx-auto">
-
-      <!-- Header with date -->
-      <div class="text-center mb-8">
-        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 diary-font mb-1">
-          {% if user.is_authenticated %}
-            Hello {{ user.username }}, what did you do today?
-          {% else %}
-            What did you do today?
-          {% endif %}
-        </h2>
-        <p class="text-gray-600 text-sm">{{ current_date|default:"Today" }}</p>
+      <!-- User profile section when logged in -->
+      <div class="flex items-center gap-3">
+        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 hover:opacity-80 transition">
+          <div class="h-9 w-9 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+            {{ user.username|first|upper }}
+          </div>
+          <span class="text-sm text-gray-700">{{ user.username }}</span>
+        </a>
       </div>
 
-      <!-- Chat area (visible if there are already messages) -->
-      <div id="chatArea" class="mb-6 space-y-4 {% if not has_conversation %}hidden{% endif %}">
-        <!-- Sample AI message (this would be populated dynamically) -->
-        <div class="chat-bubble ai">
-          <p class="handwritten text-gray-800 text-lg leading-relaxed">Hey there! Tell me about your day, and I'll help you turn it into a beautiful journal entry.</p>
-        </div>
-
-        <!-- This is where chat messages would appear dynamically -->
-        <div id="chatMessages">
-          <!-- Example of conversation flow (would be added dynamically) -->
-          {% if has_conversation %}
-            <!-- These would be populated from your backend -->
-            {% for message in conversation %}
-              {% if message.is_user %}
-                <div class="chat-bubble user diary-font">
-                  <p>{{ message.content }}</p>
-                </div>
-              {% else %}
-                <div class="chat-bubble ai handwritten">
-                  <p>{{ message.content }}</p>
-                </div>
-              {% endif %}
-            {% endfor %}
-          {% endif %}
-        </div>
-      </div>
-
-      <!-- Main input form -->
-      <form method="post" action="{% url 'process_journal' %}" class="w-full">
+      <form method="post" action="{% url 'logout' %}" class="inline">
         {% csrf_token %}
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
-          <div class="p-4 sm:p-5">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="font-semibold text-gray-800">Share your day</h3>
-              <div class="text-xs text-gray-500 flex items-center gap-1">
-                <span id="charCount">0</span>
-                <span>characters</span>
-              </div>
-            </div>
-
-            <textarea
-              id="journalInput"
-              name="journal_content"
-              class="input-area w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition diary-font"
-              placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am, worked on the project until 5pm, then went out for dinner with friends..."
-              oninput="countChars()"></textarea>
-
-            <div class="mt-3">
-              <div class="text-xs text-gray-600 mb-2">Suggested topics:</div>
-              <div class="flex flex-wrap gap-2">
-                <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestions-pill bg-sky-50 hover:bg-sky-100 text-sky-700 px-3 py-1 rounded-full text-xs transition">Today I accomplished</button>
-                <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs transition">I felt happy when</button>
-                <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs transition">I learned that</button>
-                <button type="button" onclick="addSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs transition">I met with</button>
-                <button type="button" onclick="addSuggestion('I'm grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs transition">I'm grateful for</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-gray-50 px-4 sm:px-5 py-3 flex justify-between items-center">
-            <div class="text-xs text-gray-500">Our AI will craft a journal entry based on your day</div>
-            <button type="submit" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition">
-              <span>Create Entry</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </button>
-          </div>
-        </div>
+        <button type="submit" class="text-gray-700 hover:text-red-500 transition bg-gray-100 px-4 py-2 rounded-full text-sm hover:bg-red-50">Logout</button>
       </form>
-
-      <!-- Results preview (would show after submission) -->
-      <div id="resultPreview" class="mt-8 bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 {% if not show_result %}hidden{% endif %}">
-        <div class="p-5 border-b border-gray-200">
-          <h3 class="font-bold text-gray-800 text-lg mb-2">Your Journal Entry</h3>
-          <p class="text-gray-600 text-sm">Generated based on your day</p>
-        </div>
-
-        <div class="p-5">
-          <div class="handwritten text-xl text-gray-800 leading-relaxed">
-            {% if journal_entry %}
-              {{ journal_entry|linebreaks }}
-            {% else %}
-              <!-- This would be populated with the AI-generated entry -->
-              <p class="italic text-gray-400">Your journal entry will appear here...</p>
-            {% endif %}
-          </div>
-        </div>
-
-        <div class="bg-gray-50 p-5 flex justify-between items-center">
-          <div class="text-gray-600 text-sm">
-            <span class="text-sky-600 font-medium">Title:</span>
-            <span id="entryTitle">{% if entry_title %}{{ entry_title }}{% else %}My Day - {{ current_date|default:"Today" }}{% endif %}</span>
-          </div>
-          <div class="flex gap-2">
-            <button type="button" class="border border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-1.5 rounded text-sm transition">Edit</button>
-            <button type="button" class="bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded text-sm transition">Save to Journal</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Feature highlights (minimal) -->
-      <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
-          <div class="h-10 w-10 bg-sky-100 rounded-full flex items-center justify-center mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
-          </div>
-          <h4 class="font-semibold text-gray-800 mb-1">AI-Powered Writing</h4>
-          <p class="text-gray-600 text-sm">Turn simple notes into beautiful journal entries</p>
-        </div>
-
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
-          <div class="h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          <h4 class="font-semibold text-gray-800 mb-1">Builds Your Biography</h4>
-          <p class="text-gray-600 text-sm">We organize your memories into a life story</p>
-        </div>
-
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
-          <div class="h-10 w-10 bg-emerald-100 rounded-full flex items-center justify-center mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <h4 class="font-semibold text-gray-800 mb-1">Personal Insights</h4>
-          <p class="text-gray-600 text-sm">Discover patterns and growth in your journey</p>
-        </div>
-      </div>
-
-      <!-- If not logged in, show a subtle sign-up prompt -->
-      {% if not user.is_authenticated %}
-      <div class="mt-8 text-center">
-        <p class="text-gray-600 mb-4">Create an account to save your entries and build your personal biography</p>
-        <div class="flex justify-center gap-4">
-          <a href="{% url 'login' %}" class="text-sky-600 hover:underline text-sm font-medium">Log in</a>
-          <a href="{% url 'signup' %}" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Sign up free</a>
-        </div>
-      </div>
-      {% endif %}
+    </nav>
+    {% else %}
+    <!-- Auth buttons if not logged in -->
+    <div class="flex gap-4 items-center">
+      <a href="{% url 'login' %}" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium transition px-5 py-2">Log in</a>
+      <a href="{% url 'signup' %}" class="btn-gradient text-white px-5 py-2 rounded-full text-sm font-medium shadow-md">Sign up</a>
     </div>
-  </main>
+    {% endif %}
 
-  <!-- Mobile Bottom Navigation (only shown if logged in) -->
-  {% if user.is_authenticated %}
-  <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 mobile-bottom-nav z-30">
-    <div class="grid grid-cols-5 items-center text-xs text-gray-600">
-      <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <!-- Mobile menu button (only shown if logged in) -->
+    {% if user.is_authenticated %}
+    <button class="md:hidden text-gray-700 hover:text-secondary-600 p-1.5 bg-white rounded-lg shadow-sm" onclick="toggleMobileMenu()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+    {% endif %}
+  </div>
+</header>
+
+<!-- Mobile Menu Overlay (only shown if logged in) -->
+{% if user.is_authenticated %}
+<div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 hidden">
+  <div class="absolute right-0 top-0 bottom-0 w-72 glass-effect p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
+    <div class="flex justify-between items-center mb-8">
+      <h2 class="font-bold text-lg gradient-text">Menu</h2>
+      <button onclick="toggleMobileMenu()" class="p-1.5 bg-white rounded-lg shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- User info in mobile menu -->
+    <a href="{% url 'account_settings' %}" class="block">
+      <div class="flex items-center gap-3 p-4 glass-effect rounded-xl mb-6 hover:bg-white/50 transition border border-white/20">
+        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold shadow-md">
+          {{ user.username|first|upper }}
+        </div>
+        <div>
+          <div class="font-medium">{{ user.username }}</div>
+          <div class="text-xs text-gray-500">{{ total_entries|default:'0' }} entries</div>
+        </div>
+      </div>
+    </a>
+
+    <nav class="flex flex-col gap-2">
+      <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
         </svg>
         <span>Dashboard</span>
       </a>
-      <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <a href="{% url 'library' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
         </svg>
         <span>Library</span>
       </a>
-      <a href="{% url 'home' %}" class="flex flex-col items-center justify-center py-3 text-sky-600">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <a href="{% url 'new_entry' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
         </svg>
         <span>Journal</span>
       </a>
-      <a href="{% url 'insights' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <a href="{% url 'insights' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
         <span>Insights</span>
       </a>
-      <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
         <span>Account</span>
       </a>
+      <div class="border-t border-white/20 my-3 pt-2">
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="flex items-center gap-3 p-3 w-full hover:bg-red-50/80 rounded-xl text-red-600 transition border border-transparent hover:border-red-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span>Logout</span>
+          </button>
+        </form>
+      </div>
+    </nav>
+  </div>
+</div>
+{% endif %}
+
+<!-- Main Content -->
+<main class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-6 flex flex-col items-center">
+  <div class="max-w-4xl w-full mx-auto relative">
+    <!-- Decorative elements -->
+    <div class="absolute -top-10 -left-16 h-32 w-32 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+    <div class="absolute -bottom-8 -right-16 h-32 w-32 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+
+    <!-- Header with date -->
+    <div class="text-center mb-10 relative z-10">
+      <div class="inline-block mb-3">
+        <span class="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-gray-500 shadow-sm border border-white/50">
+          {{ current_date|default:"Today" }}
+        </span>
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2">
+        {% if user.is_authenticated %}
+          Hello <span class="gradient-text">{{ user.username }}</span>, what's on your mind today?
+        {% else %}
+          What's on your mind today?
+        {% endif %}
+      </h2>
+      <p class="text-gray-600 text-sm max-w-md mx-auto">Capture your thoughts, feelings and experiences - our AI will transform them into meaningful journal entries.</p>
+    </div>
+
+    <!-- Chat area (visible if there are already messages) -->
+    <div id="chatArea" class="mb-8 space-y-4 {% if not has_conversation %}hidden{% endif %}">
+      <!-- Sample AI message (this would be populated dynamically) -->
+      <div class="chat-bubble ai">
+        <p class="handwritten text-gray-800 text-lg leading-relaxed">Hey there! Tell me about your day, and I'll help you turn it into a beautiful journal entry.</p>
+      </div>
+
+      <!-- This is where chat messages would appear dynamically -->
+      <div id="chatMessages">
+        <!-- Example of conversation flow (would be added dynamically) -->
+        {% if has_conversation %}
+          <!-- These would be populated from your backend -->
+          {% for message in conversation %}
+            {% if message.is_user %}
+              <div class="chat-bubble user diary-font">
+                <p>{{ message.content }}</p>
+              </div>
+            {% else %}
+              <div class="chat-bubble ai handwritten">
+                <p>{{ message.content }}</p>
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Main input form -->
+    <form method="post" action="{% url 'new_entry' %}" class="w-full relative z-10">
+      {% csrf_token %}
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-white transition-all hover:shadow-2xl card-hover">
+        <div class="p-5 sm:p-6">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd" />
+              </svg>
+              Share your day
+            </h3>
+            <div class="text-xs font-medium bg-gray-100 px-3 py-1 rounded-full text-gray-500 flex items-center gap-1 shadow-inner">
+              <span id="charCount">0</span>
+              <span>characters</span>
+            </div>
+          </div>
+
+          <textarea
+            id="journalInput"
+            name="journal_content"
+            class="input-area w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition diary-font shadow-inner bg-gray-50/50"
+            placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am, worked on the project until 5pm, then went out for dinner with friends..."
+            oninput="countChars()"></textarea>
+
+          <div class="mt-4">
+            <div class="text-xs font-medium text-gray-600 mb-2">Suggested topics:</div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestions-pill bg-secondary-50 hover:bg-secondary-100 text-secondary-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-secondary-200/50">Today I accomplished</button>
+              <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-emerald-200/50">I felt happy when</button>
+              <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-indigo-200/50">I learned that</button>
+              <button type="button" onclick="addSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50">I met with</button>
+              <button type="button" onclick="addSuggestion('I'm grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50">I'm grateful for</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-secondary-50 to-primary-50 px-5 sm:px-6 py-4 flex justify-between items-center border-t border-white">
+          <div class="text-xs text-gray-600 flex items-center gap-2">
+            <span class="h-6 w-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-600" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+              </svg>
+            </span>
+            AI-powered journal creation
+          </div>
+          <button type="submit" class="btn-gradient text-white px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-2 shadow-md">
+            <span>Create Entry</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Results preview (would show after submission) -->
+    <div id="resultPreview" class="mt-12 bg-white rounded-2xl shadow-xl overflow-hidden border border-white card-hover {% if not show_result %}hidden{% endif %}">
+      <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-gray-800 text-lg mb-1 diary-font">Your Journal Entry</h3>
+          <p class="text-gray-600 text-xs">Generated based on your day</p>
+        </div>
+        <div class="h-9 w-9 bg-gray-50 rounded-full flex items-center justify-center text-secondary-600 shadow-sm border border-gray-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="p-6 bg-gradient-to-br from-white to-gray-50">
+        <div class="handwritten text-xl text-gray-800 leading-relaxed">
+          {% if journal_entry %}
+            {{ journal_entry|linebreaks }}
+          {% else %}
+            <!-- This would be populated with the AI-generated entry -->
+            <p class="italic text-gray-400">Your journal entry will appear here...</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-r from-secondary-50 to-primary-50 p-6 flex justify-between items-center border-t border-white">
+        <div class="text-gray-600 text-sm diary-font">
+          <span class="text-secondary-600 font-medium">Title:</span>
+          <span id="entryTitle">{% if entry_title %}{{ entry_title }}{% else %}My Day - {{ current_date|default:"Today" }}{% endif %}</span>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-full text-sm transition shadow-sm flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            Edit
+          </button>
+          <button type="button" class="btn-gradient text-white px-4 py-2 rounded-full text-sm font-medium shadow-md flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+            Save to Journal
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature highlights -->
+    <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div class="bg-white p-6 rounded-2xl shadow-lg border border-white flex flex-col items-center text-center card-hover">
+        <div class="h-14 w-14 gradient-bg rounded-xl flex items-center justify-center mb-4 shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </div>
+        <h4 class="font-semibold text-gray-800 text-lg mb-2">AI-Powered Writing</h4>
+        <p class="text-gray-600 text-sm">Transform simple notes into beautiful journal entries automatically with our AI assistant</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow-lg border border-white flex flex-col items-center text-center card-hover">
+        <div class="h-14 w-14 gradient-bg rounded-xl flex items-center justify-center mb-4 shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h4 class="font-semibold text-gray-800 text-lg mb-2">Your Digital Biography</h4>
+        <p class="text-gray-600 text-sm">We organize your memories into a beautiful life story you can revisit and share</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow-lg border border-white flex flex-col items-center text-center card-hover">
+        <div class="h-14 w-14 gradient-bg rounded-xl flex items-center justify-center mb-4 shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <h4 class="font-semibold text-gray-800 text-lg mb-2">Personal Insights</h4>
+        <p class="text-gray-600 text-sm">Discover patterns and growth in your journey with AI-generated insights and analytics</p>
+      </div>
+    </div>
+
+    <!-- If not logged in, show a subtle sign-up prompt -->
+    {% if not user.is_authenticated %}
+    <div class="mt-12 text-center bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-white relative overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-r from-secondary-100/50 to-primary-100/50 opacity-60"></div>
+
+      <div class="relative z-10">
+        <h3 class="font-bold text-xl diary-font mb-3 text-gray-800">Start Your Journal Journey Today</h3>
+        <p class="text-gray-600 mb-6 max-w-md mx-auto">Create an account to save your entries, get personalized insights, and build your beautiful digital biography</p>
+        <div class="flex justify-center gap-4">
+          <a href="{% url 'login' %}" class="text-secondary-700 bg-white border border-secondary-200 hover:bg-secondary-50 px-6 py-3 rounded-full text-sm font-medium shadow-sm transition">Log in</a>
+          <a href="{% url 'signup' %}" class="btn-gradient text-white px-6 py-3 rounded-full text-sm font-medium shadow-md transition">Sign up free</a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</main>
+
+<!-- Mobile Bottom Navigation (only shown if logged in) -->
+{% if user.is_authenticated %}
+<div class="md:hidden fixed bottom-0 left-0 right-0 border-t border-white/20 glass-effect mobile-bottom-nav z-30">
+  <div class="grid grid-cols-5 items-center text-xs font-medium text-gray-600">
+    <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-3 hover:text-secondary-600 transition">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-3 hover:text-secondary-600 transition">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+      </svg>
+      <span>Library</span>
+    </a>
+    <a href="{% url 'home' %}" class="flex flex-col items-center justify-center py-3 text-secondary-600 relative">
+      <div class="absolute -top-5 gradient-bg w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        </svg>
+      </div>
+      <div class="mt-5">
+        <span>Journal</span>
+      </div>
+    </a>
+    <a href="{% url 'insights' %}" class="flex flex-col items-center justify-center py-3 hover:text-secondary-600 transition">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+      <span>Insights</span>
+    </a>
+    <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-3 hover:text-secondary-600 transition">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+      <span>Account</span>
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- Footer with links to other platforms -->
+<footer class="py-6 mt-12 bg-white/80 backdrop-blur-sm border-t border-white/30">
+  <div class="w-full max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center">
+    <div class="mb-4 sm:mb-0 text-center sm:text-left">
+      <a href="{% url 'home' %}" class="flex items-center justify-center sm:justify-start mb-2">
+        <div class="bg-white p-1.5 rounded-lg shadow-sm mr-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <h2 class="text-lg font-bold gradient-text">DiaryVault</h2>
+        <span class="text-xs text-gray-400 ml-1 bg-gray-100 px-1.5 py-0.5 rounded">v1.0</span>
+      </a>
+      <p class="text-xs text-gray-500">© 2025 DiaryVault. All rights reserved.</p>
+    </div>
+    <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-sm font-medium">
+      <a href="https://crene.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-gray-600 hover:text-secondary-600 transition-colors px-3 py-1.5 rounded-full hover:bg-white">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span>Crene.com</span>
+      </a>
+      <a href="https://euphorie.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors px-3 py-1.5 rounded-full hover:bg-white">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <span>Euphorie.com</span>
+      </a>
     </div>
   </div>
-  {% endif %}
+</footer>
 
-  <script>
-    // Mobile menu toggle
-    function toggleMobileMenu() {
-      const menu = document.getElementById('mobileMenu');
-      if (!menu) return;
+<script>
+  // Mobile menu toggle
+  function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    if (!menu) return;
 
-      const menuContent = menu.querySelector('div.mobile-menu-slide');
+    const menuContent = menu.querySelector('div.mobile-menu-slide');
 
-      if (menu.classList.contains('hidden')) {
-        menu.classList.remove('hidden');
-        // Small delay to allow the display:block to take effect before animation
-        setTimeout(() => {
-          menuContent.classList.remove('mobile-menu-closed');
-          menuContent.classList.add('mobile-menu-open');
-        }, 10);
-      } else {
-        menuContent.classList.remove('mobile-menu-open');
-        menuContent.classList.add('mobile-menu-closed');
-        // Wait for animation to complete before hiding the menu
-        setTimeout(() => {
-          menu.classList.add('hidden');
-        }, 300);
-      }
+    if (menu.classList.contains('hidden')) {
+      menu.classList.remove('hidden');
+      // Small delay to allow the display:block to take effect before animation
+      setTimeout(() => {
+        menuContent.classList.remove('mobile-menu-closed');
+        menuContent.classList.add('mobile-menu-open');
+      }, 10);
+    } else {
+      menuContent.classList.remove('mobile-menu-open');
+      menuContent.classList.add('mobile-menu-closed');
+      // Wait for animation to complete before hiding the menu
+      setTimeout(() => {
+        menu.classList.add('hidden');
+      }, 300);
+    }
+  }
+
+  // Character counter
+  function countChars() {
+    const textArea = document.getElementById('journalInput');
+    const charCount = document.getElementById('charCount');
+    charCount.textContent = textArea.value.length;
+  }
+
+  // Add suggestion to textarea
+  function addSuggestion(text) {
+    const textArea = document.getElementById('journalInput');
+    let currentText = textArea.value;
+
+    // Add a line break if there's already content
+    if (currentText && !currentText.endsWith('\n') && !currentText.endsWith(' ')) {
+      currentText += ' ';
     }
 
-    // Character counter
-    function countChars() {
-      const textArea = document.getElementById('journalInput');
-      const charCount = document.getElementById('charCount');
-      charCount.textContent = textArea.value.length;
+    textArea.value = currentText + text + ' ';
+    textArea.focus();
+
+    // Update character count
+    countChars();
+
+    // Move cursor to end
+    textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
+  }
+
+  // Add some animations for a more modern feel
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add a small animation to the main form on page load
+    const mainForm = document.querySelector('form');
+    if (mainForm) {
+      setTimeout(() => {
+        mainForm.classList.add('opacity-100');
+        mainForm.classList.add('translate-y-0');
+      }, 300);
     }
-
-    // Add suggestion to textarea
-    function addSuggestion(text) {
-      const textArea = document.getElementById('journalInput');
-      let currentText = textArea.value;
-
-      // Add a line break if there's already content
-      if (currentText && !currentText.endsWith('\n') && !currentText.endsWith(' ')) {
-        currentText += ' ';
-      }
-
-      textArea.value = currentText + text + ' ';
-      textArea.focus();
-
-      // Update character count
-      countChars();
-
-      // Move cursor to end
-      textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
-    }
-  </script>
+  });
+</script>
 </body>
 </html>
