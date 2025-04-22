@@ -1,7 +1,7 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <!-- Favicon and App Icons -->
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
@@ -14,7 +14,7 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DiaryVault</title>
+  <title>DiaryVault - Your Daily Journal</title>
   <meta name="theme-color" content="#0ea5e9" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&family=Caveat:wght@400;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
@@ -23,11 +23,11 @@
       font-family: 'Inter', sans-serif;
       background-color: #f8fafc;
       width: 100%;
-      overflow-x: hidden; /* Prevent horizontal scrolling */
+      overflow-x: hidden;
       position: relative;
     }
     html {
-      overflow-x: hidden; /* Double protection against horizontal scrolling */
+      overflow-x: hidden;
     }
     .diary-font {
       font-family: 'Merriweather', serif;
@@ -38,108 +38,58 @@
     .handwritten {
       font-family: 'Caveat', cursive;
     }
-    .book {
-      transition: all 0.3s ease;
-      transform-style: preserve-3d;
-      perspective: 1000px;
+    .input-area {
+      min-height: 180px;
+      resize: none;
     }
-    .book:hover {
-      transform: rotateY(-15deg) translateY(-10px);
-      z-index: 10;
+    .suggestions-pill {
+      transition: all 0.2s ease;
     }
-    .book-spine {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      width: 30px;
-      background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0));
+    .suggestions-pill:hover {
+      transform: translateY(-3px);
     }
-    .book-shelf {
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="20" viewBox="0 0 100 20" fill="none"><rect width="100" height="20" fill="%23D1BAA1"/><path d="M0 0 L100 0 L100 2 L0 2 Z" fill="%23A58768"/><path d="M0 18 L100 18 L100 20 L0 20 Z" fill="%237A6348"/></svg>');
-      background-repeat: repeat-x;
-      background-position: bottom;
-      overflow: hidden; /* Contain child overflow */
+    .chat-bubble {
+      border-radius: 1.15rem;
+      padding: 1rem 1.25rem;
+      position: relative;
     }
-    .book-collection {
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    .chat-bubble.ai {
+      background-color: #f1f5f9;
+      margin-right: 2rem;
     }
-    .book-collection::-webkit-scrollbar {
-      display: none;
+    .chat-bubble.user {
+      background-color: #e0f2fe;
+      margin-left: 2rem;
     }
-    .page-flip {
-      transition: all 0.5s ease-in-out;
-    }
-    .page-flip:hover {
-      transform: perspective(1000px) rotateY(-7deg);
-    }
-    .page-curl {
-      position: absolute;
-      top: 0;
-      right: 0;
-      height: 30px;
-      width: 30px;
-      background: linear-gradient(135deg, transparent 50%, rgba(230,230,230,0.7) 50%);
-    }
-    .page-texture {
-      background-image:
-        linear-gradient(rgba(255,255,255,0.5) 2px, transparent 2px),
-        linear-gradient(90deg, rgba(255,255,255,0.5) 2px, transparent 2px);
-      background-size: 40px 40px;
-      background-color: #f8f5f0;
-    }
-    .diary-highlight {
-      box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
-    }
-    @keyframes rotate3d {
-      0% {
-        transform: rotateY(0deg);
-      }
-      50% {
-        transform: rotateY(-15deg);
-      }
-      100% {
-        transform: rotateY(0deg);
-      }
-    }
-    .featured-book {
-      animation: rotate3d 5s infinite;
-    }
-    .timeline-entry::before {
+    .chat-bubble.ai::before {
       content: '';
       position: absolute;
-      left: -29px;
-      top: 0;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background-color: #0ea5e9;
-      border: 2px solid white;
-      z-index: 1;
+      left: -0.5rem;
+      bottom: 1rem;
+      width: 1rem;
+      height: 1rem;
+      background-color: #f1f5f9;
+      clip-path: polygon(100% 0, 0 100%, 100% 100%);
+      transform: rotate(135deg);
     }
-    .timeline-line {
+    .chat-bubble.user::after {
+      content: '';
       position: absolute;
-      left: -24px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background-color: #e2e8f0;
+      right: -0.5rem;
+      bottom: 1rem;
+      width: 1rem;
+      height: 1rem;
+      background-color: #e0f2fe;
+      clip-path: polygon(100% 0, 0 100%, 100% 100%);
+      transform: rotate(-45deg);
     }
-    .tabs-container button.active {
-      color: #0ea5e9;
-      border-color: #0ea5e9;
+    .gradient-text {
+      background: linear-gradient(to right, #0ea5e9, #6366f1);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
-    /* Mobile-specific enhancements */
     @media (max-width: 640px) {
-      .book {
-        transform: none !important;
-      }
-      .book:hover {
-        transform: translateY(-5px) !important;
-      }
       .mobile-menu-slide {
         transition: transform 0.3s ease-in-out;
       }
@@ -152,57 +102,39 @@
       .mobile-bottom-nav {
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
       }
-      .mobile-tabs {
-        overflow-x: auto;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-        -webkit-overflow-scrolling: touch;
-      }
-      .mobile-tabs::-webkit-scrollbar {
-        display: none;
-      }
-      .timeline-entry::before {
-        left: -22px;
-      }
-      .timeline-line {
-        left: -17px;
-      }
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f0f9ff] to-[#e6f7ff] text-gray-900">
 
-  <!-- Navbar -->
-  <header class="bg-white shadow sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
-      <div class="flex items-center gap-1 sm:gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-        </svg>
-        <h1 class="text-xl sm:text-2xl font-extrabold text-sky-600 tracking-tight">DiaryVault</h1>
+<!-- Navbar -->
+<header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
+      <div class="flex items-center gap-2">
+        <a href="{% url 'home' %}" class="flex items-center gap-2 hover:opacity-80 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <h1 class="text-xl sm:text-2xl font-extrabold text-sky-600 tracking-tight">DiaryVault</h1>
+        </a>
       </div>
 
-      <!-- Main Navigation -->
+      <!-- Main Navigation (only shown if logged in) -->
+      {% if user.is_authenticated %}
       <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
-        <a href="#" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+        <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+          </svg>
+          Dashboard
+        </a>
+        <a href="{% url 'library' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
           </svg>
           Library
         </a>
-        <a href="#" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-          Journal
-        </a>
-        <a href="#" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Biography
-        </a>
-        <a href="#" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+        <a href="{% url 'insights' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
@@ -211,24 +143,42 @@
 
         <div class="w-px h-6 bg-gray-200"></div>
 
+        <!-- User profile section when logged in -->
         <div class="flex items-center gap-3">
-          <div class="h-8 w-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold text-sm">
-            U
-          </div>
-          <span class="text-sm text-gray-700">username</span>
+          <a href="{% url 'account_settings' %}" class="flex items-center gap-3 hover:opacity-80 transition">
+            <div class="h-8 w-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold text-sm">
+              {{ user.username|first|upper }}
+            </div>
+            <span class="text-sm text-gray-700">{{ user.username }}</span>
+          </a>
         </div>
-      </nav>
 
-      <!-- Mobile menu button -->
+        <form method="post" action="{% url 'logout' %}" class="inline">
+          {% csrf_token %}
+          <button type="submit" class="text-gray-700 hover:text-red-500 transition">Logout</button>
+        </form>
+      </nav>
+      {% else %}
+      <!-- Auth buttons if not logged in -->
+      <div class="flex gap-4 items-center">
+        <a href="{% url 'login' %}" class="text-sky-600 hover:text-sky-800 text-sm font-medium transition">Log in</a>
+        <a href="{% url 'signup' %}" class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-sky-700 transition">Sign up</a>
+      </div>
+      {% endif %}
+
+      <!-- Mobile menu button (only shown if logged in) -->
+      {% if user.is_authenticated %}
       <button class="md:hidden text-gray-700 hover:text-sky-600 p-1" onclick="toggleMobileMenu()">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
+      {% endif %}
     </div>
   </header>
 
-  <!-- Mobile Menu Overlay -->
+  <!-- Mobile Menu Overlay (only shown if logged in) -->
+  {% if user.is_authenticated %}
   <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden">
     <div class="absolute right-0 top-0 bottom-0 w-72 bg-white p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
       <div class="flex justify-between items-center mb-8">
@@ -241,43 +191,53 @@
       </div>
 
       <!-- User info in mobile menu -->
-      <div class="flex items-center gap-3 p-3 bg-sky-50 rounded-lg mb-6">
-        <div class="h-10 w-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold">
-          U
+      <a href="{% url 'account_settings' %}" class="block">
+        <div class="flex items-center gap-3 p-3 bg-sky-50 rounded-lg mb-6 hover:bg-sky-100 transition">
+          <div class="h-10 w-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold">
+            {{ user.username|first|upper }}
+          </div>
+          <div>
+            <div class="font-medium">{{ user.username }}</div>
+            <div class="text-xs text-gray-500">{{ total_entries|default:'0' }} entries</div>
+          </div>
         </div>
-        <div>
-          <div class="font-medium">username</div>
-          <div class="text-xs text-gray-500">65% biography complete</div>
-        </div>
-      </div>
+      </a>
 
       <nav class="flex flex-col gap-1">
-        <a href="#" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="{% url 'library' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
           </svg>
           <span>Library</span>
         </a>
-        <a href="#" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
+        <a href="{% url 'new_entry' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>
           <span>Journal</span>
         </a>
-        <a href="#" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <span>Biography</span>
-        </a>
-        <a href="#" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
+        <a href="{% url 'insights' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
           <span>Insights</span>
         </a>
+        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Account</span>
+        </a>
         <div class="border-t border-gray-200 my-3 pt-2">
-          <form method="post" action="#">
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
             <button type="submit" class="flex items-center gap-3 p-3 w-full hover:bg-red-50 rounded-lg text-red-600">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -289,422 +249,216 @@
       </nav>
     </div>
   </div>
+  {% endif %}
 
   <!-- Main Content -->
-  <div class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-6 max-w-full overflow-hidden">
-    <div class="max-w-7xl mx-auto overflow-hidden">
-      <!-- Welcome & Stats Section -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-10 overflow-hidden">
-        <div class="mb-4 md:mb-0">
-          <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Welcome back, username</h2>
-          <p class="text-gray-600 text-sm sm:text-base">Continue your journey or explore past memories</p>
+  <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-6 flex flex-col items-center">
+    <div class="max-w-3xl w-full mx-auto">
+
+      <!-- Header with date -->
+      <div class="text-center mb-8">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 diary-font mb-1">
+          {% if user.is_authenticated %}
+            Hello {{ user.username }}, what did you do today?
+          {% else %}
+            What did you do today?
+          {% endif %}
+        </h2>
+        <p class="text-gray-600 text-sm">{{ current_date|default:"Today" }}</p>
+      </div>
+
+      <!-- Chat area (visible if there are already messages) -->
+      <div id="chatArea" class="mb-6 space-y-4 {% if not has_conversation %}hidden{% endif %}">
+        <!-- Sample AI message (this would be populated dynamically) -->
+        <div class="chat-bubble ai">
+          <p class="handwritten text-gray-800 text-lg leading-relaxed">Hey there! Tell me about your day, and I'll help you turn it into a beautiful journal entry.</p>
         </div>
-        <div class="grid grid-cols-3 w-full md:w-auto gap-2 sm:gap-4 md:gap-6 md:flex">
-          <div class="text-center bg-white p-2 sm:p-3 rounded-lg shadow-sm">
-            <div class="text-xl sm:text-2xl font-bold text-sky-600">127</div>
-            <div class="text-xs sm:text-sm text-gray-500">Entries</div>
+
+        <!-- This is where chat messages would appear dynamically -->
+        <div id="chatMessages">
+          <!-- Example of conversation flow (would be added dynamically) -->
+          {% if has_conversation %}
+            <!-- These would be populated from your backend -->
+            {% for message in conversation %}
+              {% if message.is_user %}
+                <div class="chat-bubble user diary-font">
+                  <p>{{ message.content }}</p>
+                </div>
+              {% else %}
+                <div class="chat-bubble ai handwritten">
+                  <p>{{ message.content }}</p>
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Main input form -->
+      <form method="post" action="{% url 'process_journal' %}" class="w-full">
+        {% csrf_token %}
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+          <div class="p-4 sm:p-5">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-semibold text-gray-800">Share your day</h3>
+              <div class="text-xs text-gray-500 flex items-center gap-1">
+                <span id="charCount">0</span>
+                <span>characters</span>
+              </div>
+            </div>
+
+            <textarea
+              id="journalInput"
+              name="journal_content"
+              class="input-area w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition diary-font"
+              placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am, worked on the project until 5pm, then went out for dinner with friends..."
+              oninput="countChars()"></textarea>
+
+            <div class="mt-3">
+              <div class="text-xs text-gray-600 mb-2">Suggested topics:</div>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestions-pill bg-sky-50 hover:bg-sky-100 text-sky-700 px-3 py-1 rounded-full text-xs transition">Today I accomplished</button>
+                <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs transition">I felt happy when</button>
+                <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs transition">I learned that</button>
+                <button type="button" onclick="addSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs transition">I met with</button>
+                <button type="button" onclick="addSuggestion('I'm grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs transition">I'm grateful for</button>
+              </div>
+            </div>
           </div>
-          <div class="text-center bg-white p-2 sm:p-3 rounded-lg shadow-sm">
-            <div class="text-xl sm:text-2xl font-bold text-emerald-600">5</div>
-            <div class="text-xs sm:text-sm text-gray-500">Streak</div>
+
+          <div class="bg-gray-50 px-4 sm:px-5 py-3 flex justify-between items-center">
+            <div class="text-xs text-gray-500">Our AI will craft a journal entry based on your day</div>
+            <button type="submit" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition">
+              <span>Create Entry</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
           </div>
-          <div class="text-center bg-white p-2 sm:p-3 rounded-lg shadow-sm">
-            <div class="text-xl sm:text-2xl font-bold text-indigo-600">65%</div>
-            <div class="text-xs sm:text-sm text-gray-500">Biography</div>
+        </div>
+      </form>
+
+      <!-- Results preview (would show after submission) -->
+      <div id="resultPreview" class="mt-8 bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 {% if not show_result %}hidden{% endif %}">
+        <div class="p-5 border-b border-gray-200">
+          <h3 class="font-bold text-gray-800 text-lg mb-2">Your Journal Entry</h3>
+          <p class="text-gray-600 text-sm">Generated based on your day</p>
+        </div>
+
+        <div class="p-5">
+          <div class="handwritten text-xl text-gray-800 leading-relaxed">
+            {% if journal_entry %}
+              {{ journal_entry|linebreaks }}
+            {% else %}
+              <!-- This would be populated with the AI-generated entry -->
+              <p class="italic text-gray-400">Your journal entry will appear here...</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="bg-gray-50 p-5 flex justify-between items-center">
+          <div class="text-gray-600 text-sm">
+            <span class="text-sky-600 font-medium">Title:</span>
+            <span id="entryTitle">{% if entry_title %}{{ entry_title }}{% else %}My Day - {{ current_date|default:"Today" }}{% endif %}</span>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" class="border border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-1.5 rounded text-sm transition">Edit</button>
+            <button type="button" class="bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded text-sm transition">Save to Journal</button>
           </div>
         </div>
       </div>
 
-      <!-- Quick Actions -->
-      <div class="grid grid-cols-3 gap-2 mb-8 sm:gap-4 sm:mb-12">
-        <a href="#" class="bg-white rounded-xl p-3 sm:p-5 shadow-md hover:shadow-lg transition flex flex-col sm:flex-row items-center sm:gap-4">
-          <div class="bg-sky-100 p-2 sm:p-3 rounded-lg mb-1 sm:mb-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-6 sm:w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      <!-- Feature highlights (minimal) -->
+      <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+          <div class="h-10 w-10 bg-sky-100 rounded-full flex items-center justify-center mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
           </div>
-          <div class="text-center sm:text-left">
-            <h3 class="font-semibold text-gray-800 text-xs sm:text-base">New Entry</h3>
-            <p class="text-xs text-gray-600 hidden sm:block">Record today's thoughts</p>
-          </div>
-        </a>
+          <h4 class="font-semibold text-gray-800 mb-1">AI-Powered Writing</h4>
+          <p class="text-gray-600 text-sm">Turn simple notes into beautiful journal entries</p>
+        </div>
 
-        <a href="#" class="bg-white rounded-xl p-3 sm:p-5 shadow-md hover:shadow-lg transition flex flex-col sm:flex-row items-center sm:gap-4">
-          <div class="bg-indigo-100 p-2 sm:p-3 rounded-lg mb-1 sm:mb-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-6 sm:w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+          <div class="h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <div class="text-center sm:text-left">
-            <h3 class="font-semibold text-gray-800 text-xs sm:text-base">Biography</h3>
-            <p class="text-xs text-gray-600 hidden sm:block">Read your life story</p>
-          </div>
-        </a>
+          <h4 class="font-semibold text-gray-800 mb-1">Builds Your Biography</h4>
+          <p class="text-gray-600 text-sm">We organize your memories into a life story</p>
+        </div>
 
-        <a href="#" class="bg-white rounded-xl p-3 sm:p-5 shadow-md hover:shadow-lg transition flex flex-col sm:flex-row items-center sm:gap-4">
-          <div class="bg-emerald-100 p-2 sm:p-3 rounded-lg mb-1 sm:mb-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-6 sm:w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+          <div class="h-10 w-10 bg-emerald-100 rounded-full flex items-center justify-center mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
-          <div class="text-center sm:text-left">
-            <h3 class="font-semibold text-gray-800 text-xs sm:text-base">Insights</h3>
-            <p class="text-xs text-gray-600 hidden sm:block">Discover patterns</p>
-          </div>
-        </a>
-      </div>
-
-      <!-- Tabs Container -->
-      <div class="mb-6 sm:mb-8 max-w-full">
-        <div class="tabs-container flex border-b border-gray-200 mobile-tabs overflow-x-auto touch-pan-x scrollbar-hide w-full">
-          <button onclick="switchTab('library')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base text-gray-600 border-b-2 border-transparent whitespace-nowrap flex-shrink-0 active">Library</button>
-          <button onclick="switchTab('recent')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base text-gray-600 border-b-2 border-transparent whitespace-nowrap flex-shrink-0">Recent Entries</button>
-          <button onclick="switchTab('insights')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base text-gray-600 border-b-2 border-transparent whitespace-nowrap flex-shrink-0">AI Insights</button>
+          <h4 class="font-semibold text-gray-800 mb-1">Personal Insights</h4>
+          <p class="text-gray-600 text-sm">Discover patterns and growth in your journey</p>
         </div>
       </div>
 
-      <!-- Tab Contents -->
-      <div id="tabContents">
-        <!-- Library Tab Content (visible by default) -->
-        <div id="library-tab">
-          <!-- Time Period Collection -->
-          <div class="mb-12">
-            <div class="flex justify-between items-center mb-4 sm:mb-6">
-              <h3 class="text-lg sm:text-xl font-semibold text-gray-800">Time Periods</h3>
-              <button class="text-xs sm:text-sm text-sky-600 hover:underline">View all</button>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6">
-              <!-- Book 1 -->
-              <a href="#" class="block">
-                <div class="h-48 sm:h-64 bg-blue-500 rounded-lg shadow-lg book group relative">
-                  <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col justify-between">
-                    <div>
-                      <div class="book-title text-center font-bold text-gray-800 text-sm sm:text-base">2025 Q1</div>
-                      <div class="text-xs text-center text-gray-500 mb-2">
-                        Jan - Mar
-                      </div>
-                      <div class="h-16 sm:h-24 overflow-hidden">
-                        <div class="handwritten text-xs text-gray-600 leading-relaxed">
-                          Today marks the beginning of a new chapter. The promotion I've been working towards finally came through...
-                        </div>
-                      </div>
-                    </div>
-                    <div class="text-xs text-center text-blue-500">24 entries</div>
-                  </div>
-                  <div class="book-spine"></div>
-                  <div class="absolute inset-0 rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-10 transition pointer-events-none"></div>
-                </div>
-              </a>
-
-              <!-- Book 2 -->
-              <a href="#" class="block">
-                <div class="h-48 sm:h-64 bg-purple-500 rounded-lg shadow-lg book group relative">
-                  <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col justify-between">
-                    <div>
-                      <div class="book-title text-center font-bold text-gray-800 text-sm sm:text-base">2024 Q4</div>
-                      <div class="text-xs text-center text-gray-500 mb-2">
-                        Oct - Dec
-                      </div>
-                      <div class="h-16 sm:h-24 overflow-hidden">
-                        <div class="handwritten text-xs text-gray-600 leading-relaxed">
-                          The holiday season brought both joy and reflection. Family gatherings reminded me of what truly matters...
-                        </div>
-                      </div>
-                    </div>
-                    <div class="text-xs text-center text-purple-500">31 entries</div>
-                  </div>
-                  <div class="book-spine"></div>
-                  <div class="absolute inset-0 rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-10 transition pointer-events-none"></div>
-                </div>
-              </a>
-
-              <!-- Book 3 -->
-              <a href="#" class="block">
-                <div class="h-48 sm:h-64 bg-emerald-500 rounded-lg shadow-lg book group relative">
-                  <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col justify-between">
-                    <div>
-                      <div class="book-title text-center font-bold text-gray-800 text-sm sm:text-base">2024 Q3</div>
-                      <div class="text-xs text-center text-gray-500 mb-2">
-                        Jul - Sep
-                      </div>
-                      <div class="h-16 sm:h-24 overflow-hidden">
-                        <div class="handwritten text-xs text-gray-600 leading-relaxed">
-                          Summer travels and new friendships defined these months. The beach retreat helped clear my mind...
-                        </div>
-                      </div>
-                    </div>
-                    <div class="text-xs text-center text-emerald-500">28 entries</div>
-                  </div>
-                  <div class="book-spine"></div>
-                  <div class="absolute inset-0 rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-10 transition pointer-events-none"></div>
-                </div>
-              </a>
-
-              <!-- Add New -->
-              <a href="#" class="block">
-                <div class="h-48 sm:h-64 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center hover:bg-gray-50 transition">
-                  <div class="text-center">
-                    <div class="h-10 w-10 sm:h-12 sm:w-12 bg-gray-200 mx-auto rounded-full flex items-center justify-center mb-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                    </div>
-                    <div class="text-xs sm:text-sm text-gray-600">Create New</div>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
-
-          <!-- Life Chapters Collection -->
-          <div class="mb-12">
-            <div class="flex justify-between items-center mb-4 sm:mb-6">
-              <h3 class="text-lg sm:text-xl font-semibold text-gray-800">Life Chapters</h3>
-              <button class="text-xs sm:text-sm text-sky-600 hover:underline">Manage chapters</button>
-            </div>
-
-            <!-- Book Shelf - Fixed for Mobile -->
-            <div class="h-60 sm:h-80 relative book-shelf mb-6">
-              <div class="overflow-x-auto h-full book-collection touch-pan-x pb-2 pr-2 max-w-full">
-                <div class="flex gap-4 sm:gap-8 px-4 py-2 h-full items-end w-max">
-                  <!-- Book 1 -->
-                  <div class="h-48 sm:h-64 w-32 sm:w-40 bg-purple-700 rounded-lg shadow-xl book flex-shrink-0">
-                    <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col items-center">
-                      <div class="book-title text-center font-bold text-gray-800 mb-2 text-sm sm:text-base">Career Journey</div>
-                      <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
-                        From first internship to leadership role, the professional path that shaped who I am today.
-                      </div>
-                    </div>
-                    <div class="book-spine"></div>
-                  </div>
-
-                  <!-- Book 2 -->
-                  <div class="h-44 sm:h-56 w-32 sm:w-40 bg-sky-600 rounded-lg shadow-xl book flex-shrink-0">
-                    <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col items-center">
-                      <div class="book-title text-center font-bold text-gray-800 mb-2 text-sm sm:text-base">Travels</div>
-                      <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
-                        Exploring new places and cultures that shaped my worldview and perspective.
-                      </div>
-                    </div>
-                    <div class="book-spine"></div>
-                  </div>
-
-                  <!-- Book 3 -->
-                  <div class="h-48 sm:h-60 w-32 sm:w-40 bg-emerald-600 rounded-lg shadow-xl book flex-shrink-0">
-                    <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col items-center">
-                      <div class="book-title text-center font-bold text-gray-800 mb-2 text-sm sm:text-base">Relationships</div>
-                      <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
-                        The people who've made the biggest impact on my journey through life.
-                      </div>
-                    </div>
-                    <div class="book-spine"></div>
-                  </div>
-
-                  <!-- Book 4 -->
-                  <div class="h-40 sm:h-52 w-32 sm:w-40 bg-amber-600 rounded-lg shadow-xl book flex-shrink-0">
-                    <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col items-center">
-                      <div class="book-title text-center font-bold text-gray-800 mb-2 text-sm sm:text-base">Growth</div>
-                      <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
-                        Lessons learned and wisdom gained through challenges and triumphs.
-                      </div>
-                    </div>
-                    <div class="book-spine"></div>
-                  </div>
-
-                  <!-- Add New -->
-                  <div class="h-32 sm:h-40 w-24 sm:w-32 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:text-sky-600 hover:border-sky-300 transition cursor-pointer flex-shrink-0">
-                    <div class="text-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                      <span class="text-xs font-medium">Create</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Biography Preview -->
-          <div class="bg-gradient-to-r from-sky-50 to-indigo-50 rounded-xl p-4 sm:p-6 border border-indigo-100 shadow-md mb-10">
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="text-base sm:text-lg font-bold text-gray-800 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Biography Preview
-              </h3>
-              <div class="text-xs text-gray-500">Updated today</div>
-            </div>
-            <div class="mb-4">
-              <div class="flex justify-between text-xs text-gray-600 mb-1">
-                <span>202 entries processed</span>
-                <span>65% complete</span>
-              </div>
-              <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div class="h-full bg-indigo-600 rounded-full" style="width: 65%"></div>
-              </div>
-            </div>
-            <div class="bg-white p-4 sm:p-5 rounded-lg shadow-sm border border-gray-100">
-              <div class="handwritten text-base sm:text-lg text-gray-800 leading-relaxed">
-                <p>In the spring of 2025, I find myself at an interesting crossroads in both my professional and personal life. The new leadership role at work marks a significant milestone in my career journey, one that I've been working toward for some time...</p>
-              </div>
-              <div class="mt-3 text-right">
-                <a href="#" class="text-sm text-indigo-600 hover:underline inline-flex items-center gap-1">
-                  Continue reading
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Recent Entries Tab (Hidden) -->
-        <div id="recent-tab" class="hidden">
-          <div class="mb-8">
-            <div class="text-right mb-4">
-              <div class="relative inline-block">
-                <select class="pl-3 pr-8 py-1.5 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 appearance-none">
-                  <option>All entries</option>
-                  <option>Work</option>
-                  <option>Personal</option>
-                  <option>Goals</option>
-                </select>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute right-2 top-2 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-
-            <!-- Recent Entries Timeline -->
-            <div class="relative pl-6 sm:pl-8">
-              <!-- Timeline line -->
-              <div class="timeline-line"></div>
-
-              <!-- Timeline entries -->
-              <div class="space-y-4 sm:space-y-6">
-                <!-- Entry -->
-                <div class="timeline-entry relative">
-                  <div class="bg-white rounded-xl shadow p-4 sm:p-5 mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                      <h3 class="font-semibold text-gray-800 text-sm sm:text-base">New project kickoff</h3>
-                      <div class="text-xs text-gray-500">Apr 11, 2025</div>
-                    </div>
-                    <div class="text-sm text-gray-600 diary-font">
-                      <p>Today was the kickoff meeting for our new project at work. The team seems excited about the challenge, although there are some concerns about the tight deadline...</p>
-                    </div>
-                    <div class="mt-3 flex justify-between items-center">
-                      <div class="flex gap-1">
-                        <span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">work</span>
-                      </div>
-                      <button class="text-sky-600 text-xs hover:underline">Read more</button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Entry -->
-                <div class="timeline-entry relative">
-                  <div class="bg-white rounded-xl shadow p-4 sm:p-5 mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                      <h3 class="font-semibold text-gray-800 text-sm sm:text-base">Found a new coffee shop</h3>
-                      <div class="text-xs text-gray-500">Apr 10, 2025</div>
-                    </div>
-                    <div class="text-sm text-gray-600 diary-font">
-                      <p>While walking home, I stumbled upon this cozy little coffee shop called "Bean There". The atmosphere was perfect for getting some work done...</p>
-                    </div>
-                    <div class="mt-3 flex justify-between items-center">
-                      <div class="flex gap-1">
-                        <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">personal</span>
-                      </div>
-                      <button class="text-sky-600 text-xs hover:underline">Read more</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- AI Insights Tab (Hidden) -->
-        <div id="insights-tab" class="hidden">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
-            <!-- Mood Analysis -->
-            <div class="bg-white rounded-xl shadow p-4 sm:p-6">
-              <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Mood Analysis
-              </h3>
-              <div class="aspect-w-16 aspect-h-9 mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
-                <img src="/api/placeholder/400/320" alt="Mood chart" />
-              </div>
-              <p class="text-xs sm:text-sm text-gray-600">Your entries show a generally positive mood trend over the past month, with occasional dips typically associated with work stress.</p>
-            </div>
-
-            <!-- Topic Distribution -->
-            <div class="bg-white rounded-xl shadow p-4 sm:p-6">
-              <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                </svg>
-                Topic Distribution
-              </h3>
-              <div class="aspect-w-16 aspect-h-9 mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
-                <img src="/api/placeholder/400/320" alt="Topic distribution" />
-              </div>
-              <p class="text-xs sm:text-sm text-gray-600">Work-related topics dominate your entries (42%), followed by personal growth (28%), and relationships (15%).</p>
-            </div>
-          </div>
+      <!-- If not logged in, show a subtle sign-up prompt -->
+      {% if not user.is_authenticated %}
+      <div class="mt-8 text-center">
+        <p class="text-gray-600 mb-4">Create an account to save your entries and build your personal biography</p>
+        <div class="flex justify-center gap-4">
+          <a href="{% url 'login' %}" class="text-sky-600 hover:underline text-sm font-medium">Log in</a>
+          <a href="{% url 'signup' %}" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Sign up free</a>
         </div>
       </div>
+      {% endif %}
     </div>
-  </div>
+  </main>
 
-  <!-- Mobile Bottom Navigation -->
+  <!-- Mobile Bottom Navigation (only shown if logged in) -->
+  {% if user.is_authenticated %}
   <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 mobile-bottom-nav z-30">
-    <div class="grid grid-cols-4 items-center text-xs text-gray-600">
-      <a href="#" class="flex flex-col items-center justify-center py-3 text-sky-600">
+    <div class="grid grid-cols-5 items-center text-xs text-gray-600">
+      <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-3">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
         </svg>
         <span>Library</span>
       </a>
-      <a href="#" class="flex flex-col items-center justify-center py-3">
+      <a href="{% url 'home' %}" class="flex flex-col items-center justify-center py-3 text-sky-600">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
         </svg>
         <span>Journal</span>
       </a>
-      <a href="#" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <span>Bio</span>
-      </a>
-      <a href="#" class="flex flex-col items-center justify-center py-3">
+      <a href="{% url 'insights' %}" class="flex flex-col items-center justify-center py-3">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
         <span>Insights</span>
       </a>
+      <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span>Account</span>
+      </a>
     </div>
   </div>
-
-  <!-- Quick Entry Button (mobile friendly) -->
-  <button class="fixed bottom-20 md:bottom-6 right-6 bg-sky-600 text-white p-3 sm:p-4 rounded-full shadow-lg hover:bg-sky-500 transition z-40">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-    </svg>
-  </button>
+  {% endif %}
 
   <script>
     // Mobile menu toggle
     function toggleMobileMenu() {
       const menu = document.getElementById('mobileMenu');
+      if (!menu) return;
+
       const menuContent = menu.querySelector('div.mobile-menu-slide');
 
       if (menu.classList.contains('hidden')) {
@@ -724,27 +478,32 @@
       }
     }
 
-    // Tab switching
-    function switchTab(tabName) {
-      // Hide all tabs
-      document.getElementById('library-tab').classList.add('hidden');
-      document.getElementById('recent-tab').classList.add('hidden');
-      document.getElementById('insights-tab').classList.add('hidden');
-
-      // Show selected tab
-      document.getElementById(tabName + '-tab').classList.remove('hidden');
-
-      // Update active state on buttons
-      const buttons = document.querySelector('.tabs-container').querySelectorAll('button');
-      buttons.forEach(btn => btn.classList.remove('active'));
-      event.currentTarget.classList.add('active');
+    // Character counter
+    function countChars() {
+      const textArea = document.getElementById('journalInput');
+      const charCount = document.getElementById('charCount');
+      charCount.textContent = textArea.value.length;
     }
 
-    // Initialize the page
-    document.addEventListener('DOMContentLoaded', function() {
-      // Set library tab as active by default
-      document.querySelector('.tabs-container button').classList.add('active');
-    });
+    // Add suggestion to textarea
+    function addSuggestion(text) {
+      const textArea = document.getElementById('journalInput');
+      let currentText = textArea.value;
+
+      // Add a line break if there's already content
+      if (currentText && !currentText.endsWith('\n') && !currentText.endsWith(' ')) {
+        currentText += ' ';
+      }
+
+      textArea.value = currentText + text + ' ';
+      textArea.focus();
+
+      // Update character count
+      countChars();
+
+      // Move cursor to end
+      textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
+    }
   </script>
 </body>
 </html>

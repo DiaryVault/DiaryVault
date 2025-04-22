@@ -1,32 +1,36 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Favicon and App Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="msapplication-config" content="/static/browserconfig.xml">
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DiaryVault - AI-Powered Journaling That's Actually Fun</title>
-  <meta name="description" content="DiaryVault uses AI to transform your daily journaling into a beautiful life story. Make recording your life easy, insightful, and fun." />
+  <title>DiaryVault - Your Daily Journal</title>
   <meta name="theme-color" content="#0ea5e9" />
-
-  <!-- Favicon and App Icons -->
-  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
-  <link rel="shortcut icon" href="/static/favicon.ico">
-  <link rel="manifest" href="/static/manifest.json">
-  <meta name="msapplication-config" content="/static/browserconfig.xml">
-
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:wght@300;400;700&family=Caveat:wght@400;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&family=Caveat:wght@400;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    html, body {
-      overflow-x: hidden;
-      position: relative;
-      width: 100%;
-    }
     body {
       font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      width: 100%;
+      overflow-x: hidden;
+      position: relative;
+    }
+    html {
+      overflow-x: hidden;
+    }
+    .diary-font {
+      font-family: 'Merriweather', serif;
     }
     .book-title {
       font-family: 'Libre Baskerville', serif;
@@ -34,557 +38,499 @@
     .handwritten {
       font-family: 'Caveat', cursive;
     }
-    .book {
-      transition: all 0.3s ease;
-      transform-style: preserve-3d;
-      perspective: 1000px;
-      position: relative;
-      max-width: 100%;
+    .input-area {
+      min-height: 180px;
+      resize: none;
     }
-    .book:hover {
-      transform: rotateY(-15deg) translateY(-10px);
-      z-index: 10;
+    .suggestions-pill {
+      transition: all 0.2s ease;
     }
-    .book-spine {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      width: 30px;
-      background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0));
+    .suggestions-pill:hover {
+      transform: translateY(-3px);
     }
-    @keyframes rotate3d {
-      0% {
-        transform: rotateY(0deg);
-      }
-      50% {
-        transform: rotateY(-15deg);
-      }
-      100% {
-        transform: rotateY(0deg);
-      }
-    }
-    .featured-book {
-      animation: rotate3d 5s infinite;
-    }
-    .floating {
-      animation: floating 3s ease-in-out infinite;
-    }
-    @keyframes floating {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
-    }
-    .ai-assistant-bubble {
+    .chat-bubble {
+      border-radius: 1.15rem;
+      padding: 1rem 1.25rem;
       position: relative;
     }
-    .ai-assistant-bubble:after {
+    .chat-bubble.ai {
+      background-color: #f1f5f9;
+      margin-right: 2rem;
+    }
+    .chat-bubble.user {
+      background-color: #e0f2fe;
+      margin-left: 2rem;
+    }
+    .chat-bubble.ai::before {
       content: '';
       position: absolute;
-      bottom: -10px;
-      left: 20px;
-      border-width: 10px 10px 0;
-      border-style: solid;
-      border-color: #e0f2fe transparent;
+      left: -0.5rem;
+      bottom: 1rem;
+      width: 1rem;
+      height: 1rem;
+      background-color: #f1f5f9;
+      clip-path: polygon(100% 0, 0 100%, 100% 100%);
+      transform: rotate(135deg);
+    }
+    .chat-bubble.user::after {
+      content: '';
+      position: absolute;
+      right: -0.5rem;
+      bottom: 1rem;
+      width: 1rem;
+      height: 1rem;
+      background-color: #e0f2fe;
+      clip-path: polygon(100% 0, 0 100%, 100% 100%);
+      transform: rotate(-45deg);
+    }
+    .gradient-text {
+      background: linear-gradient(to right, #0ea5e9, #6366f1);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
     @media (max-width: 640px) {
-      .mobile-full {
-        width: 100% !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
+      .mobile-menu-slide {
+        transition: transform 0.3s ease-in-out;
       }
-      .mobile-center {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
+      .mobile-menu-open {
+        transform: translateX(0);
       }
-      .mobile-stack {
-        flex-direction: column !important;
+      .mobile-menu-closed {
+        transform: translateX(100%);
       }
-      .mobile-px-4 {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-      }
-      .mobile-py-8 {
-        padding-top: 2rem !important;
-        padding-bottom: 2rem !important;
-      }
-      .mobile-py-6 {
-        padding-top: 1.5rem !important;
-        padding-bottom: 1.5rem !important;
-      }
-      .mobile-py-4 {
-        padding-top: 1rem !important;
-        padding-bottom: 1rem !important;
-      }
-      .mobile-mt-6 {
-        margin-top: 1.5rem !important;
-      }
-      .mobile-mb-8 {
-        margin-bottom: 2rem !important;
-      }
-      .mobile-h-auto {
-        height: auto !important;
-      }
-      .mobile-grid-cols-1 {
-        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
-      }
-      .mobile-gap-6 {
-        gap: 1.5rem !important;
-      }
-      .mobile-gap-4 {
-        gap: 1rem !important;
-      }
-      .mobile-text-sm {
-        font-size: 0.875rem !important;
-        line-height: 1.25rem !important;
-      }
-      .mobile-text-base {
-        font-size: 1rem !important;
-        line-height: 1.5rem !important;
-      }
-      .mobile-text-lg {
-        font-size: 1.125rem !important;
-        line-height: 1.75rem !important;
-      }
-      .mobile-text-xl {
-        font-size: 1.25rem !important;
-        line-height: 1.75rem !important;
-      }
-      .mobile-text-2xl {
-        font-size: 1.5rem !important;
-        line-height: 2rem !important;
-      }
-      .mobile-w-full {
-        width: 100% !important;
-      }
-      .mobile-mx-auto {
-        margin-left: auto !important;
-        margin-right: auto !important;
-      }
-      .mobile-text-center {
-        text-align: center !important;
-      }
-      .mobile-p-4 {
-        padding: 1rem !important;
-      }
-      .mobile-mb-4 {
-        margin-bottom: 1rem !important;
-      }
-      .mobile-h-64 {
-        height: 16rem !important;
+      .mobile-bottom-nav {
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
       }
     }
   </style>
 </head>
-<body class="bg-gradient-to-br from-sky-50 to-indigo-50 text-gray-900">
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f0f9ff] to-[#e6f7ff] text-gray-900">
 
-    <!-- Navbar -->
-    <header class="bg-white shadow sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
-        <div class="flex items-center gap-2">
-            <a href="/dashboard/" class="flex items-center gap-2 hover:opacity-80 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-            <h1 class="text-xl sm:text-2xl font-extrabold text-sky-600 tracking-tight">DiaryVault</h1>
-            </a>
+<!-- Navbar -->
+<header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
+      <div class="flex items-center gap-2">
+        <a href="{% url 'home' %}" class="flex items-center gap-2 hover:opacity-80 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <h1 class="text-xl sm:text-2xl font-extrabold text-sky-600 tracking-tight">DiaryVault</h1>
+        </a>
+      </div>
+
+      <!-- Main Navigation (only shown if logged in) -->
+      {% if user.is_authenticated %}
+      <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
+        <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+          </svg>
+          Dashboard
+        </a>
+        <a href="{% url 'library' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+          </svg>
+          Library
+        </a>
+        <a href="{% url 'insights' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Insights
+        </a>
+
+        <div class="w-px h-6 bg-gray-200"></div>
+
+        <!-- User profile section when logged in -->
+        <div class="flex items-center gap-3">
+          <a href="{% url 'account_settings' %}" class="flex items-center gap-3 hover:opacity-80 transition">
+            <div class="h-8 w-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold text-sm">
+              {{ user.username|first|upper }}
+            </div>
+            <span class="text-sm text-gray-700">{{ user.username }}</span>
+          </a>
         </div>
-        <nav class="hidden md:flex gap-6 items-center">
-            <a href="#features" class="text-gray-700 hover:text-sky-600 transition text-sm font-medium">Features</a>
-            <a href="#how-it-works" class="text-gray-700 hover:text-sky-600 transition text-sm font-medium">How It Works</a>
-            <a href="#testimonials" class="text-gray-700 hover:text-sky-600 transition text-sm font-medium">Testimonials</a>
-            <a href="/login/" class="text-gray-700 hover:text-sky-600 transition text-sm font-medium">Login</a>
-            <a href="/signup/" class="bg-sky-600 text-white px-4 py-2 rounded-md hover:bg-sky-500 transition text-sm font-medium">Get Started</a>
-        </nav>
-        <button class="md:hidden text-gray-700 p-1" id="mobile-menu-button" aria-label="Menu">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+
+        <form method="post" action="{% url 'logout' %}" class="inline">
+          {% csrf_token %}
+          <button type="submit" class="text-gray-700 hover:text-red-500 transition">Logout</button>
+        </form>
+      </nav>
+      {% else %}
+      <!-- Auth buttons if not logged in -->
+      <div class="flex gap-4 items-center">
+        <a href="{% url 'login' %}" class="text-sky-600 hover:text-sky-800 text-sm font-medium transition">Log in</a>
+        <a href="{% url 'signup' %}" class="bg-sky-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-sky-700 transition">Sign up</a>
+      </div>
+      {% endif %}
+
+      <!-- Mobile menu button (only shown if logged in) -->
+      {% if user.is_authenticated %}
+      <button class="md:hidden text-gray-700 hover:text-sky-600 p-1" onclick="toggleMobileMenu()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- Mobile Menu Overlay (only shown if logged in) -->
+  {% if user.is_authenticated %}
+  <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden">
+    <div class="absolute right-0 top-0 bottom-0 w-72 bg-white p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="font-bold text-lg">Menu</h2>
+        <button onclick="toggleMobileMenu()" class="p-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
-        </div>
-
-        <!-- Mobile menu -->
-        <div id="mobile-menu" class="md:hidden hidden bg-white border-t border-gray-100 px-4 py-4">
-        <nav class="flex flex-col gap-4">
-            <a href="#features" class="text-gray-700 hover:text-sky-600 transition py-2">Features</a>
-            <a href="#how-it-works" class="text-gray-700 hover:text-sky-600 transition py-2">How It Works</a>
-            <a href="#testimonials" class="text-gray-700 hover:text-sky-600 transition py-2">Testimonials</a>
-            <a href="/login/" class="text-gray-700 hover:text-sky-600 transition py-2">Login</a>
-            <a href="/signup/" class="bg-sky-600 text-white px-4 py-3 rounded-md hover:bg-sky-500 transition text-center mt-2">Get Started</a>
-        </nav>
-        </div>
-    </header>
-    
-  <!-- Hero Section -->
-  <section class="py-10 sm:py-16 md:py-20 px-4 sm:px-6 overflow-hidden mobile-py-6">
-    <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-      <div class="lg:w-1/2 mobile-center">
-        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4 sm:mb-6 mobile-text-2xl">Make Recording Your Life Story Actually Fun</h2>
-        <p class="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 mobile-text-base">DiaryVault's friendly AI assistant turns brief thoughts into meaningful journals—making it effortless and enjoyable to capture your journey. It's like having a personal biographer who makes sure your story is recorded, even when you're too busy.</p>
-        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          <a href="/signup/" class="bg-sky-600 text-white px-6 py-3 rounded-lg hover:bg-sky-500 transition text-center font-medium">Start Your Story</a>
-          <a href="#how-it-works" class="border border-sky-600 text-sky-600 px-6 py-3 rounded-lg hover:bg-sky-50 transition text-center font-medium">See Demo</a>
-        </div>
       </div>
 
-      <div class="lg:w-1/2 relative w-full mt-8 lg:mt-0 mobile-h-64">
-        <div class="book-display relative mx-auto mobile-mx-auto" style="height: 400px; max-width: 320px;">
-
-          <!-- Blue/Journey Book -->
-          <div class="absolute book-cover rounded-lg shadow-xl" style="width: 220px; height: 280px; top: 20px; right: 20px; z-index: 1; background-color: #1d4ed8; transform: rotate(15deg);">
-            <div class="absolute inset-1 bg-white rounded-lg p-4 flex flex-col">
-              <div class="book-title text-center text-lg font-bold text-gray-800 mb-1">My Life Journey</div>
-              <div class="text-xs text-center text-gray-500 mb-3">2023-2025</div>
-              <div class="handwritten text-sm text-gray-800 leading-relaxed">
-                As I reflect on these past two years, I'm amazed at how much has changed...
-              </div>
-            </div>
+      <!-- User info in mobile menu -->
+      <a href="{% url 'account_settings' %}" class="block">
+        <div class="flex items-center gap-3 p-3 bg-sky-50 rounded-lg mb-6 hover:bg-sky-100 transition">
+          <div class="h-10 w-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold">
+            {{ user.username|first|upper }}
           </div>
-
-          <!-- Sky/Experience Book -->
-          <div class="absolute book-cover rounded-lg shadow-xl featured-book" style="width: 260px; height: 340px; top: 60px; left: 40px; z-index: 2; background-color: #0284c7;">
-            <div class="absolute inset-1 bg-white rounded-lg p-4 flex flex-col">
-              <div class="book-title text-center text-xl font-bold text-gray-800 mb-2">The DiaryVault Experience</div>
-              <div class="bg-sky-50 p-3 rounded-lg w-full mb-3">
-                <p class="handwritten text-sm text-gray-700">Today I started using DiaryVault. Just wrote a quick note about my day, and the AI turned it into this amazing entry!</p>
-              </div>
-              <div class="bg-indigo-50 p-3 rounded-lg w-full">
-                <div class="text-sm font-medium text-indigo-800 mb-1">AI Enhancement</div>
-                <p class="text-xs text-gray-600">It looks like today was a milestone in your journey! I've added context about how this connects to your goals from last month...</p>
-              </div>
-            </div>
+          <div>
+            <div class="font-medium">{{ user.username }}</div>
+            <div class="text-xs text-gray-500">{{ total_entries|default:'0' }} entries</div>
           </div>
         </div>
-      </div>
+      </a>
+
+      <nav class="flex flex-col gap-1">
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="{% url 'library' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+          </svg>
+          <span>Library</span>
+        </a>
+        <a href="{% url 'new_entry' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+          <span>Journal</span>
+        </a>
+        <a href="{% url 'insights' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span>Insights</span>
+        </a>
+        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Account</span>
+        </a>
+        <div class="border-t border-gray-200 my-3 pt-2">
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="flex items-center gap-3 p-3 w-full hover:bg-red-50 rounded-lg text-red-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span>Logout</span>
+            </button>
+          </form>
+        </div>
+      </nav>
     </div>
-  </section>
+  </div>
+  {% endif %}
 
-  <!-- AI Fun Feature Showcase -->
-  <section class="py-12 sm:py-16 px-4 sm:px-6 bg-white mobile-py-8">
-    <div class="max-w-6xl mx-auto">
-      <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4 mobile-text-xl">Journaling That's Actually Fun</h2>
-      <p class="text-center text-gray-600 max-w-3xl mx-auto mb-10 mobile-mb-8 mobile-text-sm">Our AI makes recording your life story something you'll actually look forward to</p>
+  <!-- Main Content -->
+  <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-6 flex flex-col items-center">
+    <div class="max-w-3xl w-full mx-auto">
 
-      <div class="grid md:grid-cols-2 gap-8 mobile-gap-6">
-        <!-- Left Side - Screenshot -->
-        <div class="bg-gray-50 p-6 rounded-xl shadow-md order-2 md:order-1 mobile-p-4">
-          <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-            <!-- App Header Mockup -->
-            <div class="bg-sky-600 text-white p-3 flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                <span class="font-semibold">DiaryVault</span>
+      <!-- Header with date -->
+      <div class="text-center mb-8">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 diary-font mb-1">
+          {% if user.is_authenticated %}
+            Hello {{ user.username }}, what did you do today?
+          {% else %}
+            What did you do today?
+          {% endif %}
+        </h2>
+        <p class="text-gray-600 text-sm">{{ current_date|default:"Today" }}</p>
+      </div>
+
+      <!-- Chat area (visible if there are already messages) -->
+      <div id="chatArea" class="mb-6 space-y-4 {% if not has_conversation %}hidden{% endif %}">
+        <!-- Sample AI message (this would be populated dynamically) -->
+        <div class="chat-bubble ai">
+          <p class="handwritten text-gray-800 text-lg leading-relaxed">Hey there! Tell me about your day, and I'll help you turn it into a beautiful journal entry.</p>
+        </div>
+
+        <!-- This is where chat messages would appear dynamically -->
+        <div id="chatMessages">
+          <!-- Example of conversation flow (would be added dynamically) -->
+          {% if has_conversation %}
+            <!-- These would be populated from your backend -->
+            {% for message in conversation %}
+              {% if message.is_user %}
+                <div class="chat-bubble user diary-font">
+                  <p>{{ message.content }}</p>
+                </div>
+              {% else %}
+                <div class="chat-bubble ai handwritten">
+                  <p>{{ message.content }}</p>
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Main input form -->
+      <form method="post" action="{% url 'new_entry' %}" class="w-full">
+        {% csrf_token %}
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+          <div class="p-4 sm:p-5">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-semibold text-gray-800">Share your day</h3>
+              <div class="text-xs text-gray-500 flex items-center gap-1">
+                <span id="charCount">0</span>
+                <span>characters</span>
               </div>
-              <div class="text-sm">April 11, 2025</div>
             </div>
 
-            <!-- Journal Entry -->
-            <div class="p-4">
-              <div class="bg-gray-50 p-3 rounded-lg mb-4">
-                <p class="handwritten text-gray-800 mb-2">Exhausted today. Work was crazy.</p>
-                <p class="text-xs text-gray-500 italic">Your entry (12:42 PM)</p>
-              </div>
+            <textarea
+              id="journalInput"
+              name="journal_content"
+              class="input-area w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition diary-font"
+              placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am, worked on the project until 5pm, then went out for dinner with friends..."
+              oninput="countChars()"></textarea>
 
-              <!-- AI Assistant Response -->
-              <div class="flex items-start gap-3 mb-4">
-                <div class="bg-sky-100 p-2 rounded-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
-                  </svg>
-                </div>
-                <div>
-                  <div class="bg-sky-50 p-3 rounded-lg">
-                    <p class="text-sm text-gray-700 mb-2">Sounds like a tough day! I noticed this is the third stressful workday this week. Would you like to share what specifically made it crazy?</p>
-                    <div class="flex gap-2 mt-3 flex-wrap">
-                      <button class="bg-sky-100 hover:bg-sky-200 text-sky-700 text-xs px-3 py-1 rounded-full transition">The client meeting</button>
-                      <button class="bg-sky-100 hover:bg-sky-200 text-sky-700 text-xs px-3 py-1 rounded-full transition">Too many deadlines</button>
-                      <button class="bg-sky-100 hover:bg-sky-200 text-sky-700 text-xs px-3 py-1 rounded-full transition">Office politics</button>
-                    </div>
-                  </div>
-                  <p class="text-xs text-gray-500 mt-1">DiaryVault AI (12:43 PM)</p>
-                </div>
-              </div>
-
-              <!-- Enhanced Entry -->
-              <div class="border-t border-gray-200 pt-4 mt-4">
-                <h3 class="text-sm font-medium text-gray-900 mb-2">Your Enhanced Entry</h3>
-                <div class="bg-indigo-50 p-3 rounded-lg">
-                  <p class="text-sm text-gray-700">Work was particularly demanding today, continuing a pattern of high-stress days this week. Despite the exhaustion, I managed to complete the quarterly report ahead of schedule, which is worth celebrating. This relates to my goal of maintaining better work-life balance while still delivering quality results.</p>
-                  <div class="flex items-center gap-2 mt-3 flex-wrap">
-                    <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">Stress</span>
-                    <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">Work</span>
-                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Achievement</span>
-                  </div>
-                </div>
+            <div class="mt-3">
+              <div class="text-xs text-gray-600 mb-2">Suggested topics:</div>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestions-pill bg-sky-50 hover:bg-sky-100 text-sky-700 px-3 py-1 rounded-full text-xs transition">Today I accomplished</button>
+                <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs transition">I felt happy when</button>
+                <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs transition">I learned that</button>
+                <button type="button" onclick="addSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs transition">I met with</button>
+                <button type="button" onclick="addSuggestion('I'm grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs transition">I'm grateful for</button>
               </div>
             </div>
           </div>
+
+          <div class="bg-gray-50 px-4 sm:px-5 py-3 flex justify-between items-center">
+            <div class="text-xs text-gray-500">Our AI will craft a journal entry based on your day</div>
+            <button type="submit" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition">
+              <span>Create Entry</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Results preview (would show after submission) -->
+      <div id="resultPreview" class="mt-8 bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 {% if not show_result %}hidden{% endif %}">
+        <div class="p-5 border-b border-gray-200">
+          <h3 class="font-bold text-gray-800 text-lg mb-2">Your Journal Entry</h3>
+          <p class="text-gray-600 text-sm">Generated based on your day</p>
         </div>
 
-        <!-- Right Side - Feature list -->
-        <div class="order-1 md:order-2 flex flex-col justify-center mobile-center">
-          <h3 class="text-2xl font-bold text-gray-900 mb-6 mobile-text-xl mobile-mb-4">Your AI Writing Partner</h3>
+        <div class="p-5">
+          <div class="handwritten text-xl text-gray-800 leading-relaxed">
+            {% if journal_entry %}
+              {{ journal_entry|linebreaks }}
+            {% else %}
+              <!-- This would be populated with the AI-generated entry -->
+              <p class="italic text-gray-400">Your journal entry will appear here...</p>
+            {% endif %}
+          </div>
+        </div>
 
-          <div class="space-y-6 mobile-gap-4">
-            <div class="flex items-start gap-4">
-              <div class="bg-sky-100 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <div>
-                <h4 class="text-lg font-semibold text-gray-900 mb-1 mobile-text-base">Turn One Sentence Into a Full Entry</h4>
-                <p class="text-gray-600 mobile-text-sm">No time to write? Just jot down a quick thought, and our AI transforms it into a meaningful, detailed journal entry that captures what you meant to say.</p>
-              </div>
-            </div>
-
-            <div class="flex items-start gap-4">
-              <div class="bg-indigo-100 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              </div>
-              <div>
-                <h4 class="text-lg font-semibold text-gray-900 mb-1 mobile-text-base">Fun Conversations, Not Blank Pages</h4>
-                <p class="text-gray-600 mobile-text-sm">Our AI asks just the right questions to spark your memory and help you dive deeper—turning journaling into an engaging conversation rather than a chore.</p>
-              </div>
-            </div>
-
-            <div class="flex items-start gap-4">
-              <div class="bg-emerald-100 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <h4 class="text-lg font-semibold text-gray-900 mb-1 mobile-text-base">Automatic Mood Tracking</h4>
-                <p class="text-gray-600 mobile-text-sm">The AI recognizes your emotions and tracks patterns over time, helping you gain insights about your wellbeing without any extra effort.</p>
-              </div>
-            </div>
+        <div class="bg-gray-50 p-5 flex justify-between items-center">
+          <div class="text-gray-600 text-sm">
+            <span class="text-sky-600 font-medium">Title:</span>
+            <span id="entryTitle">{% if entry_title %}{{ entry_title }}{% else %}My Day - {{ current_date|default:"Today" }}{% endif %}</span>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" class="border border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-1.5 rounded text-sm transition">Edit</button>
+            <button type="button" class="bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded text-sm transition">Save to Journal</button>
           </div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- Features Section -->
-  <section id="features" class="py-12 sm:py-16 px-4 sm:px-6 bg-gradient-to-br from-sky-50 to-indigo-50 mobile-py-8">
-    <div class="max-w-6xl mx-auto">
-      <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4 sm:mb-6 mobile-text-xl mobile-mb-4">Transform Your Journaling Experience</h2>
-      <p class="text-center text-gray-600 max-w-3xl mx-auto mb-10 sm:mb-16 mobile-mb-8 mobile-text-sm">Powered by advanced AI that understands context, emotion, and personal growth</p>
-
-      <div class="grid md:grid-cols-3 gap-8 sm:gap-10 mobile-grid-cols-1 mobile-gap-6">
-        <!-- Feature 1 -->
-        <div class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition mobile-p-4">
-          <div class="bg-sky-100 p-4 rounded-full mb-5 sm:mb-6 w-16 h-16 flex items-center justify-center mobile-mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      <!-- Feature highlights (minimal) -->
+      <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+          <div class="h-10 w-10 bg-sky-100 rounded-full flex items-center justify-center mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-3 mobile-text-lg mobile-mb-2">Beautiful Digital Library</h3>
-          <p class="text-gray-600 mobile-text-sm">Our AI automatically organizes your journals into a visually stunning virtual bookshelf. Simply write—our system handles categorization, tagging, and presentation without any manual effort.</p>
+          <h4 class="font-semibold text-gray-800 mb-1">AI-Powered Writing</h4>
+          <p class="text-gray-600 text-sm">Turn simple notes into beautiful journal entries</p>
         </div>
 
-        <!-- Feature 2 -->
-        <div class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition mobile-p-4">
-          <div class="bg-indigo-100 p-4 rounded-full mb-5 sm:mb-6 w-16 h-16 flex items-center justify-center mobile-mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-3 mobile-text-lg mobile-mb-2">AI-Powered Insights</h3>
-          <p class="text-gray-600 mobile-text-sm">Our intelligent AI analyzes your entries to provide personalized insights, identify emotional patterns, and highlight meaningful moments you might have missed. It's like having a personal therapist and biographer in one.</p>
-        </div>
-
-        <!-- Feature 3 -->
-        <div class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition mobile-p-4">
-          <div class="bg-emerald-100 p-4 rounded-full mb-5 sm:mb-6 w-16 h-16 flex items-center justify-center mobile-mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+          <div class="h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-3 mobile-text-lg mobile-mb-2">AI-Written Biography</h3>
-          <p class="text-gray-600 mobile-text-sm">Our advanced AI transforms your scattered entries into a beautifully cohesive narrative. The AI identifies themes, creates chapters, and crafts a flowing story that reads like a professional memoir—with your unique voice.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- How It Works -->
-  <section id="how-it-works" class="py-12 sm:py-16 px-4 sm:px-6 bg-white mobile-py-8">
-    <div class="max-w-6xl mx-auto">
-      <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-4 sm:mb-6 mobile-text-xl mobile-mb-4">How DiaryVault Works</h2>
-      <p class="text-center text-gray-600 max-w-3xl mx-auto mb-10 sm:mb-16 mobile-mb-8 mobile-text-sm">Our AI makes journaling effortless, meaningful, and surprisingly fun</p>
-
-      <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mobile-grid-cols-1 mobile-gap-4">
-        <!-- Step 1 -->
-        <div class="bg-white rounded-xl p-5 sm:p-6 shadow-md hover:shadow-lg transition mobile-p-4">
-          <div class="w-12 h-12 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4">1</div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-2 sm:mb-3 mobile-text-base">Write Quick, Easy Entries</h3>
-          <p class="text-gray-600 text-sm">Just jot down a few thoughts—our AI will ask follow-up questions, expand on your ideas, and help you capture deeper reflections with minimal effort. Even a short note becomes meaningful.</p>
+          <h4 class="font-semibold text-gray-800 mb-1">Builds Your Biography</h4>
+          <p class="text-gray-600 text-sm">We organize your memories into a life story</p>
         </div>
 
-        <!-- Step 2 -->
-        <div class="bg-white rounded-xl p-5 sm:p-6 shadow-md hover:shadow-lg transition mobile-p-4">
-          <div class="w-12 h-12 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4">2</div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-2 sm:mb-3 mobile-text-base">Receive AI Insights</h3>
-          <p class="text-gray-600 text-sm">Our AI companion analyzes each entry, uncovering hidden patterns in your thinking, summarizing key thoughts, and offering meaningful reflection prompts that deepen your self-awareness.</p>
-        </div>
-
-        <!-- Step 3 -->
-        <div class="bg-white rounded-xl p-5 sm:p-6 shadow-md hover:shadow-lg transition mobile-p-4">
-          <div class="w-12 h-12 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4">3</div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-2 sm:mb-3 mobile-text-base">Browse Your Collection</h3>
-          <p class="text-gray-600 text-sm">Our AI organizes everything automatically—discovering themes, creating chapters, and categorizing entries. Search by emotion, life event, or relationship and receive intelligent suggestions for related memories.</p>
-        </div>
-
-        <!-- Step 4 -->
-        <div class="bg-white rounded-xl p-5 sm:p-6 shadow-md hover:shadow-lg transition mobile-p-4">
-          <div class="w-12 h-12 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4">4</div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-2 sm:mb-3 mobile-text-base">Get Your AI-Crafted Biography</h3>
-          <p class="text-gray-600 text-sm">With one click, our advanced AI transforms your entries into a beautifully written biography that captures your unique voice, journey, and growth—creating a meaningful narrative you'll treasure.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Testimonials -->
-  <section id="testimonials" class="py-12 sm:py-16 px-4 sm:px-6 bg-gray-900 text-white mobile-py-8">
-    <div class="max-w-6xl mx-auto">
-      <h2 class="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6 mobile-text-xl mobile-mb-4">What Our Users Say</h2>
-      <p class="text-center text-gray-300 max-w-3xl mx-auto mb-10 sm:mb-16 mobile-mb-8 mobile-text-sm">Our AI-powered approach has changed how people think about journaling</p>
-
-      <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 mobile-grid-cols-1 mobile-gap-4">
-        <!-- Testimonial 1 -->
-        <div class="bg-gray-800 rounded-xl p-5 sm:p-6 mobile-p-4">
-          <div class="flex items-center mb-4">
-            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">S</div>
-            <div>
-              <div class="font-semibold">Sarah K.</div>
-              <div class="text-gray-400 text-sm">Using for 6 months</div>
-            </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+          <div class="h-10 w-10 bg-emerald-100 rounded-full flex items-center justify-center mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
           </div>
-          <p class="text-gray-300 text-sm sm:text-base">DiaryVault's AI has completely transformed how I journal. I used to struggle with consistency, but the intelligent prompts make it fun and easy. The AI uncovered patterns in my thinking I never noticed before—it's like having a therapist and biographer rolled into one!</p>
-        </div>
-
-        <!-- Testimonial 2 -->
-        <div class="bg-gray-800 rounded-xl p-5 sm:p-6 mobile-p-4">
-          <div class="flex items-center mb-4">
-            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">M</div>
-            <div>
-              <div class="font-semibold">Michael T.</div>
-              <div class="text-gray-400 text-sm">Using for 1 year</div>
-            </div>
-          </div>
-          <p class="text-gray-300 text-sm sm:text-base">I've tried many journaling apps, but DiaryVault's AI makes all the difference. I just write a few thoughts, and the AI expands it into meaningful reflections. The automated organization is magical—I can see my entire life story beautifully arranged without any effort on my part.</p>
-        </div>
-
-        <!-- Testimonial 3 -->
-        <div class="bg-gray-800 rounded-xl p-5 sm:p-6 mobile-p-4">
-          <div class="flex items-center mb-4">
-            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">J</div>
-            <div>
-              <div class="font-semibold">Jennifer L.</div>
-              <div class="text-gray-400 text-sm">Using for 8 months</div>
-            </div>
-          </div>
-          <p class="text-gray-300 text-sm sm:text-base">I started journaling to process grief. DiaryVault's AI was like having a compassionate guide—asking just the right questions, highlighting my growth over time, and connecting dots I couldn't see. The AI-generated insights were so profound that my actual therapist asked what app I was using!</p>
+          <h4 class="font-semibold text-gray-800 mb-1">Personal Insights</h4>
+          <p class="text-gray-600 text-sm">Discover patterns and growth in your journey</p>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- CTA Section -->
-  <section id="signup" class="py-14 sm:py-20 px-4 sm:px-6 bg-gradient-to-r from-sky-600 to-indigo-600 text-white mobile-py-8">
-    <div class="max-w-4xl mx-auto text-center">
-      <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 mobile-text-xl mobile-mb-4">Start Your Journey Today</h2>
-      <p class="text-lg sm:text-xl opacity-90 mb-6 sm:mb-8 mobile-text-base mobile-mb-4">Join thousands of others who are preserving their memories and creating their life story—with an AI that makes it fun!</p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center mobile-stack">
-        <a href="/login/" class="bg-white text-sky-600 px-6 py-3 rounded-lg font-medium hover:bg-sky-50 transition">Log In</a>
-        <a href="/signup/" class="bg-transparent border-2 border-white text-white px-6 py-3 rounded-lg font-medium hover:bg-white/10 transition">Sign Up Free</a>
+      <!-- If not logged in, show a subtle sign-up prompt -->
+      {% if not user.is_authenticated %}
+      <div class="mt-8 text-center">
+        <p class="text-gray-600 mb-4">Create an account to save your entries and build your personal biography</p>
+        <div class="flex justify-center gap-4">
+          <a href="{% url 'login' %}" class="text-sky-600 hover:underline text-sm font-medium">Log in</a>
+          <a href="{% url 'signup' %}" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Sign up free</a>
+        </div>
       </div>
+      {% endif %}
     </div>
-  </section>
+  </main>
 
-  <!-- Footer -->
-  <footer class="bg-gray-100 py-6 px-4 sm:px-6">
-    <div class="pt-4 border-t border-gray-200 text-sm text-gray-500 text-center">
-      © 2025 DiaryVault. All rights reserved.
+  <!-- Mobile Bottom Navigation (only shown if logged in) -->
+  {% if user.is_authenticated %}
+  <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 mobile-bottom-nav z-30">
+    <div class="grid grid-cols-5 items-center text-xs text-gray-600">
+      <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+        </svg>
+        <span>Library</span>
+      </a>
+      <a href="{% url 'home' %}" class="flex flex-col items-center justify-center py-3 text-sky-600">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        </svg>
+        <span>Journal</span>
+      </a>
+      <a href="{% url 'insights' %}" class="flex flex-col items-center justify-center py-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        <span>Insights</span>
+      </a>
+      <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span>Account</span>
+      </a>
     </div>
-    <div class="flex justify-center gap-4 text-sm mt-1">
-      <a href="https://crene.com" target="_blank" class="text-blue-500 hover:underline font-medium">Crene</a>
-      <a href="https://euphorie.com" target="_blank" class="text-blue-500 hover:underline font-medium">Euphorie</a>
+  </div>
+  {% endif %}
+
+  <!-- Footer with links to other platforms - Now more compact -->
+  <footer class="py-4 border-t border-pink-100 mt-8 bg-white compact-footer">
+    <div class="w-full max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center">
+      <div class="mb-3 sm:mb-0 text-center sm:text-left">
+        <a href="{% url 'home' %}" class="flex items-center justify-center sm:justify-start mb-1">
+          <h2 class="text-base font-bold gradient-text">Diaryvault</h2>
+          <span class="text-xs text-gray-400 ml-1">v1</span>
+        </a>
+        <p class="text-xs text-gray-500">© 2025 DiaryVault. All rights reserved.</p>
+      </div>
+      <div class="flex items-center gap-4 sm:gap-8 text-[13px] font-semibold tracking-wide text-gray-500">
+        <a href="https://crene.com" target="_blank" rel="noopener" class="flex items-center gap-2 hover:text-indigo-500 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span class="hover:underline underline-offset-2">Crene.com</span>
+        </a>
+        <a href="https://euphorie.com" target="_blank" rel="noopener" class="flex items-center gap-2 hover:text-green-500 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <span class="hover:underline underline-offset-2">Euphorie.com</span>
+        </a>
+      </div>
     </div>
   </footer>
 
   <script>
     // Mobile menu toggle
-    document.getElementById('mobile-menu-button').addEventListener('click', function() {
-      document.getElementById('mobile-menu').classList.toggle('hidden');
-    });
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      if (!menu) return;
 
-    // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
+      const menuContent = menu.querySelector('div.mobile-menu-slide');
 
-        const targetId = this.getAttribute('href');
-        if (targetId === '#') return;
-
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-          window.scrollTo({
-            top: targetElement.offsetTop - 80,
-            behavior: 'smooth'
-          });
-
-          // Close mobile menu if open
-          document.getElementById('mobile-menu').classList.add('hidden');
-        }
-      });
-    });
-
-    // Handle login functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      // Get all links that should trigger the login modal
-      const loginLinks = document.querySelectorAll('a[href="#login"]');
-
-      loginLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-          e.preventDefault();
-          alert('Login functionality would open here!');
-          // In a real implementation, you would show a login modal or redirect to a login page
-        });
-      });
-
-      // Handle the "Get Started" and "Sign Up" buttons
-      const signupLinks = document.querySelectorAll('a[href="#signup"], a[href="/signup"]');
-
-      signupLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-          if (link.getAttribute('href') === '/signup') {
-            // If it's an external link, we'd normally let it navigate
-            // But for this demo, we'll prevent default and show an alert
-            e.preventDefault();
-          }
-
-          alert('Sign up functionality would open here!');
-          // In a real implementation, you would show a signup form or redirect to a signup page
-        });
-      });
-
-      // Demo video play button
-      const playButton = document.querySelector('button:contains("Play Video")');
-      if (playButton) {
-        playButton.addEventListener('click', function() {
-          alert('Video would play here!');
-        });
+      if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        // Small delay to allow the display:block to take effect before animation
+        setTimeout(() => {
+          menuContent.classList.remove('mobile-menu-closed');
+          menuContent.classList.add('mobile-menu-open');
+        }, 10);
+      } else {
+        menuContent.classList.remove('mobile-menu-open');
+        menuContent.classList.add('mobile-menu-closed');
+        // Wait for animation to complete before hiding the menu
+        setTimeout(() => {
+          menu.classList.add('hidden');
+        }, 300);
       }
-    });
+    }
+
+    // Character counter
+    function countChars() {
+      const textArea = document.getElementById('journalInput');
+      const charCount = document.getElementById('charCount');
+      charCount.textContent = textArea.value.length;
+    }
+
+    // Add suggestion to textarea
+    function addSuggestion(text) {
+      const textArea = document.getElementById('journalInput');
+      let currentText = textArea.value;
+
+      // Add a line break if there's already content
+      if (currentText && !currentText.endsWith('\n') && !currentText.endsWith(' ')) {
+        currentText += ' ';
+      }
+
+      textArea.value = currentText + text + ' ';
+      textArea.focus();
+
+      // Update character count
+      countChars();
+
+      // Move cursor to end
+      textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
+    }
   </script>
 </body>
 </html>
