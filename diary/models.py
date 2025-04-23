@@ -2,6 +2,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django import forms
+from django.apps import apps
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -24,7 +27,7 @@ class LifeChapter(models.Model):
         return self.entries.count()
 
 class Entry(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='entries')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='diary_entries')
     title = models.CharField(max_length=200)
     content = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
@@ -66,11 +69,12 @@ class Biography(models.Model):
     """Generated user biography from multiple entries"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='biographies')
     title = models.CharField(max_length=200, default="My Life Story")
-    content = models.TextField()
+    content = models.TextField(blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     time_period_start = models.DateField(null=True, blank=True)
     time_period_end = models.DateField(null=True, blank=True)
+    chapters_data = models.JSONField(blank=True, null=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -81,6 +85,7 @@ class Biography(models.Model):
 
     def completion_percentage(self):
         """Calculate biography completion percentage"""
+        Entry = apps.get_model('diary', 'Entry')
         total_entries = Entry.objects.filter(user=self.user).count()
         if total_entries == 0:
             return 0
@@ -93,20 +98,24 @@ class Biography(models.Model):
         return min(int((time_period_entries / total_entries) * 100), 100)
 
 class UserInsight(models.Model):
-    """AI-generated insights about user patterns"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='insights')
-    title = models.CharField(max_length=200)
-    description = models.TextField()
     insight_type = models.CharField(max_length=50, choices=[
-        ('pattern', 'Pattern'),
+        ('mood_analysis', 'Mood Analysis'),
+        ('pattern', 'Pattern Detection'),
         ('suggestion', 'Suggestion'),
-        ('achievement', 'Achievement'),
-        ('mood', 'Mood Analysis')
+        ('topic_analysis', 'Topic Analysis')
     ])
-    created_at = models.DateTimeField(default=timezone.now)
+    title = models.CharField(max_length=200)
+    # Make sure this field exists
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.title
+        return f"{self.insight_type}: {self.title}"
+
+    class Meta:
+        ordering = ['-created_at']
 
 class UserPreference(models.Model):
     """Store user personalization preferences for journal generation"""
@@ -159,3 +168,70 @@ class UserPreference(models.Model):
     class Meta:
         verbose_name = "User Preference"
         verbose_name_plural = "User Preferences"
+
+class EntryForm(forms.ModelForm):
+    # Add a field for tags that will be processed separately
+    tags = forms.CharField(required=False, help_text="Comma-separated tags")
+
+    class Meta:
+        model = Entry
+        fields = ['title', 'content', 'mood', 'chapter']
+        widgets = {
+            'content': forms.Textarea(attrs={'class': 'diary-font'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        # Extract user from kwargs so we can use it later
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        # If this is an existing entry, populate the tags field
+        if self.instance and self.instance.pk:
+            self.initial['tags'] = ', '.join([tag.name for tag in self.instance.tags.all()])
+
+    def save(self, commit=True, user=None):
+        # Use either the user passed to save() or the one set during initialization
+        user = user or self.user
+        if not user:
+            raise ValueError("User must be provided to save the form")
+
+        # Save the entry but don't commit until we handle the tags
+        entry = super().save(commit=False)
+        entry.user = user
+
+        if commit:
+            entry.save()
+
+            # Process tags field
+            if 'tags' in self.cleaned_data:
+                tag_names = [t.strip() for t in self.cleaned_data['tags'].split(',') if t.strip()]
+
+                # Clear existing tags for this entry
+                entry.tags.clear()
+
+                # Add each tag, creating new ones as needed
+                for tag_name in tag_names:
+                    tag, created = Tag.objects.get_or_create(
+                        name=tag_name,
+                        user=user  # This links the tag to the user
+                    )
+                    entry.tags.add(tag)
+
+        return entry
+class EntryTag(models.Model):
+    entry = models.ForeignKey(Entry, on_delete=models.CASCADE, related_name='entry_tags')
+    name = models.CharField(max_length=50)
+    tag_type = models.CharField(max_length=20, default='topic', choices=[
+        ('topic', 'Topic'),
+        ('mood', 'Mood'),
+        ('person', 'Person'),
+        ('location', 'Location'),
+        ('other', 'Other')
+    ])
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+

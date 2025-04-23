@@ -1,6 +1,12 @@
 from django.http import JsonResponse
 import time
 from django.utils.deprecation import MiddlewareMixin
+from django.shortcuts import redirect
+from django.dispatch import receiver
+import json
+from django.contrib.auth.signals import user_logged_in
+
+
 
 class RateLimitMiddleware(MiddlewareMixin):
     # Store IP addresses and their last request times
@@ -45,3 +51,58 @@ class RateLimitMiddleware(MiddlewareMixin):
 
         for ip in to_remove:
             self.ip_requests.pop(ip, None)
+
+class PendingEntryMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Process the request before the view is called
+        response = self.get_response(request)
+
+        # We need to check if the user just logged in
+        # This is a simple check - see if the user is authenticated and came from the login page
+        referer = request.META.get('HTTP_REFERER', '')
+        is_authenticated = request.user.is_authenticated
+        came_from_login = 'login' in referer
+
+        if is_authenticated and came_from_login:
+            # Try to get pending entry from localStorage via a parameter
+            if 'pendingEntry' in request.GET:
+                try:
+                    from .models import Entry, Tag
+                    from .views import auto_generate_tags
+
+                    pending_entry = json.loads(request.GET.get('pendingEntry', '{}'))
+
+                    if pending_entry and pending_entry.get('content'):
+                        # Create the entry
+                        entry = Entry.objects.create(
+                            user=request.user,
+                            title=pending_entry.get('title', 'Untitled Entry'),
+                            content=pending_entry.get('content', ''),
+                            mood=pending_entry.get('mood')
+                        )
+
+                        # Add tags
+                        tags = pending_entry.get('tags', [])
+                        if not tags and pending_entry.get('content'):
+                            tags = auto_generate_tags(pending_entry.get('content'), pending_entry.get('mood'))
+
+                        if tags:
+                            for tag_name in tags:
+                                tag, created = Tag.objects.get_or_create(
+                                    name=tag_name.lower().strip(),
+                                    user=request.user
+                                )
+                                entry.tags.add(tag)
+
+                        # Redirect to the created entry
+                        return redirect('entry_detail', entry_id=entry.id)
+                except Exception as e:
+                    # Log the error but don't crash
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Error processing pending entry: {str(e)}")
+
+        return response

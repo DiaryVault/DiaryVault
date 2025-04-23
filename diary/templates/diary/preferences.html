@@ -4,19 +4,30 @@
 {% block title %}Journal Preferences | DiaryVault{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="mb-8">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+  <!-- Decorative elements -->
+  <div class="absolute -top-10 -left-16 h-32 w-32 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+  <div class="absolute -bottom-8 -right-16 h-32 w-32 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+
+  <!-- Page header -->
+  <div class="text-center mb-8 relative z-10">
+    <div class="inline-block mb-3">
+      <span class="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-gray-500 shadow-sm border border-white/50">
+        Personalization
+      </span>
+    </div>
     <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2">Personalize Your Journal</h1>
-    <p class="text-gray-600">Customize how your journal entries are generated to match your personal style and preferences.</p>
+    <p class="text-gray-600 text-sm max-w-lg mx-auto">Customize how your journal entries are generated to match your personal style and preferences.</p>
   </div>
 
-  <form method="POST" class="bg-white rounded-2xl shadow-lg p-6 mb-10">
+  <!-- Form Section -->
+  <form method="POST" class="glass-effect rounded-xl shadow-lg p-6 sm:p-8 mb-10 border border-white relative z-10 scale-in">
     {% csrf_token %}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
       <!-- Writing Style -->
       <div>
         <label for="writing_style" class="block font-medium text-gray-700 mb-2">Writing Style</label>
-        <select name="writing_style" id="writing_style" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400">
+        <select name="writing_style" id="writing_style" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 bg-white/80">
           <option value="reflective" {% if preferences.writing_style == 'reflective' %}selected{% endif %}>Reflective - Thoughtful and introspective</option>
           <option value="analytical" {% if preferences.writing_style == 'analytical' %}selected{% endif %}>Analytical - Logical and pattern-focused</option>
           <option value="creative" {% if preferences.writing_style == 'creative' %}selected{% endif %}>Creative - Expressive with vivid imagery</option>
@@ -30,7 +41,7 @@
       <!-- Emotional Tone -->
       <div>
         <label for="tone" class="block font-medium text-gray-700 mb-2">Emotional Tone</label>
-        <select name="tone" id="tone" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400">
+        <select name="tone" id="tone" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 bg-white/80">
           <option value="positive" {% if preferences.tone == 'positive' %}selected{% endif %}>Mostly Positive - Focus on the bright side</option>
           <option value="balanced" {% if preferences.tone == 'balanced' %}selected{% endif %}>Balanced - Equal attention to positives and negatives</option>
           <option value="realistic" {% if preferences.tone == 'realistic' %}selected{% endif %}>Realistic - Pragmatic and straightforward</option>
@@ -43,14 +54,14 @@
         <label for="focus_areas" class="block font-medium text-gray-700 mb-2">Focus Areas (comma-separated)</label>
         <input type="text" name="focus_areas" id="focus_areas" value="{{ preferences.focus_areas }}"
                placeholder="e.g., personal growth, relationships, health, career goals"
-               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400">
+               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 bg-white/80">
         <p class="text-xs text-gray-500 mt-1">Topics you'd like your journal entries to emphasize when relevant</p>
       </div>
 
       <!-- Language Complexity -->
       <div>
         <label for="language_complexity" class="block font-medium text-gray-700 mb-2">Language Complexity</label>
-        <select name="language_complexity" id="language_complexity" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400">
+        <select name="language_complexity" id="language_complexity" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 bg-white/80">
           <option value="simple" {% if preferences.language_complexity == 'simple' %}selected{% endif %}>Simple - Clear, straightforward vocabulary</option>
           <option value="moderate" {% if preferences.language_complexity == 'moderate' %}selected{% endif %}>Moderate - Balanced complexity</option>
           <option value="advanced" {% if preferences.language_complexity == 'advanced' %}selected{% endif %}>Advanced - Rich, sophisticated vocabulary</option>
@@ -60,15 +71,15 @@
       <!-- Metaphor Frequency -->
       <div>
         <label for="metaphor_frequency" class="block font-medium text-gray-700 mb-2">Metaphor & Imagery Usage</label>
-        <select name="metaphor_frequency" id="metaphor_frequency" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400">
+        <select name="metaphor_frequency" id="metaphor_frequency" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 bg-white/80">
           <option value="minimal" {% if preferences.metaphor_frequency == 'minimal' %}selected{% endif %}>Minimal - Straightforward language</option>
           <option value="occasional" {% if preferences.metaphor_frequency == 'occasional' %}selected{% endif %}>Occasional - Some metaphors and imagery</option>
           <option value="frequent" {% if preferences.metaphor_frequency == 'frequent' %}selected{% endif %}>Frequent - Rich with metaphors and imagery</option>
         </select>
       </div>
 
-      <!-- Include Questions Toggle -->
-      <div class="md:col-span-2 flex items-center">
+      <!-- Include Questions Toggle with improved styling -->
+      <div class="md:col-span-2 flex items-center p-3 bg-white/50 rounded-lg border border-gray-100 shadow-sm">
         <input type="checkbox" name="include_questions" id="include_questions"
                {% if preferences.include_questions %}checked{% endif %}
                class="h-5 w-5 text-secondary-600 focus:ring-secondary-400 border-gray-300 rounded">
@@ -78,34 +89,61 @@
       </div>
     </div>
 
-    <div class="mt-8 border-t border-gray-200 pt-6 flex justify-between items-center">
+    <div class="mt-8 border-t border-gray-200 pt-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
       <div>
         <p class="text-sm text-gray-600">Preferences will be applied to all future journal entries</p>
       </div>
       <div class="flex gap-3">
-        <a href="{% url 'dashboard' %}" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-5 py-2 rounded-full text-sm transition shadow-sm">
+        <a href="{% url 'dashboard' %}" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-5 py-2 rounded-full text-sm transition shadow-sm flex-grow sm:flex-grow-0 text-center">
           Cancel
         </a>
-        <button type="submit" class="btn-gradient text-white px-5 py-2 rounded-full text-sm font-medium shadow-md">
+        <button type="submit" class="btn-gradient text-white px-5 py-2 rounded-full text-sm font-medium shadow-md flex-grow sm:flex-grow-0 text-center">
           Save Preferences
         </button>
       </div>
     </div>
   </form>
 
-  <!-- Preview Section -->
-  <div class="bg-white rounded-2xl shadow-lg p-6">
-    <h2 class="text-xl font-bold text-gray-800 diary-font mb-4">Example Journal Style</h2>
-    <div class="p-6 bg-gray-50 rounded-xl handwritten text-lg text-gray-800 leading-relaxed">
+  <!-- Preview Section with updated styling -->
+  <div class="glass-effect rounded-xl shadow-lg p-6 sm:p-8 border border-white relative z-10 scale-in" style="animation-delay: 200ms">
+    <h2 class="text-xl font-bold text-gray-800 diary-font mb-4 flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+        <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+      </svg>
+      Example Journal Style
+    </h2>
+    <div class="p-6 page-texture rounded-xl handwritten text-lg text-gray-800 leading-relaxed relative shadow-inner">
+      <div class="absolute top-0 right-0 h-10 w-10" style="background: linear-gradient(135deg, transparent 50%, rgba(230,230,230,0.7) 50%);"></div>
       <p>Today, I attended the quarterly team meeting at work. As we discussed our recent project outcomes, I felt a sense of pride in how far we've come. The presentation I gave on the new client acquisition strategy was well-received, especially the data analysis portion showing our growth trajectory.</p>
 
       <p>After work, I met with Sarah for coffee. Our conversation about her upcoming gallery showing reminded me how important it is to support friends in their creative pursuits. The way her eyes lit up when talking about her paintings made me reflect on my own neglected hobbies.</p>
 
       <p>On my way home, the sunset painted the sky in vibrant oranges and purples, a beautiful end to a productive day. I'm grateful for these moments of natural beauty that remind me to pause and appreciate the world around me.</p>
 
-      <p>What other creative pursuits might I want to reconnect with? How can I better balance work achievements with personal fulfillment?</p>
+      <p class="mt-4 border-t border-gray-200 pt-3 italic">What other creative pursuits might I want to reconnect with? How can I better balance work achievements with personal fulfillment?</p>
     </div>
-    <p class="text-sm text-gray-500 mt-3">This is an example of a journal entry with the "reflective" style, "balanced" tone, with occasional metaphors and reflective questions.</p>
+    <div class="mt-4 flex items-start gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+      </svg>
+      <p class="text-sm text-gray-600">This is an example of a journal entry with the "reflective" style, "balanced" tone, with occasional metaphors and reflective questions.</p>
+    </div>
+  </div>
+
+  <!-- Additional info/tip card -->
+  <div class="mt-6 glass-effect rounded-xl p-4 border border-white relative z-10 fade-in" style="animation-delay: 400ms">
+    <div class="flex items-start gap-3">
+      <div class="bg-secondary-100 rounded-full p-2 text-secondary-600">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div>
+        <h3 class="font-medium text-gray-800 text-sm">Personalization Tip</h3>
+        <p class="text-sm text-gray-600">You can update these preferences anytime. Changes will apply to new journal entries but won't affect your existing ones.</p>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}
@@ -122,12 +160,23 @@
 
         // For now, we'll just show a notification that changes were made
         const notification = document.createElement('div');
-        notification.className = 'fixed bottom-4 right-4 bg-secondary-600 text-white px-4 py-2 rounded-lg shadow-lg';
-        notification.textContent = 'Style updated! Save to apply these changes.';
+        notification.className = 'fixed bottom-4 right-4 bg-gradient-to-r from-secondary-500 to-primary-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50 scale-in';
+        notification.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          <span>Style updated! Save to apply these changes.</span>
+        `;
         document.body.appendChild(notification);
 
         setTimeout(() => {
-          notification.remove();
+          notification.style.opacity = '0';
+          notification.style.transform = 'translateY(10px)';
+          notification.style.transition = 'all 0.3s ease';
+
+          setTimeout(() => {
+            notification.remove();
+          }, 300);
         }, 3000);
       });
     });

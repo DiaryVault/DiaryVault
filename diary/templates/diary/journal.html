@@ -1,26 +1,63 @@
+
 {% load static %}
+{% load widget_tweaks %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Favicon and App Icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
-    <link rel="shortcut icon" href="/static/favicon.ico">
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="msapplication-config" content="/static/browserconfig.xml">
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>New Entry - DiaryVault</title>
-  <meta name="theme-color" content="#0ea5e9" />
+  <title>{% if is_edit_mode %}Edit Entry{% else %}New Entry{% endif %} - DiaryVault</title>
+  <meta name="theme-color" content="#6366f1" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&family=Caveat:wght@400;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Poppins:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Favicon and App Icons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+  <link rel="shortcut icon" href="/static/favicon.ico">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="msapplication-config" content="/static/browserconfig.xml">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              200: '#ddd6fe',
+              300: '#c4b5fd',
+              400: '#a78bfa',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              800: '#5b21b6',
+              900: '#4c1d95',
+            },
+            secondary: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            },
+          },
+        },
+      },
+    }
+  </script>
   <style>
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Poppins', sans-serif;
       background-color: #f8fafc;
       width: 100%;
       overflow-x: hidden;
@@ -28,16 +65,24 @@
     }
     html {
       overflow-x: hidden;
+      scroll-behavior: smooth;
     }
     .diary-font {
-      font-family: 'Merriweather', serif;
-    }
-    .book-title {
-      font-family: 'Libre Baskerville', serif;
+      font-family: 'Playfair Display', serif;
     }
     .handwritten {
       font-family: 'Caveat', cursive;
     }
+
+    /* Glass effect */
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    /* Page texture */
     .page-texture {
       background-image:
         linear-gradient(rgba(255,255,255,0.5) 2px, transparent 2px),
@@ -45,6 +90,84 @@
       background-size: 40px 40px;
       background-color: #f8f5f0;
     }
+
+    .input-area {
+      min-height: 180px;
+      resize: none;
+    }
+
+    .suggestions-pill {
+      transition: all 0.3s ease;
+    }
+    .suggestions-pill:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-gradient {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      transition: all 0.3s ease;
+    }
+    .btn-gradient:hover {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .circle-pattern {
+      background-image: radial-gradient(#6366f120 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    .mood-selector {
+      transition: all 0.2s ease;
+    }
+    .mood-selector:hover {
+      transform: scale(1.05);
+    }
+    .mood-selector.selected {
+      border-color: #6366f1;
+      background-color: #e0e7ff;
+    }
+
+    .paper-bg {
+      background-color: #fffcf8;
+      background-image:
+        linear-gradient(90deg, rgba(200,200,200,0.1) 1px, transparent 1px),
+        linear-gradient(rgba(200,200,200,0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    /* Custom scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
     @media (max-width: 640px) {
       .mobile-menu-slide {
         transition: transform 0.3s ease-in-out;
@@ -55,53 +178,103 @@
       .mobile-menu-closed {
         transform: translateX(100%);
       }
+
+      /* Bottom navigation */
       .mobile-bottom-nav {
+        background-color: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 40;
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
       }
+
+      .form-container {
+        padding: 1rem;
+      }
+      .form-input {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+      }
+      .mood-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      /* Add bottom padding to account for fixed nav */
+      .pb-safe {
+        padding-bottom: 5rem !important;
+      }
+    }
+
+    /* Transition effects */
+    body {
+      transition: opacity 0.3s ease-in-out;
+    }
+    body.transition-ready {
+      opacity: 1;
+    }
+    body.page-transitioning {
+      opacity: 0;
+    }
+
+    .loading-dots:after {
+      content: '';
+      animation: dots 1.5s infinite;
+    }
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f0f9ff] to-[#e6f7ff] text-gray-900">
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f5f3ff] to-[#eef2ff] text-gray-800 custom-scrollbar circle-pattern">
 
   <!-- Navbar -->
-  <header class="bg-white shadow sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
-      <div class="flex items-center gap-2">
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-2 hover:opacity-80 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-          <h1 class="text-xl sm:text-2xl font-extrabold text-sky-600 tracking-tight">DiaryVault</h1>
+  <header class="glass-effect sticky top-0 z-50 border-b border-white/20">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 sm:py-4">
+      <!-- Logo -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-1 sm:gap-2 hover:opacity-80 transition">
+          <div class="bg-white p-1.5 rounded-lg shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <h1 class="text-lg sm:text-2xl font-extrabold gradient-text tracking-tight">DiaryVault</h1>
         </a>
       </div>
 
-      <!-- Main Navigation -->
+      <!-- Desktop Navigation -->
       <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
-        <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+        <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
           </svg>
           Dashboard
         </a>
-        <a href="{% url 'library' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+        <a href="{% url 'library' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
           </svg>
           Library
         </a>
-        <a href="{% url 'new_entry' %}" class="text-sky-600 border-b-2 border-sky-600 pb-1 flex items-center gap-1">
+        <a href="{% url 'new_entry' %}" class="text-secondary-600 border-b-2 border-secondary-600 pb-1 flex items-center gap-1.5 py-1">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>
           Journal
         </a>
-        <a href="{% url 'biography' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+        <a href="{% url 'biography' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           Biography
         </a>
-        <a href="{% url 'insights' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+        <a href="{% url 'insights' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
@@ -110,10 +283,10 @@
 
         <div class="w-px h-6 bg-gray-200"></div>
 
-        <!-- Updated user profile section with clickable username -->
+        <!-- User profile section -->
         <div class="flex items-center gap-3">
           <a href="{% url 'account_settings' %}" class="flex items-center gap-3 hover:opacity-80 transition">
-            <div class="h-8 w-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold text-sm">
+            <div class="h-9 w-9 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
               {{ request.user.username|first|upper }}
             </div>
             <span class="text-sm text-gray-700">{{ request.user.username }}</span>
@@ -122,12 +295,12 @@
 
         <form method="post" action="{% url 'logout' %}" class="inline">
           {% csrf_token %}
-          <button type="submit" class="text-gray-700 hover:text-red-500 transition">Logout</button>
+          <button type="submit" class="text-gray-700 hover:text-red-500 transition bg-gray-100 px-4 py-2 rounded-full text-sm hover:bg-red-50">Logout</button>
         </form>
       </nav>
 
       <!-- Mobile menu button -->
-      <button class="md:hidden text-gray-700 hover:text-sky-600 p-1" onclick="toggleMobileMenu()">
+      <button class="md:hidden text-gray-700 hover:text-secondary-600 p-1.5 bg-white rounded-lg shadow-sm" onclick="toggleMobileMenu()">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
@@ -136,72 +309,74 @@
   </header>
 
   <!-- Mobile Menu Overlay -->
-  <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden">
-    <div class="absolute right-0 top-0 bottom-0 w-72 bg-white p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
+  <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 hidden">
+    <div class="absolute right-0 top-0 bottom-0 w-72 glass-effect p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
       <div class="flex justify-between items-center mb-8">
-        <h2 class="font-bold text-lg">Menu</h2>
-        <button onclick="toggleMobileMenu()" class="p-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <h2 class="font-bold text-lg gradient-text">Menu</h2>
+        <button onclick="toggleMobileMenu()" class="p-1.5 bg-white rounded-lg shadow-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      <!-- User info in mobile menu - Make this clickable too -->
+      <!-- User info in mobile menu -->
       <a href="{% url 'account_settings' %}" class="block">
-        <div class="flex items-center gap-3 p-3 bg-sky-50 rounded-lg mb-6 hover:bg-sky-100 transition">
-          <div class="h-10 w-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold">
+        <div class="flex items-center gap-3 p-4 glass-effect rounded-xl mb-6 hover:bg-white/50 transition border border-white/20">
+          <div class="h-10 w-10 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold shadow-md">
             {{ request.user.username|first|upper }}
           </div>
           <div>
             <div class="font-medium">{{ request.user.username }}</div>
-            <div class="text-xs text-gray-500">New Entry</div>
+            <div class="text-xs text-gray-500">{{ total_entries }} entries</div>
           </div>
         </div>
       </a>
 
-      <nav class="flex flex-col gap-1">
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <!-- Mobile navigation menu -->
+      <nav class="flex flex-col gap-2">
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
           </svg>
           <span>Dashboard</span>
         </a>
-        <a href="{% url 'library' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <a href="{% url 'library' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
           </svg>
           <span>Library</span>
         </a>
-        <a href="{% url 'new_entry' %}" class="flex items-center gap-3 p-3 bg-sky-50 rounded-lg text-sky-600">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <a href="{% url 'new_entry' %}" class="flex items-center gap-3 p-3 bg-secondary-50 rounded-xl text-secondary-600 border border-secondary-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>
           <span>Journal</span>
         </a>
-        <a href="{% url 'biography' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <a href="{% url 'biography' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           <span>Biography</span>
         </a>
-        <a href="{% url 'insights' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <a href="{% url 'insights' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
           <span>Insights</span>
         </a>
-        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span>Account</span>
         </a>
-        <div class="border-t border-gray-200 my-3 pt-2">
+
+        <div class="border-t border-white/20 my-3 pt-2">
           <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}
-            <button type="submit" class="flex items-center gap-3 p-3 w-full hover:bg-red-50 rounded-lg text-red-600">
+            <button type="submit" class="flex items-center gap-3 p-3 w-full hover:bg-red-50/80 rounded-xl text-red-600 transition border border-transparent hover:border-red-100">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
@@ -214,156 +389,556 @@
   </div>
 
   <!-- Main Content -->
-  <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-6">
+  <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-6 pb-safe">
     <div class="max-w-4xl mx-auto">
       {% if messages %}
         <div class="mb-6">
           {% for message in messages %}
-            <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% elif message.tags == 'success' %}bg-green-100 border-green-400 text-green-700{% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} px-4 py-3 rounded border mb-4">
+            <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% elif message.tags == 'success' %}bg-green-100 border-green-400 text-green-700{% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} px-4 py-3 rounded-xl shadow-sm border mb-4 scale-in">
               {{ message }}
             </div>
           {% endfor %}
         </div>
       {% endif %}
 
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-900">New Journal Entry</h2>
-        <div class="text-gray-500 text-sm">{{ today|date:"l, F j, Y" }}</div>
+      <!-- Page Header with Date -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold diary-font text-gray-900 mb-1">
+            {% if is_edit_mode %}Edit Journal Entry{% else %}New Journal Entry{% endif %}
+          </h2>
+          <p class="text-gray-500 text-sm">{{ today|date:"l, F j, Y" }}</p>
+        </div>
+        <div class="glass-effect py-1 px-3 rounded-lg shadow-sm border border-white/30">
+          <time datetime="{{ today|date:'Y-m-d' }}" class="text-secondary-700 font-medium flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            {{ today|date:"F j, Y" }}
+          </time>
+        </div>
       </div>
 
-      <!-- Entry Form -->
-      <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="page-texture p-6 md:p-8">
+      <!-- Entry Form Card -->
+      <div class="glass-effect rounded-xl shadow-lg overflow-hidden card-hover border border-white/20">
+        <!-- Card Header -->
+        <div class="p-6 bg-gradient-to-r from-secondary-50 to-primary-50 border-b border-white/30">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold diary-font text-gray-800 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              {% if is_edit_mode %}Edit Your Journal Entry{% else %}Create New Journal Entry{% endif %}
+            </h3>
+            <!-- Character counter for quick notes -->
+            <div class="text-xs font-medium glass-effect px-3 py-1.5 rounded-full text-gray-600 flex items-center gap-1.5 shadow-sm border border-white/30">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+              </svg>
+              <span id="charCount">0</span>
+              <span>characters</span>
+            </div>
+          </div>
+        </div>
+
+        {% if not is_edit_mode %}
+        <!-- Quick Notes Area for AI-assisted entry generation -->
+        <div class="page-texture p-6 border-b border-gray-100">
+          <div class="mb-3">
+            <label for="quickNotes" class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Quick Notes
+              <span class="text-xs text-secondary-600 font-normal">(for AI generation)</span>
+            </label>
+            <textarea
+              id="quickNotes"
+              class="input-area w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition diary-font shadow-inner bg-white/70"
+              placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am, worked on the project until 5pm..."
+              oninput="countChars()"></textarea>
+            <p class="text-gray-500 text-xs mt-1 italic">Jot down quick notes about your day, and we'll help transform them into a full journal entry.</p>
+          </div>
+
+          <!-- Suggested topics in more organized layout -->
+          <div class="glass-effect rounded-lg p-3 border border-white/30 shadow-sm mb-4">
+            <div class="text-xs font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              Suggested topics:
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestions-pill bg-secondary-50 hover:bg-secondary-100 text-secondary-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-secondary-200/50">Today I accomplished</button>
+              <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-emerald-200/50">I felt happy when</button>
+              <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-primary-50 hover:bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-primary-200/50">I learned that</button>
+              <button type="button" onclick="addSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50">I met with</button>
+              <button type="button" onclick="addSuggestion('I'm grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50">I'm grateful for</button>
+              <button type="button" onclick="addSuggestion('I'm looking forward to')" class="suggestions-pill bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-rose-200/50">I'm looking forward to</button>
+            </div>
+          </div>
+
+          <!-- AI Generation Button -->
+          <div class="flex justify-end mb-2">
+            <button type="button" id="generateEntryBtn" class="btn-gradient text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>Generate Full Entry</span>
+            </button>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Full journal entry form with paper background -->
+        <div class="paper-bg p-6">
           <form method="post">
             {% csrf_token %}
 
-            <!-- Title field -->
+            <!-- Title field with styling -->
             <div class="mb-6">
-              <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-              {{ form.title }}
-              {% if form.title.errors %}
-                <p class="text-red-600 text-xs mt-1">{{ form.title.errors.0 }}</p>
-              {% endif %}
+              <label for="{{ form.title.id_for_label }}" class="block text-sm font-semibold text-gray-800 mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600 inline mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Title
+              </label>
+              <div class="relative">
+                {{ form.title|add_class:"w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition text-base glass-effect" }}
+                {% if form.title.errors %}
+                  <p class="text-red-600 text-xs mt-1">{{ form.title.errors.0 }}</p>
+                {% endif %}
+              </div>
             </div>
 
-            <!-- Content field -->
+            <!-- Mood selector -->
             <div class="mb-6">
-              <label for="{{ form.content.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Content</label>
-              {{ form.content }}
+              <label class="block text-sm font-semibold text-gray-800 mb-2 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                How are you feeling today?
+              </label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                <label class="mood-selector border border-white/50 glass-effect rounded-lg p-2 text-center cursor-pointer hover:bg-secondary-50/70">
+                  <input type="radio" name="mood" value="happy" class="sr-only" {% if form.mood.value == 'happy' %}checked{% endif %}>
+                  <div class="text-xl mb-1">😊</div>
+                  <span class="text-xs font-medium">Happy</span>
+                </label>
+                <label class="mood-selector border border-white/50 glass-effect rounded-lg p-2 text-center cursor-pointer hover:bg-secondary-50/70">
+                  <input type="radio" name="mood" value="content" class="sr-only" {% if form.mood.value == 'content' %}checked{% endif %}>
+                  <div class="text-xl mb-1">😌</div>
+                  <span class="text-xs font-medium">Content</span>
+                </label>
+                <label class="mood-selector border border-white/50 glass-effect rounded-lg p-2 text-center cursor-pointer hover:bg-secondary-50/70">
+                  <input type="radio" name="mood" value="excited" class="sr-only" {% if form.mood.value == 'excited' %}checked{% endif %}>
+                  <div class="text-xl mb-1">🤩</div>
+                  <span class="text-xs font-medium">Excited</span>
+                </label>
+                <label class="mood-selector border border-white/50 glass-effect rounded-lg p-2 text-center cursor-pointer hover:bg-secondary-50/70">
+                  <input type="radio" name="mood" value="neutral" class="sr-only" {% if form.mood.value == 'neutral' %}checked{% endif %}>
+                  <div class="text-xl mb-1">😐</div>
+                  <span class="text-xs font-medium">Neutral</span>
+                </label>
+                <label class="mood-selector border border-white/50 glass-effect rounded-lg p-2 text-center cursor-pointer hover:bg-secondary-50/70">
+                  <input type="radio" name="mood" value="anxious" class="sr-only" {% if form.mood.value == 'anxious' %}checked{% endif %}>
+                  <div class="text-xl mb-1">😰</div>
+                  <span class="text-xs font-medium">Anxious</span>
+                </label>
+                <label class="mood-selector border border-white/50 glass-effect rounded-lg p-2 text-center cursor-pointer hover:bg-secondary-50/70">
+                  <input type="radio" name="mood" value="sad" class="sr-only" {% if form.mood.value == 'sad' %}checked{% endif %}>
+                  <div class="text-xl mb-1">😢</div>
+                  <span class="text-xs font-medium">Sad</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Content field with improved styling -->
+            <div class="mb-6">
+              <label for="{{ form.content.id_for_label }}" class="block text-sm font-semibold text-gray-800 mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600 inline mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+                Content
+              </label>
+              {{ form.content|add_class:"w-full min-h-[300px] p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition diary-font shadow-inner text-base glass-effect" }}
               {% if form.content.errors %}
                 <p class="text-red-600 text-xs mt-1">{{ form.content.errors.0 }}</p>
               {% endif %}
             </div>
 
-            <!-- Tags field -->
-            <div class="mb-6">
-              <label for="{{ form.tags.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Tags (separated by commas)</label>
-              {{ form.tags }}
-              <p class="text-gray-500 text-xs mt-1">Example: personal, work, family, goals</p>
+            <!-- Tags field with visual enhancement -->
+            <div class="mb-6 glass-effect p-4 rounded-lg border border-white/30">
+              <label for="{{ form.tags.id_for_label }}" class="block text-sm font-semibold text-gray-800 mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600 inline mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+                Tags
+                <span class="text-xs font-normal text-gray-500 ml-1">(separated by commas)</span>
+              </label>
+              <div class="relative">
+                {{ form.tags|add_class:"w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition text-base glass-effect" }}
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                </div>
+              </div>
+              <p class="flex items-center text-gray-500 text-xs mt-2 italic">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Tags will be auto-generated based on your content, but you can also add specific ones here
+              </p>
+
+              <!-- Common tags suggestion -->
+              <div class="mt-3">
+                <div class="text-xs font-medium text-gray-600 mb-1.5">Common tags:</div>
+                <div class="flex flex-wrap gap-1.5">
+                  <button type="button" onclick="addTag('work')" class="glass-effect text-gray-700 hover:bg-white/50 px-2 py-1 rounded-full text-xs transition border border-white/30">work</button>
+                  <button type="button" onclick="addTag('family')" class="glass-effect text-gray-700 hover:bg-white/50 px-2 py-1 rounded-full text-xs transition border border-white/30">family</button>
+                  <button type="button" onclick="addTag('health')" class="glass-effect text-gray-700 hover:bg-white/50 px-2 py-1 rounded-full text-xs transition border border-white/30">health</button>
+                  <button type="button" onclick="addTag('friends')" class="glass-effect text-gray-700 hover:bg-white/50 px-2 py-1 rounded-full text-xs transition border border-white/30">friends</button>
+                  <button type="button" onclick="addTag('reflection')" class="glass-effect text-gray-700 hover:bg-white/50 px-2 py-1 rounded-full text-xs transition border border-white/30">reflection</button>
+                  <button type="button" onclick="addTag('goals')" class="glass-effect text-gray-700 hover:bg-white/50 px-2 py-1 rounded-full text-xs transition border border-white/30">goals</button>
+                </div>
+              </div>
             </div>
 
             <!-- Buttons -->
-            <div class="flex justify-between items-center pt-4 border-t border-gray-200">
-              <a href="{% url 'dashboard' %}" class="text-gray-600 font-medium hover:text-gray-900">Cancel</a>
+            <div class="flex justify-between items-center pt-2">
+              {% if is_edit_mode %}
+                <a href="{% url 'entry_detail' entry.id %}" class="text-gray-600 font-medium hover:text-gray-900 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Cancel
+                </a>
+              {% else %}
+                <a href="{% url 'dashboard' %}" class="text-gray-600 font-medium hover:text-gray-900 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Cancel
+                </a>
+              {% endif %}
               <div class="flex gap-3">
-                <button type="button" id="aiHelpBtn" class="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition flex items-center gap-1 text-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button type="button" id="aiHelpBtn" class="px-4 py-2 glass-effect text-gray-800 rounded-lg hover:bg-white/50 transition flex items-center gap-1 text-sm shadow-sm border border-white/30">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  AI Help
+                  Writing Help
                 </button>
-                <button type="submit" class="px-6 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-500 transition flex items-center gap-1 text-sm">
+                <button type="submit" class="btn-gradient text-white px-6 py-2 rounded-lg flex items-center gap-1 text-sm">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                   </svg>
-                  Save Entry
+                  {% if is_edit_mode %}Save Changes{% else %}Save Entry{% endif %}
                 </button>
               </div>
             </div>
           </form>
         </div>
       </div>
+
+      <!-- Loading indicator (initially hidden) -->
+      <div id="loadingIndicator" class="mt-6 hidden">
+        <div class="flex flex-col items-center justify-center p-8 glass-effect rounded-xl shadow-md border border-white/20">
+          <div class="w-12 h-12 border-4 border-secondary-200 border-t-secondary-600 rounded-full animate-spin mb-4"></div>
+          <p class="text-center text-gray-600 handwritten text-lg">Crafting your journal entry<span class="loading-dots"></span></p>
+          <p class="text-center text-gray-500 text-sm mt-2">This takes just a moment</p>
+        </div>
+      </div>
+
+      <!-- Results preview (hidden by default) -->
+      <div id="resultPreview" class="mt-6 glass-effect rounded-xl shadow-xl overflow-hidden border border-white/20 card-hover hidden opacity-0 transition-opacity duration-300">
+        <div class="p-4 sm:p-5 border-b border-white/20 flex items-center justify-between">
+          <div>
+            <h3 class="font-bold diary-font text-gray-800 text-base">Generated Journal Entry</h3>
+            <p class="text-gray-600 text-xs">Based on your quick notes</p>
+          </div>
+          <div class="h-8 w-8 bg-white/50 rounded-full flex items-center justify-center text-secondary-600 shadow-sm border border-white/30" onclick="editGeneratedEntry()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="p-4 sm:p-5 bg-gradient-to-br from-white to-gray-50">
+          <div id="generatedEntry" class="handwritten text-lg text-gray-800 leading-relaxed"></div>
+        </div>
+
+        <div class="bg-gradient-to-r from-secondary-50 to-primary-50 p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-center gap-3 border-t border-white">
+          <div class="text-gray-600 text-sm diary-font">
+            <span class="text-secondary-600 font-medium">Generated Title:</span>
+            <span id="generatedTitle">Journal Entry - {{ today|date:"F j, Y" }}</span>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="useGeneratedEntry()" class="btn-gradient text-white px-4 py-2 rounded-full text-sm font-medium shadow-md flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Use This Entry
+            </button>
+            <button type="button" onclick="regenerateEntry()" class="glass-effect border border-white/30 text-gray-700 hover:bg-white px-3 py-2 rounded-full text-sm transition shadow-sm flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 
   <!-- Mobile Bottom Navigation -->
-  <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 mobile-bottom-nav z-30">
-    <div class="grid grid-cols-5 items-center text-xs text-gray-600">
-      <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-        </svg>
-        <span>Home</span>
-      </a>
-      <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-        </svg>
-        <span>Library</span>
-      </a>
-      <a href="{% url 'new_entry' %}" class="flex flex-col items-center justify-center py-3 text-sky-600">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-        </svg>
-        <span>Journal</span>
-      </a>
-      <a href="{% url 'biography' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <span>Bio</span>
-      </a>
-      <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-        <span>Account</span>
-      </a>
-    </div>
-  </div>
+  <nav class="mobile-bottom-nav md:hidden flex items-center text-xs text-gray-600 z-30">
+    <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-3 flex-1">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+      </svg>
+      <span>Home</span>
+    </a>
+    <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-3 flex-1">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+      </svg>
+      <span>Library</span>
+    </a>
+    <a href="{% url 'new_entry' %}" class="flex flex-col items-center justify-center py-3 flex-1 text-secondary-600">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+      </svg>
+      <span>Journal</span>
+    </a>
+    <a href="{% url 'biography' %}" class="flex flex-col items-center justify-center py-3 flex-1">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <span>Bio</span>
+    </a>
+    <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-3 flex-1">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
 
-  <!-- AI Help Modal -->
-  <div id="aiHelpModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-xl shadow-xl p-6 max-w-lg w-full mx-4">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-bold text-gray-900">AI Writing Assistance</h3>
-        <button id="closeModal" class="text-gray-500 hover:text-gray-700">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+      <!-- AI Help Modal -->
+      <div id="aiHelpModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="glass-effect rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto m-3 border border-white/20">
+          <div class="p-5 border-b border-white/20 flex justify-between items-center">
+            <h3 class="text-lg font-bold diary-font text-gray-800 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Writing Assistance
+            </h3>
+            <button id="closeModal" class="text-gray-500 hover:text-gray-700 bg-white/80 p-1.5 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="p-5">
+            <p class="text-gray-600 mb-5">Select a prompt to help structure your journal entry:</p>
+
+            <div class="space-y-3">
+              <button class="ai-prompt-btn w-full glass-effect p-4 rounded-xl hover:bg-white/50 transition text-left border border-white/30 card-hover">
+                <div class="flex items-start gap-3">
+                  <div class="bg-secondary-100 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-800 text-sm sm:text-base">Help me reflect on my day</div>
+                    <p class="text-gray-500 text-xs mt-1">Creates a structured template for reflecting on experiences, achievements, and lessons of the day.</p>
+                  </div>
+                </div>
+              </button>
+
+              <button class="ai-prompt-btn w-full glass-effect p-4 rounded-xl hover:bg-white/50 transition text-left border border-white/30 card-hover">
+                <div class="flex items-start gap-3">
+                  <div class="bg-primary-100 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-800 text-sm sm:text-base">Help me structure my thoughts</div>
+                    <p class="text-gray-500 text-xs mt-1">Provides an organized framework for exploring complex thoughts and ideas systematically.</p>
+                  </div>
+                </div>
+              </button>
+
+              <button class="ai-prompt-btn w-full glass-effect p-4 rounded-xl hover:bg-white/50 transition text-left border border-white/30 card-hover">
+                <div class="flex items-start gap-3">
+                  <div class="bg-rose-100 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-800 text-sm sm:text-base">Help me express my emotions</div>
+                    <p class="text-gray-500 text-xs mt-1">Creates a template for exploring and articulating emotions with depth and clarity.</p>
+                  </div>
+                </div>
+              </button>
+
+              <button class="ai-prompt-btn w-full glass-effect p-4 rounded-xl hover:bg-white/50 transition text-left border border-white/30 card-hover">
+                <div class="flex items-start gap-3">
+                  <div class="bg-emerald-100 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-800 text-sm sm:text-base">Practice gratitude</div>
+                    <p class="text-gray-500 text-xs mt-1">Creates a framework for identifying and appreciating positive aspects of your life.</p>
+                  </div>
+                </div>
+              </button>
+
+              <button class="ai-prompt-btn w-full glass-effect p-4 rounded-xl hover:bg-white/50 transition text-left border border-white/30 card-hover">
+                <div class="flex items-start gap-3">
+                  <div class="bg-amber-100 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-800 text-sm sm:text-base">Track goals and progress</div>
+                    <p class="text-gray-500 text-xs mt-1">Helps you document progress toward personal or professional goals and next steps.</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+              <button id="cancelAiHelp" class="text-gray-700 hover:text-gray-900 px-4 py-2 rounded-lg glass-effect border border-white/30">
+                Cancel
+              </button>
+              <button class="btn-gradient text-white px-4 py-2 rounded-lg flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+                Create Custom Prompt
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <p class="text-gray-600 mb-4">Choose what type of writing assistance you need:</p>
+  <script>// JavaScript for the updated journal.html template
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize character counter
+      countChars();
 
-      <div class="space-y-3 mb-6">
-        <button class="ai-prompt-btn w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-sky-50 hover:border-sky-200 transition">
-          <div class="font-medium text-gray-800">Help me reflect on my day</div>
-          <p class="text-xs text-gray-500 mt-1">Generate thoughtful prompts to help you reflect on your day's events and emotions.</p>
-        </button>
+      // Add transition class for smooth page transitions
+      document.body.classList.add('transition-ready');
 
-        <button class="ai-prompt-btn w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-sky-50 hover:border-sky-200 transition">
-          <div class="font-medium text-gray-800">Help me structure my thoughts</div>
-          <p class="text-xs text-gray-500 mt-1">Suggest an organized format for writing about complex thoughts or experiences.</p>
-        </button>
+      // Initialize smooth page transitions
+      initPageTransitions();
 
-        <button class="ai-prompt-btn w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-sky-50 hover:border-sky-200 transition">
-          <div class="font-medium text-gray-800">Help me express my emotions</div>
-          <p class="text-xs text-gray-500 mt-1">Provide vocabulary and sentence starters to articulate complex emotions.</p>
-        </button>
-      </div>
+      // Add event listener to generate entry button
+      const generateBtn = document.getElementById('generateEntryBtn');
+      if (generateBtn) {
+        generateBtn.addEventListener('click', generateFullEntry);
+      }
 
-      <div class="flex justify-end">
-        <button id="cancelAiHelp" class="text-gray-600 font-medium hover:text-gray-900">Cancel</button>
-      </div>
-    </div>
-  </div>
+      // AI Help Modal functionality
+      initAIHelpModal();
 
-  <script>
+      // Initialize mood selectors
+      initMoodSelectors();
+
+      // Add tag button functionality
+      initTagButtons();
+    });
+
+    // Character counter function
+    function countChars() {
+      const textArea = document.getElementById('quickNotes');
+      const charCount = document.getElementById('charCount');
+      if (textArea && charCount) {
+        charCount.textContent = textArea.value.length;
+      }
+    }
+
+    // Add suggestion to textarea
+    function addSuggestion(text) {
+      const textArea = document.getElementById('quickNotes');
+      if (!textArea) return;
+
+      let currentText = textArea.value;
+
+      // Add a space if there's already content and it doesn't end with space or newline
+      if (currentText && !currentText.endsWith('\n') && !currentText.endsWith(' ')) {
+        currentText += ' ';
+      }
+
+      textArea.value = currentText + text + ' ';
+      textArea.focus();
+
+      // Update character count
+      countChars();
+
+      // Move cursor to end
+      textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
+    }
+
+    // Add tag to tag field
+    function addTag(tag) {
+      const tagField = document.getElementById('id_tags');
+      if (!tagField) return;
+
+      let currentTags = tagField.value;
+
+      // Don't add if tag already exists
+      if (currentTags.split(',').map(t => t.trim()).includes(tag)) return;
+
+      // Add comma if needed
+      if (currentTags && !currentTags.endsWith(',') && currentTags.trim() !== '') {
+        currentTags += ', ';
+      }
+
+      tagField.value = currentTags + tag;
+      tagField.focus();
+
+      // Move cursor to end
+      tagField.selectionStart = tagField.selectionEnd = tagField.value.length;
+    }
+
+    // Initialize mood selectors
+    function initMoodSelectors() {
+      const moodSelectors = document.querySelectorAll('.mood-selector');
+      moodSelectors.forEach(selector => {
+        selector.addEventListener('click', function() {
+          // Remove selected class from all selectors
+          moodSelectors.forEach(s => s.classList.remove('selected'));
+          // Add selected class to clicked selector
+          this.classList.add('selected');
+          // Check the radio button
+          const radio = this.querySelector('input[type="radio"]');
+          if (radio) radio.checked = true;
+        });
+
+        // Initialize selected state based on checked input
+        const radio = selector.querySelector('input[type="radio"]');
+        if (radio && radio.checked) {
+          selector.classList.add('selected');
+        }
+      });
+    }
+
     // Mobile menu toggle
     function toggleMobileMenu() {
       const menu = document.getElementById('mobileMenu');
+      if (!menu) return;
+
       const menuContent = menu.querySelector('div.mobile-menu-slide');
 
       if (menu.classList.contains('hidden')) {
@@ -383,59 +958,378 @@
       }
     }
 
-    // AI Help Modal functionality
-    const aiHelpBtn = document.getElementById('aiHelpBtn');
-    const aiHelpModal = document.getElementById('aiHelpModal');
-    const closeModal = document.getElementById('closeModal');
-    const cancelAiHelp = document.getElementById('cancelAiHelp');
-    const aiPromptBtns = document.querySelectorAll('.ai-prompt-btn');
+    // Initialize page transitions
+    function initPageTransitions() {
+      document.querySelectorAll('a[href^="/"]').forEach(link => {
+        if (!link.getAttribute('href').includes('://') && !link.getAttribute('href').startsWith('#')) {
+          link.addEventListener('click', function(e) {
+            // Skip if modifier keys are pressed or it's a form submit
+            if (e.metaKey || e.ctrlKey || e.shiftKey || this.tagName === 'BUTTON') return;
 
-    aiHelpBtn.addEventListener('click', () => {
-      aiHelpModal.classList.remove('hidden');
-    });
+            e.preventDefault();
+            const target = this.getAttribute('href');
 
-    closeModal.addEventListener('click', () => {
-      aiHelpModal.classList.add('hidden');
-    });
+            // Fade out
+            document.body.classList.add('page-transitioning');
 
-    cancelAiHelp.addEventListener('click', () => {
-      aiHelpModal.classList.add('hidden');
-    });
-
-    // Close modal when clicking outside
-    aiHelpModal.addEventListener('click', (e) => {
-      if (e.target === aiHelpModal) {
-        aiHelpModal.classList.add('hidden');
-      }
-    });
-
-    // AI Prompt buttons - add placeholder prompts to the textarea
-    aiPromptBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const contentField = document.getElementById('{{ form.content.id_for_label }}');
-        let promptText = '';
-
-        // Simple prompts for each button
-        if (btn.querySelector('.font-medium').textContent === 'Help me reflect on my day') {
-          promptText = "Today, I experienced...\n\nWhat went well:\n\nWhat I found challenging:\n\nWhat I learned:\n\nHow I'm feeling now:";
-        } else if (btn.querySelector('.font-medium').textContent === 'Help me structure my thoughts') {
-          promptText = "Context:\n\nMy initial thoughts:\n\nConsidering different perspectives:\n\nWhat this means for me:";
-        } else if (btn.querySelector('.font-medium').textContent === 'Help me express my emotions') {
-          promptText = "I'm feeling...\n\nThis emotion arose when...\n\nPhysically, I notice...\n\nMy thoughts around this are...\n\nWhat I need right now is...";
+            // Navigate after transition
+            setTimeout(() => {
+              window.location.href = target;
+            }, 300);
+          });
         }
-
-        contentField.value = promptText;
-        contentField.focus();
-
-        // Position cursor after the first line
-        const firstLineEnd = promptText.indexOf('\n');
-        if (firstLineEnd !== -1) {
-          contentField.setSelectionRange(firstLineEnd, firstLineEnd);
-        }
-
-        aiHelpModal.classList.add('hidden');
       });
-    });
+    }
+
+    // Initialize tag buttons
+    function initTagButtons() {
+      const tagButtons = document.querySelectorAll('button[onclick^="addTag"]');
+      tagButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          this.classList.add('bg-secondary-100');
+          setTimeout(() => {
+            this.classList.remove('bg-secondary-100');
+          }, 300);
+        });
+      });
+    }
+
+    // Initialize AI Help Modal
+    function initAIHelpModal() {
+      const aiHelpBtn = document.getElementById('aiHelpBtn');
+      const aiHelpModal = document.getElementById('aiHelpModal');
+      const closeModal = document.getElementById('closeModal');
+      const cancelAiHelp = document.getElementById('cancelAiHelp');
+      const aiPromptBtns = document.querySelectorAll('.ai-prompt-btn');
+
+      if (!aiHelpBtn || !aiHelpModal) return;
+
+      aiHelpBtn.addEventListener('click', () => {
+        aiHelpModal.classList.remove('hidden');
+        // Add slight delay to trigger any animations
+        setTimeout(() => {
+          const modalContent = aiHelpModal.querySelector('.glass-effect');
+          if (modalContent) modalContent.classList.add('scale-in');
+        }, 10);
+      });
+
+      if (closeModal) {
+        closeModal.addEventListener('click', () => {
+          closeAIModal();
+        });
+      }
+
+      if (cancelAiHelp) {
+        cancelAiHelp.addEventListener('click', () => {
+          closeAIModal();
+        });
+      }
+
+      // Close modal when clicking outside
+      aiHelpModal.addEventListener('click', (e) => {
+        if (e.target === aiHelpModal) {
+          closeAIModal();
+        }
+      });
+
+      // AI Prompt buttons functionality
+      aiPromptBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const contentField = document.getElementById('id_content'); // Django form field ID
+          if (!contentField) return;
+
+          let promptText = '';
+
+          // Simple prompts for each button
+          if (btn.querySelector('.font-medium').textContent === 'Help me reflect on my day') {
+            promptText = "Today, I experienced...\n\nWhat went well:\n\nWhat I found challenging:\n\nWhat I learned:\n\nHow I'm feeling now:";
+          } else if (btn.querySelector('.font-medium').textContent === 'Help me structure my thoughts') {
+            promptText = "Context:\n\nMy initial thoughts:\n\nConsidering different perspectives:\n\nWhat this means for me:";
+          } else if (btn.querySelector('.font-medium').textContent === 'Help me express my emotions') {
+            promptText = "I'm feeling...\n\nThis emotion arose when...\n\nPhysically, I notice...\n\nMy thoughts around this are...\n\nWhat I need right now is...";
+          } else if (btn.querySelector('.font-medium').textContent === 'Practice gratitude') {
+            promptText = "Today I'm grateful for:\n\n1. \n\n2. \n\n3. \n\nWhy these matter to me:\n\nHow this gratitude affects my perspective:";
+          } else if (btn.querySelector('.font-medium').textContent === 'Track goals and progress') {
+            promptText = "Goal I'm working toward:\n\nProgress made today:\n\nChallenges encountered:\n\nAdjustments needed:\n\nNext steps:";
+          }
+
+          contentField.value = promptText;
+          contentField.focus();
+
+          // Position cursor after the first line
+          const firstLineEnd = promptText.indexOf('\n');
+          if (firstLineEnd !== -1) {
+            contentField.setSelectionRange(firstLineEnd, firstLineEnd);
+          }
+
+          closeAIModal();
+        });
+      });
+
+      // Helper function to close the modal with animation
+      function closeAIModal() {
+        const modalContent = aiHelpModal.querySelector('.glass-effect');
+        if (modalContent) modalContent.classList.remove('scale-in');
+
+        // First fade out, then hide completely
+        aiHelpModal.style.opacity = '0';
+        setTimeout(() => {
+          aiHelpModal.classList.add('hidden');
+          aiHelpModal.style.opacity = '1';
+        }, 300);
+      }
+    }
+
+    // Generate full entry from quick notes using existing API
+    function generateFullEntry() {
+      const quickNotes = document.getElementById('quickNotes');
+      if (!quickNotes) {
+        console.error('Quick notes textarea not found');
+        alert('Could not find quick notes field');
+        return;
+      }
+
+      const notesText = quickNotes.value.trim();
+      if (notesText.length < 10) {
+        alert('Please enter at least 10 characters in your quick notes.');
+        return;
+      }
+
+      // Show loading indicator
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const resultPreview = document.getElementById('resultPreview');
+
+      if (loadingIndicator) {
+        loadingIndicator.classList.remove('hidden');
+      }
+
+      if (resultPreview) {
+        resultPreview.classList.add('hidden');
+        resultPreview.classList.remove('opacity-100');
+      }
+
+      // Check if personalization is enabled
+      const personalizationToggle = document.getElementById('personalizationToggle');
+      const usePersonalization = personalizationToggle && personalizationToggle.checked;
+
+      // Get CSRF token
+      const csrfToken = getCsrfToken();
+
+      // Use the existing demo_journal endpoint
+      fetch('/api/demo-journal/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+          journal_content: notesText,
+          personalize: usePersonalization
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(data => {
+            throw new Error(data.error || 'Failed to generate entry');
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Hide loading indicator
+        if (loadingIndicator) {
+          loadingIndicator.classList.add('hidden');
+        }
+
+        // Update the preview with generated content
+        const generatedEntryElement = document.getElementById('generatedEntry');
+        const generatedTitleElement = document.getElementById('generatedTitle');
+
+        if (generatedEntryElement) {
+          generatedEntryElement.innerHTML = data.entry.replace(/\n/g, '<br>');
+        } else {
+          console.error('Could not find generatedEntry element');
+          throw new Error('Could not find generatedEntry element');
+        }
+
+        if (generatedTitleElement) {
+          generatedTitleElement.textContent = data.title;
+        } else {
+          console.error('Could not find generatedTitle element');
+        }
+
+        // Show the preview with animation
+        if (resultPreview) {
+          resultPreview.classList.remove('hidden');
+          // Add a small delay before setting opacity to ensure the transition works
+          setTimeout(() => {
+            resultPreview.classList.add('opacity-100');
+          }, 10);
+          // Scroll to the preview
+          resultPreview.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          console.error('Could not find resultPreview element');
+          throw new Error('Could not find resultPreview element');
+        }
+      })
+      .catch(error => {
+        // Hide loading indicator
+        if (loadingIndicator) {
+          loadingIndicator.classList.add('hidden');
+        }
+
+        // Show error with a better-styled alert
+        showErrorNotification('Error generating entry: ' + error.message);
+        console.error('Error:', error);
+      });
+    }
+
+    // Show error notification
+    function showErrorNotification(message) {
+      // Check if notification already exists and remove it
+      const existingNotification = document.getElementById('errorNotification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.id = 'errorNotification';
+      notification.className = 'fixed bottom-4 right-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-lg z-50 scale-in flex items-start max-w-md';
+
+      // Add content
+      notification.innerHTML = `
+        <svg class="h-5 w-5 text-red-500 mr-3 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+        <div class="flex-1">
+          <p>${message}</p>
+        </div>
+        <button class="ml-4 text-red-500 hover:text-red-700">
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      `;
+
+      // Add to document
+      document.body.appendChild(notification);
+
+      // Add click event to close button
+      notification.querySelector('button').addEventListener('click', () => {
+        notification.remove();
+      });
+
+      // Auto-dismiss after 5 seconds
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.classList.add('opacity-0');
+          setTimeout(() => notification.remove(), 300);
+        }
+      }, 5000);
+    }
+
+    // Use generated entry in the form
+    function useGeneratedEntry() {
+      const titleField = document.getElementById('id_title'); // Django form field ID
+      const contentField = document.getElementById('id_content'); // Django form field ID
+      const generatedTitle = document.getElementById('generatedTitle');
+      const generatedEntry = document.getElementById('generatedEntry');
+      const resultPreview = document.getElementById('resultPreview');
+
+      if (!titleField || !contentField) {
+        showErrorNotification('Could not find form fields');
+        return;
+      }
+
+      if (!generatedTitle || !generatedEntry) {
+        showErrorNotification('Could not find generated content');
+        return;
+      }
+
+      titleField.value = generatedTitle.textContent;
+
+      // Replace <br> with newlines for the textarea
+      const htmlContent = generatedEntry.innerHTML;
+      const textContent = htmlContent.replace(/<br\s*\/?>/gi, '\n');
+      contentField.value = textContent;
+
+      // Hide the preview with animation
+      hidePreview();
+
+      // Scroll to the form fields
+      titleField.scrollIntoView({ behavior: 'smooth' });
+      titleField.focus();
+    }
+
+    // Regenerate entry
+    function regenerateEntry() {
+      // Just call generateFullEntry again to create a new entry
+      generateFullEntry();
+    }
+
+    // Edit generated entry
+    function editGeneratedEntry() {
+      // Focus back on quick notes to let the user modify input
+      const quickNotes = document.getElementById('quickNotes');
+      if (quickNotes) {
+        quickNotes.focus();
+      }
+    }
+
+    // Get CSRF token from cookies
+    function getCsrfToken() {
+      const name = 'csrftoken';
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    // When showing the preview:
+    function showPreview() {
+      const resultPreview = document.getElementById('resultPreview');
+      if (resultPreview) {
+        resultPreview.classList.remove('hidden');
+        // Small delay to allow the display change to take effect before animating opacity
+        setTimeout(() => {
+          resultPreview.classList.add('opacity-100');
+        }, 50);
+      }
+    }
+
+    // When hiding the preview:
+    function hidePreview() {
+      const resultPreview = document.getElementById('resultPreview');
+      if (resultPreview) {
+        resultPreview.classList.remove('opacity-100');
+        // Wait for animation to complete before hiding the element
+        setTimeout(() => {
+          resultPreview.classList.add('hidden');
+        }, 300);
+      }
+    }
+
+    // Save generated entry by submitting the form
+    function saveGeneratedEntry() {
+      useGeneratedEntry(); // First transfer the generated content to the form
+
+      // Then submit the form
+      const form = document.querySelector('form');
+      if (form) {
+        form.submit();
+      } else {
+        showErrorNotification('Could not find the form to submit');
+      }
+    }
   </script>
 </body>
 </html>

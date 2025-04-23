@@ -1,15 +1,19 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from .views import CustomLoginView
 
 urlpatterns = [
     # Main Page
     path('', views.home, name='home'),
     path('signup/', views.signup, name='signup'),
-    path('login/', auth_views.LoginView.as_view(template_name='diary/login.html'), name='login'),
+    path('login/', views.custom_login, name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('api/demo-journal/', views.demo_journal, name='demo_journal'),
     path('preferences/', views.preferences, name='preferences'),
+    path('save-generated-entry/', views.save_generated_entry, name='save_generated_entry'),
+    path('login/', CustomLoginView.as_view(template_name='diary/login.html'), name='login'),
+
 
     # Dashboard
     path('dashboard/', views.dashboard, name='dashboard'),
@@ -36,6 +40,8 @@ urlpatterns = [
     # Biography and Insights
     path('biography/', views.biography, name='biography'),
     path('insights/', views.insights, name='insights'),
+    path('api/generate-biography/', views.generate_biography_api, name='generate_biography_api'),
+
 
     # User Settings
     path('account/settings/', views.account_settings, name='account_settings'),

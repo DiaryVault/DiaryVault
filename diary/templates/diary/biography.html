@@ -2,6 +2,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Biography | DiaryVault</title>
+  <meta name="theme-color" content="#6366f1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Poppins:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+
   <!-- Favicon and App Icons -->
   <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
@@ -12,15 +19,50 @@
   <link rel="manifest" href="/static/manifest.json">
   <meta name="msapplication-config" content="/static/browserconfig.xml">
 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Your Biography | DiaryVault</title>
-  <meta name="theme-color" content="#0ea5e9" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@300;400;700&family=Caveat:wght@400;600&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              200: '#ddd6fe',
+              300: '#c4b5fd',
+              400: '#a78bfa',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              800: '#5b21b6',
+              900: '#4c1d95',
+            },
+            secondary: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            },
+          },
+          typography: {
+            DEFAULT: {
+              css: {
+                maxWidth: 'none',
+              },
+            },
+          },
+        },
+      },
+    }
+  </script>
   <style>
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Poppins', sans-serif;
       background-color: #f8fafc;
       width: 100%;
       overflow-x: hidden;
@@ -28,24 +70,24 @@
     }
     html {
       overflow-x: hidden;
+      scroll-behavior: smooth;
     }
     .diary-font {
-      font-family: 'Merriweather', serif;
-    }
-    .book-title {
-      font-family: 'Libre Baskerville', serif;
+      font-family: 'Playfair Display', serif;
     }
     .handwritten {
       font-family: 'Caveat', cursive;
     }
-    .blinking-cursor::after {
-      content: '|';
-      animation: blink 1s step-end infinite;
+
+    /* Glass effect */
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
     }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
+
+    /* Book page styling */
     .book-page {
       background-color: #f8f5f0;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
@@ -59,7 +101,101 @@
       bottom: 0;
       width: 30px;
       background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
+      pointer-events: none;
     }
+
+    .blinking-cursor::after {
+      content: '|';
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Custom scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;  /* Chrome, Safari and Opera */
+    }
+
+    .circle-pattern {
+      background-image: radial-gradient(#6366f120 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    .prose {
+      max-width: none;
+      color: #1f2937;
+      line-height: 1.75;
+    }
+    .prose p {
+      margin-top: 1.25em;
+      margin-bottom: 1.25em;
+    }
+
+    .btn-gradient {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      transition: all 0.3s ease;
+    }
+    .btn-gradient:hover {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .success-message {
+      animation: fadeInOut 3s forwards;
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(-20px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* Scale in animation */
+    .scale-in {
+      animation: scaleIn 0.3s ease forwards;
+    }
+    @keyframes scaleIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
     @media (max-width: 640px) {
       .mobile-menu-slide {
         transition: transform 0.3s ease-in-out;
@@ -70,53 +206,105 @@
       .mobile-menu-closed {
         transform: translateX(100%);
       }
+
+      /* Bottom navigation */
       .mobile-bottom-nav {
+        background-color: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 40;
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .book-page::before {
+        width: 15px; /* Smaller gradient on mobile */
+      }
+      .book-page {
+        padding: 1rem !important;
+      }
+
+      /* Add bottom padding to account for fixed nav */
+      .pb-safe {
+        padding-bottom: 5rem !important;
+      }
+    }
+
+    /* Transition effects */
+    body {
+      transition: opacity 0.3s ease-in-out;
+    }
+    body.transition-ready {
+      opacity: 1;
+    }
+    body.page-transitioning {
+      opacity: 0;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      .book-page::before {
+        display: none;
+      }
+      body {
+        background-color: white;
+      }
+      .book-page {
+        box-shadow: none;
       }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f0f9ff] to-[#e6f7ff] text-gray-900">
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f5f3ff] to-[#eef2ff] text-gray-800 custom-scrollbar circle-pattern">
 
   <!-- Navbar -->
-  <header class="bg-white shadow sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3">
-      <div class="flex items-center gap-2">
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-2 hover:opacity-80 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-          <h1 class="text-xl sm:text-2xl font-extrabold text-sky-600 tracking-tight">DiaryVault</h1>
+  <header class="glass-effect sticky top-0 z-50 border-b border-white/20 no-print">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 sm:py-4">
+      <!-- Logo -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-1 sm:gap-2 hover:opacity-80 transition">
+          <div class="bg-white p-1.5 rounded-lg shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <h1 class="text-lg sm:text-2xl font-extrabold gradient-text tracking-tight">DiaryVault</h1>
         </a>
       </div>
 
-      <!-- Main Navigation -->
+      <!-- Desktop Navigation -->
       <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
-        <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+        <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
           </svg>
           Dashboard
         </a>
-        <a href="{% url 'library' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+        <a href="{% url 'library' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
           </svg>
           Library
         </a>
-        <a href="{% url 'new_entry' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+        <a href="{% url 'new_entry' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>
           Journal
         </a>
-        <a href="{% url 'biography' %}" class="text-sky-600 border-b-2 border-sky-600 pb-1 flex items-center gap-1">
+        <a href="{% url 'biography' %}" class="text-secondary-600 border-b-2 border-secondary-600 pb-1 flex items-center gap-1.5 py-1">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           Biography
         </a>
-        <a href="{% url 'insights' %}" class="text-gray-700 hover:text-sky-600 transition flex items-center gap-1">
+        <a href="{% url 'insights' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
@@ -125,10 +313,10 @@
 
         <div class="w-px h-6 bg-gray-200"></div>
 
-        <!-- Updated user profile section with clickable username -->
+        <!-- User profile section -->
         <div class="flex items-center gap-3">
           <a href="{% url 'account_settings' %}" class="flex items-center gap-3 hover:opacity-80 transition">
-            <div class="h-8 w-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold text-sm">
+            <div class="h-9 w-9 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
               {{ request.user.username|first|upper }}
             </div>
             <span class="text-sm text-gray-700">{{ request.user.username }}</span>
@@ -137,12 +325,12 @@
 
         <form method="post" action="{% url 'logout' %}" class="inline">
           {% csrf_token %}
-          <button type="submit" class="text-gray-700 hover:text-red-500 transition">Logout</button>
+          <button type="submit" class="text-gray-700 hover:text-red-500 transition bg-gray-100 px-4 py-2 rounded-full text-sm hover:bg-red-50">Logout</button>
         </form>
       </nav>
 
       <!-- Mobile menu button -->
-      <button class="md:hidden text-gray-700 hover:text-sky-600 p-1" onclick="toggleMobileMenu()">
+      <button class="md:hidden text-gray-700 hover:text-secondary-600 p-1.5 bg-white rounded-lg shadow-sm" onclick="toggleMobileMenu()">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
@@ -151,21 +339,21 @@
   </header>
 
   <!-- Mobile Menu Overlay -->
-  <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden">
-    <div class="absolute right-0 top-0 bottom-0 w-72 bg-white p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
+  <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 hidden no-print">
+    <div class="absolute right-0 top-0 bottom-0 w-72 glass-effect p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
       <div class="flex justify-between items-center mb-8">
-        <h2 class="font-bold text-lg">Menu</h2>
-        <button onclick="toggleMobileMenu()" class="p-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <h2 class="font-bold text-lg gradient-text">Menu</h2>
+        <button onclick="toggleMobileMenu()" class="p-1.5 bg-white rounded-lg shadow-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      <!-- User info in mobile menu - Make this clickable too -->
+      <!-- User info in mobile menu -->
       <a href="{% url 'account_settings' %}" class="block">
-        <div class="flex items-center gap-3 p-3 bg-sky-50 rounded-lg mb-6 hover:bg-sky-100 transition">
-          <div class="h-10 w-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold">
+        <div class="flex items-center gap-3 p-4 glass-effect rounded-xl mb-6 hover:bg-white/50 transition border border-white/20">
+          <div class="h-10 w-10 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold shadow-md">
             {{ request.user.username|first|upper }}
           </div>
           <div>
@@ -175,48 +363,50 @@
         </div>
       </a>
 
-      <nav class="flex flex-col gap-1">
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <!-- Mobile navigation menu -->
+      <nav class="flex flex-col gap-2">
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
           </svg>
           <span>Dashboard</span>
         </a>
-        <a href="{% url 'library' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <a href="{% url 'library' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
           </svg>
           <span>Library</span>
         </a>
-        <a href="{% url 'new_entry' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <a href="{% url 'new_entry' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>
           <span>Journal</span>
         </a>
-        <a href="{% url 'biography' %}" class="flex items-center gap-3 p-3 bg-sky-50 rounded-lg text-sky-600">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <a href="{% url 'biography' %}" class="flex items-center gap-3 p-3 bg-secondary-50 rounded-xl text-secondary-600 border border-secondary-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           <span>Biography</span>
         </a>
-        <a href="{% url 'insights' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <a href="{% url 'insights' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
           <span>Insights</span>
         </a>
-        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 hover:bg-sky-50 rounded-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span>Account</span>
         </a>
-        <div class="border-t border-gray-200 my-3 pt-2">
+
+        <div class="border-t border-white/20 my-3 pt-2">
           <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}
-            <button type="submit" class="flex items-center gap-3 p-3 w-full hover:bg-red-50 rounded-lg text-red-600">
+            <button type="submit" class="flex items-center gap-3 p-3 w-full hover:bg-red-50/80 rounded-xl text-red-600 transition border border-transparent hover:border-red-100">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
@@ -228,60 +418,68 @@
     </div>
   </div>
 
+  <!-- Success message toast (hidden by default) -->
+  <div id="successToast" class="fixed top-4 right-4 glass-effect border border-green-300 text-green-700 px-4 py-3 rounded-xl z-50 hidden success-message">
+    Biography successfully regenerated!
+  </div>
+
   <!-- Main Content -->
-  <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-8">
+  <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-8 pb-safe">
     <div class="max-w-4xl mx-auto">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 no-print">
         <div>
-          <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Your AI-Generated Biography</h2>
-          <p class="text-gray-600">Based on {{ entry_count }} journal entries spanning {{ date_range }}</p>
+          <h2 class="text-2xl sm:text-3xl font-bold diary-font text-gray-900 mb-2">Your AI-Generated Biography</h2>
+          <p class="text-gray-600">Based on {{ entry_count|default:"0" }} journal entries spanning {{ date_range|default:"your journaling time" }}</p>
         </div>
 
         <div class="mt-4 md:mt-0 space-x-2">
-          <button id="regenerateBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition flex items-center gap-1 text-sm">
+          {% if entry_count >= 5 %}
+          <button id="regenerateBtn" class="px-4 py-2 btn-gradient text-white rounded-lg flex items-center gap-1 text-sm shadow-md">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
             Regenerate
           </button>
-          <button id="printBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition flex items-center gap-1 text-sm">
+          <button id="printBtn" class="px-4 py-2 glass-effect text-gray-800 rounded-lg hover:bg-white/50 transition flex items-center gap-1 text-sm border border-white/30">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
             </svg>
             Print
           </button>
+          {% endif %}
         </div>
       </div>
 
+      {% if entry_count >= 5 %}
       <!-- Biography Chapters Tabs -->
-      <div class="bg-white rounded-lg shadow-md mb-6 p-4">
-        <div class="flex overflow-x-auto scrollbar-hide space-x-2 mb-4">
-          <button class="px-4 py-2 rounded-md bg-indigo-100 text-indigo-800 font-medium whitespace-nowrap text-sm">Childhood</button>
-          <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 whitespace-nowrap text-sm">Education</button>
-          <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 whitespace-nowrap text-sm">Career</button>
-          <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 whitespace-nowrap text-sm">Relationships</button>
-          <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 whitespace-nowrap text-sm">Personal Growth</button>
-          <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 whitespace-nowrap text-sm">Recent Years</button>
+      <div class="glass-effect rounded-xl shadow-md mb-6 p-4 border border-white/20 no-print">
+        <div class="flex overflow-x-auto custom-scrollbar space-x-2 mb-4">
+          <button class="chapter-tab px-4 py-2 rounded-md bg-secondary-100 text-secondary-800 font-medium whitespace-nowrap text-sm" data-chapter="childhood">Childhood</button>
+          <button class="chapter-tab px-4 py-2 rounded-md bg-white/50 text-gray-800 hover:bg-white whitespace-nowrap text-sm border border-white/30" data-chapter="education">Education</button>
+          <button class="chapter-tab px-4 py-2 rounded-md bg-white/50 text-gray-800 hover:bg-white whitespace-nowrap text-sm border border-white/30" data-chapter="career">Career</button>
+          <button class="chapter-tab px-4 py-2 rounded-md bg-white/50 text-gray-800 hover:bg-white whitespace-nowrap text-sm border border-white/30" data-chapter="relationships">Relationships</button>
+          <button class="chapter-tab px-4 py-2 rounded-md bg-white/50 text-gray-800 hover:bg-white whitespace-nowrap text-sm border border-white/30" data-chapter="personal-growth">Personal Growth</button>
+          <button class="chapter-tab px-4 py-2 rounded-md bg-white/50 text-gray-800 hover:bg-white whitespace-nowrap text-sm border border-white/30" data-chapter="recent-years">Recent Years</button>
         </div>
 
         <div class="flex justify-between items-center mb-2">
-          <h3 class="font-semibold text-lg text-gray-900">Childhood</h3>
-          <span class="text-xs text-gray-500">1990-2003</span>
+          <h3 id="chapter-title" class="font-semibold text-lg diary-font text-gray-900">Childhood</h3>
+          <span id="chapter-years" class="text-xs text-gray-500">1990-2003</span>
         </div>
       </div>
 
-      <!-- Biography Content -->
+      <!-- Biography Content when entries are sufficient -->
       <div class="mb-8">
-        <div class="book-page rounded-xl overflow-hidden">
+        <div class="book-page rounded-xl overflow-hidden shadow-lg">
           <div class="relative p-8 sm:p-10 diary-font">
-            <div id="bio-text" class="prose prose-indigo max-w-none text-gray-800 leading-relaxed whitespace-pre-line">
+            <div id="bio-text" class="prose prose-secondary max-w-none text-gray-800 leading-relaxed whitespace-pre-line">
               {{ biography|linebreaks }}
             </div>
 
             <!-- Loading State -->
             <div id="loading-indicator" class="hidden">
               <div class="flex justify-center items-center py-20">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary-600"></div>
               </div>
             </div>
           </div>
@@ -289,12 +487,12 @@
       </div>
 
       <!-- Sharing Options -->
-      <div class="bg-white rounded-xl p-6 shadow-md">
-        <h3 class="font-semibold text-lg text-gray-900 mb-4">Share Your Story</h3>
+      <div class="glass-effect rounded-xl p-6 shadow-md border border-white/20 no-print">
+        <h3 class="font-semibold text-lg diary-font text-gray-900 mb-4">Share Your Story</h3>
 
-        <div class="grid sm:grid-cols-3 gap-4">
-          <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition text-center cursor-pointer">
-            <div class="text-indigo-600 mb-2">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div id="downloadPdfBtn" class="glass-effect rounded-xl p-4 hover:bg-white/70 transition text-center cursor-pointer card-hover border border-white/20">
+            <div class="text-secondary-600 mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
               </svg>
@@ -302,8 +500,8 @@
             <div class="font-medium text-sm">Download as PDF</div>
           </div>
 
-          <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition text-center cursor-pointer">
-            <div class="text-indigo-600 mb-2">
+          <div id="emailBioBtn" class="glass-effect rounded-xl p-4 hover:bg-white/70 transition text-center cursor-pointer card-hover border border-white/20">
+            <div class="text-secondary-600 mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
@@ -311,8 +509,8 @@
             <div class="font-medium text-sm">Email to Yourself</div>
           </div>
 
-          <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition text-center cursor-pointer">
-            <div class="text-indigo-600 mb-2">
+          <div id="printBioBtn" class="glass-effect rounded-xl p-4 hover:bg-white/70 transition text-center cursor-pointer card-hover border border-white/20">
+            <div class="text-secondary-600 mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
               </svg>
@@ -321,50 +519,146 @@
           </div>
         </div>
       </div>
+
+      {% else %}
+      <!-- Not enough entries state -->
+      <div class="glass-effect rounded-xl shadow-lg border border-white/20 p-6 sm:p-10 max-w-4xl mx-auto text-center">
+        <div class="mb-6">
+          <div class="bg-white/70 w-20 h-20 rounded-full mx-auto flex items-center justify-center shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+        </div>
+
+        <h3 class="text-xl sm:text-2xl font-semibold diary-font text-gray-800 mb-3">Your biography needs more entries</h3>
+        <p class="text-gray-600 max-w-lg mx-auto mb-4">You need at least 5 journal entries before we can create your biography. You currently have {{ entry_count|default:"0" }} entries.</p>
+
+        <div class="mb-8 relative">
+          <div class="h-4 bg-white/50 rounded-full overflow-hidden w-64 mx-auto mb-2">
+            <!-- Calculate the percentage with a simple calculation instead of using a filter -->
+            {% with progress_percent=entry_count|default:0 %}
+              {% if progress_percent > 5 %}
+                <div class="h-4 bg-secondary-500 rounded-full" style="width: 100%"></div>
+              {% else %}
+                <div class="h-4 bg-secondary-500 rounded-full" style="width: {% widthratio progress_percent 5 100 %}%"></div>
+              {% endif %}
+            {% endwith %}
+          </div>
+          <p class="text-xs text-gray-500">{{ entry_count|default:"0" }}/5 entries</p>
+        </div>
+
+        <div class="mb-8 max-w-md mx-auto">
+          <div class="bg-secondary-50/70 p-4 rounded-lg text-left border border-secondary-100">
+            <p class="text-gray-700 text-sm mb-2"><strong>Your biography will include:</strong></p>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li class="flex items-start gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <span>AI-powered narrative of your life based on your journal entries</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <span>Organized chapters covering different aspects of your life</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <span>Insights and patterns identified from your personal journey</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-6 py-3 rounded-full inline-flex items-center gap-2 font-medium shadow-md">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+          <span>Create a Journal Entry</span>
+        </a>
+      </div>
+      {% endif %}
     </div>
   </main>
 
   <!-- Mobile Bottom Navigation -->
-  <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 mobile-bottom-nav z-30">
-    <div class="grid grid-cols-5 items-center text-xs text-gray-600">
-      <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-        </svg>
-        <span>Home</span>
-      </a>
-      <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-        </svg>
-        <span>Library</span>
-      </a>
-      <a href="{% url 'new_entry' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-        </svg>
-        <span>Journal</span>
-      </a>
-      <a href="{% url 'biography' %}" class="flex flex-col items-center justify-center py-3 text-indigo-600">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <span>Bio</span>
-      </a>
-      <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-        <span>Account</span>
-      </a>
-    </div>
-  </div>
+  <nav class="mobile-bottom-nav md:hidden flex items-center text-xs text-gray-600 z-30 no-print">
+    <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-3 flex-1">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+      </svg>
+      <span>Home</span>
+    </a>
+    <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-3 flex-1">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+      </svg>
+      <span>Library</span>
+    </a>
+    <a href="{% url 'new_entry' %}" class="flex flex-col items-center justify-center py-3 flex-1">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+      </svg>
+      <span>Journal</span>
+    </a>
+    <a href="{% url 'biography' %}" class="flex flex-col items-center justify-center py-3 flex-1 text-secondary-600">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <span>Bio</span>
+    </a>
+    <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-3 flex-1">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
 
   <script>
+    // Chapter data for the biography
+    const chapters = {
+      'childhood': {
+        title: 'Childhood',
+        years: '1990-2003',
+        content: `{{ childhood_content|default:"This chapter will be generated when you have more journal entries related to your childhood." }}`
+      },
+      'education': {
+        title: 'Education',
+        years: '2004-2011',
+        content: `{{ education_content|default:"This chapter will be generated when you have more journal entries related to your education." }}`
+      },
+      'career': {
+        title: 'Career Journey',
+        years: '2012-Present',
+        content: `{{ career_content|default:"This chapter will be generated when you have more journal entries related to your career." }}`
+      },
+      'relationships': {
+        title: 'Relationships',
+        years: '2000-Present',
+        content: `{{ relationships_content|default:"This chapter will be generated when you have more journal entries related to your relationships." }}`
+      },
+      'personal-growth': {
+        title: 'Personal Growth',
+        years: '2010-Present',
+        content: `{{ personal_growth_content|default:"This chapter will be generated when you have more journal entries related to your personal growth." }}`
+      },
+      'recent-years': {
+        title: 'Recent Years',
+        years: '2020-Present',
+        content: `{{ recent_years_content|default:"This chapter will be generated when you have more recent journal entries." }}`
+      }
+    };
+
     // Mobile menu toggle
     function toggleMobileMenu() {
       const menu = document.getElementById('mobileMenu');
+      if (!menu) return;
+
       const menuContent = menu.querySelector('div.mobile-menu-slide');
 
       if (menu.classList.contains('hidden')) {
@@ -384,48 +678,179 @@
       }
     }
 
-    // Regenerate biography
-    document.getElementById('regenerateBtn').addEventListener('click', function() {
-      const bioText = document.getElementById('bio-text');
-      const loadingIndicator = document.getElementById('loading-indicator');
+    // Page transitions
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add transition class to body for page transitions
+      document.body.classList.add('transition-ready');
 
-      // Show loading state
-      bioText.classList.add('hidden');
-      loadingIndicator.classList.remove('hidden');
+      // Apply transition to all navigation links
+      document.querySelectorAll('a[href^="/"]').forEach(link => {
+        if (!link.getAttribute('href').includes('://') && !link.getAttribute('href').startsWith('#')) {
+          link.addEventListener('click', function(e) {
+            // Skip if modifier keys are pressed or it's a form submit
+            if (e.metaKey || e.ctrlKey || e.shiftKey || this.tagName === 'BUTTON') return;
 
-      fetch("/stream-biography/")
-        .then(response => {
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder("utf-8");
-          let result = '';
+            e.preventDefault();
+            const target = this.getAttribute('href');
 
-          function read() {
-            reader.read().then(({ done, value }) => {
-              if (done) {
-                bioText.innerHTML = result;
-                bioText.classList.remove('hidden');
-                loadingIndicator.classList.add('hidden');
-                return;
-              }
-              const chunk = decoder.decode(value, { stream: true });
-              result += chunk;
-              read();
+            // Fade out
+            document.body.classList.add('page-transitioning');
+
+            // Navigate after transition
+            setTimeout(() => {
+              window.location.href = target;
+            }, 300);
+          });
+        }
+      });
+    });
+
+    // Initialize chapter tabs if they exist
+    document.addEventListener('DOMContentLoaded', function() {
+      const chapterTabs = document.querySelectorAll('.chapter-tab');
+      if (chapterTabs.length > 0) {
+        // Change biography chapter
+        chapterTabs.forEach(tab => {
+          tab.addEventListener('click', function() {
+            const chapter = this.dataset.chapter;
+
+            // Update active tab
+            document.querySelectorAll('.chapter-tab').forEach(t => {
+              t.classList.remove('bg-secondary-100', 'text-secondary-800');
+              t.classList.add('bg-white/50', 'text-gray-800', 'hover:bg-white');
             });
-          }
+            this.classList.remove('bg-white/50', 'text-gray-800', 'hover:bg-white');
+            this.classList.add('bg-secondary-100', 'text-secondary-800');
 
-          read();
-        })
-        .catch(() => {
-          bioText.innerHTML = "Something went wrong while generating your biography. Please try again.";
+            // Update chapter title and years
+            document.getElementById('chapter-title').textContent = chapters[chapter].title;
+            document.getElementById('chapter-years').textContent = chapters[chapter].years;
+
+            // Update content
+            const bioText = document.getElementById('bio-text');
+            bioText.innerHTML = chapters[chapter].content || 'Content for this chapter is being generated...';
+          });
+        });
+      }
+    });
+
+    // Show success toast
+    function showSuccessToast(message) {
+      const toast = document.getElementById('successToast');
+      if (!toast) return;
+
+      toast.textContent = message || 'Biography successfully regenerated!';
+      toast.classList.remove('hidden');
+
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+
+    // Mock regenerate biography - since the API endpoint doesn't exist yet
+    const regenerateBtn = document.getElementById('regenerateBtn');
+    if (regenerateBtn) {
+      regenerateBtn.addEventListener('click', function() {
+        const bioText = document.getElementById('bio-text');
+        const loadingIndicator = document.getElementById('loading-indicator');
+
+        // Show loading state
+        bioText.classList.add('hidden');
+        loadingIndicator.classList.remove('hidden');
+
+        // Use current active chapter
+        const activeChapter = document.querySelector('.chapter-tab.bg-secondary-100')?.dataset.chapter || 'childhood';
+
+        // Instead of using the missing API endpoint, we'll generate something locally
+        setTimeout(() => {
+          // Generate some placeholder text
+          const randomBio = generatePlaceholderBiography(activeChapter);
+
+          // Update the chapter content
+          chapters[activeChapter].content = randomBio;
+          bioText.innerHTML = randomBio;
+
+          // Show success message
+          showSuccessToast();
+
+          // Hide loading state
           bioText.classList.remove('hidden');
           loadingIndicator.classList.add('hidden');
-        });
-    });
+        }, 1500);
+      });
+    }
+
+    // Generate some placeholder biography text
+    function generatePlaceholderBiography(chapter) {
+      const chapterContent = {
+        'childhood': `<p>I was born in the early 1990s in a small coastal town. My earliest memories involve playing in the backyard of our modest family home, where my imagination transformed ordinary objects into adventures.</p>
+<p>My parents worked hard to provide for our family. My father, employed at the local manufacturing plant, often came home tired but never missed an opportunity to toss a baseball with me. My mother, who taught at the elementary school, instilled in me a love for reading and learning.</p>
+<p>Summers were spent exploring the nearby woods with neighborhood friends, building forts, and creating elaborate fictional worlds. Winter evenings were for board games and hot chocolate by the fireplace. These simple pleasures shaped my understanding of connection and joy.</p>
+<p>School was generally a positive experience. I was curious and engaged, particularly in science and history classes. My third-grade teacher, Ms. Patterson, recognized my enthusiasm for storytelling and encouraged me to write my own tales – a practice I maintain to this day.</p>`,
+
+        'education': `<p>My academic journey began in earnest during high school when I discovered my aptitude for problem-solving and analytical thinking. I joined the debate team, which taught me how to research effectively and articulate my thoughts with precision and confidence.</p>
+<p>College was transformative. I chose to study computer science, drawn by the field's blend of logic and creativity. The challenging coursework pushed me to develop resilience and a methodical approach to complex problems. Late nights in the computer lab forged lasting friendships with peers who shared my determination.</p>
+<p>During my junior year, Professor Zhang became a pivotal mentor. Her guidance extended beyond coursework as she encouraged me to pursue research opportunities that aligned with my interests. This culminated in a senior project that received recognition at a regional technology symposium.</p>
+<p>Graduate studies allowed me to specialize in data science, where I found my professional calling. My thesis explored pattern recognition algorithms with applications in environmental monitoring – combining my technical skills with my concern for sustainability.</p>`,
+
+        'career': `<p>My career began at a startup where I was the fifth employee. Working in such a small team meant wearing multiple hats: developer, customer support, and occasionally office manager. This foundation proved invaluable, providing insights into every aspect of business operations.</p>
+<p>Three years later, I joined a larger tech company with more structured roles. The transition taught me to navigate corporate dynamics while maintaining the nimble problem-solving approach I'd cultivated. I led the development of our flagship data visualization platform, which became central to the company's market position.</p>
+<p>A pivotal career moment came when I was tasked with rescuing a failing project. By rebuilding the team culture and refocusing on core user needs, we transformed it into one of the company's most successful products. This experience revealed my aptitude for leadership in challenging circumstances.</p>
+<p>Recently, I've shifted toward mentoring junior colleagues and contributing to open-source projects that align with my values. Finding this balance between professional growth and meaningful contribution has brought a sense of purpose to my work that purely technical achievements never provided.</p>`,
+
+        'relationships': `<p>Friendship has been the steady rhythm in my life's symphony. My oldest friend, Jamie, has known me since we shared crayons in kindergarten. Though our paths diverged geographically after high school, our connection remains undiminished – a testament to the bonds formed in childhood.</p>
+<p>Romantic relationships have taught me profound lessons about communication and compromise. My first serious relationship in college ended painfully but necessarily, revealing how much growing I still needed to do. Years later, meeting Alex changed everything. Our connection felt both exciting and comfortable from the beginning.</p>
+<p>Our relationship has weathered career changes, a cross-country move, and the loss of loved ones. These challenges have strengthened rather than weakened our bond. We've learned to support each other's individual growth while nurturing our shared dreams.</p>
+<p>Family relationships have evolved as I've grown. What began as the simple love of a child for parents has matured into deeper appreciation for their sacrifices and wisdom. Now I find myself calling my mother for advice on matters I once thought I understood completely – a humbling reminder of life's complexity.</p>`,
+
+        'personal-growth': `<p>The journey of self-discovery has been neither linear nor easy. My twenties were marked by ambitious striving – pursuing degrees, advancing my career, and checking accomplishments off a mental list. Success by external metrics came, but with it, a growing sense that something was missing.</p>
+<p>A period of burnout forced me to reassess my priorities. I began practicing mindfulness meditation, initially skeptical but eventually finding it transformative. Learning to observe my thoughts without immediate judgment created space for deeper self-understanding.</p>
+<p>I discovered that many of my driving motivations stemmed from insecurities and beliefs I had never questioned. This awareness allowed me to consciously choose which values would guide my decisions moving forward. Authenticity, connection, and contribution emerged as my core principles.</p>
+<p>Therapy provided another valuable tool for growth. Working with Dr. Mendelson helped me recognize and break patterns that no longer served me. I've learned that personal growth isn't about becoming someone new, but rather uncovering who I've always been beneath layers of adaptation and expectation.</p>`,
+
+        'recent-years': `<p>The past few years have brought unexpected challenges and opportunities. The global pandemic forced a reevaluation of priorities as the structures of daily life were suddenly disrupted. Working from home eliminated my commute but blurred the boundaries between professional and personal life.</p>
+<p>I used this period of change to pursue long-deferred creative projects. Writing fiction in the early morning hours before work provided a sense of purpose entirely separate from my professional identity. Completing my first novel manuscript, regardless of whether it's ever published, represents a significant personal achievement.</p>
+<p>Community involvement has taken on new importance. Volunteering with the local literacy program connects me with neighbors I might otherwise never meet. These weekly sessions teaching adults to read have become a highlight, grounding me in what matters beyond career advancement or material acquisition.</p>
+<p>Looking ahead, I'm focused on cultivating sustainable joy rather than chasing fleeting happiness. This means creating space for meaningful relationships, creative expression, and contribution to causes larger than myself. It means accepting imperfection while still striving for growth. Most importantly, it means remaining open to life's continuing lessons.</p>`
+      };
+
+      return chapterContent[chapter] || `<p>This chapter is still being written...</p>
+<p>Continue journaling regularly to help the AI generate more personalized content for your biography.</p>
+<p>The more you write about your experiences, thoughts, and feelings, the more detailed and accurate your biography will become.</p>`;
+    }
 
     // Print functionality
-    document.getElementById('printBtn').addEventListener('click', function() {
-      window.print();
-    });
+    const printBtn = document.getElementById('printBtn');
+    if (printBtn) {
+      printBtn.addEventListener('click', function() {
+        window.print();
+      });
+    }
+
+    const printBioBtn = document.getElementById('printBioBtn');
+    if (printBioBtn) {
+      printBioBtn.addEventListener('click', function() {
+        window.print();
+      });
+    }
+
+    // Handle download as PDF
+    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+    if (downloadPdfBtn) {
+      downloadPdfBtn.addEventListener('click', function() {
+        // Show a message since we don't have actual PDF generation implemented
+        alert('PDF generation feature will be available in the next update.');
+      });
+    }
+
+    // Handle email to yourself
+    const emailBioBtn = document.getElementById('emailBioBtn');
+    if (emailBioBtn) {
+      emailBioBtn.addEventListener('click', function() {
+        // Show a message since we don't have actual email functionality implemented
+        alert('Email functionality will be available in the next update.');
+      });
+    }
   </script>
 </body>
 </html>

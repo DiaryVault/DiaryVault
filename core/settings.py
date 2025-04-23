@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'diary.middleware.RateLimitMiddleware',
+    'diary.middleware.PendingEntryMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
