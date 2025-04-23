@@ -12,6 +12,7 @@ import requests
 from requests.exceptions import Timeout, ConnectionError, RequestException
 
 # Django imports
+from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
@@ -1710,10 +1711,16 @@ def save_pending_entry(sender, user, request, **kwargs):
 
         if tags:
             for tag_name in tags:
-                tag, created = Tag.objects.get_or_create(
-                    name=tag_name.lower().strip(),
-                    user=user
-                )
+                tag_name = tag_name.lower().strip()
+                try:
+                    tag, created = Tag.objects.get_or_create(
+                        name=tag_name,
+                        user=user
+                    )
+                except IntegrityError:
+                    # If there's an integrity error, try once more
+                    tag = Tag.objects.get(name=tag_name, user=user)
+
                 entry.tags.add(tag)
 
         # Optional: generate summary
