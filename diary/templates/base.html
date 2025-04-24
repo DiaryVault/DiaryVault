@@ -437,9 +437,16 @@
           {{ user.username|first|upper }}
         </div>
       </a>
+      {% else %}
+      <!-- Auth buttons for non-logged in users (DESKTOP ONLY) -->
+      <div class="hidden md:flex gap-4 items-center">
+        <a href="{% url 'marketplace' %}" class="text-gray-700 hover:text-secondary-600 text-sm font-medium transition px-3 py-2 hover:bg-white/50 rounded-full">Marketplace</a>
+        <a href="{% url 'login' %}" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium transition px-5 py-2 hover:bg-white/50 rounded-full">Log in</a>
+        <a href="{% url 'signup' %}" class="btn-gradient text-white px-5 py-2 rounded-full text-sm font-medium shadow-md">Sign up</a>
+      </div>
       {% endif %}
 
-      <button class="relative text-gray-700 hover:text-secondary-600 p-1.5 bg-white rounded-lg shadow-sm" onclick="toggleMenu()">
+      <button class="relative text-gray-700 hover:text-secondary-600 p-1.5 bg-white rounded-lg shadow-sm" id="menuToggleBtn">
         {% if user.is_authenticated and unread_notifications > 0 %}
         <span class="notification-badge">{{ unread_notifications }}</span>
         {% endif %}
@@ -456,7 +463,7 @@
   <div class="absolute right-0 top-0 bottom-0 w-72 sm:w-80 glass-effect p-6 overflow-y-auto menu-slide menu-closed max-w-[80vw]">
     <div class="flex justify-between items-center mb-8">
       <h2 class="font-bold text-lg gradient-text">Menu</h2>
-      <button onclick="toggleMenu()" class="p-1.5 bg-white rounded-lg shadow-sm">
+      <button id="closeMenuBtn" class="p-1.5 bg-white rounded-lg shadow-sm">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
@@ -669,58 +676,62 @@
 <!-- Base JavaScript -->
 <script>
   // Universal menu toggle function
-  function toggleMenu() {
-    const menu = document.getElementById('menuOverlay');
-    if (!menu) return;
+  document.addEventListener('DOMContentLoaded', function() {
+    const menuToggleBtn = document.getElementById('menuToggleBtn');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+    const menuOverlay = document.getElementById('menuOverlay');
 
-    const menuContent = menu.querySelector('div.menu-slide');
+    if (!menuToggleBtn || !closeMenuBtn || !menuOverlay) return;
 
-    if (menu.classList.contains('hidden')) {
-      // Show the menu
-      menu.classList.remove('hidden');
-      menu.classList.add('menu-overlay-fade');
+    function toggleMenu() {
+      const menuContent = menuOverlay.querySelector('div.menu-slide');
 
-      // Small delay to allow the display:block to take effect before animation
-      setTimeout(() => {
-        menu.classList.add('menu-overlay-visible');
-        menuContent.classList.remove('menu-closed');
-        menuContent.classList.add('menu-open');
-      }, 10);
-    } else {
-      // Hide the menu
-      menu.classList.remove('menu-overlay-visible');
-      menuContent.classList.remove('menu-open');
-      menuContent.classList.add('menu-closed');
+      if (menuOverlay.classList.contains('hidden')) {
+        // Show the menu
+        menuOverlay.classList.remove('hidden');
+        menuOverlay.classList.add('menu-overlay-fade');
 
-      // Wait for animation to complete before hiding the menu
-      setTimeout(() => {
-        menu.classList.add('hidden');
-      }, 300);
-    }
-  }
+        // Small delay to allow the display:block to take effect before animation
+        setTimeout(() => {
+          menuOverlay.classList.add('menu-overlay-visible');
+          menuContent.classList.remove('menu-closed');
+          menuContent.classList.add('menu-open');
+        }, 10);
+      } else {
+        // Hide the menu
+        menuOverlay.classList.remove('menu-overlay-visible');
+        menuContent.classList.remove('menu-open');
+        menuContent.classList.add('menu-closed');
 
-  // Close menu when clicking outside
-  document.addEventListener('click', function(event) {
-    const menu = document.getElementById('menuOverlay');
-    const menuContent = menu?.querySelector('div.menu-slide');
-    const menuButton = document.querySelector('button[onclick="toggleMenu()"]');
-
-    if (menu && !menu.classList.contains('hidden') &&
-        !menuContent.contains(event.target) &&
-        !menuButton.contains(event.target)) {
-      toggleMenu();
-    }
-  });
-
-  // Handle escape key to close menu
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      const menu = document.getElementById('menuOverlay');
-      if (menu && !menu.classList.contains('hidden')) {
-        toggleMenu();
+        // Wait for animation to complete before hiding the menu
+        setTimeout(() => {
+          menuOverlay.classList.add('hidden');
+        }, 300);
       }
     }
-  });
+
+    // Add event listeners to buttons
+    menuToggleBtn.addEventListener('click', toggleMenu);
+    closeMenuBtn.addEventListener('click', toggleMenu);
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+      const menuContent = menuOverlay.querySelector('div.menu-slide');
+
+      if (!menuOverlay.classList.contains('hidden') &&
+          !menuContent.contains(event.target) &&
+          !menuToggleBtn.contains(event.target) &&
+          event.target !== menuToggleBtn) {
+        toggleMenu();
+      }
+    });
+
+    // Handle escape key to close menu
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !menuOverlay.classList.contains('hidden')) {
+        toggleMenu();
+      }
+    });
 
   // Page load animations
   document.addEventListener('DOMContentLoaded', function() {
