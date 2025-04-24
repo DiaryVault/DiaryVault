@@ -446,7 +446,7 @@
       </div>
       {% endif %}
 
-      <button class="relative text-gray-700 hover:text-secondary-600 p-1.5 bg-white rounded-lg shadow-sm" id="menuToggleBtn">
+      <button id="menuToggleBtn" class="relative text-gray-700 hover:text-secondary-600 p-1.5 bg-white rounded-lg shadow-sm">
         {% if user.is_authenticated and unread_notifications > 0 %}
         <span class="notification-badge">{{ unread_notifications }}</span>
         {% endif %}
@@ -681,60 +681,79 @@
     const closeMenuBtn = document.getElementById('closeMenuBtn');
     const menuOverlay = document.getElementById('menuOverlay');
 
-    if (!menuToggleBtn || !closeMenuBtn || !menuOverlay) return;
+    if (menuToggleBtn && closeMenuBtn && menuOverlay) {
+      function toggleMenu() {
+        const menuContent = menuOverlay.querySelector('div.menu-slide');
 
-    function toggleMenu() {
-      const menuContent = menuOverlay.querySelector('div.menu-slide');
+        if (menuOverlay.classList.contains('hidden')) {
+          // Show the menu
+          menuOverlay.classList.remove('hidden');
+          menuOverlay.classList.add('menu-overlay-fade');
 
-      if (menuOverlay.classList.contains('hidden')) {
-        // Show the menu
-        menuOverlay.classList.remove('hidden');
-        menuOverlay.classList.add('menu-overlay-fade');
+          // Small delay to allow the display:block to take effect before animation
+          setTimeout(() => {
+            menuOverlay.classList.add('menu-overlay-visible');
+            menuContent.classList.remove('menu-closed');
+            menuContent.classList.add('menu-open');
+          }, 10);
+        } else {
+          // Hide the menu
+          menuOverlay.classList.remove('menu-overlay-visible');
+          menuContent.classList.remove('menu-open');
+          menuContent.classList.add('menu-closed');
 
-        // Small delay to allow the display:block to take effect before animation
-        setTimeout(() => {
-          menuOverlay.classList.add('menu-overlay-visible');
-          menuContent.classList.remove('menu-closed');
-          menuContent.classList.add('menu-open');
-        }, 10);
-      } else {
-        // Hide the menu
-        menuOverlay.classList.remove('menu-overlay-visible');
-        menuContent.classList.remove('menu-open');
-        menuContent.classList.add('menu-closed');
-
-        // Wait for animation to complete before hiding the menu
-        setTimeout(() => {
-          menuOverlay.classList.add('hidden');
-        }, 300);
+          // Wait for animation to complete before hiding the menu
+          setTimeout(() => {
+            menuOverlay.classList.add('hidden');
+          }, 300);
+        }
       }
+
+      // Add event listeners to buttons
+      menuToggleBtn.addEventListener('click', toggleMenu);
+      closeMenuBtn.addEventListener('click', toggleMenu);
+
+      // Close menu when clicking outside
+      document.addEventListener('click', function(event) {
+        const menuContent = menuOverlay.querySelector('div.menu-slide');
+
+        if (!menuOverlay.classList.contains('hidden') &&
+            !menuContent.contains(event.target) &&
+            !menuToggleBtn.contains(event.target) &&
+            event.target !== menuToggleBtn) {
+          toggleMenu();
+        }
+      });
+
+      // Handle escape key to close menu
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !menuOverlay.classList.contains('hidden')) {
+          toggleMenu();
+        }
+      });
     }
 
-    // Add event listeners to buttons
-    menuToggleBtn.addEventListener('click', toggleMenu);
-    closeMenuBtn.addEventListener('click', toggleMenu);
+    // Detect if user came from dashboard
+    const referrer = document.referrer;
+    // Only show the return button if:
+    // 1. User came from dashboard AND
+    // 2. Current page is not dashboard
+    if (referrer.includes('/dashboard') &&
+        !window.location.pathname.includes('/dashboard')) {
+      // Show a return button
+      const returnButton = document.createElement('div');
+      returnButton.className = 'fixed top-20 left-6 bg-white/80 backdrop-blur-sm rounded-full shadow-md p-2 cursor-pointer z-40 fade-in';
+      returnButton.innerHTML = `
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-2 px-3 py-1 text-sm text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Dashboard
+        </a>
+      `;
+      document.body.appendChild(returnButton);
+    }
 
-    // Close menu when clicking outside
-    document.addEventListener('click', function(event) {
-      const menuContent = menuOverlay.querySelector('div.menu-slide');
-
-      if (!menuOverlay.classList.contains('hidden') &&
-          !menuContent.contains(event.target) &&
-          !menuToggleBtn.contains(event.target) &&
-          event.target !== menuToggleBtn) {
-        toggleMenu();
-      }
-    });
-
-    // Handle escape key to close menu
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && !menuOverlay.classList.contains('hidden')) {
-        toggleMenu();
-      }
-    });
-
-  // Page load animations
-  document.addEventListener('DOMContentLoaded', function() {
     // Apply scale-in animations to cards and elements with animation classes
     const animatedElements = document.querySelectorAll('.scale-in, .fade-in');
     animatedElements.forEach((element, index) => {
@@ -744,31 +763,6 @@
       }, 100);
     });
 
-    // Detect if user came from dashboard
-    document.addEventListener('DOMContentLoaded', function() {
-      const referrer = document.referrer;
-      // Only show the return button if:
-      // 1. User came from dashboard AND
-      // 2. Current page is not dashboard
-      if (referrer.includes('/dashboard') &&
-          !window.location.pathname.includes('/dashboard')) {
-        // Show a return button
-        const returnButton = document.createElement('div');
-        returnButton.className = 'fixed top-20 left-6 bg-white/80 backdrop-blur-sm rounded-full shadow-md p-2 cursor-pointer z-40 fade-in';
-        returnButton.innerHTML = `
-          <a href="{% url 'dashboard' %}" class="flex items-center gap-2 px-3 py-1 text-sm text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Dashboard
-          </a>
-        `;
-        document.body.appendChild(returnButton);
-      }
-    });
-
-  // Smooth page transitions
-  document.addEventListener('DOMContentLoaded', function() {
     // Add transition class to body
     document.body.classList.add('transition-ready');
 
@@ -797,10 +791,8 @@
         });
       }
     });
-  });
 
-  // Handle form submissions with animation
-  document.addEventListener('DOMContentLoaded', function() {
+    // Handle form submissions with animation
     document.querySelectorAll('form:not(.no-transition)').forEach(form => {
       form.addEventListener('submit', function(e) {
         // If the form has AJAX handling or specific submit behavior, skip animation
@@ -810,18 +802,8 @@
         document.body.classList.add('page-transitioning');
       });
     });
-  });
 
-  // Handle browser back button with animation
-  window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-      // Page was restored from back/forward cache
-      document.body.classList.remove('page-transitioning');
-    }
-  });
-
-  // Lazy-load images for better performance
-  document.addEventListener('DOMContentLoaded', function() {
+    // Lazy-load images for better performance
     const lazyImages = document.querySelectorAll('img[data-src]');
 
     if ('IntersectionObserver' in window) {
@@ -845,30 +827,8 @@
         image.src = image.dataset.src;
       });
     }
-  });
 
-  // Accessible keyboard navigation
-  document.addEventListener('keydown', function(e) {
-    // Skip for form elements
-    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
-
-    // Add keyboard shortcuts for common actions
-    if (e.key === 'n' && e.ctrlKey) {
-      e.preventDefault();
-      const newEntryLink = document.querySelector('a[href*="new_entry"]');
-      if (newEntryLink) newEntryLink.click();
-    }
-
-    if (e.key === 'Escape') {
-      const menu = document.getElementById('menuOverlay');
-      if (menu && !menu.classList.contains('hidden')) {
-        toggleMenu();
-      }
-    }
-  });
-
-  // Theme preference detection
-  document.addEventListener('DOMContentLoaded', function() {
+    // Theme preference detection
     // Check for saved theme preference
     const savedTheme = localStorage.getItem('diaryTheme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -878,10 +838,8 @@
       // Apply dark theme classes if you implement dark mode in the future
       document.documentElement.classList.add('dark-theme');
     }
-  });
 
-  // Init any tooltips
-  document.addEventListener('DOMContentLoaded', function() {
+    // Init any tooltips
     const tooltipElements = document.querySelectorAll('[data-tooltip]');
 
     tooltipElements.forEach(element => {
@@ -914,13 +872,7 @@
         }
       });
     });
-  });
-</script>
 
-<!-- Progressive Enhancement JavaScript -->
-<script>
-  // Check if the browser supports certain features and enhance functionality accordingly
-  document.addEventListener('DOMContentLoaded', function() {
     // Enable smooth scrolling behavior for browsers that support it
     if ('scrollBehavior' in document.documentElement.style) {
       document.documentElement.style.scrollBehavior = 'smooth';
@@ -973,10 +925,8 @@
         });
       }
     }
-  });
 
-  // Form validation enhancement
-  document.addEventListener('DOMContentLoaded', function() {
+    // Form validation enhancement
     const forms = document.querySelectorAll('form[data-validate]');
 
     forms.forEach(form => {
@@ -1008,6 +958,27 @@
         });
       });
     });
+  });
+
+  // Handle browser back button with animation
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+      // Page was restored from back/forward cache
+      document.body.classList.remove('page-transitioning');
+    }
+  });
+
+  // Accessible keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    // Skip for form elements
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+
+    // Add keyboard shortcuts for common actions
+    if (e.key === 'n' && e.ctrlKey) {
+      e.preventDefault();
+      const newEntryLink = document.querySelector('a[href*="new_entry"]');
+      if (newEntryLink) newEntryLink.click();
+    }
   });
 </script>
 
