@@ -16,7 +16,8 @@ from .insights import (
 # Biography views
 from .biography import (
     biography, manage_chapters, edit_chapter, delete_chapter,
-    generate_biography_api
+    generate_biography_api,
+    regenerate_chapter,
 )
 
 # API views

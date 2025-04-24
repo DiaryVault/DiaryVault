@@ -38,14 +38,20 @@ urlpatterns = [
     path('library/time-period/<str:period>/', views.time_period_view, name='time_period'),
 
 
-    # Biography and Insights
+    # Biography URLs
     path('biography/', views.biography, name='biography'),
-    path('insights/', views.insights, name='insights'),
-    path('api/generate-biography/', views.generate_biography_api, name='generate_biography_api'),
+    path('biography/manage-chapters/', views.manage_chapters, name='manage_chapters'),
+    path('biography/edit-chapter/<int:chapter_id>/', views.edit_chapter, name='edit_chapter'),
+    path('biography/delete-chapter/<int:chapter_id>/', views.delete_chapter, name='delete_chapter'),
+    path('biography/regenerate-chapter/<int:chapter_id>/', views.regenerate_chapter, name='regenerate_chapter'),
+    path('api/biography/generate/', views.generate_biography_api, name='generate_biography_api'),
 
 
     # User Settings
     path('account/settings/', views.account_settings, name='account_settings'),
+
+    # Insights
+    path('insights/', views.insights, name='insights'),
 
     # AJAX endpoints
     path('api/entry/<int:entry_id>/regenerate-summary/', views.regenerate_summary_ajax, name='regenerate_summary_ajax'),

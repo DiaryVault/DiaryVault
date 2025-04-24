@@ -263,6 +263,17 @@ class AIService:
         Returns the generated biography text
         """
         # Import models using apps.get_model to avoid circular imports
+        from django.apps import apps
+        from django.utils import timezone
+        import time
+        import json
+        import requests
+        from django.conf import settings
+        from requests.exceptions import RequestException
+        import logging
+
+        logger = logging.getLogger(__name__)
+
         Entry = apps.get_model('diary', 'Entry')
         UserInsight = apps.get_model('diary', 'UserInsight')
         Biography = apps.get_model('diary', 'Biography')
@@ -448,6 +459,42 @@ class AIService:
                 biography.content = biography_content
                 biography.save()
 
+                # Auto-classify biography into chapters
+                from ..services.ai_service import AIService
+                auto_chapters = AIService._auto_classify_biography_into_chapters(biography_content, user)
+
+                # If we already have chapters_data, merge with new data
+                if biography.chapters_data:
+                    chapters_data = biography.chapters_data
+                    for key, value in auto_chapters.items():
+                        chapters_data[key] = value
+                else:
+                    chapters_data = auto_chapters
+
+                biography.chapters_data = chapters_data
+                biography.save()
+
+                # If we have LifeChapter model and no chapters exist, create default ones based on the auto-classification
+                if has_life_chapters and not LifeChapter.objects.filter(user=user).exists():
+                    standard_chapters = {
+                        "childhood": "Childhood",
+                        "education": "Education",
+                        "career": "Career",
+                        "relationships": "Relationships",
+                        "personal_growth": "Personal Growth",
+                        "recent_years": "Recent Years"
+                    }
+
+                    for key, title in standard_chapters.items():
+                        if key in chapters_data and chapters_data[key].get('content'):
+                            # Create the chapter if it has content
+                            LifeChapter.objects.create(
+                                user=user,
+                                title=title,
+                                time_period=f"Your {title.lower()} period",
+                                description=f"This chapter covers your {title.lower()} experiences."
+                            )
+
                 return biography_content
 
         except Exception as e:
@@ -457,13 +504,61 @@ class AIService:
             else:
                 return "Unable to generate your biography at this time. Please try again later."
 
-    @staticmethod
-    def _get_groq_response(prompt, temperature=0.7, max_tokens=800):
-        """Send a request to Groq API and get response"""
-        request_id = int(time.time() * 1000)  # Simple request ID for tracking
-        logger.info(f"Groq API Request {request_id} started for prompt length {len(prompt)}")
+    def _auto_classify_biography_into_chapters(biography_content, user):
+        """
+        Automatically classify a biography into standard chapters.
+        This uses AI to identify and separate content into appropriate life chapters.
+        """
+        # Import models here to avoid circular imports
+        from django.apps import apps
+        from django.utils import timezone
+        import json
+        import re
+        import time
+        import requests
+        from django.conf import settings
+
+        # Get models
+        LifeChapter = apps.get_model('diary', 'LifeChapter')
+
+        request_id = int(time.time() * 1000)
+        logger.info(f"Auto-classification {request_id} started for user {user.username}")
 
         try:
+            # Standard chapter categories
+            standard_chapters = [
+                "Childhood",
+                "Education",
+                "Career",
+                "Relationships",
+                "Personal Growth",
+                "Recent Years"
+            ]
+
+            # Create prompt for classification
+            classification_prompt = f"""
+            I have a biography text that needs to be separated into the following chapters:
+
+            {', '.join(standard_chapters)}
+
+            Please read the biography and extract content relevant to each chapter.
+            For each chapter, return only the content that belongs to that specific chapter.
+
+            Format the response as JSON with the following structure:
+            {{
+                "childhood": {{ "content": "extracted content for childhood chapter here" }},
+                "education": {{ "content": "extracted content for education chapter here" }},
+                "career": {{ "content": "extracted content for career chapter here" }},
+                "relationships": {{ "content": "extracted content for relationships chapter here" }},
+                "personal_growth": {{ "content": "extracted content for personal growth chapter here" }},
+                "recent_years": {{ "content": "extracted content for recent years chapter here" }}
+            }}
+
+            Here is the biography to classify:
+
+            {biography_content}
+            """
+
             headers = {
                 'Content-Type': 'application/json',
                 'Authorization': f'Bearer {settings.GROK_API_KEY}',
@@ -473,53 +568,159 @@ class AIService:
             payload = {
                 'model': 'llama3-70b-8192',
                 'messages': [
-                    {'role': 'system', 'content': 'You are a helpful AI assistant for journal analysis.'},
+                    {'role': 'system', 'content': 'You are an expert at analyzing and organizing biographies into thematic chapters.'},
+                    {'role': 'user', 'content': classification_prompt}
+                ],
+                'temperature': 0.3,  # Lower temperature for more deterministic output
+                'max_tokens': 1500
+            }
+
+            start_time = time.time()
+            response = requests.post(
+                'https://api.groq.com/openai/v1/chat/completions',
+                headers=headers,
+                json=payload,
+                timeout=30
+            )
+            api_time = time.time() - start_time
+
+            logger.info(f"Auto-classification {request_id} completed in {api_time:.2f}s with status {response.status_code}")
+
+            if response.status_code != 200:
+                logger.error(f"Auto-classification {request_id} failed: {response.status_code} - {response.text}")
+                return {}
+
+            response_data = response.json()
+
+            # Extract the JSON content from the response
+            content = response_data['choices'][0]['message']['content']
+
+            # Try to extract JSON from the response
+
+            # First try to extract JSON from code blocks
+            json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', content)
+            if json_match:
+                json_str = json_match.group(1).strip()
+            else:
+                # If no code block, look for opening and closing braces
+                json_start = content.find('{')
+                json_end = content.rfind('}') + 1
+                if json_start >= 0 and json_end > json_start:
+                    json_str = content[json_start:json_end]
+                else:
+                    # No JSON found
+                    logger.error(f"Auto-classification {request_id}: No JSON found in response")
+                    return {}
+
+            try:
+                chapters_data = json.loads(json_str)
+
+                # Ensure all keys are properly formatted
+                formatted_data = {}
+                for chapter in standard_chapters:
+                    key = chapter.lower().replace(' ', '_')
+                    normalized_key = key.replace('-', '_')
+
+                    # Check for various possible keys
+                    if key in chapters_data:
+                        formatted_data[key] = chapters_data[key]
+                    elif normalized_key in chapters_data:
+                        formatted_data[key] = chapters_data[normalized_key]
+                    elif chapter.lower() in chapters_data:
+                        formatted_data[key] = chapters_data[chapter.lower()]
+                    elif chapter in chapters_data:
+                        formatted_data[key] = chapters_data[chapter]
+
+                # Add timestamps to each chapter
+                current_time = timezone.now().isoformat()
+                for key in formatted_data:
+                    if isinstance(formatted_data[key], dict) and 'content' in formatted_data[key]:
+                        formatted_data[key]['last_updated'] = current_time
+                    else:
+                        # If it's not a dict with content (just text or wrong format), convert to proper format
+                        if isinstance(formatted_data[key], dict):
+                            content_value = formatted_data[key].get('content', str(formatted_data[key]))
+                        else:
+                            content_value = str(formatted_data[key])
+
+                        formatted_data[key] = {
+                            'content': content_value,
+                            'last_updated': current_time
+                        }
+
+                return formatted_data
+
+            except json.JSONDecodeError:
+                logger.error(f"Auto-classification {request_id}: JSON parsing error: {json_str}")
+                return {}
+
+        except Exception as e:
+            logger.error(f"Auto-classification {request_id} error: {str(e)}", exc_info=True)
+            return {}
+
+
+    @staticmethod
+    def _get_groq_response(prompt, model="llama3-70b-8192", temperature=0.7, max_tokens=1000):
+        """
+        Get a response from the Groq API
+
+        Args:
+            prompt (str): The prompt to send to the API
+            model (str): The model to use (default: llama3-70b-8192)
+            temperature (float): Randomness parameter (default: 0.7)
+            max_tokens (int): Maximum number of tokens to generate (default: 1000)
+
+        Returns:
+            str: The generated text response
+        """
+        try:
+            import requests
+            import time
+            from django.conf import settings
+
+            request_id = int(time.time() * 1000)
+
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {settings.GROK_API_KEY}',  # Using GROK_API_KEY from settings
+                'X-Request-ID': str(request_id)
+            }
+
+            payload = {
+                'model': model,
+                'messages': [
+                    {'role': 'system', 'content': 'You are a helpful assistant.'},
                     {'role': 'user', 'content': prompt}
                 ],
                 'temperature': temperature,
                 'max_tokens': max_tokens
             }
 
-            # Add proper timeout to prevent hanging requests
             start_time = time.time()
             response = requests.post(
                 'https://api.groq.com/openai/v1/chat/completions',
                 headers=headers,
                 json=payload,
-                timeout=60  # Longer timeout for more complex generations
+                timeout=30
             )
             api_time = time.time() - start_time
 
-            # Log response time for performance monitoring
-            logger.info(f"Groq API Request {request_id} completed in {api_time:.2f}s with status {response.status_code}")
+            logger.info(f"Groq API request {request_id} completed in {api_time:.2f}s with status {response.status_code}")
 
             if response.status_code != 200:
-                logger.error(f"Groq API Request {request_id} failed: {response.status_code} - {response.text}")
-                return "Error connecting to Groq API. Please try again later."
+                logger.error(f"Groq API request {request_id} failed: {response.status_code} - {response.text}")
+                raise RequestException(f"API returned status code {response.status_code}")
 
             response_data = response.json()
 
             # Validate response structure
             if 'choices' not in response_data or not response_data['choices']:
                 error_msg = f"Invalid API response structure: {response_data}"
-                logger.error(f"Groq API Request {request_id}: {error_msg}")
-                return "Error with AI response format. Please try again later."
+                logger.error(f"Groq API request {request_id}: {error_msg}")
+                raise ValueError(error_msg)
 
-            # Extract the message content
             return response_data['choices'][0]['message']['content']
 
-        except Timeout:
-            logger.error(f"Groq API Request {request_id} timed out")
-            return "Request timed out. Please try again later."
-        except ConnectionError as e:
-            logger.error(f"Groq API Request {request_id} connection error: {str(e)}")
-            return "Connection error. Please check your internet connection."
         except Exception as e:
-            logger.error(f"Groq API Request {request_id} error: {str(e)}", exc_info=True)
-            return f"Error: {str(e)}. Please try again later."
-
-    @staticmethod
-    def _get_ollama_response(prompt, model="mistral"):
-        """DEPRECATED: Use _get_groq_response instead"""
-        logger.warning("_get_ollama_response is deprecated. Using Groq instead.")
-        return AIService._get_groq_response(prompt)
+            logger.error(f"Error in _get_groq_response: {str(e)}", exc_info=True)
+            raise

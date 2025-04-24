@@ -1,437 +1,227 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Your Biography | DiaryVault{% endblock %}
 
 {% block extra_css %}
 <style>
-  /* Book page styling */
-  .book-page {
-    background-color: #f8f5f0;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    position: relative;
-  }
-  .book-page::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 30px;
-    background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
-    pointer-events: none;
+  .chapter-navigation {
+    position: sticky;
+    top: 5rem;
   }
 
-  .blinking-cursor::after {
-    content: '|';
-    animation: blink 1s step-end infinite;
-  }
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+  .chapter-link {
+    transition: all 0.2s ease;
   }
 
-  /* Custom scrollbar */
-  .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari and Opera */
+  .chapter-link:hover {
+    transform: translateX(5px);
   }
 
-  .prose {
-    max-width: none;
-    color: #1f2937;
-    line-height: 1.75;
-  }
-  .prose p {
-    margin-top: 1.25em;
-    margin-bottom: 1.25em;
+  .chapter-link.active {
+    font-weight: 600;
+    color: #6366f1;
+    border-right: 3px solid #6366f1;
   }
 
-  .success-message {
-    animation: fadeInOut 3s forwards;
-  }
-  @keyframes fadeInOut {
-    0% { opacity: 0; transform: translateY(-20px); }
-    10% { opacity: 1; transform: translateY(0); }
-    90% { opacity: 1; }
-    100% { opacity: 0; }
+  .chapter-content {
+    scroll-margin-top: 100px;
   }
 
-  @media (max-width: 640px) {
-    .book-page::before {
-      width: 15px; /* Smaller gradient on mobile */
-    }
-    .book-page {
-      padding: 1rem !important;
-    }
+  .biography-container {
+    font-family: 'Playfair Display', serif;
+    line-height: 1.8;
   }
 
-  @media print {
-    .no-print {
-      display: none !important;
-    }
-    .book-page::before {
-      display: none;
-    }
-    body {
-      background-color: white;
-    }
-    .book-page {
-      box-shadow: none;
-    }
+  .auto-chapter {
+    display: none;
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Success message toast (hidden by default) -->
-<div id="successToast" class="fixed top-4 right-4 glass-effect border border-green-300 text-green-700 px-4 py-3 rounded-xl z-50 hidden success-message">
-  Biography successfully regenerated!
-</div>
+<div class="w-full max-w-6xl mx-auto">
 
-<div class="max-w-4xl mx-auto">
-  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 no-print">
-    <div>
-      <h2 class="text-2xl sm:text-3xl font-bold diary-font text-gray-900 mb-2">Your AI-Generated Biography</h2>
-      <p class="text-gray-600">Based on {{ entry_count|default:"0" }} journal entries spanning {{ date_range|default:"your journaling time" }}</p>
-    </div>
-
-    <div class="mt-4 md:mt-0 space-x-2">
-      {% if entry_count >= 5 %}
-      <button id="regenerateBtn" class="px-4 py-2 btn-gradient text-white rounded-lg flex items-center gap-1 text-sm shadow-md">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        Regenerate
-      </button>
-      <button id="printBtn" class="px-4 py-2 glass-effect text-gray-800 rounded-lg hover:bg-white/50 transition flex items-center gap-1 text-sm border border-white/30">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-        </svg>
-        Print
-      </button>
+  <!-- Biography Header Section -->
+  <div class="mb-8 text-center">
+    <h1 class="text-3xl md:text-4xl font-bold diary-font mb-4">Your Life Story</h1>
+    <p class="text-gray-600 max-w-3xl mx-auto">
+      Turn your journal entries into a beautifully crafted biography that tells your life story.
+      {% if entry_count > 0 %}
+      Based on {{ entry_count }} journal entries from {{ date_range }}.
+      {% else %}
+      Start by adding journal entries to create your story.
       {% endif %}
-    </div>
+    </p>
   </div>
 
-  {% if entry_count >= 5 %}
-  <!-- Biography Chapters Tabs -->
-  <div class="glass-effect rounded-xl shadow-md mb-6 p-4 border border-white/20 no-print">
-    <div class="flex overflow-x-auto custom-scrollbar space-x-2 mb-4">
-      <button class="chapter-tab px-4 py-2 rounded-md bg-secondary-100 text-secondary-800 font-medium whitespace-nowrap text-sm" data-chapter="childhood">Childhood</button>
-      <button class="chapter-tab px-4 py-2 rounded-md bg-white/50 text-gray-800 hover:bg-white whitespace-nowrap text-sm border border-white/30" data-chapter="education">Education</button>
-      <button class="chapter-tab px-4 py-2 rounded-md bg-white/50 text-gray-800 hover:bg-white whitespace-nowrap text-sm border border-white/30" data-chapter="career">Career</button>
-      <button class="chapter-tab px-4 py-2 rounded-md bg-white/50 text-gray-800 hover:bg-white whitespace-nowrap text-sm border border-white/30" data-chapter="relationships">Relationships</button>
-      <button class="chapter-tab px-4 py-2 rounded-md bg-white/50 text-gray-800 hover:bg-white whitespace-nowrap text-sm border border-white/30" data-chapter="personal-growth">Personal Growth</button>
-      <button class="chapter-tab px-4 py-2 rounded-md bg-white/50 text-gray-800 hover:bg-white whitespace-nowrap text-sm border border-white/30" data-chapter="recent-years">Recent Years</button>
-    </div>
+  <!-- No Biography Yet - Initial State -->
+  {% if not biography %}
+  <div class="bg-white rounded-xl shadow-md p-6 md:p-10 max-w-3xl mx-auto text-center">
+    <img src="{% static 'images/book-illustration.svg' %}" alt="Biography Book" class="h-48 mx-auto mb-6">
 
-    <div class="flex justify-between items-center mb-2">
-      <h3 id="chapter-title" class="font-semibold text-lg diary-font text-gray-900">Childhood</h3>
-      <span id="chapter-years" class="text-xs text-gray-500">1990-2003</span>
-    </div>
+    <h2 class="text-2xl font-bold mb-4 diary-font">Your Journal, Your Story</h2>
+
+    <p class="text-gray-600 mb-6">
+      Let DiaryVault analyze your journal entries and transform them into a comprehensive biography.
+      The more you journal, the richer your story will be!
+    </p>
+
+    {% if entry_count > 0 %}
+      <form method="post" action="{% url 'biography' %}">
+        {% csrf_token %}
+        <button type="submit" name="generate_biography" class="btn-gradient px-6 py-3 rounded-lg text-white font-medium">
+          Generate My Biography
+        </button>
+      </form>
+    {% else %}
+      <a href="{% url 'new_entry' %}" class="btn-gradient px-6 py-3 rounded-lg text-white font-medium inline-block">
+        Start Journaling First
+      </a>
+      <p class="text-sm text-gray-500 mt-4">
+        Add a few journal entries first so we have content to work with.
+      </p>
+    {% endif %}
   </div>
+  {% else %}
 
-  <!-- Biography Content when entries are sufficient -->
-  <div class="mb-8">
-    <div class="book-page rounded-xl overflow-hidden shadow-lg">
-      <div class="relative p-8 sm:p-10 diary-font">
-        <div id="bio-text" class="prose prose-secondary max-w-none text-gray-800 leading-relaxed whitespace-pre-line">
+  <!-- Biography Exists - Show Content -->
+  <div class="flex flex-col md:flex-row gap-8">
+
+    <!-- Chapter Navigation (only shown if chapters exist) -->
+    {% if chapters %}
+    <div class="md:w-1/4 chapter-navigation">
+      <div class="bg-white rounded-xl shadow-md p-4 sticky top-24">
+        <h3 class="font-bold mb-4 text-gray-700">Chapters</h3>
+        <ul>
+          <li class="mb-2">
+            <a href="#full-story" class="chapter-link block py-2 px-3 rounded hover:bg-gray-50 active">
+              Full Biography
+            </a>
+          </li>
+          {% for chapter in chapters %}
+          <li class="mb-2">
+            <a href="#chapter-{{ chapter.id }}" class="chapter-link block py-2 px-3 rounded hover:bg-gray-50">
+              {{ chapter.title }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+
+        <div class="mt-6 pt-4 border-t border-gray-100">
+          <form method="post" action="{% url 'biography' %}">
+            {% csrf_token %}
+            <button type="submit" name="generate_biography" class="text-sm text-secondary-600 hover:text-secondary-800 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refresh Biography
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Biography Content -->
+    <div class="{% if chapters %}md:w-3/4{% endif %}">
+      <!-- Full Biography Section -->
+      <section id="full-story" class="biography-container bg-white rounded-xl shadow-md p-6 md:p-10 mb-8">
+        <h2 class="text-2xl font-bold mb-6 diary-font">Your Life Story</h2>
+
+        <div class="prose prose-lg max-w-none">
           {{ biography|linebreaks }}
         </div>
 
-        <!-- Loading State -->
-        <div id="loading-indicator" class="hidden">
-          <div class="flex justify-center items-center py-20">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary-600"></div>
-          </div>
+        <div class="mt-8 text-right">
+          <form method="post" action="{% url 'biography' %}">
+            {% csrf_token %}
+            <button type="submit" name="generate_biography" class="text-secondary-600 hover:text-secondary-800 flex items-center gap-2 ml-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Regenerate
+            </button>
+          </form>
         </div>
-      </div>
-    </div>
-  </div>
+      </section>
 
-  <!-- Sharing Options -->
-  <div class="glass-effect rounded-xl p-6 shadow-md border border-white/20 no-print">
-    <h3 class="font-semibold text-lg diary-font text-gray-900 mb-4">Share Your Story</h3>
+      <!-- Individual Chapters (only shown if chapter content exists) -->
+      {% for chapter in chapters %}
+        {% for key, value in chapter_contents.items %}
+          {% if key == chapter.title %}
+          <section id="chapter-{{ chapter.id }}" class="biography-container bg-white rounded-xl shadow-md p-6 md:p-10 mb-8 chapter-content">
+            <h2 class="text-2xl font-bold mb-6 diary-font">{{ chapter.title }}</h2>
+            <div class="text-sm text-gray-500 mb-4">{{ chapter.time_period }}</div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div id="downloadPdfBtn" class="glass-effect rounded-xl p-4 hover:bg-white/70 transition text-center cursor-pointer card-hover border border-white/20">
-        <div class="text-secondary-600 mb-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-          </svg>
-        </div>
-        <div class="font-medium text-sm">Download as PDF</div>
-      </div>
+            <div class="prose prose-lg max-w-none">
+              {{ value|linebreaks }}
+            </div>
 
-      <div id="emailBioBtn" class="glass-effect rounded-xl p-4 hover:bg-white/70 transition text-center cursor-pointer card-hover border border-white/20">
-        <div class="text-secondary-600 mb-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-        </div>
-        <div class="font-medium text-sm">Email to Yourself</div>
-      </div>
-
-      <div id="printBioBtn" class="glass-effect rounded-xl p-4 hover:bg-white/70 transition text-center cursor-pointer card-hover border border-white/20">
-        <div class="text-secondary-600 mb-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-          </svg>
-        </div>
-        <div class="font-medium text-sm">Print Physical Copy</div>
-      </div>
-    </div>
-  </div>
-
-  {% else %}
-  <!-- Not enough entries state -->
-  <div class="glass-effect rounded-xl shadow-lg border border-white/20 p-6 sm:p-10 max-w-4xl mx-auto text-center">
-    <div class="mb-6">
-      <div class="bg-white/70 w-20 h-20 rounded-full mx-auto flex items-center justify-center shadow-md">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-        </svg>
-      </div>
-    </div>
-
-    <h3 class="text-xl sm:text-2xl font-semibold diary-font text-gray-800 mb-3">Your biography needs more entries</h3>
-    <p class="text-gray-600 max-w-lg mx-auto mb-4">You need at least 5 journal entries before we can create your biography. You currently have {{ entry_count|default:"0" }} entries.</p>
-
-    <div class="mb-8 relative">
-      <div class="h-4 bg-white/50 rounded-full overflow-hidden w-64 mx-auto mb-2">
-        <!-- Calculate the percentage with a simple calculation instead of using a filter -->
-        {% with progress_percent=entry_count|default:0 %}
-          {% if progress_percent > 5 %}
-            <div class="h-4 bg-secondary-500 rounded-full" style="width: 100%"></div>
-          {% else %}
-            <div class="h-4 bg-secondary-500 rounded-full" style="width: {% widthratio progress_percent 5 100 %}%"></div>
+            <div class="mt-8 text-right">
+              <a href="{% url 'regenerate_chapter' chapter.id %}" class="text-secondary-600 hover:text-secondary-800 flex items-center gap-2 ml-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh Chapter
+              </a>
+            </div>
+          </section>
           {% endif %}
-        {% endwith %}
-      </div>
-      <p class="text-xs text-gray-500">{{ entry_count|default:"0" }}/5 entries</p>
+        {% endfor %}
+      {% endfor %}
     </div>
-
-    <div class="mb-8 max-w-md mx-auto">
-      <div class="bg-secondary-50/70 p-4 rounded-lg text-left border border-secondary-100">
-        <p class="text-gray-700 text-sm mb-2"><strong>Your biography will include:</strong></p>
-        <ul class="text-sm text-gray-600 space-y-1">
-          <li class="flex items-start gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-            <span>AI-powered narrative of your life based on your journal entries</span>
-          </li>
-          <li class="flex items-start gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-            <span>Organized chapters covering different aspects of your life</span>
-          </li>
-          <li class="flex items-start gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-            <span>Insights and patterns identified from your personal journey</span>
-          </li>
-        </ul>
-      </div>
-    </div>
-
-    <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-6 py-3 rounded-full inline-flex items-center gap-2 font-medium shadow-md">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-      </svg>
-      <span>Create a Journal Entry</span>
-    </a>
   </div>
   {% endif %}
 </div>
-{% endblock %}
 
-{% block extra_js %}
+<!-- JavaScript for chapter navigation -->
 <script>
-  // Chapter data for the biography
-  const chapters = {
-    'childhood': {
-      title: 'Childhood',
-      years: '1990-2003',
-      content: `{{ childhood_content|default:"This chapter will be generated when you have more journal entries related to your childhood." }}`
-    },
-    'education': {
-      title: 'Education',
-      years: '2004-2011',
-      content: `{{ education_content|default:"This chapter will be generated when you have more journal entries related to your education." }}`
-    },
-    'career': {
-      title: 'Career Journey',
-      years: '2012-Present',
-      content: `{{ career_content|default:"This chapter will be generated when you have more journal entries related to your career." }}`
-    },
-    'relationships': {
-      title: 'Relationships',
-      years: '2000-Present',
-      content: `{{ relationships_content|default:"This chapter will be generated when you have more journal entries related to your relationships." }}`
-    },
-    'personal-growth': {
-      title: 'Personal Growth',
-      years: '2010-Present',
-      content: `{{ personal_growth_content|default:"This chapter will be generated when you have more journal entries related to your personal growth." }}`
-    },
-    'recent-years': {
-      title: 'Recent Years',
-      years: '2020-Present',
-      content: `{{ recent_years_content|default:"This chapter will be generated when you have more recent journal entries." }}`
-    }
-  };
+document.addEventListener('DOMContentLoaded', function() {
+  // Chapter navigation highlighting
+  const chapterLinks = document.querySelectorAll('.chapter-link');
+  const chapterSections = document.querySelectorAll('section[id^="chapter-"], #full-story');
 
-  // Initialize chapter tabs if they exist
-  document.addEventListener('DOMContentLoaded', function() {
-    const chapterTabs = document.querySelectorAll('.chapter-tab');
-    if (chapterTabs.length > 0) {
-      // Change biography chapter
-      chapterTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-          const chapter = this.dataset.chapter;
+  // Highlight active chapter on scroll
+  window.addEventListener('scroll', function() {
+    let currentChapter = '';
 
-          // Update active tab
-          document.querySelectorAll('.chapter-tab').forEach(t => {
-            t.classList.remove('bg-secondary-100', 'text-secondary-800');
-            t.classList.add('bg-white/50', 'text-gray-800', 'hover:bg-white');
-          });
-          this.classList.remove('bg-white/50', 'text-gray-800', 'hover:bg-white');
-          this.classList.add('bg-secondary-100', 'text-secondary-800');
+    chapterSections.forEach(section => {
+      const sectionTop = section.offsetTop;
+      const sectionHeight = section.clientHeight;
 
-          // Update chapter title and years
-          document.getElementById('chapter-title').textContent = chapters[chapter].title;
-          document.getElementById('chapter-years').textContent = chapters[chapter].years;
+      if (window.pageYOffset >= (sectionTop - 150) &&
+          window.pageYOffset < (sectionTop + sectionHeight - 150)) {
+        currentChapter = section.getAttribute('id');
+      }
+    });
 
-          // Update content
-          const bioText = document.getElementById('bio-text');
-          bioText.innerHTML = chapters[chapter].content || 'Content for this chapter is being generated...';
-        });
-      });
-    }
+    chapterLinks.forEach(link => {
+      link.classList.remove('active');
+
+      if (link.getAttribute('href') === '#' + currentChapter) {
+        link.classList.add('active');
+      }
+    });
   });
 
-  // Show success toast
-  function showSuccessToast(message) {
-    const toast = document.getElementById('successToast');
-    if (!toast) return;
+  // Smooth scroll to chapter when clicking nav link
+  chapterLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
 
-    toast.textContent = message || 'Biography successfully regenerated!';
-    toast.classList.remove('hidden');
+      const targetId = this.getAttribute('href').substring(1);
+      const targetSection = document.getElementById(targetId);
 
-    setTimeout(() => {
-      toast.classList.add('hidden');
-    }, 3000);
-  }
+      window.scrollTo({
+        top: targetSection.offsetTop - 100,
+        behavior: 'smooth'
+      });
 
-  // Mock regenerate biography - since the API endpoint doesn't exist yet
-  const regenerateBtn = document.getElementById('regenerateBtn');
-  if (regenerateBtn) {
-    regenerateBtn.addEventListener('click', function() {
-      const bioText = document.getElementById('bio-text');
-      const loadingIndicator = document.getElementById('loading-indicator');
-
-      // Show loading state
-      bioText.classList.add('hidden');
-      loadingIndicator.classList.remove('hidden');
-
-      // Use current active chapter
-      const activeChapter = document.querySelector('.chapter-tab.bg-secondary-100')?.dataset.chapter || 'childhood';
-
-      // Instead of using the missing API endpoint, we'll generate something locally
-      setTimeout(() => {
-        // Generate some placeholder text
-        const randomBio = generatePlaceholderBiography(activeChapter);
-
-        // Update the chapter content
-        chapters[activeChapter].content = randomBio;
-        bioText.innerHTML = randomBio;
-
-        // Show success message
-        showSuccessToast();
-
-        // Hide loading state
-        bioText.classList.remove('hidden');
-        loadingIndicator.classList.add('hidden');
-      }, 1500);
+      chapterLinks.forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
     });
-  }
-
-  // Generate some placeholder biography text
-  function generatePlaceholderBiography(chapter) {
-    const chapterContent = {
-      'childhood': `<p>I was born in the early 1990s in a small coastal town. My earliest memories involve playing in the backyard of our modest family home, where my imagination transformed ordinary objects into adventures.</p>
-<p>My parents worked hard to provide for our family. My father, employed at the local manufacturing plant, often came home tired but never missed an opportunity to toss a baseball with me. My mother, who taught at the elementary school, instilled in me a love for reading and learning.</p>
-<p>Summers were spent exploring the nearby woods with neighborhood friends, building forts, and creating elaborate fictional worlds. Winter evenings were for board games and hot chocolate by the fireplace. These simple pleasures shaped my understanding of connection and joy.</p>
-<p>School was generally a positive experience. I was curious and engaged, particularly in science and history classes. My third-grade teacher, Ms. Patterson, recognized my enthusiasm for storytelling and encouraged me to write my own tales – a practice I maintain to this day.</p>`,
-
-      'education': `<p>My academic journey began in earnest during high school when I discovered my aptitude for problem-solving and analytical thinking. I joined the debate team, which taught me how to research effectively and articulate my thoughts with precision and confidence.</p>
-<p>College was transformative. I chose to study computer science, drawn by the field's blend of logic and creativity. The challenging coursework pushed me to develop resilience and a methodical approach to complex problems. Late nights in the computer lab forged lasting friendships with peers who shared my determination.</p>
-<p>During my junior year, Professor Zhang became a pivotal mentor. Her guidance extended beyond coursework as she encouraged me to pursue research opportunities that aligned with my interests. This culminated in a senior project that received recognition at a regional technology symposium.</p>
-<p>Graduate studies allowed me to specialize in data science, where I found my professional calling. My thesis explored pattern recognition algorithms with applications in environmental monitoring – combining my technical skills with my concern for sustainability.</p>`,
-
-      'career': `<p>My career began at a startup where I was the fifth employee. Working in such a small team meant wearing multiple hats: developer, customer support, and occasionally office manager. This foundation proved invaluable, providing insights into every aspect of business operations.</p>
-<p>Three years later, I joined a larger tech company with more structured roles. The transition taught me to navigate corporate dynamics while maintaining the nimble problem-solving approach I'd cultivated. I led the development of our flagship data visualization platform, which became central to the company's market position.</p>
-<p>A pivotal career moment came when I was tasked with rescuing a failing project. By rebuilding the team culture and refocusing on core user needs, we transformed it into one of the company's most successful products. This experience revealed my aptitude for leadership in challenging circumstances.</p>
-<p>Recently, I've shifted toward mentoring junior colleagues and contributing to open-source projects that align with my values. Finding this balance between professional growth and meaningful contribution has brought a sense of purpose to my work that purely technical achievements never provided.</p>`,
-
-      'relationships': `<p>Friendship has been the steady rhythm in my life's symphony. My oldest friend, Jamie, has known me since we shared crayons in kindergarten. Though our paths diverged geographically after high school, our connection remains undiminished – a testament to the bonds formed in childhood.</p>
-<p>Romantic relationships have taught me profound lessons about communication and compromise. My first serious relationship in college ended painfully but necessarily, revealing how much growing I still needed to do. Years later, meeting Alex changed everything. Our connection felt both exciting and comfortable from the beginning.</p>
-<p>Our relationship has weathered career changes, a cross-country move, and the loss of loved ones. These challenges have strengthened rather than weakened our bond. We've learned to support each other's individual growth while nurturing our shared dreams.</p>
-<p>Family relationships have evolved as I've grown. What began as the simple love of a child for parents has matured into deeper appreciation for their sacrifices and wisdom. Now I find myself calling my mother for advice on matters I once thought I understood completely – a humbling reminder of life's complexity.</p>`,
-
-      'personal-growth': `<p>The journey of self-discovery has been neither linear nor easy. My twenties were marked by ambitious striving – pursuing degrees, advancing my career, and checking accomplishments off a mental list. Success by external metrics came, but with it, a growing sense that something was missing.</p>
-<p>A period of burnout forced me to reassess my priorities. I began practicing mindfulness meditation, initially skeptical but eventually finding it transformative. Learning to observe my thoughts without immediate judgment created space for deeper self-understanding.</p>
-<p>I discovered that many of my driving motivations stemmed from insecurities and beliefs I had never questioned. This awareness allowed me to consciously choose which values would guide my decisions moving forward. Authenticity, connection, and contribution emerged as my core principles.</p>
-<p>Therapy provided another valuable tool for growth. Working with Dr. Mendelson helped me recognize and break patterns that no longer served me. I've learned that personal growth isn't about becoming someone new, but rather uncovering who I've always been beneath layers of adaptation and expectation.</p>`,
-
-      'recent-years': `<p>The past few years have brought unexpected challenges and opportunities. The global pandemic forced a reevaluation of priorities as the structures of daily life were suddenly disrupted. Working from home eliminated my commute but blurred the boundaries between professional and personal life.</p>
-<p>I used this period of change to pursue long-deferred creative projects. Writing fiction in the early morning hours before work provided a sense of purpose entirely separate from my professional identity. Completing my first novel manuscript, regardless of whether it's ever published, represents a significant personal achievement.</p>
-<p>Community involvement has taken on new importance. Volunteering with the local literacy program connects me with neighbors I might otherwise never meet. These weekly sessions teaching adults to read have become a highlight, grounding me in what matters beyond career advancement or material acquisition.</p>
-<p>Looking ahead, I'm focused on cultivating sustainable joy rather than chasing fleeting happiness. This means creating space for meaningful relationships, creative expression, and contribution to causes larger than myself. It means accepting imperfection while still striving for growth. Most importantly, it means remaining open to life's continuing lessons.</p>`
-    };
-
-    return chapterContent[chapter] || `<p>This chapter is still being written...</p>
-<p>Continue journaling regularly to help the AI generate more personalized content for your biography.</p>
-<p>The more you write about your experiences, thoughts, and feelings, the more detailed and accurate your biography will become.</p>`;
-  }
-
-  // Print functionality
-  const printBtn = document.getElementById('printBtn');
-  if (printBtn) {
-    printBtn.addEventListener('click', function() {
-      window.print();
-    });
-  }
-
-  const printBioBtn = document.getElementById('printBioBtn');
-  if (printBioBtn) {
-    printBioBtn.addEventListener('click', function() {
-      window.print();
-    });
-  }
-
-  // Handle download as PDF
-  const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-  if (downloadPdfBtn) {
-    downloadPdfBtn.addEventListener('click', function() {
-      // Show a message since we don't have actual PDF generation implemented
-      alert('PDF generation feature will be available in the next update.');
-    });
-  }
-
-  // Handle email to yourself
-  const emailBioBtn = document.getElementById('emailBioBtn');
-  if (emailBioBtn) {
-    emailBioBtn.addEventListener('click', function() {
-      // Show a message since we don't have actual email functionality implemented
-      alert('Email functionality will be available in the next update.');
-    });
-  }
+  });
+});
 </script>
 {% endblock %}
