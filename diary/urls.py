@@ -19,8 +19,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
 
     # Entries
-    path('journal/', views.journal, name='new_entry'),  # Updated path but kept the same name
-    # Keep this URL pattern to maintain backward compatibility
+    path('journal/', views.journal, name='new_entry'),
     path('entry/new/', views.journal, name='new_entry'),
     path('entry/<int:entry_id>/', views.entry_detail, name='entry_detail'),
     path('entry/<int:entry_id>/edit/', views.edit_entry, name='edit_entry'),
@@ -48,4 +47,13 @@ urlpatterns = [
 
     # AJAX endpoints
     path('api/entry/<int:entry_id>/regenerate-summary/', views.regenerate_summary_ajax, name='regenerate_summary_ajax'),
+
+    # Gallery Feature
+    path('gallery/', views.gallery_view, name='gallery'),
+    path('gallery/publish/', views.gallery_publish, name='publish'),
+    path('gallery/monetization/', views.gallery_monetization, name='monetization'),
+    path('gallery/contest/', views.gallery_contest, name='contest'),
+    path('gallery/faq/', views.gallery_faq, name='faq'),
+    path('gallery/journal/<int:journal_id>/', views.gallery_journal_detail, name='journal_detail'),
+    path('gallery/author/<str:username>/', views.gallery_author_profile, name='author_profile'),
 ]

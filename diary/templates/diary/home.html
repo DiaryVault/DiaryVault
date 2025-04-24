@@ -216,6 +216,59 @@
         40% { content: '..'; }
         60%, 100% { content: '...'; }
       }
+      /* Gallery specific styles */
+      .gallery-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+      }
+      .gallery-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.2);
+      }
+      .gallery-card-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+        padding: 1.5rem;
+        color: white;
+        transform: translateY(20px);
+        opacity: 0.8;
+        transition: all 0.3s ease;
+      }
+      .gallery-card:hover .gallery-card-overlay {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .ribbon {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        padding: 0.25rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10% 50%);
+        z-index: 10;
+      }
+      .popularity-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        background-color: rgba(255,255,255,0.2);
+        backdrop-filter: blur(4px);
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        width: fit-content;
+      }
+      .crown-icon {
+        color: #fbbf24;
+      }
       @media (max-width: 640px) {
         .mobile-reduce-margin {
           margin-bottom: -2rem;
@@ -302,7 +355,7 @@
       </a>
     </div>
 
-    <!-- Main Navigation (only shown if logged in) -->
+    <!-- Main Navigation (only shown if logged in) - Hidden on Mobile -->
     {% if user.is_authenticated %}
     <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
       <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
@@ -323,6 +376,13 @@
         </svg>
         Insights
       </a>
+      <!-- Gallery Link -->
+      <a href="{% url 'gallery' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Gallery
+      </a>
 
       <div class="w-px h-6 bg-gray-200"></div>
 
@@ -342,26 +402,23 @@
       </form>
     </nav>
     {% else %}
-    <!-- Auth buttons if not logged in -->
-    <div class="flex gap-4 items-center">
+    <!-- Auth buttons if not logged in (DESKTOP ONLY) -->
+    <div class="hidden md:flex gap-4 items-center">
       <a href="{% url 'login' %}" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium transition px-5 py-2">Log in</a>
       <a href="{% url 'signup' %}" class="btn-gradient text-white px-5 py-2 rounded-full text-sm font-medium shadow-md">Sign up</a>
     </div>
     {% endif %}
 
-    <!-- Mobile menu button (only shown if logged in) -->
-    {% if user.is_authenticated %}
+    <!-- Hamburger menu button (always shown on mobile) -->
     <button class="md:hidden text-gray-700 hover:text-secondary-600 p-1.5 bg-white rounded-lg shadow-sm" onclick="toggleMobileMenu()">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
     </button>
-    {% endif %}
   </div>
 </header>
 
 <!-- Mobile Menu Overlay (only shown if logged in) -->
-{% if user.is_authenticated %}
 <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 hidden">
   <div class="absolute right-0 top-0 bottom-0 w-72 glass-effect p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
     <div class="flex justify-between items-center mb-8">
@@ -373,7 +430,8 @@
       </button>
     </div>
 
-    <!-- User info in mobile menu -->
+    {% if user.is_authenticated %}
+    <!-- User info in mobile menu when logged in -->
     <a href="{% url 'account_settings' %}" class="block">
       <div class="flex items-center gap-3 p-4 glass-effect rounded-xl mb-6 hover:bg-white/50 transition border border-white/20">
         <div class="h-10 w-10 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold shadow-md">
@@ -411,6 +469,13 @@
         </svg>
         <span>Insights</span>
       </a>
+      <!-- Gallery Link in Mobile Menu -->
+      <a href="{% url 'gallery' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span>Gallery</span>
+      </a>
       <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -430,9 +495,39 @@
         </form>
       </div>
     </nav>
+    {% else %}
+    <!-- Menu for non-logged in users -->
+    <nav class="flex flex-col gap-2">
+      <a href="{% url 'gallery' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span>Gallery</span>
+      </a>
+
+      <div class="border-t border-white/20 my-3 pt-2"></div>
+
+      <a href="{% url 'login' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+        </svg>
+        <span>Log in</span>
+      </a>
+
+      <a href="{% url 'signup' %}" class="flex items-center gap-3 p-3 bg-gradient-to-r from-secondary-100 to-primary-100 rounded-xl transition border border-white/20 font-medium text-secondary-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+        </svg>
+        <span>Sign up</span>
+      </a>
+
+      <div class="mt-6 p-4 bg-white/50 rounded-xl border border-white/30">
+        <p class="text-sm text-gray-600">Create an account to start your journal journey today and unlock all features.</p>
+      </div>
+    </nav>
+    {% endif %}
   </div>
 </div>
-{% endif %}
 
 <!-- Main Content -->
 <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-6 sm:pb-6 flex flex-col items-center">
@@ -679,6 +774,162 @@
           </div>
         </div>
       </div>
+
+    <!-- Gallery Preview Section -->
+    <div class="mt-16">
+      <div class="text-center mb-8 relative z-10">
+        <div class="inline-block mb-3">
+          <span class="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-secondary-600 shadow-sm border border-white/50">
+            NEW FEATURE
+          </span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2">
+          Explore the Gallery
+        </h2>
+        <p class="text-gray-600 text-sm max-w-md mx-auto">Discover featured journal biographies from our community, or share your own and earn recognition.</p>
+      </div>
+
+      <!-- Gallery Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Featured Gallery Item 1 -->
+        <div class="gallery-card bg-white rounded-xl shadow-lg overflow-hidden">
+          <div class="ribbon">FEATURED</div>
+          <div class="relative h-56 bg-gray-200">
+            <img src="https://images.unsplash.com/photo-1508672019048-805c876b67e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Travel Journal" class="w-full h-full object-cover">
+            <div class="gallery-card-overlay">
+              <div class="popularity-badge mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 crown-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
+                </svg>
+                <span>4,520 tips</span>
+              </div>
+              <h3 class="text-lg font-bold diary-font mb-1">Around the World in 80 Days</h3>
+              <p class="text-sm text-white/80">A travel journal chronicling adventures across six continents and fifteen countries.</p>
+            </div>
+          </div>
+          <div class="p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                  A
+                </div>
+                <span class="text-sm font-medium text-gray-800">@adventurer</span>
+              </div>
+              <div class="text-xs font-medium text-gray-500">42 entries</div>
+            </div>
+            <div class="flex gap-2 mb-3">
+              <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">Travel</span>
+              <span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">Adventure</span>
+              <span class="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-full">Photography</span>
+            </div>
+            <a href="{% url 'gallery' %}" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
+              Read Journal
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Featured Gallery Item 2 -->
+        <div class="gallery-card bg-white rounded-xl shadow-lg overflow-hidden">
+          <div class="relative h-56 bg-gray-200">
+            <img src="https://images.unsplash.com/photo-1533090161767-e6ffed986c88?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Mindfulness Journal" class="w-full h-full object-cover">
+            <div class="gallery-card-overlay">
+              <div class="popularity-badge mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 crown-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
+                </svg>
+                <span>3,180 tips</span>
+              </div>
+              <h3 class="text-lg font-bold diary-font mb-1">Mindfulness Journey</h3>
+              <p class="text-sm text-white/80">A year of daily meditations and mindfulness practices documented with reflections.</p>
+            </div>
+          </div>
+          <div class="p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                  M
+                </div>
+                <span class="text-sm font-medium text-gray-800">@mindful_me</span>
+              </div>
+              <div class="text-xs font-medium text-gray-500">365 entries</div>
+            </div>
+            <div class="flex gap-2 mb-3">
+              <span class="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded-full">Mindfulness</span>
+              <span class="text-xs bg-teal-50 text-teal-700 px-2 py-1 rounded-full">Wellness</span>
+              <span class="text-xs bg-pink-50 text-pink-700 px-2 py-1 rounded-full">Self-Care</span>
+            </div>
+            <a href="{% url 'gallery' %}" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
+              Read Journal
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- View Gallery Button -->
+      <div class="text-center mt-8">
+        <a href="{% url 'gallery' %}" class="inline-flex items-center gap-2 btn-gradient text-white px-6 py-3 rounded-full text-sm font-medium shadow-md transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Explore Full Gallery
+        </a>
+
+        <!-- Publish Call to Action -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 mt-8 border border-white">
+          <div class="flex flex-col md:flex-row items-center gap-6">
+            <div class="w-full md:w-2/3">
+              <h3 class="text-xl font-bold diary-font mb-2">Share Your Story With The World</h3>
+              <p class="text-gray-600 mb-4">Join our community of storytellers and publish your journal biography in the Gallery. Gain recognition, receive tips, and connect with like-minded journalers.</p>
+              <div class="flex flex-wrap gap-4">
+                <a href="{% url 'gallery' %}" class="btn-gradient text-white px-5 py-2.5 rounded-full text-sm font-medium shadow-md transition flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  Publish Your Journal
+                </a>
+                <a href="{% url 'signup' %}" class="bg-white border border-secondary-200 text-secondary-700 px-5 py-2.5 rounded-full text-sm font-medium shadow-sm transition hover:bg-secondary-50">
+                  Learn About Monetization
+                </a>
+              </div>
+            </div>
+            <div class="w-full md:w-1/3">
+              <div class="bg-gradient-to-br from-secondary-100 to-primary-100 p-4 rounded-lg">
+                <div class="text-center">
+                  <div class="text-xl font-bold text-secondary-800 mb-1">Gallery Benefits</div>
+                  <ul class="text-sm text-gray-700 space-y-2 text-left">
+                    <li class="flex items-start gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      </svg>
+                      <span>Showcase your writing to thousands</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      </svg>
+                      <span>Receive tips from appreciative readers</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      </svg>
+                      <span>Compete in weekly popularity contests</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Feature highlights -->
     <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-5">
       <div class="bg-white p-6 rounded-2xl shadow-lg border border-white flex flex-col items-center text-center card-hover">
@@ -782,11 +1033,12 @@
     <div class="h-6 w-6"></div>
     <span class="text-xs mt-1">New</span>
   </div>
-  <a href="{% url 'insights' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'insights' %}text-secondary-600{% else %}text-gray-500{% endif %}">
+  <!-- Add Gallery Item to Bottom Nav -->
+  <a href="{% url 'gallery' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'gallery' %}text-secondary-600{% else %}text-gray-500{% endif %}">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
     </svg>
-    <span class="text-xs mt-1">Insights</span>
+    <span class="text-xs mt-1">Gallery</span>
   </a>
   <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'account_settings' %}text-secondary-600{% else %}text-gray-500{% endif %}">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

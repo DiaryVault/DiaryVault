@@ -238,3 +238,155 @@ class EntryTag(models.Model):
     class Meta:
         ordering = ['name']
 
+class Journal(models.Model):
+    """Model representing a curated journal that can be published to the gallery"""
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='journals')
+    cover_image = models.ImageField(upload_to='journal_covers/', blank=True, null=True)
+
+    # Gallery specific fields
+    is_published = models.BooleanField(default=False)
+    date_published = models.DateTimeField(null=True, blank=True)
+    is_staff_pick = models.BooleanField(default=False)
+    featured_rank = models.IntegerField(null=True, blank=True)
+
+    # Statistics
+    view_count = models.PositiveIntegerField(default=0)
+    total_tips = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    popularity_score = models.FloatField(default=0)  # Calculated field based on views, likes, comments, etc.
+
+    # Likes (many-to-many relationship with User)
+    likes = models.ManyToManyField(User, related_name='liked_journals', blank=True)
+
+    # Contest fields
+    contest_participant = models.BooleanField(default=False)
+    contest_score = models.FloatField(default=0)
+
+    # Privacy settings
+    PRIVACY_CHOICES = [
+        ('public', 'Public'),
+        ('community', 'Community Only'),
+        ('restricted', 'Restricted'),
+    ]
+    privacy_setting = models.CharField(max_length=10, choices=PRIVACY_CHOICES, default='public')
+
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        # Set date_published when publishing for the first time
+        if self.is_published and self.date_published is None:
+            self.date_published = timezone.now()
+        super().save(*args, **kwargs)
+
+    def like_count(self):
+        return self.likes.count()
+
+    def calculate_popularity(self):
+        """Calculate popularity score based on various metrics"""
+        # Example formula: views * 0.2 + likes * 1.0 + comments * 1.5 + tips * 5.0
+        # This would need to be implemented based on your specific requirements
+        view_weight = 0.2
+        like_weight = 1.0
+        comment_weight = 1.5
+        tip_weight = 5.0
+
+        comment_count = Comment.objects.filter(journal=self).count()
+
+        score = (self.view_count * view_weight +
+                self.likes.count() * like_weight +
+                comment_count * comment_weight +
+                float(self.total_tips) * tip_weight)
+
+        self.popularity_score = score
+        self.save(update_fields=['popularity_score'])
+        return score
+
+class JournalEntry(models.Model):
+    """Model representing an individual entry in a journal"""
+
+    journal = models.ForeignKey(Journal, on_delete=models.CASCADE, related_name='entries')
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+
+    # Entry metadata
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    # Optional entry date (for when the event took place)
+    entry_date = models.DateField(null=True, blank=True)
+
+    # Include in published journal
+    is_included = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+
+class Comment(models.Model):
+    """Model for comments on journals"""
+
+    journal = models.ForeignKey(Journal, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.author.username} on {self.journal.title}"
+
+class Tip(models.Model):
+    """Model for tracking tips received by journal authors"""
+
+    journal = models.ForeignKey(Journal, on_delete=models.CASCADE, related_name='tips')
+    tipper = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='tips_given')
+    recipient = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='tips_received')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_id = models.CharField(max_length=255, blank=True, null=True)  # For payment processor reference
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"${self.amount} tip from {self.tipper.username} to {self.recipient.username}"
+
+    def save(self, *args, **kwargs):
+        # Update the journal's total_tips field when a new tip is saved
+        super().save(*args, **kwargs)
+
+        # Update journal total tips
+        journal = self.journal
+        total_tips = Tip.objects.filter(journal=journal).aggregate(models.Sum('amount'))['amount__sum'] or 0
+        journal.total_tips = total_tips
+        journal.save(update_fields=['total_tips'])
+
+        # Recalculate journal popularity
+        journal.calculate_popularity()
+
+class ContestEntry(models.Model):
+    """Model for tracking journal entries in weekly contests"""
+
+    journal = models.ForeignKey(Journal, on_delete=models.CASCADE, related_name='contest_entries')
+    contest_start_date = models.DateField()
+    contest_end_date = models.DateField()
+    final_rank = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('journal', 'contest_start_date')
+
+    def __str__(self):
+        return f"{self.journal.title} in contest {self.contest_start_date} to {self.contest_end_date}"
+
+class UserFollowing(models.Model):
+    """Model for tracking which users follow each other"""
+    user = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
+    followed_user = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'followed_user')
+
+    def __str__(self):
+        return f"{self.user.username} follows {self.followed_user.username}"
