@@ -1,1057 +1,457 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <!-- Favicon and App Icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
-    <link rel="shortcut icon" href="/static/favicon.ico">
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="msapplication-config" content="/static/browserconfig.xml">
+{% extends "base.html" %}
 
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>DiaryVault - Your Daily Journal</title>
-    <meta name="theme-color" content="#6366f1" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Poppins:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: {
-                50: '#f5f3ff',
-                100: '#ede9fe',
-                200: '#ddd6fe',
-                300: '#c4b5fd',
-                400: '#a78bfa',
-                500: '#8b5cf6',
-                600: '#7c3aed',
-                700: '#6d28d9',
-                800: '#5b21b6',
-                900: '#4c1d95',
-              },
-              secondary: {
-                50: '#eef2ff',
-                100: '#e0e7ff',
-                200: '#c7d2fe',
-                300: '#a5b4fc',
-                400: '#818cf8',
-                500: '#6366f1',
-                600: '#4f46e5',
-                700: '#4338ca',
-                800: '#3730a3',
-                900: '#312e81',
-              },
-            },
-          },
-        },
-      }
-    </script>
-    <style>
-      .personalization-badge {
-        display: inline-flex;
-        align-items: center;
-        font-size: 0.7rem;
-        vertical-align: middle;
-      }
-    </style>
-    <style>
-      body {
-        font-family: 'Poppins', sans-serif;
-        background-color: #f8fafc;
-        width: 100%;
-        overflow-x: hidden;
-        position: relative;
-      }
-      html {
-        overflow-x: hidden;
-        scroll-behavior: smooth;
-      }
-      .diary-font {
-        font-family: 'Playfair Display', serif;
-      }
-      .book-title {
-        font-family: 'Playfair Display', serif;
-      }
-      .handwritten {
-        font-family: 'Caveat', cursive;
-      }
-      .input-area {
-        min-height: 180px;
-        resize: none;
-      }
-      .suggestions-pill {
-        transition: all 0.3s ease;
-      }
-      .suggestions-pill:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      }
-      .chat-bubble {
-        border-radius: 1.5rem;
-        padding: 1rem 1.25rem;
-        position: relative;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-      }
-      .chat-bubble.ai {
-        background-color: #f1f5f9;
-        margin-right: 2rem;
-        border-bottom-left-radius: 0.25rem;
-      }
-      .chat-bubble.user {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        color: white;
-        margin-left: 2rem;
-        border-bottom-right-radius: 0.25rem;
-      }
-      .chat-bubble.ai::before {
-        content: '';
-        position: absolute;
-        left: -0.5rem;
-        bottom: 0;
-        width: 1rem;
-        height: 1rem;
-        background-color: #f1f5f9;
-        clip-path: polygon(100% 0, 0 100%, 100% 100%);
-        transform: rotate(135deg);
-      }
-      .chat-bubble.user::after {
-        content: '';
-        position: absolute;
-        right: -0.5rem;
-        bottom: 0;
-        width: 1rem;
-        height: 1rem;
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        clip-path: polygon(100% 0, 0 100%, 100% 100%);
-        transform: rotate(-45deg);
-      }
-      .gradient-bg {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-      }
-      .gradient-text {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-      }
-      .btn-gradient {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        transition: all 0.3s ease;
-      }
-      .btn-gradient:hover {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
-      }
-      .card-hover {
-        transition: all 0.3s ease;
-      }
-      .card-hover:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      }
-      .glass-effect {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-      }
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f5f9;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 3px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-      }
-      .circle-pattern {
-        background-image: radial-gradient(#6366f120 1px, transparent 1px);
-        background-size: 20px 20px;
-      }
-      .floating {
-        animation: floating 3s infinite ease-in-out;
-      }
-      @keyframes floating {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-        100% { transform: translateY(0px); }
-      }
-      .scale-in {
-        animation: scaleIn 0.5s ease forwards;
-        transform: scale(0.95);
-        opacity: 0;
-      }
-      @keyframes scaleIn {
-        to {
-          transform: scale(1);
-          opacity: 1;
-        }
-      }
-      .fade-in {
-        animation: fadeIn 0.5s ease forwards;
-        opacity: 0;
-      }
-      @keyframes fadeIn {
-        to {
-          opacity: 1;
-        }
-      }
-      .loading-dots:after {
-        content: '';
-        animation: dots 1.5s infinite;
-      }
-      @keyframes dots {
-        0%, 20% { content: '.'; }
-        40% { content: '..'; }
-        60%, 100% { content: '...'; }
-      }
-      /* Marketplace specific styles */
-      .marketplace-card {
-        position: relative;
-        overflow: hidden;
-        border-radius: 1rem;
-        transition: all 0.3s ease;
-      }
-      .marketplace-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.2);
-      }
-      .marketplace-card-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
-        padding: 1.5rem;
-        color: white;
-        transform: translateY(20px);
-        opacity: 0.8;
-        transition: all 0.3s ease;
-      }
-      .marketplace-card:hover .marketplace-card-overlay {
-        transform: translateY(0);
-        opacity: 1;
-      }
-      .ribbon {
-        position: absolute;
-        top: 0;
-        right: 0;
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        color: white;
-        padding: 0.25rem 1rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10% 50%);
-        z-index: 10;
-      }
-      .popularity-badge {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        background-color: rgba(255,255,255,0.2);
-        backdrop-filter: blur(4px);
-        padding: 0.25rem 0.5rem;
-        border-radius: 1rem;
-        font-size: 0.75rem;
-        width: fit-content;
-      }
-      .crown-icon {
-        color: #fbbf24;
-      }
-      @media (max-width: 640px) {
-        .mobile-reduce-margin {
-          margin-bottom: -2rem;
-        }
-        /* Your existing styles */
-        .mobile-menu-slide {
-          transition: transform 0.3s ease-in-out;
-        }
-        .mobile-menu-open {
-          transform: translateX(0);
-        }
-        .mobile-menu-closed {
-          transform: translateX(100%);
-        }
-        .mobile-bottom-nav {
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-        }
+{% block title %}DiaryVault - Your Daily Journal{% endblock %}
 
-        /* New styles to add */
-        .mobile-bottom-nav {
-          background-color: rgba(255, 255, 255, 0.9);
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 40;
-          border-top: 1px solid rgba(255, 255, 255, 0.3);
-        }
+{% block content %}
+<div class="max-w-4xl w-full mx-auto relative">
+  <!-- Decorative elements -->
+  <div class="absolute -top-10 -left-16 h-32 w-32 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+  <div class="absolute -bottom-8 -right-16 h-32 w-32 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
 
-        .mobile-fab {
-          position: fixed;
-          bottom: 80px;
-          right: 20px;
-          z-index: 30;
-          transform-origin: center;
-          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .mobile-fab:active {
-          transform: scale(0.95);
-        }
-
-        .input-area {
-          min-height: 150px; /* Shorter on mobile */
-        }
-
-        .chat-bubble.user {
-          margin-left: 1rem; /* Reduce margin on mobile */
-        }
-
-        .chat-bubble.ai {
-          margin-right: 1rem; /* Reduce margin on mobile */
-        }
-
-        /* Full-width button on mobile */
-        .mobile-full-width {
-          width: 100%;
-          justify-content: center;
-        }
-
-        /* Add bottom padding to account for fixed nav */
-        .pb-safe {
-          padding-bottom: 2rem !important;
-        }
-      }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f5f3ff] to-[#eef2ff] text-gray-800 custom-scrollbar circle-pattern">
-
-<!-- Navbar -->
-<header class="glass-effect sticky top-0 z-50 border-b border-white/20">
-  <div class="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 sm:py-4">
-    <!-- Logo -->
-    <div class="flex items-center gap-2 sm:gap-3">
-      <a href="{% url 'home' %}" class="flex items-center gap-1 sm:gap-2 hover:opacity-80 transition">
-        <div class="bg-white p-1.5 rounded-lg shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-        </div>
-        <h1 class="text-lg sm:text-2xl font-extrabold gradient-text tracking-tight">DiaryVault</h1>
-      </a>
+  <!-- Header with date -->
+  <div class="text-center mb-10 relative z-10">
+    <div class="inline-block mb-3">
+      <span class="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-gray-500 shadow-sm border border-white/50">
+        {{ current_date|default:"Today" }}
+      </span>
     </div>
-
-    <!-- Main Navigation (only shown if logged in) - Hidden on Mobile -->
-    {% if user.is_authenticated %}
-    <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
-      <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-        </svg>
-        Dashboard
-      </a>
-      <a href="{% url 'library' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-        </svg>
-        Library
-      </a>
-      <a href="{% url 'insights' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-        Insights
-      </a>
-      <!-- Marketplace Link -->
-      <a href="{% url 'marketplace' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        Marketplace
-      </a>
-
-      <div class="w-px h-6 bg-gray-200"></div>
-
-      <!-- User profile section when logged in -->
-      <div class="flex items-center gap-3">
-        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 hover:opacity-80 transition">
-          <div class="h-9 w-9 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
-            {{ user.username|first|upper }}
-          </div>
-          <span class="text-sm text-gray-700">{{ user.username }}</span>
-        </a>
-      </div>
-
-      <form method="post" action="{% url 'logout' %}" class="inline">
-        {% csrf_token %}
-        <button type="submit" class="text-gray-700 hover:text-red-500 transition bg-gray-100 px-4 py-2 rounded-full text-sm hover:bg-red-50">Logout</button>
-      </form>
-    </nav>
-    {% else %}
-    <!-- Auth buttons if not logged in (DESKTOP ONLY) -->
-    <div class="hidden md:flex gap-4 items-center">
-      <a href="{% url 'login' %}" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium transition px-5 py-2">Log in</a>
-      <a href="{% url 'signup' %}" class="btn-gradient text-white px-5 py-2 rounded-full text-sm font-medium shadow-md">Sign up</a>
-    </div>
-    {% endif %}
-
-    <!-- Hamburger menu button (always shown on mobile) -->
-    <button class="md:hidden text-gray-700 hover:text-secondary-600 p-1.5 bg-white rounded-lg shadow-sm" onclick="toggleMobileMenu()">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
+    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2">
+      What's on your mind today?
+    </h2>
+    <p class="text-gray-600 text-sm max-w-md mx-auto">Capture your thoughts, feelings and experiences - our AI will transform them into meaningful journal entries.</p>
   </div>
-</header>
 
-<!-- Mobile Menu Overlay (only shown if logged in) -->
-<div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 hidden">
-  <div class="absolute right-0 top-0 bottom-0 w-72 glass-effect p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
-    <div class="flex justify-between items-center mb-8">
-      <h2 class="font-bold text-lg gradient-text">Menu</h2>
-      <button onclick="toggleMobileMenu()" class="p-1.5 bg-white rounded-lg shadow-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+  <!-- Chat area (visible if there are already messages) -->
+  <div id="chatArea" class="mb-8 space-y-4 {% if not has_conversation %}hidden{% endif %}">
+    <!-- Sample AI message (this would be populated dynamically) -->
+    <div class="chat-bubble ai">
+      <p class="handwritten text-gray-800 text-lg leading-relaxed">Hey there! Tell me about your day, and I'll help you turn it into a beautiful journal entry.</p>
     </div>
 
-    {% if user.is_authenticated %}
-    <!-- User info in mobile menu when logged in -->
-    <a href="{% url 'account_settings' %}" class="block">
-      <div class="flex items-center gap-3 p-4 glass-effect rounded-xl mb-6 hover:bg-white/50 transition border border-white/20">
-        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold shadow-md">
-          {{ user.username|first|upper }}
-        </div>
-        <div>
-          <div class="font-medium">{{ user.username }}</div>
-          <div class="text-xs text-gray-500">{{ total_entries|default:'0' }} entries</div>
-        </div>
-      </div>
-    </a>
+    <!-- This is where chat messages would appear dynamically -->
+    <div id="chatMessages">
+      <!-- Example of conversation flow (would be added dynamically) -->
+      {% if has_conversation %}
+        <!-- These would be populated from your backend -->
+        {% for message in conversation %}
+          {% if message.is_user %}
+            <div class="chat-bubble user diary-font">
+              <p>{{ message.content }}</p>
+            </div>
+          {% else %}
+            <div class="chat-bubble ai handwritten">
+              <p>{{ message.content }}</p>
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
 
-    <nav class="flex flex-col gap-2">
-      <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-        </svg>
-        <span>Dashboard</span>
-      </a>
-      <a href="{% url 'library' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-        </svg>
-        <span>Library</span>
-      </a>
-      <a href="{% url 'new_entry' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-        </svg>
-        <span>Journal</span>
-      </a>
-      <a href="{% url 'insights' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-        <span>Insights</span>
-      </a>
-      <!-- Marketplace Link in Mobile Menu -->
-      <a href="{% url 'marketplace' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <span>Marketplace</span>
-      </a>
-      <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-        <span>Account</span>
-      </a>
-      <div class="border-t border-white/20 my-3 pt-2">
-        <form method="post" action="{% url 'logout' %}">
-          {% csrf_token %}
-          <button type="submit" class="flex items-center gap-3 p-3 w-full hover:bg-red-50/80 rounded-xl text-red-600 transition border border-transparent hover:border-red-100">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+  <!-- Main input form with improved mobile responsiveness -->
+  <form id="demoForm" class="w-full relative z-10">
+    {% csrf_token %}
+    <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden border border-white transition-all hover:shadow-2xl card-hover">
+      <div class="p-3 sm:p-6">
+        <!-- Header section with responsive layout -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+          <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd" />
             </svg>
-            <span>Logout</span>
-          </button>
-        </form>
-      </div>
-    </nav>
-    {% else %}
-    <!-- Menu for non-logged in users -->
-    <nav class="flex flex-col gap-2">
-      <a href="{% url 'marketplace' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <span>Marketplace</span>
-      </a>
+            Share your day
+          </h3>
+          <div class="text-xs font-medium bg-gray-100 px-3 py-1 rounded-full text-gray-500 flex items-center gap-1 shadow-inner w-fit">
+            <span id="charCount">0</span>
+            <span>characters</span>
+          </div>
+        </div>
 
-      <div class="border-t border-white/20 my-3 pt-2"></div>
+        <!-- Input textarea with reduced padding on mobile -->
+        <textarea
+          id="journalInput"
+          name="journal_content"
+          class="input-area w-full p-3 sm:p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition diary-font shadow-inner bg-gray-50/50 min-h-[120px] sm:min-h-[150px]"
+          placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am..."
+          oninput="countChars()"></textarea>
 
-      <a href="{% url 'login' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-        </svg>
-        <span>Log in</span>
-      </a>
+        <!-- Suggestions section with better wrapping -->
+        <div class="mt-3 sm:mt-4">
+          <div class="text-xs font-medium text-gray-600 mb-2">Suggested topics:</div>
+          <div class="flex flex-wrap gap-1 sm:gap-2">
+            <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestions-pill bg-secondary-50 hover:bg-secondary-100 text-secondary-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-medium transition shadow-sm border border-secondary-200/50 min-h-[32px] sm:min-h-[40px] mb-1">Today I accomplished</button>
+            <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-emerald-200/50 mb-1">I felt happy when</button>
+            <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-indigo-200/50 mb-1">I learned that</button>
+            <button type="button" onclick="addSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50 mb-1">I met with</button>
+            <button type="button" onclick="addSuggestion('I'm grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50 mb-1">I'm grateful for</button>
+          </div>
+        </div>
 
-      <a href="{% url 'signup' %}" class="flex items-center gap-3 p-3 bg-gradient-to-r from-secondary-100 to-primary-100 rounded-xl transition border border-white/20 font-medium text-secondary-700">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-        </svg>
-        <span>Sign up</span>
-      </a>
+        <!-- Personalization toggle with better responsive layout -->
+        <div class="mt-3 sm:mt-4 border-t border-gray-200 pt-3 sm:pt-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+            <div class="flex items-center">
+              <input type="checkbox" id="personalizationToggle" class="h-4 w-4 text-secondary-600 focus:ring-secondary-400 border-gray-300 rounded">
+              <label for="personalizationToggle" class="ml-2 text-sm font-medium text-gray-700 flex flex-wrap items-center">
+                <span>Use personalized style</span>
+                {% if user.is_authenticated %}
+                  <span class="ml-1 text-xs text-secondary-600">(based on your preferences)</span>
+                  <a href="{% url 'preferences' %}" class="ml-2 text-xs text-secondary-700 hover:text-secondary-900 underline">
+                    Edit preferences
+                  </a>
+                {% else %}
+                  <span class="ml-1 text-xs text-secondary-600">(login to customize)</span>
+                {% endif %}
+              </label>
+            </div>
 
-      <div class="mt-6 p-4 bg-white/50 rounded-xl border border-white/30">
-        <p class="text-sm text-gray-600">Create an account to start your journal journey today and unlock all features.</p>
-      </div>
-    </nav>
-    {% endif %}
-  </div>
-</div>
+            {% if not user.is_authenticated %}
+            <a href="{% url 'login' %}" class="text-xs text-secondary-600 hover:underline">
+              Login for personalization
+            </a>
+            {% endif %}
+          </div>
 
-<!-- Main Content -->
-<main class="flex-1 p-4 sm:p-6 lg:p-8 pb-6 sm:pb-6 flex flex-col items-center">
-  <div class="max-w-4xl w-full mx-auto relative">
-    <!-- Decorative elements -->
-    <div class="absolute -top-10 -left-16 h-32 w-32 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
-    <div class="absolute -bottom-8 -right-16 h-32 w-32 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-
-    <!-- Header with date -->
-    <div class="text-center mb-10 relative z-10">
-      <div class="inline-block mb-3">
-        <span class="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-gray-500 shadow-sm border border-white/50">
-          {{ current_date|default:"Today" }}
-        </span>
-      </div>
-      <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2">
-        What's on your mind today?
-      </h2>
-      <p class="text-gray-600 text-sm max-w-md mx-auto">Capture your thoughts, feelings and experiences - our AI will transform them into meaningful journal entries.</p>
-    </div>
-
-    <!-- Chat area (visible if there are already messages) -->
-    <div id="chatArea" class="mb-8 space-y-4 {% if not has_conversation %}hidden{% endif %}">
-      <!-- Sample AI message (this would be populated dynamically) -->
-      <div class="chat-bubble ai">
-        <p class="handwritten text-gray-800 text-lg leading-relaxed">Hey there! Tell me about your day, and I'll help you turn it into a beautiful journal entry.</p>
-      </div>
-
-      <!-- This is where chat messages would appear dynamically -->
-      <div id="chatMessages">
-        <!-- Example of conversation flow (would be added dynamically) -->
-        {% if has_conversation %}
-          <!-- These would be populated from your backend -->
-          {% for message in conversation %}
-            {% if message.is_user %}
-              <div class="chat-bubble user diary-font">
-                <p>{{ message.content }}</p>
+          <!-- Personalization Options (initially hidden) -->
+          <div id="personalizationOptions" class="hidden bg-gray-50 p-3 sm:p-4 rounded-lg">
+            {% if user.is_authenticated %}
+              <div class="text-sm text-gray-700 mb-2">
+                Your personalization settings:
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-600">
+                <div>
+                  <span class="font-medium">Writing Style:</span>
+                  <span class="capitalize">{{ user.journal_preferences.get_writing_style_display }}</span>
+                </div>
+                <div>
+                  <span class="font-medium">Tone:</span>
+                  <span class="capitalize">{{ user.journal_preferences.get_tone_display }}</span>
+                </div>
+                {% if user.journal_preferences.focus_areas %}
+                <div class="col-span-1 sm:col-span-2">
+                  <span class="font-medium">Focus Areas:</span>
+                  <span>{{ user.journal_preferences.focus_areas }}</span>
+                </div>
+                {% endif %}
+              </div>
+              <div class="text-xs text-right mt-2">
+                <a href="{% url 'preferences' %}" class="text-secondary-600 hover:text-secondary-900">
+                  Edit preferences →
+                </a>
               </div>
             {% else %}
-              <div class="chat-bubble ai handwritten">
-                <p>{{ message.content }}</p>
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="text-sm text-gray-700">
+                  <p>Login or create an account to personalize your journal entries.</p>
+                </div>
+                <div class="flex gap-2">
+                  <a href="{% url 'login' %}" class="text-xs bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-3 py-1 rounded-full">
+                    Login
+                  </a>
+                  <a href="{% url 'signup' %}" class="text-xs bg-secondary-600 hover:bg-secondary-700 text-white px-3 py-1 rounded-full">
+                    Sign up
+                  </a>
+                </div>
               </div>
             {% endif %}
-          {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom action area with mobile optimizations -->
+      <div class="bg-gradient-to-r from-secondary-50 to-primary-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-t border-white">
+        <div class="text-xs text-gray-600 flex items-center gap-2">
+          <span class="h-6 w-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-600" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+            </svg>
+          </span>
+          <span>Try for free - no account needed</span>
+        </div>
+        <div class="action-container">
+          <button type="button" id="demoButton" onclick="generateDemo()" class="btn-gradient text-white px-5 py-2.5 rounded-full text-sm font-medium flex items-center justify-center gap-2 shadow-md w-full sm:w-auto">
+            <span>Generate</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- Loading indicator (initially hidden) -->
+  <div id="loadingIndicator" class="mt-6 sm:mt-12 hidden">
+    <div class="flex flex-col items-center justify-center p-4 sm:p-8">
+      <div class="w-12 sm:w-16 h-12 sm:h-16 border-4 border-secondary-200 border-t-secondary-600 rounded-full animate-spin mb-4"></div>
+      <p class="text-center text-gray-600 handwritten text-lg sm:text-xl">Crafting your journal entry<span class="loading-dots"></span></p>
+      <p class="text-center text-gray-500 text-sm mt-2">This takes just a moment</p>
+    </div>
+  </div>
+
+  <!-- Results preview with responsive improvements -->
+  <div id="resultPreview" class="mt-6 sm:mt-12 bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden border border-white card-hover hidden scale-in">
+    <div class="p-4 sm:p-6 border-b border-gray-100 flex items-center justify-between">
+      <div>
+        <h3 class="font-bold text-gray-800 text-base sm:text-lg mb-1 diary-font">Your Journal Entry</h3>
+        <p class="text-gray-600 text-xs">Generated based on your day</p>
+      </div>
+      <div class="h-8 w-8 sm:h-9 sm:w-9 bg-gray-50 rounded-full flex items-center justify-center text-secondary-600 shadow-sm border border-gray-100" onclick="editJournalEntry()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+        </svg>
+      </div>
+    </div>
+
+    <div class="p-4 sm:p-6 bg-gradient-to-br from-white to-gray-50">
+      <div id="journalEntry" class="handwritten text-lg sm:text-xl text-gray-800 leading-relaxed">
+        <!-- This will be populated with the demo AI-generated entry via JavaScript -->
+      </div>
+    </div>
+
+    <!-- Update the result preview section with responsive improvements -->
+    <div class="bg-gradient-to-r from-secondary-50 to-primary-50 p-4 sm:p-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-t border-white">
+      <div class="text-gray-600 text-sm diary-font">
+        <span class="text-secondary-600 font-medium">Title:</span>
+        <span id="entryTitle">My Day - {{ current_date|default:"Today" }}</span>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" onclick="editJournalEntry()" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm transition shadow-sm flex items-center gap-1 w-full sm:w-auto justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+          Edit
+        </button>
+        <button type="button" onclick="restartDemo()" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm transition shadow-sm flex items-center gap-1 w-full sm:w-auto justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Try Again
+        </button>
+        <!-- New Dashboard Button -->
+        <a href="{% url 'dashboard' %}?entry_saved=true" id="saveDashboardButton" class="btn-gradient text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm font-medium shadow-md flex items-center gap-1 w-full sm:w-auto justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          Save & View Dashboard
+        </a>
+        {% if not user.is_authenticated %}
+        <a href="{% url 'signup' %}" class="btn-gradient text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm font-medium shadow-md flex items-center gap-1 w-full sm:w-auto justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+          </svg>
+          Sign Up to Save
+        </a>
         {% endif %}
       </div>
     </div>
+  </div>
 
-      <!-- Main input form with improved mobile responsiveness -->
-      <form id="demoForm" class="w-full relative z-10">
-        {% csrf_token %}
-        <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden border border-white transition-all hover:shadow-2xl card-hover">
-          <div class="p-3 sm:p-6">
-            <!-- Header section with responsive layout -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
-              <h3 class="font-semibold text-gray-800 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd" />
-                </svg>
-                Share your day
-              </h3>
-              <div class="text-xs font-medium bg-gray-100 px-3 py-1 rounded-full text-gray-500 flex items-center gap-1 shadow-inner w-fit">
-                <span id="charCount">0</span>
-                <span>characters</span>
-              </div>
-            </div>
-
-            <!-- Input textarea with reduced padding on mobile -->
-            <textarea
-              id="journalInput"
-              name="journal_content"
-              class="input-area w-full p-3 sm:p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition diary-font shadow-inner bg-gray-50/50 min-h-[120px] sm:min-h-[150px]"
-              placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am..."
-              oninput="countChars()"></textarea>
-
-            <!-- Suggestions section with better wrapping -->
-            <div class="mt-3 sm:mt-4">
-              <div class="text-xs font-medium text-gray-600 mb-2">Suggested topics:</div>
-              <div class="flex flex-wrap gap-1 sm:gap-2">
-                <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestions-pill bg-secondary-50 hover:bg-secondary-100 text-secondary-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-medium transition shadow-sm border border-secondary-200/50 min-h-[32px] sm:min-h-[40px] mb-1">Today I accomplished</button>
-                <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-emerald-200/50 mb-1">I felt happy when</button>
-                <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-indigo-200/50 mb-1">I learned that</button>
-                <button type="button" onclick="addSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50 mb-1">I met with</button>
-                <button type="button" onclick="addSuggestion('I'm grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50 mb-1">I'm grateful for</button>
-              </div>
-            </div>
-
-            <!-- Personalization toggle with better responsive layout -->
-            <div class="mt-3 sm:mt-4 border-t border-gray-200 pt-3 sm:pt-4">
-              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
-                <div class="flex items-center">
-                  <input type="checkbox" id="personalizationToggle" class="h-4 w-4 text-secondary-600 focus:ring-secondary-400 border-gray-300 rounded">
-                  <label for="personalizationToggle" class="ml-2 text-sm font-medium text-gray-700 flex flex-wrap items-center">
-                    <span>Use personalized style</span>
-                    {% if user.is_authenticated %}
-                      <span class="ml-1 text-xs text-secondary-600">(based on your preferences)</span>
-                      <a href="{% url 'preferences' %}" class="ml-2 text-xs text-secondary-700 hover:text-secondary-900 underline">
-                        Edit preferences
-                      </a>
-                    {% else %}
-                      <span class="ml-1 text-xs text-secondary-600">(login to customize)</span>
-                    {% endif %}
-                  </label>
-                </div>
-
-                {% if not user.is_authenticated %}
-                <a href="{% url 'login' %}" class="text-xs text-secondary-600 hover:underline">
-                  Login for personalization
-                </a>
-                {% endif %}
-              </div>
-
-              <!-- Personalization Options (initially hidden) -->
-              <div id="personalizationOptions" class="hidden bg-gray-50 p-3 sm:p-4 rounded-lg">
-                {% if user.is_authenticated %}
-                  <div class="text-sm text-gray-700 mb-2">
-                    Your personalization settings:
-                  </div>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-600">
-                    <div>
-                      <span class="font-medium">Writing Style:</span>
-                      <span class="capitalize">{{ user.journal_preferences.get_writing_style_display }}</span>
-                    </div>
-                    <div>
-                      <span class="font-medium">Tone:</span>
-                      <span class="capitalize">{{ user.journal_preferences.get_tone_display }}</span>
-                    </div>
-                    {% if user.journal_preferences.focus_areas %}
-                    <div class="col-span-1 sm:col-span-2">
-                      <span class="font-medium">Focus Areas:</span>
-                      <span>{{ user.journal_preferences.focus_areas }}</span>
-                    </div>
-                    {% endif %}
-                  </div>
-                  <div class="text-xs text-right mt-2">
-                    <a href="{% url 'preferences' %}" class="text-secondary-600 hover:text-secondary-900">
-                      Edit preferences →
-                    </a>
-                  </div>
-                {% else %}
-                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div class="text-sm text-gray-700">
-                      <p>Login or create an account to personalize your journal entries.</p>
-                    </div>
-                    <div class="flex gap-2">
-                      <a href="{% url 'login' %}" class="text-xs bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-3 py-1 rounded-full">
-                        Login
-                      </a>
-                      <a href="{% url 'signup' %}" class="text-xs bg-secondary-600 hover:bg-secondary-700 text-white px-3 py-1 rounded-full">
-                        Sign up
-                      </a>
-                    </div>
-                  </div>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-
-          <!-- Bottom action area with mobile optimizations -->
-          <div class="bg-gradient-to-r from-secondary-50 to-primary-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-t border-white">
-            <div class="text-xs text-gray-600 flex items-center gap-2">
-              <span class="h-6 w-6 bg-white rounded-full flex items-center justify-center shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-600" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
-                </svg>
-              </span>
-              <span>Try for free - no account needed</span>
-            </div>
-            <div class="action-container">
-              <button type="button" id="demoButton" onclick="generateDemo()" class="btn-gradient text-white px-5 py-2.5 rounded-full text-sm font-medium flex items-center justify-center gap-2 shadow-md w-full sm:w-auto">
-                <span>Generate</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </form>
-
-      <!-- Loading indicator (initially hidden) -->
-      <div id="loadingIndicator" class="mt-6 sm:mt-12 hidden">
-        <div class="flex flex-col items-center justify-center p-4 sm:p-8">
-          <div class="w-12 sm:w-16 h-12 sm:h-16 border-4 border-secondary-200 border-t-secondary-600 rounded-full animate-spin mb-4"></div>
-          <p class="text-center text-gray-600 handwritten text-lg sm:text-xl">Crafting your journal entry<span class="loading-dots"></span></p>
-          <p class="text-center text-gray-500 text-sm mt-2">This takes just a moment</p>
-        </div>
+  <!-- Marketplace Preview Section -->
+  <div class="mt-16">
+    <div class="text-center mb-8 relative z-10">
+      <div class="inline-block mb-3">
+        <span class="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-secondary-600 shadow-sm border border-white/50">
+          NEW FEATURE
+        </span>
       </div>
+      <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2">
+        Explore the Marketplace
+      </h2>
+      <p class="text-gray-600 text-sm max-w-md mx-auto">Discover featured journal biographies from our community, or share your own and earn recognition.</p>
+    </div>
 
-      <!-- Results preview with responsive improvements -->
-      <div id="resultPreview" class="mt-6 sm:mt-12 bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden border border-white card-hover hidden scale-in">
-        <div class="p-4 sm:p-6 border-b border-gray-100 flex items-center justify-between">
-          <div>
-            <h3 class="font-bold text-gray-800 text-base sm:text-lg mb-1 diary-font">Your Journal Entry</h3>
-            <p class="text-gray-600 text-xs">Generated based on your day</p>
+    <!-- Marketplace Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <!-- Featured Marketplace Item 1 -->
+      <div class="marketplace-card bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="ribbon">FEATURED</div>
+        <div class="relative h-56 bg-gray-200">
+          <img src="https://images.unsplash.com/photo-1508672019048-805c876b67e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Travel Journal" class="w-full h-full object-cover">
+          <div class="marketplace-card-overlay">
+            <div class="popularity-badge mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 crown-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
+              </svg>
+              <span>4,520 tips</span>
+            </div>
+            <h3 class="text-lg font-bold diary-font mb-1">Around the World in 80 Days</h3>
+            <p class="text-sm text-white/80">A travel journal chronicling adventures across six continents and fifteen countries.</p>
           </div>
-          <div class="h-8 w-8 sm:h-9 sm:w-9 bg-gray-50 rounded-full flex items-center justify-center text-secondary-600 shadow-sm border border-gray-100" onclick="editJournalEntry()">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+        </div>
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                A
+              </div>
+              <span class="text-sm font-medium text-gray-800">@adventurer</span>
+            </div>
+            <div class="text-xs font-medium text-gray-500">42 entries</div>
+          </div>
+          <div class="flex gap-2 mb-3">
+            <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">Travel</span>
+            <span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">Adventure</span>
+            <span class="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-full">Photography</span>
+          </div>
+          <a href="{% url 'marketplace' %}" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
+            Read Journal
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
-          </div>
-        </div>
-
-        <div class="p-4 sm:p-6 bg-gradient-to-br from-white to-gray-50">
-          <div id="journalEntry" class="handwritten text-lg sm:text-xl text-gray-800 leading-relaxed">
-            <!-- This will be populated with the demo AI-generated entry via JavaScript -->
-          </div>
-        </div>
-
-        <!-- Update the result preview section with responsive improvements -->
-        <div class="bg-gradient-to-r from-secondary-50 to-primary-50 p-4 sm:p-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-t border-white">
-          <div class="text-gray-600 text-sm diary-font">
-            <span class="text-secondary-600 font-medium">Title:</span>
-            <span id="entryTitle">My Day - {{ current_date|default:"Today" }}</span>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="editJournalEntry()" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm transition shadow-sm flex items-center gap-1 w-full sm:w-auto justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-              Edit
-            </button>
-            <button type="button" onclick="restartDemo()" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm transition shadow-sm flex items-center gap-1 w-full sm:w-auto justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Try Again
-            </button>
-            <!-- New Dashboard Button -->
-            <a href="{% url 'dashboard' %}?entry_saved=true" id="saveDashboardButton" class="btn-gradient text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm font-medium shadow-md flex items-center gap-1 w-full sm:w-auto justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-              Save & View Dashboard
-            </a>
-            {% if not user.is_authenticated %}
-            <a href="{% url 'signup' %}" class="btn-gradient text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm font-medium shadow-md flex items-center gap-1 w-full sm:w-auto justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-              </svg>
-              Sign Up to Save
-            </a>
-            {% endif %}
-          </div>
+          </a>
         </div>
       </div>
 
-    <!-- Marketplace Preview Section -->
-    <div class="mt-16">
-      <div class="text-center mb-8 relative z-10">
-        <div class="inline-block mb-3">
-          <span class="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-secondary-600 shadow-sm border border-white/50">
-            NEW FEATURE
-          </span>
-        </div>
-        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2">
-          Explore the Marketplace
-        </h2>
-        <p class="text-gray-600 text-sm max-w-md mx-auto">Discover featured journal biographies from our community, or share your own and earn recognition.</p>
-      </div>
-
-      <!-- Marketplace Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <!-- Featured Marketplace Item 1 -->
-        <div class="marketplace-card bg-white rounded-xl shadow-lg overflow-hidden">
-          <div class="ribbon">FEATURED</div>
-          <div class="relative h-56 bg-gray-200">
-            <img src="https://images.unsplash.com/photo-1508672019048-805c876b67e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Travel Journal" class="w-full h-full object-cover">
-            <div class="marketplace-card-overlay">
-              <div class="popularity-badge mb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 crown-icon" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
-                </svg>
-                <span>4,520 tips</span>
-              </div>
-              <h3 class="text-lg font-bold diary-font mb-1">Around the World in 80 Days</h3>
-              <p class="text-sm text-white/80">A travel journal chronicling adventures across six continents and fifteen countries.</p>
-            </div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-2">
-                <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                  A
-                </div>
-                <span class="text-sm font-medium text-gray-800">@adventurer</span>
-              </div>
-              <div class="text-xs font-medium text-gray-500">42 entries</div>
-            </div>
-            <div class="flex gap-2 mb-3">
-              <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">Travel</span>
-              <span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">Adventure</span>
-              <span class="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-full">Photography</span>
-            </div>
-            <a href="{% url 'marketplace' %}" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
-              Read Journal
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+      <!-- Featured Marketplace Item 2 -->
+      <div class="marketplace-card bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="relative h-56 bg-gray-200">
+          <img src="https://images.unsplash.com/photo-1533090161767-e6ffed986c88?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Mindfulness Journal" class="w-full h-full object-cover">
+          <div class="marketplace-card-overlay">
+            <div class="popularity-badge mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 crown-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
               </svg>
-            </a>
+              <span>3,180 tips</span>
+            </div>
+            <h3 class="text-lg font-bold diary-font mb-1">Mindfulness Journey</h3>
+            <p class="text-sm text-white/80">A year of daily meditations and mindfulness practices documented with reflections.</p>
           </div>
         </div>
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                M
+              </div>
+              <span class="text-sm font-medium text-gray-800">@mindful_me</span>
+            </div>
+            <div class="text-xs font-medium text-gray-500">365 entries</div>
+          </div>
+          <div class="flex gap-2 mb-3">
+            <span class="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded-full">Mindfulness</span>
+            <span class="text-xs bg-teal-50 text-teal-700 px-2 py-1 rounded-full">Wellness</span>
+            <span class="text-xs bg-pink-50 text-pink-700 px-2 py-1 rounded-full">Self-Care</span>
+          </div>
+          <a href="{% url 'marketplace' %}" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
+            Read Journal
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
 
-<!-- Featured Marketplace Item 2 -->
-<div class="marketplace-card bg-white rounded-xl shadow-lg overflow-hidden">
-  <div class="relative h-56 bg-gray-200">
-    <img src="https://images.unsplash.com/photo-1533090161767-e6ffed986c88?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Mindfulness Journal" class="w-full h-full object-cover">
-    <div class="marketplace-card-overlay">
-      <div class="popularity-badge mb-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 crown-icon" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
+    <!-- View Marketplace Button -->
+    <div class="text-center mt-8">
+      <a href="{% url 'marketplace' %}" class="inline-flex items-center gap-2 btn-gradient text-white px-6 py-3 rounded-full text-sm font-medium shadow-md transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        <span>3,180 tips</span>
-      </div>
-      <h3 class="text-lg font-bold diary-font mb-1">Mindfulness Journey</h3>
-      <p class="text-sm text-white/80">A year of daily meditations and mindfulness practices documented with reflections.</p>
-    </div>
-  </div>
-  <div class="p-4">
-    <div class="flex items-center justify-between mb-3">
-      <div class="flex items-center gap-2">
-        <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-          M
-        </div>
-        <span class="text-sm font-medium text-gray-800">@mindful_me</span>
-      </div>
-      <div class="text-xs font-medium text-gray-500">365 entries</div>
-    </div>
-    <div class="flex gap-2 mb-3">
-      <span class="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded-full">Mindfulness</span>
-      <span class="text-xs bg-teal-50 text-teal-700 px-2 py-1 rounded-full">Wellness</span>
-      <span class="text-xs bg-pink-50 text-pink-700 px-2 py-1 rounded-full">Self-Care</span>
-    </div>
-    <a href="{% url 'marketplace' %}" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
-      Read Journal
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-      </svg>
-    </a>
-  </div>
-</div>
-      </div>
+        Explore Full Marketplace
+      </a>
 
-      <!-- View Marketplace Button -->
-      <div class="text-center mt-8">
-        <a href="{% url 'marketplace' %}" class="inline-flex items-center gap-2 btn-gradient text-white px-6 py-3 rounded-full text-sm font-medium shadow-md transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          Explore Full Marketplace
-        </a>
-
-        <!-- Publish Call to Action -->
-        <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 mt-8 border border-white">
-          <div class="flex flex-col md:flex-row items-center gap-6">
-            <div class="w-full md:w-2/3">
-              <h3 class="text-xl font-bold diary-font mb-2">Share Your Story With The World</h3>
-              <p class="text-gray-600 mb-4">Join our community of storytellers and publish your journal biography in the Marketplace. Gain recognition, receive tips, and connect with like-minded journalers.</p>
-              <div class="flex flex-wrap gap-4">
-                <a href="{% url 'marketplace' %}" class="btn-gradient text-white px-5 py-2.5 rounded-full text-sm font-medium shadow-md transition flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  Publish Your Journal
-                </a>
-                <a href="{% url 'signup' %}" class="bg-white border border-secondary-200 text-secondary-700 px-5 py-2.5 rounded-full text-sm font-medium shadow-sm transition hover:bg-secondary-50">
-                  Learn About Monetization
-                </a>
-              </div>
+      <!-- Publish Call to Action -->
+      <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 mt-8 border border-white">
+        <div class="flex flex-col md:flex-row items-center gap-6">
+          <div class="w-full md:w-2/3">
+            <h3 class="text-xl font-bold diary-font mb-2">Share Your Story With The World</h3>
+            <p class="text-gray-600 mb-4">Join our community of storytellers and publish your journal biography in the Marketplace. Gain recognition, receive tips, and connect with like-minded journalers.</p>
+            <div class="flex flex-wrap gap-4">
+              <a href="{% url 'marketplace' %}" class="btn-gradient text-white px-5 py-2.5 rounded-full text-sm font-medium shadow-md transition flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Publish Your Journal
+              </a>
+              <a href="{% url 'signup' %}" class="bg-white border border-secondary-200 text-secondary-700 px-5 py-2.5 rounded-full text-sm font-medium shadow-sm transition hover:bg-secondary-50">
+                Learn About Monetization
+              </a>
             </div>
-            <div class="w-full md:w-1/3">
-              <div class="bg-gradient-to-br from-secondary-100 to-primary-100 p-4 rounded-lg">
-                <div class="text-center">
-                  <div class="text-xl font-bold text-secondary-800 mb-1">Marketplace Benefits</div>
-                  <ul class="text-sm text-gray-700 space-y-2 text-left">
-                    <li class="flex items-start gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                      </svg>
-                      <span>Showcase your writing to thousands</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                      </svg>
-                      <span>Receive tips from appreciative readers</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                      </svg>
-                      <span>Compete in weekly popularity contests</span>
-                    </li>
-                  </ul>
-                </div>
+          </div>
+          <div class="w-full md:w-1/3">
+            <div class="bg-gradient-to-br from-secondary-100 to-primary-100 p-4 rounded-lg">
+              <div class="text-center">
+                <div class="text-xl font-bold text-secondary-800 mb-1">Marketplace Benefits</div>
+                <ul class="text-sm text-gray-700 space-y-2 text-left">
+                  <li class="flex items-start gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Showcase your writing to thousands</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Receive tips from appreciative readers</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Compete in weekly popularity contests</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Feature highlights -->
-    <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-5">
-      <div class="bg-white p-6 rounded-2xl shadow-lg border border-white flex flex-col items-center text-center card-hover">
-        <div class="h-14 w-14 gradient-bg rounded-xl flex items-center justify-center mb-4 shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-        </div>
-        <h4 class="font-semibold text-gray-800 text-lg mb-2">AI-Powered Writing</h4>
-        <p class="text-gray-600 text-sm">Transform simple notes into beautiful journal entries automatically with our AI assistant</p>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl shadow-lg border border-white flex flex-col items-center text-center card-hover">
-        <div class="h-14 w-14 gradient-bg rounded-xl flex items-center justify-center mb-4 shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        </div>
-        <h4 class="font-semibold text-gray-800 text-lg mb-2">Your Digital Biography</h4>
-        <p class="text-gray-600 text-sm">We organize your memories into a beautiful life story you can revisit and share</p>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl shadow-lg border border-white flex flex-col items-center text-center card-hover">
-        <div class="h-14 w-14 gradient-bg rounded-xl flex items-center justify-center mb-4 shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        </div>
-        <h4 class="font-semibold text-gray-800 text-lg mb-2">Personal Insights</h4>
-        <p class="text-gray-600 text-sm">Discover patterns and growth in your journey with AI-generated insights and analytics</p>
-      </div>
-    </div>
-
-    <!-- Sign-up prompt -->
-    <div id="signupPrompt" class="mt-12 text-center bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-white relative overflow-hidden fade-in">
-      <div class="absolute inset-0 bg-gradient-to-r from-secondary-100/50 to-primary-100/50 opacity-60"></div>
-
-      <div class="relative z-10">
-        <h3 class="font-bold text-xl diary-font mb-3 text-gray-800">Start Your Journal Journey Today</h3>
-        <p class="text-gray-600 mb-6 max-w-md mx-auto">Create an account to save your entries, get personalized insights, and build your beautiful digital biography</p>
-        <div class="flex justify-center gap-4">
-          <a href="{% url 'login' %}" class="text-secondary-700 bg-white border border-secondary-200 hover:bg-secondary-50 px-6 py-3 rounded-full text-sm font-medium shadow-sm transition">Log in</a>
-          <a href="{% url 'signup' %}" class="btn-gradient text-white px-6 py-3 rounded-full text-sm font-medium shadow-md transition">Sign up free</a>
-        </div>
-      </div>
-    </div>
   </div>
-</main>
 
-<!-- Footer with links to other platforms -->
-<footer class="py-3 mt-6 bg-white/80 backdrop-blur-sm border-t border-white/30 pb-safe">
-  <div class="w-full max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center">
-    <div class="mb-4 sm:mb-0 text-center sm:text-left">
-      <a href="{% url 'home' %}" class="flex items-center justify-center sm:justify-start mb-2">
-        <div class="bg-white p-1.5 rounded-lg shadow-sm mr-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-        </div>
-        <h2 class="text-lg font-bold gradient-text">DiaryVault</h2>
-        <span class="text-xs text-gray-400 ml-1 bg-gray-100 px-1.5 py-0.5 rounded">v1.0</span>
-      </a>
-      <p class="text-xs text-gray-500">© 2025 DiaryVault. All rights reserved.</p>
+  <!-- Feature highlights -->
+  <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div class="bg-white p-6 rounded-2xl shadow-lg border border-white flex flex-col items-center text-center card-hover">
+      <div class="h-14 w-14 gradient-bg rounded-xl flex items-center justify-center mb-4 shadow-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        </svg>
+      </div>
+      <h4 class="font-semibold text-gray-800 text-lg mb-2">AI-Powered Writing</h4>
+      <p class="text-gray-600 text-sm">Transform simple notes into beautiful journal entries automatically with our AI assistant</p>
     </div>
-    <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-sm font-medium">
-      <a href="https://crene.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-gray-600 hover:text-secondary-600 transition-colors px-3 py-1.5 rounded-full hover:bg-white">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+    <div class="bg-white p-6 rounded-2xl shadow-lg border border-white flex flex-col items-center text-center card-hover">
+      <div class="h-14 w-14 gradient-bg rounded-xl flex items-center justify-center mb-4 shadow-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
-        <span>Crene.com</span>
-      </a>
-      <a href="https://euphorie.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors px-3 py-1.5 rounded-full hover:bg-white">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </div>
+      <h4 class="font-semibold text-gray-800 text-lg mb-2">Your Digital Biography</h4>
+      <p class="text-gray-600 text-sm">We organize your memories into a beautiful life story you can revisit and share</p>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-lg border border-white flex flex-col items-center text-center card-hover">
+      <div class="h-14 w-14 gradient-bg rounded-xl flex items-center justify-center mb-4 shadow-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
-        <span>Euphorie.com</span>
-      </a>
+      </div>
+      <h4 class="font-semibold text-gray-800 text-lg mb-2">Personal Insights</h4>
+      <p class="text-gray-600 text-sm">Discover patterns and growth in your journey with AI-generated insights and analytics</p>
     </div>
   </div>
-</footer>
 
-<!-- Add this just before your closing </body> tag -->
-{% if user.is_authenticated %}
-<nav class="mobile-bottom-nav md:hidden px-2 py-2 flex justify-around">
-  <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'dashboard' %}text-secondary-600{% else %}text-gray-500{% endif %}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-    </svg>
-    <span class="text-xs mt-1">Home</span>
-  </a>
-  <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'library' %}text-secondary-600{% else %}text-gray-500{% endif %}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-    </svg>
-    <span class="text-xs mt-1">Library</span>
-  </a>
-  <div class="flex flex-col items-center justify-center py-1 px-3 opacity-0">
-    <div class="h-6 w-6"></div>
-    <span class="text-xs mt-1">New</span>
+  <!-- Sign-up prompt -->
+  <div id="signupPrompt" class="mt-12 text-center bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-white relative overflow-hidden fade-in">
+    <div class="absolute inset-0 bg-gradient-to-r from-secondary-100/50 to-primary-100/50 opacity-60"></div>
+
+    <div class="relative z-10">
+      <h3 class="font-bold text-xl diary-font mb-3 text-gray-800">Start Your Journal Journey Today</h3>
+      <p class="text-gray-600 mb-6 max-w-md mx-auto">Create an account to save your entries, get personalized insights, and build your beautiful digital biography</p>
+      <div class="flex justify-center gap-4">
+        <a href="{% url 'login' %}" class="text-secondary-700 bg-white border border-secondary-200 hover:bg-secondary-50 px-6 py-3 rounded-full text-sm font-medium shadow-sm transition">Log in</a>
+        <a href="{% url 'signup' %}" class="btn-gradient text-white px-6 py-3 rounded-full text-sm font-medium shadow-md transition">Sign up free</a>
+      </div>
+    </div>
   </div>
-  <!-- Add Marketplace Item to Bottom Nav -->
-  <a href="{% url 'marketplace' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'marketplace' %}text-secondary-600{% else %}text-gray-500{% endif %}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-    </svg>
-    <span class="text-xs mt-1">Marketplace</span>
-  </a>
-  <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-1 px-3 {% if request.resolver_match.url_name == 'account_settings' %}text-secondary-600{% else %}text-gray-500{% endif %}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-    </svg>
-    <span class="text-xs mt-1">Profile</span>
-  </a>
-</nav>
+</div>
+{% endblock %}
 
-<!-- Floating Action Button for creating new entries -->
-<a href="{% url 'new_entry' %}" class="mobile-fab md:hidden btn-gradient shadow-lg p-4 rounded-full text-white">
-  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-  </svg>
-</a>
-{% endif %}
+{% block extra_js %}
 <script>
   // Client-side caching for journal entries
   const journalCache = {
@@ -1139,6 +539,20 @@
   // Initialize cache on page load
   document.addEventListener('DOMContentLoaded', function() {
     journalCache.init();
+
+    // Set up the personalization toggle
+    const personalizationToggle = document.getElementById('personalizationToggle');
+    const personalizationOptions = document.getElementById('personalizationOptions');
+
+    if (personalizationToggle && personalizationOptions) {
+      personalizationToggle.addEventListener('change', function() {
+        if (this.checked) {
+          personalizationOptions.classList.remove('hidden');
+        } else {
+          personalizationOptions.classList.add('hidden');
+        }
+      });
+    }
   });
 
   // Helper function to display journal entry
@@ -1160,30 +574,6 @@
 
     // Enable the button
     document.getElementById('demoButton').disabled = false;
-  }
-
-  // Mobile menu toggle
-  function toggleMobileMenu() {
-    const menu = document.getElementById('mobileMenu');
-    if (!menu) return;
-
-    const menuContent = menu.querySelector('div.mobile-menu-slide');
-
-    if (menu.classList.contains('hidden')) {
-      menu.classList.remove('hidden');
-      // Small delay to allow the display:block to take effect before animation
-      setTimeout(() => {
-        menuContent.classList.remove('mobile-menu-closed');
-        menuContent.classList.add('mobile-menu-open');
-      }, 10);
-    } else {
-      menuContent.classList.remove('mobile-menu-open');
-      menuContent.classList.add('mobile-menu-closed');
-      // Wait for animation to complete before hiding the menu
-      setTimeout(() => {
-        menu.classList.add('hidden');
-      }, 300);
-    }
   }
 
   // Character counter
@@ -1215,7 +605,7 @@
     textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
   }
 
-  // Add this function to your JavaScript code
+  // Restart demo function
   function restartDemo() {
     // Clear the input field
     document.getElementById('journalInput').value = '';
@@ -1412,54 +802,6 @@
     // Initialize character counter
     countChars();
   });
-</script>
-
-<script>
-  // Detect if user came from dashboard
-  document.addEventListener('DOMContentLoaded', function() {
-    const referrer = document.referrer;
-    if (referrer.includes('/dashboard')) {
-      // Show a return button
-      const returnButton = document.createElement('div');
-      returnButton.className = 'fixed top-20 left-6 bg-white/80 backdrop-blur-sm rounded-full shadow-md p-2 cursor-pointer z-40';
-      returnButton.innerHTML = `
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-2 px-3 py-1 text-sm text-gray-700">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Dashboard
-        </a>
-      `;
-      document.body.appendChild(returnButton);
-    }
-  });
-
-  // Smooth page transitions
-  document.addEventListener('DOMContentLoaded', function() {
-    // Add transition class to body
-    document.body.classList.add('transition-ready');
-
-    // Apply transition to all navigation links
-    document.querySelectorAll('a[href^="/"]').forEach(link => {
-      if (!link.getAttribute('href').includes('://') && !link.getAttribute('href').startsWith('#')) {
-        link.addEventListener('click', function(e) {
-          // Skip if modifier keys are pressed or it's a form submit
-          if (e.metaKey || e.ctrlKey || e.shiftKey || this.tagName === 'BUTTON') return;
-
-          e.preventDefault();
-          const target = this.getAttribute('href');
-
-          // Fade out
-          document.body.classList.add('page-transitioning');
-
-          // Navigate after transition
-          setTimeout(() => {
-            window.location.href = target;
-          }, 300);
-        });
-      }
-    });
-  });
 
   // Add a function to save the generated entry
   function saveEntryToDatabase() {
@@ -1592,19 +934,4 @@
     }
   });
 </script>
-
-<style>
-  body {
-    transition: opacity 0.3s ease-in-out;
-  }
-
-  body.transition-ready {
-    opacity: 1;
-  }
-
-  body.page-transitioning {
-    opacity: 0;
-  }
-</style>
-</body>
-</html>
+{% endblock %}

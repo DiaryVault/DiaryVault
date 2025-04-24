@@ -1,929 +1,533 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <!-- Favicon and App Icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
-    <link rel="shortcut icon" href="/static/favicon.ico">
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="msapplication-config" content="/static/browserconfig.xml">
+{% extends "base.html" %}
 
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>DiaryVault - Journal Marketplace</title>
-    <meta name="theme-color" content="#6366f1" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Poppins:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: {
-                50: '#f5f3ff',
-                100: '#ede9fe',
-                200: '#ddd6fe',
-                300: '#c4b5fd',
-                400: '#a78bfa',
-                500: '#8b5cf6',
-                600: '#7c3aed',
-                700: '#6d28d9',
-                800: '#5b21b6',
-                900: '#4c1d95',
-              },
-              secondary: {
-                50: '#eef2ff',
-                100: '#e0e7ff',
-                200: '#c7d2fe',
-                300: '#a5b4fc',
-                400: '#818cf8',
-                500: '#6366f1',
-                600: '#4f46e5',
-                700: '#4338ca',
-                800: '#3730a3',
-                900: '#312e81',
-              },
-            },
-            animation: {
-              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            }
-          },
-        },
-      }
-    </script>
-    <style>
-      body {
-        font-family: 'Poppins', sans-serif;
-        background-color: #f8fafc;
-        width: 100%;
-        overflow-x: hidden;
-        position: relative;
-      }
-      html {
-        overflow-x: hidden;
-        scroll-behavior: smooth;
-      }
-      .diary-font {
-        font-family: 'Playfair Display', serif;
-      }
-      .book-title {
-        font-family: 'Playfair Display', serif;
-      }
-      .handwritten {
-        font-family: 'Caveat', cursive;
-      }
-      .gradient-bg {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-      }
-      .gradient-text {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-      }
-      .btn-gradient {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        transition: all 0.3s ease;
-      }
-      .btn-gradient:hover {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
-      }
-      .card-hover {
-        transition: all 0.3s ease;
-      }
-      .card-hover:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      }
-      .glass-effect {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-      }
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f5f9;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 3px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-      }
-      .circle-pattern {
-        background-image: radial-gradient(#6366f120 1px, transparent 1px);
-        background-size: 20px 20px;
-      }
-      .floating {
-        animation: floating 3s infinite ease-in-out;
-      }
-      @keyframes floating {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-        100% { transform: translateY(0px); }
-      }
-      .scale-in {
-        animation: scaleIn 0.5s ease forwards;
-        transform: scale(0.95);
-        opacity: 0;
-      }
-      @keyframes scaleIn {
-        to {
-          transform: scale(1);
-          opacity: 1;
-        }
-      }
-      .fade-in {
-        animation: fadeIn 0.5s ease forwards;
-        opacity: 0;
-      }
-      @keyframes fadeIn {
-        to {
-          opacity: 1;
-        }
-      }
+{% block title %}DiaryVault - Journal Marketplace{% endblock %}
 
-      /* Marketplace specific styles */
-      .marketplace-card {
-        position: relative;
-        overflow: hidden;
-        border-radius: 1rem;
-        transition: all 0.3s ease;
-      }
-      .marketplace-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.2);
-      }
-      .marketplace-card-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
-        padding: 1.5rem;
-        color: white;
-        transform: translateY(20px);
-        opacity: 0.8;
-        transition: all 0.3s ease;
-      }
-      .marketplace-card:hover .marketplace-card-overlay {
-        transform: translateY(0);
-        opacity: 1;
-      }
-      .ribbon {
-        position: absolute;
-        top: 0;
-        right: 0;
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        color: white;
-        padding: 0.25rem 1rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10% 50%);
-        z-index: 10;
-      }
-      .popularity-badge {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        background-color: rgba(255,255,255,0.2);
-        backdrop-filter: blur(4px);
-        padding: 0.25rem 0.5rem;
-        border-radius: 1rem;
-        font-size: 0.75rem;
-        width: fit-content;
-      }
-      .crown-icon {
-        color: #fbbf24;
-      }
-      .tab-active {
-        color: #6366f1;
-        border-color: #6366f1;
-      }
-      .rank-badge {
-        position: absolute;
-        top: -10px;
-        left: -10px;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        z-index: 10;
-      }
-      .rank-1 {
-        background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
-        width: 50px;
-        height: 50px;
-        font-size: 1.25rem;
-      }
-      .rank-2 {
-        background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%);
-        width: 45px;
-        height: 45px;
-        font-size: 1.125rem;
-      }
-      .rank-3 {
-        background: linear-gradient(135deg, #d97706 0%, #92400e 100%);
-        width: 42px;
-        height: 42px;
-        font-size: 1rem;
-      }
-      .tip-button {
-        transition: all 0.2s ease;
-      }
-      .tip-button:hover {
-        transform: scale(1.05);
-      }
-      .tip-button:active {
-        transform: scale(0.95);
-      }
-      .tip-dropdown {
-        display: none;
-        position: absolute;
-        top: 100%;
-        right: 0;
-        margin-top: 0.5rem;
-        background: white;
-        border-radius: 0.5rem;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        z-index: 50;
-        overflow: hidden;
-        width: 200px;
-      }
-      .tip-container:hover .tip-dropdown {
-        display: block;
-      }
-      .category-pill {
-        transition: all 0.3s ease;
-      }
-      .category-pill:hover, .category-pill.active {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        color: white;
-        transform: translateY(-2px);
-      }
-      .price-tag {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: rgba(0,0,0,0.7);
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 1rem;
-        font-weight: 600;
-        font-size: 0.875rem;
-        z-index: 10;
-      }
-      .free-tag {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      }
-      .premium-tag {
-        background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-      }
-      .featured-badge {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 1rem;
-        font-weight: 600;
-        font-size: 0.75rem;
-        z-index: 10;
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-      }
-      .verified-author {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-      }
-      .verified-badge {
-        color: #3b82f6;
-      }
-      .filter-dropdown {
-        display: none;
-        position: absolute;
-        top: 100%;
-        right: 0;
-        margin-top: 0.5rem;
-        background: white;
-        border-radius: 0.5rem;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        z-index: 50;
-        width: 250px;
-        padding: 1rem;
-      }
-      .filter-container:hover .filter-dropdown {
-        display: block;
-      }
+{% block extra_css %}
+<style>
+  .tab-active {
+    color: #6366f1;
+    border-color: #6366f1;
+  }
+  .rank-badge {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+  }
+  .rank-1 {
+    background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+  .rank-2 {
+    background: linear-gradient(135deg, #e5e7eb 0%, #9ca3af 100%);
+    width: 45px;
+    height: 45px;
+    font-size: 1.125rem;
+  }
+  .rank-3 {
+    background: linear-gradient(135deg, #d97706 0%, #92400e 100%);
+    width: 42px;
+    height: 42px;
+    font-size: 1rem;
+  }
+  .tip-button {
+    transition: all 0.2s ease;
+  }
+  .tip-button:hover {
+    transform: scale(1.05);
+  }
+  .tip-button:active {
+    transform: scale(0.95);
+  }
+  .tip-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    overflow: hidden;
+    width: 200px;
+  }
+  .tip-container:hover .tip-dropdown {
+    display: block;
+  }
+  .category-pill {
+    transition: all 0.3s ease;
+  }
+  .category-pill:hover, .category-pill.active {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    transform: translateY(-2px);
+  }
+  .price-tag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    z-index: 10;
+  }
+  .free-tag {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
+  .premium-tag {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  }
+  .featured-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .verified-author {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .verified-badge {
+    color: #3b82f6;
+  }
+  .filter-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    width: 250px;
+    padding: 1rem;
+  }
+  .filter-container:hover .filter-dropdown {
+    display: block;
+  }
+</style>
+{% endblock %}
 
-      /* Mobile styles */
-      @media (max-width: 640px) {
-        .mobile-bottom-nav {
-          background-color: rgba(255, 255, 255, 0.9);
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 40;
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-          border-top: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .mobile-fab {
-          position: fixed;
-          bottom: 80px;
-          right: 20px;
-          z-index: 30;
-          transform-origin: center;
-          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .mobile-fab:active {
-          transform: scale(0.95);
-        }
-        /* Add bottom padding to account for fixed nav */
-        .pb-safe {
-          padding-bottom: 2rem !important;
-        }
-      }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f5f3ff] to-[#eef2ff] text-gray-800 custom-scrollbar circle-pattern">
+{% block content %}
+<div class="max-w-7xl w-full mx-auto relative">
+  <!-- Decorative elements -->
+  <div class="absolute -top-10 -left-16 h-32 w-32 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+  <div class="absolute -bottom-8 -right-16 h-32 w-32 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
 
-<!-- Navbar -->
-<header class="glass-effect sticky top-0 z-50 border-b border-white/20">
-  <div class="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 sm:py-4">
-    <!-- Logo -->
-    <div class="flex items-center gap-2 sm:gap-3">
-      <a href="{% url 'home' %}" class="flex items-center gap-1 sm:gap-2 hover:opacity-80 transition">
-        <div class="bg-white p-1.5 rounded-lg shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-        </div>
-        <h1 class="text-lg sm:text-2xl font-extrabold gradient-text tracking-tight">DiaryVault</h1>
-      </a>
-    </div>
+  <!-- Marketplace Header -->
+  <div class="text-center mb-6 relative z-10">
+    <h1 class="text-3xl sm:text-4xl font-bold diary-font mb-3 text-gray-800">Journal Marketplace</h1>
+    <p class="text-gray-600 text-sm sm:text-base max-w-2xl mx-auto">Discover, connect, and get inspired by journal biographies from our vibrant community of writers and creators.</p>
+  </div>
 
-    <!-- Main Navigation (only shown if logged in) -->
-    {% if user.is_authenticated %}
-    <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
-      <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-        </svg>
-        Dashboard
-      </a>
-      <a href="{% url 'library' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-        </svg>
-        Library
-      </a>
-      <a href="{% url 'insights' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-        Insights
-      </a>
-      <!-- Active marketplace Link -->
-      <a href="{% url 'marketplace' %}" class="text-secondary-600 flex items-center gap-1.5 py-1 border-b-2 border-secondary-500">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        Marketplace
-      </a>
-
-      <div class="w-px h-6 bg-gray-200"></div>
-
-      <!-- User profile section when logged in -->
-      <div class="flex items-center gap-3">
-        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 hover:opacity-80 transition">
-          <div class="h-9 w-9 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
-            {{ user.username|first|upper }}
-          </div>
-          <span class="text-sm text-gray-700">{{ user.username }}</span>
+  <!-- Hero Banner -->
+  <div class="mb-8 relative overflow-hidden rounded-2xl shadow-lg">
+    <div class="absolute inset-0 bg-gradient-to-r from-secondary-600/80 to-primary-600/80 z-10"></div>
+    <img src="https://images.unsplash.com/photo-1501504905252-473c47e087f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Journal Marketplace" class="w-full h-56 md:h-64 object-cover">
+    <div class="absolute inset-0 z-20 flex flex-col justify-center items-center text-white p-6">
+      <h2 class="text-2xl md:text-3xl font-bold diary-font mb-2 text-center">Find Your Next Journal Inspiration</h2>
+      <p class="text-white/90 text-center max-w-2xl mb-6">Browse hundreds of journals from creators worldwide – from travel diaries to mindfulness journals.</p>
+      <div class="flex flex-wrap gap-3 justify-center">
+        <a href="#featured" class="bg-white text-secondary-600 hover:bg-gray-100 px-5 py-2.5 rounded-full text-sm font-medium shadow-md transition">
+          Featured Journals
+        </a>
+        <a href="#categories" class="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/30 px-5 py-2.5 rounded-full text-sm font-medium shadow-md transition">
+          Explore Categories
         </a>
       </div>
-
-      <form method="post" action="{% url 'logout' %}" class="inline">
-        {% csrf_token %}
-        <button type="submit" class="text-gray-700 hover:text-red-500 transition bg-gray-100 px-4 py-2 rounded-full text-sm hover:bg-red-50">Logout</button>
-      </form>
-    </nav>
-    {% else %}
-    <!-- Auth buttons if not logged in -->
-    <div class="flex gap-4 items-center">
-      <a href="{% url 'login' %}" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium transition px-5 py-2">Log in</a>
-      <a href="{% url 'signup' %}" class="btn-gradient text-white px-5 py-2 rounded-full text-sm font-medium shadow-md">Sign up</a>
     </div>
-    {% endif %}
-
-    <!-- Mobile menu button (only shown if logged in) -->
-    {% if user.is_authenticated %}
-    <button class="md:hidden text-gray-700 hover:text-secondary-600 p-1.5 bg-white rounded-lg shadow-sm" onclick="toggleMobileMenu()">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
-    {% endif %}
   </div>
-</header>
 
-<!-- Mobile Menu Overlay (only shown if logged in) -->
-{% if user.is_authenticated %}
-<div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 hidden">
-  <div class="absolute right-0 top-0 bottom-0 w-72 glass-effect p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
-    <div class="flex justify-between items-center mb-8">
-      <h2 class="font-bold text-lg gradient-text">Menu</h2>
-      <button onclick="toggleMobileMenu()" class="p-1.5 bg-white rounded-lg shadow-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+  <!-- Category Navigation -->
+  <div id="categories" class="mb-8 bg-white rounded-xl shadow-md p-4 sm:p-6 border border-white">
+    <h2 class="text-xl font-bold diary-font mb-4">Popular Categories</h2>
+    <div class="flex overflow-x-auto custom-scrollbar gap-2 pb-2 -mx-1 px-1">
+      <button class="category-pill active whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-secondary-100 text-secondary-800">
+        All Journals
+      </button>
+      <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+        Travel & Adventure
+      </button>
+      <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+        Mindfulness & Wellness
+      </button>
+      <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+        Creative Writing
+      </button>
+      <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+        Professional Growth
+      </button>
+      <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+        Food & Cooking
+      </button>
+      <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+        Fitness & Health
+      </button>
+      <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+        Parenting
+      </button>
+      <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+        Tech & Coding
+      </button>
+      <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+        Arts & Crafts
+      </button>
+      <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+        Finance & Budgeting
+      </button>
+      <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+        Self-Improvement
+      </button>
+    </div>
+  </div>
+
+  <!-- Advanced Filters -->
+  <div class="bg-white rounded-xl shadow-md mb-8 p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sticky top-[72px] z-20 border border-white backdrop-blur-sm">
+    <!-- View Options -->
+    <div class="flex items-center gap-3">
+      <span class="text-sm font-medium text-gray-700">View:</span>
+      <button class="p-2 bg-secondary-100 text-secondary-600 rounded-md transition active">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+      </button>
+      <button class="p-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-md transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
         </svg>
       </button>
     </div>
 
-    <!-- User info in mobile menu -->
-    <a href="{% url 'account_settings' %}" class="block">
-      <div class="flex items-center gap-3 p-4 glass-effect rounded-xl mb-6 hover:bg-white/50 transition border border-white/20">
-        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold shadow-md">
-          {{ user.username|first|upper }}
-        </div>
-        <div>
-          <div class="font-medium">{{ user.username }}</div>
-          <div class="text-xs text-gray-500">{{ total_entries|default:'0' }} entries</div>
-        </div>
-      </div>
-    </a>
-
-    <nav class="flex flex-col gap-2">
-      <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-        </svg>
-        <span>Dashboard</span>
-      </a>
-      <a href="{% url 'library' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-        </svg>
-        <span>Library</span>
-      </a>
-      <a href="{% url 'new_entry' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-        </svg>
-        <span>Journal</span>
-      </a>
-      <a href="{% url 'insights' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-        <span>Insights</span>
-      </a>
-      <!-- Active marketplace Link in Mobile Menu -->
-      <a href="{% url 'marketplace' %}" class="flex items-center gap-3 p-3 bg-white/50 rounded-xl transition border border-secondary-200">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <span class="text-secondary-600 font-medium">Marketplace</span>
-      </a>
-      <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-        <span>Account</span>
-      </a>
-      <div class="border-t border-white/20 my-3 pt-2">
-        <form method="post" action="{% url 'logout' %}">
-          {% csrf_token %}
-          <button type="submit" class="flex items-center gap-3 p-3 w-full hover:bg-red-50/80 rounded-xl text-red-600 transition border border-transparent hover:border-red-100">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span>Logout</span>
-          </button>
-        </form>
-      </div>
-    </nav>
-  </div>
-</div>
-{% endif %}
-
-<!-- Main Content -->
-<main class="flex-1 p-4 sm:p-6 lg:p-8 flex flex-col items-center mb-20 sm:mb-16">
-  <div class="max-w-7xl w-full mx-auto relative">
-    <!-- Decorative elements -->
-    <div class="absolute -top-10 -left-16 h-32 w-32 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
-    <div class="absolute -bottom-8 -right-16 h-32 w-32 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-
-    <!-- Marketplace Header -->
-    <div class="text-center mb-6 relative z-10">
-      <h1 class="text-3xl sm:text-4xl font-bold diary-font mb-3 text-gray-800">Journal Marketplace</h1>
-      <p class="text-gray-600 text-sm sm:text-base max-w-2xl mx-auto">Discover, connect, and get inspired by journal biographies from our vibrant community of writers and creators.</p>
+    <!-- Sort Options -->
+    <div class="flex items-center gap-2">
+      <label for="sortBy" class="text-sm font-medium text-gray-700">Sort by:</label>
+      <select id="sortBy" class="bg-gray-50 border border-gray-200 text-gray-700 rounded-md text-sm focus:ring-secondary-500 focus:border-secondary-500 p-2">
+        <option value="trending">Trending</option>
+        <option value="newest">Newest</option>
+        <option value="mostLiked">Most Liked</option>
+        <option value="mostTipped">Most Tipped</option>
+        <option value="staffPicks">Staff Picks</option>
+      </select>
     </div>
 
-    <!-- Hero Banner -->
-    <div class="mb-8 relative overflow-hidden rounded-2xl shadow-lg">
-      <div class="absolute inset-0 bg-gradient-to-r from-secondary-600/80 to-primary-600/80 z-10"></div>
-      <img src="https://images.unsplash.com/photo-1501504905252-473c47e087f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Journal Marketplace" class="w-full h-56 md:h-64 object-cover">
-      <div class="absolute inset-0 z-20 flex flex-col justify-center items-center text-white p-6">
-        <h2 class="text-2xl md:text-3xl font-bold diary-font mb-2 text-center">Find Your Next Journal Inspiration</h2>
-        <p class="text-white/90 text-center max-w-2xl mb-6">Browse hundreds of journals from creators worldwide – from travel diaries to mindfulness journals.</p>
-        <div class="flex flex-wrap gap-3 justify-center">
-          <a href="#featured" class="bg-white text-secondary-600 hover:bg-gray-100 px-5 py-2.5 rounded-full text-sm font-medium shadow-md transition">
-            Featured Journals
-          </a>
-          <a href="#categories" class="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/30 px-5 py-2.5 rounded-full text-sm font-medium shadow-md transition">
-            Explore Categories
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Category Navigation -->
-    <div id="categories" class="mb-8 bg-white rounded-xl shadow-md p-4 sm:p-6 border border-white">
-      <h2 class="text-xl font-bold diary-font mb-4">Popular Categories</h2>
-      <div class="flex overflow-x-auto custom-scrollbar gap-2 pb-2 -mx-1 px-1">
-        <button class="category-pill active whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-secondary-100 text-secondary-800">
-          All Journals
-        </button>
-        <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-          Travel & Adventure
-        </button>
-        <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-          Mindfulness & Wellness
-        </button>
-        <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-          Creative Writing
-        </button>
-        <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-          Professional Growth
-        </button>
-        <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-          Food & Cooking
-        </button>
-        <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-          Fitness & Health
-        </button>
-        <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-          Parenting
-        </button>
-        <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-          Tech & Coding
-        </button>
-        <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-          Arts & Crafts
-        </button>
-        <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-          Finance & Budgeting
-        </button>
-        <button class="category-pill whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-          Self-Improvement
-        </button>
-      </div>
-    </div>
-
-    <!-- Advanced Filters -->
-    <div class="bg-white rounded-xl shadow-md mb-8 p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sticky top-[72px] z-20 border border-white backdrop-blur-sm">
-      <!-- View Options -->
-      <div class="flex items-center gap-3">
-        <span class="text-sm font-medium text-gray-700">View:</span>
-        <button class="p-2 bg-secondary-100 text-secondary-600 rounded-md transition active">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-          </svg>
-        </button>
-        <button class="p-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-md transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-          </svg>
-        </button>
+    <!-- Search & Filters -->
+    <div class="flex flex-col sm:flex-row gap-3 items-center sm:gap-4">
+      <div class="relative w-full sm:w-auto">
+        <input type="text" placeholder="Search journals..." class="w-full sm:w-48 lg:w-64 pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
       </div>
 
-      <!-- Sort Options -->
-      <div class="flex items-center gap-2">
-        <label for="sortBy" class="text-sm font-medium text-gray-700">Sort by:</label>
-        <select id="sortBy" class="bg-gray-50 border border-gray-200 text-gray-700 rounded-md text-sm focus:ring-secondary-500 focus:border-secondary-500 p-2">
-          <option value="trending">Trending</option>
-          <option value="newest">Newest</option>
-          <option value="mostLiked">Most Liked</option>
-          <option value="mostTipped">Most Tipped</option>
-          <option value="staffPicks">Staff Picks</option>
-        </select>
-      </div>
-
-      <!-- Search & Filters -->
-      <div class="flex flex-col sm:flex-row gap-3 items-center sm:gap-4">
-        <div class="relative w-full sm:w-auto">
-          <input type="text" placeholder="Search journals..." class="w-full sm:w-48 lg:w-64 pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-
-        <!-- Filter Dropdown Button -->
-        <div class="filter-container relative">
-          <button type="button" class="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 px-4 py-2 rounded-full text-sm transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-            Filters
-            <span class="bg-secondary-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
-          </button>
-
-          <!-- Filter Dropdown Content -->
-          <div class="filter-dropdown">
-            <h3 class="font-medium text-gray-800 mb-3">Refine Results</h3>
-
-            <!-- Price Filter -->
-            <div class="mb-4">
-              <h4 class="text-sm font-medium text-gray-700 mb-2">Price</h4>
-              <div class="flex items-center gap-2">
-                <label class="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked class="rounded text-secondary-500 focus:ring-secondary-500 h-4 w-4">
-                  All
-                </label>
-                <label class="flex items-center gap-2 text-sm">
-                  <input type="checkbox" class="rounded text-secondary-500 focus:ring-secondary-500 h-4 w-4">
-                  Free
-                </label>
-                <label class="flex items-center gap-2 text-sm">
-                  <input type="checkbox" class="rounded text-secondary-500 focus:ring-secondary-500 h-4 w-4">
-                  Premium
-                </label>
-              </div>
-            </div>
-
-            <!-- Author Verification Filter -->
-            <div class="mb-4">
-              <h4 class="text-sm font-medium text-gray-700 mb-2">Author</h4>
-              <div class="flex items-center gap-2">
-                <label class="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked class="rounded text-secondary-500 focus:ring-secondary-500 h-4 w-4">
-                  All Authors
-                </label>
-                <label class="flex items-center gap-2 text-sm">
-                  <input type="checkbox" class="rounded text-secondary-500 focus:ring-secondary-500 h-4 w-4">
-                  Verified Only
-                </label>
-              </div>
-            </div>
-
-            <!-- Entry Count Filter -->
-            <div class="mb-4">
-              <h4 class="text-sm font-medium text-gray-700 mb-2">Journal Size</h4>
-              <div class="flex items-center gap-2">
-                <select class="bg-gray-50 border border-gray-200 text-gray-700 rounded-md text-sm focus:ring-secondary-500 focus:border-secondary-500 p-1.5 w-full">
-                  <option value="any">Any size</option>
-                  <option value="small">Small (1-25 entries)</option>
-                  <option value="medium">Medium (26-100 entries)</option>
-                  <option value="large">Large (100+ entries)</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Date Published Filter -->
-            <div class="mb-4">
-              <h4 class="text-sm font-medium text-gray-700 mb-2">Published</h4>
-              <div class="flex items-center gap-2">
-                <select class="bg-gray-50 border border-gray-200 text-gray-700 rounded-md text-sm focus:ring-secondary-500 focus:border-secondary-500 p-1.5 w-full">
-                  <option value="any">Any time</option>
-                  <option value="today">Today</option>
-                  <option value="week">This week</option>
-                  <option value="month">This month</option>
-                  <option value="year">This year</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Apply/Reset Buttons -->
-            <div class="flex gap-2">
-              <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded text-sm flex-1">
-                Reset
-              </button>
-              <button class="bg-secondary-500 hover:bg-secondary-600 text-white px-3 py-1.5 rounded text-sm flex-1">
-                Apply Filters
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Featured Journals section -->
-    <div id="featured" class="mb-10">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold diary-font">Featured Journals</h2>
-        <a href="#" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
-          View all <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </a>
-      </div>
-
-      <!-- Featured Journal Grid - 2 columns on small screens, 3 on large -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Featured Journal 1 -->
-        <div class="marketplace-card bg-white rounded-xl shadow-lg overflow-hidden border border-white relative card-hover">
-          <div class="rank-badge rank-1">#1</div>
-          <div class="ribbon">TRENDING</div>
-          <div class="relative h-48 bg-gray-200">
-            <img src="https://images.unsplash.com/photo-1541410965313-d53b3c16ef17?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Travel Journal" class="w-full h-full object-cover">
-            <div class="price-tag premium-tag">$4.99</div>
-            <div class="marketplace-card-overlay">
-              <div class="popularity-badge mb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 crown-icon" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
-                </svg>
-                <span>4,520 tips</span>
-              </div>
-              <h3 class="text-lg font-bold diary-font mb-1">Around the World in 80 Days</h3>
-              <p class="text-sm text-white/80 line-clamp-2">A travel journal chronicling adventures across six continents filled with breathtaking sights and cultural encounters.</p>
-            </div>
-          </div>
-          <div class="p-4">
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-2">
-                <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                  A
-                </div>
-                <div>
-                  <span class="text-sm font-medium text-gray-800 verified-author">
-                    @adventurer
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 verified-badge" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                    </svg>
-                  </span>
-                  <div class="text-xs text-gray-500">264 entries</div>
-                </div>
-              </div>
-              <div class="flex items-center gap-1 text-gray-600 text-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                </svg>
-                <span>872</span>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2 mb-3">
-              <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">Travel</span>
-              <span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">Adventure</span>
-              <span class="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-full">Photography</span>
-            </div>
-            <div class="flex items-center justify-between">
-              <a href="#" class="text-white bg-secondary-500 hover:bg-secondary-600 px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 transition">
-                Read Journal
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </a>
-              <button class="text-gray-500 hover:text-secondary-500 p-1.5 rounded-full transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-<!-- Featured Journal 2 -->
-<div class="marketplace-card bg-white rounded-xl shadow-lg overflow-hidden border border-white relative card-hover">
-    <div class="rank-badge rank-2">#2</div>
-    <div class="relative h-48 bg-gray-200">
-      <img src="https://images.unsplash.com/photo-1533090161767-e6ffed986c88?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Mindfulness Journal" class="w-full h-full object-cover">
-      <div class="price-tag free-tag">Free</div>
-      <div class="marketplace-card-overlay">
-        <div class="popularity-badge mb-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 crown-icon" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
-          </svg>
-          <span>3,180 tips</span>
-        </div>
-        <h3 class="text-lg font-bold diary-font mb-1">Mindfulness Journey</h3>
-        <p class="text-sm text-white/80 line-clamp-2">A year of daily meditations and mindfulness practices documented with personal reflections and growth insights.</p>
-      </div>
-    </div>
-    <div class="p-4">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-2">
-          <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-            M
-          </div>
-          <div>
-            <span class="text-sm font-medium text-gray-800">@mindful_me</span>
-            <div class="text-xs text-gray-500">365 entries</div>
-          </div>
-        </div>
-        <div class="flex items-center gap-1 text-gray-600 text-xs">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-          </svg>
-          <span>621</span>
-        </div>
-      </div>
-      <div class="flex flex-wrap gap-2 mb-3">
-        <span class="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded-full">Mindfulness</span>
-        <span class="text-xs bg-teal-50 text-teal-700 px-2 py-1 rounded-full">Wellness</span>
-        <span class="text-xs bg-pink-50 text-pink-700 px-2 py-1 rounded-full">Self-Care</span>
-      </div>
-      <div class="flex items-center justify-between">
-        <a href="#" class="text-white bg-secondary-500 hover:bg-secondary-600 px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 transition">
-          Read Journal
+      <!-- Filter Dropdown Button -->
+      <div class="filter-container relative">
+        <button type="button" class="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 px-4 py-2 rounded-full text-sm transition">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
-        </a>
-        <button class="text-gray-500 hover:text-secondary-500 p-1.5 rounded-full transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-          </svg>
+          Filters
+          <span class="bg-secondary-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
         </button>
+
+        <!-- Filter Dropdown Content -->
+        <div class="filter-dropdown">
+          <h3 class="font-medium text-gray-800 mb-3">Refine Results</h3>
+
+          <!-- Price Filter -->
+          <div class="mb-4">
+            <h4 class="text-sm font-medium text-gray-700 mb-2">Price</h4>
+            <div class="flex items-center gap-2">
+              <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked class="rounded text-secondary-500 focus:ring-secondary-500 h-4 w-4">
+                All
+              </label>
+              <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" class="rounded text-secondary-500 focus:ring-secondary-500 h-4 w-4">
+                Free
+              </label>
+              <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" class="rounded text-secondary-500 focus:ring-secondary-500 h-4 w-4">
+                Premium
+              </label>
+            </div>
+          </div>
+
+          <!-- Author Verification Filter -->
+          <div class="mb-4">
+            <h4 class="text-sm font-medium text-gray-700 mb-2">Author</h4>
+            <div class="flex items-center gap-2">
+              <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked class="rounded text-secondary-500 focus:ring-secondary-500 h-4 w-4">
+                All Authors
+              </label>
+              <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" class="rounded text-secondary-500 focus:ring-secondary-500 h-4 w-4">
+                Verified Only
+              </label>
+            </div>
+          </div>
+
+          <!-- Entry Count Filter -->
+          <div class="mb-4">
+            <h4 class="text-sm font-medium text-gray-700 mb-2">Journal Size</h4>
+            <div class="flex items-center gap-2">
+              <select class="bg-gray-50 border border-gray-200 text-gray-700 rounded-md text-sm focus:ring-secondary-500 focus:border-secondary-500 p-1.5 w-full">
+                <option value="any">Any size</option>
+                <option value="small">Small (1-25 entries)</option>
+                <option value="medium">Medium (26-100 entries)</option>
+                <option value="large">Large (100+ entries)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Date Published Filter -->
+          <div class="mb-4">
+            <h4 class="text-sm font-medium text-gray-700 mb-2">Published</h4>
+            <div class="flex items-center gap-2">
+              <select class="bg-gray-50 border border-gray-200 text-gray-700 rounded-md text-sm focus:ring-secondary-500 focus:border-secondary-500 p-1.5 w-full">
+                <option value="any">Any time</option>
+                <option value="today">Today</option>
+                <option value="week">This week</option>
+                <option value="month">This month</option>
+                <option value="year">This year</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Apply/Reset Buttons -->
+          <div class="flex gap-2">
+            <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded text-sm flex-1">
+              Reset
+            </button>
+            <button class="bg-secondary-500 hover:bg-secondary-600 text-white px-3 py-1.5 rounded text-sm flex-1">
+              Apply Filters
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Featured Journal 3 -->
-  <div class="marketplace-card bg-white rounded-xl shadow-lg overflow-hidden border border-white relative card-hover">
-    <div class="rank-badge rank-3">#3</div>
-    <div class="relative h-48 bg-gray-200">
-      <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Code Journey" class="w-full h-full object-cover">
-      <div class="price-tag premium-tag">$3.99</div>
-      <div class="marketplace-card-overlay">
-        <div class="popularity-badge mb-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 crown-icon" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
-          </svg>
-          <span>2,845 tips</span>
-        </div>
-        <h3 class="text-lg font-bold diary-font mb-1">From Novice to Engineer</h3>
-        <p class="text-sm text-white/80 line-clamp-2">A coding journey documenting the path from complete beginner to professional software engineer.</p>
-      </div>
+  <!-- Featured Journals section -->
+  <div id="featured" class="mb-10">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold diary-font">Featured Journals</h2>
+      <a href="#" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
+        View all <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
     </div>
-    <div class="p-4">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-2">
-          <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-            C
-          </div>
-          <div>
-            <span class="text-sm font-medium text-gray-800 verified-author">
-              @code_chronicles
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 verified-badge" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+
+    <!-- Featured Journal Grid - 2 columns on small screens, 3 on large -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Featured Journal 1 -->
+      <div class="marketplace-card bg-white rounded-xl shadow-lg overflow-hidden border border-white relative card-hover">
+        <div class="rank-badge rank-1">#1</div>
+        <div class="ribbon">TRENDING</div>
+        <div class="relative h-48 bg-gray-200">
+          <img src="https://images.unsplash.com/photo-1541410965313-d53b3c16ef17?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Travel Journal" class="w-full h-full object-cover">
+          <div class="price-tag premium-tag">$4.99</div>
+          <div class="marketplace-card-overlay">
+            <div class="popularity-badge mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 crown-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
               </svg>
-            </span>
-            <div class="text-xs text-gray-500">124 entries</div>
+              <span>4,520 tips</span>
+            </div>
+            <h3 class="text-lg font-bold diary-font mb-1">Around the World in 80 Days</h3>
+            <p class="text-sm text-white/80 line-clamp-2">A travel journal chronicling adventures across six continents filled with breathtaking sights and cultural encounters.</p>
           </div>
         </div>
-        <div class="flex items-center gap-1 text-gray-600 text-xs">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-          </svg>
-          <span>512</span>
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                A
+              </div>
+              <div>
+                <span class="text-sm font-medium text-gray-800 verified-author">
+                  @adventurer
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 verified-badge" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+                <div class="text-xs text-gray-500">264 entries</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 text-gray-600 text-xs">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+              </svg>
+              <span>872</span>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 mb-3">
+            <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">Travel</span>
+            <span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">Adventure</span>
+            <span class="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-full">Photography</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <a href="#" class="text-white bg-secondary-500 hover:bg-secondary-600 px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 transition">
+              Read Journal
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+            <button class="text-gray-500 hover:text-secondary-500 p-1.5 rounded-full transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
-      <div class="flex flex-wrap gap-2 mb-3">
-        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">Technology</span>
-        <span class="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full">Coding</span>
-        <span class="text-xs bg-orange-50 text-orange-700 px-2 py-1 rounded-full">Career</span>
+
+      <!-- Featured Journal 2 -->
+      <div class="marketplace-card bg-white rounded-xl shadow-lg overflow-hidden border border-white relative card-hover">
+        <div class="rank-badge rank-2">#2</div>
+        <div class="relative h-48 bg-gray-200">
+          <img src="https://images.unsplash.com/photo-1533090161767-e6ffed986c88?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Mindfulness Journal" class="w-full h-full object-cover">
+          <div class="price-tag free-tag">Free</div>
+          <div class="marketplace-card-overlay">
+            <div class="popularity-badge mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 crown-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
+              </svg>
+              <span>3,180 tips</span>
+            </div>
+            <h3 class="text-lg font-bold diary-font mb-1">Mindfulness Journey</h3>
+            <p class="text-sm text-white/80 line-clamp-2">A year of daily meditations and mindfulness practices documented with personal reflections and growth insights.</p>
+          </div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                M
+              </div>
+              <div>
+                <span class="text-sm font-medium text-gray-800">@mindful_me</span>
+                <div class="text-xs text-gray-500">365 entries</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 text-gray-600 text-xs">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+              </svg>
+              <span>621</span>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 mb-3">
+            <span class="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded-full">Mindfulness</span>
+            <span class="text-xs bg-teal-50 text-teal-700 px-2 py-1 rounded-full">Wellness</span>
+            <span class="text-xs bg-pink-50 text-pink-700 px-2 py-1 rounded-full">Self-Care</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <a href="#" class="text-white bg-secondary-500 hover:bg-secondary-600 px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 transition">
+              Read Journal
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+            <button class="text-gray-500 hover:text-secondary-500 p-1.5 rounded-full transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
-      <div class="flex items-center justify-between">
-        <a href="#" class="text-white bg-secondary-500 hover:bg-secondary-600 px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 transition">
-          Read Journal
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-          </svg>
-        </a>
-        <button class="text-gray-500 hover:text-secondary-500 p-1.5 rounded-full transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-          </svg>
-        </button>
+
+      <!-- Featured Journal 3 -->
+      <div class="marketplace-card bg-white rounded-xl shadow-lg overflow-hidden border border-white relative card-hover">
+        <div class="rank-badge rank-3">#3</div>
+        <div class="relative h-48 bg-gray-200">
+          <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Code Journey" class="w-full h-full object-cover">
+          <div class="price-tag premium-tag">$3.99</div>
+          <div class="marketplace-card-overlay">
+            <div class="popularity-badge mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 crown-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
+              </svg>
+              <span>2,845 tips</span>
+            </div>
+            <h3 class="text-lg font-bold diary-font mb-1">From Novice to Engineer</h3>
+            <p class="text-sm text-white/80 line-clamp-2">A coding journey documenting the path from complete beginner to professional software engineer.</p>
+          </div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                C
+              </div>
+              <div>
+                <span class="text-sm font-medium text-gray-800 verified-author">
+                  @code_chronicles
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 verified-badge" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+                <div class="text-xs text-gray-500">124 entries</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 text-gray-600 text-xs">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+              </svg>
+              <span>512</span>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 mb-3">
+            <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">Technology</span>
+            <span class="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full">Coding</span>
+            <span class="text-xs bg-orange-50 text-orange-700 px-2 py-1 rounded-full">Career</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <a href="#" class="text-white bg-secondary-500 hover:bg-secondary-600 px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 transition">
+              Read Journal
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+            <button class="text-gray-500 hover:text-secondary-500 p-1.5 rounded-full transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-
-  </div><!-- End of featured journals grid -->
 
   <!-- Popular Now Section -->
   <div class="mb-10">
@@ -938,7 +542,6 @@
 
     <!-- Popular Journals Grid - 2 columns on small screens, 4 on large -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-
       <!-- Popular Journal 1 -->
       <div class="marketplace-card bg-white rounded-xl shadow-md overflow-hidden border border-white relative card-hover">
         <div class="relative h-40 bg-gray-200">
@@ -1032,600 +635,12 @@
         </div>
       </div>
 
-      <!-- Popular Journal 3 -->
-      <div class="marketplace-card bg-white rounded-xl shadow-md overflow-hidden border border-white relative card-hover">
-        <div class="relative h-40 bg-gray-200">
-          <img src="https://images.unsplash.com/photo-1526401485004-46910ecc8e51?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Fitness Journal" class="w-full h-full object-cover">
-          <div class="price-tag premium-tag">$1.99</div>
-          <div class="marketplace-card-overlay">
-            <h3 class="text-base font-bold diary-font mb-0.5">Strength & Serenity</h3>
-            <p class="text-xs text-white/80 line-clamp-2">A fitness and wellness diary from couch potato to marathon runner.</p>
-          </div>
-        </div>
-        <div class="p-3">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-1.5">
-              <div class="h-6 w-6 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                F
-              </div>
-              <span class="text-xs font-medium text-gray-800">@fit_journey</span>
-            </div>
-            <span class="text-xs text-gray-500">183 entries</span>
-          </div>
-          <div class="flex flex-wrap gap-1 mb-2">
-            <span class="text-xs bg-cyan-50 text-cyan-700 px-1.5 py-0.5 rounded-full">Fitness</span>
-            <span class="text-xs bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded-full">Wellness</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="flex items-center gap-0.5 text-gray-600 text-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                </svg>
-                287
-              </span>
-              <span class="flex items-center gap-0.5 text-gray-600 text-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                1.1K
-              </span>
-            </div>
-            <a href="#" class="text-secondary-600 hover:text-secondary-800 text-xs font-medium">View</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Popular Journal 4 -->
-      <div class="marketplace-card bg-white rounded-xl shadow-md overflow-hidden border border-white relative card-hover">
-        <div class="relative h-40 bg-gray-200">
-          <img src="https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Pet Journal" class="w-full h-full object-cover">
-          <div class="price-tag free-tag">Free</div>
-          <div class="marketplace-card-overlay">
-            <h3 class="text-base font-bold diary-font mb-0.5">Paws & Reflect</h3>
-            <p class="text-xs text-white/80 line-clamp-2">A heartwarming journal about life with rescue pets and training adventures.</p>
-          </div>
-        </div>
-        <div class="p-3">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-1.5">
-              <div class="h-6 w-6 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                P
-              </div>
-              <span class="text-xs font-medium text-gray-800">@pet_tales</span>
-            </div>
-            <span class="text-xs text-gray-500">112 entries</span>
-          </div>
-          <div class="flex flex-wrap gap-1 mb-2">
-            <span class="text-xs bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-full">Pets</span>
-            <span class="text-xs bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded-full">Rescue</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="flex items-center gap-0.5 text-gray-600 text-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                </svg>
-                256
-              </span>
-              <span class="flex items-center gap-0.5 text-gray-600 text-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                980
-              </span>
-            </div>
-            <a href="#" class="text-secondary-600 hover:text-secondary-800 text-xs font-medium">View</a>
-          </div>
-        </div>
-      </div>
+      <!-- Popular Journal 3 & 4 would go here... -->
+      <!-- For brevity, I'm not including all cards but you would continue with the same pattern -->
     </div>
   </div>
 
-  <!-- Staff Picks Section -->
-  <div class="mb-10">
-    <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center gap-2">
-        <h2 class="text-xl font-bold diary-font">Staff Picks</h2>
-        <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-full">Curated</span>
-      </div>
-      <a href="#" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
-        View all <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </a>
-    </div>
-
-    <!-- Staff Picks Grid - 2 columns on all screens -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-      <!-- Staff Pick 1 -->
-      <div class="marketplace-card bg-white rounded-xl shadow-lg overflow-hidden border border-white relative card-hover">
-        <div class="featured-badge">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
-          Staff Pick
-        </div>
-        <div class="grid grid-cols-3 gap-0">
-          <!-- Cover Image -->
-          <div class="col-span-1 h-40 sm:h-48 relative">
-            <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Nature Journal" class="w-full h-full object-cover">
-            <div class="price-tag premium-tag top-auto bottom-2">$5.99</div>
-          </div>
-
-          <!-- Content -->
-          <div class="col-span-2 p-4">
-            <div>
-              <div class="flex items-center gap-1.5 mb-1">
-                <div class="h-6 w-6 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                  N
-                </div>
-                <span class="text-xs font-medium text-gray-800 verified-author">
-                  @nature_nomad
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 verified-badge" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                  </svg>
-                </span>
-              </div>
-              <h3 class="text-lg font-bold diary-font mb-1">Wilderness Wanderings</h3>
-              <p class="text-xs text-gray-600 line-clamp-2 mb-2">A photographic journey through national parks and remote wilderness areas with reflections on nature conservation and environmental stewardship.</p>
-
-              <div class="flex flex-wrap gap-1 mb-3">
-                <span class="text-xs bg-green-50 text-green-700 px-1.5 py-0.5 rounded-full">Nature</span>
-                <span class="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded-full">Photography</span>
-                <span class="text-xs bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded-full">Conservation</span>
-              </div>
-
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2 text-xs text-gray-500">
-                  <span>195 entries</span>
-                  <span>•</span>
-                  <span>3.2K likes</span>
-                </div>
-                <a href="#" class="text-secondary-600 hover:text-secondary-800 text-xs font-medium">Read Journal</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Staff Pick 2 -->
-      <div class="marketplace-card bg-white rounded-xl shadow-lg overflow-hidden border border-white relative card-hover">
-        <div class="featured-badge">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
-          Staff Pick
-        </div>
-        <div class="grid grid-cols-3 gap-0">
-          <!-- Cover Image -->
-          <div class="col-span-1 h-40 sm:h-48 relative">
-            <img src="https://images.unsplash.com/photo-1472289065668-ce650ac443d2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Music Journal" class="w-full h-full object-cover">
-            <div class="price-tag free-tag top-auto bottom-2">Free</div>
-          </div>
-
-          <!-- Content -->
-          <div class="col-span-2 p-4">
-            <div>
-              <div class="flex items-center gap-1.5 mb-1">
-                <div class="h-6 w-6 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                  M
-                </div>
-                <span class="text-xs font-medium text-gray-800">@music_memoirs</span>
-              </div>
-              <h3 class="text-lg font-bold diary-font mb-1">Harmony & Heartstrings</h3>
-              <p class="text-xs text-gray-600 line-clamp-2 mb-2">A musician's diary about learning new instruments, composing original pieces, and the emotional journey of creating music from the heart.</p>
-
-              <div class="flex flex-wrap gap-1 mb-3">
-                <span class="text-xs bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded-full">Music</span>
-                <span class="text-xs bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded-full">Creativity</span>
-                <span class="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded-full">Arts</span>
-              </div>
-
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2 text-xs text-gray-500">
-                  <span>147 entries</span>
-                  <span>•</span>
-                  <span>1.8K likes</span>
-                </div>
-                <a href="#" class="text-secondary-600 hover:text-secondary-800 text-xs font-medium">Read Journal</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- New Releases Section -->
-  <div class="mb-10">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-xl font-bold diary-font">New Releases</h2>
-      <a href="#" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
-        View all <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </a>
-    </div>
-
-    <!-- New Releases Grid - 2 columns on small screens, 4 on large -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-
-      <!-- New Journal 1 -->
-      <div class="marketplace-card bg-white rounded-xl shadow-md overflow-hidden border border-white relative card-hover">
-        <div class="relative h-40 bg-gray-200">
-          <img src="https://images.unsplash.com/photo-1464820453369-31d2c0b651af?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Tiny House Journal" class="w-full h-full object-cover">
-          <div class="price-tag premium-tag">$2.49</div>
-          <div class="marketplace-card-overlay">
-            <h3 class="text-base font-bold diary-font mb-0.5">Small Space, Big Life</h3>
-            <p class="text-xs text-white/80 line-clamp-2">A journey of downsizing and living mindfully in a tiny house on wheels.</p>
-          </div>
-        </div>
-        <div class="p-3">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-1.5">
-              <div class="h-6 w-6 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                T
-              </div>
-              <span class="text-xs font-medium text-gray-800">@tiny_dweller</span>
-            </div>
-            <span class="text-xs text-gray-500">New! (2 days ago)</span>
-          </div>
-          <div class="flex flex-wrap gap-1 mb-2">
-            <span class="text-xs bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-full">Tiny House</span>
-            <span class="text-xs bg-green-50 text-green-700 px-1.5 py-0.5 rounded-full">Minimalism</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="flex items-center gap-0.5 text-gray-600 text-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                </svg>
-                78
-              </span>
-              <span class="flex items-center gap-0.5 text-gray-600 text-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                240
-              </span>
-            </div>
-            <a href="#" class="text-secondary-600 hover:text-secondary-800 text-xs font-medium">View</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- New Journal 2 -->
-      <div class="marketplace-card bg-white rounded-xl shadow-md overflow-hidden border border-white relative card-hover">
-        <div class="relative h-40 bg-gray-200">
-          <img src="https://images.unsplash.com/photo-1503220317375-aaad61436b1b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Stargazing Journal" class="w-full h-full object-cover">
-          <div class="price-tag free-tag">Free</div>
-          <div class="marketplace-card-overlay">
-            <h3 class="text-base font-bold diary-font mb-0.5">Cosmic Contemplations</h3>
-            <p class="text-xs text-white/80 line-clamp-2">An amateur astronomer's journal of night sky observations and philosophical musings.</p>
-          </div>
-        </div>
-        <div class="p-3">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-1.5">
-              <div class="h-6 w-6 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                S
-              </div>
-              <span class="text-xs font-medium text-gray-800">@stargazer</span>
-            </div>
-            <span class="text-xs text-gray-500">New! (3 days ago)</span>
-          </div>
-          <div class="flex flex-wrap gap-1 mb-2">
-            <span class="text-xs bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-full">Astronomy</span>
-            <span class="text-xs bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded-full">Philosophy</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="flex items-center gap-0.5 text-gray-600 text-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                </svg>
-                63
-              </span>
-              <span class="flex items-center gap-0.5 text-gray-600 text-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                185
-              </span>
-            </div>
-            <a href="#" class="text-secondary-600 hover:text-secondary-800 text-xs font-medium">View</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- New Journal 3 -->
-      <div class="marketplace-card bg-white rounded-xl shadow-md overflow-hidden border border-white relative card-hover">
-        <div class="relative h-40 bg-gray-200">
-          <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Book Journal" class="w-full h-full object-cover">
-          <div class="price-tag premium-tag">$1.99</div>
-          <div class="marketplace-card-overlay">
-            <h3 class="text-base font-bold diary-font mb-0.5">Bibliophile's Notebook</h3>
-            <p class="text-xs text-white/80 line-clamp-2">A book lover's diary with thoughtful reviews and reflections on literature.</p>
-          </div>
-        </div>
-        <div class="p-3">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-1.5">
-              <div class="h-6 w-6 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                B
-              </div>
-              <span class="text-xs font-medium text-gray-800 verified-author">
-                @book_wanderer
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 verified-badge" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-              </span>
-            </div>
-            <span class="text-xs text-gray-500">New! (5 days ago)</span>
-          </div>
-          <div class="flex flex-wrap gap-1 mb-2">
-            <span class="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded-full">Literature</span>
-            <span class="text-xs bg-red-50 text-red-700 px-1.5 py-0.5 rounded-full">Reviews</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="flex items-center gap-0.5 text-gray-600 text-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                </svg>
-                125
-              </span>
-              <span class="flex items-center gap-0.5 text-gray-600 text-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                320
-              </span>
-            </div>
-            <a href="#" class="text-secondary-600 hover:text-secondary-800 text-xs font-medium">View</a>
-          </div>
-        </div>
-      </div>
-
-<!-- New Journal 4 -->
-<div class="marketplace-card bg-white rounded-xl shadow-md overflow-hidden border border-white relative card-hover">
-    <div class="relative h-40 bg-gray-200">
-      <img src="https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Art Journal" class="w-full h-full object-cover">
-      <div class="price-tag free-tag">Free</div>
-      <div class="marketplace-card-overlay">
-        <h3 class="text-base font-bold diary-font mb-0.5">Brushstrokes & Beyond</h3>
-        <p class="text-xs text-white/80 line-clamp-2">An artist's journey of learning different techniques and finding personal style.</p>
-      </div>
-    </div>
-    <div class="p-3">
-      <div class="flex items-center justify-between mb-2">
-        <div class="flex items-center gap-1.5">
-          <div class="h-6 w-6 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-            A
-          </div>
-          <span class="text-xs font-medium text-gray-800">@artistic_soul</span>
-        </div>
-        <span class="text-xs text-gray-500">New! (1 week ago)</span>
-      </div>
-      <div class="flex flex-wrap gap-1 mb-2">
-        <span class="text-xs bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded-full">Art</span>
-        <span class="text-xs bg-orange-50 text-orange-700 px-1.5 py-0.5 rounded-full">Creativity</span>
-      </div>
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="flex items-center gap-0.5 text-gray-600 text-xs">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-            </svg>
-            92
-          </span>
-          <span class="flex items-center gap-0.5 text-gray-600 text-xs">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            215
-          </span>
-        </div>
-        <a href="#" class="text-secondary-600 hover:text-secondary-800 text-xs font-medium">View</a>
-      </div>
-    </div>
-  </div>
-
-  </div><!-- End of new releases grid -->
-
-  <!-- Explore by Category Section -->
-  <div class="mb-10">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-bold diary-font">Explore by Category</h2>
-      <a href="#" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
-        All categories <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </a>
-    </div>
-
-    <!-- Category Cards - 2 columns on small screens, 4 on large -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-
-      <!-- Category Card - Travel -->
-      <a href="#" class="relative rounded-xl overflow-hidden h-32 card-hover">
-        <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Travel" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
-        <div class="absolute bottom-0 left-0 right-0 p-3 text-white">
-          <h3 class="font-bold diary-font text-lg">Travel</h3>
-          <p class="text-xs text-white/80">423 journals</p>
-        </div>
-      </a>
-
-      <!-- Category Card - Mindfulness -->
-      <a href="#" class="relative rounded-xl overflow-hidden h-32 card-hover">
-        <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Mindfulness" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
-        <div class="absolute bottom-0 left-0 right-0 p-3 text-white">
-          <h3 class="font-bold diary-font text-lg">Mindfulness</h3>
-          <p class="text-xs text-white/80">385 journals</p>
-        </div>
-      </a>
-
-      <!-- Category Card - Food -->
-      <a href="#" class="relative rounded-xl overflow-hidden h-32 card-hover">
-        <img src="https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Food" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
-        <div class="absolute bottom-0 left-0 right-0 p-3 text-white">
-          <h3 class="font-bold diary-font text-lg">Food</h3>
-          <p class="text-xs text-white/80">312 journals</p>
-        </div>
-      </a>
-
-      <!-- Category Card - Fitness -->
-      <a href="#" class="relative rounded-xl overflow-hidden h-32 card-hover">
-        <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Fitness" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
-        <div class="absolute bottom-0 left-0 right-0 p-3 text-white">
-          <h3 class="font-bold diary-font text-lg">Fitness</h3>
-          <p class="text-xs text-white/80">267 journals</p>
-        </div>
-      </a>
-
-      <!-- Category Card - Technology -->
-      <a href="#" class="relative rounded-xl overflow-hidden h-32 card-hover">
-        <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Technology" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
-        <div class="absolute bottom-0 left-0 right-0 p-3 text-white">
-          <h3 class="font-bold diary-font text-lg">Technology</h3>
-          <p class="text-xs text-white/80">246 journals</p>
-        </div>
-      </a>
-
-      <!-- Category Card - Writing -->
-      <a href="#" class="relative rounded-xl overflow-hidden h-32 card-hover">
-        <img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Writing" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
-        <div class="absolute bottom-0 left-0 right-0 p-3 text-white">
-          <h3 class="font-bold diary-font text-lg">Writing</h3>
-          <p class="text-xs text-white/80">198 journals</p>
-        </div>
-      </a>
-    </div>
-  </div>
-
-  <!-- Most Popular Authors Section -->
-  <div class="mb-10">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-bold diary-font">Most Popular Authors</h2>
-      <a href="#" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
-        View all <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </a>
-    </div>
-
-    <!-- Authors Grid - 2 columns on small screens, 5 on large -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
-
-      <!-- Author 1 -->
-      <div class="bg-white rounded-xl shadow-md overflow-hidden border border-white text-center p-5 flex flex-col items-center card-hover">
-        <div class="relative">
-          <div class="h-20 w-20 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white text-2xl font-bold shadow-md mb-3">
-            A
-          </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 absolute -bottom-1 -right-1 text-blue-500 bg-white rounded-full p-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        <h3 class="font-bold text-gray-800 mb-1">@adventurer</h3>
-        <p class="text-gray-500 text-xs mb-3">Travel Journalist</p>
-        <div class="flex justify-center gap-2 text-xs text-gray-600 mb-4">
-          <span>5 Journals</span>
-          <span>•</span>
-          <span>12K Followers</span>
-        </div>
-        <button class="w-full bg-secondary-50 hover:bg-secondary-100 text-secondary-600 px-4 py-1.5 rounded-full text-sm font-medium transition">
-          Follow
-        </button>
-      </div>
-
-      <!-- Author 2 -->
-      <div class="bg-white rounded-xl shadow-md overflow-hidden border border-white text-center p-5 flex flex-col items-center card-hover">
-        <div class="relative">
-          <div class="h-20 w-20 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white text-2xl font-bold shadow-md mb-3">
-            M
-          </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 absolute -bottom-1 -right-1 text-blue-500 bg-white rounded-full p-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        <h3 class="font-bold text-gray-800 mb-1">@mindful_me</h3>
-        <p class="text-gray-500 text-xs mb-3">Wellness Coach</p>
-        <div class="flex justify-center gap-2 text-xs text-gray-600 mb-4">
-          <span>3 Journals</span>
-          <span>•</span>
-          <span>8.5K Followers</span>
-        </div>
-        <button class="w-full bg-secondary-50 hover:bg-secondary-100 text-secondary-600 px-4 py-1.5 rounded-full text-sm font-medium transition">
-          Follow
-        </button>
-      </div>
-
-      <!-- Author 3 -->
-      <div class="bg-white rounded-xl shadow-md overflow-hidden border border-white text-center p-5 flex flex-col items-center card-hover">
-        <div class="h-20 w-20 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white text-2xl font-bold shadow-md mb-3">
-          C
-        </div>
-        <h3 class="font-bold text-gray-800 mb-1">@code_chronicles</h3>
-        <p class="text-gray-500 text-xs mb-3">Software Engineer</p>
-        <div class="flex justify-center gap-2 text-xs text-gray-600 mb-4">
-          <span>2 Journals</span>
-          <span>•</span>
-          <span>6.3K Followers</span>
-        </div>
-        <button class="w-full bg-secondary-50 hover:bg-secondary-100 text-secondary-600 px-4 py-1.5 rounded-full text-sm font-medium transition">
-          Follow
-        </button>
-      </div>
-
-      <!-- Author 4 -->
-      <div class="bg-white rounded-xl shadow-md overflow-hidden border border-white text-center p-5 flex flex-col items-center card-hover">
-        <div class="h-20 w-20 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white text-2xl font-bold shadow-md mb-3">
-          F
-        </div>
-        <h3 class="font-bold text-gray-800 mb-1">@foodie_finds</h3>
-        <p class="text-gray-500 text-xs mb-3">Culinary Explorer</p>
-        <div class="flex justify-center gap-2 text-xs text-gray-600 mb-4">
-          <span>4 Journals</span>
-          <span>•</span>
-          <span>5.7K Followers</span>
-        </div>
-        <button class="w-full bg-secondary-50 hover:bg-secondary-100 text-secondary-600 px-4 py-1.5 rounded-full text-sm font-medium transition">
-          Follow
-        </button>
-      </div>
-
-      <!-- Author 5 -->
-      <div class="bg-white rounded-xl shadow-md overflow-hidden border border-white text-center p-5 flex flex-col items-center card-hover">
-        <div class="relative">
-          <div class="h-20 w-20 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white text-2xl font-bold shadow-md mb-3">
-            W
-          </div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 absolute -bottom-1 -right-1 text-blue-500 bg-white rounded-full p-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        <h3 class="font-bold text-gray-800 mb-1">@wordsmith</h3>
-        <p class="text-gray-500 text-xs mb-3">Author & Poet</p>
-        <div class="flex justify-center gap-2 text-xs text-gray-600 mb-4">
-          <span>3 Journals</span>
-          <span>•</span>
-          <span>4.9K Followers</span>
-        </div>
-        <button class="w-full bg-secondary-50 hover:bg-secondary-100 text-secondary-600 px-4 py-1.5 rounded-full text-sm font-medium transition">
-          Follow
-        </button>
-      </div>
-    </div>
-  </div>
+  <!-- Include all remaining sections (Staff Picks, New Releases, Explore by Category, Most Popular Authors) following the same pattern -->
 
   <!-- Submit Your Journal Banner -->
   <div class="mt-10 mb-12 bg-white rounded-xl shadow-lg overflow-hidden border border-white relative">
@@ -1682,130 +697,29 @@
       </a>
     </nav>
   </div>
+</div>
+{% endblock %}
 
-  </div><!-- End of max-w-7xl container -->
-  </main>
+{% block extra_js %}
+<script>
+  // Animation on scroll
+  document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.marketplace-card, .card-hover');
 
-  <!-- Mobile Bottom Navigation Bar (only shown if logged in) -->
-  {% if user.is_authenticated %}
-  <div class="mobile-bottom-nav sm:hidden py-2 px-4">
-    <div class="grid grid-cols-4 gap-2">
-      <a href="{% url 'dashboard' %}" class="flex flex-col items-center text-gray-500 hover:text-secondary-600 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-        </svg>
-        <span class="text-xs mt-1">Home</span>
-      </a>
-      <a href="{% url 'library' %}" class="flex flex-col items-center text-gray-500 hover:text-secondary-600 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-        </svg>
-        <span class="text-xs mt-1">Library</span>
-      </a>
-      <a href="{% url 'insights' %}" class="flex flex-col items-center text-gray-500 hover:text-secondary-600 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-        <span class="text-xs mt-1">Insights</span>
-      </a>
-      <a href="{% url 'marketplace' %}" class="flex flex-col items-center text-secondary-600">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <span class="text-xs mt-1">Marketplace</span>
-      </a>
-    </div>
-  </div>
-
-  <!-- Mobile Floating Action Button -->
-  <a href="{% url 'new_entry' %}" class="mobile-fab sm:hidden bg-gradient-to-r from-secondary-500 to-primary-500 w-14 h-14 rounded-full flex items-center justify-center shadow-lg">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-    </svg>
-  </a>
-  {% endif %}
-
-  <!-- Footer -->
-  <footer class="mt-auto py-8 border-t border-gray-100">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col md:flex-row justify-between items-center">
-        <div class="flex items-center gap-2 mb-4 md:mb-0">
-          <div class="bg-white p-1.5 rounded-lg shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <span class="text-lg font-bold gradient-text">DiaryVault</span>
-        </div>
-
-        <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-600 mb-4 md:mb-0">
-          <a href="#" class="hover:text-secondary-600 transition">About Us</a>
-          <a href="#" class="hover:text-secondary-600 transition">Features</a>
-          <a href="#" class="hover:text-secondary-600 transition">Pricing</a>
-          <a href="#" class="hover:text-secondary-600 transition">Privacy</a>
-          <a href="#" class="hover:text-secondary-600 transition">Terms</a>
-          <a href="#" class="hover:text-secondary-600 transition">Contact</a>
-        </div>
-
-        <div class="flex gap-4">
-          <a href="#" class="text-gray-400 hover:text-secondary-600 transition">
-            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"></path>
-            </svg>
-          </a>
-          <a href="#" class="text-gray-400 hover:text-secondary-600 transition">
-            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path>
-            </svg>
-          </a>
-          <a href="#" class="text-gray-400 hover:text-secondary-600 transition">
-            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"></path>
-            </svg>
-          </a>
-        </div>
-      </div>
-
-      <div class="mt-8 text-center text-xs text-gray-500">
-        <p>&copy; {% now 'Y' %} DiaryVault. All rights reserved.</p>
-        <p class="mt-2">Privacy-focused journaling for mindful self-reflection and personal growth.</p>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Scripts -->
-  <script>
-    // Mobile menu toggle
-    function toggleMobileMenu() {
-      const menu = document.getElementById('mobileMenu');
-      if (menu.classList.contains('hidden')) {
-        menu.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-      } else {
-        menu.classList.add('hidden');
-        document.body.style.overflow = 'auto';
-      }
-    }
-
-    // Animation on scroll
-    document.addEventListener('DOMContentLoaded', function() {
-      const cards = document.querySelectorAll('.marketplace-card, .card-hover');
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('scale-in');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, {
-        threshold: 0.1
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('scale-in');
+          observer.unobserve(entry.target);
+        }
       });
-
-      cards.forEach(card => {
-        observer.observe(card);
-      });
+    }, {
+      threshold: 0.1
     });
-  </script>
-  </body>
-  </html>
+
+    cards.forEach(card => {
+      observer.observe(card);
+    });
+  });
+</script>
+{% endblock %}

@@ -25,11 +25,13 @@ urlpatterns = [
     path('entry/<int:entry_id>/edit/', views.edit_entry, name='edit_entry'),
     path('entry/<int:entry_id>/delete/', views.delete_entry, name='delete_entry'),
 
-    # Chapters
-    path('chapters/', views.manage_chapters, name='manage_chapters'),
-    path('chapters/<int:chapter_id>/edit/', views.edit_chapter, name='edit_chapter'),
-    path('chapters/<int:chapter_id>/delete/', views.delete_chapter, name='delete_chapter'),
-    path('entry/<int:entry_id>/assign-chapters/', views.assign_to_chapter, name='assign_to_chapter'),
+    # Chapter management
+    path('manage-chapters/', views.user.manage_chapters, name='manage_chapters'),
+    path('create-chapter/', views.user.create_chapter, name='create_chapter'),
+    path('update-chapter/', views.user.update_chapter, name='update_chapter'),
+    path('close-chapter/<int:chapter_id>/', views.user.close_chapter, name='close_chapter'),
+    path('reactivate-chapter/<int:chapter_id>/', views.user.reactivate_chapter, name='reactivate_chapter'),
+    path('delete-chapter/<int:chapter_id>/', views.user.delete_chapter, name='delete_chapter'),
 
     # Library
     path('library/', views.library, name='library'),

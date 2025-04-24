@@ -1,778 +1,272 @@
+{% extends "base.html" %}
 {% load static %}
 {% load widget_tweaks %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <!-- Favicon and App Icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
-    <link rel="shortcut icon" href="/static/favicon.ico">
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="msapplication-config" content="/static/browserconfig.xml">
 
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>{{ period_name }} Entries - DiaryVault</title>
-    <meta name="theme-color" content="#6366f1" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Poppins:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: {
-                50: '#f5f3ff',
-                100: '#ede9fe',
-                200: '#ddd6fe',
-                300: '#c4b5fd',
-                400: '#a78bfa',
-                500: '#8b5cf6',
-                600: '#7c3aed',
-                700: '#6d28d9',
-                800: '#5b21b6',
-                900: '#4c1d95',
-              },
-              secondary: {
-                50: '#eef2ff',
-                100: '#e0e7ff',
-                200: '#c7d2fe',
-                300: '#a5b4fc',
-                400: '#818cf8',
-                500: '#6366f1',
-                600: '#4f46e5',
-                700: '#4338ca',
-                800: '#3730a3',
-                900: '#312e81',
-              },
-            },
-            animation: {
-              'blob': 'blob 7s infinite',
-            },
-            keyframes: {
-              blob: {
-                '0%': {
-                  transform: 'translate(0px, 0px) scale(1)',
-                },
-                '33%': {
-                  transform: 'translate(30px, -50px) scale(1.1)',
-                },
-                '66%': {
-                  transform: 'translate(-20px, 20px) scale(0.9)',
-                },
-                '100%': {
-                  transform: 'translate(0px, 0px) scale(1)',
-                },
-              },
-            },
-          },
-        },
-      }
-    </script>
-    <style>
-      body {
-        font-family: 'Poppins', sans-serif;
-        background-color: #f8fafc;
-        width: 100%;
-        overflow-x: hidden;
-        position: relative;
-      }
-      html {
-        overflow-x: hidden;
-        scroll-behavior: smooth;
-      }
-      .diary-font {
-        font-family: 'Playfair Display', serif;
-      }
-      .handwritten {
-        font-family: 'Caveat', cursive;
-      }
-      .input-area {
-        min-height: 180px;
-        resize: none;
-      }
-      .suggestions-pill {
-        transition: all 0.3s ease;
-      }
-      .suggestions-pill:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      }
-      .gradient-bg {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-      }
-      .gradient-text {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-      }
-      .btn-gradient {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        transition: all 0.3s ease;
-      }
-      .btn-gradient:hover {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
-      }
-      .card-hover {
-        transition: all 0.3s ease;
-      }
-      .card-hover:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      }
-      .glass-effect {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-      }
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f5f9;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 3px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-      }
-      .circle-pattern {
-        background-image: radial-gradient(#6366f120 1px, transparent 1px);
-        background-size: 20px 20px;
-      }
-      .floating {
-        animation: floating 3s infinite ease-in-out;
-      }
-      @keyframes floating {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-        100% { transform: translateY(0px); }
-      }
-      .scale-in {
-        animation: scaleIn 0.5s ease forwards;
-        transform: scale(0.95);
-        opacity: 0;
-      }
-      @keyframes scaleIn {
-        to {
-          transform: scale(1);
-          opacity: 1;
-        }
-      }
-      .fade-in {
-        animation: fadeIn 0.5s ease forwards;
-        opacity: 0;
-      }
-      @keyframes fadeIn {
-        to {
-          opacity: 1;
-        }
-      }
-      .animation-delay-2000 {
-        animation-delay: 2s;
-      }
-      body.transition-ready {
-        opacity: 1;
-      }
-      body.page-transitioning {
-        opacity: 0;
-      }
-      .entry-card {
-        border-left: 4px solid transparent;
-        transition: all 0.2s ease;
-      }
-      .entry-card.happy {
-        border-left-color: #22c55e;
-      }
-      .entry-card.content {
-        border-left-color: #0ea5e9;
-      }
-      .entry-card.excited {
-        border-left-color: #8b5cf6;
-      }
-      .entry-card.neutral {
-        border-left-color: #64748b;
-      }
-      .entry-card.anxious {
-        border-left-color: #f59e0b;
-      }
-      .entry-card.sad {
-        border-left-color: #ef4444;
-      }
-      .tag-pill {
-        transition: all 0.2s ease;
-      }
-      .tag-pill:hover {
-        transform: translateY(-1px);
-      }
-      .timeline-line {
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: linear-gradient(to bottom, #6366f1 0%, #8b5cf6 100%);
-        margin-left: 25px;
-      }
-      .timeline-dot {
-        position: absolute;
-        left: 0;
-        width: 12px;
-        height: 12px;
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        border-radius: 50%;
-        margin-left: 20px;
-        margin-top: 18px;
-        z-index: 1;
-      }
-      .line-clamp-3 {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      @media (max-width: 640px) {
-        .mobile-reduce-margin {
-          margin-bottom: -2rem;
-        }
-        .mobile-menu-slide {
-          transition: transform 0.3s ease-in-out;
-        }
-        .mobile-menu-open {
-          transform: translateX(0);
-        }
-        .mobile-menu-closed {
-          transform: translateX(100%);
-        }
-        .mobile-bottom-nav {
-          background-color: rgba(255, 255, 255, 0.9);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 40;
-          border-top: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .mobile-fab {
-          position: fixed;
-          bottom: 80px;
-          right: 20px;
-          z-index: 30;
-          transform-origin: center;
-          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .mobile-fab:active {
-          transform: scale(0.95);
-        }
-        /* Add bottom padding to account for fixed nav */
-        .pb-safe {
-          padding-bottom: 5rem !important;
-        }
-      }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f5f3ff] to-[#eef2ff] text-gray-800 custom-scrollbar circle-pattern transition-opacity duration-300">
+{% block title %}{{ period_name }} Entries - DiaryVault{% endblock %}
 
-<!-- Navbar -->
-<header class="glass-effect sticky top-0 z-50 border-b border-white/20">
-  <div class="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 sm:py-4">
-    <!-- Logo -->
-    <div class="flex items-center gap-2 sm:gap-3">
-      <a href="{% url 'home' %}" class="flex items-center gap-1 sm:gap-2 hover:opacity-80 transition">
-        <div class="bg-white p-1.5 rounded-lg shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
+{% block extra_css %}
+<style>
+  .entry-card {
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease;
+  }
+  .entry-card.happy {
+    border-left-color: #22c55e;
+  }
+  .entry-card.content {
+    border-left-color: #0ea5e9;
+  }
+  .entry-card.excited {
+    border-left-color: #8b5cf6;
+  }
+  .entry-card.neutral {
+    border-left-color: #64748b;
+  }
+  .entry-card.anxious {
+    border-left-color: #f59e0b;
+  }
+  .entry-card.sad {
+    border-left-color: #ef4444;
+  }
+  .tag-pill {
+    transition: all 0.2s ease;
+  }
+  .tag-pill:hover {
+    transform: translateY(-1px);
+  }
+  .timeline-line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #6366f1 0%, #8b5cf6 100%);
+    margin-left: 25px;
+  }
+  .timeline-dot {
+    position: absolute;
+    left: 0;
+    width: 12px;
+    height: 12px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-radius: 50%;
+    margin-left: 20px;
+    margin-top: 18px;
+    z-index: 1;
+  }
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl w-full mx-auto relative">
+  <!-- Decorative elements -->
+  <div class="absolute -top-10 -left-16 h-32 w-32 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+  <div class="absolute -bottom-8 -right-16 h-32 w-32 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+
+  {% if messages %}
+    <div class="mb-6 relative z-10">
+      {% for message in messages %}
+        <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% elif message.tags == 'success' %}bg-green-100 border-green-400 text-green-700{% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} px-4 py-3 rounded-lg border mb-4 shadow-sm fade-in">
+          {{ message }}
         </div>
-        <h1 class="text-lg sm:text-2xl font-extrabold gradient-text tracking-tight">DiaryVault</h1>
-      </a>
+      {% endfor %}
     </div>
+  {% endif %}
 
-    <!-- Main Navigation (only shown if logged in) -->
-    {% if user.is_authenticated %}
-    <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
-      <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-        </svg>
-        Dashboard
-      </a>
-      <a href="{% url 'library' %}" class="text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-secondary-500">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-        </svg>
-        Library
-      </a>
-      <a href="{% url 'new_entry' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-        </svg>
-        Journal
-      </a>
-      <a href="{% url 'biography' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        Biography
-      </a>
-      <a href="{% url 'insights' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-        Insights
-      </a>
-
-      <div class="w-px h-6 bg-gray-200"></div>
-
-      <!-- User profile section when logged in -->
-      <div class="flex items-center gap-3">
-        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 hover:opacity-80 transition">
-          <div class="h-9 w-9 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
-            {{ user.username|first|upper }}
-          </div>
-          <span class="text-sm text-gray-700">{{ user.username }}</span>
+  <!-- Time Period Header -->
+  <div class="glass-effect rounded-xl shadow-md p-6 mb-8 border border-white relative z-10">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold diary-font mb-1">{{ period_name }}</h1>
+        <p class="text-gray-600">{{ entries.count }} entries from this time period</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a href="{% url 'library' %}" class="flex items-center gap-1.5 text-gray-600 hover:text-gray-800 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100 transition hover:shadow">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Library
         </a>
-      </div>
-
-      <form method="post" action="{% url 'logout' %}" class="inline">
-        {% csrf_token %}
-        <button type="submit" class="text-gray-700 hover:text-red-500 transition bg-gray-100 px-4 py-2 rounded-full text-sm hover:bg-red-50">Logout</button>
-      </form>
-    </nav>
-    {% else %}
-    <!-- Auth buttons if not logged in -->
-    <div class="flex gap-4 items-center">
-      <a href="{% url 'login' %}" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium transition px-5 py-2">Log in</a>
-      <a href="{% url 'signup' %}" class="btn-gradient text-white px-5 py-2 rounded-full text-sm font-medium shadow-md">Sign up</a>
-    </div>
-    {% endif %}
-
-    <!-- Mobile menu button (only shown if logged in) -->
-    {% if user.is_authenticated %}
-    <button class="md:hidden text-gray-700 hover:text-secondary-600 p-1.5 bg-white rounded-lg shadow-sm" onclick="toggleMobileMenu()">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
-    {% endif %}
-  </div>
-</header>
-
-<!-- Mobile Menu Overlay (only shown if logged in) -->
-{% if user.is_authenticated %}
-<div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 hidden">
-  <div class="absolute right-0 top-0 bottom-0 w-72 glass-effect p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
-    <div class="flex justify-between items-center mb-8">
-      <h2 class="font-bold text-lg gradient-text">Menu</h2>
-      <button onclick="toggleMobileMenu()" class="p-1.5 bg-white rounded-lg shadow-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-    </div>
-
-    <!-- User info in mobile menu -->
-    <a href="{% url 'account_settings' %}" class="block">
-      <div class="flex items-center gap-3 p-4 glass-effect rounded-xl mb-6 hover:bg-white/50 transition border border-white/20">
-        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold shadow-md">
-          {{ user.username|first|upper }}
-        </div>
-        <div>
-          <div class="font-medium">{{ user.username }}</div>
-          <div class="text-xs text-gray-500">{{ entries.count|default:"0" }} entries</div>
-        </div>
-      </div>
-    </a>
-
-    <nav class="flex flex-col gap-2">
-      <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-        </svg>
-        <span>Dashboard</span>
-      </a>
-      <a href="{% url 'library' %}" class="flex items-center gap-3 p-3 bg-white/50 rounded-xl transition border border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-        </svg>
-        <span>Library</span>
-      </a>
-      <a href="{% url 'new_entry' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-        </svg>
-        <span>Journal</span>
-      </a>
-      <a href="{% url 'biography' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <span>Biography</span>
-      </a>
-      <a href="{% url 'insights' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-        <span>Insights</span>
-      </a>
-      <div class="border-t border-white/20 my-3 pt-2">
-        <form method="post" action="{% url 'logout' %}">
-          {% csrf_token %}
-          <button type="submit" class="flex items-center gap-3 p-3 w-full hover:bg-red-50/80 rounded-xl text-red-600 transition border border-transparent hover:border-red-100">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span>Logout</span>
-          </button>
-        </form>
-      </div>
-    </nav>
-  </div>
-</div>
-{% endif %}
-
-<!-- Main Content -->
-<main class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-6 pb-safe flex flex-col items-center">
-  <div class="max-w-5xl w-full mx-auto relative">
-    <!-- Decorative elements -->
-    <div class="absolute -top-10 -left-16 h-32 w-32 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
-    <div class="absolute -bottom-8 -right-16 h-32 w-32 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-
-    {% if messages %}
-      <div class="mb-6 relative z-10">
-        {% for message in messages %}
-          <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% elif message.tags == 'success' %}bg-green-100 border-green-400 text-green-700{% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} px-4 py-3 rounded-lg border mb-4 shadow-sm fade-in">
-            {{ message }}
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-
-    <!-- Time Period Header -->
-    <div class="glass-effect rounded-xl shadow-md p-6 mb-8 border border-white relative z-10">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 class="text-2xl sm:text-3xl font-bold diary-font mb-1">{{ period_name }}</h1>
-          <p class="text-gray-600">{{ entries.count }} entries from this time period</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <a href="{% url 'library' %}" class="flex items-center gap-1.5 text-gray-600 hover:text-gray-800 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100 transition hover:shadow">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Library
-          </a>
-          <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-4 py-2 rounded-full flex items-center gap-1.5 shadow-md">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            New Entry
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filter/Sort Controls -->
-    <div class="glass-effect rounded-xl shadow-sm p-4 mb-6 border border-white/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
-      <div class="flex flex-wrap items-center gap-2">
-        <div class="text-gray-600 text-sm font-medium">Filter by mood:</div>
-        <div class="flex flex-wrap gap-1 mt-1 sm:mt-0">
-          <a href="?mood=all" class="suggestions-pill {% if not request.GET.mood or request.GET.mood == 'all' %}bg-secondary-100 text-secondary-700 border-secondary-200{% else %}bg-gray-100 text-gray-700 border-gray-200{% endif %} px-3 py-1 rounded-full text-xs font-medium transition border">All</a>
-          <a href="?mood=happy" class="suggestions-pill {% if request.GET.mood == 'happy' %}bg-green-100 text-green-700 border-green-200{% else %}bg-green-50 text-green-700 border-green-100/50{% endif %} px-3 py-1 rounded-full text-xs font-medium transition border">Happy</a>
-          <a href="?mood=content" class="suggestions-pill {% if request.GET.mood == 'content' %}bg-blue-100 text-blue-700 border-blue-200{% else %}bg-blue-50 text-blue-700 border-blue-100/50{% endif %} px-3 py-1 rounded-full text-xs font-medium transition border">Content</a>
-          <a href="?mood=excited" class="suggestions-pill {% if request.GET.mood == 'excited' %}bg-secondary-100 text-secondary-700 border-secondary-200{% else %}bg-secondary-50 text-secondary-700 border-secondary-100/50{% endif %} px-3 py-1 rounded-full text-xs font-medium transition border">Excited</a>
-          <a href="?mood=neutral" class="suggestions-pill {% if request.GET.mood == 'neutral' %}bg-gray-200 text-gray-700 border-gray-300{% else %}bg-gray-100 text-gray-700 border-gray-200/50{% endif %} px-3 py-1 rounded-full text-xs font-medium transition border">Neutral</a>
-          <a href="?mood=anxious" class="suggestions-pill {% if request.GET.mood == 'anxious' %}bg-amber-100 text-amber-700 border-amber-200{% else %}bg-amber-50 text-amber-700 border-amber-100/50{% endif %} px-3 py-1 rounded-full text-xs font-medium transition border">Anxious</a>
-          <a href="?mood=sad" class="suggestions-pill {% if request.GET.mood == 'sad' %}bg-red-100 text-red-700 border-red-200{% else %}bg-red-50 text-red-700 border-red-100/50{% endif %} px-3 py-1 rounded-full text-xs font-medium transition border">Sad</a>
-        </div>
-      </div>
-      <div class="flex items-center gap-2 w-full sm:w-auto">
-        <span class="text-gray-600 text-sm font-medium">Sort by:</span>
-        <select id="sortOrder" onchange="changeSortOrder(this.value)" class="bg-white border border-gray-200 text-gray-700 rounded-lg px-3 py-1 text-sm flex-grow sm:flex-grow-0">
-          <option value="newest" {% if not request.GET.sort or request.GET.sort == 'newest' %}selected{% endif %}>Newest first</option>
-          <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest first</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Entries Timeline -->
-    {% if entries %}
-      <div class="relative">
-        <!-- Timeline line (only visible if more than one entry) -->
-        {% if entries.count > 1 %}
-          <div class="timeline-line"></div>
-        {% endif %}
-
-        <!-- Entries -->
-        <div class="space-y-6 pl-12">
-          {% for entry in entries %}
-            <div class="relative scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
-              <div class="timeline-dot"></div>
-              <div class="entry-card {{ entry.mood }} bg-white rounded-xl shadow-sm overflow-hidden card-hover border border-white">
-                <div class="p-5">
-                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                    <div>
-                      <h3 class="text-lg font-bold text-gray-800 diary-font">{{ entry.title }}</h3>
-                      <time datetime="{{ entry.created_at|date:'Y-m-d' }}" class="text-gray-500 text-sm">{{ entry.created_at|date:"l, F j, Y" }}</time>
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <!-- Mood indicator -->
-                      <div class="flex items-center gap-1.5 bg-gray-50 px-3 py-1 rounded-full text-xs font-medium shadow-sm border border-gray-100">
-                        <span class="text-base">
-                          {% if entry.mood == 'happy' %}😊
-                          {% elif entry.mood == 'content' %}😌
-                          {% elif entry.mood == 'excited' %}🤩
-                          {% elif entry.mood == 'neutral' %}😐
-                          {% elif entry.mood == 'anxious' %}😰
-                          {% elif entry.mood == 'sad' %}😢
-                          {% else %}😐
-                          {% endif %}
-                        </span>
-                        <span class="capitalize">{{ entry.mood }}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Entry preview -->
-                  <div class="mb-4">
-                    <p class="text-gray-600 diary-font line-clamp-3">{{ entry.content|truncatechars:200 }}</p>
-                  </div>
-
-                  <!-- Tags -->
-                  {% if entry.tags.all %}
-                    <div class="flex flex-wrap gap-1.5 mb-4">
-                      {% for tag in entry.tags.all %}
-                        <span class="tag-pill bg-secondary-50 text-secondary-700 px-2 py-1 rounded-full text-xs border border-secondary-100/50">{{ tag.name }}</span>
-                      {% endfor %}
-                    </div>
-                  {% endif %}
-
-                  <!-- Actions -->
-                  <div class="flex justify-end">
-                    <a href="{% url 'entry_detail' entry.id %}" class="btn-gradient text-white px-4 py-1.5 rounded-full text-sm flex items-center gap-1.5 transition shadow">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      Read Full Entry
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          {% endfor %}
-        </div>
-      </div>
-    {% else %}
-      <!-- No entries message -->
-      <div class="glass-effect rounded-xl p-8 text-center border border-white relative z-10 fade-in">
-        <div class="mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-        </div>
-        <h3 class="text-lg font-bold text-gray-800 mb-2">No entries found for this time period</h3>
-        <p class="text-gray-600 mb-6">There are no journal entries for {{ period_name }} {% if request.GET.mood and request.GET.mood != 'all' %}with the "{{ request.GET.mood }}" mood{% endif %}.</p>
-        <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-6 py-2 rounded-full inline-flex items-center gap-1.5 shadow-md">
+        <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-4 py-2 rounded-full flex items-center gap-1.5 shadow-md">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
-          Create Your First Entry
+          New Entry
         </a>
       </div>
-    {% endif %}
-
-    <!-- Pagination (if needed) -->
-    {% if entries.has_other_pages %}
-      <div class="mt-8 relative z-10">
-        <div class="flex justify-center">
-          <nav class="inline-flex rounded-xl shadow-sm overflow-hidden glass-effect">
-            {% if entries.has_previous %}
-              <a href="?page={{ entries.previous_page_number }}{% if request.GET.mood %}&mood={{ request.GET.mood }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="relative inline-flex items-center px-4 py-2 border-r border-white/30 bg-white/40 text-sm font-medium text-gray-600 hover:bg-white/70 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-              </a>
-            {% else %}
-              <span class="relative inline-flex items-center px-4 py-2 border-r border-white/30 bg-white/20 text-sm font-medium text-gray-400 cursor-not-allowed">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-              </span>
-            {% endif %}
-
-            {% for num in entries.paginator.page_range %}
-              {% if entries.number == num %}
-                <span class="relative inline-flex items-center px-4 py-2 border-r border-white/30 bg-secondary-100 text-sm font-medium text-secondary-700">{{ num }}</span>
-              {% elif num > entries.number|add:'-3' and num < entries.number|add:'3' %}
-                <a href="?page={{ num }}{% if request.GET.mood %}&mood={{ request.GET.mood }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="relative inline-flex items-center px-4 py-2 border-r border-white/30 bg-white/40 text-sm font-medium text-gray-700 hover:bg-white/70 transition-colors">{{ num }}</a>
-              {% endif %}
-            {% endfor %}
-
-            {% if entries.has_next %}
-              <a href="?page={{ entries.next_page_number }}{% if request.GET.mood %}&mood={{ request.GET.mood }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="relative inline-flex items-center px-4 py-2 bg-white/40 text-sm font-medium text-gray-600 hover:bg-white/70 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-            {% else %}
-              <span class="relative inline-flex items-center px-4 py-2 bg-white/20 text-sm font-medium text-gray-400 cursor-not-allowed">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            {% endif %}
-          </nav>
-        </div>
-      </div>
-    {% endif %}
-  </div>
-</main>
-
-<!-- Footer with links to other platforms -->
-<footer class="py-3 mt-6 bg-white/80 backdrop-blur-sm border-t border-white/30 pb-safe hidden sm:block">
-  <div class="w-full max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center">
-    <div class="mb-4 sm:mb-0 text-center sm:text-left">
-      <a href="{% url 'home' %}" class="flex items-center justify-center sm:justify-start mb-2">
-        <div class="bg-white p-1.5 rounded-lg shadow-sm mr-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-        </div>
-        <h2 class="text-lg font-bold gradient-text">DiaryVault</h2>
-        <span class="text-xs text-gray-400 ml-1 bg-gray-100 px-1.5 py-0.5 rounded">v1.0</span>
-      </a>
-      <p class="text-xs text-gray-500">© 2025 DiaryVault. All rights reserved.</p>
     </div>
-    <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-sm font-medium">
-      <a href="https://crene.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-gray-600 hover:text-secondary-600 transition-colors px-3 py-1.5 rounded-full hover:bg-white">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <span>Crene.com</span>
-      </a>
-      <a href="https://euphorie.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors px-3 py-1.5 rounded-full hover:bg-white">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  </div>
+
+  <!-- Filter/Sort Controls -->
+  <div class="glass-effect rounded-xl shadow-sm p-4 mb-6 border border-white/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="text-gray-600 text-sm font-medium">Filter by mood:</div>
+      <div class="flex flex-wrap gap-1 mt-1 sm:mt-0">
+        <a href="?mood=all" class="suggestions-pill {% if not request.GET.mood or request.GET.mood == 'all' %}bg-secondary-100 text-secondary-700 border-secondary-200{% else %}bg-gray-100 text-gray-700 border-gray-200{% endif %} px-3 py-1 rounded-full text-xs font-medium transition border">All</a>
+        <a href="?mood=happy" class="suggestions-pill {% if request.GET.mood == 'happy' %}bg-green-100 text-green-700 border-green-200{% else %}bg-green-50 text-green-700 border-green-100/50{% endif %} px-3 py-1 rounded-full text-xs font-medium transition border">Happy</a>
+        <a href="?mood=content" class="suggestions-pill {% if request.GET.mood == 'content' %}bg-blue-100 text-blue-700 border-blue-200{% else %}bg-blue-50 text-blue-700 border-blue-100/50{% endif %} px-3 py-1 rounded-full text-xs font-medium transition border">Content</a>
+        <a href="?mood=excited" class="suggestions-pill {% if request.GET.mood == 'excited' %}bg-secondary-100 text-secondary-700 border-secondary-200{% else %}bg-secondary-50 text-secondary-700 border-secondary-100/50{% endif %} px-3 py-1 rounded-full text-xs font-medium transition border">Excited</a>
+        <a href="?mood=neutral" class="suggestions-pill {% if request.GET.mood == 'neutral' %}bg-gray-200 text-gray-700 border-gray-300{% else %}bg-gray-100 text-gray-700 border-gray-200/50{% endif %} px-3 py-1 rounded-full text-xs font-medium transition border">Neutral</a>
+        <a href="?mood=anxious" class="suggestions-pill {% if request.GET.mood == 'anxious' %}bg-amber-100 text-amber-700 border-amber-200{% else %}bg-amber-50 text-amber-700 border-amber-100/50{% endif %} px-3 py-1 rounded-full text-xs font-medium transition border">Anxious</a>
+        <a href="?mood=sad" class="suggestions-pill {% if request.GET.mood == 'sad' %}bg-red-100 text-red-700 border-red-200{% else %}bg-red-50 text-red-700 border-red-100/50{% endif %} px-3 py-1 rounded-full text-xs font-medium transition border">Sad</a>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 w-full sm:w-auto">
+      <span class="text-gray-600 text-sm font-medium">Sort by:</span>
+      <select id="sortOrder" onchange="changeSortOrder(this.value)" class="bg-white border border-gray-200 text-gray-700 rounded-lg px-3 py-1 text-sm flex-grow sm:flex-grow-0">
+        <option value="newest" {% if not request.GET.sort or request.GET.sort == 'newest' %}selected{% endif %}>Newest first</option>
+        <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest first</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Entries Timeline -->
+  {% if entries %}
+    <div class="relative">
+      <!-- Timeline line (only visible if more than one entry) -->
+      {% if entries.count > 1 %}
+        <div class="timeline-line"></div>
+      {% endif %}
+
+      <!-- Entries -->
+      <div class="space-y-6 pl-12">
+        {% for entry in entries %}
+          <div class="relative scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
+            <div class="timeline-dot"></div>
+            <div class="entry-card {{ entry.mood }} bg-white rounded-xl shadow-sm overflow-hidden card-hover border border-white">
+              <div class="p-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                  <div>
+                    <h3 class="text-lg font-bold text-gray-800 diary-font">{{ entry.title }}</h3>
+                    <time datetime="{{ entry.created_at|date:'Y-m-d' }}" class="text-gray-500 text-sm">{{ entry.created_at|date:"l, F j, Y" }}</time>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <!-- Mood indicator -->
+                    <div class="flex items-center gap-1.5 bg-gray-50 px-3 py-1 rounded-full text-xs font-medium shadow-sm border border-gray-100">
+                      <span class="text-base">
+                        {% if entry.mood == 'happy' %}😊
+                        {% elif entry.mood == 'content' %}😌
+                        {% elif entry.mood == 'excited' %}🤩
+                        {% elif entry.mood == 'neutral' %}😐
+                        {% elif entry.mood == 'anxious' %}😰
+                        {% elif entry.mood == 'sad' %}😢
+                        {% else %}😐
+                        {% endif %}
+                      </span>
+                      <span class="capitalize">{{ entry.mood }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Entry preview -->
+                <div class="mb-4">
+                  <p class="text-gray-600 diary-font line-clamp-3">{{ entry.content|truncatechars:200 }}</p>
+                </div>
+
+                <!-- Tags -->
+                {% if entry.tags.all %}
+                  <div class="flex flex-wrap gap-1.5 mb-4">
+                    {% for tag in entry.tags.all %}
+                      <span class="tag-pill bg-secondary-50 text-secondary-700 px-2 py-1 rounded-full text-xs border border-secondary-100/50">{{ tag.name }}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
+                <!-- Actions -->
+                <div class="flex justify-end">
+                  <a href="{% url 'entry_detail' entry.id %}" class="btn-gradient text-white px-4 py-1.5 rounded-full text-sm flex items-center gap-1.5 transition shadow">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Read Full Entry
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <!-- No entries message -->
+    <div class="glass-effect rounded-xl p-8 text-center border border-white relative z-10 fade-in">
+      <div class="mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
         </svg>
-        <span>Euphorie.com</span>
+      </div>
+      <h3 class="text-lg font-bold text-gray-800 mb-2">No entries found for this time period</h3>
+      <p class="text-gray-600 mb-6">There are no journal entries for {{ period_name }} {% if request.GET.mood and request.GET.mood != 'all' %}with the "{{ request.GET.mood }}" mood{% endif %}.</p>
+      <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-6 py-2 rounded-full inline-flex items-center gap-1.5 shadow-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Create Your First Entry
       </a>
     </div>
-  </div>
-</footer>
+  {% endif %}
 
-<!-- Mobile Bottom Navigation -->
-{% if user.is_authenticated %}
-<nav class="mobile-bottom-nav md:hidden px-2 py-2 flex justify-around">
-  <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-1 px-3 text-gray-500">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-    </svg>
-    <span class="text-xs mt-1">Home</span>
-  </a>
-  <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-1 px-3 text-secondary-600">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-    </svg>
-    <span class="text-xs mt-1">Library</span>
-  </a>
-  <div class="flex flex-col items-center justify-center py-1 px-3 opacity-0">
-    <div class="h-6 w-6"></div>
-    <span class="text-xs mt-1">New</span>
-  </div>
-  <a href="{% url 'biography' %}" class="flex flex-col items-center justify-center py-1 px-3 text-gray-500">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
-    <span class="text-xs mt-1">Biography</span>
-  </a>
-  <a href="{% url 'insights' %}" class="flex flex-col items-center justify-center py-1 px-3 text-gray-500">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-    </svg>
-    <span class="text-xs mt-1">Insights</span>
-  </a>
-</nav>
+  <!-- Pagination (if needed) -->
+  {% if entries.has_other_pages %}
+    <div class="mt-8 relative z-10">
+      <div class="flex justify-center">
+        <nav class="inline-flex rounded-xl shadow-sm overflow-hidden glass-effect">
+          {% if entries.has_previous %}
+            <a href="?page={{ entries.previous_page_number }}{% if request.GET.mood %}&mood={{ request.GET.mood }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="relative inline-flex items-center px-4 py-2 border-r border-white/30 bg-white/40 text-sm font-medium text-gray-600 hover:bg-white/70 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </a>
+          {% else %}
+            <span class="relative inline-flex items-center px-4 py-2 border-r border-white/30 bg-white/20 text-sm font-medium text-gray-400 cursor-not-allowed">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </span>
+          {% endif %}
 
-<!-- Floating Action Button for creating new entries -->
-<a href="{% url 'new_entry' %}" class="mobile-fab md:hidden btn-gradient shadow-lg p-4 rounded-full text-white">
-  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-  </svg>
-</a>
-{% endif %}
+          {% for num in entries.paginator.page_range %}
+            {% if entries.number == num %}
+              <span class="relative inline-flex items-center px-4 py-2 border-r border-white/30 bg-secondary-100 text-sm font-medium text-secondary-700">{{ num }}</span>
+            {% elif num > entries.number|add:'-3' and num < entries.number|add:'3' %}
+              <a href="?page={{ num }}{% if request.GET.mood %}&mood={{ request.GET.mood }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="relative inline-flex items-center px-4 py-2 border-r border-white/30 bg-white/40 text-sm font-medium text-gray-700 hover:bg-white/70 transition-colors">{{ num }}</a>
+            {% endif %}
+          {% endfor %}
 
+          {% if entries.has_next %}
+            <a href="?page={{ entries.next_page_number }}{% if request.GET.mood %}&mood={{ request.GET.mood }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="relative inline-flex items-center px-4 py-2 bg-white/40 text-sm font-medium text-gray-600 hover:bg-white/70 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          {% else %}
+            <span class="relative inline-flex items-center px-4 py-2 bg-white/20 text-sm font-medium text-gray-400 cursor-not-allowed">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </span>
+          {% endif %}
+        </nav>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
 <script>
-  // Mobile menu toggle
-  function toggleMobileMenu() {
-    const menu = document.getElementById('mobileMenu');
-    if (!menu) return;
-
-    const menuContent = menu.querySelector('div.mobile-menu-slide');
-
-    if (menu.classList.contains('hidden')) {
-      menu.classList.remove('hidden');
-      // Small delay to allow the display:block to take effect before animation
-      setTimeout(() => {
-        menuContent.classList.remove('mobile-menu-closed');
-        menuContent.classList.add('mobile-menu-open');
-      }, 10);
-    } else {
-      menuContent.classList.remove('mobile-menu-open');
-      menuContent.classList.add('mobile-menu-closed');
-      // Wait for animation to complete before hiding the menu
-      setTimeout(() => {
-        menu.classList.add('hidden');
-      }, 300);
-    }
-  }
-
   // Sort order change function
   function changeSortOrder(value) {
     const url = new URL(window.location);
     url.searchParams.set('sort', value);
     window.location.href = url.toString();
   }
-
-  // Page load animations
-  document.addEventListener('DOMContentLoaded', function() {
-    // Add transition class to body
-    document.body.classList.add('transition-ready');
-
-    // Apply transition to all navigation links
-    document.querySelectorAll('a[href^="/"]').forEach(link => {
-      if (!link.getAttribute('href').includes('://') && !link.getAttribute('href').startsWith('#')) {
-        link.addEventListener('click', function(e) {
-          // Skip if modifier keys are pressed or it's a form submit
-          if (e.metaKey || e.ctrlKey || e.shiftKey || this.tagName === 'BUTTON') return;
-
-          e.preventDefault();
-          const target = this.getAttribute('href');
-
-          // Fade out
-          document.body.classList.add('page-transitioning');
-
-          // Navigate after transition
-          setTimeout(() => {
-            window.location.href = target;
-          }, 300);
-        });
-      }
-    });
-  });
 </script>
-
-</body>
-</html>
+{% endblock %}

@@ -1,903 +1,530 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <!-- Favicon and App Icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
-    <link rel="shortcut icon" href="/static/favicon.ico">
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="msapplication-config" content="/static/browserconfig.xml">
+{% extends 'base.html' %}
 
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>DiaryVault - AI Insights</title>
-    <meta name="theme-color" content="#6366f1" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js Library - Load this BEFORE your custom scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Poppins:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: {
-                50: '#f5f3ff',
-                100: '#ede9fe',
-                200: '#ddd6fe',
-                300: '#c4b5fd',
-                400: '#a78bfa',
-                500: '#8b5cf6',
-                600: '#7c3aed',
-                700: '#6d28d9',
-                800: '#5b21b6',
-                900: '#4c1d95',
-              },
-              secondary: {
-                50: '#eef2ff',
-                100: '#e0e7ff',
-                200: '#c7d2fe',
-                300: '#a5b4fc',
-                400: '#818cf8',
-                500: '#6366f1',
-                600: '#4f46e5',
-                700: '#4338ca',
-                800: '#3730a3',
-                900: '#312e81',
-              },
-            },
-            animation: {
-              blob: "blob 7s infinite",
-            },
-            keyframes: {
-              blob: {
-                "0%": {
-                  transform: "translate(0px, 0px) scale(1)",
-                },
-                "33%": {
-                  transform: "translate(30px, -50px) scale(1.1)",
-                },
-                "66%": {
-                  transform: "translate(-20px, 20px) scale(0.9)",
-                },
-                "100%": {
-                  transform: "translate(0px, 0px) scale(1)",
-                },
-              },
-            },
-          },
-        },
-      }
-    </script>
-    <style>
-      body {
-        font-family: 'Poppins', sans-serif;
-        background-color: #f8fafc;
-        width: 100%;
-        overflow-x: hidden;
-        position: relative;
-      }
-      html {
-        overflow-x: hidden;
-        scroll-behavior: smooth;
-      }
-      .diary-font {
-        font-family: 'Playfair Display', serif;
-      }
-      .handwritten {
-        font-family: 'Caveat', cursive;
-      }
-      .insight-card {
-        transition: all 0.3s ease;
-      }
-      .insight-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      }
-      .gradient-bg {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-      }
-      .gradient-text {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-      }
-      .btn-gradient {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        transition: all 0.3s ease;
-      }
-      .btn-gradient:hover {
-        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
-      }
-      .glass-effect {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-      }
-      .card-hover {
-        transition: all 0.3s ease;
-      }
-      .card-hover:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      }
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f5f9;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 3px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-      }
-      .circle-pattern {
-        background-image: radial-gradient(#6366f120 1px, transparent 1px);
-        background-size: 20px 20px;
-      }
-      .scale-in {
-        animation: scaleIn 0.5s ease forwards;
-        transform: scale(0.95);
-        opacity: 0;
-      }
-      @keyframes scaleIn {
-        to {
-          transform: scale(1);
-          opacity: 1;
-        }
-      }
-      .fade-in {
-        animation: fadeIn 0.5s ease forwards;
-        opacity: 0;
-      }
-      @keyframes fadeIn {
-        to {
-          opacity: 1;
-        }
-      }
-      @media (max-width: 640px) {
-        .mobile-menu-slide {
-          transition: transform 0.3s ease-in-out;
-        }
-        .mobile-menu-open {
-          transform: translateX(0);
-        }
-        .mobile-menu-closed {
-          transform: translateX(100%);
-        }
-        .mobile-bottom-nav {
-          box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-          background-color: rgba(255, 255, 255, 0.9);
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 40;
-          border-top: 1px solid rgba(255, 255, 255, 0.3);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-        }
-        .mobile-fab {
-          position: fixed;
-          bottom: 80px;
-          right: 20px;
-          z-index: 30;
-          transform-origin: center;
-          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .mobile-fab:active {
-          transform: scale(0.95);
-        }
-        .pb-safe {
-          padding-bottom: 5rem !important;
-        }
-      }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f5f3ff] to-[#eef2ff] text-gray-800 custom-scrollbar circle-pattern">
+{% block title %}DiaryVault - AI Insights{% endblock %}
 
-  <!-- Navbar -->
-  <header class="glass-effect sticky top-0 z-50 border-b border-white/20">
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 sm:py-4">
-      <!-- Logo -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-1 sm:gap-2 hover:opacity-80 transition">
-          <div class="bg-white p-1.5 rounded-lg shadow-md">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <h1 class="text-lg sm:text-2xl font-extrabold gradient-text tracking-tight">DiaryVault</h1>
-        </a>
-      </div>
+{% block extra_css %}
+<style>
+  .insight-card {
+    transition: all 0.3s ease;
+  }
+  .insight-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+  @keyframes blob {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+  }
+  .scale-in {
+    animation: scaleIn 0.5s ease forwards;
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  @keyframes scaleIn {
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  .fade-in {
+    animation: fadeIn 0.5s ease forwards;
+    opacity: 0;
+  }
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+</style>
+<!-- Chart.js Library - Load this BEFORE custom scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+{% endblock %}
 
-      <!-- Main Navigation -->
-      <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
-        <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-          </svg>
-          Dashboard
-        </a>
-        <a href="{% url 'library' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-          </svg>
-          Library
-        </a>
-        <a href="{% url 'new_entry' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-          Journal
-        </a>
-        <a href="{% url 'biography' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Biography
-        </a>
-        <a href="{% url 'insights' %}" class="text-secondary-600 flex items-center gap-1.5 py-1 border-b-2 border-secondary-600">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          Insights
-        </a>
+{% block content %}
+<div class="max-w-7xl mx-auto relative">
+  <!-- Decorative elements -->
+  <div class="absolute -top-10 -left-16 h-32 w-32 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+  <div class="absolute -bottom-8 -right-16 h-32 w-32 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
 
-        <div class="w-px h-6 bg-gray-200"></div>
-
-        <!-- User profile section -->
-        <div class="flex items-center gap-3">
-          <a href="{% url 'account_settings' %}" class="flex items-center gap-3 hover:opacity-80 transition">
-            <div class="h-9 w-9 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
-              {{ request.user.username|first|upper }}
-            </div>
-            <span class="text-sm text-gray-700">{{ request.user.username }}</span>
-          </a>
+  {% if messages %}
+    <div class="mb-6">
+      {% for message in messages %}
+        <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% elif message.tags == 'success' %}bg-green-100 border-green-400 text-green-700{% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} px-4 py-3 rounded-xl border mb-4 glass-effect">
+          {{ message }}
         </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 
-        <form method="post" action="{% url 'logout' %}" class="inline">
-          {% csrf_token %}
-          <button type="submit" class="text-gray-700 hover:text-red-500 transition bg-gray-100 px-4 py-2 rounded-full text-sm hover:bg-red-50">Logout</button>
-        </form>
-      </nav>
-
-      <!-- Mobile menu button -->
-      <button class="md:hidden text-gray-700 hover:text-secondary-600 p-1.5 bg-white rounded-lg shadow-sm" onclick="toggleMobileMenu()">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+  <!-- Header Section -->
+  <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+    <div class="text-center sm:text-left">
+      <div class="inline-block mb-2">
+        <span class="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-gray-500 shadow-sm border border-white/50">
+          Your Journal Insights
+        </span>
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2">
+        AI-Powered Insights
+      </h2>
+      <p class="text-gray-600 text-sm">Discover patterns and trends in your journaling journey</p>
+    </div>
+    <form method="post" class="inline">
+      {% csrf_token %}
+      <input type="hidden" name="regenerate_insights" value="true">
+      <button type="submit" class="btn-gradient text-white px-4 py-2 rounded-full hover:shadow-md transition text-sm flex items-center gap-1 w-full sm:w-auto justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
+        Regenerate Insights
       </button>
-    </div>
-  </header>
-
-  <!-- Mobile Menu Overlay -->
-  <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 hidden">
-    <div class="absolute right-0 top-0 bottom-0 w-72 glass-effect p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
-      <div class="flex justify-between items-center mb-8">
-        <h2 class="font-bold text-lg gradient-text">Menu</h2>
-        <button onclick="toggleMobileMenu()" class="p-1.5 bg-white rounded-lg shadow-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <!-- User info in mobile menu -->
-      <a href="{% url 'account_settings' %}" class="block">
-        <div class="flex items-center gap-3 p-4 glass-effect rounded-xl mb-6 hover:bg-white/50 transition border border-white/20">
-          <div class="h-10 w-10 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold shadow-md">
-            {{ request.user.username|first|upper }}
-          </div>
-          <div>
-            <div class="font-medium">{{ request.user.username }}</div>
-            <div class="text-xs text-gray-500">AI Insights</div>
-          </div>
-        </div>
-      </a>
-
-      <nav class="flex flex-col gap-2">
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-          </svg>
-          <span>Dashboard</span>
-        </a>
-        <a href="{% url 'library' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-          </svg>
-          <span>Library</span>
-        </a>
-        <a href="{% url 'new_entry' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-          <span>Journal</span>
-        </a>
-        <a href="{% url 'biography' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <span>Biography</span>
-        </a>
-        <a href="{% url 'insights' %}" class="flex items-center gap-3 p-3 bg-white/50 rounded-xl text-secondary-600 border border-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          <span>Insights</span>
-        </a>
-        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span>Account</span>
-        </a>
-        <div class="border-t border-white/20 my-3 pt-2">
-          <form method="post" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="flex items-center gap-3 p-3 w-full hover:bg-red-50/80 rounded-xl text-red-600 transition border border-transparent hover:border-red-100">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              <span>Logout</span>
-            </button>
-          </form>
-        </div>
-      </nav>
-    </div>
+    </form>
   </div>
 
-  <!-- Main Content -->
-  <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-6">
-    <div class="max-w-7xl mx-auto relative">
-      <!-- Decorative elements -->
-      <div class="absolute -top-10 -left-16 h-32 w-32 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
-      <div class="absolute -bottom-8 -right-16 h-32 w-32 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+  <!-- Mood Analysis Section -->
+  {% if mood_analysis %}
+  <div class="glass-effect rounded-xl shadow-md p-4 sm:p-6 mb-8 card-hover border border-white/20">
+    <h3 class="text-xl font-semibold gradient-text mb-4 flex items-center gap-2 diary-font">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      Mood Analysis
+    </h3>
 
-      {% if messages %}
-        <div class="mb-6">
-          {% for message in messages %}
-            <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% elif message.tags == 'success' %}bg-green-100 border-green-400 text-green-700{% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} px-4 py-3 rounded-xl border mb-4 glass-effect">
-              {{ message }}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+      <div class="bg-white/50 rounded-xl p-4 sm:p-5 md:col-span-2 backdrop-blur-sm border border-white/50">
+        <div class="text-gray-800 handwritten text-lg">{{ mood_analysis.content|linebreaks }}</div>
+      </div>
+
+      <div class="bg-yellow-50/80 rounded-xl p-4 sm:p-5 backdrop-blur-sm border border-yellow-100/50">
+        <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          Recent Mood Trends
+        </h4>
+        <div class="h-48 bg-white rounded-lg p-3 shadow-inner">
+          {% if mood_trends %}
+            <canvas id="moodTrendChart"></canvas>
+          {% else %}
+            <div class="h-full flex items-center justify-center text-gray-400 text-sm">
+              Not enough mood data available yet
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="bg-indigo-50/80 rounded-xl p-4 sm:p-5 backdrop-blur-sm border border-indigo-100/50">
+        <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+          </svg>
+          Mood Distribution
+        </h4>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {% for mood in mood_distribution %}
+            <div class="bg-white rounded-lg p-3 text-center shadow-sm hover:shadow-md transition">
+              <div class="text-xl mb-1">{{ mood.emoji }}</div>
+              <div class="font-medium text-gray-800">{{ mood.name }}</div>
+              <div class="text-xs text-gray-500">{{ mood.percentage }}%</div>
+            </div>
+          {% empty %}
+            <div class="col-span-3 text-center text-gray-400 py-4">
+              No mood data available yet
             </div>
           {% endfor %}
         </div>
-      {% endif %}
-
-      <!-- Header Section -->
-      <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-        <div class="text-center sm:text-left">
-          <div class="inline-block mb-2">
-            <span class="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-gray-500 shadow-sm border border-white/50">
-              Your Journal Insights
-            </span>
-          </div>
-          <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2">
-            AI-Powered Insights
-          </h2>
-          <p class="text-gray-600 text-sm">Discover patterns and trends in your journaling journey</p>
-        </div>
-        <form method="post" class="inline">
-          {% csrf_token %}
-          <input type="hidden" name="regenerate_insights" value="true">
-          <button type="submit" class="btn-gradient text-white px-4 py-2 rounded-full hover:shadow-md transition text-sm flex items-center gap-1 w-full sm:w-auto justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Regenerate Insights
-          </button>
-        </form>
-      </div>
-
-      <!-- Mood Analysis Section -->
-      {% if mood_analysis %}
-      <div class="glass-effect rounded-xl shadow-md p-4 sm:p-6 mb-8 card-hover border border-white/20">
-        <h3 class="text-xl font-semibold gradient-text mb-4 flex items-center gap-2 diary-font">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Mood Analysis
-        </h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          <div class="bg-white/50 rounded-xl p-4 sm:p-5 md:col-span-2 backdrop-blur-sm border border-white/50">
-            <div class="text-gray-800 handwritten text-lg">{{ mood_analysis.content|linebreaks }}</div>
-          </div>
-
-          <div class="bg-yellow-50/80 rounded-xl p-4 sm:p-5 backdrop-blur-sm border border-yellow-100/50">
-            <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              Recent Mood Trends
-            </h4>
-            <div class="h-48 bg-white rounded-lg p-3 shadow-inner">
-              {% if mood_trends %}
-                <canvas id="moodTrendChart"></canvas>
-              {% else %}
-                <div class="h-full flex items-center justify-center text-gray-400 text-sm">
-                  Not enough mood data available yet
-                </div>
-              {% endif %}
-            </div>
-          </div>
-
-          <div class="bg-indigo-50/80 rounded-xl p-4 sm:p-5 backdrop-blur-sm border border-indigo-100/50">
-            <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-              </svg>
-              Mood Distribution
-            </h4>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {% for mood in mood_distribution %}
-                <div class="bg-white rounded-lg p-3 text-center shadow-sm hover:shadow-md transition">
-                  <div class="text-xl mb-1">{{ mood.emoji }}</div>
-                  <div class="font-medium text-gray-800">{{ mood.name }}</div>
-                  <div class="text-xs text-gray-500">{{ mood.percentage }}%</div>
-                </div>
-              {% empty %}
-                <div class="col-span-3 text-center text-gray-400 py-4">
-                  No mood data available yet
-                </div>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- Topic Distribution Section -->
-      <div class="glass-effect rounded-xl shadow-md p-4 sm:p-6 mb-8 card-hover border border-white/20">
-        <h3 class="text-xl font-semibold gradient-text mb-4 flex items-center gap-2 diary-font">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-          </svg>
-          Topic Distribution
-        </h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-          <div class="md:col-span-2">
-            <div class="h-64 bg-white/80 border border-white shadow-inner rounded-lg p-3">
-              {% if tag_distribution %}
-                <canvas id="topicChart"></canvas>
-              {% else %}
-                <div class="h-full flex items-center justify-center text-gray-400 text-sm">
-                  No topic data available yet
-                </div>
-              {% endif %}
-            </div>
-          </div>
-
-          <div class="bg-white/50 rounded-xl p-4 sm:p-5 backdrop-blur-sm border border-white/50">
-            <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-              </svg>
-              Top Topics
-            </h4>
-            <div class="space-y-3">
-              {% for tag in tag_distribution %}
-                <div class="flex items-center">
-                  <div class="w-24 font-medium text-gray-800 truncate">{{ tag.name }}</div>
-                  <div class="flex-1">
-                    <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div class="h-full bg-{{ tag.color }} rounded-full" style="width: {{ tag.percentage }}%"></div>
-                    </div>
-                  </div>
-                  <div class="w-10 text-right text-sm text-gray-500">{{ tag.percentage }}%</div>
-                </div>
-              {% empty %}
-                <div class="text-center text-gray-400 py-4">
-                  No tag data available yet
-                </div>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Patterns & Suggestions -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
-        <!-- Patterns Section -->
-        <div class="glass-effect rounded-xl shadow-md p-4 sm:p-6 card-hover border border-white/20">
-          <h3 class="text-xl font-semibold gradient-text mb-4 flex items-center gap-2 diary-font">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            Patterns Detected
-          </h3>
-
-          <div class="space-y-4">
-            {% for pattern in patterns %}
-              <div class="bg-emerald-50/80 rounded-lg p-4 insight-card border border-emerald-100/50 backdrop-blur-sm">
-                <h4 class="font-semibold text-gray-800 mb-2">{{ pattern.title }}</h4>
-                <p class="text-gray-700 text-sm handwritten text-lg">{{ pattern.content }}</p>
-              </div>
-            {% empty %}
-              <div class="text-center text-gray-500 py-8 bg-white/50 rounded-xl p-4 backdrop-blur-sm border border-white/50">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <p class="text-gray-500">No patterns detected yet. Continue journaling to discover trends in your entries.</p>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-
-        <!-- Suggestions Section -->
-        <div class="glass-effect rounded-xl shadow-md p-4 sm:p-6 card-hover border border-white/20">
-          <h3 class="text-xl font-semibold gradient-text mb-4 flex items-center gap-2 diary-font">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
-            Journal Suggestions
-          </h3>
-
-          <div class="space-y-4">
-            {% for suggestion in suggestions %}
-              <div class="bg-purple-50/80 rounded-lg p-4 insight-card border border-purple-100/50 backdrop-blur-sm">
-                <h4 class="font-semibold text-gray-800 mb-2">{{ suggestion.title }}</h4>
-                <p class="text-gray-700 text-sm handwritten text-lg">{{ suggestion.content }}</p>
-              </div>
-            {% empty %}
-              <div class="text-center text-gray-500 py-8 bg-white/50 rounded-xl p-4 backdrop-blur-sm border border-white/50">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                <p class="text-gray-500">No suggestions generated yet. Continue journaling to receive personalized recommendations.</p>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-
-      <!-- Write New Entry Call to Action -->
-      <div class="glass-effect rounded-xl shadow-md p-6 border border-white/20 mb-8 text-center">
-        <h3 class="text-xl font-semibold text-gray-800 mb-3 diary-font">Ready to add a new entry?</h3>
-        <p class="text-gray-600 mb-4">The more you journal, the better your insights become</p>
-        <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-6 py-3 rounded-full inline-flex items-center gap-2 shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-          <span>Write New Journal Entry</span>
-        </a>
       </div>
     </div>
-  </main>
+  </div>
+  {% endif %}
 
-  <!-- Mobile Bottom Navigation -->
-  <div class="md:hidden fixed bottom-0 left-0 right-0 mobile-bottom-nav z-30">
-    <div class="grid grid-cols-5 items-center text-xs text-gray-600">
-      <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-        </svg>
-        <span>Home</span>
-      </a>
-      <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-        </svg>
-        <span>Library</span>
-      </a>
-      <div class="flex flex-col items-center justify-center py-3 opacity-0">
-        <div class="h-6 w-6"></div>
-        <span class="text-xs mt-1">New</span>
+  <!-- Topic Distribution Section -->
+  <div class="glass-effect rounded-xl shadow-md p-4 sm:p-6 mb-8 card-hover border border-white/20">
+    <h3 class="text-xl font-semibold gradient-text mb-4 flex items-center gap-2 diary-font">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+      </svg>
+      Topic Distribution
+    </h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+      <div class="md:col-span-2">
+        <div class="h-64 bg-white/80 border border-white shadow-inner rounded-lg p-3">
+          {% if tag_distribution %}
+            <canvas id="topicChart"></canvas>
+          {% else %}
+            <div class="h-full flex items-center justify-center text-gray-400 text-sm">
+              No topic data available yet
+            </div>
+          {% endif %}
+        </div>
       </div>
-      <a href="{% url 'insights' %}" class="flex flex-col items-center justify-center py-3 text-secondary-600">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-        <span>Insights</span>
-      </a>
-      <a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-        <span>Profile</span>
-      </a>
+
+      <div class="bg-white/50 rounded-xl p-4 sm:p-5 backdrop-blur-sm border border-white/50">
+        <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+          </svg>
+          Top Topics
+        </h4>
+        <div class="space-y-3">
+          {% for tag in tag_distribution %}
+            <div class="flex items-center">
+              <div class="w-24 font-medium text-gray-800 truncate">{{ tag.name }}</div>
+              <div class="flex-1">
+                <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-{{ tag.color }} rounded-full" style="width: {{ tag.percentage }}%"></div>
+                </div>
+              </div>
+              <div class="w-10 text-right text-sm text-gray-500">{{ tag.percentage }}%</div>
+            </div>
+          {% empty %}
+            <div class="text-center text-gray-400 py-4">
+              No tag data available yet
+            </div>
+          {% endfor %}
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Quick Entry Button -->
-  <a href="{% url 'new_entry' %}" class="mobile-fab md:hidden btn-gradient shadow-lg p-4 rounded-full text-white">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-    </svg>
-  </a>
+  <!-- Patterns & Suggestions -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
+    <!-- Patterns Section -->
+    <div class="glass-effect rounded-xl shadow-md p-4 sm:p-6 card-hover border border-white/20">
+      <h3 class="text-xl font-semibold gradient-text mb-4 flex items-center gap-2 diary-font">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        Patterns Detected
+      </h3>
 
-  <!-- Chart.js Initialization -->
-  <script>
-    // Helper function to convert Tailwind color classes to hex codes
-    function getColorCode(colorClass) {
-      // Define a mapping from Tailwind classes to hex codes
-      const colorMap = {
-        'indigo-600': '#4f46e5',
-        'indigo-500': '#6366f1',
-        'blue-500': '#3b82f6',
-        'sky-500': '#0ea5e9',
-        'cyan-500': '#06b6d4',
-        'teal-500': '#14b8a6',
-        'emerald-500': '#10b981',
-        'green-500': '#22c55e',
-        'lime-500': '#84cc16',
-        'yellow-500': '#eab308',
-        'amber-500': '#f59e0b',
-        'orange-500': '#f97316',
-        'red-500': '#ef4444',
-        'rose-500': '#f43f5e',
-        'fuchsia-500': '#d946ef',
-        'purple-500': '#a855f7',
-        'violet-500': '#8b5cf6',
-        'secondary-500': '#6366f1',
-        'primary-500': '#8b5cf6'
-      };
+      <div class="space-y-4">
+        {% for pattern in patterns %}
+          <div class="bg-emerald-50/80 rounded-lg p-4 insight-card border border-emerald-100/50 backdrop-blur-sm">
+            <h4 class="font-semibold text-gray-800 mb-2">{{ pattern.title }}</h4>
+            <p class="text-gray-700 text-sm handwritten text-lg">{{ pattern.content }}</p>
+          </div>
+        {% empty %}
+          <div class="text-center text-gray-500 py-8 bg-white/50 rounded-xl p-4 backdrop-blur-sm border border-white/50">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <p class="text-gray-500">No patterns detected yet. Continue journaling to discover trends in your entries.</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
 
-      return colorMap[colorClass] || '#9ca3af'; // Default to gray-400 if not found
-    }
+    <!-- Suggestions Section -->
+    <div class="glass-effect rounded-xl shadow-md p-4 sm:p-6 card-hover border border-white/20">
+      <h3 class="text-xl font-semibold gradient-text mb-4 flex items-center gap-2 diary-font">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+        Journal Suggestions
+      </h3>
 
-    // Mobile menu toggle
-    function toggleMobileMenu() {
-      const menu = document.getElementById('mobileMenu');
-      const menuContent = menu.querySelector('div.mobile-menu-slide');
+      <div class="space-y-4">
+        {% for suggestion in suggestions %}
+          <div class="bg-purple-50/80 rounded-lg p-4 insight-card border border-purple-100/50 backdrop-blur-sm">
+            <h4 class="font-semibold text-gray-800 mb-2">{{ suggestion.title }}</h4>
+            <p class="text-gray-700 text-sm handwritten text-lg">{{ suggestion.content }}</p>
+          </div>
+        {% empty %}
+          <div class="text-center text-gray-500 py-8 bg-white/50 rounded-xl p-4 backdrop-blur-sm border border-white/50">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            <p class="text-gray-500">No suggestions generated yet. Continue journaling to receive personalized recommendations.</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 
-      if (menu.classList.contains('hidden')) {
-        menu.classList.remove('hidden');
-        // Small delay to allow the display:block to take effect before animation
-        setTimeout(() => {
-          menuContent.classList.remove('mobile-menu-closed');
-          menuContent.classList.add('mobile-menu-open');
-        }, 10);
-      } else {
-        menuContent.classList.remove('mobile-menu-open');
-        menuContent.classList.add('mobile-menu-closed');
-        // Wait for animation to complete before hiding the menu
-        setTimeout(() => {
-          menu.classList.add('hidden');
-        }, 300);
-      }
-    }
+  <!-- Write New Entry Call to Action -->
+  <div class="glass-effect rounded-xl shadow-md p-6 border border-white/20 mb-8 text-center">
+    <h3 class="text-xl font-semibold text-gray-800 mb-3 diary-font">Ready to add a new entry?</h3>
+    <p class="text-gray-600 mb-4">The more you journal, the better your insights become</p>
+    <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-6 py-3 rounded-full inline-flex items-center gap-2 shadow-md">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+      </svg>
+      <span>Write New Journal Entry</span>
+    </a>
+  </div>
+</div>
+{% endblock %}
 
-    // Page transition effects
-    document.addEventListener('DOMContentLoaded', function() {
-      document.body.classList.add('transition-ready');
+{% block extra_js %}
+<script>
+  // Helper function to convert Tailwind color classes to hex codes
+  function getColorCode(colorClass) {
+    // Define a mapping from Tailwind classes to hex codes
+    const colorMap = {
+      'indigo-600': '#4f46e5',
+      'indigo-500': '#6366f1',
+      'blue-500': '#3b82f6',
+      'sky-500': '#0ea5e9',
+      'cyan-500': '#06b6d4',
+      'teal-500': '#14b8a6',
+      'emerald-500': '#10b981',
+      'green-500': '#22c55e',
+      'lime-500': '#84cc16',
+      'yellow-500': '#eab308',
+      'amber-500': '#f59e0b',
+      'orange-500': '#f97316',
+      'red-500': '#ef4444',
+      'rose-500': '#f43f5e',
+      'fuchsia-500': '#d946ef',
+      'purple-500': '#a855f7',
+      'violet-500': '#8b5cf6',
+      'secondary-500': '#6366f1',
+      'primary-500': '#8b5cf6'
+    };
 
-      // Page load animations
-      const fadeElements = document.querySelectorAll('.card-hover');
-      fadeElements.forEach((element, index) => {
-        setTimeout(() => {
-          element.style.opacity = '1';
-          element.style.transform = 'translateY(0)';
-        }, 100 + (index * 50));
-      });
+    return colorMap[colorClass] || '#9ca3af'; // Default to gray-400 if not found
+  }
 
-      // Initialize the charts
-      initializeCharts();
+  // Page load animations
+  document.addEventListener('DOMContentLoaded', function() {
+    // Page load animations
+    const fadeElements = document.querySelectorAll('.card-hover');
+    fadeElements.forEach((element, index) => {
+      setTimeout(() => {
+        element.style.opacity = '1';
+        element.style.transform = 'translateY(0)';
+      }, 100 + (index * 50));
     });
 
-    // Initialize Chart.js charts
-    function initializeCharts() {
-      console.log("Starting chart initialization...");
+    // Initialize the charts
+    initializeCharts();
+  });
 
-      // Topics chart (doughnut/pie chart)
-      const topicChartElement = document.getElementById('topicChart');
-      if (topicChartElement) {
-        console.log("Found topic chart element, initializing...");
+  // Initialize Chart.js charts
+  function initializeCharts() {
+    console.log("Starting chart initialization...");
 
-        // Make sure we have data for the topic chart
-        {% if tag_distribution %}
-        try {
-          const topicCtx = topicChartElement.getContext('2d');
-          const topicLabels = [
-            {% for tag in tag_distribution %}
-              '{{ tag.name }}',
-            {% endfor %}
-          ];
+    // Topics chart (doughnut/pie chart)
+    const topicChartElement = document.getElementById('topicChart');
+    if (topicChartElement) {
+      console.log("Found topic chart element, initializing...");
 
-          const topicValues = [
-            {% for tag in tag_distribution %}
-              {{ tag.percentage }},
-            {% endfor %}
-          ];
+      // Make sure we have data for the topic chart
+      {% if tag_distribution %}
+      try {
+        const topicCtx = topicChartElement.getContext('2d');
+        const topicLabels = [
+          {% for tag in tag_distribution %}
+            '{{ tag.name }}',
+          {% endfor %}
+        ];
 
-          const topicColors = [
-            {% for tag in tag_distribution %}
-              getColorCode('{{ tag.color }}'),
-            {% endfor %}
-          ];
+        const topicValues = [
+          {% for tag in tag_distribution %}
+            {{ tag.percentage }},
+          {% endfor %}
+        ];
 
-          console.log("Topic chart data:", topicLabels, topicValues, topicColors);
+        const topicColors = [
+          {% for tag in tag_distribution %}
+            getColorCode('{{ tag.color }}'),
+          {% endfor %}
+        ];
 
-          new Chart(topicCtx, {
-            type: 'doughnut',
-            data: {
-              labels: topicLabels,
-              datasets: [{
-                data: topicValues,
-                backgroundColor: topicColors,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.8)'
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: 'right',
-                  labels: {
-                    boxWidth: 12,
-                    font: {
-                      size: 11,
-                      family: "'Poppins', sans-serif"
-                    },
-                    padding: 15
+        console.log("Topic chart data:", topicLabels, topicValues, topicColors);
+
+        new Chart(topicCtx, {
+          type: 'doughnut',
+          data: {
+            labels: topicLabels,
+            datasets: [{
+              data: topicValues,
+              backgroundColor: topicColors,
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.8)'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right',
+                labels: {
+                  boxWidth: 12,
+                  font: {
+                    size: 11,
+                    family: "'Poppins', sans-serif"
+                  },
+                  padding: 15
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return `${context.label}: ${context.parsed}%`;
                   }
                 },
-                tooltip: {
-                  callbacks: {
-                    label: function(context) {
-                      return `${context.label}: ${context.parsed}%`;
-                    }
-                  },
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  titleColor: '#334155',
-                  bodyColor: '#334155',
-                  borderColor: '#e2e8f0',
-                  borderWidth: 1,
-                  displayColors: true,
-                  padding: 10,
-                  titleFont: {
-                    size: 13,
-                    family: "'Poppins', sans-serif"
-                  },
-                  bodyFont: {
-                    size: 12,
-                    family: "'Poppins', sans-serif"
-                  }
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                titleColor: '#334155',
+                bodyColor: '#334155',
+                borderColor: '#e2e8f0',
+                borderWidth: 1,
+                displayColors: true,
+                padding: 10,
+                titleFont: {
+                  size: 13,
+                  family: "'Poppins', sans-serif"
+                },
+                bodyFont: {
+                  size: 12,
+                  family: "'Poppins', sans-serif"
                 }
               }
             }
-          });
-          console.log("Topic chart initialized successfully");
-        } catch (error) {
-          console.error("Error initializing topic chart:", error);
-        }
-        {% else %}
-        console.log("No tag distribution data available");
-        {% endif %}
-      } else {
-        console.log("Topic chart element not found");
+          }
+        });
+        console.log("Topic chart initialized successfully");
+      } catch (error) {
+        console.error("Error initializing topic chart:", error);
       }
+      {% else %}
+      console.log("No tag distribution data available");
+      {% endif %}
+    } else {
+      console.log("Topic chart element not found");
+    }
 
-      // Mood trends chart (line chart)
-      const moodChartElement = document.getElementById('moodTrendChart');
-      if (moodChartElement) {
-        console.log("Found mood chart element, initializing...");
+    // Mood trends chart (line chart)
+    const moodChartElement = document.getElementById('moodTrendChart');
+    if (moodChartElement) {
+      console.log("Found mood chart element, initializing...");
 
-        // Make sure we have data for the mood chart
-        {% if mood_trends %}
-        try {
-          const moodCtx = moodChartElement.getContext('2d');
-          const gradientFill = moodCtx.createLinearGradient(0, 0, 0, 400);
-          gradientFill.addColorStop(0, 'rgba(250, 204, 21, 0.4)');
-          gradientFill.addColorStop(1, 'rgba(250, 204, 21, 0)');
+      // Make sure we have data for the mood chart
+      {% if mood_trends %}
+      try {
+        const moodCtx = moodChartElement.getContext('2d');
+        const gradientFill = moodCtx.createLinearGradient(0, 0, 0, 400);
+        gradientFill.addColorStop(0, 'rgba(250, 204, 21, 0.4)');
+        gradientFill.addColorStop(1, 'rgba(250, 204, 21, 0)');
 
-          const moodLabels = [
-            {% for item in mood_trends %}
-              '{{ item.date }}',
-            {% endfor %}
-          ];
+        const moodLabels = [
+          {% for item in mood_trends %}
+            '{{ item.date }}',
+          {% endfor %}
+        ];
 
-          const moodValues = [
-            {% for item in mood_trends %}
-              {{ item.mood }},
-            {% endfor %}
-          ];
+        const moodValues = [
+          {% for item in mood_trends %}
+            {{ item.mood }},
+          {% endfor %}
+        ];
 
-          console.log("Mood chart data:", moodLabels, moodValues);
+        console.log("Mood chart data:", moodLabels, moodValues);
 
-          new Chart(moodCtx, {
-            type: 'line',
-            data: {
-              labels: moodLabels,
-              datasets: [{
-                label: 'Mood',
-                data: moodValues,
-                borderColor: 'rgb(234, 179, 8)',
-                backgroundColor: gradientFill,
-                borderWidth: 3,
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: 'rgb(234, 179, 8)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                y: {
-                  min: 0,
-                  max: 10,
-                  ticks: {
-                    stepSize: 2,
-                    font: {
-                      family: "'Poppins', sans-serif"
-                    }
-                  },
-                  grid: {
-                    color: 'rgba(0, 0, 0, 0.05)'
-                  },
-                  title: {
-                    display: true,
-                    text: 'Mood Level',
-                    font: {
-                      family: "'Poppins', sans-serif"
-                    }
+        new Chart(moodCtx, {
+          type: 'line',
+          data: {
+            labels: moodLabels,
+            datasets: [{
+              label: 'Mood',
+              data: moodValues,
+              borderColor: 'rgb(234, 179, 8)',
+              backgroundColor: gradientFill,
+              borderWidth: 3,
+              tension: 0.4,
+              fill: true,
+              pointBackgroundColor: 'rgb(234, 179, 8)',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                min: 0,
+                max: 10,
+                ticks: {
+                  stepSize: 2,
+                  font: {
+                    family: "'Poppins', sans-serif"
                   }
                 },
-                x: {
-                  ticks: {
-                    maxRotation: 45,
-                    minRotation: 45,
-                    font: {
-                      family: "'Poppins', sans-serif"
-                    }
-                  },
-                  grid: {
-                    display: false
+                grid: {
+                  color: 'rgba(0, 0, 0, 0.05)'
+                },
+                title: {
+                  display: true,
+                  text: 'Mood Level',
+                  font: {
+                    family: "'Poppins', sans-serif"
                   }
                 }
               },
-              plugins: {
-                legend: {
-                  display: false
+              x: {
+                ticks: {
+                  maxRotation: 45,
+                  minRotation: 45,
+                  font: {
+                    family: "'Poppins', sans-serif"
+                  }
                 },
-                tooltip: {
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  titleColor: '#334155',
-                  bodyColor: '#334155',
-                  borderColor: '#e2e8f0',
-                  borderWidth: 1,
-                  displayColors: false,
-                  callbacks: {
-                    label: function(context) {
-                      return `Mood: ${context.parsed.y}/10`;
-                    }
+                grid: {
+                  display: false
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                titleColor: '#334155',
+                bodyColor: '#334155',
+                borderColor: '#e2e8f0',
+                borderWidth: 1,
+                displayColors: false,
+                callbacks: {
+                  label: function(context) {
+                    return `Mood: ${context.parsed.y}/10`;
                   }
                 }
               }
             }
-          });
-          console.log("Mood chart initialized successfully");
-        } catch (error) {
-          console.error("Error initializing mood chart:", error);
-        }
-        {% else %}
-        console.log("No mood trends data available");
-        {% endif %}
-      } else {
-        console.log("Mood chart element not found");
+          }
+        });
+        console.log("Mood chart initialized successfully");
+      } catch (error) {
+        console.error("Error initializing mood chart:", error);
       }
+      {% else %}
+      console.log("No mood trends data available");
+      {% endif %}
+    } else {
+      console.log("Mood chart element not found");
     }
-  </script>
-</body>
-</html>
+  }
+</script>
+{% endblock %}

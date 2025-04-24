@@ -1,1039 +1,944 @@
+{% extends 'base.html' %}
 
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DiaryVault - Library</title>
-  <meta name="theme-color" content="#6366f1" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Poppins:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+{% block title %}DiaryVault - Library{% endblock %}
 
-  <!-- Favicon and App Icons -->
-  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
-  <link rel="shortcut icon" href="/static/favicon.ico">
-  <link rel="manifest" href="/static/manifest.json">
-  <meta name="msapplication-config" content="/static/browserconfig.xml">
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: {
-              50: '#f5f3ff',
-              100: '#ede9fe',
-              200: '#ddd6fe',
-              300: '#c4b5fd',
-              400: '#a78bfa',
-              500: '#8b5cf6',
-              600: '#7c3aed',
-              700: '#6d28d9',
-              800: '#5b21b6',
-              900: '#4c1d95',
-            },
-            secondary: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              200: '#c7d2fe',
-              300: '#a5b4fc',
-              400: '#818cf8',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-              800: '#3730a3',
-              900: '#312e81',
-            },
-          },
-        },
-      },
+{% block extra_css %}
+<style>
+  .book-title {
+    font-family: 'Playfair Display', serif;
+  }
+  /* Book styling */
+  .book {
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    position: relative;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  .book:hover {
+    transform: rotateY(-15deg) translateY(-10px);
+    z-index: 10;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  .book-spine {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 30px;
+    background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0));
+  }
+  /* Book shelf styling */
+  .book-shelf {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="20" viewBox="0 0 100 20" fill="none"><rect width="100" height="20" fill="%23D1BAA1"/><path d="M0 0 L100 0 L100 2 L0 2 Z" fill="%23A58768"/><path d="M0 18 L100 18 L100 20 L0 20 Z" fill="%237A6348"/></svg>');
+    background-repeat: repeat-x;
+    background-position: bottom;
+    overflow: hidden;
+  }
+  .book-collection {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .book-collection::-webkit-scrollbar {
+    height: 6px;
+  }
+  .book-collection::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.4);
+    border-radius: 3px;
+  }
+  .book-collection::-webkit-scrollbar-thumb {
+    background: rgba(107, 114, 128, 0.3);
+    border-radius: 3px;
+  }
+  .book-collection::-webkit-scrollbar-thumb:hover {
+    background: rgba(107, 114, 128, 0.5);
+  }
+  /* Timeline styling */
+  .timeline-entry {
+    position: relative;
+    padding-left: 10px;
+  }
+  .timeline-entry::before {
+    content: '';
+    position: absolute;
+    left: -29px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border: 2px solid white;
+    z-index: 1;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .timeline-line {
+    position: absolute;
+    left: -24px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #6366f1 0%, #8b5cf6 100%);
+    opacity: 0.5;
+  }
+  /* Tab styling */
+  .tabs-container button {
+    position: relative;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  .tabs-container button.active {
+    color: #6366f1;
+    border-color: #6366f1;
+  }
+  .tabs-container button.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    animation: slideInFromLeft 0.4s ease-out forwards;
+  }
+  @keyframes slideInFromLeft {
+    0% {
+      transform: translateX(-100%);
     }
-  </script>
-
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #f8fafc;
-      width: 100%;
-      overflow-x: hidden;
-      position: relative;
+    100% {
+      transform: translateX(0);
     }
-    html {
-      overflow-x: hidden;
-      scroll-behavior: smooth;
-    }
-    .diary-font {
-      font-family: 'Playfair Display', serif;
-    }
-    .book-title {
-      font-family: 'Playfair Display', serif;
-    }
-    .handwritten {
-      font-family: 'Caveat', cursive;
-    }
-
-    /* Book styling */
+  }
+  /* Mobile styling */
+  @media (max-width: 640px) {
     .book {
-      transition: all 0.3s ease;
-      transform-style: preserve-3d;
-      perspective: 1000px;
-      position: relative;
+      transform: none !important;
     }
     .book:hover {
-      transform: rotateY(-15deg) translateY(-10px);
-      z-index: 10;
+      transform: translateY(-5px) !important;
     }
-    .book-spine {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      width: 30px;
-      background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0));
-    }
-
-    /* Glass effect */
-    .glass-effect {
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-    }
-
-    /* Book shelf styling */
-    .book-shelf {
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="20" viewBox="0 0 100 20" fill="none"><rect width="100" height="20" fill="%23D1BAA1"/><path d="M0 0 L100 0 L100 2 L0 2 Z" fill="%23A58768"/><path d="M0 18 L100 18 L100 20 L0 20 Z" fill="%237A6348"/></svg>');
-      background-repeat: repeat-x;
-      background-position: bottom;
-      overflow: hidden;
-    }
-    .book-collection {
+    .mobile-tabs {
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
       -webkit-overflow-scrolling: touch;
     }
-    .book-collection::-webkit-scrollbar {
+    .mobile-tabs::-webkit-scrollbar {
       display: none;
     }
-
-    /* Timeline styling */
     .timeline-entry::before {
-      content: '';
-      position: absolute;
-      left: -29px;
-      top: 0;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background-color: #6366f1;
-      border: 2px solid white;
-      z-index: 1;
+      left: -22px;
     }
     .timeline-line {
-      position: absolute;
-      left: -24px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background-color: #e2e8f0;
+      left: -17px;
     }
+  }
+  /* Filter badge styling */
+  .filter-badge {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+    color: #4f46e5;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+  }
+  .clear-filter {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.5rem;
+    color: #6b7280;
+    font-size: 0.75rem;
+    transition: all 0.15s ease;
+  }
+  .clear-filter:hover {
+    color: #ef4444;
+    transform: scale(1.05);
+  }
+  /* Entry card styling */
+  .entry-card {
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+  }
+  .entry-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+  }
+  /* Mood pill styling */
+  .mood-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+  }
+  .mood-pill.happy {
+    background-color: #ecfdf5;
+    color: #059669;
+    border: 1px solid rgba(5, 150, 105, 0.2);
+  }
+  .mood-pill.content {
+    background-color: #eff6ff;
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+  .mood-pill.excited {
+    background-color: #f5f3ff;
+    color: #8b5cf6;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+  }
+  .mood-pill.neutral {
+    background-color: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid rgba(107, 114, 128, 0.2);
+  }
+  .mood-pill.anxious {
+    background-color: #fffbeb;
+    color: #d97706;
+    border: 1px solid rgba(217, 119, 6, 0.2);
+  }
+  .mood-pill.sad {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: 1px solid rgba(220, 38, 38, 0.2);
+  }
+  /* Tag styling */
+  .tag-pill {
+    transition: all 0.2s ease;
+    background-color: white;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+    padding: 0.15rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  .tag-pill:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: #f5f3ff;
+    color: #6366f1;
+    border-color: #c7d2fe;
+  }
+  /* Fancy section divider */
+  .fancy-divider {
+    display: flex;
+    align-items: center;
+    margin: 2rem 0;
+  }
+  .fancy-divider::before,
+  .fancy-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.3), transparent);
+  }
+  .fancy-divider::before {
+    background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.3));
+    margin-right: 1rem;
+  }
+  .fancy-divider::after {
+    background: linear-gradient(to left, transparent, rgba(99, 102, 241, 0.3));
+    margin-left: 1rem;
+  }
+  .fancy-divider span {
+    color: #6366f1;
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  /* Improve book layout for grid responsiveness */
+  .period-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+  /* Stats bar improvements */
+  .stats-bar {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.8);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+  }
+  .stat-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #4f46e5;
+  }
+  .stat-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+  }
+  /* Entry card improvements */
+  .entry-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+</style>
+{% endblock %}
 
-    /* Tab styling */
-    .tabs-container button.active {
-      color: #6366f1;
-      border-color: #6366f1;
-    }
+{% block content %}
+<div class="max-w-7xl mx-auto">
+  <!-- Page Header -->
+  <div class="glass-effect rounded-xl p-6 mb-6 border border-white relative z-10 shadow-md">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-bold diary-font text-gray-900 mb-1 gradient-text">My Journal Library</h2>
+        <p class="text-gray-600 text-sm">Explore your collection of memories, thoughts, and reflections</p>
 
-    /* Custom scrollbar */
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 3px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-
-    /* Animation classes */
-    .card-hover {
-      transition: all 0.3s ease;
-    }
-    .card-hover:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-    .btn-gradient {
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-      transition: all 0.3s ease;
-    }
-    .btn-gradient:hover {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
-    }
-    .gradient-text {
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .circle-pattern {
-      background-image: radial-gradient(#6366f120 1px, transparent 1px);
-      background-size: 20px 20px;
-    }
-
-    /* Mobile styling */
-    @media (max-width: 640px) {
-      .book {
-        transform: none !important;
-      }
-      .book:hover {
-        transform: translateY(-5px) !important;
-      }
-      .mobile-menu-slide {
-        transition: transform 0.3s ease-in-out;
-      }
-      .mobile-menu-open {
-        transform: translateX(0);
-      }
-      .mobile-menu-closed {
-        transform: translateX(100%);
-      }
-
-      .mobile-tabs {
-        overflow-x: auto;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-        -webkit-overflow-scrolling: touch;
-      }
-      .mobile-tabs::-webkit-scrollbar {
-        display: none;
-      }
-
-      .timeline-entry::before {
-        left: -22px;
-      }
-      .timeline-line {
-        left: -17px;
-      }
-
-      /* Bottom navigation */
-      .mobile-bottom-nav {
-        background-color: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 40;
-        border-top: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-      }
-
-      .mobile-fab {
-        position: fixed;
-        bottom: 80px;
-        right: 20px;
-        z-index: 30;
-        transform-origin: center;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      }
-
-      .mobile-fab:active {
-        transform: scale(0.95);
-      }
-
-      /* Add bottom padding to account for fixed nav */
-      .pb-safe {
-        padding-bottom: 5rem !important;
-      }
-    }
-
-    /* Transition effects */
-    body {
-      transition: opacity 0.3s ease-in-out;
-    }
-    body.transition-ready {
-      opacity: 1;
-    }
-    body.page-transitioning {
-      opacity: 0;
-    }
-
-    /* Filter badge styling */
-    .filter-badge {
-      display: inline-flex;
-      align-items: center;
-      background-color: #e0e7ff;
-      color: #4f46e5;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      margin-top: 0.5rem;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    }
-    .clear-filter {
-      display: inline-flex;
-      align-items: center;
-      margin-left: 0.5rem;
-      color: #6b7280;
-      font-size: 0.75rem;
-      transition: color 0.15s ease;
-    }
-    .clear-filter:hover {
-      color: #ef4444;
-    }
-  </style>
-</head>
-
-<body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f5f3ff] to-[#eef2ff] text-gray-800 custom-scrollbar circle-pattern">
-  <!-- Navbar -->
-  <header class="glass-effect sticky top-0 z-50 border-b border-white/20">
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 sm:py-4">
-      <!-- Logo -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-1 sm:gap-2 hover:opacity-80 transition">
-          <div class="bg-white p-1.5 rounded-lg shadow-md">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        <!-- Active filter badge (only shows when filtering) -->
+        {% if active_filter %}
+        <div class="filter-badge mt-3">
+          <span>
+            {% if active_tab == 'tags' %}Filtering by tag:{% elif active_tab == 'moods' %}Filtering by mood:{% else %}Filtering by chapter:{% endif %}
+            {{ active_filter }}
+          </span>
+          <a href="{% url 'library' %}" class="clear-filter">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </div>
-          <h1 class="text-lg sm:text-2xl font-extrabold gradient-text tracking-tight">DiaryVault</h1>
-        </a>
-      </div>
-
-      <!-- Desktop Navigation -->
-      <nav class="hidden md:flex gap-6 text-sm font-medium items-center">
-        <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-          </svg>
-          Dashboard
-        </a>
-        <a href="{% url 'library' %}" class="text-secondary-600 border-b-2 border-secondary-600 pb-1 flex items-center gap-1.5 py-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-          </svg>
-          Library
-        </a>
-        <a href="{% url 'new_entry' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-          Journal
-        </a>
-        <a href="{% url 'biography' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Biography
-        </a>
-        <a href="{% url 'insights' %}" class="text-gray-700 hover:text-secondary-600 transition flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-secondary-400">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          Insights
-        </a>
-
-        <div class="w-px h-6 bg-gray-200"></div>
-
-        <!-- User profile section -->
-        <div class="flex items-center gap-3">
-          <a href="{% url 'account_settings' %}" class="flex items-center gap-3 hover:opacity-80 transition">
-            <div class="h-9 w-9 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
-              {{ request.user.username|first|upper }}
-            </div>
-            <span class="text-sm text-gray-700">{{ request.user.username }}</span>
+            Clear
           </a>
         </div>
-
-        <form method="post" action="{% url 'logout' %}" class="inline">
-          {% csrf_token %}
-          <button type="submit" class="text-gray-700 hover:text-red-500 transition bg-gray-100 px-4 py-2 rounded-full text-sm hover:bg-red-50">Logout</button>
-        </form>
-      </nav>
-
-      <!-- Mobile menu button -->
-      <button class="md:hidden text-gray-700 hover:text-secondary-600 p-1.5 bg-white rounded-lg shadow-sm" onclick="toggleMobileMenu()">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-    </div>
-  </header>
-
-  <!-- Mobile Menu Overlay -->
-  <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 hidden">
-    <div class="absolute right-0 top-0 bottom-0 w-72 glass-effect p-6 overflow-y-auto mobile-menu-slide mobile-menu-closed max-w-[80vw]">
-      <div class="flex justify-between items-center mb-8">
-        <h2 class="font-bold text-lg gradient-text">Menu</h2>
-        <button onclick="toggleMobileMenu()" class="p-1.5 bg-white rounded-lg shadow-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        {% endif %}
       </div>
-
-      <!-- User info in mobile menu -->
-      <a href="{% url 'account_settings' %}" class="block">
-        <div class="flex items-center gap-3 p-4 glass-effect rounded-xl mb-6 hover:bg-white/50 transition border border-white/20">
-          <div class="h-10 w-10 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold shadow-md">
-            {{ request.user.username|first|upper }}
-          </div>
-          <div>
-            <div class="font-medium">{{ request.user.username }}</div>
-            <div class="text-xs text-gray-500">{{ total_entries }} entries</div>
-          </div>
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <div class="relative flex-grow md:w-64">
+          <input type="text" placeholder="Search entries..." class="pl-9 pr-4 py-2 border border-white rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary-400 text-sm w-full glass-effect shadow-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
-      </a>
-
-      <!-- Mobile navigation menu -->
-      <nav class="flex flex-col gap-2">
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+        <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-4 py-2 rounded-lg shadow-md text-sm flex items-center gap-1 whitespace-nowrap">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          <span>Dashboard</span>
+          New Entry
         </a>
-        <a href="{% url 'library' %}" class="flex items-center gap-3 p-3 bg-secondary-50 rounded-xl text-secondary-600 border border-secondary-100">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-          </svg>
-          <span>Library</span>
-        </a>
-        <a href="{% url 'new_entry' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-          <span>Journal</span>
-        </a>
-        <a href="{% url 'biography' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <span>Biography</span>
-        </a>
-        <a href="{% url 'insights' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          <span>Insights</span>
-        </a>
-        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition border border-transparent hover:border-white/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span>Account</span>
-        </a>
-
-        <div class="border-t border-white/20 my-3 pt-2">
-          <form method="post" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="flex items-center gap-3 p-3 w-full hover:bg-red-50/80 rounded-xl text-red-600 transition border border-transparent hover:border-red-100">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              <span>Logout</span>
-            </button>
-          </form>
-        </div>
-      </nav>
+      </div>
     </div>
   </div>
 
-  <!-- Main Content -->
-  <main class="flex-1 p-4 sm:p-6 lg:p-8 pb-20 sm:pb-6 pb-safe">
-    <div class="max-w-7xl mx-auto">
-      <!-- Page Header -->
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
-        <div>
-          <h2 class="text-2xl sm:text-3xl font-bold diary-font text-gray-900">My Journal Library</h2>
+  <!-- Stats Overview Bar -->
+  <div class="stats-bar mb-6 scale-in" style="animation-delay: 50ms;">
+    <div class="stat-item">
+      <div class="stat-value">{{ entries|length }}</div>
+      <div class="stat-label">Entries</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ chapters|length }}</div>
+      <div class="stat-label">Chapters</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ tags|length }}</div>
+      <div class="stat-label">Tags</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ moods|length }}</div>
+      <div class="stat-label">Moods</div>
+    </div>
+  </div>
 
-          <!-- Active filter badge (only shows when filtering) -->
-          {% if active_filter %}
-          <div class="filter-badge">
-            <span>
-              {% if active_tab == 'tags' %}Filtering by tag:{% elif active_tab == 'moods' %}Filtering by mood:{% else %}Filtering by chapter:{% endif %}
-              {{ active_filter }}
-            </span>
-            <a href="{% url 'library' %}" class="clear-filter">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+  <!-- Tabs Container -->
+  <div class="mb-6 glass-effect rounded-xl overflow-hidden shadow-md scale-in" style="animation-delay: 100ms;">
+    <div class="tabs-container flex border-b border-white/20 mobile-tabs overflow-x-auto touch-pan-x">
+      <button onclick="switchTab('time-periods')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base font-medium text-gray-600 border-b-2 border-transparent flex items-center gap-1.5 {% if active_tab == 'time-periods' %}active{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Time Periods
+      </button>
+      <button onclick="switchTab('tags')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base font-medium text-gray-600 border-b-2 border-transparent flex items-center gap-1.5 {% if active_tab == 'tags' %}active{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+        </svg>
+        Tags
+      </button>
+      <button onclick="switchTab('moods')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base font-medium text-gray-600 border-b-2 border-transparent flex items-center gap-1.5 {% if active_tab == 'moods' %}active{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Moods
+      </button>
+      <button onclick="switchTab('all-entries')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base font-medium text-gray-600 border-b-2 border-transparent flex items-center gap-1.5 {% if active_tab == 'all-entries' %}active{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        All Entries
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab Contents -->
+  <div id="tabContents">
+    <!-- Time Periods Tab (visible by default) -->
+    <div id="time-periods-tab" class="{% if active_tab != 'time-periods' %}hidden{% endif %} fade-in" style="animation-delay: 200ms;">
+      <!-- Time Periods Grid -->
+      <div class="period-grid">
+        {% for period in time_periods %}
+          <a href="{% url 'time_period' period.period %}" class="block">
+            <div class="h-64 bg-{{ period.color|default:'secondary' }}-500 rounded-xl shadow-lg book group relative scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
+              <div class="absolute inset-1 bg-white rounded-lg p-4 flex flex-col justify-between">
+                <div>
+                  <div class="book-title text-center font-bold text-gray-800 text-lg">{{ period.period }}</div>
+                  <div class="text-xs text-center text-gray-500 mb-3">
+                    {% if 'Q1' in period.period %}Jan - Mar{% endif %}
+                    {% if 'Q2' in period.period %}Apr - Jun{% endif %}
+                    {% if 'Q3' in period.period %}Jul - Sep{% endif %}
+                    {% if 'Q4' in period.period %}Oct - Dec{% endif %}
+                  </div>
+                  <div class="h-24 overflow-hidden">
+                    <div class="handwritten text-xs text-gray-600 leading-relaxed">
+                      {% if period.first_entry %}
+                        {{ period.first_entry.content|truncatechars:180 }}
+                      {% else %}
+                        Start adding entries to this time period...
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center justify-center gap-1 text-{{ period.color|default:'secondary' }}-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                  <span class="text-xs font-medium">{{ period.count }} entries</span>
+                </div>
+              </div>
+              <div class="book-spine"></div>
+              <div class="absolute inset-0 rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-10 transition pointer-events-none"></div>
+            </div>
+          </a>
+        {% empty %}
+          <div class="col-span-full glass-effect rounded-xl p-8 text-center border border-white/20 shadow-md">
+            <div class="bg-white/50 rounded-lg p-6 inline-block mb-4 shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
-              Clear
-            </a>
+            </div>
+            <h3 class="text-lg font-medium diary-font text-gray-900 mb-2">No entries yet</h3>
+            <p class="text-gray-600 mb-6">Start journaling to build your library of memories.</p>
+            <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-4 py-2 rounded-lg shadow-md">Create Your First Entry</a>
           </div>
-          {% endif %}
-        </div>
-        <div class="flex items-center gap-3 w-full sm:w-auto">
-          <div class="relative flex-grow sm:flex-grow-0">
-            <input type="text" placeholder="Search entries..." class="pl-9 pr-4 py-2 border border-white rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary-400 text-sm w-full glass-effect">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-4 py-2 rounded-lg shadow-md text-sm flex items-center gap-1 whitespace-nowrap">
+        {% endfor %}
+      </div>
+
+      <!-- Fancy divider -->
+      <div class="fancy-divider">
+        <span>Life Chapters</span>
+      </div>
+
+      <!-- Life Chapters Section -->
+      <div class="mb-12 scale-in" style="animation-delay: 300ms;">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold diary-font text-gray-800">Browse by Chapter</h3>
+          <a href="{% url 'manage_chapters' %}" class="text-sm text-secondary-600 hover:text-secondary-700 flex items-center gap-1 bg-white/50 px-3 py-1.5 rounded-full shadow-sm transition hover:bg-white">
+            <span>Manage chapters</span>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065z" />
             </svg>
-            New Entry
+          </a>
+        </div>
+
+        <!-- Book Shelf with improved scrolling -->
+        <div class="h-60 sm:h-72 relative book-shelf mb-6 glass-effect rounded-xl overflow-hidden border border-white/20 shadow-md">
+          <div class="book-collection pb-4 pr-2 h-full flex items-end">
+            <div class="flex gap-4 sm:gap-6 px-4 py-4 h-full items-end w-max">
+              {% for chapter in chapters %}
+              <!-- Chapter Book -->
+              <a href="{% url 'library' %}?chapter={{ chapter.id }}" class="block flex-shrink-0">
+                <div class="h-48 sm:h-56 w-32 sm:w-40 bg-{{ chapter.color }} rounded-xl shadow-xl book {% if chapter.active %}border-4 border-white{% endif %}">
+                  <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col items-center">
+                    <div class="book-title text-center font-bold text-gray-800 mb-2 text-sm sm:text-base">{{ chapter.title }}</div>
+                    <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
+                      {{ chapter.description }}
+                    </div>
+                    <div class="mt-auto text-xs text-center text-{{ chapter.color }}-500 pt-2 flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span>{{ chapter.count }} entries</span>
+                    </div>
+                  </div>
+                  <div class="book-spine"></div>
+                </div>
+              </a>
+              {% empty %}
+              <div class="h-48 sm:h-56 w-32 sm:w-40 bg-gray-300 rounded-xl shadow-xl book flex-shrink-0">
+                <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col items-center justify-center">
+                  <div class="text-gray-400 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    <div class="book-title text-center font-bold text-gray-800 mb-2 text-sm">Add Chapters</div>
+                  </div>
+                </div>
+                <div class="book-spine"></div>
+              </div>
+              {% endfor %}
+
+              <!-- Add New -->
+              <a href="{% url 'manage_chapters' %}" class="block flex-shrink-0">
+                <div class="h-32 sm:h-40 w-24 sm:w-32 bg-white/30 backdrop-blur-sm rounded-xl border-2 border-dashed border-white/50 flex items-center justify-center text-gray-500 hover:text-secondary-600 hover:border-secondary-300 transition cursor-pointer shadow-sm hover:shadow-md">
+                  <div class="text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    <span class="text-xs font-medium">Create</span>
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- Scroll hint indicator -->
+          <div class="absolute right-4 bottom-4 bg-white/70 rounded-full p-1.5 shadow-sm backdrop-blur-sm text-gray-500 animate-pulse-slow opacity-70">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tags Tab -->
+    <div id="tags-tab" class="{% if active_tab != 'tags' %}hidden{% endif %} fade-in" style="animation-delay: 200ms;">
+      <!-- Tags Filter Bar -->
+      <div class="mb-6 flex flex-wrap gap-2 p-4 glass-effect rounded-xl border border-white/20 shadow-md">
+        <a href="{% url 'library' %}?tab=tags" class="bg-{% if not tag_filter %}secondary-100 text-secondary-700{% else %}white text-gray-700 hover:bg-gray-100{% endif %} text-sm px-3 py-1.5 rounded-full transition shadow-sm">
+          All Tags
+        </a>
+        {% for tag in tags %}
+          <a href="{% url 'library' %}?tag={{ tag.name }}" class="bg-{% if tag.active %}secondary-600 text-white{% else %}white text-gray-700 hover:bg-gray-100{% endif %} text-sm px-3 py-1.5 rounded-full transition shadow-sm">
+            {{ tag.name }} <span class="text-xs px-1.5 py-0.5 rounded-full {% if tag.active %}bg-white/30{% else %}bg-gray-100{% endif %}">{{ tag.count }}</span>
+          </a>
+        {% empty %}
+          <p class="text-gray-500 text-sm">No tags found. Add tags to your entries to organize them better.</p>
+        {% endfor %}
+      </div>
+
+      <!-- Tagged Entries - Grid Layout -->
+      <div class="entry-grid">
+        {% for entry in tagged_entries %}
+          <div class="glass-effect rounded-xl shadow-md overflow-hidden border border-white/20 hover:shadow-lg transition entry-card border-l-4 border-secondary-400 scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-3">
+                <h4 class="font-semibold diary-font text-gray-800">{{ entry.title }}</h4>
+                <div class="mood-pill {{ entry.mood|default:'neutral' }}">
+                  <span>{{ entry.mood|default:"neutral"|title }}</span>
+                </div>
+              </div>
+              <p class="text-sm text-gray-500 mb-3 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {{ entry.created_at|date:"F j, Y" }}
+              </p>
+              <p class="text-gray-600 diary-font text-sm line-clamp-3">{{ entry.content|truncatechars:120 }}</p>
+
+              <div class="mt-4 flex flex-wrap gap-1 mb-3">
+                {% for tag in entry.tags.all %}
+                  <span class="tag-pill {% if tag.name == tag_filter %}border-secondary-300 bg-secondary-50 text-secondary-600{% endif %}">{{ tag.name }}</span>
+                {% endfor %}
+              </div>
+
+              <div class="flex justify-end">
+                <a href="{% url 'entry_detail' entry.id %}" class="text-secondary-600 text-sm hover:underline flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full shadow-sm hover:bg-white/80 transition">
+                  <span>Read more</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="col-span-full glass-effect rounded-xl p-8 text-center border border-white/20 shadow-md">
+            <p class="text-gray-600">{% if tag_filter %}No entries found with tag "{{ tag_filter }}".{% else %}No tagged entries found. Add tags to your entries to see them here.{% endif %}</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Moods Tab -->
+    <div id="moods-tab" class="{% if active_tab != 'moods' %}hidden{% endif %} fade-in" style="animation-delay: 200ms;">
+      <!-- Mood Filter Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8">
+        {% for mood in moods %}
+          <a href="{% url 'library' %}?mood={{ mood.name }}" class="glass-effect p-4 rounded-xl shadow-md hover:shadow-lg transition text-center group card-hover border border-{% if mood.active %}secondary-400{% else %}white/20{% endif %} {% if mood.active %}bg-secondary-50{% endif %} scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
+            <div class="text-3xl mb-2">{{ mood.emoji }}</div>
+            <div class="font-medium text-gray-800 mb-1 group-hover:text-secondary-600 capitalize">{{ mood.name }}</div>
+            <div class="text-xs text-gray-500">{{ mood.count }} entries</div>
+          </a>
+        {% empty %}
+          <div class="col-span-full glass-effect p-8 text-center rounded-xl border border-white/20 shadow-md">
+            <p class="text-gray-600">No mood data available yet. Add moods to your entries to see them here.</p>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Recent Mood Entries - Card Grid Layout -->
+      <div class="glass-effect rounded-xl shadow-md overflow-hidden border border-white/20 mb-4">
+        <div class="px-6 py-4 bg-white/30 border-b border-white/20">
+          <h3 class="font-semibold diary-font text-gray-800">
+            {% if mood_filter %}
+            Entries with mood "{{ mood_filter }}"
+            {% else %}
+            Recent Entries by Mood
+            {% endif %}
+          </h3>
+        </div>
+      </div>
+
+      <div class="entry-grid">
+        {% for entry in mood_entries %}
+          <div class="glass-effect rounded-xl shadow-md overflow-hidden border border-white/20 hover:shadow-lg transition entry-card border-l-4 border-{% if entry.mood == 'happy' %}green-400{% elif entry.mood == 'content' %}blue-400{% elif entry.mood == 'excited' %}purple-400{% elif entry.mood == 'anxious' %}amber-400{% elif entry.mood == 'sad' %}red-400{% else %}gray-400{% endif %} scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="text-xl">{{ entry.mood_emoji|default:"😊" }}</span>
+                  <h4 class="font-semibold diary-font text-gray-800">{{ entry.title }}</h4>
+                </div>
+                <div class="mood-pill {{ entry.mood|default:'neutral' }}">
+                  <span>{{ entry.mood|default:"neutral"|title }}</span>
+                </div>
+              </div>
+              <p class="text-sm text-gray-500 mb-3 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {{ entry.created_at|date:"F j, Y" }}
+              </p>
+              <p class="text-gray-600 diary-font text-sm line-clamp-3">{{ entry.content|truncatechars:120 }}</p>
+
+              <div class="mt-4 flex justify-end">
+                <a href="{% url 'entry_detail' entry.id %}" class="text-secondary-600 text-sm hover:underline flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full shadow-sm hover:bg-white/80 transition">
+                  <span>Read more</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="col-span-full glass-effect rounded-xl p-8 text-center border border-white/20 shadow-md">
+            <p class="text-gray-600">{% if mood_filter %}No entries found with mood "{{ mood_filter }}".{% else %}No mood entries available yet. Add moods to your entries to see them here.{% endif %}</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- All Entries Tab -->
+    <div id="all-entries-tab" class="{% if active_tab != 'all-entries' %}hidden{% endif %} fade-in" style="animation-delay: 200ms;">
+      <!-- Entries Filter and Sort -->
+      <div class="glass-effect rounded-xl p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-6 border border-white/20 shadow-md">
+        <div class="text-sm text-gray-500">Showing {{ entries|length }} entries</div>
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <select class="pl-3 pr-8 py-1.5 text-sm glass-effect border border-white rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-400 appearance-none shadow-sm">
+              <option>Newest first</option>
+              <option>Oldest first</option>
+              <option>Alphabetical (A-Z)</option>
+            </select>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute right-2 top-2 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Entries Timeline with improved visuals -->
+      <div class="relative pl-8">
+        <!-- Timeline line -->
+        <div class="timeline-line"></div>
+
+        <!-- Timeline entries -->
+        <div class="space-y-6">
+          {% for entry in entries %}
+            <div class="timeline-entry relative scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
+              <div class="glass-effect rounded-xl shadow-md p-5 mb-4 border border-white/20 entry-card {% if entry.mood %}border-l-4 border-{% if entry.mood == 'happy' %}green-400{% elif entry.mood == 'content' %}blue-400{% elif entry.mood == 'excited' %}purple-400{% elif entry.mood == 'anxious' %}amber-400{% elif entry.mood == 'sad' %}red-400{% else %}gray-400{% endif %}{% endif %}">
+                <div class="flex justify-between items-center mb-2">
+                  <h3 class="font-semibold diary-font text-gray-800">{{ entry.title }}</h3>
+                  <div class="text-xs text-gray-500 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    {{ entry.created_at|date:"F j, Y" }}
+                  </div>
+                </div>
+                <div class="text-sm text-gray-600 diary-font">
+                  <p>{{ entry.content|truncatechars:200 }}</p>
+                </div>
+                <div class="mt-3 flex justify-between items-center flex-wrap gap-2">
+                  <div class="flex gap-1 flex-wrap">
+                    {% if entry.mood %}
+                      <span class="mood-pill {{ entry.mood }}">
+                        {% if entry.mood == 'happy' %}😊
+                        {% elif entry.mood == 'content' %}😌
+                        {% elif entry.mood == 'excited' %}🤩
+                        {% elif entry.mood == 'neutral' %}😐
+                        {% elif entry.mood == 'anxious' %}😰
+                        {% elif entry.mood == 'sad' %}😢
+                        {% else %}😐
+                        {% endif %}
+                        {{ entry.mood|title }}
+                      </span>
+                    {% endif %}
+                    {% for tag in entry.tags.all %}
+                      <a href="{% url 'library' %}?tag={{ tag.name }}" class="tag-pill">{{ tag.name }}</a>
+                    {% endfor %}
+                  </div>
+                  <a href="{% url 'entry_detail' entry.id %}" class="text-secondary-600 text-xs hover:underline flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full shadow-sm hover:bg-white/80 transition">
+                    <span>Read more</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <div class="glass-effect rounded-xl shadow-md p-8 text-center border border-white/20">
+              <div class="bg-white/50 rounded-lg p-6 inline-block mb-4 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </div>
+              <h3 class="text-lg font-medium diary-font text-gray-900 mb-2">No entries yet</h3>
+              <p class="text-gray-600 mb-6">Start journaling to capture your memories and thoughts.</p>
+              <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-4 py-2 rounded-lg shadow-md">Create Your First Entry</a>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Load More -->
+        {% if entries|length > 10 %}
+        <div class="text-center mt-8">
+          <button id="loadMoreBtn" class="glass-effect border border-white/20 text-gray-700 px-4 py-2 rounded-full hover:bg-white/50 transition text-sm shadow-md">
+            <span>Load More Entries</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Entry Button (Fixed for desktop) -->
+<a href="{% url 'new_entry' %}" class="hidden md:flex md:fixed md:bottom-6 md:right-6 btn-gradient text-white p-4 rounded-full shadow-lg z-40 hover:shadow-xl transition-all hover:scale-105">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+  </svg>
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Tab switching with URL parameter update
+  function switchTab(tabName) {
+    // Hide all tabs
+    document.getElementById('time-periods-tab').classList.add('hidden');
+    document.getElementById('tags-tab').classList.add('hidden');
+    document.getElementById('moods-tab').classList.add('hidden');
+    document.getElementById('all-entries-tab').classList.add('hidden');
+
+    // Show selected tab
+    document.getElementById(tabName + '-tab').classList.remove('hidden');
+
+    // Update active state on buttons
+    const buttons = document.querySelector('.tabs-container').querySelectorAll('button');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    // Update URL without page reload to reflect current tab
+    const url = new URL(window.location);
+    url.searchParams.set('tab', tabName);
+    window.history.pushState({}, '', url);
+  }
+
+  // Initialize the page
+  document.addEventListener('DOMContentLoaded', function() {
+    // Set active tab based on URL parameter or active_tab from server
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+
+    if (tabParam) {
+      // Find the button for this tab and activate it
+      const tabButton = document.querySelector(`button[onclick="switchTab('${tabParam}')"]`);
+      if (tabButton) {
+        // Simulate a click to activate the tab
+        const clickEvent = new Event('click');
+        tabButton.dispatchEvent(clickEvent);
+      }
+    } else {
+      // Default: set first tab as active if no active tab is set
+      const activeTab = document.querySelector('.tabs-container button.active');
+      if (!activeTab) {
+        document.querySelector('.tabs-container button').classList.add('active');
+      }
+    }
+
+    // Initialize load more functionality
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (loadMoreBtn) {
+      let currentPage = 1;
+
+      loadMoreBtn.addEventListener('click', function() {
+        currentPage++;
+        loadMoreEntries(currentPage);
+      });
+    }
+
+    // Add scroll indicator for book shelf
+    const bookCollection = document.querySelector('.book-collection');
+    if (bookCollection) {
+      const scrollIndicator = document.querySelector('.book-shelf svg');
+
+      // Show/hide scroll indicator based on scroll width vs client width
+      function updateScrollIndicator() {
+        if (bookCollection.scrollWidth > bookCollection.clientWidth) {
+          scrollIndicator.parentElement.classList.remove('hidden');
+        } else {
+          scrollIndicator.parentElement.classList.add('hidden');
+        }
+      }
+
+      // Update on load
+      updateScrollIndicator();
+
+      // Update on resize
+      window.addEventListener('resize', updateScrollIndicator);
+
+      // Update when scrolled to the end
+      bookCollection.addEventListener('scroll', function() {
+        if (bookCollection.scrollLeft + bookCollection.clientWidth >= bookCollection.scrollWidth - 40) {
+          scrollIndicator.parentElement.classList.add('opacity-0');
+        } else {
+          scrollIndicator.parentElement.classList.remove('opacity-0');
+        }
+      });
+    }
+  });
+
+  // Load more entries function
+  function loadMoreEntries(page) {
+    // Show loading state
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const originalText = loadMoreBtn.innerHTML;
+    loadMoreBtn.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Loading...
+    `;
+
+    // Get the current active tab and any filters
+    const activeTab = document.querySelector('.tabs-container button.active');
+    const tabName = activeTab ? activeTab.getAttribute('onclick').match(/'(.*?)'/)[1] : 'all-entries';
+
+    // Get current filters from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const tag = urlParams.get('tag');
+    const mood = urlParams.get('mood');
+    const chapter = urlParams.get('chapter');
+
+    // Build the request URL
+    let url = `?page=${page}`;
+    if (tag) url += `&tag=${tag}`;
+    if (mood) url += `&mood=${mood}`;
+    if (chapter) url += `&chapter=${chapter}`;
+    url += `&tab=${tabName}`;
+
+    // Simulate loading more entries (in a real implementation, this would be an AJAX call)
+    setTimeout(() => {
+      // This is a mockup - in reality, you would fetch new entries from the server
+      // and append them to the list
+
+      // For this demo, we'll just add some dummy entries
+      const entriesContainer = document.querySelector(`#${tabName}-tab .space-y-6`);
+
+      // Add 5 more dummy entries
+      for (let i = 0; i < 5; i++) {
+        const entryHTML = createDummyEntry(i + (page * 10));
+
+        // Create a div element to hold the entry
+        const entryDiv = document.createElement('div');
+        entryDiv.className = 'timeline-entry relative scale-in';
+        entryDiv.style.animationDelay = `${i * 100}ms`;
+        entryDiv.innerHTML = entryHTML;
+
+        // Append to the container
+        entriesContainer.appendChild(entryDiv);
+      }
+
+      // Reset button state
+      loadMoreBtn.innerHTML = originalText;
+
+      // If we've loaded all entries (this would be determined by the server response)
+      // Hide the button after some arbitrary number of pages for the demo
+      if (page >= 3) {
+        loadMoreBtn.parentElement.style.display = 'none';
+      }
+    }, 1000); // Simulate network delay
+  }
+
+  // Helper function to create dummy entries for the "load more" demo
+  function createDummyEntry(index) {
+    return `
+      <div class="glass-effect rounded-xl shadow-md p-5 mb-4 border border-white/20 entry-card border-l-4 border-blue-400">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="font-semibold diary-font text-gray-800">Loaded Entry #${index}</h3>
+          <div class="text-xs text-gray-500 flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            April 23, 2025
+          </div>
+        </div>
+        <div class="text-sm text-gray-600 diary-font">
+          <p>This is a dynamically loaded entry that would come from your server. In a real implementation, you would make an AJAX request to fetch more entries when the user clicks "Load More".</p>
+        </div>
+        <div class="mt-3 flex justify-between items-center flex-wrap gap-2">
+          <div class="flex gap-1 flex-wrap">
+            <span class="mood-pill content">😌 Content</span>
+            <a href="?tag=example" class="tag-pill">example</a>
+          </div>
+          <a href="#" class="text-secondary-600 text-xs hover:underline flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full shadow-sm hover:bg-white/80 transition">
+            <span>Read more</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
           </a>
         </div>
       </div>
-
-      <!-- Tabs Container -->
-      <div class="mb-6 sm:mb-8 glass-effect rounded-xl overflow-hidden">
-        <div class="tabs-container flex border-b border-white/20 mobile-tabs overflow-x-auto touch-pan-x scrollbar-hide">
-          <button onclick="switchTab('time-periods')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base text-gray-600 border-b-2 border-transparent {% if active_tab == 'time-periods' %}active{% endif %}">Time Periods</button>
-          <button onclick="switchTab('tags')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base text-gray-600 border-b-2 border-transparent {% if active_tab == 'tags' %}active{% endif %}">Tags</button>
-          <button onclick="switchTab('moods')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base text-gray-600 border-b-2 border-transparent {% if active_tab == 'moods' %}active{% endif %}">Moods</button>
-          <button onclick="switchTab('all-entries')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base text-gray-600 border-b-2 border-transparent {% if active_tab == 'all-entries' %}active{% endif %}">All Entries</button>
-        </div>
-      </div>
-
-      <!-- Tab Contents -->
-      <div id="tabContents">
-        <!-- Time Periods Tab (visible by default) -->
-        <div id="time-periods-tab" class="{% if active_tab != 'time-periods' %}hidden{% endif %}">
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {% for period in time_periods %}
-              <a href="{% url 'time_period' period.period %}" class="block">
-                <div class="h-64 bg-{{ period.color|default:'secondary' }}-500 rounded-xl shadow-lg book group relative">
-                  <div class="absolute inset-1 bg-white rounded-lg p-4 flex flex-col justify-between">
-                    <div>
-                      <div class="book-title text-center font-bold text-gray-800">{{ period.period }}</div>
-                      <div class="text-xs text-center text-gray-500 mb-3">
-                        {% if 'Q1' in period.period %}Jan - Mar{% endif %}
-                        {% if 'Q2' in period.period %}Apr - Jun{% endif %}
-                        {% if 'Q3' in period.period %}Jul - Sep{% endif %}
-                        {% if 'Q4' in period.period %}Oct - Dec{% endif %}
-                      </div>
-                      <div class="h-24 overflow-hidden">
-                        <div class="handwritten text-xs text-gray-600 leading-relaxed">
-                          {% if period.first_entry %}
-                            {{ period.first_entry.content|truncatechars:180 }}
-                          {% else %}
-                            Start adding entries to this time period...
-                          {% endif %}
-                        </div>
-                      </div>
-                    </div>
-                    <div class="text-xs text-center text-{{ period.color|default:'secondary' }}-500">{{ period.count }} entries</div>
-                  </div>
-                  <div class="book-spine"></div>
-                  <div class="absolute inset-0 rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-10 transition pointer-events-none"></div>
-                </div>
-              </a>
-            {% empty %}
-              <div class="col-span-full glass-effect rounded-xl p-8 text-center border border-white/20">
-                <div class="bg-white/50 rounded-lg p-6 inline-block mb-4 shadow-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                </div>
-                <h3 class="text-lg font-medium diary-font text-gray-900 mb-2">No entries yet</h3>
-                <p class="text-gray-600 mb-6">Start journaling to build your library of memories.</p>
-                <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-4 py-2 rounded-lg shadow-md">Create Your First Entry</a>
-              </div>
-            {% endfor %}
-          </div>
-
-          <!-- Life Chapters Section -->
-          <div class="my-12">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="text-xl font-semibold diary-font text-gray-800">Life Chapters</h3>
-              <a href="{% url 'manage_chapters' %}" class="text-sm text-secondary-600 hover:underline flex items-center gap-1">
-                <span>Manage chapters</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065z" />
-                </svg>
-              </a>
-            </div>
-
-            <!-- Book Shelf - Fixed for Mobile -->
-            <div class="h-60 sm:h-80 relative book-shelf mb-6 glass-effect rounded-xl overflow-hidden border border-white/20">
-              <div class="overflow-x-auto h-full book-collection touch-pan-x pb-2 pr-2">
-                <div class="flex gap-4 sm:gap-8 px-4 py-2 h-full items-end w-max">
-                  {% for chapter in chapters %}
-                  <!-- Chapter Book -->
-                  <a href="{% url 'library' %}?chapter={{ chapter.id }}" class="block flex-shrink-0">
-                    <div class="h-48 sm:h-64 w-32 sm:w-40 bg-{{ chapter.color }} rounded-xl shadow-xl book {% if chapter.active %}border-4 border-white{% endif %}">
-                      <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col items-center">
-                        <div class="book-title text-center font-bold text-gray-800 mb-2 text-sm sm:text-base">{{ chapter.title }}</div>
-                        <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
-                          {{ chapter.description }}
-                        </div>
-                        <div class="mt-auto text-xs text-center text-{{ chapter.color }}-500 pt-2">{{ chapter.count }} entries</div>
-                      </div>
-                      <div class="book-spine"></div>
-                    </div>
-                  </a>
-                  {% empty %}
-                  <div class="h-48 sm:h-64 w-32 sm:w-40 bg-gray-300 rounded-xl shadow-xl book flex-shrink-0">
-                    <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col items-center justify-center">
-                      <div class="text-gray-400 text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        <div class="book-title text-center font-bold text-gray-800 mb-2 text-sm">Add Chapters</div>
-                      </div>
-                    </div>
-                    <div class="book-spine"></div>
-                  </div>
-                  {% endfor %}
-
-                  <!-- Add New -->
-                  <a href="{% url 'manage_chapters' %}" class="block flex-shrink-0">
-                    <div class="h-32 sm:h-40 w-24 sm:w-32 bg-white/30 backdrop-blur-sm rounded-xl border-2 border-dashed border-white/50 flex items-center justify-center text-gray-500 hover:text-secondary-600 hover:border-secondary-300 transition cursor-pointer">
-                      <div class="text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        <span class="text-xs font-medium">Create</span>
-                      </div>
-                    </div>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tags Tab -->
-        <div id="tags-tab" class="{% if active_tab != 'tags' %}hidden{% endif %}">
-          <!-- Tags Filter Bar -->
-          <div class="mb-6 flex flex-wrap gap-2 p-4 glass-effect rounded-xl border border-white/20">
-            <a href="{% url 'library' %}?tab=tags" class="bg-{% if not tag_filter %}secondary-100 text-secondary-700{% else %}white text-gray-700 hover:bg-gray-100{% endif %} text-sm px-3 py-1.5 rounded-full transition shadow-sm">
-              All Tags
-            </a>
-            {% for tag in tags %}
-              <a href="{% url 'library' %}?tag={{ tag.name }}" class="bg-{% if tag.active %}secondary-600 text-white{% else %}white text-gray-700 hover:bg-gray-100{% endif %} text-sm px-3 py-1.5 rounded-full transition shadow-sm">
-                {{ tag.name }} ({{ tag.count }})
-              </a>
-            {% empty %}
-              <p class="text-gray-500 text-sm">No tags found. Add tags to your entries to organize them better.</p>
-            {% endfor %}
-          </div>
-
-          <!-- Tagged Entries -->
-          <div class="glass-effect rounded-xl shadow-md overflow-hidden border border-white/20">
-            <div class="divide-y divide-white/10">
-              {% for entry in tagged_entries %}
-                <div class="p-5 hover:bg-white/50 transition">
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <h4 class="font-semibold diary-font text-gray-800">{{ entry.title }}</h4>
-                      <p class="text-sm text-gray-500 mt-1">{{ entry.created_at|date:"F j, Y" }}</p>
-                    </div>
-                    <div class="flex gap-1 flex-wrap justify-end">
-                      {% for tag in entry.tags.all %}
-                        <span class="bg-{% if tag.name == tag_filter %}secondary-600 text-white{% else %}white text-gray-700{% endif %} text-xs px-2 py-0.5 rounded-full shadow-sm">{{ tag.name }}</span>
-                      {% endfor %}
-                    </div>
-                  </div>
-                  <p class="text-gray-600 mt-3 diary-font text-sm">{{ entry.content|truncatechars:150 }}</p>
-                  <div class="mt-4 flex justify-end">
-                    <a href="{% url 'entry_detail' entry.id %}" class="text-secondary-600 text-sm hover:underline flex items-center gap-1">
-                      <span>Read more</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              {% empty %}
-                <div class="p-8 text-center">
-                  <p class="text-gray-600">{% if tag_filter %}No entries found with tag "{{ tag_filter }}".{% else %}No tagged entries found. Add tags to your entries to see them here.{% endif %}</p>
-                </div>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-
-        <!-- Moods Tab -->
-        <div id="moods-tab" class="{% if active_tab != 'moods' %}hidden{% endif %}">
-          <!-- Mood Filter Grid -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
-            {% for mood in moods %}
-              <a href="{% url 'library' %}?mood={{ mood.name }}" class="glass-effect p-4 rounded-xl shadow-md hover:shadow-lg transition text-center group card-hover border border-{% if mood.active %}secondary-400{% else %}white/20{% endif %} {% if mood.active %}bg-secondary-50{% endif %}">
-                <div class="text-2xl mb-2">{{ mood.emoji }}</div>
-                <div class="font-medium text-gray-800 mb-1 group-hover:text-secondary-600">{{ mood.name }}</div>
-                <div class="text-xs text-gray-500">{{ mood.count }} entries</div>
-              </a>
-            {% empty %}
-              <div class="col-span-full glass-effect p-8 text-center rounded-xl border border-white/20">
-                <p class="text-gray-600">No mood data available yet. Add moods to your entries to see them here.</p>
-              </div>
-            {% endfor %}
-          </div>
-
-          <!-- Recent Mood Entries -->
-          <div class="glass-effect rounded-xl shadow-md overflow-hidden border border-white/20">
-            <div class="px-6 py-4 bg-white/30 border-b border-white/20">
-              <h3 class="font-semibold diary-font text-gray-800">
-                {% if mood_filter %}
-                Entries with mood "{{ mood_filter }}"
-                {% else %}
-                Recent Entries by Mood
-                {% endif %}
-              </h3>
-            </div>
-            <div class="divide-y divide-white/10">
-              {% for entry in mood_entries %}
-                <div class="p-5 hover:bg-white/50 transition">
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <div class="flex items-center gap-2">
-                        <span class="text-xl">{{ entry.mood_emoji|default:"😊" }}</span>
-                        <h4 class="font-semibold diary-font text-gray-800">{{ entry.title }}</h4>
-                      </div>
-                      <p class="text-sm text-gray-500 mt-1">{{ entry.created_at|date:"F j, Y" }}</p>
-                    </div>
-                  </div>
-                  <p class="text-gray-600 mt-3 diary-font text-sm">{{ entry.content|truncatechars:150 }}</p>
-                  <div class="mt-4 flex justify-end">
-                    <a href="{% url 'entry_detail' entry.id %}" class="text-secondary-600 text-sm hover:underline flex items-center gap-1">
-                      <span>Read more</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              {% empty %}
-                <div class="p-8 text-center">
-                  <p class="text-gray-600">{% if mood_filter %}No entries found with mood "{{ mood_filter }}".{% else %}No mood entries available yet. Add moods to your entries to see them here.{% endif %}</p>
-                </div>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-
-        <!-- All Entries Tab -->
-        <div id="all-entries-tab" class="{% if active_tab != 'all-entries' %}hidden{% endif %}">
-          <!-- Entries Filter and Sort -->
-          <div class="flex justify-between items-center mb-6">
-            <div class="text-sm text-gray-500">Showing {{ entries|length }} entries</div>
-            <div class="flex items-center gap-3">
-              <div class="relative">
-                <select class="pl-3 pr-8 py-1.5 text-sm glass-effect border border-white rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-400 appearance-none">
-                  <option>Newest first</option>
-                  <option>Oldest first</option>
-                  <option>Alphabetical (A-Z)</option>
-                </select>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute right-2 top-2 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <!-- Entries Timeline -->
-          <div class="relative pl-8">
-            <!-- Timeline line -->
-            <div class="timeline-line"></div>
-
-            <!-- Timeline entries -->
-            <div class="space-y-6">
-              {% for entry in entries %}
-                <div class="timeline-entry relative">
-                  <div class="glass-effect rounded-xl shadow-md p-5 mb-4 border border-white/20">
-                    <div class="flex justify-between items-center mb-2">
-                      <h3 class="font-semibold diary-font text-gray-800">{{ entry.title }}</h3>
-                      <div class="text-xs text-gray-500">{{ entry.created_at|date:"F j, Y" }}</div>
-                    </div>
-                    <div class="text-sm text-gray-600 diary-font">
-                      <p>{{ entry.content|truncatechars:200 }}</p>
-                    </div>
-                    <div class="mt-3 flex justify-between items-center flex-wrap gap-2">
-                      <div class="flex gap-1 flex-wrap">
-                        {% if entry.mood %}
-                          <span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">{{ entry.mood }}</span>
-                        {% endif %}
-                        {% for tag in entry.tags.all %}
-                          <a href="{% url 'library' %}?tag={{ tag.name }}" class="bg-white text-gray-700 text-xs px-2 py-0.5 rounded-full shadow-sm hover:bg-secondary-50">{{ tag.name }}</a>
-                        {% endfor %}
-                      </div>
-                      <a href="{% url 'entry_detail' entry.id %}" class="text-secondary-600 text-xs hover:underline flex items-center gap-1">
-                        <span>Read more</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              {% empty %}
-                <div class="glass-effect rounded-xl shadow-md p-8 text-center border border-white/20">
-                  <div class="bg-white/50 rounded-lg p-6 inline-block mb-4 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
-                  </div>
-                  <h3 class="text-lg font-medium diary-font text-gray-900 mb-2">No entries yet</h3>
-                  <p class="text-gray-600 mb-6">Start journaling to capture your memories and thoughts.</p>
-                  <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-4 py-2 rounded-lg shadow-md">Create Your First Entry</a>
-                </div>
-              {% endfor %}
-            </div>
-<!-- Load More -->
-{% if entries|length > 10 %}
-<div class="text-center mt-8">
-  <button id="loadMoreBtn" class="glass-effect border border-white/20 text-gray-700 px-4 py-2 rounded-full hover:bg-white/50 transition text-sm">
-    Load More Entries
-  </button>
-</div>
-{% endif %}
-</div>
-</div>
-</div>
-</div>
-</main>
-
-<!-- Mobile Bottom Navigation -->
-<nav class="mobile-bottom-nav md:hidden flex items-center text-xs text-gray-600 z-30">
-<a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-3 flex-1">
-<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-</svg>
-<span>Home</span>
-</a>
-<a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-3 flex-1 text-secondary-600">
-<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-</svg>
-<span>Library</span>
-</a>
-<div class="flex flex-col items-center justify-center py-3 flex-1 opacity-0">
-<div class="h-6 w-6 mb-1"></div>
-<span>New</span>
-</div>
-<a href="{% url 'biography' %}" class="flex flex-col items-center justify-center py-3 flex-1">
-<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-</svg>
-<span>Bio</span>
-</a>
-<a href="{% url 'account_settings' %}" class="flex flex-col items-center justify-center py-3 flex-1">
-<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-</svg>
-<span>Profile</span>
-</a>
-</nav>
-
-<!-- Quick Entry Button (Fixed) -->
-<a href="{% url 'new_entry' %}" class="mobile-fab md:fixed md:bottom-6 btn-gradient text-white p-4 rounded-full shadow-lg z-40">
-<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-</svg>
-</a>
-
-<script>
-// Mobile menu toggle
-function toggleMobileMenu() {
-const menu = document.getElementById('mobileMenu');
-const menuContent = menu.querySelector('div.mobile-menu-slide');
-
-if (menu.classList.contains('hidden')) {
-menu.classList.remove('hidden');
-// Small delay to allow the display:block to take effect before animation
-setTimeout(() => {
-menuContent.classList.remove('mobile-menu-closed');
-menuContent.classList.add('mobile-menu-open');
-}, 10);
-} else {
-menuContent.classList.remove('mobile-menu-open');
-menuContent.classList.add('mobile-menu-closed');
-// Wait for animation to complete before hiding the menu
-setTimeout(() => {
-menu.classList.add('hidden');
-}, 300);
-}
-}
-
-// Tab switching with URL parameter update
-function switchTab(tabName) {
-// Hide all tabs
-document.getElementById('time-periods-tab').classList.add('hidden');
-document.getElementById('tags-tab').classList.add('hidden');
-document.getElementById('moods-tab').classList.add('hidden');
-document.getElementById('all-entries-tab').classList.add('hidden');
-
-// Show selected tab
-document.getElementById(tabName + '-tab').classList.remove('hidden');
-
-// Update active state on buttons
-const buttons = document.querySelector('.tabs-container').querySelectorAll('button');
-buttons.forEach(btn => btn.classList.remove('active'));
-event.currentTarget.classList.add('active');
-
-// Update URL without page reload to reflect current tab
-const url = new URL(window.location);
-url.searchParams.set('tab', tabName);
-window.history.pushState({}, '', url);
-}
-
-// Initialize the page
-document.addEventListener('DOMContentLoaded', function() {
-// Set active tab based on URL parameter or active_tab from server
-const urlParams = new URLSearchParams(window.location.search);
-const tabParam = urlParams.get('tab');
-
-if (tabParam) {
-// Find the button for this tab and activate it
-const tabButton = document.querySelector(`button[onclick="switchTab('${tabParam}')"]`);
-if (tabButton) {
-// Simulate a click to activate the tab
-const clickEvent = new Event('click');
-tabButton.dispatchEvent(clickEvent);
-}
-} else {
-// Default: set first tab as active if no active tab is set
-const activeTab = document.querySelector('.tabs-container button.active');
-if (!activeTab) {
-document.querySelector('.tabs-container button').classList.add('active');
-}
-}
-
-// Add transition class to body for page transitions
-document.body.classList.add('transition-ready');
-
-// Apply transition to all navigation links
-document.querySelectorAll('a[href^="/"]').forEach(link => {
-if (!link.getAttribute('href').includes('://') && !link.getAttribute('href').startsWith('#') && !link.classList.contains('filter-link')) {
-link.addEventListener('click', function(e) {
-// Skip if modifier keys are pressed or it's a form submit
-if (e.metaKey || e.ctrlKey || e.shiftKey || this.tagName === 'BUTTON') return;
-
-e.preventDefault();
-const target = this.getAttribute('href');
-
-// Fade out
-document.body.classList.add('page-transitioning');
-
-// Navigate after transition
-setTimeout(() => {
-window.location.href = target;
-}, 300);
-});
-}
-});
-
-// Initialize load more functionality
-const loadMoreBtn = document.getElementById('loadMoreBtn');
-if (loadMoreBtn) {
-let currentPage = 1;
-
-loadMoreBtn.addEventListener('click', function() {
-currentPage++;
-loadMoreEntries(currentPage);
-});
-}
-});
-
-// Load more entries function
-function loadMoreEntries(page) {
-// Show loading state
-const loadMoreBtn = document.getElementById('loadMoreBtn');
-const originalText = loadMoreBtn.innerHTML;
-loadMoreBtn.innerHTML = `
-<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-</svg>
-Loading...
-`;
-
-// Get the current active tab and any filters
-const activeTab = document.querySelector('.tabs-container button.active');
-const tabName = activeTab ? activeTab.getAttribute('onclick').match(/'(.*?)'/)[1] : 'all-entries';
-
-// Get current filters from URL
-const urlParams = new URLSearchParams(window.location.search);
-const tag = urlParams.get('tag');
-const mood = urlParams.get('mood');
-const chapter = urlParams.get('chapter');
-
-// Build the request URL
-let url = `?page=${page}`;
-if (tag) url += `&tag=${tag}`;
-if (mood) url += `&mood=${mood}`;
-if (chapter) url += `&chapter=${chapter}`;
-url += `&tab=${tabName}`;
-
-// Simulate loading more entries (in a real implementation, this would be an AJAX call)
-setTimeout(() => {
-// This is a mockup - in reality, you would fetch new entries from the server
-// and append them to the list
-
-// For this demo, we'll just add some dummy entries
-const entriesContainer = document.querySelector(`#${tabName}-tab .space-y-6`);
-
-// Add 5 more dummy entries
-for (let i = 0; i < 5; i++) {
-const entryHTML = createDummyEntry(i + (page * 10));
-
-// Create a div element to hold the entry
-const entryDiv = document.createElement('div');
-entryDiv.className = 'timeline-entry relative';
-entryDiv.innerHTML = entryHTML;
-
-// Append to the container
-entriesContainer.appendChild(entryDiv);
-}
-
-// Reset button state
-loadMoreBtn.innerHTML = originalText;
-
-// If we've loaded all entries (this would be determined by the server response)
-// Hide the button after some arbitrary number of pages for the demo
-if (page >= 3) {
-loadMoreBtn.parentElement.style.display = 'none';
-}
-}, 1000); // Simulate network delay
-}
-
-// Helper function to create dummy entries for the "load more" demo
-function createDummyEntry(index) {
-return `
-<div class="glass-effect rounded-xl shadow-md p-5 mb-4 border border-white/20">
-<div class="flex justify-between items-center mb-2">
-<h3 class="font-semibold diary-font text-gray-800">Loaded Entry #${index}</h3>
-<div class="text-xs text-gray-500">April 23, 2025</div>
-</div>
-<div class="text-sm text-gray-600 diary-font">
-<p>This is a dynamically loaded entry that would come from your server. In a real implementation, you would make an AJAX request to fetch more entries when the user clicks "Load More".</p>
-</div>
-<div class="mt-3 flex justify-between items-center flex-wrap gap-2">
-<div class="flex gap-1 flex-wrap">
-<span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">happy</span>
-<a href="?tag=example" class="bg-white text-gray-700 text-xs px-2 py-0.5 rounded-full shadow-sm hover:bg-secondary-50">example</a>
-</div>
-<a href="#" class="text-secondary-600 text-xs hover:underline flex items-center gap-1">
-<span>Read more</span>
-<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-</svg>
-</a>
-</div>
-</div>
-`;
-}
+    `;
+  }
 </script>
-</body>
-</html>
+{% endblock %}

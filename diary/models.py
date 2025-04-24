@@ -21,7 +21,15 @@ class LifeChapter(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='life_chapters')
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    color = models.CharField(max_length=50, default="sky-600")  # CSS color class
+    color = models.CharField(max_length=50, default="indigo")  # CSS color class
+    start_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-start_date']
 
     def __str__(self):
         return self.title

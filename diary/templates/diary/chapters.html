@@ -1,0 +1,750 @@
+{% extends 'base.html' %}
+
+{% block title %}DiaryVault - Manage Chapters{% endblock %}
+
+{% block extra_css %}
+<style>
+  .chapter-card {
+    transition: all 0.3s ease;
+  }
+  .chapter-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Color selection styles */
+  .color-swatch {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .color-swatch:hover {
+    transform: scale(1.1);
+  }
+  .color-swatch.selected {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 2px white, 0 0 0 4px #6366f1;
+  }
+
+  /* Timeline marker for active chapter */
+  .timeline-marker {
+    position: relative;
+  }
+  .timeline-marker::before {
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 2px;
+    background: linear-gradient(to bottom, #6366f1, #8b5cf6);
+    left: 1.5rem;
+    top: 0;
+    opacity: 0.5;
+  }
+  .chapter-node {
+    position: relative;
+    z-index: 1;
+  }
+  .chapter-node::before {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border: 2px solid white;
+    left: -22px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  /* Drag handle styles */
+  .drag-handle {
+    cursor: move;
+    transition: all 0.2s ease;
+  }
+  .drag-handle:hover {
+    background-color: rgba(255,255,255,0.8);
+    color: #6366f1;
+  }
+
+  /* Animation for deletion */
+  @keyframes fadeOutUp {
+    from {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      opacity: 0;
+      transform: translate3d(0, -50px, 0);
+    }
+  }
+  .deleting {
+    animation: fadeOutUp 0.5s forwards;
+  }
+
+  /* Animation for creation */
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translate3d(0, -50px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  .creating {
+    animation: fadeInDown 0.5s forwards;
+  }
+
+  /* Modal styling */
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .modal-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal-content {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 500px;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  .modal-backdrop.active .modal-content {
+    transform: scale(1);
+    opacity: 1;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+  <!-- Page Header -->
+  <div class="glass-effect rounded-xl p-6 mb-8 border border-white relative z-10 shadow-md">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-bold diary-font text-gray-900 mb-1 gradient-text">Manage Life Chapters</h2>
+        <p class="text-gray-600 text-sm">Organize your journal entries into meaningful life chapters and periods.</p>
+      </div>
+      <button onclick="openNewChapterModal()" class="btn-gradient text-white px-4 py-2 rounded-lg shadow-md text-sm flex items-center gap-1 whitespace-nowrap">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        New Chapter
+      </button>
+    </div>
+  </div>
+
+  <!-- Active Life Chapter -->
+  <div class="mb-10">
+    <h3 class="text-xl font-semibold diary-font text-gray-800 mb-4">Current Life Chapter</h3>
+
+    {% if active_chapter %}
+    <div class="glass-effect rounded-xl overflow-hidden border border-white shadow-lg scale-in" style="animation-delay: 100ms;">
+      <div class="p-6 relative">
+        <!-- Color bar on the side -->
+        <div class="absolute left-0 top-0 bottom-0 w-2 bg-{{ active_chapter.color|default:'secondary' }}-500"></div>
+
+        <div class="flex flex-col md:flex-row justify-between gap-6">
+          <div class="md:max-w-xl">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="text-sm text-white py-1 px-3 rounded-full bg-{{ active_chapter.color|default:'secondary' }}-500 shadow-sm">Active Chapter</span>
+              <span class="text-gray-500 text-sm flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {{ active_chapter.start_date|date:"M Y" }} - Present
+              </span>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 book-title mb-2">{{ active_chapter.title }}</h3>
+            <p class="text-gray-600 mb-4">{{ active_chapter.description }}</p>
+
+            <!-- Stats -->
+            <div class="flex flex-wrap gap-4 mb-4">
+              <div class="bg-white/60 rounded-lg p-3 shadow-sm">
+                <div class="text-xl font-bold text-{{ active_chapter.color|default:'secondary' }}-600">{{ active_chapter.entry_count }}</div>
+                <div class="text-xs text-gray-500">Entries</div>
+              </div>
+              <div class="bg-white/60 rounded-lg p-3 shadow-sm">
+                <div class="text-xl font-bold text-{{ active_chapter.color|default:'secondary' }}-600">{{ active_chapter.word_count|default:'0' }}</div>
+                <div class="text-xs text-gray-500">Words</div>
+              </div>
+              <div class="bg-white/60 rounded-lg p-3 shadow-sm">
+                <div class="text-xl font-bold text-{{ active_chapter.color|default:'secondary' }}-600">{{ active_chapter.duration_days }} days</div>
+                <div class="text-xs text-gray-500">Duration</div>
+              </div>
+              <div class="bg-white/60 rounded-lg p-3 shadow-sm">
+                <div class="text-xl font-bold text-{{ active_chapter.color|default:'secondary' }}-600">{{ active_chapter.most_common_mood|default:'N/A' }}</div>
+                <div class="text-xs text-gray-500">Common Mood</div>
+              </div>
+            </div>
+
+            <!-- Tags cloud -->
+            {% if active_chapter.tags %}
+            <div class="mb-4">
+              <div class="text-sm font-medium text-gray-700 mb-2">Common Tags:</div>
+              <div class="flex flex-wrap gap-2">
+                {% for tag in active_chapter.tags %}
+                <span class="bg-white text-gray-700 text-xs px-2 py-1 rounded-full shadow-sm">{{ tag.name }} <span class="text-{{ active_chapter.color|default:'secondary' }}-500 font-medium">{{ tag.count }}</span></span>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Actions -->
+          <div class="flex flex-col gap-2 justify-center">
+            <button onclick="openEditChapterModal('{{ active_chapter.id }}', '{{ active_chapter.title|escapejs }}', '{{ active_chapter.description|escapejs }}', '{{ active_chapter.color|default:'secondary' }}', true)" class="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg shadow-sm text-sm flex items-center gap-2 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Edit Chapter
+            </button>
+            <button onclick="closeChapter('{{ active_chapter.id }}')" class="bg-white hover:bg-gray-50 text-amber-600 px-4 py-2 rounded-lg shadow-sm text-sm flex items-center gap-2 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              Close Chapter
+            </button>
+            <a href="{% url 'library' %}?chapter={{ active_chapter.id }}" class="bg-white hover:bg-gray-50 text-secondary-600 px-4 py-2 rounded-lg shadow-sm text-sm flex items-center gap-2 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              View Entries
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="glass-effect rounded-xl p-8 text-center border border-white/20 shadow-md">
+      <div class="bg-white/50 rounded-lg p-6 inline-block mb-4 shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium diary-font text-gray-900 mb-2">No Active Chapter</h3>
+      <p class="text-gray-600 mb-6">Create a new chapter to start organizing your journal entries.</p>
+      <button onclick="openNewChapterModal()" class="btn-gradient text-white px-4 py-2 rounded-lg shadow-md">
+        Create Your First Chapter
+      </button>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Past Chapters -->
+  <div class="mb-10">
+    <h3 class="text-xl font-semibold diary-font text-gray-800 mb-4">Past Chapters</h3>
+
+    {% if past_chapters %}
+    <div class="timeline-marker pb-8">
+      <div class="space-y-4">
+        {% for chapter in past_chapters %}
+        <div id="chapter-{{ chapter.id }}" class="glass-effect rounded-xl overflow-hidden border border-white/20 shadow-md ml-8 chapter-node">
+          <div class="p-5 relative chapter-card">
+            <!-- Color bar on the side -->
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-{{ chapter.color|default:'gray' }}-500"></div>
+
+            <div class="flex flex-col sm:flex-row justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-gray-500 text-sm flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    {{ chapter.start_date|date:"M Y" }} - {{ chapter.end_date|date:"M Y" }}
+                  </span>
+                  <span class="text-xs text-gray-400">({{ chapter.duration_days }} days)</span>
+                </div>
+                <h4 class="text-lg font-bold text-gray-800 book-title mb-1">{{ chapter.title }}</h4>
+                <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ chapter.description }}</p>
+
+                <!-- Stats in smaller format -->
+                <div class="flex flex-wrap gap-3 text-sm">
+                  <span class="text-gray-700">
+                    <span class="font-semibold text-{{ chapter.color|default:'gray' }}-600">{{ chapter.entry_count }}</span> entries
+                  </span>
+                  <span class="text-gray-700">
+                    <span class="font-semibold text-{{ chapter.color|default:'gray' }}-600">{{ chapter.word_count|default:'0' }}</span> words
+                  </span>
+                  {% if chapter.most_common_mood %}
+                  <span class="text-gray-700">
+                    Most common mood: <span class="font-semibold text-{{ chapter.color|default:'gray' }}-600">{{ chapter.most_common_mood }}</span>
+                  </span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex sm:flex-col gap-2 ml-auto">
+                <button onclick="openEditChapterModal('{{ chapter.id }}', '{{ chapter.title|escapejs }}', '{{ chapter.description|escapejs }}', '{{ chapter.color|default:'gray' }}', false)" class="bg-white hover:bg-gray-50 text-gray-600 px-3 py-1 rounded-lg shadow-sm text-xs flex items-center gap-1 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Edit
+                </button>
+                <button onclick="reactivateChapter('{{ chapter.id }}')" class="bg-white hover:bg-gray-50 text-secondary-600 px-3 py-1 rounded-lg shadow-sm text-xs flex items-center gap-1 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Reactivate
+                </button>
+                <a href="{% url 'library' %}?chapter={{ chapter.id }}" class="bg-white hover:bg-gray-50 text-gray-600 px-3 py-1 rounded-lg shadow-sm text-xs flex items-center gap-1 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                  View
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <div class="glass-effect rounded-xl p-6 text-center border border-white/20 shadow-md">
+      <p class="text-gray-600">You don't have any past chapters yet. When you close an active chapter, it will appear here.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- New Chapter Modal -->
+  <div id="newChapterModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-gray-900">Create New Chapter</h3>
+        <button onclick="closeModal('newChapterModal')" class="text-gray-500 hover:text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="newChapterForm" action="{% url 'create_chapter' %}" method="post" class="space-y-4">
+        {% csrf_token %}
+
+        <div>
+          <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Chapter Title</label>
+          <input type="text" id="title" name="title" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary-400" placeholder="e.g., College Years, New Job, Living Abroad" required>
+        </div>
+
+        <div>
+          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea id="description" name="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary-400" placeholder="A brief description of this chapter in your life..."></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Chapter Color</label>
+          <div class="flex flex-wrap gap-2">
+            <div class="color-swatch bg-indigo-500 selected" data-color="indigo" onclick="selectColor(this)"></div>
+            <div class="color-swatch bg-violet-500" data-color="violet" onclick="selectColor(this)"></div>
+            <div class="color-swatch bg-purple-500" data-color="purple" onclick="selectColor(this)"></div>
+            <div class="color-swatch bg-blue-500" data-color="blue" onclick="selectColor(this)"></div>
+            <div class="color-swatch bg-sky-500" data-color="sky" onclick="selectColor(this)"></div>
+            <div class="color-swatch bg-cyan-500" data-color="cyan" onclick="selectColor(this)"></div>
+            <div class="color-swatch bg-teal-500" data-color="teal" onclick="selectColor(this)"></div>
+            <div class="color-swatch bg-emerald-500" data-color="emerald" onclick="selectColor(this)"></div>
+            <div class="color-swatch bg-green-500" data-color="green" onclick="selectColor(this)"></div>
+            <div class="color-swatch bg-amber-500" data-color="amber" onclick="selectColor(this)"></div>
+            <div class="color-swatch bg-orange-500" data-color="orange" onclick="selectColor(this)"></div>
+            <div class="color-swatch bg-red-500" data-color="red" onclick="selectColor(this)"></div>
+            <div class="color-swatch bg-rose-500" data-color="rose" onclick="selectColor(this)"></div>
+            <div class="color-swatch bg-pink-500" data-color="pink" onclick="selectColor(this)"></div>
+          </div>
+          <input type="hidden" id="color" name="color" value="indigo">
+        </div>
+
+        <div>
+          <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date (Optional)</label>
+          <input type="date" id="start_date" name="start_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary-400">
+          <p class="text-xs text-gray-500 mt-1">If not specified, today's date will be used.</p>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button type="button" onclick="closeModal('newChapterModal')" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg mr-2 text-sm">Cancel</button>
+          <button type="submit" class="btn-gradient text-white px-4 py-2 rounded-lg shadow-md text-sm">Create Chapter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Chapter Modal -->
+  <div id="editChapterModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-gray-900">Edit Chapter</h3>
+        <button onclick="closeModal('editChapterModal')" class="text-gray-500 hover:text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="editChapterForm" action="{% url 'update_chapter' %}" method="post" class="space-y-4">
+        {% csrf_token %}
+        <input type="hidden" id="edit_chapter_id" name="chapter_id">
+
+        <div>
+          <label for="edit_title" class="block text-sm font-medium text-gray-700 mb-1">Chapter Title</label>
+          <input type="text" id="edit_title" name="title" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary-400" required>
+        </div>
+
+        <div>
+          <label for="edit_description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea id="edit_description" name="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary-400"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Chapter Color</label>
+          <div class="flex flex-wrap gap-2">
+            <div class="color-swatch bg-indigo-500" data-color="indigo" data-edit="true" onclick="selectColor(this, true)"></div>
+            <div class="color-swatch bg-violet-500" data-color="violet" data-edit="true" onclick="selectColor(this, true)"></div>
+            <div class="color-swatch bg-purple-500" data-color="purple" data-edit="true" onclick="selectColor(this, true)"></div>
+            <div class="color-swatch bg-blue-500" data-color="blue" data-edit="true" onclick="selectColor(this, true)"></div>
+            <div class="color-swatch bg-sky-500" data-color="sky" data-edit="true" onclick="selectColor(this, true)"></div>
+            <div class="color-swatch bg-cyan-500" data-color="cyan" data-edit="true" onclick="selectColor(this, true)"></div>
+            <div class="color-swatch bg-teal-500" data-color="teal" data-edit="true" onclick="selectColor(this, true)"></div>
+            <div class="color-swatch bg-emerald-500" data-color="emerald" data-edit="true" onclick="selectColor(this, true)"></div>
+            <div class="color-swatch bg-green-500" data-color="green" data-edit="true" onclick="selectColor(this, true)"></div>
+            <div class="color-swatch bg-amber-500" data-color="amber" data-edit="true" onclick="selectColor(this, true)"></div>
+            <div class="color-swatch bg-orange-500" data-color="orange" data-edit="true" onclick="selectColor(this, true)"></div>
+            <div class="color-swatch bg-red-500" data-color="red" data-edit="true" onclick="selectColor(this, true)"></div>
+            <div class="color-swatch bg-rose-500" data-color="rose" data-edit="true" onclick="selectColor(this, true)"></div>
+            <div class="color-swatch bg-pink-500" data-color="pink" data-edit="true" onclick="selectColor(this, true)"></div>
+          </div>
+          <input type="hidden" id="edit_color" name="color" value="">
+        </div>
+
+        <div id="edit_chapter_active_section" class="pt-2 pb-2">
+          <label class="inline-flex items-center">
+            <input type="checkbox" id="is_active" name="is_active" class="form-checkbox text-secondary-600 rounded" checked>
+            <span class="ml-2 text-sm text-gray-700">This is my current active chapter</span>
+          </label>
+        </div>
+
+        <div class="flex justify-between pt-2">
+          <button type="button" id="deleteChapterBtn" class="bg-white border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm hover:bg-red-50 transition">Delete Chapter</button>
+          <div>
+            <button type="button" onclick="closeModal('editChapterModal')" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg mr-2 text-sm">Cancel</button>
+            <button type="submit" class="btn-gradient text-white px-4 py-2 rounded-lg shadow-md text-sm">Save Changes</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteConfirmModal" class="modal-backdrop">
+    <div class="modal-content max-w-md">
+      <div class="text-center mb-4">
+        <div class="bg-red-100 rounded-full p-3 inline-block mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">Delete Chapter?</h3>
+        <p class="text-gray-600 mb-4">Are you sure you want to delete this chapter? This action will not delete the journal entries, but they will no longer be associated with this chapter.</p>
+
+        <div class="flex justify-center gap-3">
+          <button onclick="closeModal('deleteConfirmModal')" class="bg-white border border-gray-300 text-gray-700 px-5 py-2 rounded-lg text-sm">Cancel</button>
+          <button id="confirmDeleteBtn" class="bg-red-600 text-white px-5 py-2 rounded-lg shadow-md text-sm hover:bg-red-700 transition">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Notification Toast -->
+  <div id="successToast" class="fixed bottom-6 right-6 bg-green-50 border border-green-200 text-green-800 rounded-lg shadow-lg p-4 flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+    <div class="bg-green-100 p-2 rounded-full">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+    </div>
+    <div>
+      <p id="successToastMessage" class="text-sm font-medium">Changes saved successfully!</p>
+    </div>
+    <button onclick="hideToast()" class="ml-auto text-green-600">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Modal functions
+  function openModal(id) {
+    document.getElementById(id).classList.add('active');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+  }
+
+  // New Chapter modal
+  function openNewChapterModal() {
+    document.getElementById('newChapterForm').reset();
+
+    // Set default selected color
+    selectColor(document.querySelector('.color-swatch[data-color="indigo"]'));
+
+    openModal('newChapterModal');
+  }
+
+  // Edit Chapter modal
+  function openEditChapterModal(id, title, description, color, isActive) {
+    document.getElementById('edit_chapter_id').value = id;
+    document.getElementById('edit_title').value = title;
+    document.getElementById('edit_description').value = description;
+    document.getElementById('edit_color').value = color;
+
+    // Show/hide active checkbox based on whether this is the active chapter
+    const activeSection = document.getElementById('edit_chapter_active_section');
+    if (isActive) {
+      activeSection.classList.remove('hidden');
+      document.getElementById('is_active').checked = true;
+    } else {
+      activeSection.classList.add('hidden');
+      document.getElementById('is_active').checked = false;
+    }
+
+    // Select the correct color
+    selectColor(document.querySelector(`.color-swatch[data-color="${color}"][data-edit="true"]`), true);
+
+    openModal('editChapterModal');
+  }
+
+  // Color selection
+  function selectColor(element, isEdit = false) {
+    // Remove selected class from all swatches in the same group
+    const containerSelector = isEdit ? '[data-edit="true"]' : ':not([data-edit="true"])';
+    const swatches = document.querySelectorAll(`.color-swatch${containerSelector}`);
+    swatches.forEach(swatch => swatch.classList.remove('selected'));
+
+    // Add selected class to clicked swatch
+    element.classList.add('selected');
+
+    // Update hidden input
+    const color = element.getAttribute('data-color');
+    document.getElementById(isEdit ? 'edit_color' : 'color').value = color;
+  }
+
+  // Delete chapter
+  function showDeleteConfirmation(chapterId) {
+    // Set up confirmation button with the chapter ID
+    document.getElementById('confirmDeleteBtn').setAttribute('data-chapter-id', chapterId);
+    openModal('deleteConfirmModal');
+  }
+
+  // Chapter operations
+  function closeChapter(chapterId) {
+    if (confirm('Are you sure you want to close this chapter? It will be moved to past chapters.')) {
+      // AJAX request to close chapter
+      fetch(`/close-chapter/${chapterId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCsrfToken(),
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showSuccessToast('Chapter closed successfully');
+          // Redirect to refresh the page
+          window.location.reload();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      });
+    }
+  }
+
+  function reactivateChapter(chapterId) {
+    if (confirm('Reactivate this chapter? It will become your current active chapter.')) {
+      // AJAX request to reactivate chapter
+      fetch(`/reactivate-chapter/${chapterId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCsrfToken(),
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showSuccessToast('Chapter reactivated successfully');
+          // Redirect to refresh the page
+          window.location.reload();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      });
+    }
+  }
+
+  // Utility functions
+  function getCsrfToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+  }
+
+  function showSuccessToast(message) {
+    const toast = document.getElementById('successToast');
+    document.getElementById('successToastMessage').innerText = message;
+
+    toast.classList.remove('translate-y-20', 'opacity-0');
+
+    setTimeout(() => {
+      hideToast();
+    }, 3000);
+  }
+
+  function hideToast() {
+    const toast = document.getElementById('successToast');
+    toast.classList.add('translate-y-20', 'opacity-0');
+  }
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', function() {
+    // Set up delete button
+    document.getElementById('deleteChapterBtn').addEventListener('click', function() {
+      const chapterId = document.getElementById('edit_chapter_id').value;
+      closeModal('editChapterModal');
+      showDeleteConfirmation(chapterId);
+    });
+
+    // Set up confirm delete button
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+      const chapterId = this.getAttribute('data-chapter-id');
+
+      // AJAX request to delete chapter
+      fetch(`/delete-chapter/${chapterId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCsrfToken(),
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        closeModal('deleteConfirmModal');
+
+        if (data.success) {
+          // Remove the chapter from the DOM with animation
+          const chapterElement = document.getElementById(`chapter-${chapterId}`);
+          if (chapterElement) {
+            chapterElement.classList.add('deleting');
+            setTimeout(() => {
+              chapterElement.remove();
+            }, 500);
+          }
+
+          showSuccessToast('Chapter deleted successfully');
+        } else {
+          alert('Error: ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+        closeModal('deleteConfirmModal');
+      });
+    });
+
+    // Handle form submissions via AJAX
+    document.getElementById('newChapterForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+
+      fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        closeModal('newChapterModal');
+
+        if (data.success) {
+          showSuccessToast('Chapter created successfully');
+          // Redirect to refresh the page
+          window.location.reload();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      });
+    });
+
+    document.getElementById('editChapterForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+
+      fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        closeModal('editChapterModal');
+
+        if (data.success) {
+          showSuccessToast('Chapter updated successfully');
+          // Redirect to refresh the page
+          window.location.reload();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      });
+    });
+  });
+</script>
+{% endblock %}
