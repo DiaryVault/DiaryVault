@@ -1788,10 +1788,8 @@ def custom_login(request):
 
     # Use Django's built-in login view
     return auth_views.LoginView.as_view(template_name='diary/login.html')(request)
-
-
-def gallery_view(request):
-    """Main gallery view showing featured journals"""
+def marketplace_view(request):
+    """Main marketplace view showing featured journals"""
     # Later, you can fetch actual journal data from your database
     # For now, using mock data
 
@@ -1840,24 +1838,24 @@ def gallery_view(request):
         'filter_type': 'popular'  # Default filter
     }
 
-    return render(request, 'diary/gallery.html', context)
+    return render(request, 'diary/marketplace.html', context)
 
 @login_required
-def gallery_publish(request):
-    """View for publishing a journal to the gallery"""
+def marketplace_publish(request):
+    """View for publishing a journal to the marketplace"""
     # Placeholder for now
     if request.method == 'POST':
         # Handle publishing logic later
-        messages.success(request, "Your journal has been published to the gallery!")
-        return redirect('gallery')
+        messages.success(request, "Your journal has been published to the marketplace!")
+        return redirect('marketplace')
 
-    return render(request, 'gallery_publish.html')
+    return render(request, 'marketplace_publish.html')
 
-def gallery_monetization(request):
+def marketplace_monetization(request):
     """Information page about monetization"""
-    return render(request, 'gallery_monetization.html')
+    return render(request, 'marketplace_monetization.html')
 
-def gallery_contest(request):
+def marketplace_contest(request):
     """Weekly contest page"""
     # Sample contest data
     contest_data = {
@@ -1866,13 +1864,13 @@ def gallery_contest(request):
         'entries_count': 157
     }
 
-    return render(request, 'gallery_contest.html', {'contest': contest_data})
+    return render(request, 'marketplace_contest.html', {'contest': contest_data})
 
-def gallery_faq(request):
-    """FAQ about the gallery feature"""
-    return render(request, 'gallery_faq.html')
+def marketplace_faq(request):
+    """FAQ about the marketplace feature"""
+    return render(request, 'marketplace_faq.html')
 
-def gallery_journal_detail(request, journal_id):
+def marketplace_journal_detail(request, journal_id):
     """View for a single published journal"""
     # This is a placeholder - later you'll fetch the actual journal by ID
     journal = {
@@ -1883,9 +1881,9 @@ def gallery_journal_detail(request, journal_id):
         'entries': []  # Would contain actual entries
     }
 
-    return render(request, 'gallery_journal_detail.html', {'journal': journal})
+    return render(request, 'marketplace_journal_detail.html', {'journal': journal})
 
-def gallery_author_profile(request, username):
+def marketplace_author_profile(request, username):
     """View for an author's profile"""
     # This is a placeholder - later you'll fetch the actual user
     try:
@@ -1895,7 +1893,7 @@ def gallery_author_profile(request, username):
             'profile_user': user,
             'journals': []  # Would contain user's journals
         }
-        return render(request, 'gallery_author_profile.html', context)
+        return render(request, 'marketplace_author_profile.html', context)
     except User.DoesNotExist:
         messages.error(request, "Author not found")
-        return redirect('gallery')
+        return redirect('marketplace')

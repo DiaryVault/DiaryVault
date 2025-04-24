@@ -239,14 +239,14 @@ class EntryTag(models.Model):
         ordering = ['name']
 
 class Journal(models.Model):
-    """Model representing a curated journal that can be published to the gallery"""
+    """Model representing a curated journal that can be published to the marketplace"""
 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='journals')
     cover_image = models.ImageField(upload_to='journal_covers/', blank=True, null=True)
 
-    # Gallery specific fields
+    # Marketplace specific fields
     is_published = models.BooleanField(default=False)
     date_published = models.DateTimeField(null=True, blank=True)
     is_staff_pick = models.BooleanField(default=False)

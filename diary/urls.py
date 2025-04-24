@@ -48,12 +48,12 @@ urlpatterns = [
     # AJAX endpoints
     path('api/entry/<int:entry_id>/regenerate-summary/', views.regenerate_summary_ajax, name='regenerate_summary_ajax'),
 
-    # Gallery Feature
-    path('gallery/', views.gallery_view, name='gallery'),
-    path('gallery/publish/', views.gallery_publish, name='publish'),
-    path('gallery/monetization/', views.gallery_monetization, name='monetization'),
-    path('gallery/contest/', views.gallery_contest, name='contest'),
-    path('gallery/faq/', views.gallery_faq, name='faq'),
-    path('gallery/journal/<int:journal_id>/', views.gallery_journal_detail, name='journal_detail'),
-    path('gallery/author/<str:username>/', views.gallery_author_profile, name='author_profile'),
+    # Marketplace Feature
+    path('marketplace/', views.marketplace_view, name='marketplace'),
+    path('marketplace/publish/', views.marketplace_publish, name='publish'),
+    path('marketplace/monetization/', views.marketplace_monetization, name='monetization'),
+    path('marketplace/contest/', views.marketplace_contest, name='contest'),
+    path('marketplace/faq/', views.marketplace_faq, name='faq'),
+    path('marketplace/journal/<int:journal_id>/', views.marketplace_journal_detail, name='journal_detail'),
+    path('marketplace/author/<str:username>/', views.marketplace_author_profile, name='author_profile'),
 ]
