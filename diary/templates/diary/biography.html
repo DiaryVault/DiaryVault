@@ -1,227 +1,1978 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Your Biography | DiaryVault{% endblock %}
+{% block title %}Your Life Story | DiaryVault{% endblock %}
 
 {% block extra_css %}
 <style>
-  .chapter-navigation {
-    position: sticky;
-    top: 5rem;
+  /* Core styling */
+  .story-font {
+    font-family: 'Playfair Display', serif;
+  }
+
+  .journal-font {
+    font-family: 'Satisfy', cursive;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+
+  /* Card styling */
+  .story-card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+  }
+
+  .story-card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+  }
+
+  /* Life Story Timeline */
+  .story-timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .timeline-line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #4f46e5, #8b5cf6);
+    opacity: 0.5;
+  }
+
+  .timeline-entry {
+    position: relative;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .timeline-entry::before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 1.5rem;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+    border: 2px solid white;
+    z-index: 1;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  /* Featured photo styling */
+  .featured-photo-container {
+    border-radius: 1rem;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 16/9;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .featured-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+
+  .featured-photo-container:hover .featured-photo {
+    transform: scale(1.05);
+  }
+
+  .photo-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+    color: white;
+  }
+
+  /* Photo gallery */
+  .photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .gallery-item {
+    border-radius: 0.75rem;
+    overflow: hidden;
+    aspect-ratio: 1;
+    position: relative;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .gallery-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  .gallery-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .gallery-item:hover .gallery-photo {
+    transform: scale(1.08);
+  }
+
+  /* Chapter photo styling */
+  .chapter-photo-container {
+    border-radius: 0.75rem;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 3/2;
+    margin-bottom: 1rem;
+  }
+
+  .chapter-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .chapter-photo-container:hover .chapter-photo {
+    transform: scale(1.05);
+  }
+
+  /* Your existing styles from the original file */
+  /* Life story themes */
+  .story-theme {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    margin-bottom: 1rem;
+  }
+
+  .story-theme:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .theme-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(139, 92, 246, 0.1));
+    color: #4f46e5;
+  }
+
+  /* Memory blocks */
+  .memory-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: minmax(180px, auto);
+    gap: 1rem;
+  }
+
+  .memory-card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+    transform: translateY(0);
+  }
+
+  .memory-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .memory-card.featured {
+    grid-column: span 8;
+    grid-row: span 2;
+  }
+
+  .memory-card.normal {
+    grid-column: span 4;
+    grid-row: span 1;
+  }
+
+  .memory-card.tall {
+    grid-column: span 4;
+    grid-row: span 2;
+  }
+
+  .memory-card.wide {
+    grid-column: span 8;
+    grid-row: span 1;
+  }
+
+  .memory-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.5rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+    color: white;
+  }
+
+  .memory-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .memory-card:hover .memory-image {
+    transform: scale(1.05);
+  }
+
+  /* Quote styling */
+  .story-quote {
+    font-style: italic;
+    border-left: 3px solid #8b5cf6;
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    color: #6b7280;
+  }
+
+  /* Year recap cards */
+  .year-recap-card {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    padding: 1.5rem;
+  }
+
+  .year-number {
+    font-size: 8rem;
+    font-weight: 900;
+    position: absolute;
+    bottom: -2rem;
+    right: -1rem;
+    opacity: 0.1;
+    color: #4f46e5;
+    line-height: 1;
+  }
+
+  /* Story navigation tabs */
+  .story-tabs {
+    display: flex;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    padding: 0.375rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    margin-bottom: 2rem;
+  }
+
+  .tab-selector {
+    position: absolute;
+    height: calc(100% - 0.75rem);
+    top: 0.375rem;
+    left: 0.375rem;
+    background: white;
+    border-radius: 0.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    z-index: 0;
+  }
+
+  .story-tab {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    border-radius: 0.5rem;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .story-tab.active {
+    color: #4f46e5;
+    font-weight: 600;
+  }
+
+  .story-tab:not(.active):hover {
+    color: #4b5563;
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  /* Mood indicators */
+  .mood-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 9999px;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .mood-pill.happy {
+    background-color: #ecfdf5;
+    color: #059669;
+    border: 1px solid rgba(5, 150, 105, 0.2);
+  }
+
+  .mood-pill.content {
+    background-color: #eff6ff;
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+
+  .mood-pill.excited {
+    background-color: #f5f3ff;
+    color: #8b5cf6;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+  }
+
+  .mood-pill.neutral {
+    background-color: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid rgba(107, 114, 128, 0.2);
+  }
+
+  .mood-pill.anxious {
+    background-color: #fffbeb;
+    color: #d97706;
+    border: 1px solid rgba(217, 119, 6, 0.2);
+  }
+
+  .mood-pill.sad {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: 1px solid rgba(220, 38, 38, 0.2);
+  }
+
+  /* Word cloud styles */
+  .word-cloud {
+    border-radius: 1rem;
+    height: 300px;
+    background: linear-gradient(to bottom right, rgba(79, 70, 229, 0.05), rgba(139, 92, 246, 0.05));
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cloud-word {
+    position: absolute;
+    opacity: 0.8;
+    color: #4f46e5;
+    font-weight: 600;
+    transform-origin: center;
+  }
+
+  .word-size-1 { font-size: 1rem; }
+  .word-size-2 { font-size: 1.25rem; }
+  .word-size-3 { font-size: 1.5rem; }
+  .word-size-4 { font-size: 1.75rem; }
+  .word-size-5 { font-size: 2rem; }
+  .word-size-6 { font-size: 2.5rem; }
+
+  /* Location map placeholder */
+  .location-map {
+    height: 320px;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #e0e7ff, #ddd6fe);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .map-pin {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50% 50% 50% 0;
+    background: #4f46e5;
+    transform: rotate(-45deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .map-pin::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Health and habits chart */
+  .habits-chart {
+    height: 240px;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    padding: 1rem;
+    justify-content: space-around;
+  }
+
+  .habit-bar {
+    width: 40px;
+    background: linear-gradient(to top, #4f46e5, #8b5cf6);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+  }
+
+  .habit-bar:hover {
+    transform: scaleY(1.05);
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+  }
+
+  /* Responsive fixes */
+  @media (max-width: 768px) {
+    .memory-grid {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .memory-card {
+      min-height: 200px;
+    }
+
+    .story-timeline {
+      padding-left: 1.5rem;
+    }
+
+    .photo-gallery {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Enhanced modal styling */
+  .biography-content p {
+    transition: background-color 0.5s ease;
   }
 
   .chapter-link {
-    transition: all 0.2s ease;
+    border: 1px solid transparent;
   }
 
   .chapter-link:hover {
-    transform: translateX(5px);
+    border-color: rgba(79, 70, 229, 0.3);
   }
 
   .chapter-link.active {
-    font-weight: 600;
-    color: #6366f1;
-    border-right: 3px solid #6366f1;
+    border-color: rgba(79, 70, 229, 0.5);
   }
 
-  .chapter-content {
-    scroll-margin-top: 100px;
+  @media (max-width: 1023px) {
+    #modalContent {
+      max-height: 100vh;
+      height: 100vh;
+      border-radius: 0;
+    }
   }
 
-  .biography-container {
-    font-family: 'Playfair Display', serif;
-    line-height: 1.8;
-  }
-
-  .auto-chapter {
-    display: none;
+  /* Dark mode detection (optional) */
+  @media (prefers-color-scheme: dark) {
+    .biography-content p {
+      color: #e5e7eb;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="w-full max-w-6xl mx-auto">
-
-  <!-- Biography Header Section -->
-  <div class="mb-8 text-center">
-    <h1 class="text-3xl md:text-4xl font-bold diary-font mb-4">Your Life Story</h1>
-    <p class="text-gray-600 max-w-3xl mx-auto">
-      Turn your journal entries into a beautifully crafted biography that tells your life story.
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 relative">
+  <!-- Page Header -->
+  <div class="mb-10 text-center animate-fade-in">
+    <h1 class="text-3xl md:text-4xl font-bold story-font mb-4 text-gray-900 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">Your Life Story</h1>
+    <p class="text-gray-600 max-w-3xl mx-auto text-lg">
       {% if entry_count > 0 %}
-      Based on {{ entry_count }} journal entries from {{ date_range }}.
+      Explore the narrative of your life, crafted from {{ entry_count }} journal entries across {{ date_range }}.
       {% else %}
-      Start by adding journal entries to create your story.
+      Start journaling to build the story of your life, one memory at a time.
       {% endif %}
     </p>
   </div>
 
-  <!-- No Biography Yet - Initial State -->
-  {% if not biography %}
-  <div class="bg-white rounded-xl shadow-md p-6 md:p-10 max-w-3xl mx-auto text-center">
-    <img src="{% static 'images/book-illustration.svg' %}" alt="Biography Book" class="h-48 mx-auto mb-6">
+  {% if entry_count < 5 %}
+  <!-- Not Enough Entries Yet -->
+  <div class="max-w-4xl mx-auto animate-scale-in">
+    <div class="story-card p-8 md:p-10 text-center">
+      <div class="bg-indigo-50 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14-10v2m-2 4h10m-10 4h10m-10 4h10" />
+        </svg>
+      </div>
 
-    <h2 class="text-2xl font-bold mb-4 diary-font">Your Journal, Your Story</h2>
-
-    <p class="text-gray-600 mb-6">
-      Let DiaryVault analyze your journal entries and transform them into a comprehensive biography.
-      The more you journal, the richer your story will be!
-    </p>
-
-    {% if entry_count > 0 %}
-      <form method="post" action="{% url 'biography' %}">
-        {% csrf_token %}
-        <button type="submit" name="generate_biography" class="btn-gradient px-6 py-3 rounded-lg text-white font-medium">
-          Generate My Biography
-        </button>
-      </form>
-    {% else %}
-      <a href="{% url 'new_entry' %}" class="btn-gradient px-6 py-3 rounded-lg text-white font-medium inline-block">
-        Start Journaling First
-      </a>
-      <p class="text-sm text-gray-500 mt-4">
-        Add a few journal entries first so we have content to work with.
+      <h2 class="text-2xl font-bold mb-4 story-font text-gray-800">Your Story Is Just Beginning</h2>
+      <p class="text-gray-600 mb-8 max-w-md mx-auto">
+        We need at least 5 journal entries to craft your life story. You currently have {{ entry_count }}
+        {% if entry_count == 1 %}entry{% else %}entries{% endif %}.
       </p>
-    {% endif %}
-  </div>
-  {% else %}
 
-  <!-- Biography Exists - Show Content -->
-  <div class="flex flex-col md:flex-row gap-8">
-
-    <!-- Chapter Navigation (only shown if chapters exist) -->
-    {% if chapters %}
-    <div class="md:w-1/4 chapter-navigation">
-      <div class="bg-white rounded-xl shadow-md p-4 sticky top-24">
-        <h3 class="font-bold mb-4 text-gray-700">Chapters</h3>
-        <ul>
-          <li class="mb-2">
-            <a href="#full-story" class="chapter-link block py-2 px-3 rounded hover:bg-gray-50 active">
-              Full Biography
-            </a>
-          </li>
-          {% for chapter in chapters %}
-          <li class="mb-2">
-            <a href="#chapter-{{ chapter.id }}" class="chapter-link block py-2 px-3 rounded hover:bg-gray-50">
-              {{ chapter.title }}
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
-
-        <div class="mt-6 pt-4 border-t border-gray-100">
-          <form method="post" action="{% url 'biography' %}">
-            {% csrf_token %}
-            <button type="submit" name="generate_biography" class="text-sm text-secondary-600 hover:text-secondary-800 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Refresh Biography
-            </button>
-          </form>
+      <div class="mb-10">
+        <div class="h-2 bg-gray-100 rounded-full overflow-hidden max-w-md mx-auto">
+          <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full" style="width: {{ entry_count|default:0|floatformat:0 }}%"></div>
         </div>
+        <p class="text-sm text-gray-500 mt-2">{{ entry_count }}/5 entries needed</p>
+      </div>
+
+      <a href="{% url 'new_entry' %}" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+        Add New Journal Entry
+      </a>
+    </div>
+
+    <!-- Quick Prompts to Get Started -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+      <div class="story-card p-6 animate-fade-in animation-delay-100">
+        <div class="text-indigo-600 mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <h3 class="font-bold text-gray-800 mb-2">Reflect on a Memory</h3>
+        <p class="text-gray-600 text-sm mb-4">What's a moment from your past that shaped who you are today?</p>
+        <a href="{% url 'new_entry' %}?prompt=memory" class="text-indigo-600 text-sm hover:text-indigo-800 flex items-center">
+          <span>Write about this</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="story-card p-6 animate-fade-in animation-delay-200">
+        <div class="text-indigo-600 mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
+        <h3 class="font-bold text-gray-800 mb-2">About Yourself</h3>
+        <p class="text-gray-600 text-sm mb-4">How would you describe yourself? What defines you?</p>
+        <a href="{% url 'new_entry' %}?prompt=self" class="text-indigo-600 text-sm hover:text-indigo-800 flex items-center">
+          <span>Write about this</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="story-card p-6 animate-fade-in animation-delay-300">
+        <div class="text-indigo-600 mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </div>
+        <h3 class="font-bold text-gray-800 mb-2">Your Passions</h3>
+        <p class="text-gray-600 text-sm mb-4">What are you passionate about? What brings you joy?</p>
+        <a href="{% url 'new_entry' %}?prompt=passion" class="text-indigo-600 text-sm hover:text-indigo-800 flex items-center">
+          <span>Write about this</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </a>
       </div>
     </div>
-    {% endif %}
+  </div>
 
-    <!-- Biography Content -->
-    <div class="{% if chapters %}md:w-3/4{% endif %}">
-      <!-- Full Biography Section -->
-      <section id="full-story" class="biography-container bg-white rounded-xl shadow-md p-6 md:p-10 mb-8">
-        <h2 class="text-2xl font-bold mb-6 diary-font">Your Life Story</h2>
+  {% else %}
+  <!-- Enough Entries - Show Life Story -->
 
-        <div class="prose prose-lg max-w-none">
-          {{ biography|linebreaks }}
+  <!-- Story Navigation Tabs -->
+  <div class="story-tabs mb-8 animate-fade-in">
+    <div id="tabSelector" class="tab-selector" style="width: 20%;"></div>
+    <button onclick="switchTab('overview')" class="story-tab active" data-tab-width="20%" data-tab-offset="0%">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+      </svg>
+      Overview
+    </button>
+    <button onclick="switchTab('story')" class="story-tab" data-tab-width="20%" data-tab-offset="20%">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+      </svg>
+      Your Story
+    </button>
+    <button onclick="switchTab('themes')" class="story-tab" data-tab-width="20%" data-tab-offset="40%">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+      </svg>
+      Life Themes
+    </button>
+    <button onclick="switchTab('timeline')" class="story-tab" data-tab-width="20%" data-tab-offset="60%">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      Timeline
+    </button>
+    <button onclick="switchTab('insights')" class="story-tab" data-tab-width="20%" data-tab-offset="80%">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+      Insights
+    </button>
+  </div>
+
+  <!-- Tab Contents -->
+  <div id="tabContents">
+    <!-- Overview Tab -->
+    <div id="overview-tab" class="tab-content animate-fade-in">
+      <!-- Personal Summary Card -->
+      <div class="story-card mb-8 overflow-hidden">
+        <div class="flex flex-col md:flex-row">
+          <!-- Left side with image or pattern -->
+          <div class="md:w-1/3 bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-8 flex items-center justify-center">
+            <div class="text-center">
+              <div class="text-5xl mb-4">✨</div>
+              <h3 class="text-xl font-bold mb-2 story-font">Your Story</h3>
+              <p class="text-white/80 text-sm">Based on {{ entry_count }} memories</p>
+            </div>
+          </div>
+
+          <!-- Right side with content -->
+          <div class="md:w-2/3 p-8">
+            <h2 class="text-2xl font-bold story-font text-gray-800 mb-4">{{ user_name|default:"Your" }} Life Story</h2>
+
+            <div class="prose prose-lg text-gray-700">
+              {% if biography %}
+                <p class="journal-font text-lg">{{ biography|truncatewords:100 }}</p>
+                <div class="mt-4">
+                  <a href="#" onclick="showFullBiography()" class="text-indigo-600 hover:text-indigo-800 flex items-center inline-flex">
+                    <span>Read Full Story</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </a>
+                </div>
+              {% else %}
+                <p class="text-gray-500">You haven't generated your life story yet. Would you like to create it now?</p>
+                <form method="post" action="{% url 'biography' %}" class="mt-4">
+                  {% csrf_token %}
+                  <button type="submit" name="generate_biography" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Generate My Story
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Featured Photo - NEW SECTION -->
+      {% if featured_photo %}
+      <h2 class="text-xl font-bold story-font text-gray-800 mb-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Featured Moment
+      </h2>
+
+      <div class="featured-photo-container mb-10 animate-scale-in">
+        <img src="{{ featured_photo.url }}" alt="Featured life moment" class="featured-photo" />
+        <div class="photo-caption">
+          <h3 class="font-bold text-white mb-1">A Captured Moment</h3>
+          <p class="text-white/80 text-sm">This photo represents a meaningful moment from your journal entries.</p>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Key Memories -->
+      <h2 class="text-xl font-bold story-font text-gray-800 mb-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+        </svg>
+        Key Memories
+      </h2>
+
+      <!-- Memory Cards Grid -->
+      <div class="memory-grid mb-10">
+        {% for entry in featured_entries|slice:":5" %}
+          <div class="memory-card {% cycle 'featured' 'normal' 'tall' 'wide' 'normal' %} animate-scale-in" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+            <a href="{% url 'entry_detail' entry.id %}">
+              {% if entry.photos.first %}
+                <img src="{{ entry.photos.first.photo.url }}" alt="Entry photo" class="memory-image" />
+              {% elif entry.photo.url|default:'' %}
+                <img src="{{ entry.photo.url }}" alt="Entry photo" class="memory-image" />
+              {% else %}
+                <div class="memory-image bg-gradient-to-br {{ forloop.counter0|divisibleby:6|yesno:'from-indigo-400 to-purple-500,from-pink-400 to-rose-500,from-cyan-400 to-blue-500,from-green-400 to-emerald-500,from-amber-400 to-orange-500,from-red-400 to-rose-500' }} p-6 flex items-center justify-center">
+                  <div class="journal-font text-white text-center opacity-80 font-medium">
+                    {{ entry.content|truncatechars:150 }}
+                  </div>
+                </div>
+              {% endif %}
+              <div class="memory-content">
+                <h3 class="font-bold text-lg text-white mb-1">{{ entry.title|default:"Untitled Memory" }}</h3>
+                <div class="flex justify-between items-center">
+                  <div class="text-xs text-white/80">{{ entry.created_at|date:"F j, Y" }}</div>
+                  {% if entry.mood %}
+                  <div class="text-xs py-1 px-2 rounded-full bg-white/20 text-white">
+                    {% if entry.mood == 'happy' %}😊
+                    {% elif entry.mood == 'content' %}😌
+                    {% elif entry.mood == 'excited' %}🤩
+                    {% elif entry.mood == 'neutral' %}😐
+                    {% elif entry.mood == 'anxious' %}😰
+                    {% elif entry.mood == 'sad' %}😢
+                    {% else %}✨
+                    {% endif %}
+                    {{ entry.mood|title }}
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          </div>
+        {% empty %}
+          <div class="col-span-full text-center py-8 text-gray-500">
+            No featured memories found. Add more journal entries to see your key memories.
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Life Photos Gallery - NEW SECTION -->
+      {% if life_photos %}
+      <h2 class="text-xl font-bold story-font text-gray-800 mb-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Life in Pictures
+      </h2>
+
+      <div class="photo-gallery mb-10">
+        {% for photo_url in life_photos %}
+          <div class="gallery-item animate-scale-in" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+            <img src="{{ photo_url }}" alt="Life moment" class="gallery-photo" />
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Key Statistics -->
+      <h2 class="text-xl font-bold story-font text-gray-800 mb-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        Your Life in Numbers
+      </h2>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+        <div class="story-card p-5 flex flex-col items-center justify-center animate-scale-in animation-delay-100">
+          <div class="text-4xl font-bold text-indigo-600 mb-1">{{ entry_count }}</div>
+          <div class="text-sm text-gray-500">Memories Captured</div>
         </div>
 
-        <div class="mt-8 text-right">
-          <form method="post" action="{% url 'biography' %}">
-            {% csrf_token %}
-            <button type="submit" name="generate_biography" class="text-secondary-600 hover:text-secondary-800 flex items-center gap-2 ml-auto">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Regenerate
-            </button>
-          </form>
+        <div class="story-card p-5 flex flex-col items-center justify-center animate-scale-in animation-delay-200">
+          <div class="text-4xl font-bold text-indigo-600 mb-1">{{ unique_days|default:"0" }}</div>
+          <div class="text-sm text-gray-500">Unique Days</div>
         </div>
-      </section>
 
-      <!-- Individual Chapters (only shown if chapter content exists) -->
-      {% for chapter in chapters %}
-        {% for key, value in chapter_contents.items %}
-          {% if key == chapter.title %}
-          <section id="chapter-{{ chapter.id }}" class="biography-container bg-white rounded-xl shadow-md p-6 md:p-10 mb-8 chapter-content">
-            <h2 class="text-2xl font-bold mb-6 diary-font">{{ chapter.title }}</h2>
-            <div class="text-sm text-gray-500 mb-4">{{ chapter.time_period }}</div>
+        <div class="story-card p-5 flex flex-col items-center justify-center animate-scale-in animation-delay-300">
+          <div class="text-4xl font-bold text-indigo-600 mb-1">{{ tags|length|default:"0" }}</div>
+          <div class="text-sm text-gray-500">Unique Tags</div>
+        </div>
 
-            <div class="prose prose-lg max-w-none">
-              {{ value|linebreaks }}
+        <div class="story-card p-5 flex flex-col items-center justify-center animate-scale-in animation-delay-400">
+          <div class="text-4xl font-bold text-indigo-600 mb-1">{{ streak|default:"0" }}</div>
+          <div class="text-sm text-gray-500">Day Streak</div>
+        </div>
+      </div>
+
+      <!-- Recent Updates -->
+      <h2 class="text-xl font-bold story-font text-gray-800 mb-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Recent Life Updates
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        {% for entry in recent_entries|slice:":4" %}
+          <div class="story-card p-5 animate-fade-in" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+            <div class="flex justify-between items-start mb-3">
+              <h3 class="font-bold text-gray-800">{{ entry.title|default:"Untitled Entry" }}</h3>
+              <div class="text-xs text-gray-500">{{ entry.created_at|date:"F j, Y" }}</div>
             </div>
 
-            <div class="mt-8 text-right">
-              <a href="{% url 'regenerate_chapter' chapter.id %}" class="text-secondary-600 hover:text-secondary-800 flex items-center gap-2 ml-auto">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <p class="text-gray-600 text-sm journal-font mb-3">{{ entry.content|truncatechars:120 }}</p>
+
+            <div class="flex justify-between items-center">
+              {% if entry.mood %}
+                <span class="mood-pill {{ entry.mood }}">
+                  {% if entry.mood == 'happy' %}😊
+                  {% elif entry.mood == 'content' %}😌
+                  {% elif entry.mood == 'excited' %}🤩
+                  {% elif entry.mood == 'neutral' %}😐
+                  {% elif entry.mood == 'anxious' %}😰
+                  {% elif entry.mood == 'sad' %}😢
+                  {% else %}😐
+                  {% endif %}
+                  {{ entry.mood|title }}
+                </span>
+              {% else %}
+                <span></span>
+              {% endif %}
+
+              <a href="{% url 'entry_detail' entry.id %}" class="text-indigo-600 text-sm hover:text-indigo-800 flex items-center">
+                <span>Read more</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
-                Refresh Chapter
               </a>
             </div>
-          </section>
-          {% endif %}
+          </div>
+        {% empty %}
+          <div class="col-span-full text-center py-8 text-gray-500">
+            No recent entries found.
+          </div>
         {% endfor %}
+      </div>
+    </div>
+
+    <!-- Your Story Tab - NEW TAB -->
+    <div id="story-tab" class="tab-content hidden animate-fade-in">
+      <div class="mb-8">
+        <!-- Full Biography with Featured Photo -->
+        <div class="story-card overflow-hidden">
+          <div class="flex flex-col lg:flex-row">
+            <!-- Left side with content -->
+            <div class="lg:w-3/5 p-8">
+              <h2 class="text-2xl font-bold story-font text-gray-800 mb-4">{{ user_name|default:"Your" }} Complete Life Story</h2>
+
+              <div class="prose prose-lg text-gray-700 max-h-[500px] overflow-y-auto pr-4">
+                {% if biography %}
+                  <div class="journal-font">
+                    {{ biography|linebreaks }}
+                  </div>
+                {% else %}
+                  <p class="text-gray-500">You haven't generated your life story yet. Would you like to create it now?</p>
+                  <form method="post" action="{% url 'biography' %}" class="mt-4">
+                    {% csrf_token %}
+                    <button type="submit" name="generate_biography" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      Generate My Story
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+
+              {% if biography %}
+              <div class="mt-4 flex justify-between items-center">
+                <span class="text-xs text-gray-500">
+                  {% if biography_date %}
+                  Generated on {{ biography_date }}
+                  {% endif %}
+                </span>
+
+                <form method="post" action="{% url 'biography' %}">
+                  {% csrf_token %}
+                  <button type="submit" name="generate_biography" class="text-indigo-600 hover:text-indigo-800 text-sm flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Regenerate Story
+                  </button>
+                </form>
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Right side with photo gallery -->
+            <div class="lg:w-2/5 bg-gradient-to-br from-indigo-50 to-purple-50 p-6">
+              <h3 class="font-bold text-gray-800 mb-3 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Life in Pictures
+              </h3>
+
+              {% if featured_photo or life_photos %}
+                {% if featured_photo %}
+                <div class="featured-photo-container mb-4 animate-scale-in">
+                  <img src="{{ featured_photo.url }}" alt="Featured life moment" class="featured-photo" />
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-2 gap-2">
+                  {% for photo_url in life_photos|slice:":4" %}
+                    <div class="gallery-item animate-scale-in" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+                      <img src="{{ photo_url }}" alt="Life moment" class="gallery-photo" />
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="text-center py-8 text-gray-500">
+                  <p>Add photos to your journal entries to see them displayed here.</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Life Chapters Section - NEW SECTION -->
+      {% if chapters and has_chapters %}
+      <h2 class="text-xl font-bold story-font text-gray-800 mb-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        Chapters of Your Life
+      </h2>
+
+      <div class="space-y-6 mb-10">
+        {% for chapter in chapters %}
+          <div class="story-card overflow-hidden animate-fade-in" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+            <div class="flex flex-col md:flex-row">
+              <!-- Chapter photo -->
+              <div class="md:w-1/3 bg-gradient-to-br from-indigo-50 to-purple-50 p-4">
+                {% with chapter_id=chapter.id|stringformat:"s" %}
+                {% with found_photo=False %}
+                  {% for id, photo_url in chapter_photos %}
+                    {% if id == chapter_id and not found_photo %}
+                      <div class="chapter-photo-container h-full">
+                        <img src="{{ photo_url }}" alt="{{ chapter.title }}" class="chapter-photo" />
+                      </div>
+                      {% with found_photo=True %}{% endwith %}
+                    {% endif %}
+                  {% endfor %}
+
+                  {% if not found_photo %}
+                    <div class="flex items-center justify-center h-full">
+                      <div class="text-4xl">
+                        {% if chapter.title == 'Childhood' %}👶
+                        {% elif chapter.title == 'Education' %}🎓
+                        {% elif chapter.title == 'Career Journey' %}💼
+                        {% elif chapter.title == 'Relationships' %}❤️
+                        {% elif chapter.title == 'Personal Growth' %}🌱
+                        {% elif chapter.title == 'Recent Years' %}✨
+                        {% else %}📖
+                        {% endif %}
+                      </div>
+                    </div>
+                    {% endif %}
+                  {% endwith %}
+                {% endwith %}
+              </div>
+
+              <!-- Chapter content -->
+              <div class="md:w-2/3 p-6">
+                <div class="flex justify-between items-start mb-2">
+                  <h3 class="text-xl font-bold story-font text-gray-800">{{ chapter.title }}</h3>
+                  <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{{ chapter.time_period }}</span>
+                </div>
+
+                <div class="prose prose-sm text-gray-700 mb-4 journal-font">
+                  {% if chapter.title in chapter_contents %}
+                  {% for key, value in chapter_contents.items %}
+                  {% if key == chapter.title %}
+                      {{ value|truncatewords:100 }}
+                  {% endif %}
+                  {% endfor %}
+                  {% else %}
+                    <p class="text-gray-500">{{ chapter.description }}</p>
+                  {% endif %}
+                </div>
+
+                <a href="{% url 'regenerate_chapter' chapter.id %}" class="text-indigo-600 text-sm hover:text-indigo-800 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Refresh this chapter
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="text-center">
+        <a href="{% url 'manage_chapters' %}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          <span>Manage Life Chapters</span>
+        </a>
+      </div>
+      {% else %}
+      <div class="story-card p-6 text-center mb-8">
+        <h3 class="font-bold text-gray-800 mb-2">Organize Your Life Into Chapters</h3>
+        <p class="text-gray-600 mb-4">Breaking your life story into chapters helps organize your memories into meaningful periods.</p>
+        <a href="{% url 'manage_chapters' %}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <span>Create Life Chapters</span>
+        </a>
+      </div>
+      {% endif %}
+    </div>
+<!-- Life Themes Tab -->
+<div id="themes-tab" class="tab-content hidden animate-fade-in">
+  <!-- Life Themes Introduction -->
+  <div class="story-card p-6 mb-8">
+    <h2 class="text-xl font-bold story-font text-gray-800 mb-2">Themes in Your Life</h2>
+    <p class="text-gray-600 mb-0">These are the recurring themes and patterns we've identified in your journal entries.</p>
+  </div>
+
+  <!-- Themes Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+    <!-- Personal Growth Theme -->
+    <div class="story-theme story-card animate-scale-in">
+      <div class="theme-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+      </div>
+      <div>
+        <h3 class="font-bold text-gray-800 mb-1">Personal Growth</h3>
+        <p class="text-gray-600 text-sm">
+          {% if entries_by_theme.personal_growth|default:'' %}
+          {{ entries_by_theme.personal_growth|length }} entries related to your personal development and growth.
+          {% else %}
+          Journal about your personal development to reveal insights about your growth journey.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <!-- Relationships Theme -->
+    <div class="story-theme story-card animate-scale-in animation-delay-100">
+      <div class="theme-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      </div>
+      <div>
+        <h3 class="font-bold text-gray-800 mb-1">Relationships</h3>
+        <p class="text-gray-600 text-sm">
+          {% if entries_by_theme.relationships|default:'' %}
+          {{ entries_by_theme.relationships|length }} entries about the people in your life and your connections.
+          {% else %}
+          Add entries about your relationships to build this theme in your life story.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <!-- Career & Work Theme -->
+    <div class="story-theme story-card animate-scale-in animation-delay-200">
+      <div class="theme-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <div>
+        <h3 class="font-bold text-gray-800 mb-1">Career Journey</h3>
+        <p class="text-gray-600 text-sm">
+          {% if entries_by_theme.career|default:'' %}
+          {{ entries_by_theme.career|length }} entries focused on your professional life and career path.
+          {% else %}
+          Journal about your work life to build insights about your career journey.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <!-- Health & Wellness Theme -->
+    <div class="story-theme story-card animate-scale-in animation-delay-300">
+      <div class="theme-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      </div>
+      <div>
+        <h3 class="font-bold text-gray-800 mb-1">Health & Wellness</h3>
+        <p class="text-gray-600 text-sm">
+          {% if entries_by_theme.health|default:'' %}
+          {{ entries_by_theme.health|length }} entries about your health, fitness, and overall wellbeing.
+          {% else %}
+          Track your health journey in your journal to build this theme.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <!-- Hobbies & Interests Theme -->
+    <div class="story-theme story-card animate-scale-in animation-delay-400">
+      <div class="theme-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div>
+        <h3 class="font-bold text-gray-800 mb-1">Hobbies & Interests</h3>
+        <p class="text-gray-600 text-sm">
+          {% if entries_by_theme.hobbies|default:'' %}
+          {{ entries_by_theme.hobbies|length }} entries about the activities and interests you enjoy.
+          {% else %}
+          Write about your hobbies and interests to develop this theme.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <!-- Challenges & Obstacles Theme -->
+    <div class="story-theme story-card animate-scale-in animation-delay-500">
+      <div class="theme-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div>
+        <h3 class="font-bold text-gray-800 mb-1">Challenges & Growth</h3>
+        <p class="text-gray-600 text-sm">
+          {% if entries_by_theme.challenges|default:'' %}
+          {{ entries_by_theme.challenges|length }} entries about obstacles you've faced and overcome.
+          {% else %}
+          Document your challenges and how you've grown from them.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Theme Photos Gallery -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+    {% for theme_name, entries in entries_by_theme.items|slice:":3" %}
+      {% if entries %}
+        <div class="story-card overflow-hidden animate-fade-in" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+          <div class="aspect-w-4 aspect-h-3 bg-gradient-to-br {{ forloop.counter0|divisibleby:3|yesno:'from-indigo-400 to-purple-500,from-pink-400 to-rose-500,from-cyan-400 to-blue-500' }}">
+            <!-- Find a photo for this theme if available -->
+            {% for entry in entries|slice:":1" %}
+              {% if entry.photos.first %}
+                <img src="{{ entry.photos.first.photo.url }}" alt="{{ theme_name }} theme" class="w-full h-full object-cover" />
+              {% elif entry.photo %}
+                <img src="{{ entry.photo.url }}" alt="{{ theme_name }} theme" class="w-full h-full object-cover" />
+              {% else %}
+                <div class="w-full h-full flex items-center justify-center">
+                  <div class="text-6xl text-white">
+                    {% if theme_name == 'personal_growth' %}🌱
+                    {% elif theme_name == 'relationships' %}❤️
+                    {% elif theme_name == 'career' %}💼
+                    {% elif theme_name == 'health' %}🧘
+                    {% elif theme_name == 'hobbies' %}🎨
+                    {% elif theme_name == 'challenges' %}🏆
+                    {% else %}✨
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="p-4">
+            <h3 class="font-bold text-gray-800 capitalize mb-1">{{ theme_name|capfirst|cut:"_" }}</h3>
+            <p class="text-gray-600 text-sm mb-2">{{ entries|length }} related entries</p>
+            <a href="{% url 'library' %}?theme={{ theme_name }}" class="text-indigo-600 text-sm hover:text-indigo-800 flex items-center">
+              <span>View entries</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Word Cloud -->
+  <div class="story-card p-6 mb-8">
+    <h2 class="text-xl font-bold story-font text-gray-800 mb-4">Words That Define Your Life</h2>
+
+    <div class="word-cloud">
+      {% if word_cloud %}
+        {% for word, size in word_cloud %}
+          <div class="cloud-word word-size-{{ size }}" style="left: {{ forloop.counter0|divisibleby:10|yesno:'20%,30%,40%,50%,60%,70%,80%' }}; top: {{ forloop.counter0|divisibleby:5|yesno:'30%,40%,50%,60%,70%' }};">{{ word }}</div>
+        {% endfor %}
+      {% else %}
+        <div class="text-center text-gray-500">
+          Add more journal entries to generate your personal word cloud.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Theme Details -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+    <!-- Personal Values -->
+    <div class="story-card p-6 animate-scale-in">
+      <h3 class="font-bold text-gray-800 mb-3 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        Your Values
+      </h3>
+
+      <div class="space-y-3">
+        {% if personal_values %}
+          {% for value in personal_values %}
+            <div class="flex items-center">
+              <div class="w-full bg-gray-100 rounded-full h-2.5">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2.5 rounded-full" style="width: {{ value.score }}%"></div>
+              </div>
+              <span class="min-w-[80px] text-right text-sm text-gray-600 ml-3">{{ value.name }}</span>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-gray-500 text-sm">
+            As you journal more, we'll identify the values that guide your life decisions.
+          </p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Personality Insights -->
+    <div class="story-card p-6 animate-scale-in animation-delay-100">
+      <h3 class="font-bold text-gray-800 mb-3 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        Personality Insights
+      </h3>
+
+      {% if personality_traits %}
+        <div class="space-y-2">
+          {% for trait in personality_traits %}
+            <p class="text-sm text-gray-600">• {{ trait }}</p>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-gray-500 text-sm">
+          Continue journaling to reveal insights about your personality and character traits.
+        </p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Timeline Tab -->
+<div id="timeline-tab" class="tab-content hidden animate-fade-in">
+  <!-- Timeline Introduction -->
+  <div class="story-card p-6 mb-8">
+    <h2 class="text-xl font-bold story-font text-gray-800 mb-2">Your Life Timeline</h2>
+    <p class="text-gray-600 mb-0">A chronological journey through your significant moments and experiences.</p>
+  </div>
+
+  <!-- Year Recap Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    {% for year in year_recaps|slice:":4" %}
+      <div class="story-card p-6 year-recap-card {{ forloop.counter0|divisibleby:4|yesno:'bg-indigo-50,bg-purple-50,bg-blue-50,bg-green-50' }} animate-scale-in" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+        <span class="year-number">{{ year.year }}</span>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">{{ year.year }}</h3>
+        <p class="text-sm text-gray-600 mb-4">
+          {{ year.entry_count }} memories from this year
+        </p>
+
+        {% if year.summary %}
+          <p class="text-gray-700 mb-4 journal-font">{{ year.summary }}</p>
+        {% endif %}
+
+        <div class="flex flex-wrap gap-2">
+          {% for tag in year.top_tags|slice:":3" %}
+            <span class="bg-white/80 text-xs px-2 py-1 rounded-full border border-gray-200">
+              #{{ tag }}
+            </span>
+          {% endfor %}
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-span-full story-card p-6 text-center">
+        <p class="text-gray-500">Add more dated journal entries to see year summaries.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Timeline Photo Strip -->
+  {% if life_photos %}
+  <div class="relative h-24 mb-8 overflow-hidden story-card">
+    <div class="absolute inset-0 flex gap-1">
+      {% for photo_url in life_photos %}
+        <div class="h-full" style="flex: 0 0 auto; width: 100px;">
+          <img src="{{ photo_url }}" alt="Life moment" class="h-full w-full object-cover" />
+        </div>
       {% endfor %}
     </div>
   </div>
   {% endif %}
+
+  <!-- Timeline Entries -->
+  <div class="story-timeline mb-10">
+    <div class="timeline-line"></div>
+
+    {% for entry in entries|slice:":10" %}
+      <div class="timeline-entry" style="animation-delay: {{ forloop.counter0 }}00ms;">
+        <div class="story-card p-5 {% if entry.mood %}border-l-4 border-{% if entry.mood == 'happy' %}green-400{% elif entry.mood == 'content' %}blue-400{% elif entry.mood == 'excited' %}purple-400{% elif entry.mood == 'anxious' %}amber-400{% elif entry.mood == 'sad' %}red-400{% else %}gray-400{% endif %}{% endif %}">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="font-bold story-font text-gray-800 text-lg">{{ entry.title|default:"Untitled Entry" }}</h3>
+            <div class="text-sm text-gray-500 flex items-center gap-2 bg-white/50 px-3 py-1 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {{ entry.created_at|date:"F j, Y" }}
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            {% if entry.photos.first %}
+              <div class="w-24 h-24 shrink-0 rounded-lg overflow-hidden shadow-sm">
+                <img src="{{ entry.photos.first.photo.url }}" alt="Entry photo" class="w-full h-full object-cover" />
+              </div>
+            {% elif entry.photo.url|default:'' %}
+              <div class="w-24 h-24 shrink-0 rounded-lg overflow-hidden shadow-sm">
+                <img src="{{ entry.photo.url }}" alt="Entry photo" class="w-full h-full object-cover" />
+              </div>
+            {% endif %}
+
+            <div class="flex-grow">
+              <p class="text-gray-700 journal-font text-sm mb-3">{{ entry.content|truncatechars:200 }}</p>
+
+              <div class="flex flex-wrap gap-2 items-center">
+                {% if entry.mood %}
+                  <span class="mood-pill {{ entry.mood }}">
+                    {% if entry.mood == 'happy' %}😊
+                    {% elif entry.mood == 'content' %}😌
+                    {% elif entry.mood == 'excited' %}🤩
+                    {% elif entry.mood == 'neutral' %}😐
+                    {% elif entry.mood == 'anxious' %}😰
+                    {% elif entry.mood == 'sad' %}😢
+                    {% else %}😐
+                    {% endif %}
+                    {{ entry.mood|title }}
+                  </span>
+                {% endif %}
+
+                {% for tag in entry.tags.all %}
+                  <a href="{% url 'library' %}?tag={{ tag.name }}" class="bg-white text-xs px-2 py-1 rounded-full border border-gray-200 hover:border-indigo-200 hover:bg-indigo-50 transition-colors">
+                    #{{ tag.name }}
+                  </a>
+                {% endfor %}
+
+                <div class="ml-auto">
+                  <a href="{% url 'entry_detail' entry.id %}" class="text-indigo-600 text-sm hover:text-indigo-800 flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full shadow-sm hover:bg-white/80 transition-colors">
+                    <span>Read more</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="timeline-entry">
+        <div class="story-card p-6 text-center">
+          <p class="text-gray-500">No entries found. Start journaling to build your timeline.</p>
+        </div>
+      </div>
+    {% endfor %}
+
+    {% if entries|length > 10 %}
+    <div class="timeline-entry">
+      <div class="text-center">
+        <a href="{% url 'library' %}?tab=timeline" class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+          <span>View Complete Timeline</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
 </div>
 
-<!-- JavaScript for chapter navigation -->
+<!-- Insights Tab -->
+<div id="insights-tab" class="tab-content hidden animate-fade-in">
+  <!-- Insights Introduction -->
+  <div class="story-card p-6 mb-8">
+    <h2 class="text-xl font-bold story-font text-gray-800 mb-2">Your Life Insights</h2>
+    <p class="text-gray-600 mb-0">Discover patterns, trends, and meaningful insights from your journaling practice.</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+    <!-- Mood Trends -->
+    <div class="story-card p-6 animate-scale-in">
+      <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Mood Patterns
+      </h3>
+
+      {% if mood_data %}
+        <div class="space-y-3">
+          {% for mood in mood_data %}
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <span class="mood-pill {{ mood.name }}">
+                  {% if mood.name == 'happy' %}😊
+                  {% elif mood.name == 'content' %}😌
+                  {% elif mood.name == 'excited' %}🤩
+                  {% elif mood.name == 'neutral' %}😐
+                  {% elif mood.name == 'anxious' %}😰
+                  {% elif mood.name == 'sad' %}😢
+                  {% else %}😐
+                  {% endif %}
+                  {{ mood.name|title }}
+                </span>
+              </div>
+              <div class="flex-grow mx-4">
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                  <div class="h-2 rounded-full" style="width: {{ mood.percentage }}%; background-color: {{ mood.color }}"></div>
+                </div>
+              </div>
+              <div class="text-sm text-gray-600 min-w-[40px] text-right">{{ mood.percentage }}%</div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-gray-500 text-sm">
+          Add mood data to your journal entries to see your emotional patterns.
+        </p>
+      {% endif %}
+    </div>
+
+    <!-- Journal Activity -->
+    <div class="story-card p-6 animate-scale-in animation-delay-100">
+      <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Journaling Consistency
+      </h3>
+
+      <div class="grid grid-cols-7 gap-1 mb-2">
+        <div class="text-center text-xs text-gray-500">S</div>
+        <div class="text-center text-xs text-gray-500">M</div>
+        <div class="text-center text-xs text-gray-500">T</div>
+        <div class="text-center text-xs text-gray-500">W</div>
+        <div class="text-center text-xs text-gray-500">T</div>
+        <div class="text-center text-xs text-gray-500">F</div>
+        <div class="text-center text-xs text-gray-500">S</div>
+      </div>
+
+      <div class="grid grid-cols-7 gap-1 mb-4">
+        {% for i in "12345678910111213141516171819202122232425262728" %}
+          <div class="aspect-square rounded-sm {% if forloop.counter|divisibleby:3 %}bg-indigo-400{% elif forloop.counter|divisibleby:5 %}bg-indigo-200{% elif forloop.counter|divisibleby:2 %}bg-indigo-300{% else %}bg-gray-100{% endif %}"></div>
+        {% endfor %}
+      </div>
+
+      <div class="flex justify-between items-center text-sm text-gray-600">
+        <span>Less</span>
+        <div class="flex gap-1">
+          <div class="w-3 h-3 rounded-sm bg-gray-100"></div>
+          <div class="w-3 h-3 rounded-sm bg-indigo-200"></div>
+          <div class="w-3 h-3 rounded-sm bg-indigo-300"></div>
+          <div class="w-3 h-3 rounded-sm bg-indigo-400"></div>
+        </div>
+        <span>More</span>
+      </div>
+    </div>
+
+    <!-- Health & Habits -->
+    <div class="story-card p-6 animate-scale-in animation-delay-200">
+      <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+        Health & Habits
+      </h3>
+
+      <div class="habits-chart">
+        <div class="habit-bar" style="height: 60%;" title="Sleep: Good"></div>
+        <div class="habit-bar" style="height: 45%;" title="Exercise: Moderate"></div>
+        <div class="habit-bar" style="height: 80%;" title="Nutrition: Excellent"></div>
+        <div class="habit-bar" style="height: 30%;" title="Stress: High"></div>
+        <div class="habit-bar" style="height: 65%;" title="Social: Good"></div>
+      </div>
+
+      <div class="flex justify-between text-xs text-gray-500 mt-2">
+        <span>Sleep</span>
+        <span>Exercise</span>
+        <span>Nutrition</span>
+        <span>Stress</span>
+        <span>Social</span>
+      </div>
+    </div>
+
+    <!-- Photo memories -->
+    <div class="story-card p-6 animate-scale-in animation-delay-300">
+      <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Visual Journey
+      </h3>
+
+      {% if life_photos %}
+        <div class="grid grid-cols-3 gap-2 mb-4">
+          {% for photo_url in life_photos|slice:":6" %}
+            <div class="aspect-w-1 aspect-h-1 rounded-md overflow-hidden">
+              <img src="{{ photo_url }}" alt="Memory" class="w-full h-full object-cover transition-all hover:scale-110" />
+            </div>
+          {% endfor %}
+        </div>
+        <p class="text-sm text-gray-600 text-center">
+          {{ life_photos|length }} photo memories captured in your journal
+        </p>
+      {% else %}
+        <div class="text-center py-8 text-gray-500">
+          <p>Add photos to your journal entries to see your visual journey.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- AI Reflections -->
+  <div class="story-card p-6 mb-8">
+    <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+      AI Reflections on Your Journey
+    </h3>
+
+    {% if ai_reflections %}
+      <div class="journal-font text-lg text-gray-700">
+        {{ ai_reflections|linebreaks }}
+      </div>
+    {% else %}
+      <p class="text-gray-600">
+        Continue journaling to receive personalized AI reflections on your life journey.
+      </p>
+
+      <button type="submit" form="generate-insights-form" class="mt-4 inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        Generate AI Insights
+      </button>
+      <form id="generate-insights-form" method="post" action="{% url 'insights' %}" class="hidden">
+        {% csrf_token %}
+      </form>
+    {% endif %}
+  </div>
+</div>
+</div>
+
+<!-- Full Biography Modal -->
+<div id="biographyModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden overflow-hidden">
+<!-- Backdrop blur effect wrapper -->
+<div class="absolute inset-0 backdrop-blur-sm"></div>
+
+<!-- Modal container with animation settings -->
+<div class="bg-white dark:bg-gray-800 rounded-2xl max-w-5xl w-full max-h-[85vh] relative shadow-2xl flex flex-col transform transition-all duration-300" id="modalContent">
+  <!-- Header -->
+  <div class="px-8 py-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 z-10 backdrop-blur-md bg-opacity-90 dark:bg-opacity-90">
+    <h2 class="text-2xl font-bold story-font text-gray-800 dark:text-white">Your Life Story</h2>
+
+    <div class="flex items-center gap-3">
+      <form method="post" action="{% url 'biography' %}" class="hidden md:block">
+        {% csrf_token %}
+        <button type="submit" name="generate_biography" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 text-sm flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>Regenerate</span>
+        </button>
+      </form>
+
+      <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none flex items-center justify-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full p-2 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Content area -->
+  <div class="flex-grow overflow-auto">
+    <div class="flex flex-col lg:flex-row h-full">
+      <!-- Left content area - Biography text -->
+      <div class="lg:w-3/5 p-8 overflow-y-auto biography-content">
+        <div class="prose prose-lg max-w-none mb-6 dark:prose-invert journal-font">
+          {% if biography %}
+            {{ biography|linebreaks }}
+          {% else %}
+            <p class="text-gray-500 dark:text-gray-400">Your life story hasn't been generated yet.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Right sidebar - Photos and chapters -->
+      <div class="lg:w-2/5 lg:border-l border-gray-100 dark:border-gray-700 p-6 bg-gray-50 dark:bg-gray-900/50 flex flex-col overflow-y-auto">
+        {% if featured_photo %}
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Featured Moment</h3>
+          <div class="featured-photo-container rounded-xl overflow-hidden aspect-video shadow-md">
+            <img src="{{ featured_photo.url }}" alt="Featured life moment" class="featured-photo object-cover w-full h-full" />
+          </div>
+        </div>
+        {% endif %}
+
+        {% if life_photos %}
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Life in Pictures</h3>
+          <div class="grid grid-cols-2 gap-3">
+            {% for photo_url in life_photos|slice:":6" %}
+              <div class="gallery-item rounded-lg overflow-hidden aspect-square hover:shadow-lg transition-all">
+                <img src="{{ photo_url }}" alt="Life moment" class="gallery-photo object-cover w-full h-full transition-transform duration-500 hover:scale-110" />
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if chapters %}
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Life Chapters</h3>
+          <div class="space-y-2">
+            {% for chapter in chapters %}
+              <a href="#chapter-{{ chapter.id }}" class="chapter-link flex items-center gap-3 p-3 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                  {% if chapter.title == 'Childhood' %}👶
+                  {% elif chapter.title == 'Education' %}🎓
+                  {% elif chapter.title == 'Career Journey' %}💼
+                  {% elif chapter.title == 'Relationships' %}❤️
+                  {% elif chapter.title == 'Personal Growth' %}🌱
+                  {% elif chapter.title == 'Recent Years' %}✨
+                  {% else %}📖
+                  {% endif %}
+                </div>
+                <div>
+                  <h4 class="font-medium text-gray-800 dark:text-gray-200">{{ chapter.title }}</h4>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ chapter.time_period }}</p>
+                </div>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="border-t border-gray-100 dark:border-gray-700 px-8 py-4 bg-white dark:bg-gray-800 sticky bottom-0 z-10 md:hidden">
+    <div class="flex justify-between items-center">
+      <button onclick="closeModal()" class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
+        Close
+      </button>
+
+      <form method="post" action="{% url 'biography' %}">
+        {% csrf_token %}
+        <button type="submit" name="generate_biography" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
+          Regenerate Story
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+{% endif %}
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Chapter navigation highlighting
-  const chapterLinks = document.querySelectorAll('.chapter-link');
-  const chapterSections = document.querySelectorAll('section[id^="chapter-"], #full-story');
+// Tab switching functionality
+initTabs();
 
-  // Highlight active chapter on scroll
-  window.addEventListener('scroll', function() {
-    let currentChapter = '';
+// Word cloud animation
+initWordCloudAnimation();
 
-    chapterSections.forEach(section => {
-      const sectionTop = section.offsetTop;
-      const sectionHeight = section.clientHeight;
+// Initialize photo gallery hover effects
+initPhotoEffects();
+});
 
-      if (window.pageYOffset >= (sectionTop - 150) &&
-          window.pageYOffset < (sectionTop + sectionHeight - 150)) {
-        currentChapter = section.getAttribute('id');
+// Tab switching with animation
+function switchTab(tabName) {
+// Hide all tabs
+document.querySelectorAll('.tab-content').forEach(tab => {
+tab.classList.add('hidden');
+});
+
+// Show selected tab
+document.getElementById(tabName + '-tab').classList.remove('hidden');
+
+// Update active state on buttons
+const buttons = document.querySelectorAll('.story-tab');
+buttons.forEach(btn => {
+btn.classList.remove('active');
+if (btn.getAttribute('onclick').includes(tabName)) {
+  btn.classList.add('active');
+}
+});
+
+// Animate tab selector
+const activeTab = document.querySelector(`.story-tab[onclick="switchTab('${tabName}')"]`);
+const tabSelector = document.getElementById('tabSelector');
+
+if (activeTab && tabSelector) {
+const width = activeTab.getAttribute('data-tab-width');
+const offset = activeTab.getAttribute('data-tab-offset');
+
+tabSelector.style.width = width;
+tabSelector.style.transform = `translateX(${offset})`;
+}
+
+// Update URL without page reload to reflect current tab
+const url = new URL(window.location);
+url.searchParams.set('tab', tabName);
+window.history.pushState({}, '', url);
+}
+
+// Initialize tabs based on URL or default to overview
+function initTabs() {
+const urlParams = new URLSearchParams(window.location.search);
+const tabParam = urlParams.get('tab');
+
+if (tabParam && ['overview', 'story', 'themes', 'timeline', 'insights'].includes(tabParam)) {
+switchTab(tabParam);
+} else {
+// Default: set first tab as active
+switchTab('overview');
+}
+}
+
+// Create subtle animation for word cloud
+function initWordCloudAnimation() {
+const wordElements = document.querySelectorAll('.cloud-word');
+
+wordElements.forEach(word => {
+// Random initial position adjustments
+const randomX = (Math.random() * 20) - 10;
+const randomY = (Math.random() * 20) - 10;
+word.style.transform = `translate(${randomX}px, ${randomY}px)`;
+
+// Create animation
+setInterval(() => {
+  const newX = (Math.random() * 10) - 5;
+  const newY = (Math.random() * 10) - 5;
+  const newRotate = (Math.random() * 6) - 3;
+
+  word.style.transition = 'transform 3s ease-in-out';
+  word.style.transform = `translate(${newX}px, ${newY}px) rotate(${newRotate}deg)`;
+}, 3000 + Math.random() * 2000); // Slightly different interval for each word
+});
+}
+
+// Initialize parallax and hover effects for photos
+function initPhotoEffects() {
+// Subtle parallax effect for featured photos
+const featuredPhotos = document.querySelectorAll('.featured-photo');
+
+window.addEventListener('scroll', () => {
+const scrollY = window.scrollY;
+
+featuredPhotos.forEach(photo => {
+  // Only apply the effect if the photo is in viewport
+  const rect = photo.getBoundingClientRect();
+  if (rect.top < window.innerHeight && rect.bottom > 0) {
+    // Move at 5% of scroll speed (subtle parallax)
+    const translateY = scrollY * 0.05;
+    photo.style.transform = `translateY(-${translateY}px) scale(1.05)`;
+  }
+});
+});
+
+// Hover effect for gallery photos
+const galleryItems = document.querySelectorAll('.gallery-item');
+
+galleryItems.forEach(item => {
+item.addEventListener('mouseenter', () => {
+  // Add a subtle glow effect
+  item.style.boxShadow = '0 8px 20px rgba(79, 70, 229, 0.2)';
+  // Make sibling photos slightly dimmer to emphasize the hovered one
+  galleryItems.forEach(sibling => {
+    if (sibling !== item) {
+      sibling.style.opacity = '0.85';
+    }
+  });
+});
+
+item.addEventListener('mouseleave', () => {
+  // Reset effects
+  item.style.boxShadow = '';
+  galleryItems.forEach(sibling => {
+    sibling.style.opacity = '1';
+  });
+});
+});
+}
+
+// Enhanced modal functions
+function showFullBiography() {
+const modal = document.getElementById('biographyModal');
+const modalContent = document.getElementById('modalContent');
+
+// Show modal
+modal.classList.remove('hidden');
+document.body.style.overflow = 'hidden';
+
+// Add fade-in animation
+modal.style.opacity = '0';
+modalContent.style.transform = 'scale(0.98) translateY(10px)';
+modalContent.style.opacity = '0';
+
+setTimeout(() => {
+modal.style.transition = 'opacity 0.4s ease';
+modal.style.opacity = '1';
+
+modalContent.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+modalContent.style.transform = 'scale(1) translateY(0)';
+modalContent.style.opacity = '1';
+}, 10);
+
+// Initialize chapter navigation
+initChapterNavigation();
+}
+
+function closeModal() {
+const modal = document.getElementById('biographyModal');
+const modalContent = document.getElementById('modalContent');
+
+// Add exit animation
+modal.style.transition = 'opacity 0.3s ease';
+modal.style.opacity = '0';
+
+modalContent.style.transition = 'all 0.3s ease';
+modalContent.style.transform = 'scale(0.98) translateY(10px)';
+modalContent.style.opacity = '0';
+
+// Actually hide the modal after animations complete
+setTimeout(() => {
+modal.classList.add('hidden');
+document.body.style.overflow = '';
+
+// Reset styles for next opening
+modalContent.style.transform = '';
+modalContent.style.opacity = '';
+modal.style.opacity = '';
+}, 300);
+}
+
+// Chapter navigation within the biography
+function initChapterNavigation() {
+const chapterLinks = document.querySelectorAll('.chapter-link');
+const biographyContent = document.querySelector('.biography-content');
+
+chapterLinks.forEach(link => {
+link.addEventListener('click', function(e) {
+  e.preventDefault();
+
+  // Get chapter title
+  const chapterTitle = this.querySelector('h4').textContent;
+
+  // Look for chapter title in biography text
+  const biographyText = biographyContent.textContent;
+
+  if (biographyText.includes(chapterTitle)) {
+    // Find approximate location of chapter in text
+    const chapterIndex = biographyText.indexOf(chapterTitle);
+
+    // Get all paragraphs
+    const paragraphs = biographyContent.querySelectorAll('p');
+    let targetParagraph = null;
+
+    // Find paragraph containing chapter title
+    paragraphs.forEach(p => {
+      if (p.textContent.includes(chapterTitle)) {
+        targetParagraph = p;
       }
     });
 
-    chapterLinks.forEach(link => {
-      link.classList.remove('active');
+    // Scroll to that paragraph if found, otherwise just highlight the link
+    if (targetParagraph) {
+      // Add highlight animation to paragraph
+      targetParagraph.style.backgroundColor = 'rgba(79, 70, 229, 0.1)';
+      setTimeout(() => {
+        targetParagraph.style.transition = 'background-color 1s ease';
+        targetParagraph.style.backgroundColor = 'transparent';
+      }, 100);
 
-      if (link.getAttribute('href') === '#' + currentChapter) {
-        link.classList.add('active');
-      }
-    });
-  });
+      // Smooth scroll to paragraph
+      targetParagraph.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 
-  // Smooth scroll to chapter when clicking nav link
-  chapterLinks.forEach(link => {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
+    // Highlight selected chapter
+    chapterLinks.forEach(cl => cl.classList.remove('bg-white', 'dark:bg-gray-800', 'shadow-sm'));
+    this.classList.add('bg-white', 'dark:bg-gray-800', 'shadow-sm');
+  }
+});
+});
 
-      const targetId = this.getAttribute('href').substring(1);
-      const targetSection = document.getElementById(targetId);
+// Trigger click on first chapter to highlight it
+if (chapterLinks.length > 0) {
+chapterLinks[0].classList.add('bg-white', 'dark:bg-gray-800', 'shadow-sm');
+}
+}
 
-      window.scrollTo({
-        top: targetSection.offsetTop - 100,
-        behavior: 'smooth'
-      });
-
-      chapterLinks.forEach(l => l.classList.remove('active'));
-      this.classList.add('active');
-    });
-  });
+// Dynamic height adjustment
+window.addEventListener('resize', function() {
+const modal = document.getElementById('biographyModal');
+if (!modal.classList.contains('hidden')) {
+const modalContent = document.getElementById('modalContent');
+const windowHeight = window.innerHeight;
+const maxHeight = Math.round(windowHeight * 0.85);
+modalContent.style.maxHeight = `${maxHeight}px`;
+}
 });
 </script>
 {% endblock %}

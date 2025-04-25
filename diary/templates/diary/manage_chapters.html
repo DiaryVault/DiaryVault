@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Life Chapters | DiaryVault{% endblock %}
+
+{% block extra_css %}
+<style>
+  .chapter-card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+  }
+
+  .chapter-card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+  }
+
+  .story-font {
+    font-family: 'Playfair Display', serif;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.4s ease-out forwards;
+  }
+
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+  <!-- Header -->
+  <div class="mb-8 text-center animate-fade-in">
+    <h1 class="text-3xl md:text-4xl font-bold story-font mb-4 text-gray-900">Manage Life Chapters</h1>
+    <p class="text-gray-600 max-w-3xl mx-auto">
+      Organize your life story into meaningful chapters. Each chapter represents a distinct period or theme in your life journey.
+    </p>
+  </div>
+
+  <!-- Chapter List -->
+  <div class="mb-8">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-bold story-font text-gray-800">Your Life Chapters</h2>
+
+      <button id="addChapterBtn" class="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        Add New Chapter
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6">
+      {% for chapter in chapters %}
+      <div class="chapter-card p-6 animate-slide-in {% if forloop.counter0 == 0 %}animation-delay-100{% elif forloop.counter0 == 1 %}animation-delay-200{% elif forloop.counter0 == 2 %}animation-delay-300{% endif %}">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-600 flex-shrink-0">
+                  {% if chapter.title == 'Childhood' %}👶
+                  {% elif chapter.title == 'Education' %}🎓
+                  {% elif chapter.title == 'Career Journey' %}💼
+                  {% elif chapter.title == 'Relationships' %}❤️
+                  {% elif chapter.title == 'Personal Growth' %}🌱
+                  {% elif chapter.title == 'Recent Years' %}✨
+                  {% else %}📖
+                  {% endif %}
+                </div>
+                <h3 class="text-xl font-bold story-font text-gray-800">{{ chapter.title }}</h3>
+              </div>
+
+              <p class="text-gray-500 mt-2 text-sm">
+                {{ chapter.time_period }}
+              </p>
+
+              <p class="text-gray-700 mt-2">
+                {{ chapter.description }}
+              </p>
+            </div>
+
+            <div class="flex gap-3 mt-3 md:mt-0">
+              <a href="{% url 'edit_chapter' chapter.id %}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-indigo-600 hover:bg-indigo-50 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit
+              </a>
+
+              <a href="{% url 'regenerate_chapter' chapter.id %}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-purple-600 hover:bg-purple-50 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh
+              </a>
+
+              <a href="{% url 'delete_chapter' chapter.id %}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-red-600 hover:bg-red-50 transition-colors" onclick="return confirm('Are you sure you want to delete this chapter? This action cannot be undone.');">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Delete
+              </a>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="chapter-card p-8 text-center">
+          <div class="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold story-font text-gray-800 mb-2">No Chapters Yet</h3>
+          <p class="text-gray-600 mb-4">You haven't created any life chapters yet. Start organizing your story by adding chapters.</p>
+          <button id="emptyAddChapterBtn" class="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add First Chapter
+          </button>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Help Information -->
+  <div class="bg-indigo-50 rounded-xl p-6 animate-fade-in animation-delay-300">
+    <h3 class="text-lg font-bold story-font text-indigo-800 mb-3">Tips for Organizing Life Chapters</h3>
+
+    <ul class="space-y-2 text-indigo-700">
+      <li class="flex items-start">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Organize your life into meaningful chapters, such as childhood, education, career, or major life events.</span>
+      </li>
+      <li class="flex items-start">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Each chapter will have its own summary in your life story, making it easier to navigate through different periods.</span>
+      </li>
+      <li class="flex items-start">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Use the "Refresh" button to regenerate a chapter's content if you've added new journal entries related to that period.</span>
+      </li>
+      <li class="flex items-start">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>For best results, add specific time periods to your chapters to help organize your journal entries chronologically.</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Add Chapter Modal -->
+  <div id="addChapterModal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl max-w-lg w-full p-6 relative">
+      <button id="closeModalBtn" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <h3 class="text-xl font-bold story-font text-gray-800 mb-6">Add New Chapter</h3>
+
+      <form method="post" action="{% url 'manage_chapters' %}">
+        {% csrf_token %}
+
+        <div class="mb-6">
+          <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Chapter Title</label>
+          <input type="text" id="title" name="title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Childhood, College Years, Career Beginnings" required>
+        </div>
+
+        <div class="mb-6">
+          <label for="time_period" class="block text-sm font-medium text-gray-700 mb-1">Time Period (Optional)</label>
+          <input type="text" id="time_period" name="time_period" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 1990-2000, Early Twenties">
+        </div>
+
+        <div class="mb-6">
+          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea id="description" name="description" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Brief description of this life chapter..."></textarea>
+        </div>
+
+        <div class="flex justify-end">
+          <button type="button" id="cancelAddBtn" class="mr-4 px-4 py-2 text-gray-600 hover:text-gray-800">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+            Add Chapter
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Back Button -->
+  <div class="text-center mt-8">
+    <a href="{% url 'biography' %}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      <span>Back to Life Story</span>
+    </a>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Modal Elements
+    const addChapterModal = document.getElementById('addChapterModal');
+    const addChapterBtn = document.getElementById('addChapterBtn');
+    const emptyAddChapterBtn = document.getElementById('emptyAddChapterBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelAddBtn = document.getElementById('cancelAddBtn');
+
+    // Open modal
+    function openModal() {
+      addChapterModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+
+      // Add animation
+      addChapterModal.style.opacity = '0';
+      setTimeout(() => {
+        addChapterModal.style.transition = 'opacity 0.3s ease';
+        addChapterModal.style.opacity = '1';
+      }, 10);
+
+      // Focus on first input
+      setTimeout(() => {
+        document.getElementById('title').focus();
+      }, 100);
+    }
+
+    // Close modal
+    function closeModal() {
+      addChapterModal.style.opacity = '0';
+
+      setTimeout(() => {
+        addChapterModal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }, 300);
+    }
+
+    // Event listeners
+    if (addChapterBtn) {
+      addChapterBtn.addEventListener('click', openModal);
+    }
+
+    if (emptyAddChapterBtn) {
+      emptyAddChapterBtn.addEventListener('click', openModal);
+    }
+
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelAddBtn.addEventListener('click', closeModal);
+
+    // Close modal when clicking outside
+    addChapterModal.addEventListener('click', function(e) {
+      if (e.target === addChapterModal) {
+        closeModal();
+      }
+    });
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !addChapterModal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+  });
+</script>
+{% endblock %}

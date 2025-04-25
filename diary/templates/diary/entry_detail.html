@@ -1,40 +1,433 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 
 {% block title %}{{ entry.title|default:"Untitled Entry" }} - DiaryVault{% endblock %}
 
-{% block extra_css %}
+{% block content %}
+<div class="max-w-4xl w-full mx-auto pt-8 px-5 sm:px-6 lg:px-8 relative">
+  <!-- Enhanced Decorative Elements -->
+  <div class="absolute -top-10 -left-16 h-40 w-40 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
+  <div class="absolute top-1/3 right-0 h-36 w-36 bg-primary-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+  <div class="absolute bottom-1/4 -left-8 h-28 w-28 bg-amber-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+
+  <!-- Improved Flash Messages with dismiss button -->
+  {% if messages %}
+  <div class="mb-8 space-y-3">
+    {% for message in messages %}
+    <div class="px-5 py-4 rounded-xl border mb-4 shadow-sm scale-in text-sm flex justify-between items-center
+      {% if message.tags == 'error' %}bg-red-50 border-red-300 text-red-700
+      {% elif message.tags == 'success' %}bg-green-50 border-green-300 text-green-700
+      {% else %}bg-blue-50 border-blue-300 text-blue-700{% endif %}">
+      <div class="flex items-center">
+        <span class="mr-3">
+          {% if message.tags == 'error' %}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+          {% elif message.tags == 'success' %}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          {% else %}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg>
+          {% endif %}
+        </span>
+        {{ message }}
+      </div>
+      <button class="dismiss-message ml-4 focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 hover:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Enhanced Entry Header -->
+  <div class="text-center mb-8 relative z-10">
+    <div class="inline-block mb-4">
+      <span class="px-4 py-1.5 bg-white/50 backdrop-blur-sm rounded-full text-sm font-medium text-gray-600 shadow-sm border border-white/50 hover:border-primary-200 transition-all duration-300">
+        {{ entry.created_at|date:"F j, Y" }}
+      </span>
+    </div>
+    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 relative inline-block diary-font">
+      <span class="absolute inset-0 rounded-full bg-purple-100 blur-lg opacity-30 transform scale-110"></span>
+      <span class="relative z-10">{{ entry.title|default:"Untitled Entry" }}</span>
+    </h2>
+
+    {% if entry.mood or entry.tags.all %}
+    <div class="flex flex-wrap items-center justify-center gap-2 max-w-lg mx-auto mt-4">
+      {% if entry.mood %}
+      <span class="bg-secondary-50 text-secondary-700 text-sm px-3 py-1 rounded-full shadow-sm border border-secondary-100 hover:bg-secondary-100 transition-colors duration-200">
+        <span class="mr-1.5">{% if entry.mood == 'Happy' %}😊{% elif entry.mood == 'Sad' %}😔{% elif entry.mood == 'Angry' %}😠{% elif entry.mood == 'Anxious' %}😰{% elif entry.mood == 'Calm' %}😌{% elif entry.mood == 'Excited' %}🤩{% else %}✨{% endif %}</span>
+        {{ entry.mood }}
+      </span>
+      {% endif %}
+
+      {% for tag in entry.tags.all %}
+      <span class="bg-primary-50 text-primary-700 text-sm px-3 py-1 rounded-full shadow-sm border border-primary-100 hover:bg-primary-100 transition-colors duration-200">
+        #{{ tag.name }}
+      </span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Improved Entry Content Card -->
+  <div class="journal-card scale-in mb-10 relative z-10 transform hover:scale-[1.01] transition-all duration-300">
+    <div class="p-6 sm:p-8 diary-font page-texture relative rounded-xl shadow-lg">
+      <div class="page-curl"></div>
+
+      {% if entry.photos.exists %}
+        <div class="grid grid-cols-1 {% if entry.photos.count > 1 %}sm:grid-cols-2{% endif %} gap-4 mb-8">
+          {% for photo in entry.photos.all %}
+          <div class="entry-photo-container relative group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+            <img src="{{ photo.photo.url }}" alt="Entry photo" class="entry-photo w-full h-64 object-cover transform hover:scale-105 transition-transform duration-500">
+            <div class="entry-photo-overlay absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="photo-caption absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+              <span class="block text-sm font-medium mb-1">{% if photo.caption %}{{ photo.caption }}{% else %}{{ entry.created_at|date:"F j, Y" }}{% endif %}</span>
+              <a href="{{ photo.photo.url }}" target="_blank" class="text-white/90 hover:text-white text-xs flex items-center gap-1 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                View full size
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% elif entry.photo %}
+        <div class="entry-photo-container mb-8 relative group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+          <img src="{{ entry.photo.url }}" alt="Entry photo" class="entry-photo w-full h-80 object-cover transform hover:scale-105 transition-transform duration-500">
+          <div class="entry-photo-overlay absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="photo-caption absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <span class="block text-sm font-medium mb-1">{{ entry.created_at|date:"F j, Y" }}</span>
+            <a href="{{ entry.photo.url }}" target="_blank" class="text-white/90 hover:text-white text-xs flex items-center gap-1 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              View full size
+            </a>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="prose max-w-none text-gray-800 text-lg leading-relaxed">
+        {{ entry.content|linebreaks }}
+      </div>
+    </div>
+
+    {% if entry.summary %}
+    <div class="border-t border-gray-200">
+      <div class="ai-insights-container p-6 sm:p-8">
+        <div class="ai-insights-header flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-5">
+          <h2 class="text-xl font-semibold text-secondary-700 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            AI Insights
+          </h2>
+          <form method="post" class="inline">{% csrf_token %}
+            <input type="hidden" name="regenerate_summary" value="true">
+            <button type="submit" class="btn-modern btn-primary text-white text-sm flex items-center px-4 py-2 rounded-full shadow-sm transition hover:shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Regenerate Insights
+            </button>
+          </form>
+        </div>
+        <div class="ai-insights-content">
+          <div class="glass-effect rounded-lg border border-white/30 p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-gradient-to-br from-white/80 to-white/60">
+            <div class="handwritten text-lg sm:text-xl text-gray-800 leading-relaxed">
+              {{ entry.summary|linebreaks }}
+            </div>
+          </div>
+
+          {% if summary_versions %}
+          <div class="mt-5">
+            <details class="versions-accordion group">
+              <summary class="text-sm font-medium text-gray-700 mb-3 cursor-pointer flex items-center hover:text-secondary-600 transition-colors">
+                <span>Previous insights</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 transform group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div class="space-y-3 mt-3 pl-1">
+                {% for version in summary_versions %}
+                <div class="version-card border border-gray-200 p-4 rounded-lg hover:border-secondary-200 hover:bg-secondary-50/30 transition-all duration-200">
+                  <div class="text-xs text-gray-500 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Generated on {{ version.created_at|date:"F j, Y g:i a" }}
+                  </div>
+                  <div class="text-sm text-gray-600">
+                    {{ version.summary|truncatechars:120 }}
+                  </div>
+                  <form method="post" class="mt-3 text-right">{% csrf_token %}
+                    <input type="hidden" name="restore_version" value="true">
+                    <input type="hidden" name="version_id" value="{{ version.id }}">
+                    <button type="submit" class="text-secondary-600 text-xs hover:text-secondary-800 bg-secondary-50 hover:bg-secondary-100 px-3 py-1.5 rounded-full border border-secondary-100 transition-colors duration-200">Restore this version</button>
+                  </form>
+                </div>
+                {% endfor %}
+              </div>
+            </details>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Improved Actions -->
+    <div class="border-t border-gray-200 p-5 sm:p-6 flex flex-wrap justify-between items-center gap-4 bg-gradient-to-r from-secondary-50 to-primary-50 rounded-b-lg">
+      <div class="flex flex-wrap gap-3">
+        <a href="{% url 'edit_entry' entry.id %}" class="btn-modern btn-secondary flex items-center text-sm px-5 py-2.5 hover:bg-secondary-100 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Edit Entry
+        </a>
+        <form method="post" action="{% url 'delete_entry' entry.id %}" class="inline" onsubmit="return confirm('Are you sure you want to delete this entry? This action cannot be undone.');">
+          {% csrf_token %}
+          <button type="submit" class="btn-modern btn-secondary text-red-600 hover:bg-red-50 flex items-center text-sm px-5 py-2.5 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete Entry
+          </button>
+        </form>
+      </div>
+      <a href="{% url 'library' %}" class="btn-modern btn-secondary flex items-center text-sm px-5 py-2.5 hover:bg-primary-100 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Library
+      </a>
+    </div>
+  </div>
+
+  <!-- Improved Related Entries -->
+  {% if related_entries %}
+  <div class="mb-16">
+    <h3 class="text-2xl font-semibold text-gray-800 mb-6 diary-font flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
+      Related Entries
+    </h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {% for related in related_entries %}
+      <a href="{% url 'entry_detail' related.id %}" class="related-entry-card p-5 scale-in rounded-xl border border-gray-200 hover:border-primary-200 transform hover:scale-[1.02] hover:shadow-md transition-all duration-300" style="animation-delay: {{ forloop.counter | add:2 }}00ms">
+        {% if related.photos.first %}
+        <div class="mb-3 h-36 rounded-lg overflow-hidden">
+          <img src="{{ related.photos.first.photo.url }}" alt="Entry photo" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700">
+        </div>
+        {% endif %}
+        <div class="flex justify-between items-start mb-2">
+          <h4 class="font-semibold text-gray-800 text-base mb-1 diary-font">{{ related.title }}</h4>
+          <p class="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-full">{{ related.created_at|date:"M j, Y" }}</p>
+        </div>
+        <p class="text-sm text-gray-600 diary-font line-clamp-3 mb-3">{{ related.content|truncatechars:120 }}</p>
+        <div class="mt-2 flex gap-1.5 flex-wrap">
+          {% if related.mood %}
+          <span class="bg-secondary-50 text-secondary-700 text-xs px-2 py-0.5 rounded-full border border-secondary-100">
+            {% if related.mood == 'Happy' %}😊{% elif related.mood == 'Sad' %}😔{% elif related.mood == 'Angry' %}😠{% elif related.mood == 'Anxious' %}😰{% elif related.mood == 'Calm' %}😌{% elif related.mood == 'Excited' %}🤩{% else %}✨{% endif %} {{ related.mood }}
+          </span>
+          {% endif %}
+          {% for tag in related.tags.all %}
+          <span class="bg-primary-50 text-primary-700 text-xs px-2 py-0.5 rounded-full border border-primary-100">#{{ tag.name }}</span>
+          {% endfor %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Enhanced animations for entry cards with staggered effect
+    const entryCards = document.querySelectorAll('.scale-in');
+    entryCards.forEach((card, index) => {
+      setTimeout(() => {
+        card.style.animation = 'scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+      }, 120 * index);
+    });
+
+    // Enhanced click handler for photos with smooth transition
+    const entryPhotos = document.querySelectorAll('.entry-photo');
+    if (entryPhotos.length > 0) {
+      entryPhotos.forEach(photo => {
+        photo.addEventListener('click', function() {
+          const fullSizeLink = this.closest('.entry-photo-container').querySelector('.photo-caption a');
+          if (fullSizeLink) {
+            window.open(fullSizeLink.href, '_blank');
+          }
+        });
+      });
+    }
+
+    // Add dismiss functionality for flash messages
+    const dismissButtons = document.querySelectorAll('.dismiss-message');
+    if (dismissButtons.length > 0) {
+      dismissButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const message = this.closest('div');
+          message.style.opacity = '0';
+          message.style.transform = 'translateY(-10px)';
+          message.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+          setTimeout(() => {
+            message.style.height = '0';
+            message.style.margin = '0';
+            message.style.padding = '0';
+            message.style.overflow = 'hidden';
+            message.style.transition = 'all 0.3s ease';
+          }, 300);
+
+          setTimeout(() => {
+            message.remove();
+          }, 600);
+        });
+      });
+    }
+
+    // Add hover effect to header date
+    const dateSpan = document.querySelector('.text-center .inline-block span');
+    if (dateSpan) {
+      dateSpan.addEventListener('mouseenter', function() {
+        this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
+      });
+
+      dateSpan.addEventListener('mouseleave', function() {
+        this.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
+      });
+    }
+
+    // Add smooth scrolling for tag clicks
+    const tagSpans = document.querySelectorAll('.bg-primary-50, .bg-secondary-50');
+    if (tagSpans.length > 0) {
+      tagSpans.forEach(tag => {
+        tag.addEventListener('click', function(e) {
+          if (this.closest('a') && this.closest('a').href) {
+            // Don't interfere with link clicking
+            return;
+          }
+          e.preventDefault();
+          const tagText = this.textContent.trim();
+          // Future functionality: could scroll to related entries with same tag
+          console.log(`Tag clicked: ${tagText}`);
+        });
+      });
+    }
+  });
+
+  // Add lazy loading animations as elements come into viewport
+  document.addEventListener('DOMContentLoaded', function() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.1
+    });
+
+    const animatedElements = document.querySelectorAll('.related-entry-card, .ai-insights-content, .entry-photo-container');
+    animatedElements.forEach(el => {
+      observer.observe(el);
+    });
+  });
+
+  // Add smooth page transitions
+  window.addEventListener('beforeunload', function() {
+    document.body.classList.add('page-transition');
+  });
+
+  // Add keydown navigation
+  document.addEventListener('keydown', function(e) {
+    // Left arrow key to go back to library
+    if (e.key === 'ArrowLeft' && !e.ctrlKey && !e.metaKey) {
+      const backButton = document.querySelector('a[href*="library"]');
+      if (backButton) backButton.click();
+    }
+
+    // 'E' key to edit
+    if (e.key === 'e' && !e.ctrlKey && !e.metaKey) {
+      const editButton = document.querySelector('a[href*="edit_entry"]');
+      if (editButton) editButton.click();
+    }
+  });
+</script>
+
 <style>
-  .prose {
-    max-width: 65ch;
-    line-height: 1.6;
+  /* Additional styles to enhance UI */
+  .in-view {
+    animation: fadeInUp 0.6s ease forwards;
   }
-  .prose p {
-    margin-bottom: 1.25em;
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-  .page-curl {
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 30px;
-    width: 30px;
-    background: linear-gradient(135deg, transparent 50%, rgba(230,230,230,0.7) 50%);
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
-  .page-texture {
-    background-image:
-      linear-gradient(rgba(255,255,255,0.5) 2px, transparent 2px),
-      linear-gradient(90deg, rgba(255,255,255,0.5) 2px, transparent 2px);
-    background-size: 40px 40px;
-    background-color: #f8f5f0;
+
+  .page-transition {
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+
+  .handwritten {
+    font-family: 'Satisfy', cursive, var(--diary-font);
   }
+
+  .glass-effect {
+    backdrop-filter: blur(8px);
+  }
+
+  .entry-photo-container {
+    transform-origin: center;
+  }
+
   .animate-blob {
     animation: blob 7s infinite;
   }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
   @keyframes blob {
     0% {
       transform: translate(0px, 0px) scale(1);
@@ -49,224 +442,55 @@
       transform: translate(0px, 0px) scale(1);
     }
   }
-  .animation-delay-2000 {
-    animation-delay: 2s;
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
-  .scale-in {
-    animation: scaleIn 0.5s ease forwards;
-    transform: scale(0.95);
-    opacity: 0;
+
+  .journal-card {
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   }
-  @keyframes scaleIn {
-    to {
-      transform: scale(1);
-      opacity: 1;
-    }
+
+  .page-texture {
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
   }
-  .fade-in {
-    animation: fadeIn 0.5s ease forwards;
-    opacity: 0;
+
+  .page-curl {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, transparent 50%, rgba(230, 230, 230, 0.4) 55%, rgba(230, 230, 230, 0.8) 100%);
+    border-radius: 0 0 0 10px;
+    box-shadow: -2px -2px 5px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
   }
-  @keyframes fadeIn {
-    to {
-      opacity: 1;
-    }
+
+  .journal-card:hover .page-curl {
+    width: 50px;
+    height: 50px;
+  }
+
+  .btn-modern {
+    font-weight: 500;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+  }
+
+  .btn-modern:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn-modern:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 </style>
-{% endblock %}
-
-{% block content %}
-<div class="max-w-4xl w-full mx-auto relative">
-  <!-- Decorative elements -->
-  <div class="absolute -top-10 -left-16 h-32 w-32 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
-  <div class="absolute -bottom-8 -right-16 h-32 w-32 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-
-  {% if messages %}
-    <div class="mb-6">
-      {% for message in messages %}
-        <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% elif message.tags == 'success' %}bg-green-100 border-green-400 text-green-700{% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} px-4 py-3 rounded-lg border mb-4 shadow-sm">
-          {{ message }}
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  <!-- Page header with date -->
-  <div class="text-center mb-6 relative z-10">
-    <div class="inline-block mb-3">
-      <span class="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-gray-500 shadow-sm border border-white/50">
-        {{ entry.created_at|date:"F j, Y" }}
-      </span>
-    </div>
-    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2">
-      {{ entry.title|default:"Untitled Entry" }}
-    </h2>
-    {% if entry.mood or entry.tags.all %}
-    <div class="flex flex-wrap items-center justify-center gap-2 max-w-md mx-auto">
-      {% if entry.mood %}
-      <span class="bg-secondary-50 text-secondary-700 text-xs px-2 py-1 rounded-full shadow-sm">
-        {{ entry.mood }}
-      </span>
-      {% endif %}
-      {% for tag in entry.tags.all %}
-      <span class="bg-primary-50 text-primary-700 text-xs px-2 py-1 rounded-full shadow-sm">
-        {{ tag.name }}
-      </span>
-      {% endfor %}
-    </div>
-    {% endif %}
-  </div>
-
-  <!-- Entry Detail Section -->
-  <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden mb-6 border border-white card-hover scale-in relative z-10">
-    <!-- Entry Content -->
-    <div class="p-5 sm:p-6 diary-font page-texture relative">
-      <div class="page-curl"></div>
-      <div class="prose max-w-none text-gray-800 text-lg leading-relaxed">
-        {{ entry.content|linebreaks }}
-      </div>
-    </div>
-
-    <!-- AI Analysis -->
-    {% if entry.summary %}
-    <div class="border-t border-gray-200 p-5 sm:p-6 bg-gradient-to-r from-secondary-50 to-primary-50">
-      <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
-        <h2 class="text-lg font-semibold text-secondary-700 flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          AI Insights
-        </h2>
-        <form method="post" class="inline">
-          {% csrf_token %}
-          <input type="hidden" name="regenerate_summary" value="true">
-          <button type="submit" class="btn-gradient text-white text-xs flex items-center px-3 py-1.5 rounded-full shadow-sm transition hover:shadow">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Regenerate
-          </button>
-        </form>
-      </div>
-      <div class="glass-effect rounded-lg border border-white/30 p-5 shadow-md">
-        <div class="handwritten text-lg sm:text-xl text-gray-800 leading-relaxed">
-          {{ entry.summary|linebreaks }}
-        </div>
-      </div>
-
-      {% if summary_versions %}
-      <div class="mt-4">
-        <details class="group">
-          <summary class="text-sm font-medium text-gray-700 mb-2 cursor-pointer flex items-center hover:text-secondary-600">
-            <span>Previous versions</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transform group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </summary>
-          <div class="space-y-2 mt-2">
-            {% for version in summary_versions %}
-            <div class="bg-white rounded-lg border border-gray-200 p-3 hover:border-secondary-200 transition">
-              <div class="text-xs text-gray-500 mb-2">
-                Generated on {{ version.created_at|date:"F j, Y g:i a" }}
-              </div>
-              <div class="text-sm text-gray-600">
-                {{ version.summary|truncatechars:100 }}
-              </div>
-              <form method="post" class="mt-2 text-right">
-                {% csrf_token %}
-                <input type="hidden" name="restore_version" value="true">
-                <input type="hidden" name="version_id" value="{{ version.id }}">
-                <button type="submit" class="text-secondary-600 text-xs hover:underline bg-secondary-50 px-2 py-1 rounded-full">Restore this version</button>
-              </form>
-            </div>
-            {% endfor %}
-          </div>
-        </details>
-      </div>
-      {% endif %}
-    </div>
-    {% endif %}
-
-    <!-- Actions -->
-    <div class="border-t border-gray-200 p-5 sm:p-6 flex flex-wrap justify-between items-center gap-4 bg-gradient-to-r from-secondary-50 to-primary-50">
-      <div class="flex flex-wrap gap-3">
-        <a href="{% url 'edit_entry' entry.id %}" class="text-secondary-600 hover:text-secondary-800 flex items-center text-sm bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100 transition hover:shadow">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-          Edit
-        </a>
-        <form method="post" action="{% url 'delete_entry' entry.id %}" class="inline" onsubmit="return confirm('Are you sure you want to delete this entry? This action cannot be undone.');">
-          {% csrf_token %}
-          <button type="submit" class="text-red-600 hover:text-red-800 flex items-center text-sm bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100 transition hover:shadow hover:bg-red-50">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            Delete
-          </button>
-        </form>
-      </div>
-      <a href="{% url 'library' %}" class="text-gray-600 hover:text-gray-800 flex items-center text-sm bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100 transition hover:shadow">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Back to Library
-      </a>
-    </div>
-  </div>
-
-  <!-- Related Entries -->
-  {% if related_entries %}
-  <div class="mb-12">
-    <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4 diary-font">Related Entries</h3>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-      {% for related in related_entries %}
-      <a href="{% url 'entry_detail' related.id %}" class="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition border border-white card-hover">
-        <h4 class="font-semibold text-gray-800 text-sm mb-1 diary-font">{{ related.title }}</h4>
-        <p class="text-xs text-gray-500 mb-2">{{ related.created_at|date:"F j, Y" }}</p>
-        <p class="text-xs text-gray-600 diary-font line-clamp-3">{{ related.content|truncatechars:100 }}</p>
-        <div class="mt-2 flex gap-1 flex-wrap">
-          {% for tag in related.tags.all %}
-          <span class="bg-secondary-50 text-secondary-700 text-xs px-2 py-0.5 rounded-full">{{ tag.name }}</span>
-          {% endfor %}
-        </div>
-      </a>
-      {% endfor %}
-    </div>
-  </div>
-  {% endif %}
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-  // Page load animations
-  document.addEventListener('DOMContentLoaded', function() {
-    // Animations for entry cards
-    const entryCards = document.querySelectorAll('.card-hover');
-    entryCards.forEach((card, index) => {
-      setTimeout(() => {
-        card.classList.add('scale-in');
-      }, 100 * index);
-    });
-
-    // Show a return button if coming from dashboard
-    const referrer = document.referrer;
-    if (referrer.includes('/dashboard')) {
-      // Show a return button
-      const returnButton = document.createElement('div');
-      returnButton.className = 'fixed top-20 left-6 bg-white/80 backdrop-blur-sm rounded-full shadow-md p-2 cursor-pointer z-40 md:block hidden';
-      returnButton.innerHTML = `
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-2 px-3 py-1 text-sm text-gray-700">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Dashboard
-        </a>
-      `;
-      document.body.appendChild(returnButton);
-    }
-  });
-</script>
 {% endblock %}

@@ -183,6 +183,7 @@ class UserPreference(models.Model):
 class EntryForm(forms.ModelForm):
     # Add a field for tags that will be processed separately
     tags = forms.CharField(required=False, help_text="Comma-separated tags")
+    entry_photo = forms.ImageField(required=False)  # Add this field
 
     class Meta:
         model = Entry
@@ -212,6 +213,18 @@ class EntryForm(forms.ModelForm):
 
         if commit:
             entry.save()
+
+            # Handle photo upload if present
+            if 'entry_photo' in self.files:
+                from diary.models import EntryPhoto
+
+                # Create a new EntryPhoto linked to this entry
+                photo = EntryPhoto(
+                    entry=entry,
+                    photo=self.files['entry_photo']
+                )
+                photo.save()
+                print(f"Created new photo for entry #{entry.id}: {photo.photo.url}")
 
             # Process tags field
             if 'tags' in self.cleaned_data:
@@ -398,3 +411,13 @@ class UserFollowing(models.Model):
 
     def __str__(self):
         return f"{self.user.username} follows {self.followed_user.username}"
+
+class EntryPhoto(models.Model):
+    """Model for photos attached to journal entries"""
+    entry = models.ForeignKey(Entry, on_delete=models.CASCADE, related_name='photos')
+    photo = models.ImageField(upload_to='entry_photos/%Y/%m/%d/')
+    caption = models.CharField(max_length=255, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Photo for {self.entry.title}"

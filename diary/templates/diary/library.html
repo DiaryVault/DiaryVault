@@ -1,69 +1,181 @@
 {% extends 'base.html' %}
 
-{% block title %}DiaryVault - Library{% endblock %}
+{% block title %}DiaryVault - Your Journal Collection{% endblock %}
 
 {% block extra_css %}
 <style>
-  .book-title {
+  /* Core styling */
+  .diary-font {
     font-family: 'Playfair Display', serif;
   }
-  /* Book styling */
-  .book {
-    transition: all 0.3s ease;
+
+  /* Enhanced animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes floatIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+
+  .animate-float-in {
+    animation: floatIn 0.6s ease-out forwards;
+  }
+
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+
+  /* Journal Collection Redesign */
+  .journal-collection {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .journal-card {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     transform-style: preserve-3d;
     perspective: 1000px;
-    position: relative;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  }
-  .book:hover {
-    transform: rotateY(-15deg) translateY(-10px);
-    z-index: 10;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
-  .book-spine {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 30px;
-    background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0));
-  }
-  /* Book shelf styling */
-  .book-shelf {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="20" viewBox="0 0 100 20" fill="none"><rect width="100" height="20" fill="%23D1BAA1"/><path d="M0 0 L100 0 L100 2 L0 2 Z" fill="%23A58768"/><path d="M0 18 L100 18 L100 20 L0 20 Z" fill="%237A6348"/></svg>');
-    background-repeat: repeat-x;
-    background-position: bottom;
     overflow: hidden;
   }
-  .book-collection {
-    overflow-x: auto;
-    scrollbar-width: thin;
-    -ms-overflow-style: none;
-    -webkit-overflow-scrolling: touch;
+
+  .journal-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
-  .book-collection::-webkit-scrollbar {
-    height: 6px;
+
+  .journal-cover {
+    position: relative;
+    height: 280px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
-  .book-collection::-webkit-scrollbar-track {
-    background: rgba(255,255,255,0.4);
-    border-radius: 3px;
+
+  .journal-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.25rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    color: white;
+    transform: translateY(0);
+    transition: all 0.3s ease;
   }
-  .book-collection::-webkit-scrollbar-thumb {
-    background: rgba(107, 114, 128, 0.3);
-    border-radius: 3px;
+
+  .journal-card:hover .journal-info {
+    transform: translateY(-5px);
   }
-  .book-collection::-webkit-scrollbar-thumb:hover {
-    background: rgba(107, 114, 128, 0.5);
+
+  .journal-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
-  /* Timeline styling */
+
+  .journal-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    opacity: 0.9;
+  }
+
+  .journal-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  /* Journal preview content */
+  .journal-preview {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+    backdrop-filter: blur(4px);
+    padding: 1.5rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .journal-card:hover .journal-preview {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .preview-content {
+    font-family: 'Satisfy', cursive;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #4b5563;
+    flex-grow: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 8;
+    -webkit-box-orient: vertical;
+  }
+
+  .preview-actions {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Timeline view */
+  .timeline-container {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .timeline-line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #6366f1 0%, #8b5cf6 100%);
+    opacity: 0.5;
+  }
+
   .timeline-entry {
     position: relative;
-    padding-left: 10px;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
   }
+
   .timeline-entry::before {
     content: '';
     position: absolute;
-    left: -29px;
+    left: -2rem;
     top: 0;
     width: 12px;
     height: 12px;
@@ -73,268 +185,389 @@
     z-index: 1;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
-  .timeline-line {
-    position: absolute;
-    left: -24px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(to bottom, #6366f1 0%, #8b5cf6 100%);
-    opacity: 0.5;
-  }
-  /* Tab styling */
-  .tabs-container button {
-    position: relative;
-    transition: all 0.3s ease;
+
+  /* Modern tabs */
+  .modern-tabs {
+    display: flex;
+    border-radius: 0.75rem;
     overflow: hidden;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    padding: 0.375rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.5);
   }
-  .tabs-container button.active {
-    color: #6366f1;
-    border-color: #6366f1;
+
+  .tab-selector {
+    position: absolute;
+    height: calc(100% - 0.75rem);
+    top: 0.375rem;
+    left: 0.375rem;
+    background: white;
+    border-radius: 0.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    z-index: 0;
   }
-  .tabs-container button.active::after {
-    content: '';
+
+  .modern-tab {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    border-radius: 0.5rem;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .modern-tab.active {
+    color: #4f46e5;
+    font-weight: 600;
+  }
+
+  .modern-tab:not(.active):hover {
+    color: #4b5563;
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  /* Memory collection */
+  .memory-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: minmax(180px, auto);
+    gap: 1rem;
+  }
+
+  .memory-card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+    transform: translateY(0);
+  }
+
+  .memory-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .memory-card.featured {
+    grid-column: span 8;
+    grid-row: span 2;
+  }
+
+  .memory-card.normal {
+    grid-column: span 4;
+    grid-row: span 1;
+  }
+
+  .memory-card.tall {
+    grid-column: span 4;
+    grid-row: span 2;
+  }
+
+  .memory-card.wide {
+    grid-column: span 8;
+    grid-row: span 1;
+  }
+
+  .memory-content {
     position: absolute;
     bottom: 0;
     left: 0;
+    right: 0;
+    padding: 1.5rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+    color: white;
+  }
+
+  .memory-image {
     width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6);
-    animation: slideInFromLeft 0.4s ease-out forwards;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
   }
-  @keyframes slideInFromLeft {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(0);
-    }
-  }
-  /* Mobile styling */
-  @media (max-width: 640px) {
-    .book {
-      transform: none !important;
-    }
-    .book:hover {
-      transform: translateY(-5px) !important;
-    }
-    .mobile-tabs {
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      -webkit-overflow-scrolling: touch;
-    }
-    .mobile-tabs::-webkit-scrollbar {
-      display: none;
-    }
-    .timeline-entry::before {
-      left: -22px;
-    }
-    .timeline-line {
-      left: -17px;
-    }
-  }
-  /* Filter badge styling */
-  .filter-badge {
-    display: inline-flex;
-    align-items: center;
-    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-    color: #4f46e5;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    margin-top: 0.5rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-  }
-  .clear-filter {
-    display: inline-flex;
-    align-items: center;
-    margin-left: 0.5rem;
-    color: #6b7280;
-    font-size: 0.75rem;
-    transition: all 0.15s ease;
-  }
-  .clear-filter:hover {
-    color: #ef4444;
+
+  .memory-card:hover .memory-image {
     transform: scale(1.05);
   }
-  /* Entry card styling */
-  .entry-card {
+
+  /* Search bar improvements */
+  .search-container {
+    position: relative;
     transition: all 0.3s ease;
-    border-left: 3px solid transparent;
   }
-  .entry-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+
+  .search-container:focus-within {
+    transform: scale(1.02);
   }
-  /* Mood pill styling */
+
+  .search-input {
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .search-input:focus {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Mood indicators */
   .mood-pill {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.375rem;
     border-radius: 9999px;
-    padding: 0.25rem 0.75rem;
+    padding: 0.375rem 0.75rem;
     font-size: 0.75rem;
     font-weight: 500;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     transition: all 0.2s ease;
   }
+
   .mood-pill.happy {
     background-color: #ecfdf5;
     color: #059669;
     border: 1px solid rgba(5, 150, 105, 0.2);
   }
+
   .mood-pill.content {
     background-color: #eff6ff;
     color: #3b82f6;
     border: 1px solid rgba(59, 130, 246, 0.2);
   }
+
   .mood-pill.excited {
     background-color: #f5f3ff;
     color: #8b5cf6;
     border: 1px solid rgba(139, 92, 246, 0.2);
   }
+
   .mood-pill.neutral {
     background-color: #f3f4f6;
     color: #6b7280;
     border: 1px solid rgba(107, 114, 128, 0.2);
   }
+
   .mood-pill.anxious {
     background-color: #fffbeb;
     color: #d97706;
     border: 1px solid rgba(217, 119, 6, 0.2);
   }
+
   .mood-pill.sad {
     background-color: #fee2e2;
     color: #dc2626;
     border: 1px solid rgba(220, 38, 38, 0.2);
   }
-  /* Tag styling */
-  .tag-pill {
-    transition: all 0.2s ease;
-    background-color: white;
-    color: #4b5563;
-    border: 1px solid #e5e7eb;
-    padding: 0.15rem 0.6rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  }
-  .tag-pill:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    background-color: #f5f3ff;
-    color: #6366f1;
-    border-color: #c7d2fe;
-  }
-  /* Fancy section divider */
-  .fancy-divider {
-    display: flex;
-    align-items: center;
-    margin: 2rem 0;
-  }
-  .fancy-divider::before,
-  .fancy-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.3), transparent);
-  }
-  .fancy-divider::before {
-    background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.3));
-    margin-right: 1rem;
-  }
-  .fancy-divider::after {
-    background: linear-gradient(to left, transparent, rgba(99, 102, 241, 0.3));
-    margin-left: 1rem;
-  }
-  .fancy-divider span {
-    color: #6366f1;
-    font-weight: 500;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  /* Improve book layout for grid responsiveness */
-  .period-grid {
+
+  /* Calendar view */
+  .calendar-view {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
   }
-  /* Stats bar improvements */
-  .stats-bar {
-    background: rgba(255,255,255,0.7);
-    backdrop-filter: blur(10px);
-    border-radius: 0.75rem;
-    padding: 0.5rem 1rem;
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-    border: 1px solid rgba(255,255,255,0.8);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  }
-  .stat-item {
+
+  .calendar-day {
+    aspect-ratio: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0.5rem 0.75rem;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
   }
-  .stat-value {
-    font-size: 1.25rem;
-    font-weight: 600;
+
+  .calendar-day.has-entry {
+    background-color: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.2);
     color: #4f46e5;
+    font-weight: 500;
   }
-  .stat-label {
-    font-size: 0.75rem;
+
+  .calendar-day.weekend {
     color: #6b7280;
+    background-color: rgba(107, 114, 128, 0.05);
+  }
+
+  .calendar-day:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+  }
+
+  .calendar-day-number {
+    font-size: 0.875rem;
+  }
+
+  .calendar-day-indicator {
+    height: 5px;
+    width: 5px;
+    border-radius: 50%;
+    background-color: #4f46e5;
     margin-top: 0.25rem;
   }
-  /* Entry card improvements */
-  .entry-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1rem;
+
+  /* Enhanced filters */
+  .filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    background-color: white;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    color: #4b5563;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .filter-chip:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+  }
+
+  .filter-chip.active {
+    background-color: #4f46e5;
+    border-color: #4338ca;
+    color: white;
+  }
+
+  .filter-chip.active:hover {
+    background-color: #4338ca;
+  }
+
+  /* Journal patterns and colors */
+  .pattern-dots {
+    background-image: radial-gradient(#6366f1 0.5px, transparent 0.5px);
+    background-size: 10px 10px;
+  }
+
+  .pattern-lines {
+    background-image: linear-gradient(rgba(99, 102, 241, 0.2) 1px, transparent 1px);
+    background-size: 100% 15px;
+  }
+
+  .pattern-grid {
+    background: linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px),
+                linear-gradient(to right, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .journal-color-blue { background-color: #3b82f6; }
+  .journal-color-purple { background-color: #8b5cf6; }
+  .journal-color-pink { background-color: #ec4899; }
+  .journal-color-green { background-color: #10b981; }
+  .journal-color-yellow { background-color: #f59e0b; }
+  .journal-color-red { background-color: #ef4444; }
+  .journal-color-gray { background-color: #6b7280; }
+
+  /* Responsive fixes */
+  @media (max-width: 768px) {
+    .memory-grid {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .memory-card {
+      min-height: 200px;
+    }
+
+    .journal-collection {
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+
+    .calendar-view {
+      gap: 0.25rem;
+    }
+
+    .calendar-day {
+      padding: 0.25rem;
+    }
+  }
+
+  /* Preloading animation */
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+
+  .loading-shimmer {
+    background: linear-gradient(to right, #f6f7f8 8%, #edeef1 18%, #f6f7f8 33%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto">
-  <!-- Page Header -->
-  <div class="glass-effect rounded-xl p-6 mb-6 border border-white relative z-10 shadow-md">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+  <!-- Page Header with Enhanced Search -->
+  <div class="bg-white/70 backdrop-blur-md rounded-2xl p-6 mb-8 shadow-lg border border-white/30 animate-fade-in">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
       <div>
-        <h2 class="text-2xl sm:text-3xl font-bold diary-font text-gray-900 mb-1 gradient-text">My Journal Library</h2>
-        <p class="text-gray-600 text-sm">Explore your collection of memories, thoughts, and reflections</p>
+        <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 mb-2 diary-font">
+          Your Memory Collection
+        </h1>
+        <p class="text-gray-600 max-w-2xl">
+          Explore your personal collection of thoughts, memories, and reflections.
+          {% if entries|length > 0 %}You have <span class="font-medium text-indigo-600">{{ entries|length }}</span> entries so far.{% endif %}
+        </p>
 
         <!-- Active filter badge (only shows when filtering) -->
         {% if active_filter %}
-        <div class="filter-badge mt-3">
+        <div class="inline-flex items-center px-3 py-1 mt-3 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium border border-indigo-200">
           <span>
-            {% if active_tab == 'tags' %}Filtering by tag:{% elif active_tab == 'moods' %}Filtering by mood:{% else %}Filtering by chapter:{% endif %}
+            {% if active_tab == 'tags' %}Tag:{% elif active_tab == 'moods' %}Mood:{% else %}Period:{% endif %}
             {{ active_filter }}
           </span>
-          <a href="{% url 'library' %}" class="clear-filter">
+          <a href="{% url 'library' %}" class="ml-2 flex items-center text-gray-500 hover:text-red-500 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
-            Clear
           </a>
         </div>
         {% endif %}
       </div>
+
       <div class="flex items-center gap-3 w-full md:w-auto">
-        <div class="relative flex-grow md:w-64">
-          <input type="text" placeholder="Search entries..." class="pl-9 pr-4 py-2 border border-white rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary-400 text-sm w-full glass-effect shadow-sm">
+        <div class="search-container flex-grow md:w-72">
+          <input type="text" placeholder="Search your memories..." class="search-input pl-10 pr-4 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm border border-white/50 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 w-full text-gray-700" />
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
-        <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-4 py-2 rounded-lg shadow-md text-sm flex items-center gap-1 whitespace-nowrap">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+
+        <a href="{% url 'new_entry' %}" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
           New Entry
         </a>
@@ -342,404 +575,405 @@
     </div>
   </div>
 
-  <!-- Stats Overview Bar -->
-  <div class="stats-bar mb-6 scale-in" style="animation-delay: 50ms;">
-    <div class="stat-item">
-      <div class="stat-value">{{ entries|length }}</div>
-      <div class="stat-label">Entries</div>
+  <!-- Quick Stats Cards -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow border border-white/30 flex items-center animate-scale-in animation-delay-100">
+      <div class="bg-indigo-100 p-3 rounded-lg mr-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14-10v2m-14 4h14m-14 4h14m-14 4h14" />
+        </svg>
+      </div>
+      <div>
+        <div class="text-2xl font-bold text-gray-800">{{ entries|length }}</div>
+        <div class="text-xs text-gray-500">Total Entries</div>
+      </div>
     </div>
-    <div class="stat-item">
-      <div class="stat-value">{{ chapters|length }}</div>
-      <div class="stat-label">Chapters</div>
+
+    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow border border-white/30 flex items-center animate-scale-in animation-delay-200">
+      <div class="bg-purple-100 p-3 rounded-lg mr-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <div>
+        <div class="text-2xl font-bold text-gray-800">{{ time_periods|length }}</div>
+        <div class="text-xs text-gray-500">Time Periods</div>
+      </div>
     </div>
-    <div class="stat-item">
-      <div class="stat-value">{{ tags|length }}</div>
-      <div class="stat-label">Tags</div>
+
+    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow border border-white/30 flex items-center animate-scale-in animation-delay-300">
+      <div class="bg-pink-100 p-3 rounded-lg mr-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+        </svg>
+      </div>
+      <div>
+        <div class="text-2xl font-bold text-gray-800">{{ tags|length }}</div>
+        <div class="text-xs text-gray-500">Unique Tags</div>
+      </div>
     </div>
-    <div class="stat-item">
-      <div class="stat-value">{{ moods|length }}</div>
-      <div class="stat-label">Moods</div>
+
+    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow border border-white/30 flex items-center animate-scale-in animation-delay-400">
+      <div class="bg-green-100 p-3 rounded-lg mr-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div>
+        <div class="text-2xl font-bold text-gray-800">{{ moods|length }}</div>
+        <div class="text-xs text-gray-500">Mood States</div>
+      </div>
     </div>
   </div>
 
-  <!-- Tabs Container -->
-  <div class="mb-6 glass-effect rounded-xl overflow-hidden shadow-md scale-in" style="animation-delay: 100ms;">
-    <div class="tabs-container flex border-b border-white/20 mobile-tabs overflow-x-auto touch-pan-x">
-      <button onclick="switchTab('time-periods')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base font-medium text-gray-600 border-b-2 border-transparent flex items-center gap-1.5 {% if active_tab == 'time-periods' %}active{% endif %}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <!-- Modern Tabs -->
+  <div class="relative mb-8 animate-fade-in animation-delay-500">
+    <div class="modern-tabs">
+      <div id="tabSelector" class="tab-selector" style="width: 25%;"></div>
+      <button onclick="switchTab('memories')" class="modern-tab active" data-tab-width="25%" data-tab-offset="0%">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Memories
+      </button>
+      <button onclick="switchTab('journals')" class="modern-tab" data-tab-width="25%" data-tab-offset="25%">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        Journals
+      </button>
+      <button onclick="switchTab('timeline')" class="modern-tab" data-tab-width="25%" data-tab-offset="50%">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14-10v2m-2 4h10m-10 4h10m-10 4h10" />
+        </svg>
+        Timeline
+      </button>
+      <button onclick="switchTab('calendar')" class="modern-tab" data-tab-width="25%" data-tab-offset="75%">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        Time Periods
-      </button>
-      <button onclick="switchTab('tags')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base font-medium text-gray-600 border-b-2 border-transparent flex items-center gap-1.5 {% if active_tab == 'tags' %}active{% endif %}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-        </svg>
-        Tags
-      </button>
-      <button onclick="switchTab('moods')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base font-medium text-gray-600 border-b-2 border-transparent flex items-center gap-1.5 {% if active_tab == 'moods' %}active{% endif %}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        Moods
-      </button>
-      <button onclick="switchTab('all-entries')" class="pb-3 px-4 sm:px-6 text-sm sm:text-base font-medium text-gray-600 border-b-2 border-transparent flex items-center gap-1.5 {% if active_tab == 'all-entries' %}active{% endif %}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        All Entries
+        Calendar
       </button>
     </div>
   </div>
 
   <!-- Tab Contents -->
   <div id="tabContents">
-    <!-- Time Periods Tab (visible by default) -->
-    <div id="time-periods-tab" class="{% if active_tab != 'time-periods' %}hidden{% endif %} fade-in" style="animation-delay: 200ms;">
-      <!-- Time Periods Grid -->
-      <div class="period-grid">
-        {% for period in time_periods %}
-          <a href="{% url 'time_period' period.period %}" class="block">
-            <div class="h-64 bg-{{ period.color|default:'secondary' }}-500 rounded-xl shadow-lg book group relative scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
-              <div class="absolute inset-1 bg-white rounded-lg p-4 flex flex-col justify-between">
-                <div>
-                  <div class="book-title text-center font-bold text-gray-800 text-lg">{{ period.period }}</div>
-                  <div class="text-xs text-center text-gray-500 mb-3">
-                    {% if 'Q1' in period.period %}Jan - Mar{% endif %}
-                    {% if 'Q2' in period.period %}Apr - Jun{% endif %}
-                    {% if 'Q3' in period.period %}Jul - Sep{% endif %}
-                    {% if 'Q4' in period.period %}Oct - Dec{% endif %}
-                  </div>
-                  <div class="h-24 overflow-hidden">
-                    <div class="handwritten text-xs text-gray-600 leading-relaxed">
-                      {% if period.first_entry %}
-                        {{ period.first_entry.content|truncatechars:180 }}
-                      {% else %}
-                        Start adding entries to this time period...
-                      {% endif %}
-                    </div>
+    <!-- Memories Tab - Visual Grid Layout -->
+    <div id="memories-tab" class="tab-content animate-fade-in">
+      <!-- Smart filters for memories -->
+      <div class="filters-container mb-6">
+        <div class="filter-chip active">
+          <span>All Memories</span>
+        </div>
+        <div class="filter-chip">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Has Photos</span>
+        </div>
+        <div class="filter-chip">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span>With AI Insights</span>
+        </div>
+        <div class="filter-chip">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+          <span>Favorites</span>
+        </div>
+        <div class="filter-chip">
+          <span>Last 30 Days</span>
+        </div>
+      </div>
+
+      {% if entries|length > 0 %}
+      <!-- Memory Collection Grid -->
+      <div class="memory-grid mb-10">
+        {% for entry in entries|slice:":10" %}
+          <div class="memory-card {% cycle 'featured' 'normal' 'tall' 'wide' 'normal' 'normal' 'wide' 'normal' 'tall' 'featured' %} animate-scale-in" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+            <a href="{% url 'entry_detail' entry.id %}">
+              {% if entry.photos.first %}
+                <img src="{{ entry.photos.first.photo.url }}" alt="Entry photo" class="memory-image" />
+              {% elif entry.photo.url|default:'' %}
+                <img src="{{ entry.photo.url }}" alt="Entry photo" class="memory-image" />
+              {% else %}
+                <div class="memory-image bg-gradient-to-br {{ forloop.counter0|divisibleby:6|yesno:'from-indigo-400 to-purple-500,from-pink-400 to-rose-500,from-cyan-400 to-blue-500,from-green-400 to-emerald-500,from-amber-400 to-orange-500,from-red-400 to-rose-500' }} p-6 flex items-center justify-center">
+                  <div class="handwritten text-white text-center opacity-80 font-medium">
+                    {{ entry.content|truncatechars:150 }}
                   </div>
                 </div>
-                <div class="flex items-center justify-center gap-1 text-{{ period.color|default:'secondary' }}-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                  <span class="text-xs font-medium">{{ period.count }} entries</span>
+              {% endif %}
+              <div class="memory-content">
+                <h3 class="font-bold text-lg text-white mb-1">{{ entry.title|default:"Untitled Memory" }}</h3>
+                <div class="flex justify-between items-center">
+                  <div class="text-xs text-white/80">{{ entry.created_at|date:"F j, Y" }}</div>
+                  {% if entry.mood %}
+                  <div class="text-xs py-1 px-2 rounded-full bg-white/20 text-white">
+                    {% if entry.mood == 'happy' %}😊
+                    {% elif entry.mood == 'content' %}😌
+                    {% elif entry.mood == 'excited' %}🤩
+                    {% elif entry.mood == 'neutral' %}😐
+                    {% elif entry.mood == 'anxious' %}😰
+                    {% elif entry.mood == 'sad' %}😢
+                    {% else %}✨
+                    {% endif %}
+                    {{ entry.mood|title }}
+                  </div>
+                  {% endif %}
                 </div>
               </div>
-              <div class="book-spine"></div>
-              <div class="absolute inset-0 rounded-lg bg-black bg-opacity-0 group-hover:bg-opacity-10 transition pointer-events-none"></div>
-            </div>
-          </a>
-        {% empty %}
-          <div class="col-span-full glass-effect rounded-xl p-8 text-center border border-white/20 shadow-md">
-            <div class="bg-white/50 rounded-lg p-6 inline-block mb-4 shadow-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-            </div>
-            <h3 class="text-lg font-medium diary-font text-gray-900 mb-2">No entries yet</h3>
-            <p class="text-gray-600 mb-6">Start journaling to build your library of memories.</p>
-            <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-4 py-2 rounded-lg shadow-md">Create Your First Entry</a>
+            </a>
           </div>
         {% endfor %}
       </div>
-
-      <!-- Fancy divider -->
-      <div class="fancy-divider">
-        <span>Life Chapters</span>
-      </div>
-
-      <!-- Life Chapters Section -->
-      <div class="mb-12 scale-in" style="animation-delay: 300ms;">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-semibold diary-font text-gray-800">Browse by Chapter</h3>
-          <a href="{% url 'manage_chapters' %}" class="text-sm text-secondary-600 hover:text-secondary-700 flex items-center gap-1 bg-white/50 px-3 py-1.5 rounded-full shadow-sm transition hover:bg-white">
-            <span>Manage chapters</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065z" />
-            </svg>
-          </a>
+      {% else %}
+      <!-- Empty state -->
+      <div class="bg-white/70 backdrop-blur-md rounded-2xl p-8 text-center border border-white/30 shadow-md">
+        <div class="bg-indigo-50 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
         </div>
-
-        <!-- Book Shelf with improved scrolling -->
-        <div class="h-60 sm:h-72 relative book-shelf mb-6 glass-effect rounded-xl overflow-hidden border border-white/20 shadow-md">
-          <div class="book-collection pb-4 pr-2 h-full flex items-end">
-            <div class="flex gap-4 sm:gap-6 px-4 py-4 h-full items-end w-max">
-              {% for chapter in chapters %}
-              <!-- Chapter Book -->
-              <a href="{% url 'library' %}?chapter={{ chapter.id }}" class="block flex-shrink-0">
-                <div class="h-48 sm:h-56 w-32 sm:w-40 bg-{{ chapter.color }} rounded-xl shadow-xl book {% if chapter.active %}border-4 border-white{% endif %}">
-                  <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col items-center">
-                    <div class="book-title text-center font-bold text-gray-800 mb-2 text-sm sm:text-base">{{ chapter.title }}</div>
-                    <div class="handwritten text-xs text-gray-600 leading-relaxed line-clamp-4">
-                      {{ chapter.description }}
-                    </div>
-                    <div class="mt-auto text-xs text-center text-{{ chapter.color }}-500 pt-2 flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <span>{{ chapter.count }} entries</span>
-                    </div>
-                  </div>
-                  <div class="book-spine"></div>
-                </div>
-              </a>
-              {% empty %}
-              <div class="h-48 sm:h-56 w-32 sm:w-40 bg-gray-300 rounded-xl shadow-xl book flex-shrink-0">
-                <div class="absolute inset-1 bg-white rounded-lg p-3 sm:p-4 flex flex-col items-center justify-center">
-                  <div class="text-gray-400 text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    <div class="book-title text-center font-bold text-gray-800 mb-2 text-sm">Add Chapters</div>
-                  </div>
-                </div>
-                <div class="book-spine"></div>
-              </div>
-              {% endfor %}
-
-              <!-- Add New -->
-              <a href="{% url 'manage_chapters' %}" class="block flex-shrink-0">
-                <div class="h-32 sm:h-40 w-24 sm:w-32 bg-white/30 backdrop-blur-sm rounded-xl border-2 border-dashed border-white/50 flex items-center justify-center text-gray-500 hover:text-secondary-600 hover:border-secondary-300 transition cursor-pointer shadow-sm hover:shadow-md">
-                  <div class="text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    <span class="text-xs font-medium">Create</span>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
-
-          <!-- Scroll hint indicator -->
-          <div class="absolute right-4 bottom-4 bg-white/70 rounded-full p-1.5 shadow-sm backdrop-blur-sm text-gray-500 animate-pulse-slow opacity-70">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tags Tab -->
-    <div id="tags-tab" class="{% if active_tab != 'tags' %}hidden{% endif %} fade-in" style="animation-delay: 200ms;">
-      <!-- Tags Filter Bar -->
-      <div class="mb-6 flex flex-wrap gap-2 p-4 glass-effect rounded-xl border border-white/20 shadow-md">
-        <a href="{% url 'library' %}?tab=tags" class="bg-{% if not tag_filter %}secondary-100 text-secondary-700{% else %}white text-gray-700 hover:bg-gray-100{% endif %} text-sm px-3 py-1.5 rounded-full transition shadow-sm">
-          All Tags
+        <h3 class="text-xl font-bold text-gray-800 mb-2">Start Your Memory Collection</h3>
+        <p class="text-gray-600 mb-6 max-w-md mx-auto">Begin capturing your thoughts, experiences, and reflections with your first journal entry.</p>
+        <a href="{% url 'new_entry' %}" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+          Create Your First Memory
         </a>
-        {% for tag in tags %}
-          <a href="{% url 'library' %}?tag={{ tag.name }}" class="bg-{% if tag.active %}secondary-600 text-white{% else %}white text-gray-700 hover:bg-gray-100{% endif %} text-sm px-3 py-1.5 rounded-full transition shadow-sm">
-            {{ tag.name }} <span class="text-xs px-1.5 py-0.5 rounded-full {% if tag.active %}bg-white/30{% else %}bg-gray-100{% endif %}">{{ tag.count }}</span>
-          </a>
-        {% empty %}
-          <p class="text-gray-500 text-sm">No tags found. Add tags to your entries to organize them better.</p>
-        {% endfor %}
       </div>
+      {% endif %}
 
-      <!-- Tagged Entries - Grid Layout -->
-      <div class="entry-grid">
-        {% for entry in tagged_entries %}
-          <div class="glass-effect rounded-xl shadow-md overflow-hidden border border-white/20 hover:shadow-lg transition entry-card border-l-4 border-secondary-400 scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
-            <div class="p-5">
-              <div class="flex justify-between items-start mb-3">
-                <h4 class="font-semibold diary-font text-gray-800">{{ entry.title }}</h4>
-                <div class="mood-pill {{ entry.mood|default:'neutral' }}">
-                  <span>{{ entry.mood|default:"neutral"|title }}</span>
-                </div>
-              </div>
-              <p class="text-sm text-gray-500 mb-3 flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                {{ entry.created_at|date:"F j, Y" }}
-              </p>
-              <p class="text-gray-600 diary-font text-sm line-clamp-3">{{ entry.content|truncatechars:120 }}</p>
-
-              <div class="mt-4 flex flex-wrap gap-1 mb-3">
-                {% for tag in entry.tags.all %}
-                  <span class="tag-pill {% if tag.name == tag_filter %}border-secondary-300 bg-secondary-50 text-secondary-600{% endif %}">{{ tag.name }}</span>
-                {% endfor %}
-              </div>
-
-              <div class="flex justify-end">
-                <a href="{% url 'entry_detail' entry.id %}" class="text-secondary-600 text-sm hover:underline flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full shadow-sm hover:bg-white/80 transition">
-                  <span>Read more</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </a>
-              </div>
-            </div>
-          </div>
-        {% empty %}
-          <div class="col-span-full glass-effect rounded-xl p-8 text-center border border-white/20 shadow-md">
-            <p class="text-gray-600">{% if tag_filter %}No entries found with tag "{{ tag_filter }}".{% else %}No tagged entries found. Add tags to your entries to see them here.{% endif %}</p>
-          </div>
-        {% endfor %}
+      {% if entries|length > 10 %}
+      <!-- Load More Button -->
+      <div class="text-center">
+        <button id="loadMoreMemories" class="px-5 py-2.5 bg-white rounded-xl shadow border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors flex items-center mx-auto">
+          <span>Load More Memories</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
       </div>
+      {% endif %}
     </div>
 
-    <!-- Moods Tab -->
-    <div id="moods-tab" class="{% if active_tab != 'moods' %}hidden{% endif %} fade-in" style="animation-delay: 200ms;">
-      <!-- Mood Filter Grid -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8">
-        {% for mood in moods %}
-          <a href="{% url 'library' %}?mood={{ mood.name }}" class="glass-effect p-4 rounded-xl shadow-md hover:shadow-lg transition text-center group card-hover border border-{% if mood.active %}secondary-400{% else %}white/20{% endif %} {% if mood.active %}bg-secondary-50{% endif %} scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
-            <div class="text-3xl mb-2">{{ mood.emoji }}</div>
-            <div class="font-medium text-gray-800 mb-1 group-hover:text-secondary-600 capitalize">{{ mood.name }}</div>
-            <div class="text-xs text-gray-500">{{ mood.count }} entries</div>
-          </a>
-        {% empty %}
-          <div class="col-span-full glass-effect p-8 text-center rounded-xl border border-white/20 shadow-md">
-            <p class="text-gray-600">No mood data available yet. Add moods to your entries to see them here.</p>
-          </div>
-        {% endfor %}
-      </div>
-
-      <!-- Recent Mood Entries - Card Grid Layout -->
-      <div class="glass-effect rounded-xl shadow-md overflow-hidden border border-white/20 mb-4">
-        <div class="px-6 py-4 bg-white/30 border-b border-white/20">
-          <h3 class="font-semibold diary-font text-gray-800">
-            {% if mood_filter %}
-            Entries with mood "{{ mood_filter }}"
-            {% else %}
-            Recent Entries by Mood
-            {% endif %}
-          </h3>
-        </div>
-      </div>
-
-      <div class="entry-grid">
-        {% for entry in mood_entries %}
-          <div class="glass-effect rounded-xl shadow-md overflow-hidden border border-white/20 hover:shadow-lg transition entry-card border-l-4 border-{% if entry.mood == 'happy' %}green-400{% elif entry.mood == 'content' %}blue-400{% elif entry.mood == 'excited' %}purple-400{% elif entry.mood == 'anxious' %}amber-400{% elif entry.mood == 'sad' %}red-400{% else %}gray-400{% endif %} scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
-            <div class="p-5">
-              <div class="flex justify-between items-start mb-3">
-                <div class="flex items-center gap-2">
-                  <span class="text-xl">{{ entry.mood_emoji|default:"😊" }}</span>
-                  <h4 class="font-semibold diary-font text-gray-800">{{ entry.title }}</h4>
-                </div>
-                <div class="mood-pill {{ entry.mood|default:'neutral' }}">
-                  <span>{{ entry.mood|default:"neutral"|title }}</span>
-                </div>
-              </div>
-              <p class="text-sm text-gray-500 mb-3 flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                {{ entry.created_at|date:"F j, Y" }}
-              </p>
-              <p class="text-gray-600 diary-font text-sm line-clamp-3">{{ entry.content|truncatechars:120 }}</p>
-
-              <div class="mt-4 flex justify-end">
-                <a href="{% url 'entry_detail' entry.id %}" class="text-secondary-600 text-sm hover:underline flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full shadow-sm hover:bg-white/80 transition">
-                  <span>Read more</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </a>
-              </div>
-            </div>
-          </div>
-        {% empty %}
-          <div class="col-span-full glass-effect rounded-xl p-8 text-center border border-white/20 shadow-md">
-            <p class="text-gray-600">{% if mood_filter %}No entries found with mood "{{ mood_filter }}".{% else %}No mood entries available yet. Add moods to your entries to see them here.{% endif %}</p>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- All Entries Tab -->
-    <div id="all-entries-tab" class="{% if active_tab != 'all-entries' %}hidden{% endif %} fade-in" style="animation-delay: 200ms;">
-      <!-- Entries Filter and Sort -->
-      <div class="glass-effect rounded-xl p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-6 border border-white/20 shadow-md">
-        <div class="text-sm text-gray-500">Showing {{ entries|length }} entries</div>
-        <div class="flex items-center gap-3">
-          <div class="relative">
-            <select class="pl-3 pr-8 py-1.5 text-sm glass-effect border border-white rounded-md focus:outline-none focus:ring-2 focus:ring-secondary-400 appearance-none shadow-sm">
-              <option>Newest first</option>
-              <option>Oldest first</option>
-              <option>Alphabetical (A-Z)</option>
-            </select>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute right-2 top-2 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <!-- Entries Timeline with improved visuals -->
-      <div class="relative pl-8">
-        <!-- Timeline line -->
-        <div class="timeline-line"></div>
-
-        <!-- Timeline entries -->
-        <div class="space-y-6">
-          {% for entry in entries %}
-            <div class="timeline-entry relative scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
-              <div class="glass-effect rounded-xl shadow-md p-5 mb-4 border border-white/20 entry-card {% if entry.mood %}border-l-4 border-{% if entry.mood == 'happy' %}green-400{% elif entry.mood == 'content' %}blue-400{% elif entry.mood == 'excited' %}purple-400{% elif entry.mood == 'anxious' %}amber-400{% elif entry.mood == 'sad' %}red-400{% else %}gray-400{% endif %}{% endif %}">
-                <div class="flex justify-between items-center mb-2">
-                  <h3 class="font-semibold diary-font text-gray-800">{{ entry.title }}</h3>
-                  <div class="text-xs text-gray-500 flex items-center gap-1">
+    <!-- Journals Tab - Redesigned Collection -->
+    <div id="journals-tab" class="tab-content hidden animate-fade-in">
+      <!-- Journal collection -->
+      <div class="journal-collection">
+        {% for period in time_periods %}
+          <div class="journal-card animate-scale-in" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+            <div class="journal-cover journal-color-{{ forloop.counter0|divisibleby:7|yesno:'blue,purple,pink,green,yellow,red,gray' }} {{ forloop.counter0|divisibleby:3|yesno:'pattern-dots,pattern-lines,pattern-grid,' }}">
+              <div class="journal-info">
+                <h3 class="journal-title">{{ period.period }}</h3>
+                <div class="journal-meta">
+                  <div class="journal-meta-item">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    {{ entry.created_at|date:"F j, Y" }}
+                    <span>
+                      {% if 'Q1' in period.period %}Jan - Mar{% endif %}
+                      {% if 'Q2' in period.period %}Apr - Jun{% endif %}
+                      {% if 'Q3' in period.period %}Jul - Sep{% endif %}
+                      {% if 'Q4' in period.period %}Oct - Dec{% endif %}
+                    </span>
+                  </div>
+                  <div class="journal-meta-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14-10v2m-2 4h10m-10 4h10m-10 4h10" />
+                    </svg>
+                    <span>{{ period.count }} entries</span>
                   </div>
                 </div>
-                <div class="text-sm text-gray-600 diary-font">
-                  <p>{{ entry.content|truncatechars:200 }}</p>
+              </div>
+              <div class="journal-preview">
+                <h4 class="text-lg font-bold text-gray-800 mb-3 dairy-font border-b border-gray-200 pb-2">{{ period.period }}</h4>
+                <div class="preview-content">
+                  {% if period.first_entry %}
+                    {{ period.first_entry.content|truncatechars:300 }}
+                  {% else %}
+                    This journal is empty. Start adding entries to capture your memories from this time period.
+                  {% endif %}
                 </div>
-                <div class="mt-3 flex justify-between items-center flex-wrap gap-2">
-                  <div class="flex gap-1 flex-wrap">
-                    {% if entry.mood %}
-                      <span class="mood-pill {{ entry.mood }}">
-                        {% if entry.mood == 'happy' %}😊
-                        {% elif entry.mood == 'content' %}😌
-                        {% elif entry.mood == 'excited' %}🤩
-                        {% elif entry.mood == 'neutral' %}😐
-                        {% elif entry.mood == 'anxious' %}😰
-                        {% elif entry.mood == 'sad' %}😢
-                        {% else %}😐
-                        {% endif %}
-                        {{ entry.mood|title }}
-                      </span>
-                    {% endif %}
-                    {% for tag in entry.tags.all %}
-                      <a href="{% url 'library' %}?tag={{ tag.name }}" class="tag-pill">{{ tag.name }}</a>
-                    {% endfor %}
-                  </div>
-                  <a href="{% url 'entry_detail' entry.id %}" class="text-secondary-600 text-xs hover:underline flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full shadow-sm hover:bg-white/80 transition">
-                    <span>Read more</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="preview-actions mt-4 pt-3 border-t border-gray-100">
+                  <span class="text-xs text-gray-500">{{ period.count }} entries total</span>
+                  <a href="{% url 'time_period' period.period %}" class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-700">
+                    <span>Open Journal</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                   </a>
                 </div>
               </div>
             </div>
+          </div>
+        {% empty %}
+          <div class="col-span-full bg-white/70 backdrop-blur-md rounded-2xl p-8 text-center border border-white/30 shadow-md">
+            <div class="bg-indigo-50 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Your Journal Collection Is Empty</h3>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto">Start writing entries to automatically create journals organized by time periods.</p>
+            <a href="{% url 'new_entry' %}" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+              Create Your First Entry
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Recent Entries By Tag Section -->
+      <div class="mt-12 mb-8">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 diary-font flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+          </svg>
+          Browse by Tags
+        </h3>
+
+        <div class="filters-container mb-6">
+          <div class="filter-chip active">
+            <span>All Tags</span>
+          </div>
+          {% for tag in tags %}
+            <a href="{% url 'library' %}?tag={{ tag.name }}" class="filter-chip {% if tag.active %}active{% endif %}">
+              <span>{{ tag.name }}</span>
+              <span class="ml-1 px-1.5 py-0.5 rounded-full bg-white/80 text-xs text-gray-600">{{ tag.count }}</span>
+            </a>
           {% empty %}
-            <div class="glass-effect rounded-xl shadow-md p-8 text-center border border-white/20">
-              <div class="bg-white/50 rounded-lg p-6 inline-block mb-4 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </div>
-              <h3 class="text-lg font-medium diary-font text-gray-900 mb-2">No entries yet</h3>
-              <p class="text-gray-600 mb-6">Start journaling to capture your memories and thoughts.</p>
-              <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-4 py-2 rounded-lg shadow-md">Create Your First Entry</a>
+            <span class="text-sm text-gray-500 px-2">No tags found</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Recent Entries By Mood Section -->
+      <div class="mt-12 mb-8">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 diary-font flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Browse by Moods
+        </h3>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+          {% for mood in moods %}
+            <a href="{% url 'library' %}?mood={{ mood.name }}" class="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow-md hover:shadow-lg transition text-center group border border-white/30 {% if mood.active %}ring-2 ring-indigo-400{% endif %} animate-scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
+              <div class="text-4xl mb-2">{{ mood.emoji }}</div>
+              <div class="font-medium text-gray-800 mb-1 group-hover:text-indigo-600 capitalize">{{ mood.name }}</div>
+              <div class="text-xs text-gray-500">{{ mood.count }} entries</div>
+            </a>
+          {% empty %}
+            <div class="col-span-full bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-white/30">
+              <p class="text-gray-600 text-sm">No mood data available yet</p>
             </div>
           {% endfor %}
         </div>
+      </div>
+    </div>
 
-        <!-- Load More -->
+    <!-- Timeline Tab - Enhanced Timeline View -->
+    <div id="timeline-tab" class="tab-content hidden animate-fade-in">
+      <div class="timeline-container">
+        <div class="timeline-line"></div>
+
+        {% for entry in entries %}
+          <div class="timeline-entry" style="animation-delay: {{ forloop.counter0 }}00ms;">
+            <div class="bg-white/70 backdrop-blur-sm rounded-xl shadow-md overflow-hidden border border-white/30 hover:shadow-lg transition {% if entry.mood %}border-l-4 border-{% if entry.mood == 'happy' %}green-400{% elif entry.mood == 'content' %}blue-400{% elif entry.mood == 'excited' %}purple-400{% elif entry.mood == 'anxious' %}amber-400{% elif entry.mood == 'sad' %}red-400{% else %}gray-400{% endif %}{% endif %}">
+              <div class="p-5">
+                <div class="flex justify-between items-start mb-3">
+                  <h3 class="font-bold dairy-font text-gray-800 text-lg">{{ entry.title|default:"Untitled Entry" }}</h3>
+                  <div class="text-sm text-gray-500 flex items-center gap-2 bg-white/50 px-3 py-1 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    {{ entry.created_at|date:"F j, Y" }}
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-4">
+                  {% if entry.photos.first %}
+                    <div class="w-24 h-24 shrink-0 rounded-lg overflow-hidden shadow-sm">
+                      <img src="{{ entry.photos.first.photo.url }}" alt="Entry photo" class="w-full h-full object-cover" />
+                    </div>
+                  {% elif entry.photo.url|default:'' %}
+                    <div class="w-24 h-24 shrink-0 rounded-lg overflow-hidden shadow-sm">
+                      <img src="{{ entry.photo.url }}" alt="Entry photo" class="w-full h-full object-cover" />
+                    </div>
+                  {% endif %}
+
+                  <div class="flex-grow">
+                    <p class="text-gray-700 dairy-font text-sm mb-3">{{ entry.content|truncatechars:200 }}</p>
+
+                    <div class="flex flex-wrap gap-2 items-center">
+                      {% if entry.mood %}
+                        <span class="mood-pill {{ entry.mood }}">
+                          {% if entry.mood == 'happy' %}😊
+                          {% elif entry.mood == 'content' %}😌
+                          {% elif entry.mood == 'excited' %}🤩
+                          {% elif entry.mood == 'neutral' %}😐
+                          {% elif entry.mood == 'anxious' %}😰
+                          {% elif entry.mood == 'sad' %}😢
+                          {% else %}😐
+                          {% endif %}
+                          {{ entry.mood|title }}
+                        </span>
+                      {% endif %}
+
+                      {% for tag in entry.tags.all %}
+                        <a href="{% url 'library' %}?tag={{ tag.name }}" class="bg-white text-xs px-2 py-1 rounded-full border border-gray-200 hover:border-indigo-200 hover:bg-indigo-50 transition-colors">
+                          #{{ tag.name }}
+                        </a>
+                      {% endfor %}
+
+                      <div class="ml-auto">
+                        <a href="{% url 'entry_detail' entry.id %}" class="text-indigo-600 text-sm hover:text-indigo-800 flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full shadow-sm hover:bg-white/80 transition-colors">
+                          <span>Read more</span>
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {% if entry.summary %}
+                <div class="border-t border-gray-100 bg-gradient-to-r from-indigo-50/50 to-purple-50/50 px-5 py-3">
+                  <div class="flex items-center text-sm text-indigo-700 mb-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span class="font-medium">AI Insight</span>
+                  </div>
+                  <p class="text-xs text-gray-600 handwritten">{{ entry.summary|truncatechars:120 }}</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="bg-white/70 backdrop-blur-md rounded-2xl p-8 text-center border border-white/30 shadow-md">
+            <div class="bg-indigo-50 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14-10v2m-2 4h10m-10 4h10m-10 4h10" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Your Timeline Is Empty</h3>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto">Start journaling to build your personal timeline of memories.</p>
+            <a href="{% url 'new_entry' %}" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+              Create Your First Entry
+            </a>
+          </div>
+        {% endfor %}
+
         {% if entries|length > 10 %}
+        <!-- Load More Button -->
         <div class="text-center mt-8">
-          <button id="loadMoreBtn" class="glass-effect border border-white/20 text-gray-700 px-4 py-2 rounded-full hover:bg-white/50 transition text-sm shadow-md">
+          <button id="loadMoreTimeline" class="px-5 py-2.5 bg-white rounded-xl shadow border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors flex items-center mx-auto">
             <span>Load More Entries</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
@@ -747,11 +981,202 @@
         {% endif %}
       </div>
     </div>
+
+    <!-- Calendar Tab -->
+    <div id="calendar-tab" class="tab-content hidden animate-fade-in">
+      <div class="bg-white/70 backdrop-blur-sm rounded-xl p-5 shadow-md border border-white/30 mb-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-800 diary-font">April 2025</h3>
+          <div class="flex items-center gap-2 mt-2 sm:mt-0">
+            <button class="p-2 rounded-lg bg-white/70 hover:bg-indigo-50 transition-colors border border-gray-200 shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button class="px-3 py-1.5 rounded-lg bg-white/70 hover:bg-gray-50 transition-colors border border-gray-200 shadow-sm text-sm font-medium text-gray-700">
+              Today
+            </button>
+            <button class="p-2 rounded-lg bg-white/70 hover:bg-indigo-50 transition-colors border border-gray-200 shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Calendar header -->
+        <div class="grid grid-cols-7 gap-0.5 mb-2 text-center">
+          <div class="text-xs font-medium text-gray-500 py-1">Sun</div>
+          <div class="text-xs font-medium text-gray-500 py-1">Mon</div>
+          <div class="text-xs font-medium text-gray-500 py-1">Tue</div>
+          <div class="text-xs font-medium text-gray-500 py-1">Wed</div>
+          <div class="text-xs font-medium text-gray-500 py-1">Thu</div>
+          <div class="text-xs font-medium text-gray-500 py-1">Fri</div>
+          <div class="text-xs font-medium text-gray-500 py-1">Sat</div>
+        </div>
+
+        <!-- Calendar grid -->
+        <div class="calendar-view">
+          <!-- First week (previous month) -->
+          <div class="calendar-day opacity-40">
+            <span class="calendar-day-number">5</span>
+          </div>
+          <div class="calendar-day opacity-40 weekend">
+            <span class="calendar-day-number">6</span>
+          </div>
+
+          <!-- Second week -->
+          <div class="calendar-day weekend">
+            <span class="calendar-day-number">7</span>
+          </div>
+          <div class="calendar-day">
+            <span class="calendar-day-number">8</span>
+          </div>
+          <div class="calendar-day has-entry">
+            <span class="calendar-day-number">9</span>
+            <div class="calendar-day-indicator"></div>
+          </div>
+          <div class="calendar-day">
+            <span class="calendar-day-number">10</span>
+          </div>
+          <div class="calendar-day">
+            <span class="calendar-day-number">11</span>
+          </div>
+          <div class="calendar-day has-entry">
+            <span class="calendar-day-number">12</span>
+            <div class="calendar-day-indicator"></div>
+          </div>
+          <div class="calendar-day weekend">
+            <span class="calendar-day-number">13</span>
+          </div>
+
+          <!-- Third week -->
+          <div class="calendar-day weekend">
+            <span class="calendar-day-number">14</span>
+          </div>
+          <div class="calendar-day">
+            <span class="calendar-day-number">15</span>
+          </div>
+          <div class="calendar-day has-entry">
+            <span class="calendar-day-number">16</span>
+            <div class="calendar-day-indicator"></div>
+          </div>
+          <div class="calendar-day">
+            <span class="calendar-day-number">17</span>
+          </div>
+          <div class="calendar-day">
+            <span class="calendar-day-number">18</span>
+          </div>
+          <div class="calendar-day">
+            <span class="calendar-day-number">19</span>
+          </div>
+          <div class="calendar-day weekend">
+            <span class="calendar-day-number">20</span>
+          </div>
+
+          <!-- Fourth week -->
+          <div class="calendar-day weekend">
+            <span class="calendar-day-number">21</span>
+          </div>
+          <div class="calendar-day has-entry">
+            <span class="calendar-day-number">22</span>
+            <div class="calendar-day-indicator"></div>
+          </div>
+          <div class="calendar-day">
+            <span class="calendar-day-number">23</span>
+          </div>
+          <div class="calendar-day has-entry">
+            <span class="calendar-day-number">24</span>
+            <div class="calendar-day-indicator"></div>
+          </div>
+          <div class="calendar-day" style="background-color: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3);">
+            <span class="calendar-day-number font-bold text-indigo-600">25</span>
+            <div class="calendar-day-indicator"></div>
+          </div>
+          <div class="calendar-day">
+            <span class="calendar-day-number">26</span>
+          </div>
+          <div class="calendar-day weekend">
+            <span class="calendar-day-number">27</span>
+          </div>
+
+          <!-- Fifth week -->
+          <div class="calendar-day weekend">
+            <span class="calendar-day-number">28</span>
+          </div>
+          <div class="calendar-day">
+            <span class="calendar-day-number">29</span>
+          </div>
+          <div class="calendar-day">
+            <span class="calendar-day-number">30</span>
+          </div>
+          <div class="calendar-day opacity-40">
+            <span class="calendar-day-number">1</span>
+          </div>
+          <div class="calendar-day opacity-40">
+            <span class="calendar-day-number">2</span>
+          </div>
+          <div class="calendar-day opacity-40">
+            <span class="calendar-day-number">3</span>
+          </div>
+          <div class="calendar-day opacity-40 weekend">
+            <span class="calendar-day-number">4</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Entries for selected day -->
+      <h3 class="text-xl font-bold text-gray-800 diary-font mb-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Entries for April 25, 2025
+      </h3>
+
+      <!-- Entries for the day -->
+      <div class="space-y-4">
+        <div class="bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-5 border border-white/30 hover:shadow-lg transition animate-scale-in">
+          <div class="flex justify-between items-start mb-3">
+            <h4 class="font-bold text-gray-800 text-lg">Morning reflection</h4>
+            <div class="mood-pill happy">
+              <span>😊 Happy</span>
+            </div>
+          </div>
+          <p class="text-gray-700 dairy-font text-sm mb-3">Started the day with a wonderful sunrise view from my balcony. The way the light filtered through the clouds reminded me that every day brings new possibilities...</p>
+          <div class="flex justify-end">
+            <a href="#" class="text-indigo-600 text-sm hover:text-indigo-800 flex items-center gap-1 bg-white/50 px-3 py-1.5 rounded-full shadow-sm hover:bg-white/80 transition-colors">
+              <span>Read full entry</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-5 border border-white/30 hover:shadow-lg transition animation-delay-100 animate-scale-in">
+          <div class="flex justify-between items-start mb-3">
+            <h4 class="font-bold text-gray-800 text-lg">Project breakthrough</h4>
+            <div class="mood-pill excited">
+              <span>🤩 Excited</span>
+            </div>
+          </div>
+          <p class="text-gray-700 dairy-font text-sm mb-3">Finally solved that coding problem I've been stuck on for days! The solution came to me while I was taking a walk in the park. Sometimes stepping away from the screen is exactly what you need...</p>
+          <div class="flex justify-end">
+            <a href="#" class="text-indigo-600 text-sm hover:text-indigo-800 flex items-center gap-1 bg-white/50 px-3 py-1.5 rounded-full shadow-sm hover:bg-white/80 transition-colors">
+              <span>Read full entry</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Quick Entry Button (Fixed for desktop) -->
-<a href="{% url 'new_entry' %}" class="hidden md:flex md:fixed md:bottom-6 md:right-6 btn-gradient text-white p-4 rounded-full shadow-lg z-40 hover:shadow-xl transition-all hover:scale-105">
+<!-- Quick Entry Button (Fixed) -->
+<a href="{% url 'new_entry' %}" class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
   </svg>
@@ -760,21 +1185,50 @@
 
 {% block extra_js %}
 <script>
-  // Tab switching with URL parameter update
+  document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching functionality
+    initTabs();
+
+    // Initialize load more functionality
+    initLoadMore();
+
+    // Initialize memory grid interactions
+    initMemoryGrid();
+
+    // Initialize image preloading
+    preloadEntryImages();
+  });
+
+  // Tab switching with animation
   function switchTab(tabName) {
     // Hide all tabs
-    document.getElementById('time-periods-tab').classList.add('hidden');
-    document.getElementById('tags-tab').classList.add('hidden');
-    document.getElementById('moods-tab').classList.add('hidden');
-    document.getElementById('all-entries-tab').classList.add('hidden');
+    document.querySelectorAll('.tab-content').forEach(tab => {
+      tab.classList.add('hidden');
+    });
 
     // Show selected tab
     document.getElementById(tabName + '-tab').classList.remove('hidden');
 
     // Update active state on buttons
-    const buttons = document.querySelector('.tabs-container').querySelectorAll('button');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+    const buttons = document.querySelectorAll('.modern-tab');
+    buttons.forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.getAttribute('onclick').includes(tabName)) {
+        btn.classList.add('active');
+      }
+    });
+
+    // Animate tab selector
+    const activeTab = document.querySelector(`.modern-tab[onclick="switchTab('${tabName}')"]`);
+    const tabSelector = document.getElementById('tabSelector');
+
+    if (activeTab && tabSelector) {
+      const width = activeTab.getAttribute('data-tab-width');
+      const offset = activeTab.getAttribute('data-tab-offset');
+
+      tabSelector.style.width = width;
+      tabSelector.style.transform = `translateX(${offset})`;
+    }
 
     // Update URL without page reload to reflect current tab
     const url = new URL(window.location);
@@ -782,163 +1236,153 @@
     window.history.pushState({}, '', url);
   }
 
-  // Initialize the page
-  document.addEventListener('DOMContentLoaded', function() {
-    // Set active tab based on URL parameter or active_tab from server
+  // Initialize tabs based on URL or default to memories
+  function initTabs() {
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
 
-    if (tabParam) {
-      // Find the button for this tab and activate it
-      const tabButton = document.querySelector(`button[onclick="switchTab('${tabParam}')"]`);
-      if (tabButton) {
-        // Simulate a click to activate the tab
-        const clickEvent = new Event('click');
-        tabButton.dispatchEvent(clickEvent);
-      }
+    if (tabParam && ['memories', 'journals', 'timeline', 'calendar'].includes(tabParam)) {
+      switchTab(tabParam);
     } else {
-      // Default: set first tab as active if no active tab is set
-      const activeTab = document.querySelector('.tabs-container button.active');
-      if (!activeTab) {
-        document.querySelector('.tabs-container button').classList.add('active');
-      }
+      // Default: set first tab (memories) as active
+      switchTab('memories');
     }
+  }
 
-    // Initialize load more functionality
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
-    if (loadMoreBtn) {
-      let currentPage = 1;
+  // Load more functionality
+  function initLoadMore() {
+    const loadMoreButtons = [
+      document.getElementById('loadMoreMemories'),
+      document.getElementById('loadMoreTimeline')
+    ];
 
-      loadMoreBtn.addEventListener('click', function() {
-        currentPage++;
-        loadMoreEntries(currentPage);
+    loadMoreButtons.forEach(btn => {
+      if (btn) {
+        btn.addEventListener('click', function() {
+          // Show loading state
+          const originalText = this.innerHTML;
+          this.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Loading...
+          `;
+
+          // Simulate loading more entries (in a real implementation, this would be an AJAX call)
+          setTimeout(() => {
+            // Reset button state
+            this.innerHTML = originalText;
+
+            // In a real implementation, you would append new entries here
+            // For now, we'll just hide the button to simulate that all entries have been loaded
+            this.style.display = 'none';
+
+            // Show a toast notification
+            showToast('All entries loaded');
+          }, 1000);
+        });
+      }
+    });
+  }
+
+  // Memory grid interactions
+  function initMemoryGrid() {
+    const memoryCards = document.querySelectorAll('.memory-card');
+
+    memoryCards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        // Add subtle parallax effect to images on hover
+        const img = this.querySelector('.memory-image');
+        if (img) {
+          img.style.transform = 'scale(1.05)';
+        }
       });
-    }
 
-    // Add scroll indicator for book shelf
-    const bookCollection = document.querySelector('.book-collection');
-    if (bookCollection) {
-      const scrollIndicator = document.querySelector('.book-shelf svg');
-
-      // Show/hide scroll indicator based on scroll width vs client width
-      function updateScrollIndicator() {
-        if (bookCollection.scrollWidth > bookCollection.clientWidth) {
-          scrollIndicator.parentElement.classList.remove('hidden');
-        } else {
-          scrollIndicator.parentElement.classList.add('hidden');
+      card.addEventListener('mouseleave', function() {
+        // Reset image position
+        const img = this.querySelector('.memory-image');
+        if (img) {
+          img.style.transform = '';
         }
+      });
+    });
+  }
+
+  // Preload entry images for smoother experience
+  function preloadEntryImages() {
+    const images = document.querySelectorAll('.memory-image, .journal-cover');
+
+    images.forEach(img => {
+      if (img.src && !img.complete) {
+        img.classList.add('loading-shimmer');
+        img.onload = function() {
+          img.classList.remove('loading-shimmer');
+        };
       }
+    });
+  }
 
-      // Update on load
-      updateScrollIndicator();
+  // Toast notification helper
+  function showToast(message) {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in';
+    toast.textContent = message;
 
-      // Update on resize
-      window.addEventListener('resize', updateScrollIndicator);
+    // Add to document
+    document.body.appendChild(toast);
 
-      // Update when scrolled to the end
-      bookCollection.addEventListener('scroll', function() {
-        if (bookCollection.scrollLeft + bookCollection.clientWidth >= bookCollection.scrollWidth - 40) {
-          scrollIndicator.parentElement.classList.add('opacity-0');
-        } else {
-          scrollIndicator.parentElement.classList.remove('opacity-0');
+    // Remove after 3 seconds
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translate(-50%, 10px)';
+      toast.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+      setTimeout(() => {
+        document.body.removeChild(toast);
+      }, 500);
+    }, 3000);
+  }
+
+  // Filter chip functionality
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    if (!chip.classList.contains('active') && !chip.tagName.toLowerCase() === 'a') {
+      chip.addEventListener('click', function() {
+        const currentActive = this.parentNode.querySelector('.filter-chip.active');
+        if (currentActive) {
+          currentActive.classList.remove('active');
         }
+        this.classList.add('active');
       });
     }
   });
 
-  // Load more entries function
-  function loadMoreEntries(page) {
-    // Show loading state
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
-    const originalText = loadMoreBtn.innerHTML;
-    loadMoreBtn.innerHTML = `
-      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      Loading...
-    `;
+  // Calendar day selection
+  document.querySelectorAll('.calendar-day').forEach(day => {
+    day.addEventListener('click', function() {
+      if (!this.classList.contains('opacity-40')) {
+        document.querySelectorAll('.calendar-day').forEach(d => {
+          d.style.backgroundColor = '';
+          d.style.borderColor = '';
+          const num = d.querySelector('.calendar-day-number');
+          if (num) {
+            num.classList.remove('font-bold', 'text-indigo-600');
+          }
+        });
 
-    // Get the current active tab and any filters
-    const activeTab = document.querySelector('.tabs-container button.active');
-    const tabName = activeTab ? activeTab.getAttribute('onclick').match(/'(.*?)'/)[1] : 'all-entries';
+        this.style.backgroundColor = 'rgba(99, 102, 241, 0.15)';
+        this.style.borderColor = 'rgba(99, 102, 241, 0.3)';
+        const num = this.querySelector('.calendar-day-number');
+        if (num) {
+          num.classList.add('font-bold', 'text-indigo-600');
+        }
 
-    // Get current filters from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const tag = urlParams.get('tag');
-    const mood = urlParams.get('mood');
-    const chapter = urlParams.get('chapter');
-
-    // Build the request URL
-    let url = `?page=${page}`;
-    if (tag) url += `&tag=${tag}`;
-    if (mood) url += `&mood=${mood}`;
-    if (chapter) url += `&chapter=${chapter}`;
-    url += `&tab=${tabName}`;
-
-    // Simulate loading more entries (in a real implementation, this would be an AJAX call)
-    setTimeout(() => {
-      // This is a mockup - in reality, you would fetch new entries from the server
-      // and append them to the list
-
-      // For this demo, we'll just add some dummy entries
-      const entriesContainer = document.querySelector(`#${tabName}-tab .space-y-6`);
-
-      // Add 5 more dummy entries
-      for (let i = 0; i < 5; i++) {
-        const entryHTML = createDummyEntry(i + (page * 10));
-
-        // Create a div element to hold the entry
-        const entryDiv = document.createElement('div');
-        entryDiv.className = 'timeline-entry relative scale-in';
-        entryDiv.style.animationDelay = `${i * 100}ms`;
-        entryDiv.innerHTML = entryHTML;
-
-        // Append to the container
-        entriesContainer.appendChild(entryDiv);
+        // In a real implementation, you would load entries for the selected day
+        const dayNumber = this.querySelector('.calendar-day-number').textContent;
+        document.querySelector('h3:contains("Entries for")').textContent = `Entries for April ${dayNumber}, 2025`;
       }
-
-      // Reset button state
-      loadMoreBtn.innerHTML = originalText;
-
-      // If we've loaded all entries (this would be determined by the server response)
-      // Hide the button after some arbitrary number of pages for the demo
-      if (page >= 3) {
-        loadMoreBtn.parentElement.style.display = 'none';
-      }
-    }, 1000); // Simulate network delay
-  }
-
-  // Helper function to create dummy entries for the "load more" demo
-  function createDummyEntry(index) {
-    return `
-      <div class="glass-effect rounded-xl shadow-md p-5 mb-4 border border-white/20 entry-card border-l-4 border-blue-400">
-        <div class="flex justify-between items-center mb-2">
-          <h3 class="font-semibold diary-font text-gray-800">Loaded Entry #${index}</h3>
-          <div class="text-xs text-gray-500 flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            April 23, 2025
-          </div>
-        </div>
-        <div class="text-sm text-gray-600 diary-font">
-          <p>This is a dynamically loaded entry that would come from your server. In a real implementation, you would make an AJAX request to fetch more entries when the user clicks "Load More".</p>
-        </div>
-        <div class="mt-3 flex justify-between items-center flex-wrap gap-2">
-          <div class="flex gap-1 flex-wrap">
-            <span class="mood-pill content">😌 Content</span>
-            <a href="?tag=example" class="tag-pill">example</a>
-          </div>
-          <a href="#" class="text-secondary-600 text-xs hover:underline flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full shadow-sm hover:bg-white/80 transition">
-            <span>Read more</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </a>
-        </div>
-      </div>
-    `;
-  }
+    });
+  });
 </script>
 {% endblock %}

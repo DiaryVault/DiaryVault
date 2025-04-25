@@ -17,7 +17,6 @@ from ..services.ai_service import AIService
 logger = logging.getLogger(__name__)
 
 @require_POST
-@csrf_exempt
 def demo_journal(request):
     request_id = int(time.time() * 1000)
     logger.info(f"Journal request {request_id} started")
@@ -25,27 +24,44 @@ def demo_journal(request):
     try:
         start_time = time.time()
 
-        data = json.loads(request.body)
-        journal_content = data.get('journal_content', '')
-        # Check if personalization is requested
-        personalize = data.get('personalize', False)
+        # Check content type to determine how to process the request
+        if request.content_type and 'multipart/form-data' in request.content_type:
+            # Handle multipart form data (with file uploads)
+            journal_content = request.POST.get('journal_content', '')
+            photo = request.FILES.get('journal_photo')
+            personalize = request.POST.get('personalize') == 'true'
+
+            logger.info(f"Journal request {request_id} with multipart form data")
+            if photo:
+                logger.info(f"Photo included: {photo.name}, size: {photo.size} bytes")
+        else:
+            # Handle JSON data (old method)
+            data = json.loads(request.body)
+            journal_content = data.get('journal_content', '')
+            personalize = data.get('personalize', False)
+            photo = None
+
+            logger.info(f"Journal request {request_id} with JSON data")
 
         if not journal_content:
             logger.warning(f"Journal request {request_id}: No content provided")
             return JsonResponse({'error': 'No content provided'}, status=400)
 
+        # Cache key includes photo info if a photo is present
+        photo_indicator = "with_photo" if photo else "no_photo"
+
         # If personalization is requested and user is logged in, use that
         if personalize and request.user.is_authenticated:
-            # Create a unique cache key based on content and user
+            # Create a unique cache key based on content, photo presence, and user
             user_id = request.user.id
-            cache_key = f"journal_entry:user{user_id}:{get_content_hash(journal_content)}"
+            cache_key = f"journal_entry:user{user_id}:{photo_indicator}:{get_content_hash(journal_content)}"
         else:
             # Otherwise use standard cache key
-            cache_key = f"journal_entry:{get_content_hash(journal_content)}"
+            cache_key = f"journal_entry:{photo_indicator}:{get_content_hash(journal_content)}"
 
         # Try to get cached response
         cached_response = cache.get(cache_key)
-        if cached_response:
+        if cached_response and not photo:  # Don't use cache if there's a photo upload
             logger.info(f"Journal request {request_id} served from cache")
             cached_response['cache_hit'] = True
             cached_response['cache_type'] = 'server'
@@ -60,13 +76,25 @@ def demo_journal(request):
             # Use standard generation
             response_data = generate_ai_content(journal_content)
 
+        # If there's a photo, enhance the journal entry to reference it
+        if photo:
+            # Modify the entry to mention the photo
+            entry_text = response_data.get('entry', '')
+            if entry_text:
+                # Add a reference to the photo at the end of the entry
+                photo_reference = "\n\nI captured a special moment in a photo today. Looking at it now brings back the feelings and memories of that moment."
+                response_data['entry'] = entry_text + photo_reference
+
         # Add metadata
         response_data['cache_hit'] = False
         response_data['cache_type'] = 'none'
         response_data['request_time'] = round(time.time() - start_time, 2)
 
-        # Cache the response (only if successful and no errors)
-        if 'error' not in response_data:
+        # Indicate if a photo was included
+        response_data['has_photo'] = photo is not None
+
+        # Cache the response (only if successful and no errors and no photo)
+        if 'error' not in response_data and not photo:
             cache.set(cache_key, response_data, timeout=3600)  # Cache for 1 hour
 
         logger.info(f"Journal request {request_id} completed in {response_data['request_time']}s")
@@ -96,17 +124,50 @@ def regenerate_summary_ajax(request, entry_id):
 def save_generated_entry(request):
     """Save a generated journal entry to the database"""
     try:
-        data = json.loads(request.body)
-        title = data.get('title')
-        content = data.get('content')
+        # Check content type to determine how to process the request
+        if request.content_type and 'multipart/form-data' in request.content_type:
+            # Handle multipart form data (with file uploads)
+            title = request.POST.get('title')
+            content = request.POST.get('content')
+            mood = request.POST.get('mood')
+            tags_json = request.POST.get('tags', '[]')
+            photo = request.FILES.get('photo')
+
+            # Parse tags from JSON string
+            try:
+                tags = json.loads(tags_json)
+            except json.JSONDecodeError:
+                tags = []
+
+            # Store in session
+            pending_entry = {
+                'title': title,
+                'content': content,
+                'mood': mood,
+                'tags': tags
+            }
+            # We can't store file objects in session, so just note if there was a photo
+            if photo:
+                pending_entry['had_photo'] = True
+        else:
+            # Handle JSON data (old method)
+            data = json.loads(request.body)
+            title = data.get('title')
+            content = data.get('content')
+            mood = data.get('mood')
+            tags = data.get('tags', [])
+            photo = None
+
+            # Store in session
+            pending_entry = {
+                'title': title,
+                'content': content,
+                'mood': mood,
+                'tags': tags
+            }
 
         # Store in session regardless of authentication status
-        request.session['pending_entry'] = {
-            'title': title,
-            'content': content,
-            'mood': data.get('mood'),
-            'tags': data.get('tags', [])
-        }
+        request.session['pending_entry'] = pending_entry
 
         if not request.user.is_authenticated:
             return JsonResponse({
@@ -124,14 +185,22 @@ def save_generated_entry(request):
             user=request.user,
             title=title,
             content=content,
-            mood=data.get('mood')
+            mood=mood
         )
 
+        # Save the photo if provided
+        if photo:
+            from ..models import EntryPhoto
+            entry_photo = EntryPhoto.objects.create(
+                entry=entry,
+                photo=photo,
+                caption="Journal photo"
+            )
+
         # Add tags if provided
-        tags = data.get('tags', [])
         if not tags and content:
             # Auto-generate tags if none were provided
-            tags = auto_generate_tags(content, data.get('mood'))
+            tags = auto_generate_tags(content, mood)
 
         if tags:
             for tag_name in tags:

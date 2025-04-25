@@ -2,6 +2,8 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
 from .views import CustomLoginView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     # Main Page
@@ -65,3 +67,6 @@ urlpatterns = [
     path('marketplace/journal/<int:journal_id>/', views.marketplace_journal_detail, name='journal_detail'),
     path('marketplace/author/<str:username>/', views.marketplace_author_profile, name='author_profile'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

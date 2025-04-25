@@ -5,52 +5,640 @@
 
 {% block extra_css %}
 <style>
+  /* Base Styles */
+  :root {
+    --primary-color: #6366f1;
+    --primary-light: #e0e7ff;
+    --primary-dark: #4f46e5;
+    --secondary-color: #6366f1;
+    --secondary-light: #e0e7ff;
+    --text-primary: #1f2937;
+    --text-secondary: #4b5563;
+    --text-light: #9ca3af;
+    --bg-gradient: linear-gradient(135deg, #6366f1, #a855f7);
+    --surface-1: #ffffff;
+    --surface-2: #f9fafb;
+    --border-light: rgba(229, 231, 235, 0.6);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --transition-normal: all 0.3s ease;
+  }
+
   .handwritten {
     font-family: 'Caveat', cursive;
   }
-  .page-texture {
-    background-image:
-      linear-gradient(rgba(255,255,255,0.5) 2px, transparent 2px),
-      linear-gradient(90deg, rgba(255,255,255,0.5) 2px, transparent 2px);
-    background-size: 40px 40px;
-    background-color: #f8f5f0;
+
+  .diary-font {
+    font-family: 'Caveat', cursive;
   }
-  .input-area {
-    min-height: 180px;
-    resize: none;
+
+  /* Card and Container Styles */
+  .journal-card {
+    background: var(--surface-1);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+    transition: var(--transition-normal);
   }
-  .suggestions-pill {
+
+  .journal-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+
+  .header-section {
+    background: linear-gradient(to right, #f0f9ff, #e0e7ff);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .glass-effect {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  /* Form Fields */
+  .form-field {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .floating-label {
+    position: relative;
+    margin-bottom: 1.25rem;
+  }
+
+  .floating-label input,
+  .floating-label textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    background-color: var(--surface-2);
+    font-size: 1rem;
+    transition: var(--transition-normal);
+  }
+
+  .floating-label label {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    pointer-events: none;
+    transition: var(--transition-normal);
+  }
+
+  .floating-label input:focus,
+  .floating-label textarea:focus,
+  .floating-label input:not(:placeholder-shown),
+  .floating-label textarea:not(:placeholder-shown) {
+    padding-top: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-color: var(--primary-color);
+  }
+
+  .floating-label input:focus ~ label,
+  .floating-label textarea:focus ~ label,
+  .floating-label input:not(:placeholder-shown) ~ label,
+  .floating-label textarea:not(:placeholder-shown) ~ label {
+    top: 0.5rem;
+    left: 0.8rem;
+    font-size: 0.75rem;
+    color: var(--primary-color);
+  }
+
+  /* Modern Mood Selector */
+  .mood-selector-container {
+    position: relative;
+    margin: 1.5rem 0;
+  }
+
+  .mood-slider {
+    position: relative;
+    height: 5rem;
+    background: linear-gradient(to right,
+      #4ade80 0%, /* Happy/Excited */
+      #a78bfa 50%, /* Content/Neutral */
+      #f87171 100% /* Anxious/Sad */
+    );
+    border-radius: var(--radius-lg);
+    margin-top: 0.5rem;
+  }
+
+  .mood-slider-track {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    height: 0.5rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 999px;
+  }
+
+  .mood-slider-thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 3rem;
+    height: 3rem;
+    background: white;
+    border-radius: 50%;
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: transform 0.2s ease;
+    z-index: 10;
+  }
+
+  .mood-slider-thumb:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+
+  .mood-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+  }
+
+  .mood-labels span {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  /* Modern Photo Upload */
+  .photo-upload-modern {
+    position: relative;
+    margin: 1.5rem 0;
+    border-radius: var(--radius-lg);
+    background: var(--surface-2);
+    border: 2px dashed var(--border-light);
+    transition: var(--transition-normal);
+    overflow: hidden;
+  }
+
+  .photo-upload-modern:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(99, 102, 241, 0.05);
+  }
+
+  .photo-upload-input {
+    display: none;
+  }
+
+  .photo-upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    cursor: pointer;
+    height: 12rem;
+  }
+
+  .photo-upload-icon {
+    width: 3rem;
+    height: 3rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+  }
+
+  .photo-upload-text {
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  .photo-upload-text strong {
+    color: var(--primary-color);
+  }
+
+  .photo-preview-modern {
+    width: 100%;
+    height: 12rem;
+    object-fit: cover;
+    display: none;
+  }
+
+  .photo-preview-modern.has-image {
+    display: block;
+  }
+
+  .photo-controls-modern {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: var(--transition-normal);
+  }
+
+  .photo-upload-modern:hover .photo-controls-modern {
+    opacity: 1;
+  }
+
+  .photo-control-btn-modern {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-normal);
+    border: none;
+  }
+
+  .photo-control-btn-modern:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Tags Input Modern */
+  .tags-container {
+    position: relative;
+    margin-top: 1rem;
+  }
+
+  .tags-input {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    transition: var(--transition-normal);
+  }
+
+  .tags-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    outline: none;
+  }
+
+  .tags-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .tag-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.75rem;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: var(--transition-normal);
+  }
+
+  .tag-pill:hover {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .tag-pill .remove-tag {
+    margin-left: 0.25rem;
+    cursor: pointer;
+  }
+
+  .tag-suggestions {
+    margin-top: 0.75rem;
+  }
+
+  .tag-suggestion {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    background-color: var(--surface-2);
+    border: 1px solid var(--border-light);
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition-normal);
+  }
+
+  .tag-suggestion:hover {
+    background-color: var(--primary-light);
+    border-color: var(--primary-color);
+    color: var(--primary-dark);
+  }
+
+  /* Button Styles */
+  .btn-modern {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    transition: var(--transition-normal);
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background: var(--bg-gradient);
+    color: white;
+    border: none;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn-primary:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: white;
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+  }
+
+  .btn-secondary:hover {
+    background: var(--surface-2);
+    border-color: var(--text-light);
+  }
+
+  /* Animation for auto-populated content */
+  @keyframes fadeHighlight {
+    0% { background-color: rgba(99, 102, 241, 0.2); }
+    100% { background-color: transparent; }
+  }
+
+  .auto-populated {
+    animation: fadeHighlight 2s ease;
+  }
+
+  /* Content Editor */
+  .content-editor {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .content-editor-container {
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .content-editor-textarea {
+    width: 100%;
+    min-height: 300px;
+    padding: 1rem;
+    border: none;
+    resize: vertical;
+    font-family: 'Caveat', cursive;
+    font-size: 1.125rem;
+    color: var(--text-primary);
+    background-color: var(--surface-1);
+  }
+
+  .content-editor-textarea:focus {
+    outline: none;
+  }
+
+  .word-counter {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-light);
+    background: var(--surface-1);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Chat components for AI interface */
+  .chat-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .chat-bubble {
+    padding: 1rem;
+    border-radius: 1rem;
+    max-width: 85%;
+    position: relative;
+    animation: fadeIn 0.3s ease forwards;
+  }
+
+  .chat-bubble.ai {
+    background-color: rgba(243, 244, 246, 0.8);
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    align-self: flex-start;
+    border-bottom-left-radius: 0.25rem;
+  }
+
+  .chat-bubble.user {
+    background-color: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    align-self: flex-end;
+    border-bottom-right-radius: 0.25rem;
+  }
+
+  .chat-bubble.thinking {
+    background-color: rgba(243, 244, 246, 0.8);
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    align-self: flex-start;
+    border-bottom-left-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .typing-indicator {
+    display: flex;
+    gap: 0.3rem;
+  }
+
+  .typing-indicator span {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: #6366f1;
+    display: inline-block;
+    opacity: 0.6;
+  }
+
+  .typing-indicator span:nth-child(1) {
+    animation: pulse 1s infinite;
+  }
+
+  .typing-indicator span:nth-child(2) {
+    animation: pulse 1s infinite 0.3s;
+  }
+
+  .typing-indicator span:nth-child(3) {
+    animation: pulse 1s infinite 0.6s;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+
+  /* Input container */
+  .journal-input-container {
+    position: relative;
+    background-color: white;
+    border-radius: 1rem;
+    border: 1px solid rgba(229, 231, 235, 0.8);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
   }
-  .suggestions-pill:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  .journal-input-container textarea {
+    flex: 1;
+    padding-right: 3.5rem;
   }
-  .mood-selector {
+
+  .journal-input-container:focus-within {
+    border-color: #6366f1;
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.1);
+  }
+
+  /* Chat tools */
+  .chat-tools {
+    position: absolute;
+    right: 0.5rem;
+    bottom: 50%;
+    transform: translateY(50%);
+    display: flex;
+    gap: 0.5rem;
+    height: calc(100% - 1rem);
+    align-items: center;
+  }
+
+  .tool-button {
+    margin-right: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    background-color: white;
+    border: 1px solid rgba(229, 231, 235, 0.8);
+    color: #6366f1;
+    cursor: pointer;
     transition: all 0.2s ease;
   }
-  .mood-selector:hover {
-    transform: scale(1.05);
+
+  .tool-button:hover {
+    background-color: rgba(99, 102, 241, 0.1);
+    transform: translateY(-2px);
   }
-  .mood-selector.selected {
-    border-color: #6366f1;
-    background-color: #e0e7ff;
+
+  .tool-button.primary {
+    background-color: #6366f1;
+    color: white;
   }
-  .paper-bg {
-    background-color: #fffcf8;
-    background-image:
-      linear-gradient(90deg, rgba(200,200,200,0.1) 1px, transparent 1px),
-      linear-gradient(rgba(200,200,200,0.1) 1px, transparent 1px);
-    background-size: 20px 20px;
+
+  .tool-button.primary:hover {
+    background-color: #4f46e5;
   }
-  .loading-dots:after {
-    content: '';
-    animation: dots 1.5s infinite;
+
+  /* AI Modal */
+  .modal-content {
+    background: white;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    max-width: 500px;
+    width: 100%;
+    margin: 2rem;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
   }
-  @keyframes dots {
-    0%, 20% { content: '.'; }
-    40% { content: '..'; }
-    60%, 100% { content: '...'; }
+
+  .modal-visible .modal-content {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .modal-header {
+    background: linear-gradient(to right, #f0f9ff, #e0e7ff);
+    padding: 1.25rem;
+    border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .template-card {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: var(--transition-normal);
+    cursor: pointer;
+    margin-bottom: 0.75rem;
+  }
+
+  .template-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .template-card-content {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .template-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+  }
+
+  /* Other Animations */
+  @keyframes scaleIn {
+    0% { transform: scale(0.95); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .scale-in {
+    animation: scaleIn 0.3s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.3s ease forwards;
   }
 </style>
 {% endblock %}
@@ -85,18 +673,17 @@
     </div>
   </div>
 
-  <!-- Entry Form Card -->
-  <div class="glass-effect rounded-xl shadow-lg overflow-hidden card-hover border border-white/20">
-    <!-- Card Header -->
-    <div class="p-6 bg-gradient-to-r from-secondary-50 to-primary-50 border-b border-white/30">
+  <!-- Main content area -->
+  <div class="journal-card" id="journalCard">
+    <!-- Header section - always visible -->
+    <div class="header-section">
       <div class="flex items-center justify-between">
         <h3 class="font-semibold diary-font text-gray-800 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>
-          {% if is_edit_mode %}Edit Your Journal Entry{% else %}Create New Journal Entry{% endif %}
+          {% if is_edit_mode %}Edit Your Journal Entry{% else %}Create Journal Entry with AI{% endif %}
         </h3>
-        <!-- Character counter for quick notes -->
         <div class="text-xs font-medium glass-effect px-3 py-1.5 rounded-full text-gray-600 flex items-center gap-1.5 shadow-sm border border-white/30">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
@@ -107,32 +694,89 @@
       </div>
     </div>
 
+    <!-- Chat/conversation area -->
     {% if not is_edit_mode %}
-    <!-- Quick Notes Area for AI-assisted entry generation -->
-    <div class="page-texture p-6 border-b border-gray-100">
-      <div class="mb-3">
-        <label for="quickNotes" class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-          Quick Notes
-          <span class="text-xs text-secondary-600 font-normal">(for AI generation)</span>
-        </label>
-        <textarea
-          id="quickNotes"
-          class="input-area w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition diary-font shadow-inner bg-white/70"
-          placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am, worked on the project until 5pm..."
-          oninput="countChars()"></textarea>
-        <p class="text-gray-500 text-xs mt-1 italic">Jot down quick notes about your day, and we'll help transform them into a full journal entry.</p>
+    <div class="p-4 sm:p-6 glass-effect border-b border-white/20">
+      <div class="chat-container" id="chatContainer">
+        <!-- Initial AI greeting -->
+        <div class="chat-bubble ai">
+          <p class="handwritten text-gray-800 text-lg leading-relaxed">Hello! I'm your journal assistant. Share some quick notes about your day, and I'll help transform them into a beautiful journal entry. You can also add a photo to capture the moment.</p>
+        </div>
+
+        <!-- Conversation history will be added here dynamically -->
+        <div id="chatHistory"></div>
+
+        <!-- Thinking indicator (initially hidden) -->
+        <div class="chat-bubble thinking hidden" id="thinkingIndicator">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <span class="ml-2 text-gray-600">Thinking...</span>
+        </div>
       </div>
 
-      <!-- Suggested topics in more organized layout -->
-      <div class="glass-effect rounded-lg p-3 border border-white/30 shadow-sm mb-4">
+      <!-- Chat input container -->
+      <div class="mt-4 mb-2 journal-input-container">
+        <textarea id="quickNotes" class="input-area w-full p-4 pr-16 border-0 focus:ring-0 diary-font text-gray-800 bg-transparent rounded-xl"
+          placeholder="Tell me about your day..."
+          oninput="countChars()" rows="3"></textarea>
+
+        <!-- Chat tools -->
+        <div class="chat-tools">
+          <!-- Photo upload tool -->
+          <div class="relative">
+            <button type="button" class="tool-button" onclick="document.getElementById('entryPhotoInput').click()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="tooltip">Add Photo</span>
+            </button>
+            <!-- Hidden file input -->
+            <input type="file" name="entry_photo" id="entryPhotoInput" class="hidden" accept="image/*" onchange="handleFileSelect(this)">
+          </div>
+
+          <!-- Generate button -->
+          <button type="button" class="tool-button primary" id="generateEntryBtn" onclick="sendMessage()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+            <span class="tooltip">Generate</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Photo preview (initially hidden) -->
+      <div id="photoContainer" class="hidden mt-3 rounded-lg overflow-hidden border border-white/30 shadow-sm">
+        <div class="relative">
+          <img id="photoPreview" class="w-full max-h-60 object-cover" src="" alt="Journal photo preview">
+          <div class="absolute top-2 right-2 flex gap-2">
+            <button type="button" class="photo-control-btn" onclick="document.getElementById('entryPhotoInput').click()" title="Change photo">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+            </button>
+            <button type="button" class="photo-control-btn" onclick="removePhoto()" title="Remove photo">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="p-2 bg-white/80 text-xs text-gray-600 flex justify-between items-center">
+          <span id="photoName">image.jpg</span>
+          <span class="text-secondary-600">Added to journal</span>
+        </div>
+      </div>
+
+      <!-- Topic suggestions -->
+      <div class="mt-3">
         <div class="text-xs font-medium text-gray-700 mb-2 flex items-center gap-1.5">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
           </svg>
-          Suggested topics:
+          Try these topics:
         </div>
         <div class="flex flex-wrap gap-2">
           <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestions-pill bg-secondary-50 hover:bg-secondary-100 text-secondary-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-secondary-200/50">Today I accomplished</button>
@@ -140,163 +784,217 @@
           <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-primary-50 hover:bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-primary-200/50">I learned that</button>
           <button type="button" onclick="addSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50">I met with</button>
           <button type="button" onclick="addSuggestion('I'm grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50">I'm grateful for</button>
-          <button type="button" onclick="addSuggestion('I'm looking forward to')" class="suggestions-pill bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-rose-200/50">I'm looking forward to</button>
         </div>
       </div>
 
-      <!-- AI Generation Button -->
-      <div class="flex justify-end mb-2">
-        <button type="button" id="generateEntryBtn" class="btn-gradient text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-md">
+      <div class="mt-4 text-center">
+        <button id="useEntryFormBtn" class="btn-modern btn-secondary flex items-center gap-2 mx-auto">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
           </svg>
-          <span>Generate Full Entry</span>
+          <span>Edit entry in full form</span>
         </button>
       </div>
     </div>
     {% endif %}
 
-    <!-- Full journal entry form with paper background -->
-    <div class="paper-bg p-6">
-      <form method="post">
+    <!-- Modern Full Entry Form -->
+    <div id="fullEntryForm" class="p-6 {% if not is_edit_mode %}hidden{% endif %}">
+      <form method="post" enctype="multipart/form-data" class="space-y-8">
         {% csrf_token %}
 
-        <!-- Title field with styling -->
-        <div class="mb-6">
-          <label for="{{ form.title.id_for_label }}" class="block text-sm font-semibold text-gray-800 mb-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600 inline mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Title
-          </label>
-          <div class="relative">
-            {{ form.title|add_class:"w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition text-base glass-effect" }}
-            {% if form.title.errors %}
-              <p class="text-red-600 text-xs mt-1">{{ form.title.errors.0 }}</p>
-            {% endif %}
+        <!-- Title field with floating label -->
+        <div class="form-field">
+          <div class="floating-label">
+            <input type="text" id="id_title" name="title" placeholder=" "
+                  class="focus:ring-primary-color focus:border-primary-color"
+                  value="{{ form.title.value|default:'' }}">
+            <label for="id_title">Journal Title</label>
           </div>
+          {% if form.title.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ form.title.errors.0 }}</p>
+          {% endif %}
         </div>
 
-        <!-- Mood selector -->
-        <div class="mb-6">
-          <label class="block text-sm font-semibold text-gray-800 mb-2 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- Modern Photo Upload -->
+        <div class="form-field">
+          <h3 class="text-sm font-medium mb-2 text-gray-700 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Add a Moment
+          </h3>
+
+          <div class="photo-upload-modern" id="photoUploadModern">
+            <!-- Hidden file input -->
+            <input type="file" name="entry_photo" id="formPhotoInputModern" class="photo-upload-input" accept="image/*">
+
+            <!-- Photo preview -->
+            <img src="{{ form.instance.photo.url|default:'' }}" id="photoPreviewModern" class="photo-preview-modern {% if form.instance.photo %}has-image{% endif %}" alt="Journal photo">
+
+            <!-- Placeholder content -->
+            <label for="formPhotoInputModern" class="photo-upload-label" id="photoPlaceholderModern" {% if form.instance.photo %}style="display: none;"{% endif %}>
+              <svg xmlns="http://www.w3.org/2000/svg" class="photo-upload-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <div class="photo-upload-text">
+                <p class="mb-1">Drag & drop a photo or</p>
+                <p><strong>click to browse</strong></p>
+              </div>
+            </label>
+
+            <!-- Controls -->
+            <div class="photo-controls-modern" id="photoControlsModern" {% if not form.instance.photo %}style="display: none;"{% endif %}>
+              <button type="button" class="photo-control-btn-modern" id="changePhotoModern">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+              </button>
+              <button type="button" class="photo-control-btn-modern" id="removePhotoModern">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <p class="text-xs text-gray-500 mt-2 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Add a photo to capture this moment visually (max 5MB)
+          </p>
+        </div>
+
+        <!-- Modern Mood Selector -->
+        <div class="form-field">
+          <h3 class="text-sm font-medium mb-2 text-gray-700 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             How are you feeling today?
-          </label>
-          <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
-            <label class="mood-selector border border-white/50 glass-effect rounded-lg p-2 text-center cursor-pointer hover:bg-secondary-50/70">
-              <input type="radio" name="mood" value="happy" class="sr-only" {% if form.mood.value == 'happy' %}checked{% endif %}>
-              <div class="text-xl mb-1">😊</div>
-              <span class="text-xs font-medium">Happy</span>
-            </label>
-            <label class="mood-selector border border-white/50 glass-effect rounded-lg p-2 text-center cursor-pointer hover:bg-secondary-50/70">
-              <input type="radio" name="mood" value="content" class="sr-only" {% if form.mood.value == 'content' %}checked{% endif %}>
-              <div class="text-xl mb-1">😌</div>
-              <span class="text-xs font-medium">Content</span>
-            </label>
-            <label class="mood-selector border border-white/50 glass-effect rounded-lg p-2 text-center cursor-pointer hover:bg-secondary-50/70">
-              <input type="radio" name="mood" value="excited" class="sr-only" {% if form.mood.value == 'excited' %}checked{% endif %}>
-              <div class="text-xl mb-1">🤩</div>
-              <span class="text-xs font-medium">Excited</span>
-            </label>
-            <label class="mood-selector border border-white/50 glass-effect rounded-lg p-2 text-center cursor-pointer hover:bg-secondary-50/70">
-              <input type="radio" name="mood" value="neutral" class="sr-only" {% if form.mood.value == 'neutral' %}checked{% endif %}>
-              <div class="text-xl mb-1">😐</div>
-              <span class="text-xs font-medium">Neutral</span>
-            </label>
-            <label class="mood-selector border border-white/50 glass-effect rounded-lg p-2 text-center cursor-pointer hover:bg-secondary-50/70">
-              <input type="radio" name="mood" value="anxious" class="sr-only" {% if form.mood.value == 'anxious' %}checked{% endif %}>
-              <div class="text-xl mb-1">😰</div>
-              <span class="text-xs font-medium">Anxious</span>
-            </label>
-            <label class="mood-selector border border-white/50 glass-effect rounded-lg p-2 text-center cursor-pointer hover:bg-secondary-50/70">
-              <input type="radio" name="mood" value="sad" class="sr-only" {% if form.mood.value == 'sad' %}checked{% endif %}>
-              <div class="text-xl mb-1">😢</div>
-              <span class="text-xs font-medium">Sad</span>
-            </label>
+          </h3>
+
+          <div class="mood-selector-container">
+            <div class="flex justify-between items-center mb-3">
+              <span class="text-sm font-medium text-gray-700" id="moodValue">Select a mood</span>
+              <span class="text-2xl" id="moodEmoji">😐</span>
+            </div>
+
+            <div class="mood-slider" id="moodSlider">
+              <div class="mood-slider-track"></div>
+              <div class="mood-slider-thumb" id="moodThumb" style="left: 50%;">
+                <span id="moodEmoji">😐</span>
+              </div>
+            </div>
+
+            <div class="mood-labels mt-1">
+              <span>Happy</span>
+              <span>Content</span>
+              <span>Sad</span>
+            </div>
+          </div>
+
+          <!-- Hidden radio buttons (for form submission) -->
+          <div class="hidden">
+            <input type="radio" name="mood" value="happy" id="mood_happy" {% if form.mood.value == 'happy' %}checked{% endif %}>
+            <input type="radio" name="mood" value="excited" id="mood_excited" {% if form.mood.value == 'excited' %}checked{% endif %}>
+            <input type="radio" name="mood" value="content" id="mood_content" {% if form.mood.value == 'content' %}checked{% endif %}>
+            <input type="radio" name="mood" value="neutral" id="mood_neutral" {% if form.mood.value == 'neutral' %}checked{% endif %}>
+            <input type="radio" name="mood" value="anxious" id="mood_anxious" {% if form.mood.value == 'anxious' %}checked{% endif %}>
+            <input type="radio" name="mood" value="sad" id="mood_sad" {% if form.mood.value == 'sad' %}checked{% endif %}>
           </div>
         </div>
 
-        <!-- Content field with improved styling -->
-        <div class="mb-6">
-          <label for="{{ form.content.id_for_label }}" class="block text-sm font-semibold text-gray-800 mb-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600 inline mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- Content field with modern editor -->
+        <div class="form-field content-editor">
+          <h3 class="text-sm font-medium mb-2 text-gray-700 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
             </svg>
-            Content
-          </label>
-          {{ form.content|add_class:"w-full min-h-[300px] p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition diary-font shadow-inner text-base glass-effect" }}
+            Your Journal Entry
+          </h3>
+
+          <div class="content-editor-container">
+            <textarea id="id_content" name="content" class="content-editor-textarea" placeholder="Write your thoughts here...">{{ form.content.value|default:'' }}</textarea>
+          </div>
+
           {% if form.content.errors %}
             <p class="text-red-600 text-xs mt-1">{{ form.content.errors.0 }}</p>
           {% endif %}
         </div>
 
-        <!-- Tags field with visual enhancement -->
-        <div class="mb-6 glass-effect p-4 rounded-lg border border-white/30">
-          <label for="{{ form.tags.id_for_label }}" class="block text-sm font-semibold text-gray-800 mb-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600 inline mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- Tags field with modern input -->
+        <div class="form-field">
+          <h3 class="text-sm font-medium mb-2 text-gray-700 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
             </svg>
             Tags
-            <span class="text-xs font-normal text-gray-500 ml-1">(separated by commas)</span>
-          </label>
-          <div class="relative">
-            {{ form.tags|add_class:"w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition text-base glass-effect" }}
-            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-              </svg>
+          </h3>
+
+          <div class="tags-container">
+            <input type="text" id="id_tags" name="tags" class="tags-input" placeholder="Add tags separated by commas" value="{{ form.tags.value|default:'' }}">
+
+            <!-- Selected tags will appear here -->
+            <div class="tags-pills" id="selectedTags"></div>
+
+            <!-- Tag suggestions -->
+            <div class="tag-suggestions mt-3">
+              <p class="text-xs text-gray-500 mb-2">Suggested tags:</p>
+              <button type="button" class="tag-suggestion">work</button>
+              <button type="button" class="tag-suggestion">family</button>
+              <button type="button" class="tag-suggestion">health</button>
+              <button type="button" class="tag-suggestion">friends</button>
+              <button type="button" class="tag-suggestion">reflection</button>
+              <button type="button" class="tag-suggestion">gratitude</button>
+              <button type="button" class="tag-suggestion">travel</button>
+              <button type="button" class="tag-suggestion">food</button>
+              <button type="button" class="tag-suggestion">learning</button>
+              <button type="button" class="tag-suggestion">goals</button>
             </div>
           </div>
-          <p class="flex items-center text-gray-500 text-xs mt-2 italic">
+
+          <p class="text-xs text-gray-500 mt-2 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Tags will be auto-generated based on your content, but you can also add specific ones here
+            Tags help organize your entries and are auto-suggested based on your content
           </p>
-
-          <!-- Common tags suggestion -->
-          <div class="mt-3">
-            <div class="text-xs font-medium text-gray-600 mb-1.5">Common tags:</div>
-            <div class="flex flex-wrap gap-1.5">
-              <button type="button" onclick="addTag('work')" class="glass-effect text-gray-700 hover:bg-white/50 px-2 py-1 rounded-full text-xs transition border border-white/30">work</button>
-              <button type="button" onclick="addTag('family')" class="glass-effect text-gray-700 hover:bg-white/50 px-2 py-1 rounded-full text-xs transition border border-white/30">family</button>
-              <button type="button" onclick="addTag('health')" class="glass-effect text-gray-700 hover:bg-white/50 px-2 py-1 rounded-full text-xs transition border border-white/30">health</button>
-              <button type="button" onclick="addTag('friends')" class="glass-effect text-gray-700 hover:bg-white/50 px-2 py-1 rounded-full text-xs transition border border-white/30">friends</button>
-              <button type="button" onclick="addTag('reflection')" class="glass-effect text-gray-700 hover:bg-white/50 px-2 py-1 rounded-full text-xs transition border border-white/30">reflection</button>
-              <button type="button" onclick="addTag('goals')" class="glass-effect text-gray-700 hover:bg-white/50 px-2 py-1 rounded-full text-xs transition border border-white/30">goals</button>
-            </div>
-          </div>
         </div>
 
-        <!-- Buttons -->
-        <div class="flex justify-between items-center pt-2">
+        <!-- Modern Buttons -->
+        <div class="pt-4 border-t border-gray-100 flex justify-between items-center">
           {% if is_edit_mode %}
-            <a href="{% url 'entry_detail' entry.id %}" class="text-gray-600 font-medium hover:text-gray-900 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <a href="{% url 'entry_detail' entry.id %}" class="btn-modern btn-secondary">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               Cancel
             </a>
           {% else %}
-            <a href="{% url 'dashboard' %}" class="text-gray-600 font-medium hover:text-gray-900 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <a href="{% url 'dashboard' %}" class="btn-modern btn-secondary">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               Cancel
             </a>
           {% endif %}
+
           <div class="flex gap-3">
-            <button type="button" id="aiHelpBtn" class="px-4 py-2 glass-effect text-gray-800 rounded-lg hover:bg-white/50 transition flex items-center gap-1 text-sm shadow-sm border border-white/30">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button type="button" id="aiHelpBtn" class="btn-modern btn-secondary relative">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              Writing Help
+              AI Writing Help
+              <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-secondary-500"></span>
+              </span>
             </button>
-            <button type="submit" class="btn-gradient text-white px-6 py-2 rounded-lg flex items-center gap-1 text-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+            <button type="submit" class="btn-modern btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
               </svg>
               {% if is_edit_mode %}Save Changes{% else %}Save Entry{% endif %}
@@ -307,157 +1005,132 @@
     </div>
   </div>
 
-  <!-- Loading indicator (initially hidden) -->
-  <div id="loadingIndicator" class="mt-6 hidden">
-    <div class="flex flex-col items-center justify-center p-8 glass-effect rounded-xl shadow-md border border-white/20">
-      <div class="w-12 h-12 border-4 border-secondary-200 border-t-secondary-600 rounded-full animate-spin mb-4"></div>
-      <p class="text-center text-gray-600 handwritten text-lg">Crafting your journal entry<span class="loading-dots"></span></p>
-      <p class="text-center text-gray-500 text-sm mt-2">This takes just a moment</p>
-    </div>
-  </div>
-
-  <!-- Results preview (hidden by default) -->
-  <div id="resultPreview" class="mt-6 glass-effect rounded-xl shadow-xl overflow-hidden border border-white/20 card-hover hidden opacity-0 transition-opacity duration-300">
-    <div class="p-4 sm:p-5 border-b border-white/20 flex items-center justify-between">
-      <div>
-        <h3 class="font-bold diary-font text-gray-800 text-base">Generated Journal Entry</h3>
-        <p class="text-gray-600 text-xs">Based on your quick notes</p>
-      </div>
-      <div class="h-8 w-8 bg-white/50 rounded-full flex items-center justify-center text-secondary-600 shadow-sm border border-white/30" onclick="editGeneratedEntry()">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-        </svg>
-      </div>
-    </div>
-
-    <div class="p-4 sm:p-5 bg-gradient-to-br from-white to-gray-50">
-      <div id="generatedEntry" class="handwritten text-lg text-gray-800 leading-relaxed"></div>
-    </div>
-
-    <div class="bg-gradient-to-r from-secondary-50 to-primary-50 p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-center gap-3 border-t border-white">
-      <div class="text-gray-600 text-sm diary-font">
-        <span class="text-secondary-600 font-medium">Generated Title:</span>
-        <span id="generatedTitle">Journal Entry - {{ today|date:"F j, Y" }}</span>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <button type="button" onclick="useGeneratedEntry()" class="btn-gradient text-white px-4 py-2 rounded-full text-sm font-medium shadow-md flex items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+  <!-- Modern AI Help Modal -->
+  <div id="aiHelpModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden transition-opacity duration-300">
+    <div class="max-w-lg w-full bg-white rounded-xl shadow-2xl m-4 overflow-hidden transform transition-transform duration-300 scale-95 opacity-0" id="modalContent">
+      <!-- Modal Header -->
+      <div class="p-5 bg-gradient-to-r from-secondary-50 to-primary-50 flex justify-between items-center border-b border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
-          Use This Entry
-        </button>
-        <button type="button" onclick="regenerateEntry()" class="glass-effect border border-white/30 text-gray-700 hover:bg-white px-3 py-2 rounded-full text-sm transition shadow-sm flex items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          <span>AI Writing Assistance</span>
+        </h3>
+        <button id="closeModal" class="bg-white/80 p-1.5 rounded-full text-gray-500 hover:text-gray-700 transition-colors duration-200 hover:bg-white/100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
-          Try Again
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- AI Help Modal -->
-<div id="aiHelpModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-  <div class="glass-effect rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto m-3 border border-white/20">
-    <div class="p-5 border-b border-white/20 flex justify-between items-center">
-      <h3 class="text-lg font-bold diary-font text-gray-800 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-        Writing Assistance
-      </h3>
-      <button id="closeModal" class="text-gray-500 hover:text-gray-700 bg-white/80 p-1.5 rounded-full">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-    </div>
-    <div class="p-5">
-      <p class="text-gray-600 mb-5">Select a prompt to help structure your journal entry:</p>
-
-      <div class="space-y-3">
-        <button class="ai-prompt-btn w-full glass-effect p-4 rounded-xl hover:bg-white/50 transition text-left border border-white/30 card-hover">
-          <div class="flex items-start gap-3">
-            <div class="bg-secondary-100 p-2 rounded-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <div>
-              <div class="font-medium text-gray-800 text-sm sm:text-base">Help me reflect on my day</div>
-              <p class="text-gray-500 text-xs mt-1">Creates a structured template for reflecting on experiences, achievements, and lessons of the day.</p>
-            </div>
-          </div>
-        </button>
-
-        <button class="ai-prompt-btn w-full glass-effect p-4 rounded-xl hover:bg-white/50 transition text-left border border-white/30 card-hover">
-          <div class="flex items-start gap-3">
-            <div class="bg-primary-100 p-2 rounded-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <div>
-              <div class="font-medium text-gray-800 text-sm sm:text-base">Help me structure my thoughts</div>
-              <p class="text-gray-500 text-xs mt-1">Provides an organized framework for exploring complex thoughts and ideas systematically.</p>
-            </div>
-          </div>
-        </button>
-
-        <button class="ai-prompt-btn w-full glass-effect p-4 rounded-xl hover:bg-white/50 transition text-left border border-white/30 card-hover">
-          <div class="flex items-start gap-3">
-            <div class="bg-rose-100 p-2 rounded-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </div>
-            <div>
-              <div class="font-medium text-gray-800 text-sm sm:text-base">Help me express my emotions</div>
-              <p class="text-gray-500 text-xs mt-1">Creates a template for exploring and articulating emotions with depth and clarity.</p>
-            </div>
-          </div>
-        </button>
-
-        <button class="ai-prompt-btn w-full glass-effect p-4 rounded-xl hover:bg-white/50 transition text-left border border-white/30 card-hover">
-          <div class="flex items-start gap-3">
-            <div class="bg-emerald-100 p-2 rounded-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-              </svg>
-            </div>
-            <div>
-              <div class="font-medium text-gray-800 text-sm sm:text-base">Practice gratitude</div>
-              <p class="text-gray-500 text-xs mt-1">Creates a framework for identifying and appreciating positive aspects of your life.</p>
-            </div>
-          </div>
-        </button>
-
-        <button class="ai-prompt-btn w-full glass-effect p-4 rounded-xl hover:bg-white/50 transition text-left border border-white/30 card-hover">
-          <div class="flex items-start gap-3">
-            <div class="bg-amber-100 p-2 rounded-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
-            <div>
-              <div class="font-medium text-gray-800 text-sm sm:text-base">Track goals and progress</div>
-              <p class="text-gray-500 text-xs mt-1">Helps you document progress toward personal or professional goals and next steps.</p>
-            </div>
-          </div>
         </button>
       </div>
 
-      <div class="mt-6 flex justify-end gap-3">
-        <button id="cancelAiHelp" class="text-gray-700 hover:text-gray-900 px-4 py-2 rounded-lg glass-effect border border-white/30">
-          Cancel
-        </button>
-        <button class="btn-gradient text-white px-4 py-2 rounded-lg flex items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-          </svg>
-          Create Custom Prompt
-        </button>
+      <!-- Modal Content -->
+      <div class="p-6">
+        <p class="text-gray-600 mb-6">Choose a writing template to enhance your journal entry:</p>
+
+        <div class="grid gap-4">
+          <!-- Template Cards -->
+          <div class="ai-prompt-btn overflow-hidden rounded-lg border border-gray-100 bg-white transition-all duration-200 hover:shadow-md hover:border-secondary-200 hover:bg-secondary-50/20 cursor-pointer" data-template="daily-reflection">
+            <div class="flex p-4">
+              <div class="bg-secondary-100 rounded-lg p-3 mr-4 self-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <div class="font-medium text-gray-800 mb-1">Daily Reflection</div>
+                <p class="text-gray-500 text-sm">Create a structured entry about your experiences, achievements, and lessons of the day.</p>
+              </div>
+              <div class="ml-2 self-center text-secondary-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="ai-prompt-btn overflow-hidden rounded-lg border border-gray-100 bg-white transition-all duration-200 hover:shadow-md hover:border-primary-200 hover:bg-primary-50/20 cursor-pointer" data-template="thought-organizer">
+            <div class="flex p-4">
+              <div class="bg-primary-100 rounded-lg p-3 mr-4 self-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <div class="font-medium text-gray-800 mb-1">Thought Organizer</div>
+                <p class="text-gray-500 text-sm">Provides a framework for exploring complex thoughts and ideas methodically.</p>
+              </div>
+              <div class="ml-2 self-center text-primary-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="ai-prompt-btn overflow-hidden rounded-lg border border-gray-100 bg-white transition-all duration-200 hover:shadow-md hover:border-rose-200 hover:bg-rose-50/20 cursor-pointer" data-template="emotional-explorer">
+            <div class="flex p-4">
+              <div class="bg-rose-100 rounded-lg p-3 mr-4 self-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <div class="font-medium text-gray-800 mb-1">Emotional Explorer</div>
+                <p class="text-gray-500 text-sm">Create a template for exploring and understanding your emotions with depth.</p>
+              </div>
+              <div class="ml-2 self-center text-rose-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="ai-prompt-btn overflow-hidden rounded-lg border border-gray-100 bg-white transition-all duration-200 hover:shadow-md hover:border-emerald-200 hover:bg-emerald-50/20 cursor-pointer" data-template="gratitude-practice">
+            <div class="flex p-4">
+              <div class="bg-emerald-100 rounded-lg p-3 mr-4 self-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <div class="font-medium text-gray-800 mb-1">Gratitude Practice</div>
+                <p class="text-gray-500 text-sm">Creates a framework for identifying and appreciating positive aspects of your life.</p>
+              </div>
+              <div class="ml-2 self-center text-emerald-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="ai-prompt-btn overflow-hidden rounded-lg border border-gray-100 bg-white transition-all duration-200 hover:shadow-md hover:border-amber-200 hover:bg-amber-50/20 cursor-pointer" data-template="progress-tracker">
+            <div class="flex p-4">
+              <div class="bg-amber-100 rounded-lg p-3 mr-4 self-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <div class="font-medium text-gray-800 mb-1">Progress Tracker</div>
+                <p class="text-gray-500 text-sm">Helps you document progress toward personal or professional goals and next steps.</p>
+              </div>
+              <div class="ml-2 self-center text-amber-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="mt-6 flex justify-end">
+          <button id="cancelAiHelp" class="btn-modern btn-secondary">
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -466,449 +1139,1510 @@
 
 {% block extra_js %}
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Initialize character counter
-    countChars();
+// Global chat history storage
+let chatHistory = [];
 
-    // Add event listener to generate entry button
-    const generateBtn = document.getElementById('generateEntryBtn');
-    if (generateBtn) {
-      generateBtn.addEventListener('click', generateFullEntry);
-    }
+// Main initialization
+document.addEventListener('DOMContentLoaded', function() {
+  console.log("DOM fully loaded, initializing components...");
 
-    // AI Help Modal functionality
-    initAIHelpModal();
+  // Initialize character counter
+  countChars();
+  console.log("Character counter initialized");
 
-    // Initialize mood selectors
+  // Initialize components based on view mode
+  if (document.getElementById('moodSlider')) {
+    initModernMoodSlider();
+    console.log("Modern mood slider initialized");
+  } else {
     initMoodSelectors();
+    console.log("Classic mood selectors initialized");
+  }
 
-    // Add tag button functionality
-    initTagButtons();
+  initAIHelpModal();
+  console.log("AI Help Modal initialized");
+
+  initTagButtons();
+  console.log("Tag buttons initialized");
+
+  if (document.getElementById('photoUploadModern')) {
+    initModernPhotoUpload();
+    console.log("Modern photo upload initialized");
+  } else {
+    setupPhotoDragAndDrop();
+    console.log("Classic photo drag and drop initialized");
+  }
+
+  initExistingPhoto();
+  console.log("Existing photo initialized");
+
+  // Initialize modern tags system if available
+  if (document.getElementById('selectedTags')) {
+    initModernTagsInput();
+    console.log("Modern tags input initialized");
+  }
+
+  // Initialize the word counter for content
+  if (document.getElementById('id_content')) {
+    initContentEditor();
+    console.log("Content editor initialized");
+  }
+
+  initChatInterface();
+  console.log("Chat interface initialized");
+});
+
+// Function to ensure base.html elements are preserved
+function transferToFullForm() {
+  console.log("Transferring to full form...");
+
+  // Find the main journal card container
+  const journalCard = document.getElementById('journalCard');
+
+  if (!journalCard) {
+    console.error('Could not find journal card container');
+    return;
+  }
+
+  // Find the chat interface and form sections
+  const chatInterface = journalCard.querySelector('.p-4.sm\\:p-6.glass-effect.border-b.border-white\\/20');
+  const fullEntryForm = document.getElementById('fullEntryForm');
+
+  if (!chatInterface || !fullEntryForm) {
+    console.error('Could not find chat interface or form');
+    return;
+  }
+
+  // 1. First, transfer any AI-generated content to the form
+  transferAIContentToForm();
+
+  // 2. Next, transfer any photo
+  transferPhotoToForm();
+
+  // 3. Hide the chat interface section
+  chatInterface.classList.add('hidden');
+
+  // 4. Show the form section
+  fullEntryForm.classList.remove('hidden');
+
+  // 5. Scroll to the form
+  fullEntryForm.scrollIntoView({ behavior: 'smooth' });
+
+  // 6. Re-run initialization for form elements
+  if (document.getElementById('moodSlider')) {
+    initModernMoodSlider();
+  } else {
+    initMoodSelectors();
+  }
+
+  if (document.getElementById('photoUploadModern')) {
+    initModernPhotoUpload();
+  } else {
+    setupPhotoDragAndDrop();
+  }
+
+  if (document.getElementById('selectedTags')) {
+    initModernTagsInput();
+  }
+
+  console.log("Transfer to full form complete");
+}
+
+// Transfer AI generated content to form fields
+function transferAIContentToForm() {
+  console.log("Transferring AI content to form...");
+
+  const contentField = document.getElementById('id_content');
+  const titleField = document.getElementById('id_title');
+
+  if (!contentField || !titleField) {
+    console.error("Content or title field not found");
+    return;
+  }
+
+  // If we don't have AI content yet, create default content
+  if (contentField.value.trim() === '') {
+    // Get any user input from the chat
+    const userMessages = chatHistory.filter(msg => msg.role === 'user')
+                                   .map(msg => msg.content);
+
+    if (userMessages.length > 0) {
+      console.log("Found user messages to transfer:", userMessages.length);
+
+      const userInput = userMessages.join('\n\n');
+      const today = new Date();
+      const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      contentField.value = `${dateStr}\n\n${userInput}\n\nReflecting on this has been insightful. I'll continue to journal my thoughts regularly to track my growth and insights.`;
+
+      // Set a default title if empty
+      if (titleField.value.trim() === '') {
+        titleField.value = `Journal Entry - ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
+      }
+
+      // Add highlight animation if modern UI
+      contentField.classList.add('auto-populated');
+      titleField.classList.add('auto-populated');
+      setTimeout(() => {
+        contentField.classList.remove('auto-populated');
+        titleField.classList.remove('auto-populated');
+      }, 2000);
+
+      console.log("AI content transferred to form");
+    } else {
+      console.log("No user messages found to transfer");
+    }
+  } else {
+    console.log("Content field already contains text, skipping transfer");
+  }
+}
+
+// Initialize chat interface
+function initChatInterface() {
+  console.log("Initializing chat interface...");
+
+  // Edit form button functionality with better naming
+  const useEntryFormBtn = document.getElementById('useEntryFormBtn');
+  if (useEntryFormBtn) {
+    // Use the improved transfer function
+    useEntryFormBtn.addEventListener('click', transferToFullForm);
+    console.log("Entry form button listener attached");
+  } else {
+    console.log("Entry form button not found");
+  }
+}
+
+// Character counter function
+function countChars() {
+  const textArea = document.getElementById('quickNotes');
+  const charCount = document.getElementById('charCount');
+
+  if (!textArea || !charCount) {
+    console.log("Quick notes textarea or char counter not found");
+    return;
+  }
+
+  const updateCount = () => {
+    charCount.textContent = textArea.value.length;
+  };
+
+  // Set initial count
+  updateCount();
+
+  // Update on input
+  textArea.addEventListener('input', updateCount);
+
+  console.log("Character counter set up");
+}
+
+// Transfer photo from chat interface to form
+function transferPhotoToForm() {
+  console.log("Attempting to transfer photo...");
+
+  const chatPhotoInput = document.getElementById('entryPhotoInput');
+
+  // Try to find modern or classic form photo input
+  const formPhotoInput = document.getElementById('formPhotoInputModern') ||
+                         document.getElementById('formPhotoInput');
+
+  if (!chatPhotoInput || !formPhotoInput) {
+    console.log("Photo inputs not found");
+    return;
+  }
+
+  if (chatPhotoInput.files && chatPhotoInput.files[0]) {
+    console.log("Found photo to transfer:", chatPhotoInput.files[0].name);
+
+    try {
+      // Make sure the name attribute is set correctly for Django
+      formPhotoInput.name = 'entry_photo';
+
+      // Create a new DataTransfer
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(chatPhotoInput.files[0]);
+      formPhotoInput.files = dataTransfer.files;
+
+      // Update the preview based on which UI we're using
+      if (document.getElementById('formPhotoInputModern')) {
+        // For modern UI
+        const event = new Event('change');
+        formPhotoInput.dispatchEvent(event);
+        console.log("Modern photo preview updated");
+      } else {
+        // For classic UI
+        handleFormFileSelect(formPhotoInput);
+        console.log("Classic photo preview updated");
+      }
+
+      console.log("Photo transferred successfully");
+    } catch (error) {
+      console.error("Error transferring photo:", error);
+    }
+  } else {
+    console.log("No photo to transfer");
+  }
+}
+
+// Add suggestion to textarea
+function addSuggestion(text) {
+  console.log("Adding suggestion:", text);
+
+  const textArea = document.getElementById('quickNotes');
+  if (!textArea) {
+    console.error("Quick notes textarea not found");
+    return;
+  }
+
+  let currentText = textArea.value;
+
+  // Add a space if there's already content and it doesn't end with space or newline
+  if (currentText && !currentText.endsWith('\n') && !currentText.endsWith(' ')) {
+    currentText += ' ';
+  }
+
+  textArea.value = currentText + text + ' ';
+  textArea.focus();
+
+  // Update character count
+  const charCount = document.getElementById('charCount');
+  if (charCount) {
+    charCount.textContent = textArea.value.length;
+  }
+
+  // Move cursor to end
+  textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
+
+  console.log("Suggestion added");
+}
+
+// Add tag to tag field
+function addTag(tag) {
+  console.log("Adding tag:", tag);
+
+  const tagField = document.getElementById('id_tags');
+  if (!tagField) {
+    console.error("Tags field not found");
+    return;
+  }
+
+  let currentTags = tagField.value;
+
+  // Don't add if tag already exists
+  if (currentTags.split(',').map(t => t.trim()).includes(tag)) {
+    console.log("Tag already exists, skipping");
+    return;
+  }
+
+  // Add comma if needed
+  if (currentTags && !currentTags.endsWith(',') && currentTags.trim() !== '') {
+    currentTags += ', ';
+  }
+
+  tagField.value = currentTags + tag;
+
+  // Update visual pills if using modern UI
+  if (document.getElementById('selectedTags')) {
+    updateTagPills();
+  }
+
+  tagField.focus();
+
+  // Move cursor to end
+  tagField.selectionStart = tagField.selectionEnd = tagField.value.length;
+
+  console.log("Tag added");
+}
+
+// Initialize mood selectors (classic UI)
+function initMoodSelectors() {
+  console.log("Initializing classic mood selectors");
+
+  const moodSelectors = document.querySelectorAll('.mood-selector');
+  if (moodSelectors.length === 0) {
+    console.log("No classic mood selectors found");
+    return;
+  }
+
+  moodSelectors.forEach(selector => {
+    selector.addEventListener('click', function() {
+      // Remove selected class from all selectors
+      moodSelectors.forEach(s => s.classList.remove('selected'));
+      // Add selected class to clicked selector
+      this.classList.add('selected');
+      // Check the radio button
+      const radio = this.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+    });
+
+    // Initialize selected state based on checked input
+    const radio = selector.querySelector('input[type="radio"]');
+    if (radio && radio.checked) {
+      selector.classList.add('selected');
+    }
   });
 
-  // Character counter function
-  function countChars() {
-    const textArea = document.getElementById('quickNotes');
-    const charCount = document.getElementById('charCount');
-    if (textArea && charCount) {
-      charCount.textContent = textArea.value.length;
-    }
+  console.log("Classic mood selectors initialized with", moodSelectors.length, "options");
+}
+
+// Modern Mood Slider
+function initModernMoodSlider() {
+  console.log("Initializing modern mood slider");
+
+  const moodSlider = document.getElementById('moodSlider');
+  const moodThumb = document.getElementById('moodThumb');
+  const moodValue = document.getElementById('moodValue');
+  const moodEmojis = document.querySelectorAll('#moodEmoji');
+
+  if (!moodSlider || !moodThumb || !moodValue || moodEmojis.length === 0) {
+    console.error("Missing required elements for mood slider");
+    return;
   }
 
-  // Add suggestion to textarea
-  function addSuggestion(text) {
-    const textArea = document.getElementById('quickNotes');
-    if (!textArea) return;
+  console.log("Found", moodEmojis.length, "mood emoji elements");
 
-    let currentText = textArea.value;
+  // Mood options mapping
+  const moods = [
+    { value: 'happy', emoji: '😊', position: '16.6%', color: '#4ade80' },
+    { value: 'excited', emoji: '🤩', position: '33.3%', color: '#34d399' },
+    { value: 'content', emoji: '😌', position: '50%', color: '#a78bfa' },
+    { value: 'neutral', emoji: '😐', position: '66.6%', color: '#c4b5fd' },
+    { value: 'anxious', emoji: '😰', position: '83.3%', color: '#fb923c' },
+    { value: 'sad', emoji: '😢', position: '100%', color: '#f87171' }
+  ];
 
-    // Add a space if there's already content and it doesn't end with space or newline
-    if (currentText && !currentText.endsWith('\n') && !currentText.endsWith(' ')) {
-      currentText += ' ';
-    }
+  // Auto-detect mood from content if appropriate
+  autoDetectMood();
 
-    textArea.value = currentText + text + ' ';
-    textArea.focus();
+  // Set initial position based on selected mood radio
+  setMoodFromRadio();
 
-    // Update character count
-    countChars();
+  // Make the thumb draggable
+  let isDragging = false;
 
-    // Move cursor to end
-    textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
-  }
+  moodThumb.addEventListener('mousedown', function(e) {
+    isDragging = true;
+    updateMoodPosition(e);
+  });
 
-  // Add tag to tag field
-  function addTag(tag) {
-    const tagField = document.getElementById('id_tags');
-    if (!tagField) return;
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    updateMoodPosition(e);
+  });
 
-    let currentTags = tagField.value;
+  document.addEventListener('mouseup', function() {
+    isDragging = false;
+  });
 
-    // Don't add if tag already exists
-    if (currentTags.split(',').map(t => t.trim()).includes(tag)) return;
+  // Touch support
+  moodThumb.addEventListener('touchstart', function(e) {
+    isDragging = true;
+    updateMoodPosition(e.touches[0]);
+  });
 
-    // Add comma if needed
-    if (currentTags && !currentTags.endsWith(',') && currentTags.trim() !== '') {
-      currentTags += ', ';
-    }
+  document.addEventListener('touchmove', function(e) {
+    if (!isDragging) return;
+    updateMoodPosition(e.touches[0]);
+  });
 
-    tagField.value = currentTags + tag;
-    tagField.focus();
+  document.addEventListener('touchend', function() {
+    isDragging = false;
+  });
 
-    // Move cursor to end
-    tagField.selectionStart = tagField.selectionEnd = tagField.value.length;
-  }
+  // Click anywhere on the track to set mood
+  moodSlider.addEventListener('click', updateMoodPosition);
 
-  // Initialize mood selectors
-  function initMoodSelectors() {
-    const moodSelectors = document.querySelectorAll('.mood-selector');
-    moodSelectors.forEach(selector => {
-      selector.addEventListener('click', function() {
-        // Remove selected class from all selectors
-        moodSelectors.forEach(s => s.classList.remove('selected'));
-        // Add selected class to clicked selector
-        this.classList.add('selected');
-        // Check the radio button
-        const radio = this.querySelector('input[type="radio"]');
-        if (radio) radio.checked = true;
-      });
+  function updateMoodPosition(e) {
+    try {
+      // Get position relative to the slider
+      const sliderRect = moodSlider.getBoundingClientRect();
+      const clientX = e.clientX || (e.touches && e.touches[0].clientX);
 
-      // Initialize selected state based on checked input
-      const radio = selector.querySelector('input[type="radio"]');
-      if (radio && radio.checked) {
-        selector.classList.add('selected');
+      if (!clientX) {
+        console.warn("Could not get clientX coordinate");
+        return;
       }
-    });
+
+      const relativeX = clientX - sliderRect.left;
+      const percentage = Math.max(0, Math.min(100, (relativeX / sliderRect.width) * 100));
+
+      // Find the closest mood
+      const moodIndex = Math.min(
+        Math.floor((percentage / 100) * moods.length),
+        moods.length - 1
+      );
+
+      // Update the UI
+      const selectedMood = moods[moodIndex];
+      moodThumb.style.left = selectedMood.position;
+
+      moodEmojis.forEach(el => {
+        el.textContent = selectedMood.emoji;
+      });
+
+      moodValue.textContent = selectedMood.value.charAt(0).toUpperCase() + selectedMood.value.slice(1);
+
+      // Update the hidden radio button
+      const radioToCheck = document.querySelector(`input[name="mood"][value="${selectedMood.value}"]`);
+      if (radioToCheck) {
+        radioToCheck.checked = true;
+      }
+
+      // Update background color with a smooth transition
+      moodThumb.style.backgroundColor = 'white';
+      moodThumb.style.boxShadow = `0 0 0 2px ${selectedMood.color}, 0 4px 6px -1px rgba(0, 0, 0, 0.1)`;
+
+      console.log("Updated mood to:", selectedMood.value);
+    } catch (error) {
+      console.error("Error updating mood position:", error);
+    }
   }
 
-  // Initialize tag buttons
-  function initTagButtons() {
-    const tagButtons = document.querySelectorAll('button[onclick^="addTag"]');
-    tagButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        this.classList.add('bg-secondary-100');
-        setTimeout(() => {
-          this.classList.remove('bg-secondary-100');
-        }, 300);
+  function setMoodFromRadio() {
+    // Find checked radio
+    const checkedRadio = document.querySelector('input[name="mood"]:checked');
+    if (!checkedRadio) {
+      // Default to "content" if nothing is selected
+      const defaultRadio = document.querySelector('input[name="mood"][value="content"]');
+      if (defaultRadio) defaultRadio.checked = true;
+      const defaultMood = moods.find(mood => mood.value === "content");
+      if (defaultMood) {
+        setMoodUI(defaultMood);
+        console.log("Set default mood to content");
+      }
+      return;
+    }
+
+    // Find corresponding mood
+    const selectedMood = moods.find(mood => mood.value === checkedRadio.value);
+    if (!selectedMood) return;
+
+    setMoodUI(selectedMood);
+    console.log("Set mood from radio to:", selectedMood.value);
+  }
+
+  function setMoodUI(selectedMood) {
+    // Update UI
+    moodThumb.style.left = selectedMood.position;
+
+    moodEmojis.forEach(el => {
+      el.textContent = selectedMood.emoji;
+    });
+
+    moodValue.textContent = selectedMood.value.charAt(0).toUpperCase() + selectedMood.value.slice(1);
+    moodThumb.style.backgroundColor = 'white';
+    moodThumb.style.boxShadow = `0 0 0 2px ${selectedMood.color}, 0 4px 6px -1px rgba(0, 0, 0, 0.1)`;
+  }
+
+  function autoDetectMood() {
+    // Get content from the textarea
+    const content = document.getElementById('id_content');
+    if (!content || !content.value) return;
+
+    // Simple mood detection based on keywords
+    const contentText = content.value.toLowerCase();
+
+    // Define mood keywords
+    const moodKeywords = {
+      happy: ['happy', 'joy', 'wonderful', 'great', 'awesome', 'delighted', 'pleased'],
+      excited: ['excited', 'thrilled', 'amazing', 'fantastic', 'exhilarated', 'pumped'],
+      content: ['content', 'satisfied', 'peaceful', 'calm', 'relaxed', 'at ease'],
+      neutral: ['okay', 'fine', 'alright', 'neutral', 'average', 'so-so'],
+      anxious: ['anxious', 'worried', 'nervous', 'stressed', 'concerned', 'uneasy'],
+      sad: ['sad', 'disappointed', 'upset', 'unhappy', 'down', 'depressed', 'low']
+    };
+
+    // Count keyword occurrences
+    const moodCounts = {};
+    for (const [mood, keywords] of Object.entries(moodKeywords)) {
+      moodCounts[mood] = 0;
+      keywords.forEach(keyword => {
+        const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+        const matches = contentText.match(regex);
+        if (matches) {
+          moodCounts[mood] += matches.length;
+        }
+      });
+    }
+
+    // Find the dominant mood
+    let dominantMood = 'neutral'; // default
+    let maxCount = 0;
+
+    for (const [mood, count] of Object.entries(moodCounts)) {
+      if (count > maxCount) {
+        maxCount = count;
+        dominantMood = mood;
+      }
+    }
+
+    // Set the mood if detected
+    if (maxCount > 0) {
+      const radioToCheck = document.querySelector(`input[name="mood"][value="${dominantMood}"]`);
+      if (radioToCheck) {
+        radioToCheck.checked = true;
+
+        // Find corresponding mood and update UI
+        const selectedMood = moods.find(mood => mood.value === dominantMood);
+        if (selectedMood) {
+          setMoodUI(selectedMood);
+
+          // Add animation to show it was auto-populated
+          moodSlider.classList.add('auto-populated');
+          setTimeout(() => {
+            moodSlider.classList.remove('auto-populated');
+          }, 2000);
+
+          console.log("Auto-detected mood:", dominantMood);
+        }
+      }
+    }
+  }
+
+  console.log("Modern mood slider initialization complete");
+}
+
+// Initialize tag buttons
+function initTagButtons() {
+  console.log("Initializing tag buttons");
+
+  const tagButtons = document.querySelectorAll('button[onclick^="addTag"]');
+  if (tagButtons.length === 0) {
+    console.log("No tag buttons found");
+    return;
+  }
+
+  tagButtons.forEach(button => {
+    // Remove the inline onclick attribute if exists
+    if (button.hasAttribute('onclick')) {
+      const tag = button.getAttribute('onclick').match(/addTag\(['"](.+?)['"]\)/);
+      if (tag && tag[1]) {
+        const tagValue = tag[1];
+        button.removeAttribute('onclick');
+
+        // Add proper event listener
+        button.addEventListener('click', function() {
+          addTag(tagValue);
+
+          // Add visual feedback
+          this.classList.add('bg-secondary-100');
+          setTimeout(() => {
+            this.classList.remove('bg-secondary-100');
+          }, 300);
+        });
+      }
+    }
+  });
+
+  // Also initialize tag suggestions for modern UI
+  const tagSuggestions = document.querySelectorAll('.tag-suggestion');
+  if (tagSuggestions.length > 0) {
+    console.log("Found", tagSuggestions.length, "tag suggestions");
+
+    tagSuggestions.forEach(suggestion => {
+      suggestion.addEventListener('click', function() {
+        addTag(this.textContent.trim());
       });
     });
   }
 
-  // Initialize AI Help Modal
-  function initAIHelpModal() {
-    const aiHelpBtn = document.getElementById('aiHelpBtn');
-    const aiHelpModal = document.getElementById('aiHelpModal');
-    const closeModal = document.getElementById('closeModal');
-    const cancelAiHelp = document.getElementById('cancelAiHelp');
-    const aiPromptBtns = document.querySelectorAll('.ai-prompt-btn');
+  console.log("Tag buttons initialized with", tagButtons.length, "buttons");
+}
 
-    if (!aiHelpBtn || !aiHelpModal) return;
+// Modern Tags Input
+function initModernTagsInput() {
+  console.log("Initializing modern tags input");
 
-    aiHelpBtn.addEventListener('click', () => {
-      aiHelpModal.classList.remove('hidden');
-      // Add slight delay to trigger any animations
+  const tagsInput = document.getElementById('id_tags');
+  const tagsList = document.getElementById('selectedTags');
+
+  if (!tagsInput || !tagsList) {
+    console.log("Tags input or container not found");
+    return;
+  }
+
+  // Auto-generate tags from content if appropriate
+  autoGenerateTags();
+
+  // Display existing tags as pills
+  updateTagPills();
+
+  // Handle input changes
+  tagsInput.addEventListener('input', function() {
+    // Check if a comma was just typed
+    if (this.value.endsWith(',')) {
+      // Get the tag before the comma
+      const tag = this.value.slice(0, -1).trim();
+      if (tag) {
+        addTag(tag);
+        // Clean up the input
+        this.value = this.value.split(',').map(t => t.trim()).filter(t => t).join(', ');
+      }
+    }
+  });
+
+  tagsInput.addEventListener('keydown', function(e) {
+    // If Enter is pressed, add the current tag
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const tag = this.value.trim();
+      if (tag) {
+        addTag(tag);
+        this.value = '';
+      }
+    }
+  });
+
+  function autoGenerateTags() {
+    // Get content from the textarea
+    const content = document.getElementById('id_content');
+    if (!content || !content.value) {
+      console.log("No content to generate tags from");
+      return;
+    }
+
+    // Skip if tags are already set
+    if (tagsInput.value.trim()) {
+      console.log("Tags already set, skipping auto-generation");
+      return;
+    }
+
+    const contentText = content.value.toLowerCase();
+
+    // Common categories for journal entries
+    const categories = {
+      work: ['work', 'job', 'career', 'office', 'project', 'meeting', 'colleague', 'boss', 'deadline'],
+      health: ['health', 'fitness', 'exercise', 'gym', 'workout', 'run', 'yoga', 'meditation', 'diet', 'sleep'],
+      family: ['family', 'mom', 'dad', 'sister', 'brother', 'wife', 'husband', 'kids', 'children', 'parents'],
+      friends: ['friend', 'buddy', 'hangout', 'gathering', 'party', 'social'],
+      travel: ['travel', 'trip', 'journey', 'vacation', 'visit', 'explore', 'adventure'],
+      food: ['food', 'meal', 'breakfast', 'lunch', 'dinner', 'cook', 'restaurant', 'recipe'],
+      learning: ['learn', 'study', 'class', 'course', 'book', 'read', 'knowledge'],
+      reflection: ['reflect', 'think', 'contemplation', 'introspection', 'realization'],
+      goals: ['goal', 'aim', 'objective', 'target', 'plan', 'aspiration', 'achievement'],
+      gratitude: ['grateful', 'thankful', 'appreciate', 'blessing', 'gratitude']
+    };
+
+    // Detect categories
+    const detectedTags = [];
+
+    for (const [category, keywords] of Object.entries(categories)) {
+      for (const keyword of keywords) {
+        if (contentText.includes(keyword)) {
+          detectedTags.push(category);
+          console.log("Detected tag:", category);
+          break; // Only add each category once
+        }
+      }
+    }
+
+    // Add mood as a tag
+    const selectedMood = document.querySelector('input[name="mood"]:checked');
+    if (selectedMood) {
+      detectedTags.push(selectedMood.value);
+      console.log("Added mood tag:", selectedMood.value);
+    }
+
+    // Update tags if any were detected
+    if (detectedTags.length > 0) {
+      tagsInput.value = detectedTags.join(', ');
+      updateTagPills();
+
+      // Add animation to show it was auto-populated
+      tagsInput.classList.add('auto-populated');
+      setTimeout(() => {
+        tagsInput.classList.remove('auto-populated');
+      }, 2000);
+
+      console.log("Auto-generated", detectedTags.length, "tags");
+    }
+  }
+
+  console.log("Modern tags input initialized");
+}
+
+// Update visual tags pills
+function updateTagPills() {
+  console.log("Updating tag pills");
+
+  const tagsInput = document.getElementById('id_tags');
+  const tagsList = document.getElementById('selectedTags');
+
+  if (!tagsInput || !tagsList) {
+    console.log("Tags input or container not found");
+    return;
+  }
+
+  // Clear existing pills
+  tagsList.innerHTML = '';
+
+  // Get current tags
+  const currentTags = tagsInput.value ? tagsInput.value.split(',').map(t => t.trim()).filter(t => t) : [];
+
+  // Create a pill for each tag
+  currentTags.forEach(tag => {
+    const pill = document.createElement('div');
+    pill.className = 'tag-pill';
+    pill.innerHTML = `
+      ${tag}
+      <span class="remove-tag ml-1" data-tag="${tag}">×</span>
+    `;
+    tagsList.appendChild(pill);
+  });
+
+  // Add event listeners to remove buttons
+  document.querySelectorAll('.remove-tag').forEach(button => {
+    button.addEventListener('click', function() {
+      removeTag(this.dataset.tag);
+    });
+  });
+
+  console.log("Updated tag pills for", currentTags.length, "tags");
+}
+
+// Remove tag
+function removeTag(tagToRemove) {
+  console.log("Removing tag:", tagToRemove);
+
+  const tagsInput = document.getElementById('id_tags');
+  if (!tagsInput) return;
+
+  // Get current tags
+  let currentTags = tagsInput.value.split(',').map(t => t.trim()).filter(t => t);
+
+  // Remove the tag
+  currentTags = currentTags.filter(tag => tag !== tagToRemove);
+
+  // Update the input value
+  tagsInput.value = currentTags.join(', ');
+
+  // Update visual representation if using modern UI
+  if (document.getElementById('selectedTags')) {
+    updateTagPills();
+  }
+
+  console.log("Tag removed");
+}
+
+// Initialize content editor
+function initContentEditor() {
+  console.log("Initializing content editor");
+
+  const contentEditor = document.getElementById('id_content');
+  if (!contentEditor) {
+    console.log("Content editor not found");
+    return;
+  }
+
+  // Add word counter if using modern UI
+  if (!document.querySelector('.word-counter')) {
+    const wordCounter = document.createElement('div');
+    wordCounter.className = 'word-counter';
+    wordCounter.textContent = '0 words';
+    contentEditor.parentNode.appendChild(wordCounter);
+
+    contentEditor.addEventListener('input', function() {
+      // Count words
+      const text = this.value.trim();
+      const wordCount = text ? text.split(/\s+/).length : 0;
+      wordCounter.textContent = `${wordCount} words`;
+    });
+
+    // Trigger initial count
+    contentEditor.dispatchEvent(new Event('input'));
+
+    console.log("Word counter added");
+  }
+
+  console.log("Content editor initialized");
+}
+
+// Initialize AI Help Modal
+function initAIHelpModal() {
+  console.log("Initializing AI Help Modal");
+
+  const aiHelpBtn = document.getElementById('aiHelpBtn');
+  const aiHelpModal = document.getElementById('aiHelpModal');
+
+  if (!aiHelpBtn || !aiHelpModal) {
+    console.log("AI help button or modal not found");
+    return;
+  }
+
+  aiHelpBtn.addEventListener('click', () => {
+    console.log("AI help button clicked");
+
+    aiHelpModal.classList.remove('hidden');
+
+    // Handle animation based on modern or classic UI
+    if (document.getElementById('modalContent')) {
+      // Modern UI
+      const modalContent = document.getElementById('modalContent');
+      setTimeout(() => {
+        modalContent.style.opacity = '1';
+        modalContent.style.transform = 'scale(1)';
+      }, 10);
+    } else {
+      // Classic UI
       setTimeout(() => {
         const modalContent = aiHelpModal.querySelector('.glass-effect');
         if (modalContent) modalContent.classList.add('scale-in');
       }, 10);
-    });
-
-    if (closeModal) {
-      closeModal.addEventListener('click', () => {
-        closeAIModal();
-      });
     }
+  });
 
-    if (cancelAiHelp) {
-      cancelAiHelp.addEventListener('click', () => {
-        closeAIModal();
-      });
+  // Close button
+  const closeModal = document.getElementById('closeModal');
+  if (closeModal) {
+    closeModal.addEventListener('click', closeAIModal);
+  }
+
+  // Cancel button
+  const cancelAiHelp = document.getElementById('cancelAiHelp');
+  if (cancelAiHelp) {
+    cancelAiHelp.addEventListener('click', closeAIModal);
+  }
+
+  // Close modal when clicking outside
+  aiHelpModal.addEventListener('click', (e) => {
+    if (e.target === aiHelpModal) {
+      closeAIModal();
     }
+  });
 
-    // Close modal when clicking outside
-    aiHelpModal.addEventListener('click', (e) => {
-      if (e.target === aiHelpModal) {
-        closeAIModal();
+  // Process AI prompt buttons - works with both modern and classic UI
+  const aiPromptBtns = document.querySelectorAll('.ai-prompt-btn');
+
+  aiPromptBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const contentField = document.getElementById('id_content');
+      if (!contentField) return;
+
+      let promptText = '';
+
+      // Try to identify the template - support both approaches
+      let templateType = null;
+
+      // Modern UI uses data attributes
+      if (btn.dataset.template) {
+        templateType = btn.dataset.template;
       }
-    });
+      // Classic UI uses text content
+      else if (btn.querySelector('.font-medium')) {
+        const buttonText = btn.querySelector('.font-medium').textContent;
 
-    // AI Prompt buttons functionality
-    aiPromptBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const contentField = document.getElementById('id_content'); // Django form field ID
-        if (!contentField) return;
+        if (buttonText.includes('reflect')) templateType = 'daily-reflection';
+        else if (buttonText.includes('structure')) templateType = 'thought-organizer';
+        else if (buttonText.includes('emotion')) templateType = 'emotional-explorer';
+        else if (buttonText.includes('gratitude')) templateType = 'gratitude-practice';
+        else if (buttonText.includes('goal')) templateType = 'progress-tracker';
+      }
 
-        let promptText = '';
+      console.log("Selected template:", templateType);
 
-        // Simple prompts for each button
-        if (btn.querySelector('.font-medium').textContent === 'Help me reflect on my day') {
-          promptText = "Today, I experienced...\n\nWhat went well:\n\nWhat I found challenging:\n\nWhat I learned:\n\nHow I'm feeling now:";
-        } else if (btn.querySelector('.font-medium').textContent === 'Help me structure my thoughts') {
-          promptText = "Context:\n\nMy initial thoughts:\n\nConsidering different perspectives:\n\nWhat this means for me:";
-        } else if (btn.querySelector('.font-medium').textContent === 'Help me express my emotions') {
-          promptText = "I'm feeling...\n\nThis emotion arose when...\n\nPhysically, I notice...\n\nMy thoughts around this are...\n\nWhat I need right now is...";
-        } else if (btn.querySelector('.font-medium').textContent === 'Practice gratitude') {
-          promptText = "Today I'm grateful for:\n\n1. \n\n2. \n\n3. \n\nWhy these matter to me:\n\nHow this gratitude affects my perspective:";
-        } else if (btn.querySelector('.font-medium').textContent === 'Track goals and progress') {
-          promptText = "Goal I'm working toward:\n\nProgress made today:\n\nChallenges encountered:\n\nAdjustments needed:\n\nNext steps:";
-        }
+      // Templates for each button type
+      if (templateType === 'daily-reflection') {
+        promptText = "Today, I experienced...\n\nWhat went well:\n\nWhat I found challenging:\n\nWhat I learned:\n\nHow I'm feeling now:";
+      } else if (templateType === 'thought-organizer') {
+        promptText = "Context:\n\nMy initial thoughts:\n\nConsidering different perspectives:\n\nWhat this means for me:";
+      } else if (templateType === 'emotional-explorer') {
+        promptText = "I'm feeling...\n\nThis emotion arose when...\n\nPhysically, I notice...\n\nMy thoughts around this are...\n\nWhat I need right now is...";
+      } else if (templateType === 'gratitude-practice') {
+        promptText = "Today I'm grateful for:\n\n1. \n\n2. \n\n3. \n\nWhy these matter to me:\n\nHow this gratitude affects my perspective:";
+      } else if (templateType === 'progress-tracker') {
+        promptText = "Current goal: \n\nProgress made today: \n\nChallenges encountered: \n\nNext steps: \n\nThoughts on my progress:";
+      }
 
-        contentField.value = promptText;
-        contentField.focus();
+      // Set the value to the content field
+      contentField.value = promptText;
 
-        // Position cursor after the first line
-        const firstLineEnd = promptText.indexOf('\n');
-        if (firstLineEnd !== -1) {
-          contentField.setSelectionRange(firstLineEnd, firstLineEnd);
-        }
-
-        closeAIModal();
-      });
-    });
-
-    // Helper function to close the modal with animation
-    function closeAIModal() {
-      const modalContent = aiHelpModal.querySelector('.glass-effect');
-      if (modalContent) modalContent.classList.remove('scale-in');
-
-      // First fade out, then hide completely
-      aiHelpModal.style.opacity = '0';
+      // Add highlight animation if modern UI
+      contentField.classList.add('auto-populated');
       setTimeout(() => {
-        aiHelpModal.classList.add('hidden');
-        aiHelpModal.style.opacity = '1';
-      }, 300);
-    }
+        contentField.classList.remove('auto-populated');
+      }, 2000);
+
+      console.log("Applied template to content field");
+
+      // Close the modal
+      closeAIModal();
+    });
+  });
+
+  console.log("AI Help Modal initialized with", aiPromptBtns.length, "prompt buttons");
+}
+
+// Close AI help modal
+function closeAIModal() {
+  console.log("Closing AI modal");
+
+  const aiHelpModal = document.getElementById('aiHelpModal');
+  if (!aiHelpModal) return;
+
+  // Handle animation based on modern or classic UI
+  if (document.getElementById('modalContent')) {
+    // Modern UI
+    const modalContent = document.getElementById('modalContent');
+    modalContent.style.opacity = '0';
+    modalContent.style.transform = 'scale(0.95)';
+  } else {
+    // Classic UI
+    const modalContent = aiHelpModal.querySelector('.glass-effect');
+    if (modalContent) modalContent.classList.remove('scale-in');
   }
 
-  // Generate full entry from quick notes using existing API
-  function generateFullEntry() {
-    const quickNotes = document.getElementById('quickNotes');
-    if (!quickNotes) {
-      console.error('Quick notes textarea not found');
-      alert('Could not find quick notes field');
+  // Hide modal after animation completes
+  setTimeout(() => {
+    aiHelpModal.classList.add('hidden');
+  }, 200);
+}
+
+// Modern Photo Upload
+function initModernPhotoUpload() {
+  console.log("Initializing modern photo upload");
+
+  const photoUpload = document.getElementById('photoUploadModern');
+  const photoInput = document.getElementById('formPhotoInputModern');
+  const photoPreview = document.getElementById('photoPreviewModern');
+  const photoPlaceholder = document.getElementById('photoPlaceholderModern');
+  const photoControls = document.getElementById('photoControlsModern');
+
+  if (!photoUpload || !photoInput || !photoPreview || !photoPlaceholder || !photoControls) {
+    console.log("Required photo upload elements not found");
+    return;
+  }
+
+  // Handle file selection
+  photoInput.addEventListener('change', function() {
+    if (!this.files || !this.files[0]) return;
+
+    const file = this.files[0];
+    console.log("Photo selected:", file.name);
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image file is too large. Please select an image under 5MB.');
+      this.value = '';
       return;
     }
 
-    const notesText = quickNotes.value.trim();
-    if (notesText.length < 10) {
-      alert('Please enter at least 10 characters in your quick notes.');
-      return;
-    }
+    // Preview the image
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      photoPreview.src = e.target.result;
+      photoPreview.classList.add('has-image');
+      photoPlaceholder.style.display = 'none';
+      photoControls.style.display = 'flex';
 
-    // Show loading indicator
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    const resultPreview = document.getElementById('resultPreview');
+      // Add scaling animation
+      photoPreview.style.transform = 'scale(0.95)';
+      photoPreview.style.opacity = '0';
 
-    if (loadingIndicator) {
-      loadingIndicator.classList.remove('hidden');
-    }
+      setTimeout(() => {
+        photoPreview.style.transition = 'all 0.3s ease';
+        photoPreview.style.transform = 'scale(1)';
+        photoPreview.style.opacity = '1';
+      }, 10);
+    };
+    reader.readAsDataURL(file);
+  });
 
-    if (resultPreview) {
-      resultPreview.classList.add('hidden');
-      resultPreview.classList.remove('opacity-100');
-    }
-
-    // Check if personalization is enabled
-    const personalizationToggle = document.getElementById('personalizationToggle');
-    const usePersonalization = personalizationToggle && personalizationToggle.checked;
-
-    // Get CSRF token
-    const csrfToken = getCsrfToken();
-
-    // Use the existing demo_journal endpoint
-    fetch('/api/demo-journal/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken
-      },
-      body: JSON.stringify({
-        journal_content: notesText,
-        personalize: usePersonalization
-      })
-    })
-    .then(response => {
-      if (!response.ok) {
-        return response.json().then(data => {
-          throw new Error(data.error || 'Failed to generate entry');
-        });
-      }
-      return response.json();
-    })
-    .then(data => {
-      // Hide loading indicator
-      if (loadingIndicator) {
-        loadingIndicator.classList.add('hidden');
-      }
-
-      // Update the preview with generated content
-      const generatedEntryElement = document.getElementById('generatedEntry');
-      const generatedTitleElement = document.getElementById('generatedTitle');
-
-      if (generatedEntryElement) {
-        generatedEntryElement.innerHTML = data.entry.replace(/\n/g, '<br>');
-      } else {
-        console.error('Could not find generatedEntry element');
-        throw new Error('Could not find generatedEntry element');
-      }
-
-      if (generatedTitleElement) {
-        generatedTitleElement.textContent = data.title;
-      } else {
-        console.error('Could not find generatedTitle element');
-      }
-
-      // Show the preview with animation
-      if (resultPreview) {
-        resultPreview.classList.remove('hidden');
-        // Add a small delay before setting opacity to ensure the transition works
-        setTimeout(() => {
-          resultPreview.classList.add('opacity-100');
-        }, 10);
-        // Scroll to the preview
-        resultPreview.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        console.error('Could not find resultPreview element');
-        throw new Error('Could not find resultPreview element');
-      }
-    })
-    .catch(error => {
-      // Hide loading indicator
-      if (loadingIndicator) {
-        loadingIndicator.classList.add('hidden');
-      }
-
-      // Show error with a better-styled alert
-      showErrorNotification('Error generating entry: ' + error.message);
-      console.error('Error:', error);
+  // Remove photo button
+  const removePhotoBtn = document.getElementById('removePhotoModern');
+  if (removePhotoBtn) {
+    removePhotoBtn.addEventListener('click', function() {
+      photoInput.value = '';
+      photoPreview.src = '';
+      photoPreview.classList.remove('has-image');
+      photoPlaceholder.style.display = 'flex';
+      photoControls.style.display = 'none';
+      console.log("Photo removed");
     });
   }
 
-  // Show error notification
-  function showErrorNotification(message) {
-    // Check if notification already exists and remove it
-    const existingNotification = document.getElementById('errorNotification');
-    if (existingNotification) {
-      existingNotification.remove();
-    }
-
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.id = 'errorNotification';
-    notification.className = 'fixed bottom-4 right-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-lg z-50 scale-in flex items-start max-w-md';
-
-    // Add content
-    notification.innerHTML = `
-      <svg class="h-5 w-5 text-red-500 mr-3 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-      </svg>
-      <div class="flex-1">
-        <p>${message}</p>
-      </div>
-      <button class="ml-4 text-red-500 hover:text-red-700">
-        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-        </svg>
-      </button>
-    `;
-
-    // Add to document
-    document.body.appendChild(notification);
-
-    // Add click event to close button
-    notification.querySelector('button').addEventListener('click', () => {
-      notification.remove();
+  // Change photo button
+  const changePhotoBtn = document.getElementById('changePhotoModern');
+  if (changePhotoBtn) {
+    changePhotoBtn.addEventListener('click', function() {
+      photoInput.click();
     });
+  }
 
-    // Auto-dismiss after 5 seconds
-    setTimeout(() => {
-      if (notification.parentNode) {
-        notification.classList.add('opacity-0');
-        setTimeout(() => notification.remove(), 300);
+  // Drag and drop functionality
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    photoUpload.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+    photoUpload.addEventListener(eventName, highlight, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    photoUpload.addEventListener(eventName, unhighlight, false);
+  });
+
+  function highlight() {
+    photoUpload.classList.add('drop-active');
+    photoUpload.style.borderColor = 'var(--primary-color)';
+    photoUpload.style.backgroundColor = 'rgba(99, 102, 241, 0.05)';
+  }
+
+  function unhighlight() {
+    photoUpload.classList.remove('drop-active');
+    photoUpload.style.borderColor = '';
+    photoUpload.style.backgroundColor = '';
+  }
+
+  photoUpload.addEventListener('drop', handleDrop, false);
+
+  function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+
+    if (files.length) {
+      photoInput.files = files;
+
+      // Trigger the change event manually
+      const event = new Event('change');
+      photoInput.dispatchEvent(event);
+
+      console.log("File dropped and processed");
+    }
+  }
+
+  console.log("Modern photo upload initialized");
+}
+
+// Handle file selection for chat interface
+function handleFileSelect(input) {
+  console.log("Handling file selection for chat");
+
+  if (!input.files || !input.files[0]) return;
+
+  const file = input.files[0];
+  console.log("File selected:", file.name);
+
+  // Check file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Image file is too large. Please select an image under 5MB.');
+    input.value = '';
+    return;
+  }
+
+  // Preview the image
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const photoPreview = document.getElementById('photoPreview');
+    if (photoPreview) {
+      photoPreview.src = e.target.result;
+    }
+
+    // Show the photo container
+    const photoContainer = document.getElementById('photoContainer');
+    if (photoContainer) {
+      photoContainer.classList.remove('hidden');
+    }
+
+    // Update file name
+    const photoName = document.getElementById('photoName');
+    if (photoName) {
+      photoName.textContent = file.name;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// Remove photo from chat interface
+function removePhoto() {
+  console.log("Removing photo from chat");
+
+  const photoInput = document.getElementById('entryPhotoInput');
+  if (photoInput) {
+    photoInput.value = '';
+  }
+
+  const photoContainer = document.getElementById('photoContainer');
+  if (photoContainer) {
+    photoContainer.classList.add('hidden');
+  }
+}
+
+// Handle file selection for classic form
+function handleFormFileSelect(input) {
+  console.log("Handling file selection for form");
+
+  if (!input.files || !input.files[0]) return;
+
+  const file = input.files[0];
+  console.log("File selected:", file.name);
+
+  // Check file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Image file is too large. Please select an image under 5MB.');
+    input.value = '';
+    return;
+  }
+
+  // Preview the image
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const photoPreview = document.getElementById('formPhotoPreview');
+    if (photoPreview) {
+      photoPreview.src = e.target.result;
+      photoPreview.classList.add('has-image');
+    }
+
+    // Hide placeholder, show controls
+    const photoPlaceholder = document.getElementById('formPhotoPlaceholder');
+    const photoControls = document.getElementById('formPhotoControls');
+
+    if (photoPlaceholder) {
+      photoPlaceholder.classList.add('hidden');
+    }
+
+    if (photoControls) {
+      photoControls.style.display = 'flex';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// Remove photo from classic form
+function removeFormPhoto() {
+  console.log("Removing photo from form");
+
+  const photoInput = document.getElementById('formPhotoInput');
+  if (photoInput) {
+    photoInput.value = '';
+  }
+
+  const photoPreview = document.getElementById('formPhotoPreview');
+  if (photoPreview) {
+    photoPreview.src = '';
+    photoPreview.classList.remove('has-image');
+  }
+
+  // Show placeholder, hide controls
+  const photoPlaceholder = document.getElementById('formPhotoPlaceholder');
+  const photoControls = document.getElementById('formPhotoControls');
+
+  if (photoPlaceholder) {
+    photoPlaceholder.classList.remove('hidden');
+  }
+
+  if (photoControls) {
+    photoControls.style.display = 'none';
+  }
+}
+
+// Setup photo drag and drop for classic UI
+function setupPhotoDragAndDrop() {
+  console.log("Setting up photo drag and drop");
+
+  const dropZone = document.getElementById('photoDropZone');
+  const dropOverlay = document.getElementById('formDropOverlay');
+
+  if (!dropZone) {
+    console.log("Drop zone not found");
+    return;
+  }
+
+  // Prevent default behavior
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  // Highlight drop zone when dragging over it
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, highlight, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, unhighlight, false);
+  });
+
+  function highlight() {
+    dropZone.classList.add('drop-zone-active');
+  }
+
+  function unhighlight() {
+    dropZone.classList.remove('drop-zone-active');
+  }
+
+  // Handle dropped files
+  dropZone.addEventListener('drop', handleDrop, false);
+
+  function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+
+    if (files.length) {
+      const photoInput = document.getElementById('formPhotoInput');
+      if (photoInput) {
+        photoInput.files = files;
+        handleFormFileSelect(photoInput);
+        console.log("File dropped and processed");
       }
-    }, 5000);
-  }
-
-  // Use generated entry in the form
-  function useGeneratedEntry() {
-    const titleField = document.getElementById('id_title'); // Django form field ID
-    const contentField = document.getElementById('id_content'); // Django form field ID
-    const generatedTitle = document.getElementById('generatedTitle');
-    const generatedEntry = document.getElementById('generatedEntry');
-    const resultPreview = document.getElementById('resultPreview');
-
-    if (!titleField || !contentField) {
-      showErrorNotification('Could not find form fields');
-      return;
-    }
-
-    if (!generatedTitle || !generatedEntry) {
-      showErrorNotification('Could not find generated content');
-      return;
-    }
-
-    titleField.value = generatedTitle.textContent;
-
-    // Replace <br> with newlines for the textarea
-    const htmlContent = generatedEntry.innerHTML;
-    const textContent = htmlContent.replace(/<br\s*\/?>/gi, '\n');
-    contentField.value = textContent;
-
-    // Hide the preview with animation
-    hidePreview();
-
-    // Scroll to the form fields
-    titleField.scrollIntoView({ behavior: 'smooth' });
-    titleField.focus();
-  }
-
-  // Regenerate entry
-  function regenerateEntry() {
-    // Just call generateFullEntry again to create a new entry
-    generateFullEntry();
-  }
-
-  // Edit generated entry
-  function editGeneratedEntry() {
-    // Focus back on quick notes to let the user modify input
-    const quickNotes = document.getElementById('quickNotes');
-    if (quickNotes) {
-      quickNotes.focus();
     }
   }
 
-  // Get CSRF token from cookies
-  function getCsrfToken() {
-    const name = 'csrftoken';
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
+  console.log("Photo drag and drop set up");
+}
+
+// Initialize existing photo for edit mode
+function initExistingPhoto() {
+  console.log("Initializing existing photo");
+
+  // Check if we're using modern or classic UI
+  const modernPhotoPreview = document.getElementById('photoPreviewModern');
+  const classicPhotoPreview = document.getElementById('formPhotoPreview');
+
+  if (modernPhotoPreview && modernPhotoPreview.getAttribute('src')) {
+    if (modernPhotoPreview.getAttribute('src').trim() !== '') {
+      modernPhotoPreview.classList.add('has-image');
+
+      // Hide placeholder, show controls
+      const photoPlaceholder = document.getElementById('photoPlaceholderModern');
+      const photoControls = document.getElementById('photoControlsModern');
+
+      if (photoPlaceholder) {
+        photoPlaceholder.style.display = 'none';
       }
+
+      if (photoControls) {
+        photoControls.style.display = 'flex';
+      }
+
+      console.log("Found existing photo (modern UI)");
     }
-    return cookieValue;
+  }
+  else if (classicPhotoPreview && classicPhotoPreview.getAttribute('src')) {
+    // If there's a source already set (for edit mode)
+    if (classicPhotoPreview.getAttribute('src').trim() !== '') {
+      classicPhotoPreview.classList.add('has-image');
+
+      // Hide placeholder, show controls
+      const photoPlaceholder = document.getElementById('formPhotoPlaceholder');
+      const photoControls = document.getElementById('formPhotoControls');
+
+      if (photoPlaceholder) {
+        photoPlaceholder.classList.add('hidden');
+      }
+
+      if (photoControls) {
+        photoControls.style.display = 'flex';
+      }
+
+      console.log("Found existing photo (classic UI)");
+    }
+  }
+}
+
+// Send message function
+function sendMessage() {
+  console.log("Sending message");
+
+  const quickNotes = document.getElementById('quickNotes');
+  if (!quickNotes || quickNotes.value.trim() === '') {
+    console.log("No message to send");
+    return;
   }
 
-  // When showing the preview:
-  function showPreview() {
-    const resultPreview = document.getElementById('resultPreview');
-    if (resultPreview) {
-      resultPreview.classList.remove('hidden');
-      // Small delay to allow the display change to take effect before animating opacity
+  // Get user message
+  const userMessage = quickNotes.value.trim();
+
+  // Add to chat history
+  chatHistory.push({ role: 'user', content: userMessage });
+
+  // Display user message
+  addMessageToChat(userMessage, 'user');
+
+  // Clear input
+  quickNotes.value = '';
+
+  // Update character count
+  const charCount = document.getElementById('charCount');
+  if (charCount) {
+    charCount.textContent = '0';
+  }
+
+  // Show thinking indicator
+  const thinkingIndicator = document.getElementById('thinkingIndicator');
+  if (thinkingIndicator) {
+    thinkingIndicator.classList.remove('hidden');
+  }
+
+  // Get the photo if any
+  const photoInput = document.getElementById('entryPhotoInput');
+  let photoDescription = '';
+
+  if (photoInput && photoInput.files && photoInput.files[0]) {
+    photoDescription = `The user has also uploaded a photo: ${photoInput.files[0].name}`;
+    console.log("Found uploaded photo:", photoInput.files[0].name);
+  }
+
+  // Simulate AI response (in a real app, this would call your backend API)
+  setTimeout(() => {
+    // Hide thinking indicator
+    if (thinkingIndicator) {
+      thinkingIndicator.classList.add('hidden');
+    }
+
+    // Generate AI response based on the conversation history
+    let aiResponse;
+
+    if (chatHistory.length === 1) {
+      // First message
+      aiResponse = `Thanks for sharing! Let me transform this into a beautiful journal entry for you. ${photoDescription ? 'I noticed you uploaded a photo, which will be included with your entry.' : ''}`;
+
+      // Show the generated entry after the initial response
       setTimeout(() => {
-        resultPreview.classList.add('opacity-100');
-      }, 50);
-    }
-  }
-
-  // When hiding the preview:
-  function hidePreview() {
-    const resultPreview = document.getElementById('resultPreview');
-    if (resultPreview) {
-      resultPreview.classList.remove('opacity-100');
-      // Wait for animation to complete before hiding the element
-      setTimeout(() => {
-        resultPreview.classList.add('hidden');
-      }, 300);
-    }
-  }
-
-  // Save generated entry by submitting the form
-  function saveGeneratedEntry() {
-    useGeneratedEntry(); // First transfer the generated content to the form
-
-    // Then submit the form
-    const form = document.querySelector('form');
-    if (form) {
-      form.submit();
+        generateEntry(userMessage, photoDescription);
+      }, 1500);
     } else {
-      showErrorNotification('Could not find the form to submit');
+      // Follow-up messages
+      aiResponse = "I've updated your journal entry with this additional information.";
+
+      // Update the generated entry
+      setTimeout(() => {
+        updateGeneratedEntry(userMessage);
+      }, 1000);
+    }
+
+    // Add AI response to chat history
+    chatHistory.push({ role: 'assistant', content: aiResponse });
+
+    // Display AI message
+    addMessageToChat(aiResponse, 'ai');
+  }, 1500);
+}
+
+function addMessageToChat(message, role) {
+  console.log(`Adding ${role} message to chat`);
+
+  const chatHistoryContainer = document.getElementById('chatHistory');
+  if (!chatHistoryContainer) {
+    console.error("Chat history container not found");
+    return;
+  }
+
+  const messageElement = document.createElement('div');
+  messageElement.classList.add('chat-bubble', role);
+
+  // Use handwritten class for AI messages
+  if (role === 'ai') {
+    messageElement.classList.add('handwritten');
+  } else {
+    messageElement.classList.add('diary-font');
+  }
+
+  messageElement.innerHTML = `<p>${message}</p>`;
+  chatHistoryContainer.appendChild(messageElement);
+
+  // Scroll to the bottom of the chat
+  const chatContainer = document.getElementById('chatContainer');
+  if (chatContainer) {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+}
+
+function generateEntry(userNotes, photoDescription) {
+  console.log("Generating journal entry");
+
+  // In a real app, this would be an API call to your backend
+  // For demo purposes, we'll simulate a simple response
+
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  const aiGeneratedContent = `${dateStr}\n\n${userNotes}\n\nI took some time to reflect on what this means for me going forward. It's amazing how each day brings new experiences and opportunities for growth.\n\n${photoDescription ? 'I captured a special moment in a photo today, which helps me remember the feelings associated with this memory.\n\n' : ''}As I wind down for the day, I'm grateful for these moments of reflection and the chance to document my journey.`;
+
+  // Add the generated entry to the form
+  const contentField = document.getElementById('id_content');
+  if (contentField) {
+    contentField.value = aiGeneratedContent;
+    console.log("Content field populated");
+
+    // Trigger auto-detection of mood and tags if using modern UI
+    if (document.getElementById('moodSlider')) {
+      initModernMoodSlider();
+    }
+
+    if (document.getElementById('selectedTags')) {
+      initModernTagsInput();
     }
   }
+
+  // Set a default title
+  const titleField = document.getElementById('id_title');
+  if (titleField && !titleField.value) {
+    titleField.value = `Journal Entry - ${today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
+    console.log("Title field populated");
+  }
+
+  // Add a final message suggesting to continue or use the form
+  setTimeout(() => {
+    const finalMessage = "I've created a journal entry based on what you shared. You can continue sharing more details with me, or click the button below to edit the entry directly in the form.";
+
+    // Add AI response to chat history
+    chatHistory.push({ role: 'assistant', content: finalMessage });
+
+    // Display AI message
+    addMessageToChat(finalMessage, 'ai');
+  }, 1000);
+}
+
+function updateGeneratedEntry(additionalNotes) {
+  console.log("Updating generated entry");
+
+  // In a real app, this would use the entire conversation history
+  // to generate a new entry via your backend API
+
+  // For demo purposes, we'll just append the new information
+  const contentField = document.getElementById('id_content');
+  if (contentField) {
+    contentField.value += `\n\nAdditional thoughts: ${additionalNotes}`;
+
+    // Add highlight animation if using modern UI
+    contentField.classList.add('auto-populated');
+    setTimeout(() => {
+      contentField.classList.remove('auto-populated');
+    }, 2000);
+
+    console.log("Content field updated");
+
+    // Re-run mood and tag detection if using modern UI
+    if (document.getElementById('moodSlider')) {
+      initModernMoodSlider();
+    }
+
+    if (document.getElementById('selectedTags')) {
+      initModernTagsInput();
+    }
+  }
+}
+
+// Make functions available globally for debugging
+window.diaryFunctions = {
+  sendMessage,
+  addSuggestion,
+  addTag,
+  removeTag,
+  transferToFullForm,
+  updateTagPills,
+  initModernMoodSlider,
+  initModernTagsInput,
+  initModernPhotoUpload
+};
+
 </script>
 {% endblock %}

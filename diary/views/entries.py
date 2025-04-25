@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 
-from ..models import Entry, Tag, SummaryVersion, LifeChapter
+from ..models import Entry, Tag, SummaryVersion, LifeChapter, EntryPhoto
 from ..forms import EntryForm
 from ..services.ai_service import AIService
 from ..utils.analytics import get_mood_emoji, get_tag_color
@@ -15,14 +15,20 @@ logger = logging.getLogger(__name__)
 def journal(request):
     """Create a new diary entry"""
     if request.method == 'POST':
-        form = EntryForm(request.POST)
+        form = EntryForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
-            # Save without committing to get the entry instance
+            # Create the entry object but don't save to the database yet
             entry = form.save(commit=False)
             # Set the user manually
             entry.user = request.user
-            # Now save to the database
+            # Now save to database
             entry.save()
+            # Save many-to-many relationships if any
+            form.save_m2m()
+
+            photo_file = request.FILES.get('entry_photo')
+            if photo_file:
+                EntryPhoto.objects.create(entry=entry, photo=photo_file)
 
             # Generate AI summary
             AIService.generate_entry_summary(entry)
@@ -36,14 +42,14 @@ def journal(request):
 
             return redirect('entry_detail', entry_id=entry.id)
     else:
-        form = EntryForm()
+        form = EntryForm(user=request.user)
 
-    return render(request, 'diary/journal.html', {'form': form})
+    return render(request, 'diary/journal.html', {'form': form, 'today': timezone.now()})
 
 @login_required
 def entry_detail(request, entry_id):
     """View a single diary entry"""
-    entry = get_object_or_404(Entry, id=entry_id, user=request.user)
+    entry = get_object_or_404(Entry, pk=entry_id, user=request.user)
 
     if request.method == 'POST':
         if 'regenerate_summary' in request.POST:
@@ -76,10 +82,30 @@ def entry_detail(request, entry_id):
         tags__in=entry.tags.all()
     ).exclude(id=entry.id).distinct()[:3]
 
+    # Add debug information about photos
+    photos = entry.photos.all()
+    photo_count = photos.count()
+    photo_info = []
+
+    for photo in photos:
+        try:
+            photo_info.append({
+                'id': photo.id,
+                'url': photo.photo.url,
+                'exists': photo.photo.storage.exists(photo.photo.name)
+            })
+        except Exception as e:
+            photo_info.append({
+                'id': photo.id,
+                'error': str(e)
+            })
+
     context = {
         'entry': entry,
         'summary_versions': entry.versions.all(),
         'related_entries': related_entries,
+        'debug_photo_count': photo_count,
+        'debug_photo_info': photo_info
     }
 
     return render(request, 'diary/entry_detail.html', context)
@@ -90,15 +116,21 @@ def edit_entry(request, entry_id):
     entry = get_object_or_404(Entry, id=entry_id, user=request.user)
 
     if request.method == 'POST':
-        form = EntryForm(request.POST, instance=entry, user=request.user)  # Pass user here
+        form = EntryForm(request.POST, request.FILES, instance=entry, user=request.user)
         if form.is_valid():
-            entry = form.save(commit=False)
-            entry.user = request.user
-            entry.save()
+            # Create the entry object but don't save to the database yet
+            updated_entry = form.save(commit=False)
+            # Make sure user is still set correctly (though it should be since we're using instance)
+            updated_entry.user = request.user
+            # Now save to database
+            updated_entry.save()
+            # Save many-to-many relationships
+            form.save_m2m()
+
             messages.success(request, "Entry updated successfully!")
             return redirect('entry_detail', entry_id=entry.id)
     else:
-        form = EntryForm(instance=entry, user=request.user)  # And here
+        form = EntryForm(instance=entry, user=request.user)
 
     # Use the same template as new entries but with different context
     context = {
