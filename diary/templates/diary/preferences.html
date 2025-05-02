@@ -1,1311 +1,270 @@
 {% extends 'base.html' %}
 
-{% block title %}DiaryVault - Journal Preferences{% endblock %}
+{% block title %}Journal Preferences - DiaryVault{% endblock %}
 
 {% block extra_css %}
 <style>
-  :root {
-    --primary-color: #6366f1;
-    --primary-color-light: #818cf8;
-    --primary-color-dark: #4f46e5;
-    --secondary-color: #8b5cf6;
-    --tertiary-color: #ec4899;
-    --glass-bg: rgba(255, 255, 255, 0.15);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
-    --content-width: 640px;
+  .scale-in {
+    animation: scaleIn 0.5s ease forwards;
+    transform: scale(0.95);
+    opacity: 0;
   }
-
-  /* === Base animations === */
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  @keyframes scaleIn {
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
-
-  @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  .animate-fade-in {
+  .fade-in {
     animation: fadeIn 0.5s ease forwards;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.5s ease forwards;
-  }
-
-  /* === Modern Card Design === */
-  .modern-card {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    margin-bottom: 1.5rem;
-    border: 1px solid rgba(0, 0, 0, 0.03);
-    transform: translateZ(0);
-  }
-
-  .modern-card:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.09);
-  }
-
-  .card-header {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .card-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 12px;
-    flex-shrink: 0;
-    background: linear-gradient(135deg, var(--primary-color-light), var(--primary-color));
-    color: white;
-  }
-
-  .card-content {
-    padding: 1.5rem;
-  }
-
-  /* === Typography === */
-  .card-title {
-    font-weight: 600;
-    color: #1f2937;
-    font-size: 1.125rem;
-    margin: 0;
-    line-height: 1.3;
-  }
-
-  .card-subtitle {
-    color: #6b7280;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-  }
-
-  /* === Modern Tab Design === */
-  .tab-container {
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    padding: 1rem 0;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-  }
-
-  .tab-nav {
-    display: flex;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    scroll-snap-type: x mandatory;
-    gap: 0.5rem;
-    padding-bottom: 0.25rem;
-  }
-
-  .tab-nav::-webkit-scrollbar {
-    display: none;
-  }
-
-  .tab-button {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    border-radius: 12px;
-    color: #6b7280;
-    font-weight: 500;
-    white-space: nowrap;
-    transition: all 0.3s;
-    scroll-snap-align: start;
-    flex-shrink: 0;
-  }
-
-  .tab-button.active {
-    background: white;
-    color: var(--primary-color);
-    border-color: rgba(99, 102, 241, 0.1);
-    box-shadow: 0 2px 10px rgba(99, 102, 241, 0.15);
-  }
-
-  .tab-button:hover:not(.active) {
-    background: rgba(255, 255, 255, 0.8);
-    color: #4b5563;
-  }
-
-  .tab-button svg {
-    flex-shrink: 0;
-  }
-
-  /* === Toggle Switch === */
-  .toggle-container {
-    position: relative;
-    width: 3rem;
-    height: 1.75rem;
-  }
-
-  .toggle-checkbox {
     opacity: 0;
-    width: 0;
-    height: 0;
-    position: absolute;
   }
-
-  .toggle-label {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #e5e7eb;
-    transition: 0.4s;
-    border-radius: 9999px;
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
   }
-
-  .toggle-label:before {
-    position: absolute;
-    content: "";
-    height: 1.25rem;
-    width: 1.25rem;
-    left: 0.25rem;
-    bottom: 0.25rem;
-    background-color: white;
-    transition: 0.4s;
-    border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  .glass-effect {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
   }
-
-  .toggle-checkbox:checked + .toggle-label {
-    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-  }
-
-  .toggle-checkbox:checked + .toggle-label:before {
-    transform: translateX(1.25rem);
-  }
-
-  /* === Setting Row === */
-  .setting-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-  }
-
-  .setting-row:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-
-  .setting-row:first-child {
-    padding-top: 0;
-  }
-
-  .setting-title {
-    font-weight: 500;
-    color: #1f2937;
-    margin-bottom: 0.25rem;
-  }
-
-  .setting-description {
-    color: #6b7280;
-    font-size: 0.875rem;
-  }
-
-  /* === Theme Selection === */
-  .theme-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
-
-  .theme-option {
-    position: relative;
-    padding: 1rem;
-    border-radius: 12px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    background: white;
-    cursor: pointer;
-    transition: all 0.3s;
-    overflow: hidden;
-  }
-
-  .theme-option:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  }
-
-  .theme-option input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-
-  .theme-option-content {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .theme-preview {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 8px;
-    flex-shrink: 0;
-    overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-  }
-
-  .theme-preview-light {
-    background-color: white;
-  }
-
-  .theme-preview-dark {
-    background-color: #1f2937;
-  }
-
-  .theme-preview-system {
-    background: linear-gradient(to right, white 50%, #1f2937 50%);
-  }
-
-  .theme-preview-paper {
-    background-color: #fff8e1;
-    background-image:
-      linear-gradient(#f3e5c1 0.1rem, transparent 0.1rem),
-      linear-gradient(90deg, #f3e5c1 0.1rem, transparent 0.1rem);
-    background-size: 2rem 2rem;
-  }
-
-  .theme-details h4 {
-    margin: 0;
-    font-weight: 500;
-    color: #1f2937;
-  }
-
-  .theme-details p {
-    margin: 0.25rem 0 0;
-    font-size: 0.75rem;
-    color: #6b7280;
-  }
-
-  .theme-check {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    background: var(--primary-color);
-    opacity: 0;
-    transform: scale(0.8);
-    transition: all 0.2s;
-  }
-
-  .theme-option input:checked ~ .theme-check {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  .theme-option input:checked ~ .theme-option-content {
-    opacity: 1;
-  }
-
-  .theme-option input:checked + label {
-    border-color: var(--primary-color);
-  }
-
-  /* === Color Picker === */
-  .color-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0.75rem;
-  }
-
-  .color-option {
-    position: relative;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-
-  .color-option:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  }
-
-  .color-option input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-
-  .color-check {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    color: white;
-    font-size: 1rem;
-    transition: all 0.2s;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  }
-
-  .color-option input:checked ~ .color-check {
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  .color-option input:checked + label {
-    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary-color);
-  }
-
-  /* === Font Selection === */
-  .font-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
-
-  .font-option {
-    position: relative;
-    padding: 1rem;
-    border-radius: 12px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    background: white;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-
-  .font-option:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  }
-
-  .font-option input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-
-  .font-sample {
-    text-align: center;
-    margin-top: 0.5rem;
-    line-height: 1.4;
-  }
-
-  .font-name {
-    text-align: center;
-    font-size: 0.875rem;
-    margin-top: 0.75rem;
-    font-weight: 500;
-    color: #4b5563;
-  }
-
-  .font-playfair { font-family: 'Playfair Display', serif; }
-  .font-poppins { font-family: 'Poppins', sans-serif; }
-  .font-caveat { font-family: 'Caveat', cursive; }
-  .font-merriweather { font-family: 'Merriweather', serif; }
-
-  .font-check {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    background: var(--primary-color);
-    opacity: 0;
-    transform: scale(0.8);
-    transition: all 0.2s;
-  }
-
-  .font-option input:checked ~ .font-check {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  .font-option input:checked + label {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 1px var(--primary-color);
-  }
-
-  /* === Header Bar === */
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 0 1.5rem;
-  }
-
-  .back-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 12px;
-    background: white;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-    color: #4b5563;
-    transition: all 0.3s;
-    border: 1px solid rgba(0, 0, 0, 0.04);
-  }
-
-  .back-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-    color: var(--primary-color);
-  }
-
-  .page-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    background: linear-gradient(90deg, var(--primary-color), var(--tertiary-color));
+  .gradient-text {
+    background: linear-gradient(90deg, #6366f1, #ec4899);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
-
-  /* === Day Picker === */
-  .day-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0.5rem;
-  }
-
-  .day-option {
-    position: relative;
-    aspect-ratio: 1/1;
-  }
-
-  .day-option input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-
-  .day-label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
-    border-radius: 12px;
-    background: white;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    font-size: 0.875rem;
-    color: #4b5563;
-    transition: all 0.2s;
-  }
-
-  .day-option input:checked + .day-label {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-    box-shadow: 0 2px 5px rgba(99, 102, 241, 0.25);
-  }
-
-  .day-option:hover .day-label:not(.day-option input:checked + .day-label) {
-    background: rgba(255, 255, 255, 0.8);
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  }
-
-  /* === Alert Boxes === */
-  .alert-box {
-    padding: 1rem;
-    border-radius: 12px;
-    margin-top: 1rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-
-  .alert-icon {
-    flex-shrink: 0;
-    width: 1.5rem;
-    height: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-  }
-
-  .alert-content {
-    flex-grow: 1;
-  }
-
-  .alert-title {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-  }
-
-  .alert-text {
-    margin: 0;
-  }
-
-  .alert-info {
-    background-color: rgba(59, 130, 246, 0.08);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-  }
-
-  .alert-info .alert-icon {
-    background-color: rgba(59, 130, 246, 0.2);
-    color: rgb(37, 99, 235);
-  }
-
-  .alert-info .alert-title {
-    color: rgb(37, 99, 235);
-  }
-
-  .alert-warning {
-    background-color: rgba(245, 158, 11, 0.08);
-    border: 1px solid rgba(245, 158, 11, 0.2);
-  }
-
-  .alert-warning .alert-icon {
-    background-color: rgba(245, 158, 11, 0.2);
-    color: rgb(217, 119, 6);
-  }
-
-  .alert-warning .alert-title {
-    color: rgb(217, 119, 6);
-  }
-
-  .alert-danger {
-    background-color: rgba(239, 68, 68, 0.08);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-  }
-
-  .alert-danger .alert-icon {
-    background-color: rgba(239, 68, 68, 0.2);
-    color: rgb(220, 38, 38);
-  }
-
-  .alert-danger .alert-title {
-    color: rgb(220, 38, 38);
-  }
-
-  /* === Buttons === */
-  .button {
-    padding: 0.75rem 1.25rem;
-    border-radius: 12px;
-    font-weight: 500;
-    transition: all 0.3s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    border: none;
-    cursor: pointer;
-  }
-
-  .button-primary {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
-  }
-
-  .button-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
-  }
-
-  .button-primary:active {
-    transform: translateY(0);
-  }
-
-  .button-secondary {
-    background: white;
-    color: var(--primary-color);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-  }
-
-  .button-secondary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  }
-
-  .button-danger {
-    background: white;
-    color: rgb(220, 38, 38);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-  }
-
-  .button-danger:hover {
-    background: rgba(239, 68, 68, 0.05);
-  }
-
-  /* === Save Bar === */
-  .save-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 1rem;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
-    transform: translateY(100%);
-    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    z-index: 50;
-    border-top: 1px solid rgba(0, 0, 0, 0.03);
-  }
-
-  .save-bar.visible {
-    transform: translateY(0);
-  }
-
-  .save-bar-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: var(--content-width);
-    margin: 0 auto;
-  }
-
-  .save-bar-text {
-    font-size: 0.875rem;
-    color: #6b7280;
-  }
-
-  .save-button {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    transition: all 0.3s;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .save-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
-  }
-
-  .save-button:active {
-    transform: translateY(0);
-  }
-
-  /* === Success Notification === */
-  .success-notification {
-    position: fixed;
-    top: 1.5rem;
-    right: 1.5rem;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    padding: 1rem 1.25rem;
-    border-radius: 12px;
-    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.25);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    z-index: 100;
-    transform: translateY(-2rem);
-    opacity: 0;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  .success-notification.visible {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  /* === Responsive styles === */
-  .page-container {
-    max-width: var(--content-width);
-    margin: 0 auto;
-    padding: 0 1rem 6rem;
-  }
-
-  @media (max-width: 640px) {
-    .theme-grid,
-    .font-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .card-header {
-      padding: 1rem;
-    }
-
-    .card-content {
-      padding: 1.25rem;
-    }
-
-    .tab-button {
-      padding: 0.6rem 1rem;
-    }
-
-    .color-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-
-    .page-title {
-      font-size: 1.25rem;
-    }
-
-    .card-title {
-      font-size: 1rem;
-    }
-
-    .save-button {
-      padding: 0.6rem 1.25rem;
-    }
-  }
-
-  /* === Reduced Motion === */
-  body.reduce-motion * {
-    animation: none !important;
-    transition: none !important;
-  }
-
-  /* === Animation for card appearing === */
-  .section-animate {
-    animation: cardAppear 0.5s forwards cubic-bezier(0.25, 0.8, 0.25, 1);
-    opacity: 0;
-    transform: translateY(1rem);
-  }
-
-  @keyframes cardAppear {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* === Helper Utilities === */
-  .mb-4 {
-    margin-bottom: 1rem;
-  }
-
-  .mb-6 {
-    margin-bottom: 1.5rem;
-  }
-
-  .mt-4 {
-    margin-top: 1rem;
-  }
-
-  .grid-2 {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
-
-  @media (max-width: 480px) {
-    .grid-2 {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .w-full {
-    width: 100%;
-  }
-
-  .flex {
-    display: flex;
-  }
-
-  .items-center {
-    align-items: center;
-  }
-
-  .justify-between {
-    justify-content: space-between;
-  }
-
-  .gap-2 {
-    gap: 0.5rem;
-  }
-
-  .text-sm {
-    font-size: 0.875rem;
-  }
-
-  /* Spacing for fixed height container to account for fixed save bar */
-  .page-content {
-    padding-bottom: 4rem;
+  .btn-gradient {
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
-  <!-- Page Header -->
-  <header class="page-header animate-fade-in">
-    <a href="{% url 'dashboard' %}" class="back-button">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 12H5M12 19l-7-7 7-7"/>
-      </svg>
-    </a>
-    <h1 class="page-title">Journal Preferences</h1>
-    <div style="width: 2.5rem"></div>
-  </header>
+<div class="max-w-4xl w-full mx-auto px-4 py-6 relative">
+  {% if messages %}
+    <div class="mb-6 relative z-10">
+      {% for message in messages %}
+        <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% elif message.tags == 'success' %}bg-green-100 border-green-400 text-green-700{% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} px-4 py-3 rounded-lg border mb-4 shadow-sm fade-in">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 
-  <!-- Success Notification -->
-  <div id="successNotification" class="success-notification">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-      <polyline points="22 4 12 14.01 9 11.01"/>
-    </svg>
-    <span>Settings saved successfully</span>
+  <!-- Page header with title -->
+  <div class="text-center mb-6 relative z-10">
+    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
+      Journal Preferences
+    </h2>
+    <p class="text-gray-600 text-sm max-w-md mx-auto">Customize your journaling experience</p>
   </div>
 
-  <!-- Tab Navigation -->
-  <div class="tab-container animate-fade-in">
-    <div class="tab-nav">
-      <button id="tab-appearance" class="tab-button active" data-tab="appearance-section">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-        </svg>
-        <span>Appearance</span>
+  <!-- Settings Tabs -->
+  <div class="glass-effect rounded-xl shadow-lg overflow-hidden mb-6 border border-gray-200 relative z-10 scale-in">
+    <div class="flex overflow-x-auto scrollbar-hide">
+      <button id="tab-appearance" class="tab-button px-6 py-3 font-medium text-secondary-600 relative active">
+        Appearance
+        <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-secondary-500"></span>
       </button>
-      <button id="tab-journal" class="tab-button" data-tab="journal-section">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-        </svg>
-        <span>Journaling</span>
+      <button id="tab-journal" class="tab-button px-6 py-3 font-medium text-gray-700 hover:text-secondary-600 transition">
+        Journaling
       </button>
-      <button id="tab-notifications" class="tab-button" data-tab="notifications-section">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-        </svg>
-        <span>Alerts</span>
+      <button id="tab-notifications" class="tab-button px-6 py-3 font-medium text-gray-700 hover:text-secondary-600 transition">
+        Alerts
       </button>
-      <button id="tab-privacy" class="tab-button" data-tab="privacy-section">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        <span>Privacy</span>
+      <button id="tab-privacy" class="tab-button px-6 py-3 font-medium text-gray-700 hover:text-secondary-600 transition">
+        Privacy
       </button>
     </div>
-  </div>
 
-  <div class="page-content">
     <!-- Appearance Tab Content -->
-    <section id="appearance-section" class="tab-content">
-      <!-- Theme Selection -->
-      <div class="modern-card section-animate" style="animation-delay: 0ms;">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="5"/>
-              <path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="card-title">Theme</h3>
-            <p class="card-subtitle">Choose how your journal looks</p>
-          </div>
-        </div>
-        <div class="card-content">
-          <div class="theme-grid">
-            <label class="theme-option">
-              <input type="radio" name="theme" value="light" checked>
-              <div class="theme-option-content">
-                <div class="theme-preview theme-preview-light"></div>
-                <div class="theme-details">
-                  <h4>Light</h4>
-                  <p>Clean, bright interface</p>
-                </div>
-              </div>
-              <div class="theme-check">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-              </div>
-            </label>
+    <div id="appearance-section" class="tab-content p-6">
+      <form method="post">
+        {% csrf_token %}
 
-            <label class="theme-option">
-              <input type="radio" name="theme" value="dark">
-              <div class="theme-option-content">
-                <div class="theme-preview theme-preview-dark"></div>
-                <div class="theme-details">
-                  <h4>Dark</h4>
-                  <p>Easy on the eyes</p>
-                </div>
-              </div>
-              <div class="theme-check">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-              </div>
+        <!-- Theme Selection -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <input type="radio" name="theme" value="light" class="mr-2" checked>
+              <span>Light</span>
             </label>
-
-            <label class="theme-option">
-              <input type="radio" name="theme" value="system">
-              <div class="theme-option-content">
-                <div class="theme-preview theme-preview-system"></div>
-                <div class="theme-details">
-                  <h4>System</h4>
-                  <p>Matches your device</p>
-                </div>
-              </div>
-              <div class="theme-check">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-              </div>
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <input type="radio" name="theme" value="dark" class="mr-2">
+              <span>Dark</span>
             </label>
-
-            <label class="theme-option">
-              <input type="radio" name="theme" value="paper">
-              <div class="theme-option-content">
-                <div class="theme-preview theme-preview-paper"></div>
-                <div class="theme-details">
-                  <h4>Paper</h4>
-                  <p>Classic journal look</p>
-                </div>
-              </div>
-              <div class="theme-check">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-              </div>
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <input type="radio" name="theme" value="system" class="mr-2">
+              <span>System</span>
+            </label>
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <input type="radio" name="theme" value="paper" class="mr-2">
+              <span>Paper</span>
             </label>
           </div>
         </div>
-      </div>
 
-      <!-- Color Accent -->
-      <div class="modern-card section-animate" style="animation-delay: 100ms;">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="card-title">Accent Color</h3>
-            <p class="card-subtitle">Personalize your journal's color scheme</p>
-          </div>
-        </div>
-        <div class="card-content">
-          <div class="color-grid">
-            <label class="color-option" style="background-color: #6366f1;">
-              <input type="radio" name="accent-color" value="indigo" checked>
-              <div class="color-check">✓</div>
+        <!-- Accent Color -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Accent Color</label>
+          <div class="grid grid-cols-5 sm:grid-cols-10 gap-2">
+            <label class="color-option h-8 rounded-full relative cursor-pointer" style="background-color: #6366f1;">
+              <input type="radio" name="accent-color" value="indigo" class="sr-only" checked>
+              <span class="absolute inset-0 rounded-full opacity-0 hover:opacity-20 bg-white"></span>
+              <span class="absolute inset-0 rounded-full opacity-0 selected-ring border-2 border-white"></span>
             </label>
-            <label class="color-option" style="background-color: #8b5cf6;">
-              <input type="radio" name="accent-color" value="purple">
-              <div class="color-check">✓</div>
+            <label class="color-option h-8 rounded-full relative cursor-pointer" style="background-color: #8b5cf6;">
+              <input type="radio" name="accent-color" value="purple" class="sr-only">
+              <span class="absolute inset-0 rounded-full opacity-0 hover:opacity-20 bg-white"></span>
+              <span class="absolute inset-0 rounded-full opacity-0 selected-ring border-2 border-white"></span>
             </label>
-            <label class="color-option" style="background-color: #ec4899;">
-              <input type="radio" name="accent-color" value="pink">
-              <div class="color-check">✓</div>
+            <label class="color-option h-8 rounded-full relative cursor-pointer" style="background-color: #ec4899;">
+              <input type="radio" name="accent-color" value="pink" class="sr-only">
+              <span class="absolute inset-0 rounded-full opacity-0 hover:opacity-20 bg-white"></span>
+              <span class="absolute inset-0 rounded-full opacity-0 selected-ring border-2 border-white"></span>
             </label>
-            <label class="color-option" style="background-color: #f43f5e;">
-              <input type="radio" name="accent-color" value="rose">
-              <div class="color-check">✓</div>
+            <label class="color-option h-8 rounded-full relative cursor-pointer" style="background-color: #ef4444;">
+              <input type="radio" name="accent-color" value="red" class="sr-only">
+              <span class="absolute inset-0 rounded-full opacity-0 hover:opacity-20 bg-white"></span>
+              <span class="absolute inset-0 rounded-full opacity-0 selected-ring border-2 border-white"></span>
             </label>
-            <label class="color-option" style="background-color: #ef4444;">
-              <input type="radio" name="accent-color" value="red">
-              <div class="color-check">✓</div>
+            <label class="color-option h-8 rounded-full relative cursor-pointer" style="background-color: #f97316;">
+              <input type="radio" name="accent-color" value="orange" class="sr-only">
+              <span class="absolute inset-0 rounded-full opacity-0 hover:opacity-20 bg-white"></span>
+              <span class="absolute inset-0 rounded-full opacity-0 selected-ring border-2 border-white"></span>
             </label>
-            <label class="color-option" style="background-color: #f97316;">
-              <input type="radio" name="accent-color" value="orange">
-              <div class="color-check">✓</div>
+            <label class="color-option h-8 rounded-full relative cursor-pointer" style="background-color: #eab308;">
+              <input type="radio" name="accent-color" value="yellow" class="sr-only">
+              <span class="absolute inset-0 rounded-full opacity-0 hover:opacity-20 bg-white"></span>
+              <span class="absolute inset-0 rounded-full opacity-0 selected-ring border-2 border-white"></span>
             </label>
-            <label class="color-option" style="background-color: #eab308;">
-              <input type="radio" name="accent-color" value="yellow">
-              <div class="color-check">✓</div>
+            <label class="color-option h-8 rounded-full relative cursor-pointer" style="background-color: #10b981;">
+              <input type="radio" name="accent-color" value="green" class="sr-only">
+              <span class="absolute inset-0 rounded-full opacity-0 hover:opacity-20 bg-white"></span>
+              <span class="absolute inset-0 rounded-full opacity-0 selected-ring border-2 border-white"></span>
             </label>
-            <label class="color-option" style="background-color: #10b981;">
-              <input type="radio" name="accent-color" value="green">
-              <div class="color-check">✓</div>
+            <label class="color-option h-8 rounded-full relative cursor-pointer" style="background-color: #06b6d4;">
+              <input type="radio" name="accent-color" value="cyan" class="sr-only">
+              <span class="absolute inset-0 rounded-full opacity-0 hover:opacity-20 bg-white"></span>
+              <span class="absolute inset-0 rounded-full opacity-0 selected-ring border-2 border-white"></span>
             </label>
-            <label class="color-option" style="background-color: #06b6d4;">
-              <input type="radio" name="accent-color" value="cyan">
-              <div class="color-check">✓</div>
+            <label class="color-option h-8 rounded-full relative cursor-pointer" style="background-color: #3b82f6;">
+              <input type="radio" name="accent-color" value="blue" class="sr-only">
+              <span class="absolute inset-0 rounded-full opacity-0 hover:opacity-20 bg-white"></span>
+              <span class="absolute inset-0 rounded-full opacity-0 selected-ring border-2 border-white"></span>
             </label>
-            <label class="color-option" style="background-color: #3b82f6;">
-              <input type="radio" name="accent-color" value="blue">
-              <div class="color-check">✓</div>
+            <label class="color-option h-8 rounded-full relative cursor-pointer" style="background-color: #6b7280;">
+              <input type="radio" name="accent-color" value="gray" class="sr-only">
+              <span class="absolute inset-0 rounded-full opacity-0 hover:opacity-20 bg-white"></span>
+              <span class="absolute inset-0 rounded-full opacity-0 selected-ring border-2 border-white"></span>
             </label>
           </div>
         </div>
-      </div>
 
-      <!-- Font Selection -->
-      <div class="modern-card section-animate" style="animation-delay: 200ms;">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="4 7 4 4 20 4 20 7"/>
-              <line x1="9" y1="20" x2="15" y2="20"/>
-              <line x1="12" y1="4" x2="12" y2="20"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="card-title">Font Style</h3>
-            <p class="card-subtitle">Select your preferred text style</p>
-          </div>
-        </div>
-        <div class="card-content">
-          <div class="mb-4">
-            <div class="flex items-center justify-between mb-4">
-              <button id="text-font-tab" class="tab-button active" style="width: 50%; border-radius: 10px 10px 10px 10px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="4 7 4 4 20 4 20 7"/>
-                  <line x1="9" y1="20" x2="15" y2="20"/>
-                  <line x1="12" y1="4" x2="12" y2="20"/>
-                </svg>
-                <span>Text</span>
-              </button>
-              <button id="handwriting-tab" class="tab-button" style="width: 50%; border-radius: 10px 10px 10px 10px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 19l7-7 3 3-7 7-3-3z"/>
-                  <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
-                  <path d="M2 2l7.586 7.586"/>
-                  <circle cx="11" cy="11" r="2"/>
-                </svg>
-                <span>Handwriting</span>
-              </button>
-            </div>
-
-            <div id="text-font-options" class="font-grid">
-              <label class="font-option">
-                <input type="radio" name="text-font" value="poppins" checked>
-                <div class="font-sample font-poppins">The quick brown fox jumps over the lazy dog.</div>
-                <div class="font-name">Poppins</div>
-                <div class="font-check">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </div>
-              </label>
-
-              <label class="font-option">
-                <input type="radio" name="text-font" value="merriweather">
-                <div class="font-sample font-merriweather">The quick brown fox jumps over the lazy dog.</div>
-                <div class="font-name">Merriweather</div>
-                <div class="font-check">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </div>
-              </label>
-
-              <label class="font-option">
-                <input type="radio" name="text-font" value="playfair">
-                <div class="font-sample font-playfair">The quick brown fox jumps over the lazy dog.</div>
-                <div class="font-name">Playfair Display</div>
-                <div class="font-check">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </div>
-              </label>
-
-              <label class="font-option">
-                <input type="radio" name="text-font" value="system">
-                <div class="font-sample" style="font-family: system-ui, -apple-system, sans-serif;">The quick brown fox jumps over the lazy dog.</div>
-                <div class="font-name">System</div>
-                <div class="font-check">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </div>
-              </label>
-            </div>
-
-            <div id="handwriting-font-options" class="font-grid" style="display: none;">
-              <label class="font-option">
-                <input type="radio" name="handwriting-font" value="caveat" checked>
-                <div class="font-sample font-caveat">The quick brown fox jumps over the lazy dog.</div>
-                <div class="font-name">Caveat</div>
-                <div class="font-check">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </div>
-              </label>
-
-              <label class="font-option">
-                <input type="radio" name="handwriting-font" value="indie-flower">
-                <div class="font-sample" style="font-family: 'Indie Flower', cursive;">The quick brown fox jumps over the lazy dog.</div>
-                <div class="font-name">Indie Flower</div>
-                <div class="font-check">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </div>
-              </label>
-
-              <label class="font-option">
-                <input type="radio" name="handwriting-font" value="dancing-script">
-                <div class="font-sample" style="font-family: 'Dancing Script', cursive;">The quick brown fox jumps over the lazy dog.</div>
-                <div class="font-name">Dancing Script</div>
-                <div class="font-check">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </div>
-              </label>
-
-              <label class="font-option">
-                <input type="radio" name="handwriting-font" value="shadows-into-light">
-                <div class="font-sample" style="font-family: 'Shadows Into Light', cursive;">The quick brown fox jumps over the lazy dog.</div>
-                <div class="font-name">Shadows Into Light</div>
-                <div class="font-check">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </div>
-              </label>
-            </div>
+        <!-- Font Selection -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Font Style</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="flex flex-col p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <input type="radio" name="text-font" value="poppins" class="sr-only" checked>
+              <span class="text-center mb-2" style="font-family: 'Poppins', sans-serif;">The quick brown fox jumps.</span>
+              <span class="text-center text-sm text-gray-500">Poppins</span>
+            </label>
+            <label class="flex flex-col p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <input type="radio" name="text-font" value="merriweather" class="sr-only">
+              <span class="text-center mb-2" style="font-family: 'Merriweather', serif;">The quick brown fox jumps.</span>
+              <span class="text-center text-sm text-gray-500">Merriweather</span>
+            </label>
+            <label class="flex flex-col p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <input type="radio" name="text-font" value="playfair" class="sr-only">
+              <span class="text-center mb-2" style="font-family: 'Playfair Display', serif;">The quick brown fox jumps.</span>
+              <span class="text-center text-sm text-gray-500">Playfair Display</span>
+            </label>
+            <label class="flex flex-col p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <input type="radio" name="text-font" value="system" class="sr-only">
+              <span class="text-center mb-2" style="font-family: system-ui, -apple-system, sans-serif;">The quick brown fox jumps.</span>
+              <span class="text-center text-sm text-gray-500">System</span>
+            </label>
           </div>
         </div>
-      </div>
 
-      <!-- Accessibility -->
-      <div class="modern-card section-animate" style="animation-delay: 300ms;">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="card-title">Accessibility</h3>
-            <p class="card-subtitle">Make your journal easier to use</p>
+        <!-- Accessibility Settings -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Accessibility</label>
+          <div class="space-y-3">
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Reduce Motion</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="reduce-motion" id="reduce-motion" class="sr-only">
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Larger Text</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="larger-text" id="larger-text" class="sr-only">
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>High Contrast</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="high-contrast" id="high-contrast" class="sr-only">
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
           </div>
         </div>
-        <div class="card-content">
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Reduce Motion</div>
-              <div class="setting-description">Minimize animated effects</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="reduce-motion" class="toggle-checkbox">
-              <label for="reduce-motion" class="toggle-label"></label>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Larger Text</div>
-              <div class="setting-description">Increase text sizes</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="larger-text" class="toggle-checkbox">
-              <label for="larger-text" class="toggle-label"></label>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">High Contrast</div>
-              <div class="setting-description">Improve text readability</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="high-contrast" class="toggle-checkbox">
-              <label for="high-contrast" class="toggle-label"></label>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+      </form>
+    </div>
 
     <!-- Journaling Tab Content -->
-    <section id="journal-section" class="tab-content" style="display: none;">
-      <!-- Journal Reminders -->
-      <div class="modern-card section-animate" style="animation-delay: 0ms;">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="card-title">Journaling Schedule</h3>
-            <p class="card-subtitle">Set your preferred writing days</p>
-          </div>
-        </div>
-        <div class="card-content">
-          <div class="day-grid mb-4">
-            <label class="day-option">
-              <input type="checkbox" name="journal-days" value="mon">
-              <div class="day-label">Mon</div>
+    <div id="journal-section" class="tab-content p-6" style="display: none;">
+      <form method="post">
+        {% csrf_token %}
+
+        <!-- Journaling Schedule -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Journaling Schedule</label>
+          <div class="grid grid-cols-7 gap-1 mb-4">
+            <label class="flex items-center justify-center p-2 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50 text-center text-sm">
+              <input type="checkbox" name="journal-days" value="mon" class="sr-only">
+              <span>Mon</span>
             </label>
-            <label class="day-option">
-              <input type="checkbox" name="journal-days" value="tue">
-              <div class="day-label">Tue</div>
+            <label class="flex items-center justify-center p-2 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50 text-center text-sm">
+              <input type="checkbox" name="journal-days" value="tue" class="sr-only">
+              <span>Tue</span>
             </label>
-            <label class="day-option">
-              <input type="checkbox" name="journal-days" value="wed" checked>
-              <div class="day-label">Wed</div>
+            <label class="flex items-center justify-center p-2 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50 text-center text-sm">
+              <input type="checkbox" name="journal-days" value="wed" class="sr-only" checked>
+              <span>Wed</span>
             </label>
-            <label class="day-option">
-              <input type="checkbox" name="journal-days" value="thu">
-              <div class="day-label">Thu</div>
+            <label class="flex items-center justify-center p-2 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50 text-center text-sm">
+              <input type="checkbox" name="journal-days" value="thu" class="sr-only">
+              <span>Thu</span>
             </label>
-            <label class="day-option">
-              <input type="checkbox" name="journal-days" value="fri" checked>
-              <div class="day-label">Fri</div>
+            <label class="flex items-center justify-center p-2 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50 text-center text-sm">
+              <input type="checkbox" name="journal-days" value="fri" class="sr-only" checked>
+              <span>Fri</span>
             </label>
-            <label class="day-option">
-              <input type="checkbox" name="journal-days" value="sat" checked>
-              <div class="day-label">Sat</div>
+            <label class="flex items-center justify-center p-2 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50 text-center text-sm">
+              <input type="checkbox" name="journal-days" value="sat" class="sr-only" checked>
+              <span>Sat</span>
             </label>
-            <label class="day-option">
-              <input type="checkbox" name="journal-days" value="sun" checked>
-              <div class="day-label">Sun</div>
+            <label class="flex items-center justify-center p-2 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50 text-center text-sm">
+              <input type="checkbox" name="journal-days" value="sun" class="sr-only" checked>
+              <span>Sun</span>
             </label>
           </div>
 
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Preferred Time</div>
-              <div class="setting-description">When to receive reminders</div>
-            </div>
-            <select class="button button-secondary" style="background: white; padding: 0.5rem 1rem;">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between rounded-lg border p-3">
+            <label for="preferred-time" class="text-sm text-gray-700 mb-2 sm:mb-0">Preferred Time</label>
+            <select id="preferred-time" name="preferred-time" class="rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent">
               <option value="morning">Morning (8:00 AM)</option>
               <option value="afternoon">Afternoon (2:00 PM)</option>
               <option value="evening" selected>Evening (8:00 PM)</option>
@@ -1313,747 +272,344 @@
             </select>
           </div>
         </div>
-      </div>
 
-      <!-- Writing Prompts -->
-      <div class="modern-card section-animate" style="animation-delay: 100ms;">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 4-3 4-6.5-2.5 0-4 2.5-4 5.5 0-2.5-2-5.5-4-5.5-2.04 0-4 3-4 5.5 0-2.5-1.5-5.5-4-5.5 0 3.5 1 6.5 4 6.5 1.25 0 2.5-1.06 4-1.06z"/>
-              <path d="M12 11.94c1.5 0 2.75 1.06 4 1.06 3 0 4-3 4-6.5-2.5 0-4 2.5-4 5.5 0-2.5-2-5.5-4-5.5-2.04 0-4 3-4 5.5 0-2.5-1.5-5.5-4-5.5 0 3.5 1 6.5 4 6.5 1.25 0 2.5-1.06 4-1.06z"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="card-title">Writing Prompts</h3>
-            <p class="card-subtitle">Inspiration for your journal entries</p>
-          </div>
-        </div>
-        <div class="card-content">
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Daily Prompts</div>
-              <div class="setting-description">Receive writing inspiration</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="daily-prompts" class="toggle-checkbox" checked>
-              <label for="daily-prompts" class="toggle-label"></label>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Prompt Categories</div>
-              <div class="setting-description">Choose your preferred topics</div>
-            </div>
-            <button class="button button-secondary" style="background: white; padding: 0.5rem 1rem;">
-              <span>Edit Categories</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </button>
-          </div>
-
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">AI-Generated Prompts</div>
-              <div class="setting-description">Personalized suggestions</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="ai-prompts" class="toggle-checkbox" checked>
-              <label for="ai-prompts" class="toggle-label"></label>
+        <!-- Writing Prompts Settings -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Writing Prompts</label>
+          <div class="space-y-3">
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Daily Prompts</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="daily-prompts" id="daily-prompts" class="sr-only" checked>
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>AI-Generated Prompts</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="ai-prompts" id="ai-prompts" class="sr-only" checked>
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <div class="p-3 border rounded-lg flex items-center justify-between">
+              <span>Prompt Categories</span>
+              <button type="button" class="px-3 py-1 bg-gray-100 rounded-lg text-gray-700 text-sm hover:bg-gray-200">Edit Categories</button>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Entry Templates -->
-      <div class="modern-card section-animate" style="animation-delay: 200ms;">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-              <line x1="9" y1="3" x2="9" y2="21"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="card-title">Entry Templates</h3>
-            <p class="card-subtitle">Select your preferred structure</p>
-          </div>
-        </div>
-        <div class="card-content">
-          <div class="grid-2">
-            <label class="theme-option">
-              <input type="radio" name="template" value="freeform" checked>
-              <div class="theme-option-content">
-                <div class="theme-details">
-                  <h4>Freeform</h4>
-                  <p>Write without structure</p>
-                </div>
-              </div>
-              <div class="theme-check">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
+        <!-- Entry Templates -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Entry Templates</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <input type="radio" name="template" value="freeform" class="mr-2" checked>
+              <div>
+                <span class="block font-medium">Freeform</span>
+                <span class="text-sm text-gray-500">Write without structure</span>
               </div>
             </label>
-
-            <label class="theme-option">
-              <input type="radio" name="template" value="gratitude">
-              <div class="theme-option-content">
-                <div class="theme-details">
-                  <h4>Gratitude</h4>
-                  <p>Focus on thankfulness</p>
-                </div>
-              </div>
-              <div class="theme-check">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <input type="radio" name="template" value="gratitude" class="mr-2">
+              <div>
+                <span class="block font-medium">Gratitude</span>
+                <span class="text-sm text-gray-500">Focus on thankfulness</span>
               </div>
             </label>
-
-            <label class="theme-option">
-              <input type="radio" name="template" value="reflection">
-              <div class="theme-option-content">
-                <div class="theme-details">
-                  <h4>Reflection</h4>
-                  <p>Review your day</p>
-                </div>
-              </div>
-              <div class="theme-check">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <input type="radio" name="template" value="reflection" class="mr-2">
+              <div>
+                <span class="block font-medium">Reflection</span>
+                <span class="text-sm text-gray-500">Review your day</span>
               </div>
             </label>
-
-            <label class="theme-option">
-              <input type="radio" name="template" value="goals">
-              <div class="theme-option-content">
-                <div class="theme-details">
-                  <h4>Goals</h4>
-                  <p>Track your progress</p>
-                </div>
-              </div>
-              <div class="theme-check">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <input type="radio" name="template" value="goals" class="mr-2">
+              <div>
+                <span class="block font-medium">Goals</span>
+                <span class="text-sm text-gray-500">Track your progress</span>
               </div>
             </label>
-
-            <label class="theme-option">
-              <input type="radio" name="template" value="mood">
-              <div class="theme-option-content">
-                <div class="theme-details">
-                  <h4>Mood Tracker</h4>
-                  <p>Monitor your emotions</p>
-                </div>
-              </div>
-              <div class="theme-check">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <input type="radio" name="template" value="mood" class="mr-2">
+              <div>
+                <span class="block font-medium">Mood Tracker</span>
+                <span class="text-sm text-gray-500">Monitor emotions</span>
               </div>
             </label>
-
-            <label class="theme-option">
-              <input type="radio" name="template" value="custom">
-              <div class="theme-option-content">
-                <div class="theme-details">
-                  <h4>Custom</h4>
-                  <p>Create your own format</p>
-                </div>
-              </div>
-              <div class="theme-check">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
+            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <input type="radio" name="template" value="custom" class="mr-2">
+              <div>
+                <span class="block font-medium">Custom</span>
+                <span class="text-sm text-gray-500">Create your own</span>
               </div>
             </label>
           </div>
-
-          <button class="button button-secondary w-full mt-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            <span>Create Custom Template</span>
+          <button type="button" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-secondary-600 hover:text-secondary-700 hover:bg-gray-50">
+            Create Custom Template
           </button>
         </div>
-      </div>
-   <!-- Writing Stats -->
-   <div class="modern-card section-animate" style="animation-delay: 300ms;">
-    <div class="card-header">
-      <div class="card-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
-          <path d="M22 12A10 10 0 0 0 12 2v10z"/>
-        </svg>
-      </div>
-      <div>
-        <h3 class="card-title">Writing Stats</h3>
-        <p class="card-subtitle">Track your journaling progress</p>
-      </div>
+
+        <!-- Writing Stats -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Writing Stats</label>
+          <div class="space-y-3">
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Word Count</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="word-count" id="word-count" class="sr-only" checked>
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Streak Tracking</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="streak-tracking" id="streak-tracking" class="sr-only" checked>
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Mood Analysis</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="mood-analysis" id="mood-analysis" class="sr-only">
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Monthly Reports</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="monthly-reports" id="monthly-reports" class="sr-only" checked>
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </form>
     </div>
-    <div class="card-content">
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">Word Count</div>
-          <div class="setting-description">Track daily words written</div>
-        </div>
-        <div class="toggle-container">
-          <input type="checkbox" id="word-count" class="toggle-checkbox" checked>
-          <label for="word-count" class="toggle-label"></label>
-        </div>
-      </div>
 
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">Streak Tracking</div>
-          <div class="setting-description">Consecutive days journaling</div>
-        </div>
-        <div class="toggle-container">
-          <input type="checkbox" id="streak-tracking" class="toggle-checkbox" checked>
-          <label for="streak-tracking" class="toggle-label"></label>
-        </div>
-      </div>
+    <!-- Alerts Tab Content -->
+    <div id="notifications-section" class="tab-content p-6" style="display: none;">
+      <form method="post">
+        {% csrf_token %}
 
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">Mood Analysis</div>
-          <div class="setting-description">Analyze emotional patterns</div>
+        <!-- Notification Settings -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Notification Settings</label>
+          <div class="space-y-3">
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Journal Reminders</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="journal-reminders" id="journal-reminders" class="sr-only" checked>
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Missed Days</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="missed-days" id="missed-days" class="sr-only" checked>
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Streak Milestones</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="streak-milestones" id="streak-milestones" class="sr-only" checked>
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>App Updates</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="app-updates" id="app-updates" class="sr-only">
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+          </div>
         </div>
-        <div class="toggle-container">
-          <input type="checkbox" id="mood-analysis" class="toggle-checkbox">
-          <label for="mood-analysis" class="toggle-label"></label>
-        </div>
-      </div>
 
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">Monthly Reports</div>
-          <div class="setting-description">Receive summary emails</div>
+        <!-- Notification Methods -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Notification Methods</label>
+          <div class="space-y-3">
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Push Notifications</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="push-notifications" id="push-notifications" class="sr-only" checked>
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Email Notifications</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="email-notifications" id="email-notifications" class="sr-only">
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>SMS Notifications</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="sms-notifications" id="sms-notifications" class="sr-only">
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+          </div>
         </div>
-        <div class="toggle-container">
-          <input type="checkbox" id="monthly-reports" class="toggle-checkbox" checked>
-          <label for="monthly-reports" class="toggle-label"></label>
+
+        <!-- Do Not Disturb -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Quiet Hours</label>
+          <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50 mb-3">
+            <span>Do Not Disturb</span>
+            <div class="relative inline-block w-10 align-middle select-none">
+              <input type="checkbox" name="do-not-disturb" id="do-not-disturb" class="sr-only">
+              <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+              <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+            </div>
+          </label>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="p-3 border rounded-lg">
+              <label for="quiet-start" class="block text-sm text-gray-700 mb-2">Quiet Hours Start</label>
+              <select id="quiet-start" name="quiet-start" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent">
+                <option value="8pm">8:00 PM</option>
+                <option value="9pm">9:00 PM</option>
+                <option value="10pm" selected>10:00 PM</option>
+                <option value="11pm">11:00 PM</option>
+              </select>
+            </div>
+            <div class="p-3 border rounded-lg">
+              <label for="quiet-end" class="block text-sm text-gray-700 mb-2">Quiet Hours End</label>
+              <select id="quiet-end" name="quiet-end" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent">
+                <option value="6am">6:00 AM</option>
+                <option value="7am" selected>7:00 AM</option>
+                <option value="8am">8:00 AM</option>
+                <option value="9am">9:00 AM</option>
+              </select>
+            </div>
+          </div>
         </div>
-      </div>
+      </form>
     </div>
-  </div>
-
-  <!-- Writing Insights -->
-  <div class="modern-card section-animate" style="animation-delay: 400ms;">
-    <div class="card-header">
-      <div class="card-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-        </svg>
-      </div>
-      <div>
-        <h3 class="card-title">Writing Insights</h3>
-        <p class="card-subtitle">Discover patterns in your journal</p>
-      </div>
-    </div>
-    <div class="card-content">
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">Topic Analysis</div>
-          <div class="setting-description">Identify common themes</div>
-        </div>
-        <div class="toggle-container">
-          <input type="checkbox" id="topic-analysis" class="toggle-checkbox" checked>
-          <label for="topic-analysis" class="toggle-label"></label>
-        </div>
-      </div>
-
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">Sentiment Tracking</div>
-          <div class="setting-description">Monitor emotional trends</div>
-        </div>
-        <div class="toggle-container">
-          <input type="checkbox" id="sentiment-tracking" class="toggle-checkbox" checked>
-          <label for="sentiment-tracking" class="toggle-label"></label>
-        </div>
-      </div>
-
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">Personal Growth</div>
-          <div class="setting-description">Track development over time</div>
-        </div>
-        <div class="toggle-container">
-          <input type="checkbox" id="personal-growth" class="toggle-checkbox">
-          <label for="personal-growth" class="toggle-label"></label>
-        </div>
-      </div>
-
-      <div class="alert-box alert-info mt-4">
-        <div class="alert-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="16" x2="12" y2="12"/>
-            <line x1="12" y1="8" x2="12.01" y2="8"/>
-          </svg>
-        </div>
-        <div class="alert-content">
-          <div class="alert-title">Privacy First</div>
-          <p class="alert-text">All analysis happens on your device. Your data is never shared with our servers.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Journal Export Options -->
-  <div class="modern-card section-animate" style="animation-delay: 500ms;">
-    <div class="card-header">
-      <div class="card-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-      </div>
-      <div>
-        <h3 class="card-title">Export Options</h3>
-        <p class="card-subtitle">Share or print your journals</p>
-      </div>
-    </div>
-    <div class="card-content">
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">PDF Export</div>
-          <div class="setting-description">High-quality printable format</div>
-        </div>
-        <div class="toggle-container">
-          <input type="checkbox" id="pdf-export" class="toggle-checkbox" checked>
-          <label for="pdf-export" class="toggle-label"></label>
-        </div>
-      </div>
-
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">Plain Text</div>
-          <div class="setting-description">Simple text format</div>
-        </div>
-        <div class="toggle-container">
-          <input type="checkbox" id="text-export" class="toggle-checkbox" checked>
-          <label for="text-export" class="toggle-label"></label>
-        </div>
-      </div>
-
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">Markdown</div>
-          <div class="setting-description">Formatted text with syntax</div>
-        </div>
-        <div class="toggle-container">
-          <input type="checkbox" id="markdown-export" class="toggle-checkbox">
-          <label for="markdown-export" class="toggle-label"></label>
-        </div>
-      </div>
-
-      <div class="setting-row">
-        <div>
-          <div class="setting-title">Include Images</div>
-          <div class="setting-description">Add photos in exports</div>
-        </div>
-        <div class="toggle-container">
-          <input type="checkbox" id="include-images" class="toggle-checkbox" checked>
-          <label for="include-images" class="toggle-label"></label>
-        </div>
-      </div>
-
-      <button class="button button-secondary w-full mt-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        <span>Export Journal Now</span>
-      </button>
-    </div>
-  </div>
-</section>
-    <!-- Notifications Tab Content -->
-    <section id="notifications-section" class="tab-content" style="display: none;">
-      <!-- Reminder Settings -->
-      <div class="modern-card section-animate" style="animation-delay: 0ms;">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="card-title">Notification Settings</h3>
-            <p class="card-subtitle">Manage your reminder preferences</p>
-          </div>
-        </div>
-        <div class="card-content">
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Journal Reminders</div>
-              <div class="setting-description">Daily writing reminders</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="journal-reminders" class="toggle-checkbox" checked>
-              <label for="journal-reminders" class="toggle-label"></label>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Missed Days</div>
-              <div class="setting-description">Gentle prompts when you miss entries</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="missed-days" class="toggle-checkbox" checked>
-              <label for="missed-days" class="toggle-label"></label>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Streak Milestones</div>
-              <div class="setting-description">Celebrate your progress</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="streak-milestones" class="toggle-checkbox" checked>
-              <label for="streak-milestones" class="toggle-label"></label>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">App Updates</div>
-              <div class="setting-description">New features and improvements</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="app-updates" class="toggle-checkbox">
-              <label for="app-updates" class="toggle-label"></label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Notification Methods -->
-      <div class="modern-card section-animate" style="animation-delay: 100ms;">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="card-title">Notification Methods</h3>
-            <p class="card-subtitle">How you'll receive alerts</p>
-          </div>
-        </div>
-        <div class="card-content">
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Push Notifications</div>
-              <div class="setting-description">Alerts on your device</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="push-notifications" class="toggle-checkbox" checked>
-              <label for="push-notifications" class="toggle-label"></label>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Email Notifications</div>
-              <div class="setting-description">Reminders in your inbox</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="email-notifications" class="toggle-checkbox">
-              <label for="email-notifications" class="toggle-label"></label>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">SMS Notifications</div>
-              <div class="setting-description">Text message reminders</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="sms-notifications" class="toggle-checkbox">
-              <label for="sms-notifications" class="toggle-label"></label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Do Not Disturb -->
-      <div class="modern-card section-animate" style="animation-delay: 200ms;">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="card-title">Quiet Hours</h3>
-            <p class="card-subtitle">Set when not to be disturbed</p>
-          </div>
-        </div>
-        <div class="card-content">
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Do Not Disturb</div>
-              <div class="setting-description">Pause all notifications</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="do-not-disturb" class="toggle-checkbox">
-              <label for="do-not-disturb" class="toggle-label"></label>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Quiet Hours Start</div>
-              <div class="setting-description">When to pause notifications</div>
-            </div>
-            <select class="button button-secondary" style="background: white; padding: 0.5rem 1rem;">
-              <option value="8pm">8:00 PM</option>
-              <option value="9pm">9:00 PM</option>
-              <option value="10pm" selected>10:00 PM</option>
-              <option value="11pm">11:00 PM</option>
-            </select>
-          </div>
-
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Quiet Hours End</div>
-              <div class="setting-description">When to resume notifications</div>
-            </div>
-            <select class="button button-secondary" style="background: white; padding: 0.5rem 1rem;">
-              <option value="6am">6:00 AM</option>
-              <option value="7am" selected>7:00 AM</option>
-              <option value="8am">8:00 AM</option>
-              <option value="9am">9:00 AM</option>
-            </select>
-          </div>
-
-          <div class="alert-box alert-info mt-4">
-            <div class="alert-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="16" x2="12" y2="12"/>
-                <line x1="12" y1="8" x2="12.01" y2="8"/>
-              </svg>
-            </div>
-            <div class="alert-content">
-              <div class="alert-title">When Quiet Hours are active</div>
-              <p class="alert-text">You'll still receive important notifications about your account security.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- Privacy Tab Content -->
-    <section id="privacy-section" class="tab-content" style="display: none;">
-      <!-- Security Settings -->
-      <div class="modern-card section-animate" style="animation-delay: 0ms;">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="card-title">Security</h3>
-            <p class="card-subtitle">Protect your journal data</p>
-          </div>
-        </div>
-        <div class="card-content">
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Journal Lock</div>
-              <div class="setting-description">Require password</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="journal-lock" class="toggle-checkbox" checked>
-              <label for="journal-lock" class="toggle-label"></label>
-            </div>
-          </div>
+    <div id="privacy-section" class="tab-content p-6" style="display: none;">
+      <form method="post">
+        {% csrf_token %}
 
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Biometric Unlock</div>
-              <div class="setting-description">Fingerprint/Face ID</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="biometric-auth" class="toggle-checkbox" checked>
-              <label for="biometric-auth" class="toggle-label"></label>
-            </div>
+        <!-- Security Settings -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Security</label>
+          <div class="space-y-3 mb-3">
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Journal Lock</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="journal-lock" id="journal-lock" class="sr-only" checked>
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Biometric Unlock</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="biometric-auth" id="biometric-auth" class="sr-only" checked>
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Auto Logout</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="auto-logout" id="auto-logout" class="sr-only">
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
           </div>
-
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Auto Logout</div>
-              <div class="setting-description">After inactivity</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="auto-logout" class="toggle-checkbox">
-              <label for="auto-logout" class="toggle-label"></label>
-            </div>
-          </div>
-
-          <button class="button button-secondary w-full mt-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-            <span>Change Password</span>
+          <button type="button" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-secondary-600 hover:text-secondary-700 hover:bg-gray-50">
+            Change Password
           </button>
         </div>
-      </div>
 
-      <!-- Privacy Controls -->
-      <div class="modern-card section-animate" style="animation-delay: 100ms;">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="card-title">Data Privacy</h3>
-            <p class="card-subtitle">Manage how your data is handled</p>
-          </div>
-        </div>
-        <div class="card-content">
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Analytics</div>
-              <div class="setting-description">Anonymous usage data</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="analytics" class="toggle-checkbox" checked>
-              <label for="analytics" class="toggle-label"></label>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Encryption</div>
-              <div class="setting-description">End-to-end protection</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="encryption" class="toggle-checkbox" checked>
-              <label for="encryption" class="toggle-label"></label>
-            </div>
-          </div>
-
-          <div class="setting-row">
-            <div>
-              <div class="setting-title">Cloud Backup</div>
-              <div class="setting-description">Encrypted cloud storage</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" id="cloud-backup" class="toggle-checkbox" checked>
-              <label for="cloud-backup" class="toggle-label"></label>
-            </div>
-          </div>
-
-          <div class="alert-box alert-warning mt-4">
-            <div class="alert-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-            </div>
-            <div class="alert-content">
-              <div class="alert-title">Privacy Protection</div>
-              <p class="alert-text">Your entries are encrypted and only accessible to you. <a href="#" class="underline">Privacy Policy</a></p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Data Management -->
-      <div class="modern-card section-animate" style="animation-delay: 200ms;">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <ellipse cx="12" cy="5" rx="9" ry="3"/>
-              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="card-title">Your Data</h3>
-            <p class="card-subtitle">Manage your journal information</p>
-          </div>
-        </div>
-        <div class="card-content">
-          <div class="grid-2 mb-4">
-            <button class="button button-secondary">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              <span>Export Data</span>
-            </button>
-
-            <button class="button button-secondary">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-              <span>Import Data</span>
-            </button>
-          </div>
-
-          <div class="alert-box alert-danger mt-4">
-            <div class="alert-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                <line x1="12" y1="9" x2="12" y2="13"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
-            </div>
-            <div class="alert-content">
-              <div class="alert-title">Danger Zone</div>
-              <div class="grid-2" style="margin-top: 0.75rem;">
-                <button class="button button-danger">
-                  Delete All Entries
-                </button>
-                <button class="button button-danger">
-                  Delete Account
-                </button>
+        <!-- Data Privacy -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Data Privacy</label>
+          <div class="space-y-3">
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Analytics</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="analytics" id="analytics" class="sr-only" checked>
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
               </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Encryption</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="encryption" id="encryption" class="sr-only" checked>
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:border-secondary-500 hover:bg-gray-50">
+              <span>Cloud Backup</span>
+              <div class="relative inline-block w-10 align-middle select-none">
+                <input type="checkbox" name="cloud-backup" id="cloud-backup" class="sr-only" checked>
+                <div class="block h-6 bg-gray-300 rounded-full w-10"></div>
+                <div class="dot absolute left-1 top-1 h-4 w-4 bg-white rounded-full transition"></div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Your Data</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <button type="button" class="px-4 py-3 border border-gray-300 rounded-lg text-secondary-600 hover:text-secondary-700 hover:bg-gray-50 text-sm flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Export Data
+            </button>
+            <button type="button" class="px-4 py-3 border border-gray-300 rounded-lg text-secondary-600 hover:text-secondary-700 hover:bg-gray-50 text-sm flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4-4m0 0l4 4m-4-4v12" />
+              </svg>
+              Import Data
+            </button>
+          </div>
+
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p class="text-red-600 font-medium mb-3">Danger Zone</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button type="button" class="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-100 text-sm">
+                Delete All Entries
+              </button>
+              <button type="button" class="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-100 text-sm">
+                Delete Account
+              </button>
             </div>
           </div>
         </div>
-      </div>
-    </section>
-  </div>
+      </form>
+    </div>
 
-  <!-- Save button bar (fixed at bottom) -->
-  <div id="saveBar" class="save-bar">
-    <div class="save-bar-content">
-      <div class="save-bar-text">Changes will be applied immediately</div>
-      <button id="savePreferencesBtn" class="save-button">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-          <polyline points="17 21 17 13 7 13 7 21"/>
-          <polyline points="7 3 7 8 15 8"/>
-        </svg>
+    <!-- Save Button -->
+    <div class="px-6 py-4 border-t border-gray-200">
+      <button type="submit" class="w-full sm:w-auto px-6 py-2 bg-secondary-600 hover:bg-secondary-700 btn-gradient text-white rounded-full shadow-md transition">
         Save Preferences
       </button>
     </div>
@@ -2063,36 +619,22 @@
 
 {% block extra_js %}
 <script>
-  // Initialize on document load
   document.addEventListener('DOMContentLoaded', function() {
     // Tab switching functionality
-    setupTabs();
-
-    // Input change detection for save bar
-    setupInputChangeDetection();
-
-    // Font type tabs
-    setupFontTabs();
-
-    // Save button functionality
-    setupSaveButton();
-
-    // Handle section animations with delays
-    animateSectionsWithDelay();
-
-    // Accessibility: Reduce motion toggle
-    setupReduceMotion();
-  });
-
-  // Tab switching functionality
-  function setupTabs() {
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
 
     tabButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        // Get tab target
-        const targetId = button.dataset.tab;
+      button.addEventListener('click', function() {
+        // Remove active class from all tabs
+        tabButtons.forEach(btn => {
+          btn.classList.remove('active');
+          btn.querySelector('span')?.remove();
+        });
+
+        // Add active class to clicked tab
+        this.classList.add('active');
+        this.innerHTML += '<span class="absolute bottom-0 left-0 w-full h-0.5 bg-secondary-500"></span>';
 
         // Hide all tab contents
         tabContents.forEach(content => {
@@ -2100,130 +642,71 @@
         });
 
         // Show selected tab content
-        document.getElementById(targetId).style.display = 'block';
-
-        // Update active button state
-        tabButtons.forEach(btn => {
-          btn.classList.remove('active');
-        });
-        button.classList.add('active');
-
-        // Show save bar
-        document.getElementById('saveBar').classList.add('visible');
-
-        // Animate sections in the new tab
-        animateSectionsInTab(targetId);
+        const tabId = this.id.replace('tab-', '');
+        document.getElementById(tabId + '-section').style.display = 'block';
       });
     });
-  }
 
-  // Animate sections in a tab
-  function animateSectionsInTab(tabId) {
-    const sections = document.querySelectorAll(`#${tabId} .section-animate`);
-    sections.forEach((section, index) => {
-      section.style.animationDelay = `${index * 100}ms`;
-      // Reset animation
-      section.style.animation = 'none';
-      section.offsetHeight; // Trigger reflow
-      section.style.animation = null;
-    });
-  }
-
-  // Staggered animation on initial load
-  function animateSectionsWithDelay() {
-    const sections = document.querySelectorAll('#appearance-section .section-animate');
-    sections.forEach((section, index) => {
-      section.style.animationDelay = `${index * 100}ms`;
-    });
-  }
-
-  // Setup font tabs
-  function setupFontTabs() {
-    const textFontTab = document.getElementById('text-font-tab');
-    const handwritingTab = document.getElementById('handwriting-tab');
-    const textFontOptions = document.getElementById('text-font-options');
-    const handwritingFontOptions = document.getElementById('handwriting-font-options');
-
-    if (textFontTab && handwritingTab) {
-      textFontTab.addEventListener('click', () => {
-        textFontOptions.style.display = 'grid';
-        handwritingFontOptions.style.display = 'none';
-        textFontTab.classList.add('active');
-        handwritingTab.classList.remove('active');
-      });
-
-      handwritingTab.addEventListener('click', () => {
-        textFontOptions.style.display = 'none';
-        handwritingFontOptions.style.display = 'grid';
-        handwritingTab.classList.add('active');
-        textFontTab.classList.remove('active');
-      });
-    }
-  }
-
-  // Listen for input changes to show save bar
-  function setupInputChangeDetection() {
-    const inputs = document.querySelectorAll('input, select');
-    inputs.forEach(input => {
-      input.addEventListener('change', () => {
-        document.getElementById('saveBar').classList.add('visible');
-
-        // Special case for reduce motion
-        if (input.id === 'reduce-motion') {
-          if (input.checked) {
-            document.body.classList.add('reduce-motion');
-          } else {
-            document.body.classList.remove('reduce-motion');
-          }
-        }
-      });
-    });
-  }
-
-  // Reduce motion accessibility
-  function setupReduceMotion() {
-    const reduceMotionToggle = document.getElementById('reduce-motion');
-    if (reduceMotionToggle) {
-      reduceMotionToggle.addEventListener('change', function() {
+    // Toggle switches
+    const toggles = document.querySelectorAll('input[type="checkbox"]');
+    toggles.forEach(toggle => {
+      toggle.addEventListener('change', function() {
+        const dot = this.parentNode.querySelector('.dot');
         if (this.checked) {
-          document.body.classList.add('reduce-motion');
+          dot.style.transform = 'translateX(1rem)';
+          this.parentNode.querySelector('.block').style.backgroundColor = '#6366f1';
         } else {
-          document.body.classList.remove('reduce-motion');
+          dot.style.transform = 'translateX(0)';
+          this.parentNode.querySelector('.block').style.backgroundColor = '#d1d5db';
         }
       });
-    }
-  }
 
-  // Save button functionality
-  function setupSaveButton() {
-    const saveButton = document.getElementById('savePreferencesBtn');
-    const saveBar = document.getElementById('saveBar');
-    const successNotification = document.getElementById('successNotification');
-
-    saveButton.addEventListener('click', () => {
-      // Show loading state
-      const originalContent = saveButton.innerHTML;
-      saveButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin"><circle cx="12" cy="12" r="10" opacity="0.25"></circle><path opacity="0.75" d="M12 2a10 10 0 0 1 10 10"></path></svg> Saving...`;
-      saveButton.disabled = true;
-
-      // Simulate API call
-      setTimeout(() => {
-        // Restore button state
-        saveButton.innerHTML = originalContent;
-        saveButton.disabled = false;
-
-        // Hide save bar
-        saveBar.classList.remove('visible');
-
-        // Show success notification
-        successNotification.classList.add('visible');
-
-        // Hide notification after 3 seconds
-        setTimeout(() => {
-          successNotification.classList.remove('visible');
-        }, 3000);
-      }, 1200);
+      // Initialize state
+      if (toggle.checked) {
+        const dot = toggle.parentNode.querySelector('.dot');
+        dot.style.transform = 'translateX(1rem)';
+        toggle.parentNode.querySelector('.block').style.backgroundColor = '#6366f1';
+      }
     });
-  }
+
+    // Color options
+    const colorOptions = document.querySelectorAll('.color-option input');
+    colorOptions.forEach(option => {
+      option.addEventListener('change', function() {
+        document.querySelectorAll('.color-option .selected-ring').forEach(ring => {
+          ring.style.opacity = '0';
+        });
+
+        if (this.checked) {
+          this.parentNode.querySelector('.selected-ring').style.opacity = '1';
+        }
+      });
+
+      // Initialize state
+      if (option.checked) {
+        option.parentNode.querySelector('.selected-ring').style.opacity = '1';
+      }
+    });
+
+    // Day selection
+    const dayOptions = document.querySelectorAll('input[name="journal-days"]');
+    dayOptions.forEach(day => {
+      day.addEventListener('change', function() {
+        if (this.checked) {
+          this.parentNode.style.backgroundColor = '#6366f1';
+          this.parentNode.style.color = 'white';
+        } else {
+          this.parentNode.style.backgroundColor = '';
+          this.parentNode.style.color = '';
+        }
+      });
+
+      // Initialize state
+      if (day.checked) {
+        day.parentNode.style.backgroundColor = '#6366f1';
+        day.parentNode.style.color = 'white';
+      }
+    });
+  });
 </script>
 {% endblock %}
