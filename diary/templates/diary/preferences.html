@@ -25,11 +25,6 @@
     to { transform: translateY(0); opacity: 1; }
   }
 
-  @keyframes slideInFromLeft {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(0); }
-  }
-
   .animate-fade-in {
     animation: fadeIn 0.5s ease forwards;
   }
@@ -38,20 +33,20 @@
     animation: slideUp 0.5s ease forwards;
   }
 
+  body.reduce-motion * {
+    animation: none !important;
+    transition: none !important;
+  }
+
   /* Glass Effect Cards */
   .glass-effect {
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border-radius: 16px;
+    border-radius: 12px;
     border: 1px solid var(--glass-border);
     box-shadow: var(--card-shadow);
     transition: all 0.3s ease;
-  }
-
-  .glass-effect:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
   }
 
   /* Gradient Text & Buttons */
@@ -67,32 +62,17 @@
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-  }
-
-  .btn-gradient:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-  }
-
-  .btn-gradient:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
     width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: all 0.6s ease;
   }
 
-  .btn-gradient:hover:before {
-    left: 100%;
+  .btn-gradient:active {
+    transform: translateY(1px);
   }
 
   /* Toggle Button Styling */
   .toggle-container {
     position: relative;
-    width: 3rem;
+    width: 2.8rem;
     height: 1.5rem;
   }
 
@@ -132,7 +112,7 @@
   }
 
   .toggle-checkbox:checked + .toggle-label:before {
-    transform: translateX(1.5rem);
+    transform: translateX(1.3rem);
   }
 
   .toggle-checkbox:focus + .toggle-label {
@@ -154,6 +134,10 @@
 
   .custom-radio-container:hover {
     background-color: rgba(255, 255, 255, 0.7);
+  }
+
+  .custom-radio-container:active {
+    background-color: rgba(255, 255, 255, 0.8);
   }
 
   .custom-radio-input {
@@ -183,7 +167,7 @@
   /* Color Picker Styles */
   .color-options-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(2.5rem, 1fr));
+    grid-template-columns: repeat(5, 1fr);
     gap: 0.75rem;
   }
 
@@ -197,8 +181,8 @@
     border: 2px solid transparent;
   }
 
-  .color-option:hover {
-    transform: scale(1.1);
+  .color-option:active {
+    transform: scale(0.95);
   }
 
   .color-option.selected {
@@ -227,9 +211,8 @@
     border: 1px solid rgba(0, 0, 0, 0.05);
   }
 
-  .font-preview:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+  .font-preview:active {
+    background-color: rgba(255, 255, 255, 0.9);
   }
 
   .font-preview.selected {
@@ -241,10 +224,11 @@
   .font-preview-caveat { font-family: 'Caveat', cursive; }
   .font-preview-merriweather { font-family: 'Merriweather', serif; }
 
-  /* Tab system */
+  /* Mobile-friendly tab system */
   .tabs-container {
     position: relative;
     z-index: 10;
+    margin-bottom: 1rem;
   }
 
   .tab-nav {
@@ -253,10 +237,12 @@
     border-radius: 0.75rem;
     background: rgba(255, 255, 255, 0.3);
     padding: 0.25rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     overflow-x: auto;
     scrollbar-width: none; /* Firefox */
     -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: none; /* IE and Edge */
+    scroll-snap-type: x mandatory;
   }
 
   .tab-nav::-webkit-scrollbar {
@@ -267,15 +253,20 @@
     position: relative;
     cursor: pointer;
     transition: all 0.3s ease;
-    padding: 0.75rem 1rem;
+    padding: 0.65rem 0.85rem;
     white-space: nowrap;
     border-radius: 0.5rem;
     color: #4b5563;
+    scroll-snap-align: start;
+    min-width: fit-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
   }
 
-  .pref-tab:hover {
-    background: rgba(255, 255, 255, 0.3);
-    color: var(--primary-color-dark);
+  .pref-tab:active {
+    background: rgba(255, 255, 255, 0.5);
   }
 
   .pref-tab.active {
@@ -284,42 +275,13 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 
-  /* Responsive adjustments */
-  @media (max-width: 640px) {
-    .pref-tab {
-      padding: 0.5rem 0.75rem;
-    }
-
-    .pref-tab-icon {
-      margin-right: 0.25rem;
-    }
-
-    .custom-radio-container {
-      padding: 0.5rem;
-    }
-
-    .color-options-grid {
-      grid-template-columns: repeat(5, 1fr);
-    }
-
-    .color-option {
-      width: 2rem;
-      height: 2rem;
-    }
-
-    .section-header {
-      font-size: 1rem;
-    }
+  .pref-tab-icon {
+    margin-right: 0.35rem;
   }
 
-  /* Accessibility focus styles */
-  button:focus, input:focus, select:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
-  }
-
-  /* Smooth section transitions */
+  /* Section styling */
   .preferences-section {
+    margin-bottom: 1rem;
     opacity: 0;
     transform: translateY(10px);
   }
@@ -339,59 +301,236 @@
     }
   }
 
-  /* Section content animation delays */
-  .delay-100 { animation-delay: 100ms; }
-  .delay-200 { animation-delay: 200ms; }
-  .delay-300 { animation-delay: 300ms; }
-  .delay-400 { animation-delay: 400ms; }
+  /* Mobile optimizations */
+  .section-header {
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .section-header svg {
+    flex-shrink: 0;
+    margin-right: 0.5rem;
+  }
+
+  /* Day picker styling */
+  .day-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: flex-start;
+  }
+
+  .day-item {
+    min-width: 2.5rem;
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    font-size: 0.8rem;
+    position: relative;
+  }
+
+  .day-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .day-checkbox:checked + span {
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Sticky mobile save button */
+  .save-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 50;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .save-bar.show {
+    transform: translateY(0);
+  }
+
+  .fixed-height-container {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 5rem; /* Room for fixed save bar */
+  }
+
+  /* Accessibility focus styles */
+  button:focus, input:focus, select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+  }
+
+  /* Active state for buttons - mobile optimization */
+  .setting-btn:active,
+  .day-item:active,
+  .color-option:active,
+  .custom-radio-container:active {
+    transform: scale(0.98);
+  }
+
+  .settings-group {
+    margin-bottom: 1rem;
+  }
+
+  /* Radio groups with better touch targets */
+  .touch-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .touch-radio-group label {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  /* Mobile-specific optimizations */
+  @media (max-width: 640px) {
+    .glass-effect {
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .color-option {
+      width: 2rem;
+      height: 2rem;
+    }
+
+    .toggle-container {
+      width: 2.5rem;
+    }
+
+    .custom-radio-container {
+      padding: 0.5rem 0.75rem;
+    }
+
+    .font-preview {
+      padding: 0.75rem;
+    }
+
+    .day-picker {
+      justify-content: space-between;
+    }
+
+    .day-item {
+      min-width: 2.2rem;
+      font-size: 0.75rem;
+    }
+  }
+
+  /* Header with back button */
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .back-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4b5563;
+  }
+
+  /* Fixed tab navigation for mobile */
+  @media (max-width: 768px) {
+    .tabs-container {
+      top: 0;
+      position: sticky;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      z-index: 30;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      margin: -0.5rem -1rem 1rem;
+      padding: 0.5rem 1rem;
+    }
+
+    .tab-nav {
+      margin-bottom: 0;
+    }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
-  <!-- Page Header -->
-  <div class="glass-effect rounded-xl p-5 sm:p-6 mb-6 sm:mb-8 border border-white/20 relative z-10 shadow-md animate-fade-in">
-    <h2 class="text-2xl sm:text-3xl font-bold diary-font text-gray-900 mb-2 gradient-text">Journal Preferences</h2>
-    <p class="text-sm sm:text-base text-gray-600">Customize your journaling experience to match your personal style.</p>
+<div class="max-w-4xl mx-auto px-4 py-4 fixed-height-container">
+  <!-- Mobile Header -->
+  <div class="mobile-header animate-fade-in">
+    <a href="#" class="back-button">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </a>
+    <h2 class="text-xl font-bold gradient-text">Journal Preferences</h2>
+    <div class="w-10"></div> <!-- Empty div for flexbox alignment -->
   </div>
 
-  <!-- Tab Navigation -->
-  <div class="tabs-container animate-fade-in" style="animation-delay: 100ms;">
+  <!-- Tab Navigation - Optimized for mobile scrolling -->
+  <div class="tabs-container animate-fade-in">
     <div class="tab-nav">
       <button class="pref-tab active" onclick="switchPrefsTab('appearance')" id="appearance-tab-btn">
-        <div class="flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pref-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-          </svg>
-          <span class="font-medium ml-1.5">Appearance</span>
-        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pref-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+        </svg>
+        <span>Appearance</span>
       </button>
 
       <button class="pref-tab" onclick="switchPrefsTab('journaling')" id="journaling-tab-btn">
-        <div class="flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pref-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-          <span class="font-medium ml-1.5">Journaling</span>
-        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pref-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+        <span>Journaling</span>
       </button>
 
       <button class="pref-tab" onclick="switchPrefsTab('notifications')" id="notifications-tab-btn">
-        <div class="flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pref-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
-          <span class="font-medium ml-1.5">Notifications</span>
-        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pref-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+        <span>Alerts</span>
       </button>
 
       <button class="pref-tab" onclick="switchPrefsTab('privacy')" id="privacy-tab-btn">
-        <div class="flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pref-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          <span class="font-medium ml-1.5">Privacy</span>
-        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pref-tab-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        <span>Privacy</span>
       </button>
     </div>
   </div>
@@ -399,63 +538,65 @@
   <!-- Tab Contents -->
   <div id="prefsTabContents">
     <!-- Appearance Tab -->
-    <div id="appearance-tab" class="space-y-6 sm:space-y-8">
+    <div id="appearance-tab" class="space-y-4">
       <!-- Theme Selection -->
-      <div class="glass-effect rounded-xl p-5 sm:p-6 border border-white/20 shadow-md preferences-section">
-        <h3 class="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2 section-header">
+      <div class="glass-effect rounded-xl p-4 border border-white/20 shadow-md preferences-section">
+        <h3 class="section-header">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
           </svg>
           Theme
         </h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="custom-radio-container flex items-center">
+
+        <div class="grid grid-cols-2 gap-3">
+          <label class="custom-radio-container">
             <input type="radio" name="theme" value="light" class="custom-radio-input" checked>
             <div class="flex-grow">
-              <div class="font-medium text-gray-800">Light Theme</div>
-              <div class="text-gray-500 text-sm">Clean, bright interface</div>
+              <div class="font-medium">Light</div>
+              <div class="text-gray-500 text-xs">Clean, bright</div>
             </div>
-            <div class="bg-white w-10 h-10 rounded-md shadow-sm ml-auto flex-shrink-0"></div>
+            <div class="bg-white w-8 h-8 rounded-md shadow-sm ml-auto flex-shrink-0"></div>
           </label>
 
-          <label class="custom-radio-container flex items-center">
+          <label class="custom-radio-container">
             <input type="radio" name="theme" value="dark" class="custom-radio-input">
             <div class="flex-grow">
-              <div class="font-medium text-gray-800">Dark Theme</div>
-              <div class="text-gray-500 text-sm">Easy on the eyes at night</div>
+              <div class="font-medium">Dark</div>
+              <div class="text-gray-500 text-xs">Easy on eyes</div>
             </div>
-            <div class="bg-gray-800 w-10 h-10 rounded-md shadow-sm ml-auto flex-shrink-0"></div>
+            <div class="bg-gray-800 w-8 h-8 rounded-md shadow-sm ml-auto flex-shrink-0"></div>
           </label>
 
-          <label class="custom-radio-container flex items-center">
+          <label class="custom-radio-container">
             <input type="radio" name="theme" value="auto" class="custom-radio-input">
             <div class="flex-grow">
-              <div class="font-medium text-gray-800">System Default</div>
-              <div class="text-gray-500 text-sm">Match your device settings</div>
+              <div class="font-medium">System</div>
+              <div class="text-gray-500 text-xs">Match device</div>
             </div>
-            <div class="bg-gradient-to-r from-white to-gray-800 w-10 h-10 rounded-md shadow-sm ml-auto flex-shrink-0"></div>
+            <div class="bg-gradient-to-r from-white to-gray-800 w-8 h-8 rounded-md shadow-sm ml-auto flex-shrink-0"></div>
           </label>
 
-          <label class="custom-radio-container flex items-center">
+          <label class="custom-radio-container">
             <input type="radio" name="theme" value="paper" class="custom-radio-input">
             <div class="flex-grow">
-              <div class="font-medium text-gray-800">Paper</div>
-              <div class="text-gray-500 text-sm">Classic journal look</div>
+              <div class="font-medium">Paper</div>
+              <div class="text-gray-500 text-xs">Journal look</div>
             </div>
-            <div class="bg-amber-50 w-10 h-10 rounded-md shadow-sm ml-auto flex-shrink-0"></div>
+            <div class="bg-amber-50 w-8 h-8 rounded-md shadow-sm ml-auto flex-shrink-0"></div>
           </label>
         </div>
       </div>
 
       <!-- Color Selection -->
-      <div class="glass-effect rounded-xl p-5 sm:p-6 border border-white/20 shadow-md preferences-section">
-        <h3 class="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2 section-header">
+      <div class="glass-effect rounded-xl p-4 border border-white/20 shadow-md preferences-section">
+        <h3 class="section-header">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
           </svg>
           Accent Color
         </h3>
-        <div class="color-options-grid mb-3">
+
+        <div class="color-options-grid mb-2">
           <div class="color-option selected bg-indigo-500" data-color="indigo" tabindex="0" role="button" aria-label="Indigo color"></div>
           <div class="color-option bg-violet-500" data-color="violet" tabindex="0" role="button" aria-label="Violet color"></div>
           <div class="color-option bg-blue-500" data-color="blue" tabindex="0" role="button" aria-label="Blue color"></div>
@@ -465,96 +606,103 @@
           <div class="color-option bg-red-500" data-color="red" tabindex="0" role="button" aria-label="Red color"></div>
           <div class="color-option bg-rose-500" data-color="rose" tabindex="0" role="button" aria-label="Rose color"></div>
           <div class="color-option bg-fuchsia-500" data-color="fuchsia" tabindex="0" role="button" aria-label="Fuchsia color"></div>
+          <div class="color-option bg-green-500" data-color="green" tabindex="0" role="button" aria-label="Green color"></div>
         </div>
 
-        <p class="text-sm text-gray-500 mt-2">This color will be used for buttons, highlights, and accents throughout your journal.</p>
+        <p class="text-xs text-gray-500">Color for buttons, highlights, and accents.</p>
       </div>
 
-      <!-- Font Selection -->
-      <div class="glass-effect rounded-xl p-5 sm:p-6 border border-white/20 shadow-md preferences-section">
-        <h3 class="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2 section-header">
+      <!-- Font Selection - Simplified for mobile -->
+      <div class="glass-effect rounded-xl p-4 border border-white/20 shadow-md preferences-section">
+        <h3 class="section-header">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
           </svg>
-          Font Selection
+          Fonts
         </h3>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h4 class="font-medium text-gray-700 mb-3">Journal Text Font</h4>
-            <div class="space-y-3">
-              <label class="block">
-                <input type="radio" name="text-font" value="playfair" class="sr-only" checked>
-                <div class="font-preview font-preview-playfair selected" tabindex="0" role="button">
-                  <div class="font-bold mb-2">Playfair Display</div>
-                  <p class="text-sm">The quick brown fox jumps over the lazy dog.</p>
-                </div>
-              </label>
-
-              <label class="block">
-                <input type="radio" name="text-font" value="poppins" class="sr-only">
-                <div class="font-preview font-preview-poppins" tabindex="0" role="button">
-                  <div class="font-bold mb-2">Poppins</div>
-                  <p class="text-sm">The quick brown fox jumps over the lazy dog.</p>
-                </div>
-              </label>
-
-              <label class="block">
-                <input type="radio" name="text-font" value="merriweather" class="sr-only">
-                <div class="font-preview font-preview-merriweather" tabindex="0" role="button">
-                  <div class="font-bold mb-2">Merriweather</div>
-                  <p class="text-sm">The quick brown fox jumps over the lazy dog.</p>
-                </div>
-              </label>
-            </div>
+        <!-- Tabs for text and handwriting fonts -->
+        <div class="mb-3">
+          <div class="flex bg-white/30 rounded-lg p-0.5 mb-3">
+            <button class="flex-1 py-1.5 rounded-md bg-white text-primary-600 font-medium text-sm" id="text-font-tab">Journal Text</button>
+            <button class="flex-1 py-1.5 rounded-md text-gray-600 font-medium text-sm" id="handwriting-tab">Handwriting</button>
           </div>
+        </div>
 
-          <div>
-            <h4 class="font-medium text-gray-700 mb-3">Handwriting Font</h4>
-            <div class="space-y-3">
-              <label class="block">
-                <input type="radio" name="handwriting-font" value="caveat" class="sr-only" checked>
-                <div class="font-preview font-preview-caveat selected" tabindex="0" role="button">
-                  <div class="font-bold mb-2">Caveat</div>
-                  <p class="text-sm">The quick brown fox jumps over the lazy dog.</p>
-                </div>
-              </label>
+        <!-- Text font options -->
+        <div id="text-font-options">
+          <div class="space-y-3">
+            <label class="block">
+              <input type="radio" name="text-font" value="playfair" class="sr-only" checked>
+              <div class="font-preview font-preview-playfair selected" tabindex="0" role="button">
+                <div class="font-medium mb-1 text-sm">Playfair Display</div>
+                <p class="text-xs">The quick brown fox jumps over the lazy dog.</p>
+              </div>
+            </label>
 
-              <label class="block">
-                <input type="radio" name="handwriting-font" value="indie-flower" class="sr-only">
-                <div class="font-preview" style="font-family: cursive" tabindex="0" role="button">
-                  <div class="font-bold mb-2">Indie Flower</div>
-                  <p class="text-sm">The quick brown fox jumps over the lazy dog.</p>
-                </div>
-              </label>
+            <label class="block">
+              <input type="radio" name="text-font" value="poppins" class="sr-only">
+              <div class="font-preview font-preview-poppins" tabindex="0" role="button">
+                <div class="font-medium mb-1 text-sm">Poppins</div>
+                <p class="text-xs">The quick brown fox jumps over the lazy dog.</p>
+              </div>
+            </label>
 
-              <label class="block">
-                <input type="radio" name="handwriting-font" value="dancing-script" class="sr-only">
-                <div class="font-preview" style="font-family: cursive;" tabindex="0" role="button">
-                  <div class="font-bold mb-2">Dancing Script</div>
-                  <p class="text-sm">The quick brown fox jumps over the lazy dog.</p>
-                </div>
-              </label>
-            </div>
+            <label class="block">
+              <input type="radio" name="text-font" value="merriweather" class="sr-only">
+              <div class="font-preview font-preview-merriweather" tabindex="0" role="button">
+                <div class="font-medium mb-1 text-sm">Merriweather</div>
+                <p class="text-xs">The quick brown fox jumps over the lazy dog.</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Handwriting font options (initially hidden) -->
+        <div id="handwriting-font-options" class="hidden">
+          <div class="space-y-3">
+            <label class="block">
+              <input type="radio" name="handwriting-font" value="caveat" class="sr-only" checked>
+              <div class="font-preview font-preview-caveat selected" tabindex="0" role="button">
+                <div class="font-medium mb-1 text-sm">Caveat</div>
+                <p class="text-xs">The quick brown fox jumps over the lazy dog.</p>
+              </div>
+            </label>
+
+            <label class="block">
+              <input type="radio" name="handwriting-font" value="indie-flower" class="sr-only">
+              <div class="font-preview" style="font-family: cursive" tabindex="0" role="button">
+                <div class="font-medium mb-1 text-sm">Indie Flower</div>
+                <p class="text-xs">The quick brown fox jumps over the lazy dog.</p>
+              </div>
+            </label>
+
+            <label class="block">
+              <input type="radio" name="handwriting-font" value="dancing-script" class="sr-only">
+              <div class="font-preview" style="font-family: cursive;" tabindex="0" role="button">
+                <div class="font-medium mb-1 text-sm">Dancing Script</div>
+                <p class="text-xs">The quick brown fox jumps over the lazy dog.</p>
+              </div>
+            </label>
           </div>
         </div>
       </div>
 
-      <!-- Animation Settings -->
-      <div class="glass-effect rounded-xl p-5 sm:p-6 border border-white/20 shadow-md preferences-section">
-        <h3 class="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2 section-header">
+      <!-- Animation Settings - Combined into a simple toggle list -->
+      <div class="glass-effect rounded-xl p-4 border border-white/20 shadow-md preferences-section">
+        <h3 class="section-header">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          Animation Settings
+          Visual Effects
         </h3>
 
-        <div class="space-y-4">
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Interface Animations</div>
-              <div class="text-gray-500 text-sm">Page transitions and visual effects</div>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Animations</div>
+              <div class="text-gray-500 text-xs">Page transitions</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="interface-animations" id="interface-animations" class="toggle-checkbox" checked />
@@ -562,10 +710,10 @@
             </div>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Reduce Motion</div>
-              <div class="text-gray-500 text-sm">Minimize animations for accessibility</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Reduce Motion</div>
+              <div class="text-gray-500 text-xs">For accessibility</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="reduce-motion" id="reduce-motion" class="toggle-checkbox" />
@@ -573,10 +721,10 @@
             </div>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Book Animations</div>
-              <div class="text-gray-500 text-sm">3D effects on books in the library</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Book Effects</div>
+              <div class="text-gray-500 text-xs">3D book covers</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="book-animations" id="book-animations" class="toggle-checkbox" checked />
@@ -588,21 +736,21 @@
     </div>
 
     <!-- Journaling Tab -->
-    <div id="journaling-tab" class="space-y-6 sm:space-y-8 hidden">
+    <div id="journaling-tab" class="space-y-4 hidden">
       <!-- Default Journal Settings -->
-      <div class="glass-effect rounded-xl p-5 sm:p-6 border border-white/20 shadow-md preferences-section">
-        <h3 class="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2 section-header">
+      <div class="glass-effect rounded-xl p-4 border border-white/20 shadow-md preferences-section">
+        <h3 class="section-header">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
-          Default Journal Settings
+          Entry Elements
         </h3>
 
-        <div class="space-y-4">
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Show Mood Selector</div>
-              <div class="text-gray-500 text-sm">Include mood tracking with each entry</div>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Mood Tracker</div>
+              <div class="text-gray-500 text-xs">Track your feelings</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="show-mood" id="show-mood" class="toggle-checkbox" checked />
@@ -610,10 +758,10 @@
             </div>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Show Weather</div>
-              <div class="text-gray-500 text-sm">Include weather information in entries</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Weather</div>
+              <div class="text-gray-500 text-xs">Include conditions</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="show-weather" id="show-weather" class="toggle-checkbox" checked />
@@ -621,10 +769,10 @@
             </div>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Show Location</div>
-              <div class="text-gray-500 text-sm">Include location with each entry</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Location</div>
+              <div class="text-gray-500 text-xs">Record your place</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="show-location" id="show-location" class="toggle-checkbox" />
@@ -632,10 +780,10 @@
             </div>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Enable Tags</div>
-              <div class="text-gray-500 text-sm">Allow adding tags to entries</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Tags</div>
+              <div class="text-gray-500 text-xs">Categorize entries</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="enable-tags" id="enable-tags" class="toggle-checkbox" checked />
@@ -646,47 +794,47 @@
       </div>
 
       <!-- Writing Experience -->
-      <div class="glass-effect rounded-xl p-5 sm:p-6 border border-white/20 shadow-md preferences-section">
-        <h3 class="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2 section-header">
+      <div class="glass-effect rounded-xl p-4 border border-white/20 shadow-md preferences-section">
+        <h3 class="section-header">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          Writing Experience
+          Writing Setup
         </h3>
 
-        <div class="space-y-5">
+        <div class="space-y-4">
           <div>
-            <label class="block font-medium text-gray-800 mb-3">Default Editor Mode</label>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <label class="custom-radio-container flex items-center">
-                <input type="radio" name="editor-mode" value="rich" class="custom-radio-input" checked>
-                <div>
-                  <div class="font-medium text-gray-800">Rich Text</div>
-                  <div class="text-gray-500 text-sm">Formatting tools</div>
-                </div>
+            <label class="block font-medium text-sm mb-2">Editor Mode</label>
+            <div class="grid grid-cols-3 gap-2">
+              <label class="flex flex-col items-center text-center p-2 bg-white/50 rounded-lg border border-gray-100 cursor-pointer">
+                <input type="radio" name="editor-mode" value="rich" class="sr-only" checked>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-1 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                <span class="text-xs font-medium">Rich Text</span>
               </label>
 
-              <label class="custom-radio-container flex items-center">
-                <input type="radio" name="editor-mode" value="markdown" class="custom-radio-input">
-                <div>
-                  <div class="font-medium text-gray-800">Markdown</div>
-                  <div class="text-gray-500 text-sm">Text with markup</div>
-                </div>
+              <label class="flex flex-col items-center text-center p-2 bg-white/50 rounded-lg border border-gray-100 cursor-pointer">
+                <input type="radio" name="editor-mode" value="markdown" class="sr-only">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-1 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                </svg>
+                <span class="text-xs font-medium">Markdown</span>
               </label>
 
-              <label class="custom-radio-container flex items-center">
-                <input type="radio" name="editor-mode" value="distraction-free" class="custom-radio-input">
-                <div>
-                  <div class="font-medium text-gray-800">Focus Mode</div>
-                  <div class="text-gray-500 text-sm">Minimal interface</div>
-                </div>
+              <label class="flex flex-col items-center text-center p-2 bg-white/50 rounded-lg border border-gray-100 cursor-pointer">
+                <input type="radio" name="editor-mode" value="distraction-free" class="sr-only">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-1 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span class="text-xs font-medium">Focus</span>
               </label>
             </div>
           </div>
 
           <div>
-            <label class="block font-medium text-gray-800 mb-2">Auto-Save Frequency</label>
-            <select class="w-full p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-secondary-400 bg-white/70">
+            <label class="block font-medium text-sm mb-2">Auto-Save</label>
+            <select class="w-full p-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-secondary-400 bg-white/70 text-sm">
               <option value="30">Every 30 seconds</option>
               <option value="60" selected>Every minute</option>
               <option value="300">Every 5 minutes</option>
@@ -694,10 +842,10 @@
             </select>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Writing Suggestions</div>
-              <div class="text-gray-500 text-sm">Show writing prompts and suggestions</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Suggestions</div>
+              <div class="text-gray-500 text-xs">Writing prompts</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="writing-suggestions" id="writing-suggestions" class="toggle-checkbox" checked />
@@ -705,10 +853,10 @@
             </div>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Spell Check</div>
-              <div class="text-gray-500 text-sm">Enable spell checking while writing</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Spell Check</div>
+              <div class="text-gray-500 text-xs">Fix as you type</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="spell-check" id="spell-check" class="toggle-checkbox" checked />
@@ -719,56 +867,56 @@
       </div>
 
       <!-- Statistics and Insights -->
-      <div class="glass-effect rounded-xl p-5 sm:p-6 border border-white/20 shadow-md preferences-section">
-        <h3 class="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2 section-header">
+      <div class="glass-effect rounded-xl p-4 border border-white/20 shadow-md preferences-section">
+        <h3 class="section-header">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
-          Statistics and Insights
+          Insights
         </h3>
 
-        <div class="space-y-4">
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Word Count Tracking</div>
-              <div class="text-gray-500 text-sm">Track your writing progress over time</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" name="word-count" id="word-count" class="toggle-checkbox" checked />
-              <label for="word-count" class="toggle-label"></label>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Mood Analysis</div>
-              <div class="text-gray-500 text-sm">Generate insights based on your moods</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" name="mood-analysis" id="mood-analysis" class="toggle-checkbox" checked />
-              <label for="mood-analysis" class="toggle-label"></label>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col justify-between bg-white/50 p-3 rounded-lg">
+            <div class="font-medium text-sm mb-1">Word Count</div>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-gray-500">Track progress</span>
+              <div class="toggle-container">
+                <input type="checkbox" name="word-count" id="word-count" class="toggle-checkbox" checked />
+                <label for="word-count" class="toggle-label"></label>
+              </div>
             </div>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Writing Streaks</div>
-              <div class="text-gray-500 text-sm">Track consecutive days of writing</div>
-            </div>
-            <div class="toggle-container">
-              <input type="checkbox" name="writing-streaks" id="writing-streaks" class="toggle-checkbox" checked />
-              <label for="writing-streaks" class="toggle-label"></label>
+          <div class="flex flex-col justify-between bg-white/50 p-3 rounded-lg">
+            <div class="font-medium text-sm mb-1">Mood Analysis</div>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-gray-500">Mood insights</span>
+              <div class="toggle-container">
+                <input type="checkbox" name="mood-analysis" id="mood-analysis" class="toggle-checkbox" checked />
+                <label for="mood-analysis" class="toggle-label"></label>
+              </div>
             </div>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Topic Insights</div>
-              <div class="text-gray-500 text-sm">Identify common themes in your writing</div>
+          <div class="flex flex-col justify-between bg-white/50 p-3 rounded-lg">
+            <div class="font-medium text-sm mb-1">Streaks</div>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-gray-500">Writing days</span>
+              <div class="toggle-container">
+                <input type="checkbox" name="writing-streaks" id="writing-streaks" class="toggle-checkbox" checked />
+                <label for="writing-streaks" class="toggle-label"></label>
+              </div>
             </div>
-            <div class="toggle-container">
-              <input type="checkbox" name="topic-insights" id="topic-insights" class="toggle-checkbox" checked />
-              <label for="topic-insights" class="toggle-label"></label>
+          </div>
+
+          <div class="flex flex-col justify-between bg-white/50 p-3 rounded-lg">
+            <div class="font-medium text-sm mb-1">Topic Insights</div>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-gray-500">Common themes</span>
+              <div class="toggle-container">
+                <input type="checkbox" name="topic-insights" id="topic-insights" class="toggle-checkbox" checked />
+                <label for="topic-insights" class="toggle-label"></label>
+              </div>
             </div>
           </div>
         </div>
@@ -776,21 +924,21 @@
     </div>
 
     <!-- Notifications Tab -->
-    <div id="notifications-tab" class="space-y-6 sm:space-y-8 hidden">
+    <div id="notifications-tab" class="space-y-4 hidden">
       <!-- Reminders -->
-      <div class="glass-effect rounded-xl p-5 sm:p-6 border border-white/20 shadow-md preferences-section">
-        <h3 class="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2 section-header">
+      <div class="glass-effect rounded-xl p-4 border border-white/20 shadow-md preferences-section">
+        <h3 class="section-header">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           Writing Reminders
         </h3>
 
-        <div class="space-y-5">
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Daily Journal Reminders</div>
-              <div class="text-gray-500 text-sm">Receive reminders to write in your journal</div>
+        <div class="space-y-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Daily Reminders</div>
+              <div class="text-gray-500 text-xs">Remind me to write</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="daily-reminders" id="daily-reminders" class="toggle-checkbox" checked />
@@ -799,61 +947,60 @@
           </div>
 
           <div>
-            <label for="reminder-time" class="block font-medium text-gray-800 mb-2">Reminder Time</label>
-            <input type="time" id="reminder-time" class="w-full sm:w-auto p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-secondary-400 bg-white/70" value="20:00">
-            <p class="text-sm text-gray-500 mt-2">Set the time when you prefer to receive your daily reminder.</p>
+            <label for="reminder-time" class="block font-medium text-sm mb-2">Reminder Time</label>
+            <input type="time" id="reminder-time" class="w-full p-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-secondary-400 bg-white/70" value="20:00">
           </div>
 
           <div>
-            <label class="block font-medium text-gray-800 mb-2">Reminder Days</label>
-            <div class="flex flex-wrap gap-2">
-              <label class="inline-flex items-center p-2 bg-white/50 rounded-lg border border-gray-100 hover:bg-white/80 transition cursor-pointer">
-                <input type="checkbox" class="form-checkbox text-secondary-600 rounded mr-2" checked>
-                <span>Mon</span>
-              </label>
-              <label class="inline-flex items-center p-2 bg-white/50 rounded-lg border border-gray-100 hover:bg-white/80 transition cursor-pointer">
-                <input type="checkbox" class="form-checkbox text-secondary-600 rounded mr-2" checked>
-                <span>Tue</span>
-              </label>
-              <label class="inline-flex items-center p-2 bg-white/50 rounded-lg border border-gray-100 hover:bg-white/80 transition cursor-pointer">
-                <input type="checkbox" class="form-checkbox text-secondary-600 rounded mr-2" checked>
-                <span>Wed</span>
-              </label>
-              <label class="inline-flex items-center p-2 bg-white/50 rounded-lg border border-gray-100 hover:bg-white/80 transition cursor-pointer">
-                <input type="checkbox" class="form-checkbox text-secondary-600 rounded mr-2" checked>
-                <span>Thu</span>
-              </label>
-              <label class="inline-flex items-center p-2 bg-white/50 rounded-lg border border-gray-100 hover:bg-white/80 transition cursor-pointer">
-                <input type="checkbox" class="form-checkbox text-secondary-600 rounded mr-2" checked>
-                <span>Fri</span>
-              </label>
-              <label class="inline-flex items-center p-2 bg-white/50 rounded-lg border border-gray-100 hover:bg-white/80 transition cursor-pointer">
-                <input type="checkbox" class="form-checkbox text-secondary-600 rounded mr-2" checked>
-                <span>Sat</span>
-              </label>
-              <label class="inline-flex items-center p-2 bg-white/50 rounded-lg border border-gray-100 hover:bg-white/80 transition cursor-pointer">
-                <input type="checkbox" class="form-checkbox text-secondary-600 rounded mr-2" checked>
-                <span>Sun</span>
-              </label>
+            <label class="block font-medium text-sm mb-2">Reminder Days</label>
+            <div class="day-picker">
+              <div class="day-item">
+                <input type="checkbox" class="day-checkbox" id="day-mon" checked>
+                <span>M</span>
+              </div>
+              <div class="day-item">
+                <input type="checkbox" class="day-checkbox" id="day-tue" checked>
+                <span>T</span>
+              </div>
+              <div class="day-item">
+                <input type="checkbox" class="day-checkbox" id="day-wed" checked>
+                <span>W</span>
+              </div>
+              <div class="day-item">
+                <input type="checkbox" class="day-checkbox" id="day-thu" checked>
+                <span>T</span>
+              </div>
+              <div class="day-item">
+                <input type="checkbox" class="day-checkbox" id="day-fri" checked>
+                <span>F</span>
+              </div>
+              <div class="day-item">
+                <input type="checkbox" class="day-checkbox" id="day-sat" checked>
+                <span>S</span>
+              </div>
+              <div class="day-item">
+                <input type="checkbox" class="day-checkbox" id="day-sun" checked>
+                <span>S</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Notifications Settings -->
-      <div class="glass-effect rounded-xl p-5 sm:p-6 border border-white/20 shadow-md preferences-section">
-        <h3 class="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2 section-header">
+      <div class="glass-effect rounded-xl p-4 border border-white/20 shadow-md preferences-section">
+        <h3 class="section-header">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
-          Notification Settings
+          Alert Preferences
         </h3>
 
-        <div class="space-y-4">
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Push Notifications</div>
-              <div class="text-gray-500 text-sm">Receive notifications in your browser</div>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Push Notifications</div>
+              <div class="text-gray-500 text-xs">Browser alerts</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="push-notifications" id="push-notifications" class="toggle-checkbox" checked />
@@ -861,10 +1008,10 @@
             </div>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Email Notifications</div>
-              <div class="text-gray-500 text-sm">Receive reminders via email</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Email Reminders</div>
+              <div class="text-gray-500 text-xs">Email alerts</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="email-notifications" id="email-notifications" class="toggle-checkbox" />
@@ -872,10 +1019,10 @@
             </div>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Writing Streak Alerts</div>
-              <div class="text-gray-500 text-sm">Get notified about your writing streaks</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Streak Alerts</div>
+              <div class="text-gray-500 text-xs">Writing consistency</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="streak-alerts" id="streak-alerts" class="toggle-checkbox" checked />
@@ -883,10 +1030,10 @@
             </div>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">System Notifications</div>
-              <div class="text-gray-500 text-sm">Updates, new features, and announcements</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">App Updates</div>
+              <div class="text-gray-500 text-xs">New features</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="system-notifications" id="system-notifications" class="toggle-checkbox" checked />
@@ -898,21 +1045,21 @@
     </div>
 
     <!-- Privacy Tab -->
-    <div id="privacy-tab" class="space-y-6 sm:space-y-8 hidden">
+    <div id="privacy-tab" class="space-y-4 hidden">
       <!-- Security Settings -->
-      <div class="glass-effect rounded-xl p-5 sm:p-6 border border-white/20 shadow-md preferences-section">
-        <h3 class="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2 section-header">
+      <div class="glass-effect rounded-xl p-4 border border-white/20 shadow-md preferences-section">
+        <h3 class="section-header">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
-          Security Settings
+          Security
         </h3>
 
-        <div class="space-y-4">
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Journal Lock</div>
-              <div class="text-gray-500 text-sm">Require password to view your journal</div>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Journal Lock</div>
+              <div class="text-gray-500 text-xs">Require password</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="journal-lock" id="journal-lock" class="toggle-checkbox" />
@@ -920,10 +1067,10 @@
             </div>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Biometric Authentication</div>
-              <div class="text-gray-500 text-sm">Use fingerprint or face ID to unlock</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Biometric Unlock</div>
+              <div class="text-gray-500 text-xs">Fingerprint/Face ID</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="biometric-auth" id="biometric-auth" class="toggle-checkbox" />
@@ -931,39 +1078,40 @@
             </div>
           </div>
 
-          <div>
-            <button class="bg-white/70 hover:bg-white text-secondary-600 font-medium py-2.5 px-4 rounded-lg shadow-sm transition focus:ring-2 focus:ring-secondary-400 focus:outline-none">
-              Change Password
-            </button>
-          </div>
-
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Auto Logout</div>
-              <div class="text-gray-500 text-sm">Automatically log out after inactivity</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Auto Logout</div>
+              <div class="text-gray-500 text-xs">After inactivity</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="auto-logout" id="auto-logout" class="toggle-checkbox" />
               <label for="auto-logout" class="toggle-label"></label>
             </div>
           </div>
+
+          <button class="w-full bg-white/70 hover:bg-white text-primary-600 font-medium py-2 px-3 rounded-lg shadow-sm text-sm transition flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Change Password
+          </button>
         </div>
       </div>
 
       <!-- Privacy Controls -->
-      <div class="glass-effect rounded-xl p-5 sm:p-6 border border-white/20 shadow-md preferences-section">
-        <h3 class="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2 section-header">
+      <div class="glass-effect rounded-xl p-4 border border-white/20 shadow-md preferences-section">
+        <h3 class="section-header">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
-          Privacy Controls
+          Data Privacy
         </h3>
 
-        <div class="space-y-4">
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Analytics Collection</div>
-              <div class="text-gray-500 text-sm">Allow collection of anonymous usage data</div>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Analytics</div>
+              <div class="text-gray-500 text-xs">Anonymous usage</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="analytics" id="analytics" class="toggle-checkbox" checked />
@@ -971,10 +1119,10 @@
             </div>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">End-to-End Encryption</div>
-              <div class="text-gray-500 text-sm">Enable encryption for your journal entries</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Encryption</div>
+              <div class="text-gray-500 text-xs">End-to-end</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="encryption" id="encryption" class="toggle-checkbox" checked />
@@ -982,10 +1130,10 @@
             </div>
           </div>
 
-          <div class="flex flex-wrap justify-between items-center py-2">
-            <div class="mr-4 mb-2 sm:mb-0">
-              <div class="font-medium text-gray-800">Cloud Backup</div>
-              <div class="text-gray-500 text-sm">Store encrypted backups of your journal</div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-medium text-sm">Cloud Backup</div>
+              <div class="text-gray-500 text-xs">Encrypted backup</div>
             </div>
             <div class="toggle-container">
               <input type="checkbox" name="backup" id="backup" class="toggle-checkbox" checked />
@@ -994,62 +1142,57 @@
           </div>
         </div>
 
-        <div class="mt-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
-          <div class="flex items-start gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+          <div class="flex items-start gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <p class="text-sm text-amber-800">Your privacy is important to us. Your journal entries are encrypted and only accessible to you.</p>
-              <a href="#" class="text-xs text-amber-800 underline mt-2 inline-block">Read our Privacy Policy</a>
+              <p class="text-xs text-amber-800">Your entries are encrypted and only accessible to you.</p>
+              <a href="#" class="text-xs text-amber-800 underline mt-1 inline-block">Privacy Policy</a>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Data Management -->
-      <div class="glass-effect rounded-xl p-5 sm:p-6 border border-white/20 shadow-md preferences-section">
-        <h3 class="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2 section-header">
+      <div class="glass-effect rounded-xl p-4 border border-white/20 shadow-md preferences-section">
+        <h3 class="section-header">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
           </svg>
-          Data Management
+          Your Data
         </h3>
-        <div class="space-y-4">
-          <div>
-            <button class="bg-white/70 hover:bg-white text-secondary-600 font-medium py-2.5 px-4 rounded-lg shadow-sm transition focus:ring-2 focus:ring-secondary-400 focus:outline-none flex items-center gap-2 w-full sm:w-auto mb-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+        <div class="space-y-3">
+          <div class="grid grid-cols-2 gap-2">
+            <button class="bg-white/70 hover:bg-white text-primary-600 font-medium py-2.5 px-3 rounded-lg shadow-sm transition text-sm flex items-center justify-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
-              Export All Journal Data
+              Export Data
             </button>
-            <p class="text-xs text-gray-500 mt-1 ml-1">Download all your journal entries as a backup</p>
-          </div>
 
-          <div>
-            <button class="bg-white/70 hover:bg-white text-secondary-600 font-medium py-2.5 px-4 rounded-lg shadow-sm transition focus:ring-2 focus:ring-secondary-400 focus:outline-none flex items-center gap-2 w-full sm:w-auto mb-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button class="bg-white/70 hover:bg-white text-primary-600 font-medium py-2.5 px-3 rounded-lg shadow-sm transition text-sm flex items-center justify-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
-              Import Journal Data
+              Import Data
             </button>
-            <p class="text-xs text-gray-500 mt-1 ml-1">Restore from a previous backup</p>
           </div>
 
-          <div class="p-4 bg-red-50 rounded-lg border border-red-200 mt-4">
-            <div class="flex flex-wrap items-start gap-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="p-3 bg-red-50 rounded-lg border border-red-200 mt-3">
+            <div class="flex items-start gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <div>
-                <p class="text-sm font-medium text-red-800">Danger Zone</p>
-                <p class="text-xs text-red-700 mt-1">These actions are permanent and cannot be undone.</p>
-
-                <div class="mt-3 flex flex-wrap gap-2">
-                  <button class="bg-white hover:bg-red-50 text-red-600 text-sm py-2 px-4 rounded border border-red-200 transition focus:ring-2 focus:ring-red-400 focus:outline-none">
+                <p class="text-xs font-medium text-red-800">Danger Zone</p>
+                <div class="mt-2 flex flex-col gap-2">
+                  <button class="bg-white hover:bg-red-50 text-red-600 text-xs py-2 px-3 rounded border border-red-200 transition flex items-center justify-center">
                     Delete All Journal Entries
                   </button>
-                  <button class="bg-white hover:bg-red-50 text-red-600 text-sm py-2 px-4 rounded border border-red-200 transition focus:ring-2 focus:ring-red-400 focus:outline-none">
+                  <button class="bg-white hover:bg-red-50 text-red-600 text-xs py-2 px-3 rounded border border-red-200 transition flex items-center justify-center">
                     Delete Account
                   </button>
                 </div>
@@ -1059,13 +1202,16 @@
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Save Settings Button -->
-    <div class="flex justify-end my-8">
-      <button class="btn-gradient text-white px-6 py-3 rounded-lg shadow-md text-base font-medium">
-        Save Preferences
-      </button>
-    </div>
+  <!-- Sticky Save Button for Mobile -->
+  <div class="save-bar show">
+    <button class="btn-gradient text-white py-3 rounded-lg shadow-md text-base font-medium flex items-center justify-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      Save Preferences
+    </button>
   </div>
 </div>
 {% endblock %}
@@ -1090,14 +1236,21 @@
 
     // Animate the sections of the newly visible tab
     animateSections(tabName + '-tab');
+
+    // Show the save bar when tab is switched
+    document.querySelector('.save-bar').classList.add('show');
   }
 
   // Animate sections with staggered delay
   function animateSections(containerId) {
     const sections = document.querySelectorAll('#' + containerId + ' .preferences-section');
     sections.forEach((section, index) => {
-      section.style.animationDelay = (index * 100) + 'ms';
-      section.classList.add('animate');
+      // Reset animation by removing and re-adding class
+      section.classList.remove('animate');
+      setTimeout(() => {
+        section.classList.add('animate');
+      }, 10);
+      section.style.animationDelay = (index * 50) + 'ms';
     });
   }
 
@@ -1125,6 +1278,30 @@
       });
     });
 
+    // Setup font preview tabs
+    const textFontTab = document.getElementById('text-font-tab');
+    const handwritingTab = document.getElementById('handwriting-tab');
+    const textFontOptions = document.getElementById('text-font-options');
+    const handwritingFontOptions = document.getElementById('handwriting-font-options');
+
+    textFontTab.addEventListener('click', function() {
+      textFontOptions.classList.remove('hidden');
+      handwritingFontOptions.classList.add('hidden');
+      textFontTab.classList.add('bg-white', 'text-primary-600');
+      textFontTab.classList.remove('text-gray-600');
+      handwritingTab.classList.remove('bg-white', 'text-primary-600');
+      handwritingTab.classList.add('text-gray-600');
+    });
+
+    handwritingTab.addEventListener('click', function() {
+      textFontOptions.classList.add('hidden');
+      handwritingFontOptions.classList.remove('hidden');
+      handwritingTab.classList.add('bg-white', 'text-primary-600');
+      handwritingTab.classList.remove('text-gray-600');
+      textFontTab.classList.remove('bg-white', 'text-primary-600');
+      textFontTab.classList.add('text-gray-600');
+    });
+
     // Font preview selection for text font
     const textFontPreviews = document.querySelectorAll('input[name="text-font"] + div.font-preview');
     textFontPreviews.forEach(preview => {
@@ -1136,14 +1313,6 @@
         // Add selected class to clicked preview
         this.classList.add('selected');
       });
-
-      // Keyboard accessibility
-      preview.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          this.click();
-        }
-      });
     });
 
     // Font preview selection for handwriting font
@@ -1152,47 +1321,58 @@
       preview.addEventListener('click', function() {
         const input = this.parentElement.querySelector('input');
         input.checked = true;
-        // Remove selected class from all previews of this type
+        // Remove selected class from all previews
         handwritingFontPreviews.forEach(p => p.classList.remove('selected'));
         // Add selected class to clicked preview
         this.classList.add('selected');
       });
-
-      // Keyboard accessibility
-      preview.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          this.click();
-        }
-      });
     });
-
-    // Smooth scrolling for tab navigation
-    const tabButtons = document.querySelectorAll('.pref-tab');
-    tabButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        // Smooth scroll to top of tab content for better mobile UX
-        const tabContent = document.getElementById('prefsTabContents');
-        if (window.innerWidth < 768) {
-          tabContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
-    });
-
-    // Media query for reducing animations on smaller screens
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (mediaQuery.matches) {
-      document.getElementById('reduce-motion').checked = true;
-      document.documentElement.classList.add('reduce-motion');
-    }
 
     // Setup reduce motion toggle
     document.getElementById('reduce-motion').addEventListener('change', function() {
       if (this.checked) {
-        document.documentElement.classList.add('reduce-motion');
+        document.body.classList.add('reduce-motion');
       } else {
-        document.documentElement.classList.remove('reduce-motion');
+        document.body.classList.remove('reduce-motion');
       }
+    });
+
+    // Handle scroll for sticky save button
+    let lastScrollTop = 0;
+    const saveBar = document.querySelector('.save-bar');
+
+    window.addEventListener('scroll', function() {
+      let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+      if (scrollTop > lastScrollTop && scrollTop > 300) {
+        // Scrolling down & not at top
+        saveBar.classList.remove('show');
+      } else {
+        // Scrolling up or at top
+        saveBar.classList.add('show');
+      }
+
+      lastScrollTop = scrollTop;
+    });
+
+    // Hide save bar when user reaches bottom of content
+    const checkIfBottom = () => {
+      const scrollHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const clientHeight = document.documentElement.clientHeight;
+
+      if(scrollTop + clientHeight >= scrollHeight - 100) {
+        saveBar.classList.add('show'); // Show at bottom of page
+      }
+    };
+
+    window.addEventListener('scroll', checkIfBottom);
+
+    // Back button functionality
+    document.querySelector('.back-button').addEventListener('click', function(e) {
+      e.preventDefault();
+      // Would navigate back in a real app
+      alert('This would navigate back to the previous page');
     });
   });
 </script>
