@@ -131,6 +131,14 @@
     transform: translateY(0);
   }
 
+  /* Add touch support for journal previews on mobile */
+  @media (max-width: 768px) {
+    .journal-card.touch-active .journal-preview {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   .preview-content {
     font-family: 'Satisfy', cursive;
     font-size: 0.95rem;
@@ -227,16 +235,6 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-  }
-
-  .modern-tab.active {
-    color: #4f46e5;
-    font-weight: 600;
-  }
-
-  .modern-tab:not(.active):hover {
-    color: #4b5563;
-    background: rgba(255, 255, 255, 0.5);
   }
 
   /* Memory collection */
@@ -430,6 +428,7 @@
     backdrop-filter: blur(8px);
     border-radius: 0.75rem;
     border: 1px solid rgba(255, 255, 255, 0.8);
+    overflow-x: auto; /* Allow horizontal scrolling on small screens */
   }
 
   .filter-chip {
@@ -446,6 +445,7 @@
     color: #4b5563;
     transition: all 0.2s ease;
     cursor: pointer;
+    white-space: nowrap; /* Prevent text wrapping in filters */
   }
 
   .filter-chip:hover {
@@ -489,30 +489,6 @@
   .journal-color-red { background-color: #ef4444; }
   .journal-color-gray { background-color: #6b7280; }
 
-  /* Responsive fixes */
-  @media (max-width: 768px) {
-    .memory-grid {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .memory-card {
-      min-height: 200px;
-    }
-
-    .journal-collection {
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    }
-
-    .calendar-view {
-      gap: 0.25rem;
-    }
-
-    .calendar-day {
-      padding: 0.25rem;
-    }
-  }
-
   /* Preloading animation */
   @keyframes shimmer {
     0% { background-position: -1000px 0; }
@@ -524,19 +500,249 @@
     background-size: 1000px 100%;
     animation: shimmer 2s infinite linear;
   }
+
+  /* ENHANCED MOBILE OPTIMIZATIONS */
+
+  /* Improved tab display for mobile */
+  @media (max-width: 640px) {
+    .modern-tab {
+      padding: 0.5rem 0.5rem;
+      font-size: 0.75rem;
+      gap: 0.25rem;
+    }
+
+    .modern-tab svg {
+      height: 1rem;
+      width: 1rem;
+    }
+  }
+
+  /* Better touch targets for mobile */
+  @media (max-width: 768px) {
+    /* Touch-friendly buttons with larger hit areas */
+    .filter-chip,
+    .mood-pill,
+    .calendar-day,
+    .modern-tab {
+      min-height: 2.5rem;
+    }
+
+    /* Journal card optimizations */
+    .journal-card {
+      touch-action: manipulation;
+    }
+
+    /* Add tap-to-preview functionality for mobile */
+    .journal-card {
+      cursor: pointer;
+    }
+
+    /* Improved header layout */
+    .header-container {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    /* Make search input larger for touch */
+    .search-input {
+      height: 3rem;
+      font-size: 1rem;
+    }
+
+    /* Ensure filters are scrollable horizontally */
+    .filters-container {
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+      padding-bottom: 0.5rem;
+    }
+
+    .filters-container::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+
+    /* Memory grid becomes a column for better mobile experience */
+    .memory-grid {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .memory-card {
+      min-height: 200px;
+      margin-bottom: 1rem;
+    }
+
+    .memory-card.featured,
+    .memory-card.normal,
+    .memory-card.tall,
+    .memory-card.wide {
+      /* Reset all grid spans for mobile */
+      grid-column: 1 / -1;
+      grid-row: auto;
+    }
+
+    /* Timeline optimizations */
+    .timeline-container {
+      padding-left: 1.5rem;
+    }
+
+    .timeline-entry::before {
+      left: -1.5rem;
+      width: 10px;
+      height: 10px;
+    }
+
+    /* Make journal collection layout more mobile-friendly */
+    .journal-collection {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    .journal-cover {
+      height: 220px;
+    }
+
+    /* Simplify calendar view on mobile */
+    .calendar-view {
+      gap: 0.25rem;
+    }
+
+    .calendar-day {
+      padding: 0.25rem;
+    }
+
+    .calendar-day-number {
+      font-size: 0.75rem;
+    }
+  }
+
+  /* Further optimizations for very small devices */
+  @media (max-width: 480px) {
+    .modern-tab {
+      padding: 0.375rem;
+      font-size: 0.675rem;
+    }
+
+    /* Make the tab icons smaller on mobile */
+    .modern-tab svg {
+      height: 0.875rem;
+      width: 0.875rem;
+    }
+
+    /* Optimize statistics cards for very small screens */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+    }
+
+    .stats-card {
+      padding: 0.75rem;
+    }
+
+    .stats-card-value {
+      font-size: 1.25rem;
+    }
+
+    .stats-card-label {
+      font-size: 0.625rem;
+    }
+
+    /* Optimize journal cards for very small screens */
+    .journal-cover {
+      height: 180px;
+    }
+
+    /* Smaller New Entry button */
+    .floating-action-button {
+      bottom: 1rem;
+      right: 1rem;
+      height: 3rem;
+      width: 3rem;
+    }
+
+    /* Calendar optimizations for tiny screens */
+    .calendar-day {
+      padding: 0.125rem;
+    }
+
+    .calendar-day-number {
+      font-size: 0.675rem;
+    }
+
+    /* Better spacing in the timeline view */
+    .timeline-entry {
+      margin-bottom: 1.25rem;
+    }
+
+    /* Make mood pills more compact */
+    .mood-pill {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.625rem;
+    }
+  }
+
+  /* Bottom navigation bar for mobile */
+  @media (max-width: 768px) {
+    .mobile-bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(229, 231, 235, 0.8);
+      z-index: 50;
+      padding: 0.5rem 0.25rem;
+      justify-content: space-around;
+    }
+
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      min-width: 4rem;
+    }
+
+    .mobile-nav-item.active {
+      background-color: rgba(99, 102, 241, 0.1);
+      color: #4f46e5;
+    }
+
+    .mobile-nav-icon {
+      margin-bottom: 0.25rem;
+    }
+
+    .mobile-nav-label {
+      font-size: 0.625rem;
+      font-weight: 500;
+    }
+
+    /* Add padding to the bottom of the content to account for the nav bar */
+    .page-content {
+      padding-bottom: 4.5rem;
+    }
+
+    /* Reposition the floating action button above the nav bar */
+    .floating-action-button {
+      bottom: 4.5rem;
+    }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
-  <!-- Page Header with Enhanced Search -->
-  <div class="bg-white/70 backdrop-blur-md rounded-2xl p-6 mb-8 shadow-lg border border-white/30 animate-fade-in">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 page-content">
+  <!-- Page Header with Enhanced Search - Mobile Optimized -->
+  <div class="bg-white/70 backdrop-blur-md rounded-2xl p-3 sm:p-6 mb-4 sm:mb-8 shadow-lg border border-white/30 animate-fade-in">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-5 header-container">
       <div>
-        <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 mb-2 diary-font">
+        <h1 class="text-xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 mb-2 diary-font">
           Your Memory Collection
         </h1>
-        <p class="text-gray-600 max-w-2xl">
+        <p class="text-sm text-gray-600 max-w-2xl">
           Explore your personal collection of thoughts, memories, and reflections.
           {% if entries|length > 0 %}You have <span class="font-medium text-indigo-600">{{ entries|length }}</span> entries so far.{% endif %}
         </p>
@@ -557,15 +763,16 @@
         {% endif %}
       </div>
 
-      <div class="flex items-center gap-3 w-full md:w-auto">
-        <div class="search-container flex-grow md:w-72">
-          <input type="text" placeholder="Search your memories..." class="search-input pl-10 pr-4 py-2.5 rounded-xl bg-white/80 backdrop-blur-sm border border-white/50 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 w-full text-gray-700" />
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <!-- Improved mobile layout for search and new entry -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+        <div class="search-container flex-grow w-full md:w-72">
+          <input type="text" placeholder="Search your memories..." class="search-input pl-10 pr-4 py-2 sm:py-2.5 rounded-xl bg-white/80 backdrop-blur-sm border border-white/50 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 w-full text-gray-700" />
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
 
-        <a href="{% url 'new_entry' %}" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+        <a href="{% url 'new_entry' %}" class="inline-flex items-center px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all w-full sm:w-auto justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
@@ -575,111 +782,111 @@
     </div>
   </div>
 
-  <!-- Quick Stats Cards -->
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow border border-white/30 flex items-center animate-scale-in animation-delay-100">
-      <div class="bg-indigo-100 p-3 rounded-lg mr-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <!-- Quick Stats Cards - Mobile Optimized -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-8 stats-grid">
+    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-3 shadow border border-white/30 flex items-center animate-scale-in animation-delay-100 stats-card">
+      <div class="bg-indigo-100 p-2 sm:p-3 rounded-lg mr-2 sm:mr-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14-10v2m-14 4h14m-14 4h14m-14 4h14" />
         </svg>
       </div>
       <div>
-        <div class="text-2xl font-bold text-gray-800">{{ entries|length }}</div>
-        <div class="text-xs text-gray-500">Total Entries</div>
+        <div class="text-lg sm:text-xl font-bold text-gray-800 stats-card-value">{{ entries|length }}</div>
+        <div class="text-xs text-gray-500 stats-card-label">Total Entries</div>
       </div>
     </div>
 
-    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow border border-white/30 flex items-center animate-scale-in animation-delay-200">
-      <div class="bg-purple-100 p-3 rounded-lg mr-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-3 shadow border border-white/30 flex items-center animate-scale-in animation-delay-200 stats-card">
+      <div class="bg-purple-100 p-2 sm:p-3 rounded-lg mr-2 sm:mr-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       </div>
       <div>
-        <div class="text-2xl font-bold text-gray-800">{{ time_periods|length }}</div>
-        <div class="text-xs text-gray-500">Time Periods</div>
+        <div class="text-lg sm:text-xl font-bold text-gray-800 stats-card-value">{{ time_periods|length }}</div>
+        <div class="text-xs text-gray-500 stats-card-label">Time Periods</div>
       </div>
     </div>
 
-    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow border border-white/30 flex items-center animate-scale-in animation-delay-300">
-      <div class="bg-pink-100 p-3 rounded-lg mr-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-3 shadow border border-white/30 flex items-center animate-scale-in animation-delay-300 stats-card">
+      <div class="bg-pink-100 p-2 sm:p-3 rounded-lg mr-2 sm:mr-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
         </svg>
       </div>
       <div>
-        <div class="text-2xl font-bold text-gray-800">{{ tags|length }}</div>
-        <div class="text-xs text-gray-500">Unique Tags</div>
+        <div class="text-lg sm:text-xl font-bold text-gray-800 stats-card-value">{{ tags|length }}</div>
+        <div class="text-xs text-gray-500 stats-card-label">Unique Tags</div>
       </div>
     </div>
 
-    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow border border-white/30 flex items-center animate-scale-in animation-delay-400">
-      <div class="bg-green-100 p-3 rounded-lg mr-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-3 shadow border border-white/30 flex items-center animate-scale-in animation-delay-400 stats-card">
+      <div class="bg-green-100 p-2 sm:p-3 rounded-lg mr-2 sm:mr-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
       <div>
-        <div class="text-2xl font-bold text-gray-800">{{ moods|length }}</div>
-        <div class="text-xs text-gray-500">Mood States</div>
+        <div class="text-lg sm:text-xl font-bold text-gray-800 stats-card-value">{{ moods|length }}</div>
+        <div class="text-xs text-gray-500 stats-card-label">Mood States</div>
       </div>
     </div>
   </div>
 
-  <!-- Modern Tabs -->
-  <div class="relative mb-8 animate-fade-in animation-delay-500">
+  <!-- Improved Mobile Tabs -->
+  <div class="relative mb-5 animate-fade-in animation-delay-500">
     <div class="modern-tabs">
       <div id="tabSelector" class="tab-selector" style="width: 25%;"></div>
       <button onclick="switchTab('memories')" class="modern-tab active" data-tab-width="25%" data-tab-offset="0%">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        Memories
+        <span>Memories</span>
       </button>
       <button onclick="switchTab('journals')" class="modern-tab" data-tab-width="25%" data-tab-offset="25%">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
         </svg>
-        Journals
+        <span>Journals</span>
       </button>
       <button onclick="switchTab('timeline')" class="modern-tab" data-tab-width="25%" data-tab-offset="50%">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14-10v2m-2 4h10m-10 4h10m-10 4h10" />
         </svg>
-        Timeline
+        <span>Timeline</span>
       </button>
       <button onclick="switchTab('calendar')" class="modern-tab" data-tab-width="25%" data-tab-offset="75%">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        Calendar
+        <span>Calendar</span>
       </button>
     </div>
   </div>
 
   <!-- Tab Contents -->
   <div id="tabContents">
-    <!-- Memories Tab - Visual Grid Layout -->
+    <!-- Memories Tab - Mobile Optimized -->
     <div id="memories-tab" class="tab-content animate-fade-in">
-      <!-- Smart filters for memories -->
-      <div class="filters-container mb-6">
+      <!-- Scrollable filters for mobile -->
+      <div class="filters-container mb-4">
         <div class="filter-chip active">
           <span>All Memories</span>
         </div>
         <div class="filter-chip">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           <span>Has Photos</span>
         </div>
         <div class="filter-chip">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
           <span>With AI Insights</span>
         </div>
         <div class="filter-chip">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
           <span>Favorites</span>
@@ -690,8 +897,8 @@
       </div>
 
       {% if entries|length > 0 %}
-      <!-- Memory Collection Grid -->
-      <div class="memory-grid mb-10">
+      <!-- Memory Collection - Mobile optimized as vertical list -->
+      <div class="memory-grid mb-6 sm:mb-10">
         {% for entry in entries|slice:":10" %}
           <div class="memory-card {% cycle 'featured' 'normal' 'tall' 'wide' 'normal' 'normal' 'wide' 'normal' 'tall' 'featured' %} animate-scale-in" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
             <a href="{% url 'entry_detail' entry.id %}">
@@ -700,14 +907,14 @@
               {% elif entry.photo.url|default:'' %}
                 <img src="{{ entry.photo.url }}" alt="Entry photo" class="memory-image" />
               {% else %}
-                <div class="memory-image bg-gradient-to-br {{ forloop.counter0|divisibleby:6|yesno:'from-indigo-400 to-purple-500,from-pink-400 to-rose-500,from-cyan-400 to-blue-500,from-green-400 to-emerald-500,from-amber-400 to-orange-500,from-red-400 to-rose-500' }} p-6 flex items-center justify-center">
-                  <div class="handwritten text-white text-center opacity-80 font-medium">
+                <div class="memory-image bg-gradient-to-br {{ forloop.counter0|divisibleby:6|yesno:'from-indigo-400 to-purple-500,from-pink-400 to-rose-500,from-cyan-400 to-blue-500,from-green-400 to-emerald-500,from-amber-400 to-orange-500,from-red-400 to-rose-500' }} p-4 flex items-center justify-center">
+                  <div class="handwritten text-white text-center opacity-80 font-medium text-sm">
                     {{ entry.content|truncatechars:150 }}
                   </div>
                 </div>
               {% endif %}
               <div class="memory-content">
-                <h3 class="font-bold text-lg text-white mb-1">{{ entry.title|default:"Untitled Memory" }}</h3>
+                <h3 class="font-bold text-base sm:text-lg text-white mb-1">{{ entry.title|default:"Untitled Memory" }}</h3>
                 <div class="flex justify-between items-center">
                   <div class="text-xs text-white/80">{{ entry.created_at|date:"F j, Y" }}</div>
                   {% if entry.mood %}
@@ -730,27 +937,27 @@
         {% endfor %}
       </div>
       {% else %}
-      <!-- Empty state -->
-      <div class="bg-white/70 backdrop-blur-md rounded-2xl p-8 text-center border border-white/30 shadow-md">
-        <div class="bg-indigo-50 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <!-- Empty state - Mobile optimized -->
+      <div class="bg-white/70 backdrop-blur-md rounded-2xl p-4 sm:p-8 text-center border border-white/30 shadow-md">
+        <div class="bg-indigo-50 rounded-full h-14 w-14 sm:h-20 sm:w-20 flex items-center justify-center mx-auto mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-10 sm:w-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
         </div>
-        <h3 class="text-xl font-bold text-gray-800 mb-2">Start Your Memory Collection</h3>
-        <p class="text-gray-600 mb-6 max-w-md mx-auto">Begin capturing your thoughts, experiences, and reflections with your first journal entry.</p>
-        <a href="{% url 'new_entry' %}" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+        <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">Start Your Memory Collection</h3>
+        <p class="text-sm text-gray-600 mb-4 sm:mb-6 max-w-md mx-auto">Begin capturing your thoughts, experiences, and reflections with your first journal entry.</p>
+        <a href="{% url 'new_entry' %}" class="inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
           Create Your First Memory
         </a>
       </div>
       {% endif %}
 
       {% if entries|length > 10 %}
-      <!-- Load More Button -->
-      <div class="text-center">
-        <button id="loadMoreMemories" class="px-5 py-2.5 bg-white rounded-xl shadow border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors flex items-center mx-auto">
+      <!-- Load More Button - Mobile optimized -->
+      <div class="text-center mb-6">
+        <button id="loadMoreMemories" class="px-4 py-2 sm:py-2.5 bg-white rounded-xl shadow border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors flex items-center mx-auto">
           <span>Load More Memories</span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
@@ -758,9 +965,9 @@
       {% endif %}
     </div>
 
-    <!-- Journals Tab - Redesigned Collection -->
+    <!-- Journals Tab - Mobile optimized -->
     <div id="journals-tab" class="tab-content hidden animate-fade-in">
-      <!-- Journal collection -->
+      <!-- Journal collection - Responsive grid -->
       <div class="journal-collection">
         {% for period in time_periods %}
           <div class="journal-card animate-scale-in" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
@@ -769,7 +976,7 @@
                 <h3 class="journal-title">{{ period.period }}</h3>
                 <div class="journal-meta">
                   <div class="journal-meta-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <span>
@@ -780,7 +987,7 @@
                     </span>
                   </div>
                   <div class="journal-meta-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14-10v2m-2 4h10m-10 4h10m-10 4h10" />
                     </svg>
                     <span>{{ period.count }} entries</span>
@@ -788,7 +995,7 @@
                 </div>
               </div>
               <div class="journal-preview">
-                <h4 class="text-lg font-bold text-gray-800 mb-3 dairy-font border-b border-gray-200 pb-2">{{ period.period }}</h4>
+                <h4 class="text-base sm:text-lg font-bold text-gray-800 mb-3 dairy-font border-b border-gray-200 pb-2">{{ period.period }}</h4>
                 <div class="preview-content">
                   {% if period.first_entry %}
                     {{ period.first_entry.content|truncatechars:300 }}
@@ -796,7 +1003,7 @@
                     This journal is empty. Start adding entries to capture your memories from this time period.
                   {% endif %}
                 </div>
-                <div class="preview-actions mt-4 pt-3 border-t border-gray-100">
+                <div class="preview-actions mt-3 pt-2 border-t border-gray-100">
                   <span class="text-xs text-gray-500">{{ period.count }} entries total</span>
                   <a href="{% url 'time_period' period.period %}" class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-700">
                     <span>Open Journal</span>
@@ -809,31 +1016,31 @@
             </div>
           </div>
         {% empty %}
-          <div class="col-span-full bg-white/70 backdrop-blur-md rounded-2xl p-8 text-center border border-white/30 shadow-md">
-            <div class="bg-indigo-50 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="col-span-full bg-white/70 backdrop-blur-md rounded-2xl p-4 sm:p-8 text-center border border-white/30 shadow-md">
+            <div class="bg-indigo-50 rounded-full h-14 w-14 sm:h-20 sm:w-20 flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-10 sm:w-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2">Your Journal Collection Is Empty</h3>
-            <p class="text-gray-600 mb-6 max-w-md mx-auto">Start writing entries to automatically create journals organized by time periods.</p>
-            <a href="{% url 'new_entry' %}" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">Your Journal Collection Is Empty</h3>
+            <p class="text-sm text-gray-600 mb-4 sm:mb-6 max-w-md mx-auto">Start writing entries to automatically create journals organized by time periods.</p>
+            <a href="{% url 'new_entry' %}" class="inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
               Create Your First Entry
             </a>
           </div>
         {% endfor %}
       </div>
 
-      <!-- Recent Entries By Tag Section -->
-      <div class="mt-12 mb-8">
-        <h3 class="text-xl font-bold text-gray-800 mb-4 diary-font flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <!-- Recent Entries By Tag Section - Mobile scrollable -->
+      <div class="mt-6 sm:mt-10 mb-4 sm:mb-6">
+        <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-3 diary-font flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
           </svg>
           Browse by Tags
         </h3>
 
-        <div class="filters-container mb-6">
+        <div class="filters-container mb-4 sm:mb-6">
           <div class="filter-chip active">
             <span>All Tags</span>
           </div>
@@ -848,20 +1055,20 @@
         </div>
       </div>
 
-      <!-- Recent Entries By Mood Section -->
-      <div class="mt-12 mb-8">
-        <h3 class="text-xl font-bold text-gray-800 mb-4 diary-font flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <!-- Recent Entries By Mood Section - Mobile optimized grid -->
+      <div class="mt-6 sm:mt-10 mb-4 sm:mb-6">
+        <h3 class="text-base sm:text-lg font-bold text-gray-800 mb-3 diary-font flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           Browse by Moods
         </h3>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3">
           {% for mood in moods %}
-            <a href="{% url 'library' %}?mood={{ mood.name }}" class="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow-md hover:shadow-lg transition text-center group border border-white/30 {% if mood.active %}ring-2 ring-indigo-400{% endif %} animate-scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
-              <div class="text-4xl mb-2">{{ mood.emoji }}</div>
-              <div class="font-medium text-gray-800 mb-1 group-hover:text-indigo-600 capitalize">{{ mood.name }}</div>
+            <a href="{% url 'library' %}?mood={{ mood.name }}" class="bg-white/70 backdrop-blur-sm rounded-xl p-3 shadow-md hover:shadow-lg transition text-center group border border-white/30 {% if mood.active %}ring-2 ring-indigo-400{% endif %} animate-scale-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
+              <div class="text-2xl sm:text-3xl mb-1">{{ mood.emoji }}</div>
+              <div class="font-medium text-gray-800 mb-1 text-xs sm:text-sm group-hover:text-indigo-600 capitalize">{{ mood.name }}</div>
               <div class="text-xs text-gray-500">{{ mood.count }} entries</div>
             </a>
           {% empty %}
@@ -873,7 +1080,7 @@
       </div>
     </div>
 
-    <!-- Timeline Tab - Enhanced Timeline View -->
+    <!-- Timeline Tab - Mobile optimized -->
     <div id="timeline-tab" class="tab-content hidden animate-fade-in">
       <div class="timeline-container">
         <div class="timeline-line"></div>
@@ -881,30 +1088,30 @@
         {% for entry in entries %}
           <div class="timeline-entry" style="animation-delay: {{ forloop.counter0 }}00ms;">
             <div class="bg-white/70 backdrop-blur-sm rounded-xl shadow-md overflow-hidden border border-white/30 hover:shadow-lg transition {% if entry.mood %}border-l-4 border-{% if entry.mood == 'happy' %}green-400{% elif entry.mood == 'content' %}blue-400{% elif entry.mood == 'excited' %}purple-400{% elif entry.mood == 'anxious' %}amber-400{% elif entry.mood == 'sad' %}red-400{% else %}gray-400{% endif %}{% endif %}">
-              <div class="p-5">
-                <div class="flex justify-between items-start mb-3">
-                  <h3 class="font-bold dairy-font text-gray-800 text-lg">{{ entry.title|default:"Untitled Entry" }}</h3>
-                  <div class="text-sm text-gray-500 flex items-center gap-2 bg-white/50 px-3 py-1 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div class="p-3 sm:p-4">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 sm:mb-3">
+                  <h3 class="font-bold dairy-font text-gray-800 text-base mb-1 sm:mb-0">{{ entry.title|default:"Untitled Entry" }}</h3>
+                  <div class="text-xs text-gray-500 flex items-center gap-1 sm:gap-2 bg-white/50 px-2 py-1 rounded-full self-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     {{ entry.created_at|date:"F j, Y" }}
                   </div>
                 </div>
 
-                <div class="flex items-start gap-4">
+                <div class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4">
                   {% if entry.photos.first %}
-                    <div class="w-24 h-24 shrink-0 rounded-lg overflow-hidden shadow-sm">
+                    <div class="w-full sm:w-24 h-24 shrink-0 rounded-lg overflow-hidden shadow-sm">
                       <img src="{{ entry.photos.first.photo.url }}" alt="Entry photo" class="w-full h-full object-cover" />
                     </div>
                   {% elif entry.photo.url|default:'' %}
-                    <div class="w-24 h-24 shrink-0 rounded-lg overflow-hidden shadow-sm">
+                    <div class="w-full sm:w-24 h-24 shrink-0 rounded-lg overflow-hidden shadow-sm">
                       <img src="{{ entry.photo.url }}" alt="Entry photo" class="w-full h-full object-cover" />
                     </div>
                   {% endif %}
 
                   <div class="flex-grow">
-                    <p class="text-gray-700 dairy-font text-sm mb-3">{{ entry.content|truncatechars:200 }}</p>
+                    <p class="text-gray-700 dairy-font text-xs sm:text-sm mb-3">{{ entry.content|truncatechars:150 }}</p>
 
                     <div class="flex flex-wrap gap-2 items-center">
                       {% if entry.mood %}
@@ -927,462 +1134,543 @@
                         </a>
                       {% endfor %}
 
-                      <div class="ml-auto">
-                        <a href="{% url 'entry_detail' entry.id %}" class="text-indigo-600 text-sm hover:text-indigo-800 flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full shadow-sm hover:bg-white/80 transition-colors">
+                      <div class="w-full sm:w-auto sm:ml-auto mt-2 sm:mt-0">
+                        <a href="{% url 'entry_detail' entry.id %}" class="text-indigo-600 text-xs hover:text-indigo-800 flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full shadow-sm hover:bg-white/80 transition-colors w-full sm:w-auto justify-center sm:justify-start">
                           <span>Read more</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                           </svg>
                         </a>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
+                    </div>
+                    </div>
 
-              {% if entry.summary %}
-                <div class="border-t border-gray-100 bg-gradient-to-r from-indigo-50/50 to-purple-50/50 px-5 py-3">
-                  <div class="flex items-center text-sm text-indigo-700 mb-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    <span class="font-medium">AI Insight</span>
-                  </div>
-                  <p class="text-xs text-gray-600 handwritten">{{ entry.summary|truncatechars:120 }}</p>
-                </div>
-              {% endif %}
-            </div>
-          </div>
-        {% empty %}
-          <div class="bg-white/70 backdrop-blur-md rounded-2xl p-8 text-center border border-white/30 shadow-md">
-            <div class="bg-indigo-50 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14-10v2m-2 4h10m-10 4h10m-10 4h10" />
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2">Your Timeline Is Empty</h3>
-            <p class="text-gray-600 mb-6 max-w-md mx-auto">Start journaling to build your personal timeline of memories.</p>
-            <a href="{% url 'new_entry' %}" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
-              Create Your First Entry
-            </a>
-          </div>
-        {% endfor %}
+                    {% if entry.summary %}
+                    <div class="border-t border-gray-100 bg-gradient-to-r from-indigo-50/50 to-purple-50/50 px-3 sm:px-4 py-2 sm:py-3">
+                      <div class="flex items-center text-xs sm:text-sm text-indigo-700 mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <span class="font-medium">AI Insight</span>
+                      </div>
+                      <p class="text-xs text-gray-600 handwritten">{{ entry.summary|truncatechars:100 }}</p>
+                    </div>
+                    {% endif %}
+                    </div>
+                    </div>
+                    {% empty %}
+                    <div class="bg-white/70 backdrop-blur-md rounded-2xl p-4 sm:p-8 text-center border border-white/30 shadow-md">
+                      <div class="bg-indigo-50 rounded-full h-14 w-14 sm:h-20 sm:w-20 flex items-center justify-center mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-10 sm:w-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14-10v2m-2 4h10m-10 4h10m-10 4h10" />
+                        </svg>
+                      </div>
+                      <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">Your Timeline Is Empty</h3>
+                      <p class="text-sm text-gray-600 mb-4 sm:mb-6 max-w-md mx-auto">Start journaling to build your personal timeline of memories.</p>
+                      <a href="{% url 'new_entry' %}" class="inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+                        Create Your First Entry
+                      </a>
+                    </div>
+                    {% endfor %}
 
-        {% if entries|length > 10 %}
-        <!-- Load More Button -->
-        <div class="text-center mt-8">
-          <button id="loadMoreTimeline" class="px-5 py-2.5 bg-white rounded-xl shadow border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors flex items-center mx-auto">
-            <span>Load More Entries</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-        </div>
-        {% endif %}
-      </div>
-    </div>
+                    {% if entries|length > 10 %}
+                    <!-- Load More Button - Mobile optimized -->
+                    <div class="text-center mt-6 mb-4">
+                      <button id="loadMoreTimeline" class="px-4 py-2 bg-white rounded-xl shadow border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors flex items-center mx-auto">
+                        <span>Load More Entries</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                    </div>
+                    {% endif %}
+                    </div>
+                    </div>
 
-    <!-- Calendar Tab -->
-    <div id="calendar-tab" class="tab-content hidden animate-fade-in">
-      <div class="bg-white/70 backdrop-blur-sm rounded-xl p-5 shadow-md border border-white/30 mb-6">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-          <h3 class="text-xl font-bold text-gray-800 diary-font">April 2025</h3>
-          <div class="flex items-center gap-2 mt-2 sm:mt-0">
-            <button class="p-2 rounded-lg bg-white/70 hover:bg-indigo-50 transition-colors border border-gray-200 shadow-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button class="px-3 py-1.5 rounded-lg bg-white/70 hover:bg-gray-50 transition-colors border border-gray-200 shadow-sm text-sm font-medium text-gray-700">
-              Today
-            </button>
-            <button class="p-2 rounded-lg bg-white/70 hover:bg-indigo-50 transition-colors border border-gray-200 shadow-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-        </div>
+                    <!-- Calendar Tab - Mobile optimized -->
+                    <div id="calendar-tab" class="tab-content hidden animate-fade-in">
+                      <div class="bg-white/70 backdrop-blur-sm rounded-xl p-3 sm:p-5 shadow-md border border-white/30 mb-4 sm:mb-6">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 sm:mb-4">
+                          <h3 class="text-lg sm:text-xl font-bold text-gray-800 diary-font">April 2025</h3>
+                          <div class="flex items-center gap-2 mt-2 sm:mt-0">
+                            <button class="p-1.5 sm:p-2 rounded-lg bg-white/70 hover:bg-indigo-50 transition-colors border border-gray-200 shadow-sm">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                              </svg>
+                            </button>
+                            <button class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white/70 hover:bg-gray-50 transition-colors border border-gray-200 shadow-sm text-xs sm:text-sm font-medium text-gray-700">
+                              Today
+                            </button>
+                            <button class="p-1.5 sm:p-2 rounded-lg bg-white/70 hover:bg-indigo-50 transition-colors border border-gray-200 shadow-sm">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
 
-        <!-- Calendar header -->
-        <div class="grid grid-cols-7 gap-0.5 mb-2 text-center">
-          <div class="text-xs font-medium text-gray-500 py-1">Sun</div>
-          <div class="text-xs font-medium text-gray-500 py-1">Mon</div>
-          <div class="text-xs font-medium text-gray-500 py-1">Tue</div>
-          <div class="text-xs font-medium text-gray-500 py-1">Wed</div>
-          <div class="text-xs font-medium text-gray-500 py-1">Thu</div>
-          <div class="text-xs font-medium text-gray-500 py-1">Fri</div>
-          <div class="text-xs font-medium text-gray-500 py-1">Sat</div>
-        </div>
+                        <!-- Calendar header -->
+                        <div class="grid grid-cols-7 gap-0.5 mb-1 sm:mb-2 text-center">
+                          <div class="text-xs font-medium text-gray-500 py-1">S</div>
+                          <div class="text-xs font-medium text-gray-500 py-1">M</div>
+                          <div class="text-xs font-medium text-gray-500 py-1">T</div>
+                          <div class="text-xs font-medium text-gray-500 py-1">W</div>
+                          <div class="text-xs font-medium text-gray-500 py-1">T</div>
+                          <div class="text-xs font-medium text-gray-500 py-1">F</div>
+                          <div class="text-xs font-medium text-gray-500 py-1">S</div>
+                        </div>
 
-        <!-- Calendar grid -->
-        <div class="calendar-view">
-          <!-- First week (previous month) -->
-          <div class="calendar-day opacity-40">
-            <span class="calendar-day-number">5</span>
-          </div>
-          <div class="calendar-day opacity-40 weekend">
-            <span class="calendar-day-number">6</span>
-          </div>
+                        <!-- Calendar grid - Mobile optimized with smaller cells -->
+                        <div class="calendar-view">
+                          <!-- First week (previous month) -->
+                          <div class="calendar-day opacity-40">
+                            <span class="calendar-day-number">5</span>
+                          </div>
+                          <div class="calendar-day opacity-40 weekend">
+                            <span class="calendar-day-number">6</span>
+                          </div>
 
-          <!-- Second week -->
-          <div class="calendar-day weekend">
-            <span class="calendar-day-number">7</span>
-          </div>
-          <div class="calendar-day">
-            <span class="calendar-day-number">8</span>
-          </div>
-          <div class="calendar-day has-entry">
-            <span class="calendar-day-number">9</span>
-            <div class="calendar-day-indicator"></div>
-          </div>
-          <div class="calendar-day">
-            <span class="calendar-day-number">10</span>
-          </div>
-          <div class="calendar-day">
-            <span class="calendar-day-number">11</span>
-          </div>
-          <div class="calendar-day has-entry">
-            <span class="calendar-day-number">12</span>
-            <div class="calendar-day-indicator"></div>
-          </div>
-          <div class="calendar-day weekend">
-            <span class="calendar-day-number">13</span>
-          </div>
+                          <!-- Second week -->
+                          <div class="calendar-day weekend">
+                            <span class="calendar-day-number">7</span>
+                          </div>
+                          <div class="calendar-day">
+                            <span class="calendar-day-number">8</span>
+                          </div>
+                          <div class="calendar-day has-entry">
+                            <span class="calendar-day-number">9</span>
+                            <div class="calendar-day-indicator"></div>
+                          </div>
+                          <div class="calendar-day">
+                            <span class="calendar-day-number">10</span>
+                          </div>
+                          <div class="calendar-day">
+                            <span class="calendar-day-number">11</span>
+                          </div>
+                          <div class="calendar-day has-entry">
+                            <span class="calendar-day-number">12</span>
+                            <div class="calendar-day-indicator"></div>
+                          </div>
+                          <div class="calendar-day weekend">
+                            <span class="calendar-day-number">13</span>
+                          </div>
 
-          <!-- Third week -->
-          <div class="calendar-day weekend">
-            <span class="calendar-day-number">14</span>
-          </div>
-          <div class="calendar-day">
-            <span class="calendar-day-number">15</span>
-          </div>
-          <div class="calendar-day has-entry">
-            <span class="calendar-day-number">16</span>
-            <div class="calendar-day-indicator"></div>
-          </div>
-          <div class="calendar-day">
-            <span class="calendar-day-number">17</span>
-          </div>
-          <div class="calendar-day">
-            <span class="calendar-day-number">18</span>
-          </div>
-          <div class="calendar-day">
-            <span class="calendar-day-number">19</span>
-          </div>
-          <div class="calendar-day weekend">
-            <span class="calendar-day-number">20</span>
-          </div>
+                          <!-- Third week -->
+                          <div class="calendar-day weekend">
+                            <span class="calendar-day-number">14</span>
+                          </div>
+                          <div class="calendar-day">
+                            <span class="calendar-day-number">15</span>
+                          </div>
+                          <div class="calendar-day has-entry">
+                            <span class="calendar-day-number">16</span>
+                            <div class="calendar-day-indicator"></div>
+                          </div>
+                          <div class="calendar-day">
+                            <span class="calendar-day-number">17</span>
+                          </div>
+                          <div class="calendar-day">
+                            <span class="calendar-day-number">18</span>
+                          </div>
+                          <div class="calendar-day">
+                            <span class="calendar-day-number">19</span>
+                          </div>
+                          <div class="calendar-day weekend">
+                            <span class="calendar-day-number">20</span>
+                          </div>
 
-          <!-- Fourth week -->
-          <div class="calendar-day weekend">
-            <span class="calendar-day-number">21</span>
-          </div>
-          <div class="calendar-day has-entry">
-            <span class="calendar-day-number">22</span>
-            <div class="calendar-day-indicator"></div>
-          </div>
-          <div class="calendar-day">
-            <span class="calendar-day-number">23</span>
-          </div>
-          <div class="calendar-day has-entry">
-            <span class="calendar-day-number">24</span>
-            <div class="calendar-day-indicator"></div>
-          </div>
-          <div class="calendar-day" style="background-color: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3);">
-            <span class="calendar-day-number font-bold text-indigo-600">25</span>
-            <div class="calendar-day-indicator"></div>
-          </div>
-          <div class="calendar-day">
-            <span class="calendar-day-number">26</span>
-          </div>
-          <div class="calendar-day weekend">
-            <span class="calendar-day-number">27</span>
-          </div>
+                          <!-- Fourth week -->
+                          <div class="calendar-day weekend">
+                            <span class="calendar-day-number">21</span>
+                          </div>
+                          <div class="calendar-day has-entry">
+                            <span class="calendar-day-number">22</span>
+                            <div class="calendar-day-indicator"></div>
+                          </div>
+                          <div class="calendar-day">
+                            <span class="calendar-day-number">23</span>
+                          </div>
+                          <div class="calendar-day has-entry">
+                            <span class="calendar-day-number">24</span>
+                            <div class="calendar-day-indicator"></div>
+                          </div>
+                          <div class="calendar-day" style="background-color: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3);">
+                            <span class="calendar-day-number font-bold text-indigo-600">25</span>
+                            <div class="calendar-day-indicator"></div>
+                          </div>
+                          <div class="calendar-day">
+                            <span class="calendar-day-number">26</span>
+                          </div>
+                          <div class="calendar-day weekend">
+                            <span class="calendar-day-number">27</span>
+                          </div>
 
-          <!-- Fifth week -->
-          <div class="calendar-day weekend">
-            <span class="calendar-day-number">28</span>
-          </div>
-          <div class="calendar-day">
-            <span class="calendar-day-number">29</span>
-          </div>
-          <div class="calendar-day">
-            <span class="calendar-day-number">30</span>
-          </div>
-          <div class="calendar-day opacity-40">
-            <span class="calendar-day-number">1</span>
-          </div>
-          <div class="calendar-day opacity-40">
-            <span class="calendar-day-number">2</span>
-          </div>
-          <div class="calendar-day opacity-40">
-            <span class="calendar-day-number">3</span>
-          </div>
-          <div class="calendar-day opacity-40 weekend">
-            <span class="calendar-day-number">4</span>
-          </div>
-        </div>
-      </div>
+                          <!-- Fifth week -->
+                          <div class="calendar-day weekend">
+                            <span class="calendar-day-number">28</span>
+                          </div>
+                          <div class="calendar-day">
+                            <span class="calendar-day-number">29</span>
+                          </div>
+                          <div class="calendar-day">
+                            <span class="calendar-day-number">30</span>
+                          </div>
+                          <div class="calendar-day opacity-40">
+                            <span class="calendar-day-number">1</span>
+                          </div>
+                          <div class="calendar-day opacity-40">
+                            <span class="calendar-day-number">2</span>
+                          </div>
+                          <div class="calendar-day opacity-40">
+                            <span class="calendar-day-number">3</span>
+                          </div>
+                          <div class="calendar-day opacity-40 weekend">
+                            <span class="calendar-day-number">4</span>
+                          </div>
+                        </div>
+                      </div>
 
-      <!-- Entries for selected day -->
-      <h3 class="text-xl font-bold text-gray-800 diary-font mb-4 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        Entries for April 25, 2025
-      </h3>
+                      <!-- Entries for selected day - Mobile optimized -->
+                      <h3 class="text-lg font-bold text-gray-800 diary-font mb-3 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Entries for April 25, 2025
+                      </h3>
 
-      <!-- Entries for the day -->
-      <div class="space-y-4">
-        <div class="bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-5 border border-white/30 hover:shadow-lg transition animate-scale-in">
-          <div class="flex justify-between items-start mb-3">
-            <h4 class="font-bold text-gray-800 text-lg">Morning reflection</h4>
-            <div class="mood-pill happy">
-              <span>😊 Happy</span>
-            </div>
-          </div>
-          <p class="text-gray-700 dairy-font text-sm mb-3">Started the day with a wonderful sunrise view from my balcony. The way the light filtered through the clouds reminded me that every day brings new possibilities...</p>
-          <div class="flex justify-end">
-            <a href="#" class="text-indigo-600 text-sm hover:text-indigo-800 flex items-center gap-1 bg-white/50 px-3 py-1.5 rounded-full shadow-sm hover:bg-white/80 transition-colors">
-              <span>Read full entry</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </a>
-          </div>
-        </div>
+                      <!-- Entries for the day - Mobile optimized -->
+                      <div class="space-y-3 sm:space-y-4">
+                        <div class="bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-3 sm:p-4 border border-white/30 hover:shadow-lg transition animate-scale-in">
+                          <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-gray-800 text-base sm:text-lg">Morning reflection</h4>
+                            <div class="mood-pill happy">
+                              <span>😊 Happy</span>
+                            </div>
+                          </div>
+                          <p class="text-gray-700 dairy-font text-xs sm:text-sm mb-2">Started the day with a wonderful sunrise view from my balcony. The way the light filtered through the clouds reminded me that every day brings new possibilities...</p>
+                          <div class="flex justify-end">
+                            <a href="#" class="text-indigo-600 text-xs sm:text-sm hover:text-indigo-800 flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full shadow-sm hover:bg-white/80 transition-colors">
+                              <span>Read full entry</span>
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                              </svg>
+                            </a>
+                          </div>
+                        </div>
 
-        <div class="bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-5 border border-white/30 hover:shadow-lg transition animation-delay-100 animate-scale-in">
-          <div class="flex justify-between items-start mb-3">
-            <h4 class="font-bold text-gray-800 text-lg">Project breakthrough</h4>
-            <div class="mood-pill excited">
-              <span>🤩 Excited</span>
-            </div>
-          </div>
-          <p class="text-gray-700 dairy-font text-sm mb-3">Finally solved that coding problem I've been stuck on for days! The solution came to me while I was taking a walk in the park. Sometimes stepping away from the screen is exactly what you need...</p>
-          <div class="flex justify-end">
-            <a href="#" class="text-indigo-600 text-sm hover:text-indigo-800 flex items-center gap-1 bg-white/50 px-3 py-1.5 rounded-full shadow-sm hover:bg-white/80 transition-colors">
-              <span>Read full entry</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+                        <div class="bg-white/70 backdrop-blur-sm rounded-xl shadow-md p-3 sm:p-4 border border-white/30 hover:shadow-lg transition animation-delay-100 animate-scale-in">
+                          <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-gray-800 text-base sm:text-lg">Project breakthrough</h4>
+                            <div class="mood-pill excited">
+                              <span>🤩 Excited</span>
+                            </div>
+                          </div>
+                          <p class="text-gray-700 dairy-font text-xs sm:text-sm mb-2">Finally solved that coding problem I've been stuck on for days! The solution came to me while I was taking a walk in the park. Sometimes stepping away from the screen is exactly what you need...</p>
+                          <div class="flex justify-end">
+                            <a href="#" class="text-indigo-600 text-xs sm:text-sm hover:text-indigo-800 flex items-center gap-1 bg-white/50 px-3 py-1 rounded-full shadow-sm hover:bg-white/80 transition-colors">
+                              <span>Read full entry</span>
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                              </svg>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    </div>
+                    </div>
 
-<!-- Quick Entry Button (Fixed) -->
-<a href="{% url 'new_entry' %}" class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
-  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-  </svg>
-</a>
-{% endblock %}
+                    <!-- Mobile Bottom Navigation - Added for small screens -->
+                    <div class="mobile-bottom-nav hidden">
+                      <button onclick="switchTab('memories')" class="mobile-nav-item active">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mobile-nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="mobile-nav-label">Memories</span>
+                      </button>
+                      <button onclick="switchTab('journals')" class="mobile-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mobile-nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span class="mobile-nav-label">Journals</span>
+                      </button>
+                      <button onclick="switchTab('timeline')" class="mobile-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mobile-nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14-10v2m-2 4h10m-10 4h10m-10 4h10" />
+                        </svg>
+                        <span class="mobile-nav-label">Timeline</span>
+                      </button>
+                      <button onclick="switchTab('calendar')" class="mobile-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mobile-nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="mobile-nav-label">Calendar</span>
+                      </button>
+                    </div>
 
-{% block extra_js %}
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Tab switching functionality
-    initTabs();
+                    <!-- Quick Entry Button (Fixed) - Mobile optimized -->
+                    <a href="{% url 'new_entry' %}" class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 sm:p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all floating-action-button">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </a>
+                    {% endblock %}
 
-    // Initialize load more functionality
-    initLoadMore();
+                    {% block extra_js %}
+                    <script>
+                      document.addEventListener('DOMContentLoaded', function() {
+                        // Tab switching functionality
+                        initTabs();
 
-    // Initialize memory grid interactions
-    initMemoryGrid();
+                        // Initialize load more functionality
+                        initLoadMore();
 
-    // Initialize image preloading
-    preloadEntryImages();
-  });
+                        // Initialize memory grid interactions
+                        initMemoryGrid();
 
-  // Tab switching with animation
-  function switchTab(tabName) {
-    // Hide all tabs
-    document.querySelectorAll('.tab-content').forEach(tab => {
-      tab.classList.add('hidden');
-    });
+                        // Initialize image preloading
+                        preloadEntryImages();
 
-    // Show selected tab
-    document.getElementById(tabName + '-tab').classList.remove('hidden');
+                        // Initialize mobile-specific features
+                        initMobileFeatures();
+                      });
 
-    // Update active state on buttons
-    const buttons = document.querySelectorAll('.modern-tab');
-    buttons.forEach(btn => {
-      btn.classList.remove('active');
-      if (btn.getAttribute('onclick').includes(tabName)) {
-        btn.classList.add('active');
-      }
-    });
+                      // Mobile-specific features initialization
+                      function initMobileFeatures() {
+                        // Show bottom navigation on small screens
+                        if (window.innerWidth <= 768) {
+                          document.querySelector('.mobile-bottom-nav').classList.remove('hidden');
+                          document.querySelector('.page-content').classList.add('pb-16');
+                        }
 
-    // Animate tab selector
-    const activeTab = document.querySelector(`.modern-tab[onclick="switchTab('${tabName}')"]`);
-    const tabSelector = document.getElementById('tabSelector');
+                        // Add tap-to-preview functionality for journal cards on touch devices
+                        const journalCards = document.querySelectorAll('.journal-card');
+                        journalCards.forEach(card => {
+                          card.addEventListener('touchstart', function() {
+                            // Remove active class from any other cards first
+                            journalCards.forEach(c => c.classList.remove('touch-active'));
+                            // Toggle active class on this card
+                            this.classList.toggle('touch-active');
+                          });
+                        });
 
-    if (activeTab && tabSelector) {
-      const width = activeTab.getAttribute('data-tab-width');
-      const offset = activeTab.getAttribute('data-tab-offset');
+                        // Adjust calendar days for better touch
+                        const calendarDays = document.querySelectorAll('.calendar-day');
+                        if (window.innerWidth <= 480) {
+                          calendarDays.forEach(day => {
+                            day.style.minHeight = '32px';
+                          });
+                        }
+                      }
 
-      tabSelector.style.width = width;
-      tabSelector.style.transform = `translateX(${offset})`;
-    }
+                      // Tab switching with animation
+                      function switchTab(tabName) {
+                        // Hide all tabs
+                        document.querySelectorAll('.tab-content').forEach(tab => {
+                          tab.classList.add('hidden');
+                        });
 
-    // Update URL without page reload to reflect current tab
-    const url = new URL(window.location);
-    url.searchParams.set('tab', tabName);
-    window.history.pushState({}, '', url);
-  }
+                        // Show selected tab
+                        document.getElementById(tabName + '-tab').classList.remove('hidden');
 
-  // Initialize tabs based on URL or default to memories
-  function initTabs() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tabParam = urlParams.get('tab');
+                        // Update active state on buttons
+                        const buttons = document.querySelectorAll('.modern-tab');
+                        buttons.forEach(btn => {
+                          btn.classList.remove('active');
+                          if (btn.getAttribute('onclick').includes(tabName)) {
+                            btn.classList.add('active');
+                          }
+                        });
 
-    if (tabParam && ['memories', 'journals', 'timeline', 'calendar'].includes(tabParam)) {
-      switchTab(tabParam);
-    } else {
-      // Default: set first tab (memories) as active
-      switchTab('memories');
-    }
-  }
+                        // Update bottom navigation active state on mobile
+                        const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
+                        mobileNavItems.forEach(item => {
+                          item.classList.remove('active');
+                          if (item.getAttribute('onclick').includes(tabName)) {
+                            item.classList.add('active');
+                          }
+                        });
 
-  // Load more functionality
-  function initLoadMore() {
-    const loadMoreButtons = [
-      document.getElementById('loadMoreMemories'),
-      document.getElementById('loadMoreTimeline')
-    ];
+                        // Animate tab selector
+                        const activeTab = document.querySelector(`.modern-tab[onclick="switchTab('${tabName}')"]`);
+                        const tabSelector = document.getElementById('tabSelector');
 
-    loadMoreButtons.forEach(btn => {
-      if (btn) {
-        btn.addEventListener('click', function() {
-          // Show loading state
-          const originalText = this.innerHTML;
-          this.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Loading...
-          `;
+                        if (activeTab && tabSelector) {
+                          const width = activeTab.getAttribute('data-tab-width');
+                          const offset = activeTab.getAttribute('data-tab-offset');
 
-          // Simulate loading more entries (in a real implementation, this would be an AJAX call)
-          setTimeout(() => {
-            // Reset button state
-            this.innerHTML = originalText;
+                          tabSelector.style.width = width;
+                          tabSelector.style.transform = `translateX(${offset})`;
+                        }
 
-            // In a real implementation, you would append new entries here
-            // For now, we'll just hide the button to simulate that all entries have been loaded
-            this.style.display = 'none';
+                        // Update URL without page reload to reflect current tab
+                        const url = new URL(window.location);
+                        url.searchParams.set('tab', tabName);
+                        window.history.pushState({}, '', url);
+                      }
 
-            // Show a toast notification
-            showToast('All entries loaded');
-          }, 1000);
-        });
-      }
-    });
-  }
+                      // Initialize tabs based on URL or default to memories
+                      function initTabs() {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const tabParam = urlParams.get('tab');
 
-  // Memory grid interactions
-  function initMemoryGrid() {
-    const memoryCards = document.querySelectorAll('.memory-card');
+                        if (tabParam && ['memories', 'journals', 'timeline', 'calendar'].includes(tabParam)) {
+                          switchTab(tabParam);
+                        } else {
+                          // Default: set first tab (memories) as active
+                          switchTab('memories');
+                        }
+                      }
 
-    memoryCards.forEach(card => {
-      card.addEventListener('mouseenter', function() {
-        // Add subtle parallax effect to images on hover
-        const img = this.querySelector('.memory-image');
-        if (img) {
-          img.style.transform = 'scale(1.05)';
-        }
-      });
+                      // Load more functionality
+                      function initLoadMore() {
+                        const loadMoreButtons = [
+                          document.getElementById('loadMoreMemories'),
+                          document.getElementById('loadMoreTimeline')
+                        ];
 
-      card.addEventListener('mouseleave', function() {
-        // Reset image position
-        const img = this.querySelector('.memory-image');
-        if (img) {
-          img.style.transform = '';
-        }
-      });
-    });
-  }
+                        loadMoreButtons.forEach(btn => {
+                          if (btn) {
+                            btn.addEventListener('click', function() {
+                              // Show loading state
+                              const originalText = this.innerHTML;
+                              this.innerHTML = `
+                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Loading...
+                              `;
 
-  // Preload entry images for smoother experience
-  function preloadEntryImages() {
-    const images = document.querySelectorAll('.memory-image, .journal-cover');
+                              // Simulate loading more entries (in a real implementation, this would be an AJAX call)
+                              setTimeout(() => {
+                                // Reset button state
+                                this.innerHTML = originalText;
 
-    images.forEach(img => {
-      if (img.src && !img.complete) {
-        img.classList.add('loading-shimmer');
-        img.onload = function() {
-          img.classList.remove('loading-shimmer');
-        };
-      }
-    });
-  }
+                                // In a real implementation, you would append new entries here
+                                // For now, we'll just hide the button to simulate that all entries have been loaded
+                                this.style.display = 'none';
 
-  // Toast notification helper
-  function showToast(message) {
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in';
-    toast.textContent = message;
+                                // Show a toast notification
+                                showToast('All entries loaded');
+                              }, 1000);
+                            });
+                          }
+                        });
+                      }
 
-    // Add to document
-    document.body.appendChild(toast);
+                      // Memory grid interactions
+                      function initMemoryGrid() {
+                        const memoryCards = document.querySelectorAll('.memory-card');
 
-    // Remove after 3 seconds
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translate(-50%, 10px)';
-      toast.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        memoryCards.forEach(card => {
+                          card.addEventListener('mouseenter', function() {
+                            // Add subtle parallax effect to images on hover
+                            const img = this.querySelector('.memory-image');
+                            if (img) {
+                              img.style.transform = 'scale(1.05)';
+                            }
+                          });
 
-      setTimeout(() => {
-        document.body.removeChild(toast);
-      }, 500);
-    }, 3000);
-  }
+                          card.addEventListener('mouseleave', function() {
+                            // Reset image position
+                            const img = this.querySelector('.memory-image');
+                            if (img) {
+                              img.style.transform = '';
+                            }
+                          });
+                        });
+                      }
 
-  // Filter chip functionality
-  document.querySelectorAll('.filter-chip').forEach(chip => {
-    if (!chip.classList.contains('active') && !chip.tagName.toLowerCase() === 'a') {
-      chip.addEventListener('click', function() {
-        const currentActive = this.parentNode.querySelector('.filter-chip.active');
-        if (currentActive) {
-          currentActive.classList.remove('active');
-        }
-        this.classList.add('active');
-      });
-    }
-  });
+                      // Preload entry images for smoother experience
+                      function preloadEntryImages() {
+                        const images = document.querySelectorAll('.memory-image, .journal-cover');
 
-  // Calendar day selection
-  document.querySelectorAll('.calendar-day').forEach(day => {
-    day.addEventListener('click', function() {
-      if (!this.classList.contains('opacity-40')) {
-        document.querySelectorAll('.calendar-day').forEach(d => {
-          d.style.backgroundColor = '';
-          d.style.borderColor = '';
-          const num = d.querySelector('.calendar-day-number');
-          if (num) {
-            num.classList.remove('font-bold', 'text-indigo-600');
-          }
-        });
+                        images.forEach(img => {
+                          if (img.src && !img.complete) {
+                            img.classList.add('loading-shimmer');
+                            img.onload = function() {
+                              img.classList.remove('loading-shimmer');
+                            };
+                          }
+                        });
+                      }
 
-        this.style.backgroundColor = 'rgba(99, 102, 241, 0.15)';
-        this.style.borderColor = 'rgba(99, 102, 241, 0.3)';
-        const num = this.querySelector('.calendar-day-number');
-        if (num) {
-          num.classList.add('font-bold', 'text-indigo-600');
-        }
+                      // Toast notification helper
+                      function showToast(message) {
+                        // Create toast element
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in text-sm';
+                        toast.textContent = message;
 
-        // In a real implementation, you would load entries for the selected day
-        const dayNumber = this.querySelector('.calendar-day-number').textContent;
-        document.querySelector('h3:contains("Entries for")').textContent = `Entries for April ${dayNumber}, 2025`;
-      }
-    });
-  });
-</script>
-{% endblock %}
+                        // Add to document
+                        document.body.appendChild(toast);
+
+                        // Remove after 3 seconds
+                        setTimeout(() => {
+                          toast.style.opacity = '0';
+                          toast.style.transform = 'translate(-50%, 10px)';
+                          toast.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+                          setTimeout(() => {
+                            document.body.removeChild(toast);
+                          }, 500);
+                        }, 3000);
+                      }
+
+                      // Filter chip functionality
+                      document.querySelectorAll('.filter-chip').forEach(chip => {
+                        if (!chip.classList.contains('active') && !chip.tagName.toLowerCase() === 'a') {
+                          chip.addEventListener('click', function() {
+                            const currentActive = this.parentNode.querySelector('.filter-chip.active');
+                            if (currentActive) {
+                              currentActive.classList.remove('active');
+                            }
+                            this.classList.add('active');
+                          });
+                        }
+                      });
+
+                      // Calendar day selection
+                      document.querySelectorAll('.calendar-day').forEach(day => {
+                        day.addEventListener('click', function() {
+                          if (!this.classList.contains('opacity-40')) {
+                            document.querySelectorAll('.calendar-day').forEach(d => {
+                              d.style.backgroundColor = '';
+                              d.style.borderColor = '';
+                              const num = d.querySelector('.calendar-day-number');
+                              if (num) {
+                                num.classList.remove('font-bold', 'text-indigo-600');
+                              }
+                            });
+
+                            this.style.backgroundColor = 'rgba(99, 102, 241, 0.15)';
+                            this.style.borderColor = 'rgba(99, 102, 241, 0.3)';
+                            const num = this.querySelector('.calendar-day-number');
+                            if (num) {
+                              num.classList.add('font-bold', 'text-indigo-600');
+                            }
+
+                            // In a real implementation, you would load entries for the selected day
+                            const dayNumber = this.querySelector('.calendar-day-number').textContent;
+                            document.querySelector('h3:contains("Entries for")').textContent = `Entries for April ${dayNumber}, 2025`;
+                          }
+                        });
+                      });
+
+                      // Handle window resize for mobile features
+                      window.addEventListener('resize', function() {
+                        const mobileNav = document.querySelector('.mobile-bottom-nav');
+                        const pageContent = document.querySelector('.page-content');
+
+                        if (window.innerWidth <= 768) {
+                          if (mobileNav) mobileNav.classList.remove('hidden');
+                          if (pageContent) pageContent.classList.add('pb-16');
+                        } else {
+                          if (mobileNav) mobileNav.classList.add('hidden');
+                          if (pageContent) pageContent.classList.remove('pb-16');
+                        }
+                      });
+                    </script>
+                    {% endblock %}

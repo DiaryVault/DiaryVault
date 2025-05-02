@@ -87,6 +87,13 @@
     box-shadow: 0 15px 30px rgba(0,0,0,0.1);
   }
 
+  /* Use more touch-friendly transform for mobile */
+  @media (max-width: 640px) {
+    .marketplace-card:hover {
+      transform: translateY(-5px);
+    }
+  }
+
   .marketplace-card-overlay {
     background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.1) 100%);
     opacity: 0;
@@ -95,6 +102,13 @@
 
   .marketplace-card:hover .marketplace-card-overlay {
     opacity: 1;
+  }
+
+  /* Always show overlay on mobile for better UX */
+  @media (max-width: 640px) {
+    .marketplace-card-overlay {
+      opacity: 0.8;
+    }
   }
 
   .rank-badge {
@@ -308,6 +322,13 @@
     opacity: 1;
   }
 
+  /* Make overlay visible on mobile for better UX */
+  @media (max-width: 640px) {
+    .card-hover .card-overlay {
+      opacity: 0.8;
+    }
+  }
+
   /* Tooltip styles */
   .tooltip {
     position: relative;
@@ -343,6 +364,17 @@
     z-index: 30;
   }
 
+  /* Mobile navigation improvements */
+  @media (max-width: 640px) {
+    .sticky-nav {
+      top: 0;
+      border-radius: 0;
+      margin-left: -1rem;
+      margin-right: -1rem;
+      width: calc(100% + 2rem);
+    }
+  }
+
   /* Responsive adjustments */
   @media (max-width: 640px) {
     .rank-badge {
@@ -355,12 +387,103 @@
       width: 45px;
       height: 45px;
     }
+
+    /* Adjust hero text size on mobile */
+    h1.text-4xl {
+      font-size: 2rem;
+    }
+
+    /* Make stats banner more compact on mobile */
+    .stats-banner {
+      gap: 0.5rem !important;
+    }
+
+    .stats-banner > div {
+      padding: 0.5rem 1rem !important;
+    }
+
+    /* Make featured section full width on mobile */
+    .featured-author-grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    /* Improve spacing on mobile */
+    .section-spacing {
+      margin-bottom: 2rem !important;
+    }
+
+    /* Touch-friendly padding for buttons */
+    .mobile-btn {
+      padding-top: 0.625rem !important;
+      padding-bottom: 0.625rem !important;
+      font-size: 0.875rem !important;
+    }
+
+    /* Full width buttons on mobile */
+    .mobile-btn-full {
+      width: 100% !important;
+      justify-content: center !important;
+      margin-bottom: 0.5rem !important;
+    }
+
+    /* Improve grid layouts */
+    .mobile-grid-1 {
+      grid-template-columns: 1fr !important;
+    }
+
+    .mobile-grid-2 {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+  }
+
+  /* Add bottom padding to make room for floating button */
+  @media (max-width: 640px) {
+    .pb-mobile-extra {
+      padding-bottom: 5rem !important;
+    }
+  }
+
+  /* Carousel Improvements */
+  .carousel-container {
+    position: relative;
+    padding: 0 1rem;
+  }
+
+  .carousel-container .carousel-scroll {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 1rem;
+  }
+
+  .carousel-container .carousel-item {
+    scroll-snap-align: start;
+  }
+
+  /* Keep image ratio consistent */
+  .aspect-ratio-box {
+    position: relative;
+    width: 100%;
+  }
+
+  .aspect-ratio-box::before {
+    content: "";
+    display: block;
+    padding-top: 66.67%; /* 2:3 aspect ratio */
+  }
+
+  .aspect-ratio-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative pb-20">
+<div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative pb-20 pb-mobile-extra">
   <!-- Decorative elements -->
   <div class="absolute -top-10 -left-16 h-64 w-64 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
   <div class="absolute -bottom-32 -right-16 h-64 w-64 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
@@ -370,43 +493,43 @@
   <div class="relative z-10 animate-fade-in">
     <div class="mb-10 rounded-3xl overflow-hidden shadow-2xl relative">
       <div class="absolute inset-0 bg-gradient-to-r from-secondary-800/90 to-primary-800/90 z-10"></div>
-      <img src="https://images.unsplash.com/photo-1517842645767-c639042777db?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Journal Marketplace" class="w-full h-96 lg:h-[500px] object-cover">
+      <img src="https://images.unsplash.com/photo-1517842645767-c639042777db?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Journal Marketplace" class="w-full h-64 sm:h-72 md:h-96 lg:h-[500px] object-cover">
 
       <div class="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center">
-        <span class="px-4 py-1.5 bg-white/20 backdrop-blur-sm text-white text-sm rounded-full mb-6 font-medium">Discover • Connect • Get Inspired</span>
+        <span class="px-4 py-1.5 bg-white/20 backdrop-blur-sm text-white text-xs sm:text-sm rounded-full mb-4 sm:mb-6 font-medium">Discover • Connect • Get Inspired</span>
 
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold diary-font mb-6 text-white max-w-4xl">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold diary-font mb-4 sm:mb-6 text-white max-w-4xl">
           Share Your Story With The World
         </h1>
 
-        <p class="text-white/90 text-lg sm:text-xl max-w-2xl mb-8 leading-relaxed">
+        <p class="text-white/90 text-base sm:text-lg md:text-xl max-w-2xl mb-6 sm:mb-8 leading-relaxed">
           Join our vibrant community of writers and creators. Publish your journal, build your audience, and earn rewards for your authentic stories.
         </p>
 
-        <!-- Stats banner -->
-        <div class="flex flex-wrap justify-center gap-6 mb-8">
-          <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-6 py-3 text-center">
-            <div class="text-3xl font-bold text-white">12,500+</div>
-            <div class="text-sm text-white/80">Active Authors</div>
+        <!-- Stats banner - More compact on mobile -->
+        <div class="flex flex-wrap justify-center gap-2 sm:gap-6 mb-6 sm:mb-8 stats-banner">
+          <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-3 py-2 sm:px-6 sm:py-3 text-center">
+            <div class="text-xl sm:text-2xl md:text-3xl font-bold text-white">12,500+</div>
+            <div class="text-xs sm:text-sm text-white/80">Active Authors</div>
           </div>
-          <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-6 py-3 text-center">
-            <div class="text-3xl font-bold text-white">$230K+</div>
-            <div class="text-sm text-white/80">Author Earnings</div>
+          <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-3 py-2 sm:px-6 sm:py-3 text-center">
+            <div class="text-xl sm:text-2xl md:text-3xl font-bold text-white">$230K+</div>
+            <div class="text-xs sm:text-sm text-white/80">Author Earnings</div>
           </div>
-          <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-6 py-3 text-center">
-            <div class="text-3xl font-bold text-white">45,000+</div>
-            <div class="text-sm text-white/80">Journal Entries</div>
+          <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-3 py-2 sm:px-6 sm:py-3 text-center">
+            <div class="text-xl sm:text-2xl md:text-3xl font-bold text-white">45,000+</div>
+            <div class="text-xs sm:text-sm text-white/80">Journal Entries</div>
           </div>
         </div>
 
-        <div class="flex flex-wrap gap-4 justify-center">
-          <a href="#explore" class="btn-gradient text-white px-6 py-3 rounded-full text-base font-medium shadow-lg flex items-center gap-2">
+        <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 justify-center w-full sm:w-auto">
+          <a href="#explore" class="btn-gradient text-white px-6 py-3 rounded-full text-base font-medium shadow-lg flex items-center justify-center gap-2 mobile-btn mobile-btn-full">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
             </svg>
             Explore Journals
           </a>
-          <a href="/signup/" class="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-full text-base font-medium shadow-lg flex items-center gap-2 transition-all">
+          <a href="/signup/" class="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-full text-base font-medium shadow-lg flex items-center justify-center gap-2 transition-all mobile-btn mobile-btn-full">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
               <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
@@ -416,7 +539,7 @@
         </div>
       </div>
 
-      <!-- Testimonial cards -->
+      <!-- Testimonial cards - Hidden on small screens by default, shown on medium up -->
       <div class="absolute bottom-6 left-6 z-30 max-w-xs hidden md:block">
         <div class="testimonial-bubble animate-float">
           <div class="flex items-start gap-3">
@@ -480,22 +603,22 @@
   </div>
 
   <!-- Value Proposition Cards -->
-  <div class="mb-16 grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+  <div class="mb-12 md:mb-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 relative z-10 section-spacing">
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transform transition-all hover:-translate-y-2 hover:shadow-2xl animate-fade-in animation-delay-300">
       <div class="h-2 bg-gradient-to-r from-amber-400 to-amber-600"></div>
-      <div class="p-6">
-        <div class="bg-amber-100 h-14 w-14 rounded-full flex items-center justify-center mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
+      <div class="p-4 sm:p-6">
+        <div class="bg-amber-100 h-12 w-12 sm:h-14 sm:w-14 rounded-full flex items-center justify-center mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-7 sm:w-7 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
             <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
           </svg>
         </div>
-        <h3 class="text-xl font-bold text-gray-800 mb-2">Earn From Your Stories</h3>
-        <p class="text-gray-600 mb-5">Monetize your writing through tips, premium content, and our author rewards program. Top writers earn $1,000+ monthly.</p>
+        <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">Earn From Your Stories</h3>
+        <p class="text-gray-600 mb-5 text-sm sm:text-base">Monetize your writing through tips, premium content, and our author rewards program. Top writers earn $1,000+ monthly.</p>
         <div class="pt-4 border-t border-gray-100">
           <div class="flex items-center justify-between">
-            <span class="text-sm text-gray-500">Average author earnings</span>
-            <span class="text-lg font-bold text-amber-600">$450/mo</span>
+            <span class="text-xs sm:text-sm text-gray-500">Average author earnings</span>
+            <span class="text-base sm:text-lg font-bold text-amber-600">$450/mo</span>
           </div>
         </div>
       </div>
@@ -503,18 +626,18 @@
 
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transform transition-all hover:-translate-y-2 hover:shadow-2xl animate-fade-in animation-delay-500">
       <div class="h-2 bg-gradient-to-r from-secondary-400 to-secondary-600"></div>
-      <div class="p-6">
-        <div class="bg-secondary-100 h-14 w-14 rounded-full flex items-center justify-center mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-secondary-600" viewBox="0 0 20 20" fill="currentColor">
+      <div class="p-4 sm:p-6">
+        <div class="bg-secondary-100 h-12 w-12 sm:h-14 sm:w-14 rounded-full flex items-center justify-center mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-7 sm:w-7 text-secondary-600" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
           </svg>
         </div>
-        <h3 class="text-xl font-bold text-gray-800 mb-2">Build Your Audience</h3>
-        <p class="text-gray-600 mb-5">Connect with readers who value your unique perspective. Grow your following and receive feedback that helps you improve.</p>
+        <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">Build Your Audience</h3>
+        <p class="text-gray-600 mb-5 text-sm sm:text-base">Connect with readers who value your unique perspective. Grow your following and receive feedback that helps you improve.</p>
         <div class="pt-4 border-t border-gray-100">
           <div class="flex items-center justify-between">
-            <span class="text-sm text-gray-500">Average follower growth</span>
-            <span class="text-lg font-bold text-secondary-600">250+/month</span>
+            <span class="text-xs sm:text-sm text-gray-500">Average follower growth</span>
+            <span class="text-base sm:text-lg font-bold text-secondary-600">250+/month</span>
           </div>
         </div>
       </div>
@@ -522,18 +645,18 @@
 
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transform transition-all hover:-translate-y-2 hover:shadow-2xl animate-fade-in animation-delay-700">
       <div class="h-2 bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
-      <div class="p-6">
-        <div class="bg-emerald-100 h-14 w-14 rounded-full flex items-center justify-center mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-emerald-600" viewBox="0 0 20 20" fill="currentColor">
+      <div class="p-4 sm:p-6">
+        <div class="bg-emerald-100 h-12 w-12 sm:h-14 sm:w-14 rounded-full flex items-center justify-center mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-7 sm:w-7 text-emerald-600" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
           </svg>
         </div>
-        <h3 class="text-xl font-bold text-gray-800 mb-2">Privacy Control</h3>
-        <p class="text-gray-600 mb-5">You decide what to share. Choose which entries are public, premium, or private, with easy-to-use privacy settings.</p>
+        <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">Privacy Control</h3>
+        <p class="text-gray-600 mb-5 text-sm sm:text-base">You decide what to share. Choose which entries are public, premium, or private, with easy-to-use privacy settings.</p>
         <div class="pt-4 border-t border-gray-100">
           <div class="flex items-center justify-between">
-            <span class="text-sm text-gray-500">Control your content</span>
-            <span class="text-lg font-bold text-emerald-600">100%</span>
+            <span class="text-xs sm:text-sm text-gray-500">Control your content</span>
+            <span class="text-base sm:text-lg font-bold text-emerald-600">100%</span>
           </div>
         </div>
       </div>
@@ -541,80 +664,80 @@
   </div>
 
   <!-- Category Navigation with Visual Appeal -->
-  <div id="explore" class="mb-12 relative z-10 animate-fade-in">
-    <div class="text-center mb-8">
-      <h2 class="text-3xl font-bold diary-font mb-3 text-gray-800">Explore Journal Categories</h2>
-      <p class="text-gray-600 max-w-2xl mx-auto">Find inspiration from a diverse collection of journals spanning various topics and interests.</p>
+  <div id="explore" class="mb-12 relative z-10 animate-fade-in section-spacing">
+    <div class="text-center mb-6 sm:mb-8">
+      <h2 class="text-xl sm:text-2xl md:text-3xl font-bold diary-font mb-2 sm:mb-3 text-gray-800">Explore Journal Categories</h2>
+      <p class="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">Find inspiration from a diverse collection of journals spanning various topics and interests.</p>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-      <a href="#" class="category-card bg-white rounded-xl p-5 shadow-md flex flex-col items-center text-center hover:shadow-lg transition border border-gray-100 group">
-        <div class="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center mb-3 group-hover:bg-blue-500 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600 group-hover:text-white transition-colors" viewBox="0 0 20 20" fill="currentColor">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+      <a href="#" class="category-card bg-white rounded-xl p-3 sm:p-5 shadow-md flex flex-col items-center text-center hover:shadow-lg transition border border-gray-100 group">
+        <div class="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-blue-100 flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-blue-500 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 group-hover:text-white transition-colors" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
           </svg>
         </div>
-        <h3 class="font-medium text-gray-800 mb-1 group-hover:text-blue-600 transition-colors">Travel & Adventure</h3>
+        <h3 class="font-medium text-gray-800 mb-1 text-sm sm:text-base group-hover:text-blue-600 transition-colors">Travel & Adventure</h3>
         <p class="text-xs text-gray-500">1,245 journals</p>
       </a>
 
-      <a href="#" class="category-card bg-white rounded-xl p-5 shadow-md flex flex-col items-center text-center hover:shadow-lg transition border border-gray-100 group">
-        <div class="h-16 w-16 rounded-full bg-purple-100 flex items-center justify-center mb-3 group-hover:bg-purple-500 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-600 group-hover:text-white transition-colors" viewBox="0 0 20 20" fill="currentColor">
+      <a href="#" class="category-card bg-white rounded-xl p-3 sm:p-5 shadow-md flex flex-col items-center text-center hover:shadow-lg transition border border-gray-100 group">
+        <div class="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-purple-100 flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-purple-500 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 text-purple-600 group-hover:text-white transition-colors" viewBox="0 0 20 20" fill="currentColor">
             <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z" />
           </svg>
         </div>
-        <h3 class="font-medium text-gray-800 mb-1 group-hover:text-purple-600 transition-colors">Mindfulness</h3>
+        <h3 class="font-medium text-gray-800 mb-1 text-sm sm:text-base group-hover:text-purple-600 transition-colors">Mindfulness</h3>
         <p class="text-xs text-gray-500">986 journals</p>
       </a>
 
-      <a href="#" class="category-card bg-white rounded-xl p-5 shadow-md flex flex-col items-center text-center hover:shadow-lg transition border border-gray-100 group">
-        <div class="h-16 w-16 rounded-full bg-pink-100 flex items-center justify-center mb-3 group-hover:bg-pink-500 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-pink-600 group-hover:text-white transition-colors" viewBox="0 0 20 20" fill="currentColor">
+      <a href="#" class="category-card bg-white rounded-xl p-3 sm:p-5 shadow-md flex flex-col items-center text-center hover:shadow-lg transition border border-gray-100 group">
+        <div class="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-pink-100 flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-pink-500 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 text-pink-600 group-hover:text-white transition-colors" viewBox="0 0 20 20" fill="currentColor">
             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
           </svg>
         </div>
-        <h3 class="font-medium text-gray-800 mb-1 group-hover:text-pink-600 transition-colors">Creative Writing</h3>
+        <h3 class="font-medium text-gray-800 mb-1 text-sm sm:text-base group-hover:text-pink-600 transition-colors">Creative Writing</h3>
         <p class="text-xs text-gray-500">1,872 journals</p>
       </a>
 
-      <a href="#" class="category-card bg-white rounded-xl p-5 shadow-md flex flex-col items-center text-center hover:shadow-lg transition border border-gray-100 group">
-        <div class="h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center mb-3 group-hover:bg-amber-500 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600 group-hover:text-white transition-colors" viewBox="0 0 20 20" fill="currentColor">
+      <a href="#" class="category-card bg-white rounded-xl p-3 sm:p-5 shadow-md flex flex-col items-center text-center hover:shadow-lg transition border border-gray-100 group">
+        <div class="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-amber-100 flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-amber-500 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 text-amber-600 group-hover:text-white transition-colors" viewBox="0 0 20 20" fill="currentColor">
             <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
           </svg>
         </div>
-        <h3 class="font-medium text-gray-800 mb-1 group-hover:text-amber-600 transition-colors">Personal Growth</h3>
+        <h3 class="font-medium text-gray-800 mb-1 text-sm sm:text-base group-hover:text-amber-600 transition-colors">Personal Growth</h3>
         <p class="text-xs text-gray-500">1,123 journals</p>
       </a>
 
-      <a href="#" class="category-card bg-white rounded-xl p-5 shadow-md flex flex-col items-center text-center hover:shadow-lg transition border border-gray-100 group">
-        <div class="h-16 w-16 rounded-full bg-red-100 flex items-center justify-center mb-3 group-hover:bg-red-500 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600 group-hover:text-white transition-colors" viewBox="0 0 20 20" fill="currentColor">
+      <a href="#" class="category-card bg-white rounded-xl p-3 sm:p-5 shadow-md flex flex-col items-center text-center hover:shadow-lg transition border border-gray-100 group">
+        <div class="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-red-100 flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-red-500 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 text-red-600 group-hover:text-white transition-colors" viewBox="0 0 20 20" fill="currentColor">
             <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
           </svg>
         </div>
-        <h3 class="font-medium text-gray-800 mb-1 group-hover:text-red-600 transition-colors">Food & Cooking</h3>
+        <h3 class="font-medium text-gray-800 mb-1 text-sm sm:text-base group-hover:text-red-600 transition-colors">Food & Cooking</h3>
         <p class="text-xs text-gray-500">758 journals</p>
       </a>
 
-      <a href="#" class="category-card bg-white rounded-xl p-5 shadow-md flex flex-col items-center text-center hover:shadow-lg transition border border-gray-100 group">
-        <div class="h-16 w-16 rounded-full bg-emerald-100 flex items-center justify-center mb-3 group-hover:bg-emerald-500 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-600 group-hover:text-white transition-colors" viewBox="0 0 20 20" fill="currentColor">
+      <a href="#" class="category-card bg-white rounded-xl p-3 sm:p-5 shadow-md flex flex-col items-center text-center hover:shadow-lg transition border border-gray-100 group">
+        <div class="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-emerald-100 flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-emerald-500 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 text-emerald-600 group-hover:text-white transition-colors" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd" />
           </svg>
         </div>
-        <h3 class="font-medium text-gray-800 mb-1 group-hover:text-emerald-600 transition-colors">Explore All</h3>
+        <h3 class="font-medium text-gray-800 mb-1 text-sm sm:text-base group-hover:text-emerald-600 transition-colors">Explore All</h3>
         <p class="text-xs text-gray-500">45+ categories</p>
       </a>
     </div>
   </div>
 
   <!-- Advanced Search & Filter (Sticky) -->
-  <div class="sticky-nav mb-8 relative z-20 animate-fade-in">
-    <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-4 sm:p-6 flex flex-col sm:flex-row gap-4 justify-between items-center border border-white">
+  <div class="sticky-nav mb-6 sm:mb-8 relative z-20 animate-fade-in">
+    <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-3 sm:p-6 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-start sm:items-center border border-white">
       <div class="w-full sm:w-auto relative">
-        <input type="text" placeholder="Search journals by title, author, or topic..." class="w-full sm:w-80 pl-10 pr-4 py-2.5 rounded-full bg-white border border-gray-200 focus:border-secondary-400 focus:ring focus:ring-secondary-200 focus:ring-opacity-50 shadow-sm transition-all">
+        <input type="text" placeholder="Search journals..." class="w-full sm:w-64 md:w-80 pl-10 pr-4 py-2 sm:py-2.5 rounded-full bg-white border border-gray-200 focus:border-secondary-400 focus:ring focus:ring-secondary-200 focus:ring-opacity-50 shadow-sm transition-all text-sm">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
@@ -623,7 +746,7 @@
       <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
         <!-- View Options -->
         <div class="flex items-center gap-2 ml-auto sm:ml-0">
-          <span class="text-sm font-medium text-gray-700">View:</span>
+          <span class="text-xs sm:text-sm font-medium text-gray-700 hidden sm:inline">View:</span>
           <button class="p-2 bg-secondary-100 text-secondary-600 rounded-md transition active">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -636,10 +759,10 @@
           </button>
         </div>
 
-        <!-- Sort Options -->
+        <!-- Sort Options - Simplified on mobile -->
         <div class="flex items-center gap-2">
-          <label for="sortBy" class="text-sm font-medium text-gray-700">Sort by:</label>
-          <select id="sortBy" class="bg-white border border-gray-200 text-gray-700 rounded-lg text-sm focus:ring-secondary-500 focus:border-secondary-500 p-2 pr-8">
+          <label for="sortBy" class="text-xs sm:text-sm font-medium text-gray-700 hidden sm:inline">Sort:</label>
+          <select id="sortBy" class="bg-white border border-gray-200 text-gray-700 rounded-lg text-xs sm:text-sm focus:ring-secondary-500 focus:border-secondary-500 p-2 pr-8">
             <option value="trending">Trending</option>
             <option value="mostTipped">Most Tipped</option>
             <option value="newest">Newest</option>
@@ -650,16 +773,16 @@
 
         <!-- Filter Button -->
         <div class="relative filter-container">
-          <button type="button" class="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition shadow-sm">
+          <button type="button" class="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
             Filters
-            <span class="bg-secondary-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+            <span class="bg-secondary-500 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">3</span>
           </button>
 
           <!-- Filter Dropdown -->
-          <div class="filter-dropdown absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-gray-100 p-4 z-30 hidden">
+          <div class="filter-dropdown absolute right-0 mt-2 w-64 sm:w-72 bg-white rounded-xl shadow-lg border border-gray-100 p-4 z-30 hidden">
             <!-- Filter content would go here -->
           </div>
         </div>
@@ -668,215 +791,215 @@
   </div>
 
   <!-- Featured Author Spotlight -->
-  <div class="mb-16 relative z-10 animate-fade-in">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-bold diary-font text-gray-800 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <div class="mb-12 md:mb-16 relative z-10 animate-fade-in section-spacing">
+    <div class="flex items-center justify-between mb-4 sm:mb-6">
+      <h2 class="text-xl sm:text-2xl font-bold diary-font text-gray-800 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
         </svg>
-        Featured Author of the Month
+        Featured Author
       </h2>
-      <a href="#" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
-        View all featured authors
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <a href="#" class="text-secondary-600 hover:text-secondary-800 text-xs sm:text-sm font-medium flex items-center gap-1">
+        View all
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
-      </a>
-    </div>
-
-    <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl overflow-hidden shadow-lg border border-amber-200">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-0">
-        <!-- Author Profile -->
-        <div class="p-8 flex flex-col items-center text-center">
-          <div class="relative mb-4">
-            <div class="h-24 w-24 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 p-1">
-              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80" alt="Emily Davis" class="h-full w-full rounded-full object-cover border-2 border-white">
-            </div>
-            <div class="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              $2,450 earned
-            </div>
-          </div>
-
-          <h3 class="text-xl font-bold text-gray-800 flex items-center justify-center">
-            Emily Davis
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-          </h3>
-          <p class="text-gray-600 mb-4">@worldtraveler</p>
-
-          <div class="flex flex-wrap justify-center gap-2 mb-6">
-            <span class="text-xs bg-white text-blue-600 px-3 py-1.5 rounded-full font-medium border border-blue-100">Travel</span>
-            <span class="text-xs bg-white text-purple-600 px-3 py-1.5 rounded-full font-medium border border-purple-100">Photography</span>
-            <span class="text-xs bg-white text-green-600 px-3 py-1.5 rounded-full font-medium border border-green-100">Lifestyle</span>
-          </div>
-
-          <div class="w-full bg-white rounded-lg p-4 mb-4 text-left">
-            <div class="text-gray-700 text-sm mb-2">Author Stats:</div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <div class="text-xs text-gray-500">Followers</div>
-                <div class="text-lg font-bold text-gray-800">12.8K</div>
-              </div>
-              <div>
-                <div class="text-xs text-gray-500">Published Journals</div>
-                <div class="text-lg font-bold text-gray-800">24</div>
-              </div>
-              <div>
-                <div class="text-xs text-gray-500">Total Tips</div>
-                <div class="text-lg font-bold text-amber-600">$2,450</div>
-              </div>
-              <div>
-                <div class="text-xs text-gray-500">Avg. Rating</div>
-                <div class="flex items-center">
-                  <span class="text-lg font-bold text-gray-800 mr-1">4.9</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex gap-3">
-            <button class="flex-1 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center justify-center gap-1 transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Tip Author
-            </button>
-            <button class="flex-1 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium shadow-sm flex items-center justify-center gap-1 transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-              </svg>
-              Follow
-            </button>
-          </div>
+        </a>
         </div>
 
-        <!-- Featured Journal -->
-        <div class="md:col-span-2 bg-white p-8 relative">
-          <div class="absolute top-4 right-4 flex items-center text-amber-500 text-sm font-medium bg-amber-50 px-3 py-1 rounded-full border border-amber-100">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-            </svg>
-            Featured Journal
-          </div>
-
-          <h3 class="text-2xl font-bold text-gray-800 mb-2 diary-font">Wanderlust Chronicles: A Year in Southeast Asia</h3>
-          <p class="text-gray-500 mb-6 text-sm">Published April 10, 2025 • Premium Journal</p>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <div class="aspect-w-16 aspect-h-9 mb-4 rounded-lg overflow-hidden shadow-md">
-                <img src="https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Thailand Travel" class="object-cover w-full h-full">
-              </div>
-              <p class="text-gray-600 text-sm diary-font line-clamp-4">
-                "The morning sun painted Railay Beach in gold, and I found myself completely lost in the moment. There's something about Thailand that awakens the soul - perhaps it's the contrast between chaotic cities and serene landscapes, or maybe it's simply the warm smiles that greet you everywhere..."
-              </p>
-            </div>
-
-            <div class="space-y-4">
-              <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                <div class="text-sm font-medium text-gray-700 mb-2">Journal Highlights:</div>
-                <ul class="space-y-2">
-                  <li class="flex items-start gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                    <span class="text-sm text-gray-600">365 days across 7 countries with stunning photography</span>
-                  </li>
-                  <li class="flex items-start gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                    <span class="text-sm text-gray-600">Personal insights on solo female travel safety tips</span>
-                  </li>
-                  <li class="flex items-start gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                    <span class="text-sm text-gray-600">Budget breakdowns and planning resources included</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div class="flex items-center justify-between text-sm text-gray-500">
-                <div class="flex items-center gap-4">
-                  <span class="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pink-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    2.4K
-                  </span>
-                  <span class="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                    </svg>
-                    315
-                  </span>
+        <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl overflow-hidden shadow-lg border border-amber-200">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-0 featured-author-grid">
+            <!-- Author Profile -->
+            <div class="p-4 sm:p-8 flex flex-col items-center text-center">
+              <div class="relative mb-4">
+                <div class="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 p-1">
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80" alt="Emily Davis" class="h-full w-full rounded-full object-cover border-2 border-white">
                 </div>
-                <div class="flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="absolute -top-2 -right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span class="font-medium text-gray-700">$8.99</span>
+                  $2,450 earned
                 </div>
               </div>
 
-              <div class="flex items-center text-amber-500 bg-amber-50 p-3 rounded-lg border border-amber-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              <h3 class="text-lg sm:text-xl font-bold text-gray-800 flex items-center justify-center">
+                Emily Davis
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 ml-1 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                 </svg>
-                <p class="text-sm text-amber-800">This journal has earned over <span class="font-bold">$1,240</span> in tips and purchases since publication!</p>
+              </h3>
+              <p class="text-gray-600 mb-3 sm:mb-4 text-sm">@worldtraveler</p>
+
+              <div class="flex flex-wrap justify-center gap-2 mb-4 sm:mb-6">
+                <span class="text-xs bg-white text-blue-600 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full font-medium border border-blue-100">Travel</span>
+                <span class="text-xs bg-white text-purple-600 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full font-medium border border-purple-100">Photography</span>
+                <span class="text-xs bg-white text-green-600 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full font-medium border border-green-100">Lifestyle</span>
+              </div>
+
+              <div class="w-full bg-white rounded-lg p-3 sm:p-4 mb-4 text-left">
+                <div class="text-gray-700 text-xs sm:text-sm mb-2">Author Stats:</div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <div class="text-xs text-gray-500">Followers</div>
+                    <div class="text-base sm:text-lg font-bold text-gray-800">12.8K</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-500">Published Journals</div>
+                    <div class="text-base sm:text-lg font-bold text-gray-800">24</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-500">Total Tips</div>
+                    <div class="text-base sm:text-lg font-bold text-amber-600">$2,450</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-500">Avg. Rating</div>
+                    <div class="flex items-center">
+                      <span class="text-base sm:text-lg font-bold text-gray-800 mr-1">4.9</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex gap-2 sm:gap-3 w-full">
+                <button class="flex-1 bg-amber-500 hover:bg-amber-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm flex items-center justify-center gap-1 transition-all">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Tip Author
+                </button>
+                <button class="flex-1 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm flex items-center justify-center gap-1 transition-all">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Follow
+                </button>
+              </div>
+            </div>
+
+            <!-- Featured Journal -->
+            <div class="md:col-span-2 bg-white p-4 sm:p-8 relative">
+              <div class="absolute top-4 right-4 flex items-center text-amber-500 text-xs font-medium bg-amber-50 px-2 py-1 sm:px-3 sm:py-1 rounded-full border border-amber-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+                Featured Journal
+              </div>
+
+              <h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-1 sm:mb-2 diary-font">Wanderlust Chronicles: A Year in Southeast Asia</h3>
+              <p class="text-gray-500 mb-4 sm:mb-6 text-xs sm:text-sm">Published April 10, 2025 • Premium Journal</p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
+                <div>
+                  <div class="aspect-ratio-box mb-3 sm:mb-4 rounded-lg overflow-hidden shadow-md">
+                    <div class="aspect-ratio-content">
+                      <img src="https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Thailand Travel" class="object-cover w-full h-full">
+                    </div>
+                  </div>
+                  <p class="text-gray-600 text-xs sm:text-sm diary-font line-clamp-3 sm:line-clamp-4">
+                    "The morning sun painted Railay Beach in gold, and I found myself completely lost in the moment. There's something about Thailand that awakens the soul - perhaps it's the contrast between chaotic cities and serene landscapes, or maybe it's simply the warm smiles that greet you everywhere..."
+                  </p>
+                </div>
+
+                <div class="space-y-3 sm:space-y-4">
+                  <div class="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-100">
+                    <div class="text-xs sm:text-sm font-medium text-gray-700 mb-2">Journal Highlights:</div>
+                    <ul class="space-y-2">
+                      <li class="flex items-start gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span class="text-xs sm:text-sm text-gray-600">365 days across 7 countries with stunning photography</span>
+                      </li>
+                      <li class="flex items-start gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span class="text-xs sm:text-sm text-gray-600">Personal insights on solo female travel safety tips</span>
+                      </li>
+                      <li class="flex items-start gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span class="text-xs sm:text-sm text-gray-600">Budget breakdowns and planning resources included</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div class="flex items-center justify-between text-xs sm:text-sm text-gray-500">
+                    <div class="flex items-center gap-3 sm:gap-4">
+                      <span class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-pink-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        2.4K
+                      </span>
+                      <span class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                        </svg>
+                        315
+                      </span>
+                    </div>
+                    <div class="flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-amber-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span class="font-medium text-gray-700">$8.99</span>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center text-amber-500 bg-amber-50 p-3 rounded-lg border border-amber-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <p class="text-xs sm:text-sm text-amber-800">This journal has earned over <span class="font-bold">$1,240</span> in tips and purchases since publication!</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-3">
+                <a href="#" class="flex-grow btn-gradient text-white px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-medium shadow-md flex items-center justify-center gap-2 mobile-btn-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                  Read Journal Preview
+                </a>
+                <a href="/signup/" class="flex-grow bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-medium shadow-md flex items-center justify-center gap-2 transition-all mobile-btn-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Publish Your Own Journal
+                </a>
               </div>
             </div>
           </div>
-
-          <div class="flex flex-col sm:flex-row gap-3">
-            <a href="#" class="flex-grow btn-gradient text-white px-4 py-3 rounded-lg text-sm font-medium shadow-md flex items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-              Read Journal Preview
-            </a>
-            <a href="/signup/" class="flex-grow bg-amber-500 hover:bg-amber-600 text-white px-4 py-3 rounded-lg text-sm font-medium shadow-md flex items-center justify-center gap-2 transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-              </svg>
-              Publish Your Own Journal
-            </a>
-          </div>
         </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Top-Earning Journals Section -->
-  <div class="mb-16 relative z-10 animate-fade-in">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-bold diary-font text-gray-800 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <div class="mb-12 md:mb-16 relative z-10 animate-fade-in section-spacing">
+    <div class="flex items-center justify-between mb-4 sm:mb-6">
+      <h2 class="text-xl sm:text-2xl font-bold diary-font text-gray-800 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         Top-Earning Journals
       </h2>
-      <a href="#" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
+      <a href="#" class="text-secondary-600 hover:text-secondary-800 text-xs sm:text-sm font-medium flex items-center gap-1">
         View all
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </a>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mobile-grid-1">
       <!-- Top Journal 1 -->
       <div class="marketplace-card bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 relative">
         <div class="rank-badge rank-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
           </svg>
         </div>
@@ -889,7 +1012,7 @@
           $2,450 earned
         </div>
 
-        <div class="relative h-48 bg-gray-200">
+        <div class="relative h-40 sm:h-48 bg-gray-200">
           <img src="https://images.unsplash.com/photo-1540202404-a2f29016b523?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Travel Journal" class="w-full h-full object-cover">
           <div class="price-tag premium-tag">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -898,21 +1021,21 @@
             $8.99
           </div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-            <h3 class="text-lg font-bold text-white mb-1 diary-font">Around the World in 80 Days</h3>
-            <p class="text-sm text-white/90 line-clamp-2">A breathtaking journey through 20 countries with stunning photography and personal insights.</p>
+            <h3 class="text-base sm:text-lg font-bold text-white mb-1 diary-font">Around the World in 80 Days</h3>
+            <p class="text-xs sm:text-sm text-white/90 line-clamp-2">A breathtaking journey through 20 countries with stunning photography and personal insights.</p>
           </div>
         </div>
 
-        <div class="p-4">
-          <div class="flex items-center justify-between mb-3">
+        <div class="p-3 sm:p-4">
+          <div class="flex items-center justify-between mb-2 sm:mb-3">
             <div class="flex items-center gap-2">
-              <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+              <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                 <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Avatar" class="h-full w-full rounded-full object-cover">
               </div>
               <div>
-                <span class="text-sm font-medium text-gray-800 verified-author">
+                <span class="text-xs sm:text-sm font-medium text-gray-800 verified-author">
                   @adventurer
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 verified-badge" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 verified-badge" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                   </svg>
                 </span>
@@ -934,14 +1057,14 @@
           </div>
 
           <div class="flex items-center justify-between">
-            <a href="#" class="text-white bg-secondary-500 hover:bg-secondary-600 px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 transition">
+            <a href="#" class="text-white bg-secondary-500 hover:bg-secondary-600 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1 transition mobile-btn">
               Read Journal
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </a>
             <button class="text-amber-500 hover:text-amber-600 p-1.5 rounded-full transition bg-amber-50">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </button>
@@ -961,7 +1084,7 @@
           $1,870 earned
         </div>
 
-        <div class="relative h-48 bg-gray-200">
+        <div class="relative h-40 sm:h-48 bg-gray-200">
           <img src="https://images.unsplash.com/photo-1533090161767-e6ffed986c88?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Mindfulness Journal" class="w-full h-full object-cover">
           <div class="price-tag premium-tag">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -970,21 +1093,21 @@
             $6.99
           </div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-            <h3 class="text-lg font-bold text-white mb-1 diary-font">Mindfulness Journey</h3>
-            <p class="text-sm text-white/90 line-clamp-2">A year of daily meditations and mindfulness practices documented with personal reflections and growth insights.</p>
+            <h3 class="text-base sm:text-lg font-bold text-white mb-1 diary-font">Mindfulness Journey</h3>
+            <p class="text-xs sm:text-sm text-white/90 line-clamp-2">A year of daily meditations and mindfulness practices documented with personal reflections and growth insights.</p>
           </div>
         </div>
 
-        <div class="p-4">
-          <div class="flex items-center justify-between mb-3">
+        <div class="p-3 sm:p-4">
+          <div class="flex items-center justify-between mb-2 sm:mb-3">
             <div class="flex items-center gap-2">
-              <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+              <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                 <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Avatar" class="h-full w-full rounded-full object-cover">
               </div>
               <div>
-                <span class="text-sm font-medium text-gray-800 verified-author">
+                <span class="text-xs sm:text-sm font-medium text-gray-800 verified-author">
                   @mindful_me
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 verified-badge" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 verified-badge" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                   </svg>
                 </span>
@@ -1006,14 +1129,14 @@
           </div>
 
           <div class="flex items-center justify-between">
-            <a href="#" class="text-white bg-secondary-500 hover:bg-secondary-600 px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 transition">
+            <a href="#" class="text-white bg-secondary-500 hover:bg-secondary-600 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1 transition mobile-btn">
               Read Journal
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </a>
             <button class="text-amber-500 hover:text-amber-600 p-1.5 rounded-full transition bg-amber-50">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </button>
@@ -1033,7 +1156,7 @@
           $1,520 earned
         </div>
 
-        <div class="relative h-48 bg-gray-200">
+        <div class="relative h-40 sm:h-48 bg-gray-200">
           <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Code Journey" class="w-full h-full object-cover">
           <div class="price-tag premium-tag">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1042,21 +1165,21 @@
             $5.99
           </div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-            <h3 class="text-lg font-bold text-white mb-1 diary-font">From Novice to Engineer</h3>
-            <p class="text-sm text-white/90 line-clamp-2">A coding journey documenting the path from complete beginner to professional software engineer with practical insights.</p>
+            <h3 class="text-base sm:text-lg font-bold text-white mb-1 diary-font">From Novice to Engineer</h3>
+            <p class="text-xs sm:text-sm text-white/90 line-clamp-2">A coding journey documenting the path from complete beginner to professional software engineer with practical insights.</p>
           </div>
         </div>
 
-        <div class="p-4">
-          <div class="flex items-center justify-between mb-3">
+        <div class="p-3 sm:p-4">
+          <div class="flex items-center justify-between mb-2 sm:mb-3">
             <div class="flex items-center gap-2">
-              <div class="h-8 w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+              <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                 <img src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Avatar" class="h-full w-full rounded-full object-cover">
               </div>
               <div>
-                <span class="text-sm font-medium text-gray-800 verified-author">
+                <span class="text-xs sm:text-sm font-medium text-gray-800 verified-author">
                   @code_chronicles
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 verified-badge" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 verified-badge" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                   </svg>
                 </span>
@@ -1078,14 +1201,14 @@
           </div>
 
           <div class="flex items-center justify-between">
-            <a href="#" class="text-white bg-secondary-500 hover:bg-secondary-600 px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1 transition">
+            <a href="#" class="text-white bg-secondary-500 hover:bg-secondary-600 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1 transition mobile-btn">
               Read Journal
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </a>
             <button class="text-amber-500 hover:text-amber-600 p-1.5 rounded-full transition bg-amber-50">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </button>
@@ -1095,41 +1218,41 @@
     </div>
   </div>
 
-  <!-- Free Popular Journals Section (Carousel-style) -->
-  <div class="mb-16 relative z-10 animate-fade-in">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-bold diary-font text-gray-800 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <!-- Free Popular Journals Section (Mobile-Friendly Carousel) -->
+  <div class="mb-12 md:mb-16 relative z-10 animate-fade-in section-spacing">
+    <div class="flex items-center justify-between mb-4 sm:mb-6">
+      <h2 class="text-xl sm:text-2xl font-bold diary-font text-gray-800 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         Popular Free Journals
       </h2>
-      <a href="#" class="text-secondary-600 hover:text-secondary-800 text-sm font-medium flex items-center gap-1">
+      <a href="#" class="text-secondary-600 hover:text-secondary-800 text-xs sm:text-sm font-medium flex items-center gap-1">
         View all
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </a>
     </div>
 
-    <div class="relative">
-      <!-- Scroll buttons for mobile -->
+    <div class="carousel-container relative">
+      <!-- Scroll buttons for desktop only -->
       <button class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full shadow-lg p-2 z-10 hidden sm:block">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
       </button>
 
       <button class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full shadow-lg p-2 z-10 hidden sm:block">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </button>
 
-      <div class="flex overflow-x-auto gap-5 pb-4 custom-scrollbar">
+      <div class="flex overflow-x-auto gap-4 sm:gap-5 pb-4 carousel-scroll">
         <!-- Card 1 -->
-        <div class="marketplace-card flex-shrink-0 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 relative w-72">
-          <div class="relative h-40 bg-gray-200">
+        <div class="marketplace-card carousel-item flex-shrink-0 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 relative w-64 sm:w-72">
+          <div class="relative h-36 sm:h-40 bg-gray-200">
             <img src="https://images.unsplash.com/photo-1550439062-609e1531270e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Food Journal" class="w-full h-full object-cover">
             <div class="price-tag free-tag">Free</div>
             <div class="featured-badge">
@@ -1139,19 +1262,19 @@
               Staff Pick
             </div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-              <h3 class="text-lg font-bold text-white mb-1 diary-font">Culinary Chronicles</h3>
-              <p class="text-sm text-white/90 line-clamp-2">A food lover's diary of recipes and the journey of learning to cook like a pro.</p>
+              <h3 class="text-base sm:text-lg font-bold text-white mb-1 diary-font">Culinary Chronicles</h3>
+              <p class="text-xs sm:text-sm text-white/90 line-clamp-2">A food lover's diary of recipes and the journey of learning to cook like a pro.</p>
             </div>
           </div>
 
-          <div class="p-4">
-            <div class="flex items-center justify-between mb-3">
+          <div class="p-3 sm:p-4">
+            <div class="flex items-center justify-between mb-2 sm:mb-3">
               <div class="flex items-center gap-2">
-                <div class="h-8 w-8 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                   <img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Avatar" class="h-full w-full rounded-full object-cover">
                 </div>
                 <div>
-                  <span class="text-sm font-medium text-gray-800">@foodie_finds</span>
+                  <span class="text-xs sm:text-sm font-medium text-gray-800">@foodie_finds</span>
                   <div class="text-xs text-gray-500">86 entries</div>
                 </div>
               </div>
@@ -1172,24 +1295,24 @@
         </div>
 
         <!-- Card 2 -->
-        <div class="marketplace-card flex-shrink-0 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 relative w-72">
-          <div class="relative h-40 bg-gray-200">
+        <div class="marketplace-card carousel-item flex-shrink-0 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 relative w-64 sm:w-72">
+          <div class="relative h-36 sm:h-40 bg-gray-200">
             <img src="https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Running Journal" class="w-full h-full object-cover">
             <div class="price-tag free-tag">Free</div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-              <h3 class="text-lg font-bold text-white mb-1 diary-font">Fitness Journey</h3>
-              <p class="text-sm text-white/90 line-clamp-2">From couch potato to marathon runner - my transformation story with workout plans included.</p>
+              <h3 class="text-base sm:text-lg font-bold text-white mb-1 diary-font">Fitness Journey</h3>
+              <p class="text-xs sm:text-sm text-white/90 line-clamp-2">From couch potato to marathon runner - my transformation story with workout plans included.</p>
             </div>
           </div>
 
-          <div class="p-4">
-            <div class="flex items-center justify-between mb-3">
+          <div class="p-3 sm:p-4">
+            <div class="flex items-center justify-between mb-2 sm:mb-3">
               <div class="flex items-center gap-2">
-                <div class="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                   <img src="https://images.unsplash.com/photo-1536087785043-34ac3b6dfddb?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Avatar" class="h-full w-full rounded-full object-cover">
                 </div>
                 <div>
-                  <span class="text-sm font-medium text-gray-800">@fitness_first</span>
+                  <span class="text-xs sm:text-sm font-medium text-gray-800">@fitness_first</span>
                   <div class="text-xs text-gray-500">52 entries</div>
                 </div>
               </div>
@@ -1210,24 +1333,24 @@
         </div>
 
         <!-- Card 3 -->
-        <div class="marketplace-card flex-shrink-0 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 relative w-72">
-          <div class="relative h-40 bg-gray-200">
+        <div class="marketplace-card carousel-item flex-shrink-0 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 relative w-64 sm:w-72">
+          <div class="relative h-36 sm:h-40 bg-gray-200">
             <img src="https://images.unsplash.com/photo-1535957998253-26ae1ef29506?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Parenting Journal" class="w-full h-full object-cover">
             <div class="price-tag free-tag">Free</div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-              <h3 class="text-lg font-bold text-white mb-1 diary-font">Parenting Journey</h3>
-              <p class="text-sm text-white/90 line-clamp-2">The ups and downs of raising twins - honest reflections, milestones, and practical advice.</p>
+              <h3 class="text-base sm:text-lg font-bold text-white mb-1 diary-font">Parenting Journey</h3>
+              <p class="text-xs sm:text-sm text-white/90 line-clamp-2">The ups and downs of raising twins - honest reflections, milestones, and practical advice.</p>
             </div>
           </div>
 
-          <div class="p-4">
-            <div class="flex items-center justify-between mb-3">
+          <div class="p-3 sm:p-4">
+            <div class="flex items-center justify-between mb-2 sm:mb-3">
               <div class="flex items-center gap-2">
-                <div class="h-8 w-8 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                   <img src="https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Avatar" class="h-full w-full rounded-full object-cover">
                 </div>
                 <div>
-                  <span class="text-sm font-medium text-gray-800">@twin_mom</span>
+                  <span class="text-xs sm:text-sm font-medium text-gray-800">@twin_mom</span>
                   <div class="text-xs text-gray-500">124 entries</div>
                 </div>
               </div>
@@ -1248,29 +1371,27 @@
         </div>
 
         <!-- Card 4 -->
-        <div class="marketplace-card flex-shrink-0 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 relative w-72">
-          <div class="relative h-40 bg-gray-200">
+        <div class="marketplace-card carousel-item flex-shrink-0 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 relative w-64 sm:w-72">
+          <div class="relative h-36 sm:h-40 bg-gray-200">
             <img src="https://images.unsplash.com/photo-1471107340929-a87cd0f5b5f3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Writing Journal" class="w-full h-full object-cover">
             <div class="price-tag free-tag">Free</div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-              <h3 class="text-lg font-bold text-white mb-1 diary-font">The Writer's Almanac</h3>
-              <p class="text-sm text-white/90 line-clamp-2">Daily writing exercises and the journey to becoming a published author with practical tips.</p>
+              <h3 class="text-base sm:text-lg font-bold text-white mb-1 diary-font">The Writer's Almanac</h3>
+              <p class="text-xs sm:text-sm text-white/90 line-clamp-2">Daily writing exercises and the journey to becoming a published author with practical tips.</p>
             </div>
           </div>
 
-          <div class="p-4">
-            <div class="flex items-center justify-between mb-3">
+          <div class="p-3 sm:p-4">
+            <div class="flex items-center justify-between mb-2 sm:mb-3">
               <div class="flex items-center gap-2">
-                <div class="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                   <img src="https://images.unsplash.com/photo-1544723795-3fb6469f5b39?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Avatar" class="h-full w-full rounded-full object-cover">
                 </div>
                 <div>
-                  <span class="text-sm font-medium text-gray-800 verified-author">
+                  <span class="text-xs sm:text-sm font-medium text-gray-800 verified-author">
                     @wordsmith
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 verified-badge" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.
-
-723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 verified-badge" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                     </svg>
                   </span>
                   <div class="text-xs text-gray-500">248 entries</div>
@@ -1293,24 +1414,24 @@
         </div>
 
         <!-- Card 5 -->
-        <div class="marketplace-card flex-shrink-0 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 relative w-72">
-          <div class="relative h-40 bg-gray-200">
+        <div class="marketplace-card carousel-item flex-shrink-0 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 relative w-64 sm:w-72">
+          <div class="relative h-36 sm:h-40 bg-gray-200">
             <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Vegan Journal" class="w-full h-full object-cover">
             <div class="price-tag free-tag">Free</div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-              <h3 class="text-lg font-bold text-white mb-1 diary-font">Plant-Based Living</h3>
-              <p class="text-sm text-white/90 line-clamp-2">My journey transitioning to a vegan lifestyle with favorite recipes and sustainability tips.</p>
+              <h3 class="text-base sm:text-lg font-bold text-white mb-1 diary-font">Plant-Based Living</h3>
+              <p class="text-xs sm:text-sm text-white/90 line-clamp-2">My journey transitioning to a vegan lifestyle with favorite recipes and sustainability tips.</p>
             </div>
           </div>
 
-          <div class="p-4">
-            <div class="flex items-center justify-between mb-3">
+          <div class="p-3 sm:p-4">
+            <div class="flex items-center justify-between mb-2 sm:mb-3">
               <div class="flex items-center gap-2">
-                <div class="h-8 w-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                <div class="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                   <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="Avatar" class="h-full w-full rounded-full object-cover">
                 </div>
                 <div>
-                  <span class="text-sm font-medium text-gray-800">@plant_power</span>
+                  <span class="text-xs sm:text-sm font-medium text-gray-800">@plant_power</span>
                   <div class="text-xs text-gray-500">74 entries</div>
                 </div>
               </div>
@@ -1333,52 +1454,52 @@
     </div>
   </div>
 
-  <!-- Testimonials Section -->
-  <div class="mb-16 relative z-10 animate-fade-in">
-    <div class="text-center mb-10">
-      <h2 class="text-2xl font-bold diary-font text-gray-800 mb-3">What Our Community Says</h2>
-      <p class="text-gray-600 max-w-2xl mx-auto">Join thousands of writers and readers who have found their voice on DiaryVault.</p>
+  <!-- Testimonials Section - Stacked on mobile, grid on larger screens -->
+  <div class="mb-12 md:mb-16 relative z-10 animate-fade-in section-spacing">
+    <div class="text-center mb-6 sm:mb-10">
+      <h2 class="text-xl sm:text-2xl font-bold diary-font text-gray-800 mb-2 sm:mb-3">What Our Community Says</h2>
+      <p class="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">Join thousands of writers and readers who have found their voice on DiaryVault.</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mobile-grid-1">
       <!-- Testimonial 1 -->
-      <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 relative">
+      <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100 relative">
         <div class="absolute top-0 right-0 transform translate-x-2 -translate-y-2">
-          <svg width="42" height="30" viewBox="0 0 42 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="36" height="25" viewBox="0 0 42 30" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M11.7984 29.8L0.599609 15.2V0H16.7996V15.2H8.39961L15.5996 29.8H11.7984ZM36.7984 29.8L25.5996 15.2V0H41.7996V15.2H33.3996L40.5996 29.8H36.7984Z" fill="#6366F1" fill-opacity="0.1"/>
           </svg>
         </div>
 
-        <div class="flex items-center gap-4 mb-6">
-          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="User" class="w-12 h-12 rounded-full object-cover">
+        <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="User" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover">
           <div>
-            <h4 class="font-bold text-gray-800">Sarah Johnson</h4>
+            <h4 class="font-bold text-gray-800 text-sm sm:text-base">Sarah Johnson</h4>
             <div class="text-xs text-gray-500">Travel Blogger & Author</div>
           </div>
         </div>
 
-        <p class="text-gray-600 mb-6 italic diary-font">"I started sharing my travel experiences on DiaryVault and never expected to build such a dedicated following. The tips from readers have helped fund my next three trips!"</p>
+        <p class="text-gray-600 mb-4 sm:mb-6 italic diary-font text-xs sm:text-sm">"I started sharing my travel experiences on DiaryVault and never expected to build such a dedicated following. The tips from readers have helped fund my next three trips!"</p>
 
         <div class="flex justify-between items-center">
           <div class="flex text-amber-400">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
           </div>
-          <div class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 sm:px-3 sm:py-1 rounded-full flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-3.5 sm:w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             $2,450 earned
@@ -1387,43 +1508,43 @@
       </div>
 
       <!-- Testimonial 2 -->
-      <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 relative">
+      <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100 relative">
         <div class="absolute top-0 right-0 transform translate-x-2 -translate-y-2">
-          <svg width="42" height="30" viewBox="0 0 42 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="36" height="25" viewBox="0 0 42 30" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M11.7984 29.8L0.599609 15.2V0H16.7996V15.2H8.39961L15.5996 29.8H11.7984ZM36.7984 29.8L25.5996 15.2V0H41.7996V15.2H33.3996L40.5996 29.8H36.7984Z" fill="#6366F1" fill-opacity="0.1"/>
           </svg>
         </div>
 
-        <div class="flex items-center gap-4 mb-6">
-          <img src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="User" class="w-12 h-12 rounded-full object-cover">
+        <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <img src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="User" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover">
           <div>
-            <h4 class="font-bold text-gray-800">Michael Rodriguez</h4>
+            <h4 class="font-bold text-gray-800 text-sm sm:text-base">Michael Rodriguez</h4>
             <div class="text-xs text-gray-500">Software Developer & Writer</div>
           </div>
         </div>
 
-        <p class="text-gray-600 mb-6 italic diary-font">"The community feedback on my coding journey journal has been incredible. I've not only earned money through tips but also landed a better job because of connections made here!"</p>
+        <p class="text-gray-600 mb-4 sm:mb-6 italic diary-font text-xs sm:text-sm">"The community feedback on my coding journey journal has been incredible. I've not only earned money through tips but also landed a better job because of connections made here!"</p>
 
         <div class="flex justify-between items-center">
           <div class="flex text-amber-400">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
           </div>
-          <div class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 sm:px-3 sm:py-1 rounded-full flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-3.5 sm:w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             $1,890 earned
@@ -1432,43 +1553,43 @@
       </div>
 
       <!-- Testimonial 3 -->
-      <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 relative">
+      <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100 relative">
         <div class="absolute top-0 right-0 transform translate-x-2 -translate-y-2">
-          <svg width="42" height="30" viewBox="0 0 42 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="36" height="25" viewBox="0 0 42 30" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M11.7984 29.8L0.599609 15.2V0H16.7996V15.2H8.39961L15.5996 29.8H11.7984ZM36.7984 29.8L25.5996 15.2V0H41.7996V15.2H33.3996L40.5996 29.8H36.7984Z" fill="#6366F1" fill-opacity="0.1"/>
           </svg>
         </div>
 
-        <div class="flex items-center gap-4 mb-6">
-          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="User" class="w-12 h-12 rounded-full object-cover">
+        <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="User" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover">
           <div>
-            <h4 class="font-bold text-gray-800">Emily Chen</h4>
+            <h4 class="font-bold text-gray-800 text-sm sm:text-base">Emily Chen</h4>
             <div class="text-xs text-gray-500">Mental Health Advocate</div>
           </div>
         </div>
 
-        <p class="text-gray-600 mb-6 italic diary-font">"Sharing my mental health journey on DiaryVault has been healing not just for me but for my readers too. The supportive community here is unlike anywhere else online."</p>
+        <p class="text-gray-600 mb-4 sm:mb-6 italic diary-font text-xs sm:text-sm">"Sharing my mental health journey on DiaryVault has been healing not just for me but for my readers too. The supportive community here is unlike anywhere else online."</p>
 
         <div class="flex justify-between items-center">
           <div class="flex text-amber-400">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
           </div>
-          <div class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 sm:px-3 sm:py-1 rounded-full flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-3.5 sm:w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             $1,120 earned
@@ -1479,103 +1600,103 @@
   </div>
 
   <!-- FAQs Section -->
-  <div class="mb-16 relative z-10 animate-fade-in">
-    <div class="text-center mb-10">
-      <h2 class="text-2xl font-bold diary-font text-gray-800 mb-3">Frequently Asked Questions</h2>
-      <p class="text-gray-600 max-w-2xl mx-auto">Everything you need to know about publishing on DiaryVault.</p>
+  <div class="mb-12 md:mb-16 relative z-10 animate-fade-in section-spacing">
+    <div class="text-center mb-6 sm:mb-10">
+      <h2 class="text-xl sm:text-2xl font-bold diary-font text-gray-800 mb-2 sm:mb-3">Frequently Asked Questions</h2>
+      <p class="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">Everything you need to know about publishing on DiaryVault.</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mobile-grid-1">
       <!-- FAQ 1 -->
-      <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-        <h3 class="font-bold text-gray-800 text-lg mb-3 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100">
+        <h3 class="font-bold text-gray-800 text-base sm:text-lg mb-2 sm:mb-3 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           How do I earn money from my journals?
         </h3>
-        <p class="text-gray-600">You can earn through tips from readers who appreciate your content, selling premium journals, and participating in our author rewards program. Top authors earn $1,000+ monthly from these combined income streams.</p>
+        <p class="text-gray-600 text-xs sm:text-sm">You can earn through tips from readers who appreciate your content, selling premium journals, and participating in our author rewards program. Top authors earn $1,000+ monthly from these combined income streams.</p>
       </div>
 
       <!-- FAQ 2 -->
-      <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-        <h3 class="font-bold text-gray-800 text-lg mb-3 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100">
+        <h3 class="font-bold text-gray-800 text-base sm:text-lg mb-2 sm:mb-3 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           Do I need to be a professional writer?
         </h3>
-        <p class="text-gray-600">Not at all! DiaryVault welcomes authentic voices at all skill levels. Our community values genuine experiences and personal perspectives over polished prose. Just be yourself and share your journey.</p>
+        <p class="text-gray-600 text-xs sm:text-sm">Not at all! DiaryVault welcomes authentic voices at all skill levels. Our community values genuine experiences and personal perspectives over polished prose. Just be yourself and share your journey.</p>
       </div>
 
       <!-- FAQ 3 -->
-      <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-        <h3 class="font-bold text-gray-800 text-lg mb-3 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100">
+        <h3 class="font-bold text-gray-800 text-base sm:text-lg mb-2 sm:mb-3 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           How are payments processed?
         </h3>
-        <p class="text-gray-600">We process payments through secure services like Stripe and PayPal. Authors can withdraw their earnings once they reach $25. We handle all transaction fees for premium journals, and there's only a small 5% fee on tips.</p>
+        <p class="text-gray-600 text-xs sm:text-sm">We process payments through secure services like Stripe and PayPal. Authors can withdraw their earnings once they reach $25. We handle all transaction fees for premium journals, and there's only a small 5% fee on tips.</p>
       </div>
 
       <!-- FAQ 4 -->
-      <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-        <h3 class="font-bold text-gray-800 text-lg mb-3 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100">
+        <h3 class="font-bold text-gray-800 text-base sm:text-lg mb-2 sm:mb-3 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           What about privacy and ownership?
         </h3>
-        <p class="text-gray-600">You maintain full ownership of all your content. Our privacy controls let you decide which entries are public, premium, or private. You can delete your content at any time, and we never claim rights to your work.</p>
+        <p class="text-gray-600 text-xs sm:text-sm">You maintain full ownership of all your content. Our privacy controls let you decide which entries are public, premium, or private. You can delete your content at any time, and we never claim rights to your work.</p>
       </div>
     </div>
   </div>
 
   <!-- Large CTA Banner -->
-  <div class="mb-16 relative z-10 animate-fade-in">
+  <div class="mb-12 md:mb-16 relative z-10 animate-fade-in section-spacing">
     <div class="bg-gradient-to-r from-secondary-600 to-primary-600 rounded-2xl overflow-hidden shadow-xl">
-      <div class="p-8 sm:p-12 relative">
+      <div class="p-6 sm:p-8 md:p-12 relative">
         <div class="absolute top-0 right-0 h-64 w-64 bg-white/10 rounded-full mix-blend-overlay filter blur-3xl opacity-70 transform translate-x-1/3 -translate-y-1/3"></div>
         <div class="absolute bottom-0 left-0 h-64 w-64 bg-white/10 rounded-full mix-blend-overlay filter blur-3xl opacity-70 transform -translate-x-1/3 translate-y-1/3"></div>
 
         <div class="max-w-3xl mx-auto text-center relative z-10">
-          <h2 class="text-3xl sm:text-4xl font-bold diary-font mb-6 text-white">Ready to Share Your Story With The World?</h2>
-          <p class="text-white/90 text-lg mb-8">Join thousands of writers monetizing their personal journals and connecting with readers who value authentic experiences.</p>
+          <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold diary-font mb-4 sm:mb-6 text-white">Ready to Share Your Story With The World?</h2>
+          <p class="text-white/90 text-sm sm:text-base md:text-lg mb-6 sm:mb-8">Join thousands of writers monetizing their personal journals and connecting with readers who value authentic experiences.</p>
 
-          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="/signup/" class="bg-white hover:bg-gray-50 text-secondary-600 px-8 py-3 rounded-full text-base font-medium shadow-lg flex items-center gap-2 transform transition-all hover:-translate-y-1 w-full sm:w-auto">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+            <a href="/signup/" class="bg-white hover:bg-gray-50 text-secondary-600 px-6 py-2.5 sm:py-3 rounded-full text-sm sm:text-base font-medium shadow-lg flex items-center justify-center gap-2 transform transition-all hover:-translate-y-1 w-full sm:w-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
               Create Your Account
             </a>
-            <a href="#explore" class="bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 px-8 py-3 rounded-full text-base font-medium shadow-lg border border-white/30 flex items-center gap-2 w-full sm:w-auto">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <a href="#explore" class="bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 px-6 py-2.5 sm:py-3 rounded-full text-sm sm:text-base font-medium shadow-lg border border-white/30 flex items-center justify-center gap-2 w-full sm:w-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
               Explore Journals
             </a>
           </div>
 
-          <div class="mt-8 flex items-center justify-center gap-6 text-white/80">
+          <div class="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-white/80">
             <div class="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
-              <span class="text-sm">Free to join</span>
+              <span class="text-xs sm:text-sm">Free to join</span>
             </div>
             <div class="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
-              <span class="text-sm">Secure payments</span>
+              <span class="text-xs sm:text-sm">Secure payments</span>
             </div>
             <div class="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
-              <span class="text-sm">You own your content</span>
+              <span class="text-xs sm:text-sm">You own your content</span>
             </div>
           </div>
         </div>
@@ -1584,69 +1705,69 @@
   </div>
 
   <!-- Join Author Program -->
-  <div class="mb-16 relative z-10 animate-fade-in">
+  <div class="mb-12 md:mb-16 relative z-10 animate-fade-in section-spacing">
     <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
-        <div class="p-8 md:p-10">
-          <div class="text-amber-500 text-sm font-bold mb-3 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-0 featured-author-grid">
+        <div class="p-4 sm:p-6 md:p-10">
+          <div class="text-amber-500 text-xs sm:text-sm font-bold mb-2 sm:mb-3 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
             </svg>
             EXCLUSIVE OPPORTUNITY
           </div>
-          <h2 class="text-2xl sm:text-3xl font-bold diary-font text-gray-800 mb-4">Join Our Featured Authors Program</h2>
-          <p class="text-gray-600 mb-6">Get highlighted on our homepage, receive promotional support, and earn higher rewards when you become part of our curated featured authors program.</p>
+          <h2 class="text-xl sm:text-2xl md:text-3xl font-bold diary-font text-gray-800 mb-3 sm:mb-4">Join Our Featured Authors Program</h2>
+          <p class="text-gray-600 mb-4 sm:mb-6 text-xs sm:text-sm md:text-base">Get highlighted on our homepage, receive promotional support, and earn higher rewards when you become part of our curated featured authors program.</p>
 
-          <div class="space-y-4 mb-6">
-            <div class="flex items-start gap-3">
+          <div class="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+            <div class="flex items-start gap-2 sm:gap-3">
               <div class="bg-amber-100 p-1 rounded-full flex-shrink-0 mt-0.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <div>
-                <h4 class="font-medium text-gray-800">Premium Dashboard Access</h4>
-                <p class="text-sm text-gray-600">Access detailed analytics and reader insights to optimize your content.</p>
+                <h4 class="font-medium text-gray-800 text-sm sm:text-base">Premium Dashboard Access</h4>
+                <p class="text-xs sm:text-sm text-gray-600">Access detailed analytics and reader insights to optimize your content.</p>
               </div>
             </div>
-            <div class="flex items-start gap-3">
+            <div class="flex items-start gap-2 sm:gap-3">
               <div class="bg-amber-100 p-1 rounded-full flex-shrink-0 mt-0.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <div>
-                <h4 class="font-medium text-gray-800">Lower Platform Fees</h4>
-                <p class="text-sm text-gray-600">Enjoy reduced commission rates and keep more of your earnings.</p>
+                <h4 class="font-medium text-gray-800 text-sm sm:text-base">Lower Platform Fees</h4>
+                <p class="text-xs sm:text-sm text-gray-600">Enjoy reduced commission rates and keep more of your earnings.</p>
               </div>
             </div>
-            <div class="flex items-start gap-3">
+            <div class="flex items-start gap-2 sm:gap-3">
               <div class="bg-amber-100 p-1 rounded-full flex-shrink-0 mt-0.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <div>
-                <h4 class="font-medium text-gray-800">Marketing Support</h4>
-                <p class="text-sm text-gray-600">Get featured in our newsletter and social media promotions.</p>
+                <h4 class="font-medium text-gray-800 text-sm sm:text-base">Marketing Support</h4>
+                <p class="text-xs sm:text-sm text-gray-600">Get featured in our newsletter and social media promotions.</p>
               </div>
             </div>
           </div>
 
-          <a href="/signup/?ref=featured_author" class="btn-amber text-white px-6 py-3 rounded-full text-sm font-medium shadow-md flex items-center gap-2 w-fit">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <a href="/signup/?ref=featured_author" class="btn-amber text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-medium shadow-md flex items-center justify-center gap-2 w-full sm:w-fit">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             Apply to the Program
           </a>
         </div>
-        <div class="relative">
+        <div class="relative hidden md:block">
           <div class="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-amber-600/20 mix-blend-multiply"></div>
           <img src="https://images.unsplash.com/photo-1516383607781-913a19294fd1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Featured Author Program" class="w-full h-full object-cover">
           <div class="absolute inset-0 flex items-end p-6">
             <div class="bg-white/90 backdrop-blur-sm rounded-lg p-4 sm:p-6 shadow-lg text-center">
-              <div class="text-4xl sm:text-5xl font-bold diary-font text-amber-600 mb-2">5X</div>
-              <p class="text-gray-800 font-medium">Average increase in earnings for authors in our featured program</p>
+              <div class="text-3xl sm:text-4xl md:text-5xl font-bold diary-font text-amber-600 mb-2">5X</div>
+              <p class="text-gray-800 font-medium text-sm sm:text-base">Average increase in earnings for authors in our featured program</p>
             </div>
           </div>
         </div>
@@ -1665,59 +1786,27 @@
   </div>
 </div>
 
-<!-- Additional JavaScript for enhanced marketplace features -->
+<!-- Mobile enhancements for JavaScript -->
 {% block extra_js %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Initialize animation on scroll
+    // Initialize animation on scroll with better mobile performance
     animateOnScroll();
 
-    // Initialize counters
+    // Initialize counters with reduced animations on mobile
     initCounters();
 
-    // Initialize tab switching
-    const tabs = document.querySelectorAll('.tab-selector');
-    if (tabs.length > 0) {
-      tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-          const target = this.getAttribute('data-target');
-          switchTab(target);
-        });
-      });
-    }
+    // Handle touch events for carousel
+    initMobileCarousel();
 
-    // Initialize filters
-    const filterChips = document.querySelectorAll('.filter-chip');
-    if (filterChips.length > 0) {
-      filterChips.forEach(chip => {
-        chip.addEventListener('click', function() {
-          // Toggle active class
-          filterChips.forEach(c => c.classList.remove('active'));
-          this.classList.add('active');
-
-          // In a real implementation, you would filter content here
-        });
-      });
-    }
-
-    // Initialize category pills
-    const categoryPills = document.querySelectorAll('.category-pill');
-    if (categoryPills.length > 0) {
-      categoryPills.forEach(pill => {
-        pill.addEventListener('click', function() {
-          // Toggle active class
-          categoryPills.forEach(p => p.classList.remove('active'));
-          this.classList.add('active');
-
-          // In a real implementation, you would filter by category here
-        });
-      });
-    }
+    // Make hover states work better on touch devices
+    initTouchFriendlyHovers();
   });
 
-  // Animation on scroll
+  // Animation on scroll with mobile optimization
   function animateOnScroll() {
     const elements = document.querySelectorAll('.animate-fade-in, .animate-scale-in');
+    const isMobile = window.innerWidth < 640;
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -1725,31 +1814,35 @@
           entry.target.style.visibility = 'visible';
           entry.target.style.opacity = '1';
           entry.target.style.transform = 'translateY(0) scale(1)';
+
+          // For better mobile performance, unobserve after animation
           observer.unobserve(entry.target);
         }
       });
     }, {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
+      threshold: isMobile ? 0.05 : 0.1, // Lower threshold on mobile for earlier triggering
+      rootMargin: isMobile ? '0px 0px -20px 0px' : '0px 0px -50px 0px'
     });
 
     elements.forEach(element => {
       element.style.visibility = 'hidden';
       element.style.opacity = '0';
       element.style.transform = element.classList.contains('animate-scale-in') ? 'scale(0.9)' : 'translateY(20px)';
-      element.style.transition = 'opacity 0.6s ease, transform 0.6s ease, visibility 0.6s ease';
+      element.style.transition = `opacity ${isMobile ? '0.4s' : '0.6s'} ease, transform ${isMobile ? '0.4s' : '0.6s'} ease, visibility ${isMobile ? '0.4s' : '0.6s'} ease`;
       observer.observe(element);
     });
   }
 
-  // Initialize counters with animation
+  // Initialize counters with animation optimized for mobile
   function initCounters() {
     const counters = document.querySelectorAll('.stat-counter');
+    const isMobile = window.innerWidth < 640;
 
     counters.forEach(counter => {
       const target = parseInt(counter.getAttribute('data-value'), 10);
       let current = 0;
-      const increment = Math.ceil(target / 50); // Adjust for speed
+      // Faster increments on mobile
+      const increment = Math.ceil(target / (isMobile ? 30 : 50));
 
       const updateCounter = () => {
         if (current < target) {
@@ -1760,7 +1853,6 @@
         }
       };
 
-      // Start animation when element becomes visible
       const observer = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting) {
           requestAnimationFrame(updateCounter);
@@ -1772,28 +1864,92 @@
     });
   }
 
-  // Tab switching function
-  function switchTab(target) {
-    // Hide all tab contents
-    const contents = document.querySelectorAll('.tab-content');
-    contents.forEach(content => {
-      content.style.display = 'none';
+  // Initialize mobile-friendly carousel with touch support
+  function initMobileCarousel() {
+    const carousels = document.querySelectorAll('.carousel-scroll');
+
+    carousels.forEach(carousel => {
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      // Touch events
+      carousel.addEventListener('touchstart', (e) => {
+        isDown = true;
+        carousel.classList.add('active');
+        startX = e.touches[0].pageX - carousel.offsetLeft;
+        scrollLeft = carousel.scrollLeft;
+      });
+
+      carousel.addEventListener('touchend', () => {
+        isDown = false;
+        carousel.classList.remove('active');
+      });
+
+      carousel.addEventListener('touchcancel', () => {
+        isDown = false;
+        carousel.classList.remove('active');
+      });
+
+      carousel.addEventListener('touchmove', (e) => {
+        if(!isDown) return;
+        e.preventDefault();
+        const x = e.touches[0].pageX - carousel.offsetLeft;
+        const walk = (x - startX) * 2; // Scroll speed
+        carousel.scrollLeft = scrollLeft - walk;
+      });
+
+      // Mouse events (for desktop)
+      carousel.addEventListener('mousedown', (e) => {
+        isDown = true;
+        carousel.classList.add('active');
+        startX = e.pageX - carousel.offsetLeft;
+        scrollLeft = carousel.scrollLeft;
+      });
+
+      carousel.addEventListener('mouseleave', () => {
+        isDown = false;
+        carousel.classList.remove('active');
+      });
+
+      carousel.addEventListener('mouseup', () => {
+        isDown = false;
+        carousel.classList.remove('active');
+      });
+
+      carousel.addEventListener('mousemove', (e) => {
+        if(!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - carousel.offsetLeft;
+        const walk = (x - startX) * 2; // Scroll speed
+        carousel.scrollLeft = scrollLeft - walk;
+      });
+    });
+  }
+
+  // Make hover states work better on touch devices
+  function initTouchFriendlyHovers() {
+    // For card overlays
+    const cardElements = document.querySelectorAll('.marketplace-card, .card-hover');
+
+    cardElements.forEach(card => {
+      card.addEventListener('touchstart', function() {
+        // Remove active class from all other cards
+        cardElements.forEach(c => {
+          if (c !== card) c.classList.remove('touch-active');
+        });
+
+        // Toggle active class on this card
+        this.classList.toggle('touch-active');
+      }, { passive: true });
     });
 
-    // Show selected tab content
-    const selected = document.getElementById(target);
-    if (selected) {
-      selected.style.display = 'block';
-    }
-
-    // Update tab styles
-    const tabs = document.querySelectorAll('.tab-selector');
-    tabs.forEach(tab => {
-      tab.classList.remove('active');
-      if (tab.getAttribute('data-target') === target) {
-        tab.classList.add('active');
+    // For other hover elements
+    document.addEventListener('touchend', function(e) {
+      if (!e.target.closest('.marketplace-card, .card-hover')) {
+        cardElements.forEach(c => c.classList.remove('touch-active'));
       }
-    });
+    }, { passive: true });
   }
 </script>
 {% endblock %}
