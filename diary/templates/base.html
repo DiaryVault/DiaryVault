@@ -31,72 +31,74 @@
     <script src="https://cdn.tailwindcss.com" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Poppins:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
     <script>
-     document.addEventListener('DOMContentLoaded', function() {
-       if (typeof tailwind !== 'undefined') {
-         tailwind.config = {
-           theme: {
-             extend: {
-               colors: {
-              primary: {
-                50: '#f5f3ff',
-                100: '#ede9fe',
-                200: '#ddd6fe',
-                300: '#c4b5fd',
-                400: '#a78bfa',
-                500: '#8b5cf6',
-                600: '#7c3aed',
-                700: '#6d28d9',
-                800: '#5b21b6',
-                900: '#4c1d95',
-              },
-              secondary: {
-                50: '#eef2ff',
-                100: '#e0e7ff',
-                200: '#c7d2fe',
-                300: '#a5b4fc',
-                400: '#818cf8',
-                500: '#6366f1',
-                600: '#4f46e5',
-                700: '#4338ca',
-                800: '#3730a3',
-                900: '#312e81',
-              },
-            },
-            animation: {
-              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'bounce-slow': 'bounce 3s infinite',
-              'wiggle': 'wiggle 1s ease-in-out infinite',
-              'fade-in': 'fadeIn 0.5s ease forwards',
-              'scale-in': 'scaleIn 0.5s ease forwards',
-            },
-            keyframes: {
-              wiggle: {
-                '0%, 100%': { transform: 'rotate(-1deg)' },
-                '50%': { transform: 'rotate(1deg)' },
-              },
-              fadeIn: {
-                'from': { opacity: 0 },
-                'to': { opacity: 1 },
-              },
-              scaleIn: {
-                'from': { transform: 'scale(0.95)', opacity: 0 },
-                'to': { transform: 'scale(1)', opacity: 1 },
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof tailwind !== 'undefined') {
+          tailwind.config = {
+            theme: {
+              extend: {
+                colors: {
+                  primary: {
+                    50: '#f5f3ff',
+                    100: '#ede9fe',
+                    200: '#ddd6fe',
+                    300: '#c4b5fd',
+                    400: '#a78bfa',
+                    500: '#8b5cf6',
+                    600: '#7c3aed',
+                    700: '#6d28d9',
+                    800: '#5b21b6',
+                    900: '#4c1d95',
+                  },
+                  secondary: {
+                    50: '#eef2ff',
+                    100: '#e0e7ff',
+                    200: '#c7d2fe',
+                    300: '#a5b4fc',
+                    400: '#818cf8',
+                    500: '#6366f1',
+                    600: '#4f46e5',
+                    700: '#4338ca',
+                    800: '#3730a3',
+                    900: '#312e81',
+                  }
+                },
+                animation: {
+                  'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                  'bounce-slow': 'bounce 3s infinite',
+                  'wiggle': 'wiggle 1s ease-in-out infinite',
+                  'fade-in': 'fadeIn 0.5s ease forwards',
+                  'scale-in': 'scaleIn 0.5s ease forwards',
+                },
+                keyframes: {
+                  wiggle: {
+                    '0%, 100%': { transform: 'rotate(-1deg)' },
+                    '50%': { transform: 'rotate(1deg)' },
+                  },
+                  fadeIn: {
+                    'from': { opacity: 0 },
+                    'to': { opacity: 1 },
+                  },
+                  scaleIn: {
+                    'from': { transform: 'scale(0.95)', opacity: 0 },
+                    'to': { transform: 'scale(1)', opacity: 1 },
+                  }
+                },
+                borderRadius: {
+                  'sm': 'var(--radius-sm)',
+                  'md': 'var(--radius-md)',
+                  'lg': 'var(--radius-lg)',
+                  'xl': 'var(--radius-xl)',
+                },
+                boxShadow: {
+                  'elevated': 'var(--shadow-elevated)',
+                  'subtle': 'var(--shadow-subtle)',
+                  'focus': 'var(--shadow-focus)',
+                }
               }
-            },
-            borderRadius: {
-              'sm': 'var(--radius-sm)',
-              'md': 'var(--radius-md)',
-              'lg': 'var(--radius-lg)',
-              'xl': 'var(--radius-xl)',
-            },
-            boxShadow: {
-              'elevated': 'var(--shadow-elevated)',
-              'subtle': 'var(--shadow-subtle)',
-              'focus': 'var(--shadow-focus)',
-            },
-          },
-        },
-      }
+            }
+          }
+        }
+      });
     </script>
     <style>
       :root {
@@ -777,6 +779,59 @@
         }
       }
     </style>
+    And also the toast notification code needs to be fixed to properly format the SVG paths:
+    javascript// Define toast notification system
+    const toast = {
+      element: document.getElementById('toast'),
+      iconElement: document.getElementById('toast-icon'),
+      messageElement: document.getElementById('toast-message'),
+      timeoutId: null,
+
+      show: function(message, type = 'info', duration = 3000) {
+        // Clear any existing timeout
+        if (this.timeoutId) clearTimeout(this.timeoutId);
+
+        // Set icon based on type
+        let iconSvg = '';
+        this.element.className = 'toast visible';
+
+        switch(type) {
+          case 'success':
+            iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm3.707-9.293a1 1 0 0 0-1.414-1.414L9 10.586 7.707 9.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4z" clip-rule="evenodd" /></svg>';
+            this.element.classList.add('toast-success');
+            break;
+          case 'error':
+            iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM8.707 7.293a1 1 0 0 0-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 1 0 1.414 1.414L10 11.414l1.293 1.293a1 1 0 0 0 1.414-1.414L11.414 10l1.293-1.293a1 1 0 0 0-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>';
+            this.element.classList.add('toast-error');
+            break;
+          case 'warning':
+            iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-1-8a1 1 0 0 0-1 1v3a1 1 0 0 0 2 0V6a1 1 0 0 0-1-1z" clip-rule="evenodd" /></svg>';
+            this.element.classList.add('toast-warning');
+            break;
+          default:
+            iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM9 9a1 1 0 0 0 0 2v3a1 1 0 0 0 1 1h1a1 1 0 1 0 0-2v-3a1 1 0 0 0-1-1H9z" clip-rule="evenodd" /></svg>';
+            this.element.classList.add('toast-info');
+        }
+
+        this.iconElement.innerHTML = iconSvg;
+        this.messageElement.textContent = message;
+
+        // Show the toast
+        this.element.classList.add('visible');
+
+        // Set timeout to hide the toast
+        this.timeoutId = setTimeout(() => {
+          this.element.classList.remove('visible');
+
+          // Additional cleanup
+          setTimeout(() => {
+            this.element.className = 'toast';
+            this.iconElement.innerHTML = '';
+            this.messageElement.textContent = '';
+          }, 300);
+        }, duration);
+      }
+    };
     {% block extra_css %}{% endblock %}
 </head>
 <body class="min-h-screen flex flex-col bg-gradient-to-br from-[#f5f3ff] to-[#eef2ff] text-gray-800 custom-scrollbar circle-pattern">
