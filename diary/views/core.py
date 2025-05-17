@@ -26,32 +26,90 @@ def home(request):
     return render(request, 'diary/home.html')
 
 def signup(request):
+    """
+    User registration view with feature tracking
+    """
+    # Track which feature led the user to signup
+    feature = request.GET.get('feature', None)
+
+    # Feature information for highlighting on signup page
+    feature_data = {
+        'journal': {
+            'title': 'Journal Your Thoughts',
+            'description': 'Create beautiful journal entries powered by AI. Track your daily experiences, emotions, and reflections.',
+            'icon': 'pencil'
+        },
+        'library': {
+            'title': 'Browse Your Memory Library',
+            'description': 'Organize and explore your journal entries by time period, mood, and themes.',
+            'icon': 'book'
+        },
+        'insights': {
+            'title': 'Discover Personal Insights',
+            'description': 'Get AI-powered analytics about your writing patterns, mood trends, and personal growth.',
+            'icon': 'chart'
+        },
+        'biography': {
+            'title': 'Create Your Life Story',
+            'description': 'DiaryVault transforms your journal entries into beautiful chapter-based biographies.',
+            'icon': 'document'
+        }
+    }
+
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
+            # Create and save the user
             user = form.save()
+
+            # Log the user in
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=password)
             login(request, user)
 
-            # Create default tags and chapters for new user
-            default_tags = ['personal', 'work', 'goals', 'ideas', 'memories']
-            for tag_name in default_tags:
-                Tag.objects.create(name=tag_name, user=user)
+            # Create initial user preferences
+            try:
+                from ..models import JournalPreferences
+                JournalPreferences.objects.create(user=user)
+            except Exception as e:
+                print(f"Error creating preferences: {e}")
 
-            default_chapters = [
-                {'title': 'Personal Growth', 'color': 'amber-600', 'description': 'Lessons learned and wisdom gained through challenges'},
-                {'title': 'Career Journey', 'color': 'purple-700', 'description': 'Professional development and work experiences'},
-            ]
-            for chapter in default_chapters:
-                LifeChapter.objects.create(user=user, **chapter)
+            # Direct the user to the appropriate page based on the feature
+            # that brought them to signup
+            redirect_url = 'dashboard'  # Default redirect
 
-            return redirect('dashboard')
+            if feature == 'journal':
+                redirect_url = 'new_entry'
+                messages.success(request, "Your account has been created! Start your first journal entry.")
+            elif feature == 'library':
+                redirect_url = 'library'
+                messages.success(request, "Your account has been created! Explore your journal library.")
+            elif feature == 'insights':
+                redirect_url = 'insights'
+                messages.success(request, "Your account has been created! Discover insights about your journaling.")
+            elif feature == 'biography':
+                redirect_url = 'biography'
+                messages.success(request, "Your account has been created! Start building your biography.")
+            else:
+                messages.success(request, "Welcome to DiaryVault! Your account has been created successfully.")
+
+            return redirect(redirect_url)
+        else:
+            # If form is invalid, re-render with errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = SignUpForm()
 
-    return render(request, 'diary/signup.html', {'form': form})
+    context = {
+        'form': form,
+        'feature': feature,
+        'feature_info': feature_data.get(feature, None)
+    }
+
+    return render(request, 'diary/signup.html', context)
 
 @login_required
 def dashboard(request):
