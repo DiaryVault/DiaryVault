@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>DiaryVault - Your Daily Journal</title>
-    <meta name="theme-color" content="#6366f1" />
+    <title>{% block title %}DiaryVault - Your Daily Journal{% endblock %}</title>
+    <meta name="theme-color" content="#0ea5e9" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.3/cdn.min.js" defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
@@ -221,6 +221,110 @@
         opacity: 1;
       }
 
+      /* AI Chat Interface Styles */
+      .chat-bubble {
+        border-radius: 1.5rem;
+        padding: 1rem 1.25rem;
+        position: relative;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        max-width: 80%;
+        margin-bottom: 1rem;
+      }
+      .chat-bubble.ai {
+        background-color: #f1f5f9;
+        margin-right: auto;
+        border-bottom-left-radius: 0.25rem;
+        color: #334155;
+      }
+      .chat-bubble.user {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 0.25rem;
+      }
+      .chat-bubble.ai::before {
+        content: '';
+        position: absolute;
+        left: -0.5rem;
+        bottom: 0;
+        width: 1rem;
+        height: 1rem;
+        background-color: #f1f5f9;
+        clip-path: polygon(100% 0, 0 100%, 100% 100%);
+        transform: rotate(135deg);
+      }
+      .chat-bubble.user::after {
+        content: '';
+        position: absolute;
+        right: -0.5rem;
+        bottom: 0;
+        width: 1rem;
+        height: 1rem;
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        clip-path: polygon(100% 0, 0 100%, 100% 100%);
+        transform: rotate(-45deg);
+      }
+
+      .input-area {
+        min-height: 120px;
+        resize: none;
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+        padding: 0.75rem;
+        width: 100%;
+        background-color: white;
+        transition: all 0.2s ease;
+      }
+      .input-area:focus {
+        outline: none;
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+      }
+
+      .suggestions-pill {
+        background-color: #f0f9ff;
+        color: #0284c7;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid #bae6fd;
+      }
+      .suggestions-pill:hover {
+        background-color: #e0f2fe;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+
+      .loading-dots:after {
+        content: '';
+        animation: dots 1.5s infinite;
+      }
+      @keyframes dots {
+        0%, 20% { content: '.'; }
+        40% { content: '..'; }
+        60%, 100% { content: '...'; }
+      }
+
+      /* Notification badge */
+      .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        font-size: 0.7rem;
+        font-weight: bold;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
       /* Mobile adjustments */
       @media (max-width: 640px) {
         .mobile-safe-area {
@@ -229,6 +333,24 @@
 
         .mobile-bottom-nav {
           padding-bottom: env(safe-area-inset-bottom, 16px);
+        }
+
+        .chat-bubble {
+          max-width: 90%;
+        }
+
+        .chat-bubble.user {
+          margin-left: auto;
+          margin-right: 0;
+        }
+
+        .chat-bubble.ai {
+          margin-right: auto;
+          margin-left: 0;
+        }
+
+        .input-area {
+          min-height: 100px;
         }
       }
     </style>
@@ -285,7 +407,7 @@
                 Insights
             </a>
             <a href="#" class="nav-link font-medium text-secondary-500 hover:text-secondary-700">
-                Marketplace
+                AI Assistant
             </a>
         </nav>
 
@@ -394,9 +516,9 @@
             </a>
             <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary-50 border border-transparent hover:border-secondary-100 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                 </svg>
-                <span>Marketplace</span>
+                <span>AI Assistant</span>
             </a>
         </nav>
 
@@ -430,436 +552,138 @@
     </div>
 </div>
 
-<!-- Main Content - Mockup Dashboard -->
-<main class="container max-w-6xl mx-auto px-4 py-6 lg:py-8">
+<!-- Main Content - AI Assistant Interface -->
+<main class="container max-w-4xl mx-auto px-4 py-6 lg:py-8">
 
-    <!-- Welcome Section -->
-    <section class="mb-8">
-        <div class="bg-gradient-to-br from-primary-600 to-primary-800 rounded-2xl p-6 md:p-8 shadow-lg text-white overflow-hidden relative">
-            <div class="absolute inset-0 overflow-hidden">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" class="absolute bottom-0 right-0 opacity-10 w-full h-auto transform translate-x-1/4 translate-y-1/4">
-                    <circle cx="400" cy="400" r="200" fill="none" stroke="currentColor" stroke-width="40" stroke-dasharray="50 30" />
-                    <circle cx="400" cy="400" r="300" fill="none" stroke="currentColor" stroke-width="20" stroke-dasharray="30 20" />
-                    <circle cx="400" cy="400" r="380" fill="none" stroke="currentColor" stroke-width="10" stroke-dasharray="20 20" />
+    <!-- AI Assistant Section -->
+    <div class="bg-white rounded-2xl shadow-md p-6 mb-6">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="bg-primary-100 p-2 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
             </div>
-
-            <div class="relative z-10 max-w-2xl">
-                <div class="flex items-center gap-3 mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    <h2 class="text-3xl font-bold">Good afternoon, Jane</h2>
-                </div>
-                <p class="text-primary-100 text-lg mb-6">Ready to put your thoughts on paper today? Your last entry was 2 days ago.</p>
-                <div class="flex flex-wrap gap-3">
-                    <a href="#" class="bg-white text-primary-700 px-6 py-3 rounded-lg font-medium shadow-sm hover:shadow-md transition transform hover:-translate-y-0.5">
-                        New Journal Entry
-                    </a>
-                    <a href="#" class="bg-primary-700 bg-opacity-30 text-white px-6 py-3 rounded-lg font-medium hover:bg-opacity-40 transition">
-                        View Insights
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Overview -->
-    <section class="mb-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-secondary-100 scale-in" style="animation-delay: 0.1s">
-            <div class="flex items-center gap-4">
-                <div class="bg-primary-100 p-3 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-secondary-400 text-sm font-medium">Total Entries</h3>
-                    <p class="text-2xl font-bold text-secondary-900">128</p>
-                </div>
-            </div>
+            <h1 class="text-xl font-bold text-secondary-800">AI Journal Assistant</h1>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-secondary-100 scale-in" style="animation-delay: 0.2s">
-            <div class="flex items-center gap-4">
-                <div class="bg-primary-100 p-3 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-secondary-400 text-sm font-medium">Month Streak</h3>
-                    <p class="text-2xl font-bold text-secondary-900">6</p>
-                </div>
+        <!-- Chat History Section -->
+        <div class="mb-6 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+            <div class="chat-bubble ai scale-in" style="animation-delay: 0.1s">
+                <p>Hello Jane! I'm your DiaryVault assistant. I can help you with journal prompts, reflect on entries, or answer questions about journaling. How can I assist you today?</p>
+            </div>
+
+            <div class="chat-bubble user scale-in" style="animation-delay: 0.2s">
+                <p>I'm not sure what to write about today. Can you suggest some prompts?</p>
+            </div>
+
+            <div class="chat-bubble ai scale-in" style="animation-delay: 0.3s">
+                <p>Of course! Here are some prompts to inspire your journal entry today:</p>
+                <ol class="list-decimal pl-5 mt-2 space-y-2">
+                    <li>Reflect on a moment this week that brought you unexpected joy. What made it special?</li>
+                    <li>Write about a challenge you're currently facing and three potential ways to overcome it.</li>
+                    <li>Describe your ideal day from start to finish. What elements would make it fulfilling?</li>
+                    <li>Think about a person who has influenced you positively. What qualities do you admire in them?</li>
+                </ol>
+                <p class="mt-3">Would you like me to elaborate on any of these prompts?</p>
+            </div>
+
+            <div class="chat-bubble user scale-in" style="animation-delay: 0.4s">
+                <p>I like the first one! Can you help me explore that more?</p>
+            </div>
+
+            <div class="chat-bubble ai scale-in" style="animation-delay: 0.5s">
+                <p>Great choice! Here are some questions to help you dive deeper into that unexpected joyful moment:</p>
+                <ul class="list-disc pl-5 mt-2 space-y-2">
+                    <li>Describe the moment in detail - where were you, who was there, what happened?</li>
+                    <li>What emotions did you experience before, during, and after this moment?</li>
+                    <li>Why do you think this particular moment stood out to you?</li>
+                    <li>Did this experience change your perspective on anything?</li>
+                    <li>How might you create more opportunities for similar moments in the future?</li>
+                </ul>
+                <p class="mt-3">Take your time to reflect on these questions. Sometimes the small joys reveal important insights about what truly matters to us.</p>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-secondary-100 scale-in" style="animation-delay: 0.3s">
-            <div class="flex items-center gap-4">
-                <div class="bg-primary-100 p-3 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- Suggested Prompts -->
+        <div class="mb-6">
+            <h3 class="text-sm font-medium text-secondary-500 mb-3">Suggested topics:</h3>
+            <div class="flex flex-wrap gap-2">
+                <button class="suggestions-pill">Daily reflection</button>
+                <button class="suggestions-pill">Gratitude practice</button>
+                <button class="suggestions-pill">Goal setting</button>
+                <button class="suggestions-pill">Stress management</button>
+                <button class="suggestions-pill">Personal growth</button>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <form class="space-y-4">
+            <textarea class="input-area" placeholder="Type your message here..."></textarea>
+            <div class="flex justify-between items-center">
+                <div class="text-xs text-secondary-400">
+                    Your conversations are private and secure.
+                </div>
+                <button type="submit" class="btn-primary px-6 py-3 rounded-xl font-medium flex items-center gap-2">
+                    <span>Send</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Features Section -->
+    <section class="mb-8">
+        <h2 class="text-xl font-bold mb-4 text-secondary-800">What can the AI assistant help with?</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-secondary-200 card-hover">
+                <div class="bg-primary-50 p-3 rounded-lg w-fit mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                </div>
+                <h3 class="font-medium text-secondary-800 mb-2">Journal Prompts</h3>
+                <p class="text-secondary-600 text-sm">Get personalized prompts based on your journaling goals, mood, or interests.</p>
+            </div>
+
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-secondary-200 card-hover">
+                <div class="bg-primary-50 p-3 rounded-lg w-fit mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                 </div>
-                <div>
-                    <h3 class="text-secondary-400 text-sm font-medium">Insights Found</h3>
-                    <p class="text-2xl font-bold text-secondary-900">42</p>
-                </div>
+                <h3 class="font-medium text-secondary-800 mb-2">Entry Reflection</h3>
+                <p class="text-secondary-600 text-sm">Get insights and deeper understanding of your journal entries and emotional patterns.</p>
             </div>
-        </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-secondary-100 scale-in" style="animation-delay: 0.4s">
-            <div class="flex items-center gap-4">
-                <div class="bg-primary-100 p-3 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-secondary-200 card-hover">
+                <div class="bg-primary-50 p-3 rounded-lg w-fit mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
-                <div>
-                    <h3 class="text-secondary-400 text-sm font-medium">Mood Score</h3>
-                    <p class="text-2xl font-bold text-secondary-900">8.2</p>
-                </div>
+                <h3 class="font-medium text-secondary-800 mb-2">Habit Building</h3>
+                <p class="text-secondary-600 text-sm">Get guidance on establishing and maintaining a consistent journaling practice.</p>
             </div>
         </div>
     </section>
 
-    <!-- Recent Entries & Mood Chart -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-        <!-- Recent Entries -->
-        <div class="col-span-2">
-            <h2 class="text-xl font-bold mb-4 text-secondary-800">Recent Entries</h2>
-
-            <div class="space-y-4">
-                <!-- Entry Item -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-secondary-100 card-hover">
-                    <div class="flex flex-col sm:flex-row">
-                        <div class="bg-primary-50 sm:w-24 p-4 flex flex-row sm:flex-col items-center justify-center gap-2 sm:gap-1">
-                            <span class="text-2xl font-bold text-primary-700">14</span>
-                            <span class="text-primary-600 font-medium">May</span>
-                        </div>
-
-                        <div class="p-5 flex-1">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="font-semibold text-lg text-secondary-800">A Day of Reflection</h3>
-                                <div class="flex items-center text-yellow-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                                    </svg>
-                                    <span class="text-secondary-600 text-sm ml-1">Grateful</span>
-                                </div>
-                            </div>
-                            <p class="text-secondary-600 line-clamp-2">Today I spent some time thinking about the progress I've made this year. Despite the challenges, I'm proud of how far I've come and excited about what's ahead...</p>
-                            <div class="flex items-center justify-between mt-4">
-                                <div class="flex items-center text-secondary-500 text-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    2 days ago
-                                </div>
-                                <a href="#" class="text-primary-600 font-medium text-sm hover:text-primary-700">Read More</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Entry Item -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-secondary-100 card-hover">
-                    <div class="flex flex-col sm:flex-row">
-                        <div class="bg-primary-50 sm:w-24 p-4 flex flex-row sm:flex-col items-center justify-center gap-2 sm:gap-1">
-                            <span class="text-2xl font-bold text-primary-700">10</span>
-                            <span class="text-primary-600 font-medium">May</span>
-                        </div>
-
-                        <div class="p-5 flex-1">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="font-semibold text-lg text-secondary-800">New Project Ideas</h3>
-                                <div class="flex items-center text-blue-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                                    </svg>
-                                    <span class="text-secondary-600 text-sm ml-1">Inspired</span>
-                                </div>
-                            </div>
-                            <p class="text-secondary-600 line-clamp-2">I had a breakthrough today with some ideas for my next creative project. I'm thinking of combining photography with digital art to create something unique...</p>
-                            <div class="flex items-center justify-between mt-4">
-                                <div class="flex items-center text-secondary-500 text-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    6 days ago
-                                </div>
-                                <a href="#" class="text-primary-600 font-medium text-sm hover:text-primary-700">Read More</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Entry Item -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-secondary-100 card-hover">
-                    <div class="flex flex-col sm:flex-row">
-                        <div class="bg-primary-50 sm:w-24 p-4 flex flex-row sm:flex-col items-center justify-center gap-2 sm:gap-1">
-                            <span class="text-2xl font-bold text-primary-700">5</span>
-                            <span class="text-primary-600 font-medium">May</span>
-                        </div>
-
-                        <div class="p-5 flex-1">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="font-semibold text-lg text-secondary-800">Morning Walk Reflections</h3>
-                                <div class="flex items-center text-green-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                                    </svg>
-                                    <span class="text-secondary-600 text-sm ml-1">Peaceful</span>
-                                </div>
-                            </div>
-                            <p class="text-secondary-600 line-clamp-2">The early morning walk through the park was exactly what I needed. The combination of fresh air, bird songs, and solitude helped clear my mind and set a positive tone...</p>
-                            <div class="flex items-center justify-between mt-4">
-                                <div class="flex items-center text-secondary-500 text-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    11 days ago
-                                </div>
-                                <a href="#" class="text-primary-600 font-medium text-sm hover:text-primary-700">Read More</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="text-center">
-                    <a href="#" class="inline-block text-primary-600 font-medium hover:text-primary-700 border-b-2 border-primary-100 hover:border-primary-300 transition-colors">
-                        View All Entries
-                    </a>
-                </div>
-            </div>
+    <!-- Premium Features Callout -->
+    <section class="bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl p-6 text-white overflow-hidden relative mb-10">
+        <div class="absolute top-0 right-0 w-64 h-64 opacity-10">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M13 7h-2v2h2V7zm0 4h-2v2h2v-2zm4 0h-2v2h2v-2zM5 7h2v2H5V7zm0 4h2v2H5v-2zM17 7h2v2h-2V7zM9 11H7v2h2v-2zM9 7H7v2h2V7zm8 8h2v2h-2v-2zm-4 0h-2v2h2v-2zm4-4h2v2h-2v-2zm-8 4H7v2h2v-2zm-4 0H5v2h2v-2zM13 15h-2v2h2v-2z"/>
+            </svg>
         </div>
 
-        <!-- Mood Chart -->
-        <div class="lg:col-span-1">
-            <div class="bg-white rounded-xl shadow-sm p-5 border border-secondary-100 h-full">
-                <h2 class="text-xl font-bold mb-4 text-secondary-800">Mood Trends</h2>
-                <div class="aspect-w-4 aspect-h-3 mb-4">
-                    <!-- This would be a chart in the real implementation -->
-                    <div class="w-full h-64 bg-secondary-50 rounded-lg flex items-center justify-center">
-                        <div class="text-center text-secondary-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 text-primary-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                            <p class="text-sm">Mood data visualization</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="font-medium text-secondary-700 mb-2">Recent Mood Tags</h3>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">Grateful</span>
-                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Inspired</span>
-                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">Peaceful</span>
-                        <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">Creative</span>
-                        <span class="px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-sm">Excited</span>
-                    </div>
-                </div>
-
-                <div class="mt-4 pt-4 border-t border-secondary-100">
-                    <h3 class="font-medium text-secondary-700 mb-2">Insights</h3>
-                    <p class="text-secondary-600 text-sm">Your mood has been consistently positive for the past two weeks, with peaks during weekend activities.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Inspiration & Suggested Prompts -->
-    <section class="mb-10">
-        <h2 class="text-xl font-bold mb-4 text-secondary-800">Journal Prompts</h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-gradient-to-br from-primary-50 to-blue-50 rounded-xl p-5 shadow-sm border border-primary-100 card-hover">
-                <div class="flex justify-between items-start mb-3">
-                    <div class="bg-white rounded-lg p-2 shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                    </div>
-                    <button class="text-secondary-400 hover:text-secondary-600 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                    </button>
-                </div>
-                <h3 class="font-medium text-secondary-800 mb-2">Moment of Gratitude</h3>
-                <p class="text-secondary-600 text-sm">What are three things that happened today that you're grateful for, and why did they bring you joy?</p>
-            </div>
-
-            <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-5 shadow-sm border border-purple-100 card-hover">
-                <div class="flex justify-between items-start mb-3">
-                    <div class="bg-white rounded-lg p-2 shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <button class="text-secondary-400 hover:text-secondary-600 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                    </button>
-                </div>
-                <h3 class="font-medium text-secondary-800 mb-2">Self-Reflection</h3>
-                <p class="text-secondary-600 text-sm">How have you grown in the past month? What challenges have you overcome, and what have you learned?</p>
-            </div>
-
-            <div class="bg-gradient-to-br from-green-50 to-teal-50 rounded-xl p-5 shadow-sm border border-green-100 card-hover">
-                <div class="flex justify-between items-start mb-3">
-                    <div class="bg-white rounded-lg p-2 shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                        </svg>
-                    </div>
-                    <button class="text-secondary-400 hover:text-secondary-600 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                    </button>
-                </div>
-                <h3 class="font-medium text-secondary-800 mb-2">Future Visioning</h3>
-                <p class="text-secondary-600 text-sm">Write about where you see yourself one year from now. What goals do you hope to achieve?</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Marketplace Preview -->
-    <section class="mb-10">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-bold text-secondary-800">Explore Marketplace</h2>
-            <a href="#" class="text-primary-600 font-medium text-sm hover:text-primary-700">View All</a>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Marketplace Item -->
-            <div class="rounded-xl overflow-hidden shadow-md card-hover">
-                <div class="relative h-40 bg-gradient-to-br from-blue-400 to-indigo-600">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-white opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                        </svg>
-                    </div>
-                    <div class="absolute top-2 right-2 px-2 py-1 bg-white rounded-full text-xs font-medium text-primary-600 shadow-sm">
-                        Featured
-                    </div>
-                    <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent text-white">
-                        <h3 class="font-bold">Productivity Theme</h3>
-                        <div class="flex items-center text-xs mt-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <span class="ml-1">5.0</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-4 bg-white">
-                    <p class="text-secondary-600 text-sm mb-3">Goal-focused journal theme with habit tracking and productivity tools.</p>
-                    <div class="flex items-center justify-between">
-                        <span class="font-bold text-secondary-800">$4.99</span>
-                        <button class="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium hover:bg-primary-200 transition">
-                            Preview
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Marketplace Item -->
-            <div class="rounded-xl overflow-hidden shadow-md card-hover">
-                <div class="relative h-40 bg-gradient-to-br from-amber-400 to-rose-500">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-white opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                    </div>
-                    <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent text-white">
-                        <h3 class="font-bold">Gratitude Bundle</h3>
-                        <div class="flex items-center text-xs mt-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400/30" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <span class="ml-1">4.8</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-4 bg-white">
-                    <p class="text-secondary-600 text-sm mb-3">Prompts and templates focused on cultivating daily gratitude practice.</p>
-                    <div class="flex items-center justify-between">
-                        <span class="font-bold text-secondary-800">$2.99</span>
-                        <button class="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium hover:bg-primary-200 transition">
-                            Preview
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Marketplace Item -->
-            <div class="rounded-xl overflow-hidden shadow-md card-hover">
-                <div class="relative h-40 bg-gradient-to-br from-emerald-400 to-teal-600">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-white opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                        </svg>
-                    </div>
-                    <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent text-white">
-                        <h3 class="font-bold">Mindfulness Pack</h3>
-                        <div class="flex items-center text-xs mt-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.5L15.09 8.26L21.5 9.27L16.75 14.14L18.5 20.5L12 17.77L5.5 20.5L7.25 14.14L2.5 9.27L8.91 8.26L12 2.5Z" />
-                            </svg>
-                            <span class="ml-1">4.9</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-4 bg-white">
-                    <p class="text-secondary-600 text-sm mb-3">Meditation prompts and reflection templates for mindful journaling.</p>
-                    <div class="flex items-center justify-between">
-                        <span class="font-bold text-secondary-800">$3.99</span>
-                        <button class="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium hover:bg-primary-200 transition">
-                            Preview
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="relative z-10 max-w-xl">
+            <h2 class="text-2xl font-bold mb-3">Upgrade to Premium AI Features</h2>
+            <p class="mb-6 text-primary-100">Get unlimited AI interactions, custom analysis of your mood patterns, and personalized growth insights with our premium plan.</p>
+            <a href="#" class="inline-block bg-white text-primary-700 px-6 py-3 rounded-lg font-medium shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
+                Explore Premium
+            </a>
         </div>
     </section>
 </main>
@@ -889,9 +713,9 @@
         </div>
         <a href="#" class="flex flex-col items-center text-secondary-400">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
-            <span class="text-xs mt-1">Bio</span>
+            <span class="text-xs mt-1">AI</span>
         </a>
         <a href="#" class="flex flex-col items-center text-secondary-400">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -954,22 +778,77 @@
 <!-- Initialize Alpine.js listeners for demonstration -->
 <script>
   document.addEventListener('alpine:init', () => {
-    // Simulate page transitions
-    Alpine.data('transition', () => ({
-      show: false,
-      init() {
-        document.querySelectorAll('a[href]:not([target="_blank"]):not([href^="#"]):not([href^="javascript:"])').forEach(link => {
-          link.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.show = true;
-
-            setTimeout(() => {
-              window.location.href = link.getAttribute('href');
-            }, 300);
-          });
-        });
+    // Suggested prompts functionality
+    Alpine.data('promptSuggestions', () => ({
+      prompts: [
+        'Daily reflection',
+        'Gratitude practice',
+        'Goal setting',
+        'Stress management',
+        'Personal growth'
+      ],
+      selectPrompt(prompt) {
+        const textarea = document.querySelector('.input-area');
+        textarea.value = `I'd like to write about ${prompt.toLowerCase()}. Can you help me?`;
+        textarea.focus();
       }
     }));
+
+    // Chat functionality (mock)
+    Alpine.data('chatInterface', () => ({
+      messages: [
+        { type: 'ai', content: 'Hello! I\'m your DiaryVault assistant. How can I help you today?' },
+      ],
+      newMessage: '',
+      isTyping: false,
+
+      sendMessage() {
+        if (this.newMessage.trim() === '') return;
+
+        // Add user message
+        this.messages.push({ type: 'user', content: this.newMessage });
+        const sentMessage = this.newMessage;
+        this.newMessage = '';
+
+        // Show typing indicator
+        this.isTyping = true;
+
+        // Simulate AI response after a delay
+        setTimeout(() => {
+          this.isTyping = false;
+          this.messages.push({
+            type: 'ai',
+            content: `Thank you for your message about "${sentMessage}". This is a simulated response. In the actual implementation, this would be handled by your AI backend.`
+          });
+
+          // Scroll to bottom after new message
+          this.$nextTick(() => {
+            const chatContainer = document.querySelector('.chat-history');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+          });
+        }, 1500);
+      }
+    }));
+  });
+
+  // Textarea auto-resize
+  document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.querySelector('.input-area');
+    if (textarea) {
+      textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+      });
+    }
+
+    // Add click handlers to suggestion pills
+    document.querySelectorAll('.suggestions-pill').forEach(pill => {
+      pill.addEventListener('click', function() {
+        const textarea = document.querySelector('.input-area');
+        textarea.value = `I'd like to write about ${this.textContent.toLowerCase()}. Can you help me?`;
+        textarea.focus();
+      });
+    });
   });
 </script>
 </body>
