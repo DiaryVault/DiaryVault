@@ -538,12 +538,12 @@
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-      padding-bottom: env(safe-area-inset-bottom, 16px);
+      padding-bottom: env(safe-area-inset-bottom, 12px);
     }
 
     .mobile-fab {
       position: fixed;
-      bottom: 80px;
+      bottom: 65px;
       right: 20px;
       z-index: 30;
       transform-origin: center;
@@ -664,6 +664,101 @@
   input[type="checkbox"]:focus {
     box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3);
   }
+
+  /* Page transitions */
+  body {
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  body.transition-ready {
+    opacity: 1;
+  }
+
+  body.page-transitioning {
+    opacity: 0;
+  }
+
+  /* Enhanced card hovering effect */
+  .enhanced-hover {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .enhanced-hover:hover {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+  }
+
+  /* Improve accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    .menu-sheet {
+      transition: none !important;
+    }
+
+    body.page-transitioning {
+      opacity: 1;
+    }
+  }
+
+  /* Dark mode support - basic implementation */
+  @media (prefers-color-scheme: dark) {
+    :root.dark-theme {
+      color-scheme: dark;
+    }
+
+    .dark-theme body {
+      background-color: #1a1a2e;
+      color: #e1e1e6;
+    }
+
+    .dark-theme .glass-effect {
+      background: rgba(26, 26, 46, 0.8);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  /* Improved focus ring for accessibility */
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline: 2px solid #8b5cf6;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+  }
+
+  /* Print styles for better document printing */
+  @media print {
+    header, footer, .mobile-fab, .mobile-bottom-nav {
+      display: none !important;
+    }
+
+    main {
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    body {
+      background: white !important;
+      color: black !important;
+    }
+
+    .card-hover {
+      box-shadow: none !important;
+      border: 1px solid #eee !important;
+      transform: none !important;
+    }
+
+    /* Ensure full content is visible */
+    .truncate, .line-clamp-2, .line-clamp-3 {
+      white-space: normal !important;
+      overflow: visible !important;
+      text-overflow: initial !important;
+      -webkit-line-clamp: initial !important;
+    }
+  }
 </style>
 
 {% block extra_css %}{% endblock %}
@@ -674,17 +769,17 @@
          x-data="{ scrolled: false }"
          x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 10 })"
          :class="{ 'shadow-md': scrolled }">
-<div class="container max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+<div class="container max-w-6xl mx-auto px-4 py-2 flex items-center justify-between">
     <!-- Logo Section -->
     <div class="flex items-center gap-2">
         <a href="{% url 'home' %}" class="flex items-center gap-2 group">
-            <div class="p-1.5 bg-primary-500 rounded-lg shadow-sm group-hover:bg-primary-600 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="p-1 bg-primary-500 rounded-lg shadow-sm group-hover:bg-primary-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
             </div>
             <div class="flex items-center">
-                <h1 class="text-xl sm:text-2xl font-bold text-primary-600 diary-font">DiaryVault</h1>
+                <h1 class="text-lg sm:text-xl font-bold text-primary-600 diary-font">DiaryVault</h1>
                 <span class="beta-badge ml-2">Beta</span>
             </div>
         </a>
@@ -694,70 +789,70 @@
     {% if user.is_authenticated %}
     <!-- For logged in users (hidden on mobile) -->
     <nav class="hidden md:flex items-center gap-1 absolute left-1/2 transform -translate-x-1/2">
-      <a href="{% url 'dashboard' %}" class="nav-link px-3 py-2 text-sm font-medium {% if request.resolver_match.url_name == 'dashboard' %}text-primary-600 active{% else %}text-secondary-700 hover:text-primary-600{% endif %}">
+      <a href="{% url 'dashboard' %}" class="nav-link px-2 py-1.5 text-sm font-medium {% if request.resolver_match.url_name == 'dashboard' %}text-primary-600 active{% else %}text-secondary-700 hover:text-primary-600{% endif %}">
         Dashboard
       </a>
-      <a href="{% url 'library' %}" class="nav-link px-3 py-2 text-sm font-medium {% if request.resolver_match.url_name == 'library' %}text-primary-600 active{% else %}text-secondary-700 hover:text-primary-600{% endif %}">
+      <a href="{% url 'library' %}" class="nav-link px-2 py-1.5 text-sm font-medium {% if request.resolver_match.url_name == 'library' %}text-primary-600 active{% else %}text-secondary-700 hover:text-primary-600{% endif %}">
         Library
       </a>
-      <a href="{% url 'new_entry' %}" class="nav-link px-3 py-2 text-sm font-medium {% if request.resolver_match.url_name == 'new_entry' %}text-primary-600 active{% else %}text-secondary-700 hover:text-primary-600{% endif %}">
+      <a href="{% url 'new_entry' %}" class="nav-link px-2 py-1.5 text-sm font-medium {% if request.resolver_match.url_name == 'new_entry' %}text-primary-600 active{% else %}text-secondary-700 hover:text-primary-600{% endif %}">
         Journal
       </a>
-      <a href="{% url 'biography' %}" class="nav-link px-3 py-2 text-sm font-medium {% if request.resolver_match.url_name == 'biography' %}text-primary-600 active{% else %}text-secondary-700 hover:text-primary-600{% endif %}">
+      <a href="{% url 'biography' %}" class="nav-link px-2 py-1.5 text-sm font-medium {% if request.resolver_match.url_name == 'biography' %}text-primary-600 active{% else %}text-secondary-700 hover:text-primary-600{% endif %}">
         Biography
       </a>
-      <a href="{% url 'insights' %}" class="nav-link px-3 py-2 text-sm font-medium {% if request.resolver_match.url_name == 'insights' %}text-primary-600 active{% else %}text-secondary-700 hover:text-primary-600{% endif %}">
+      <a href="{% url 'insights' %}" class="nav-link px-2 py-1.5 text-sm font-medium {% if request.resolver_match.url_name == 'insights' %}text-primary-600 active{% else %}text-secondary-700 hover:text-primary-600{% endif %}">
         Insights
       </a>
-      <a href="{% url 'marketplace' %}" class="nav-link px-3 py-2 text-sm font-medium {% if request.resolver_match.url_name == 'marketplace' %}text-primary-600 active{% else %}text-secondary-700 hover:text-primary-600{% endif %}">
+      <a href="{% url 'marketplace' %}" class="nav-link px-2 py-1.5 text-sm font-medium {% if request.resolver_match.url_name == 'marketplace' %}text-primary-600 active{% else %}text-secondary-700 hover:text-primary-600{% endif %}">
         Marketplace
       </a>
     </nav>
     {% else %}
     <!-- Feature showcase navigation for non-logged in users -->
     <nav class="hidden md:flex items-center gap-1 absolute left-1/2 transform -translate-x-1/2">
-      <a href="{% url 'signup' %}?feature=journal" class="nav-link px-3 py-2 text-sm font-medium text-secondary-700 hover:text-primary-600">
+      <a href="{% url 'signup' %}?feature=journal" class="nav-link px-2 py-1.5 text-sm font-medium text-secondary-700 hover:text-primary-600">
         Journal
       </a>
-      <a href="{% url 'signup' %}?feature=library" class="nav-link px-3 py-2 text-sm font-medium text-secondary-700 hover:text-primary-600">
+      <a href="{% url 'signup' %}?feature=library" class="nav-link px-2 py-1.5 text-sm font-medium text-secondary-700 hover:text-primary-600">
         Library
       </a>
-      <a href="{% url 'signup' %}?feature=biography" class="nav-link px-3 py-2 text-sm font-medium text-secondary-700 hover:text-primary-600">
+      <a href="{% url 'signup' %}?feature=biography" class="nav-link px-2 py-1.5 text-sm font-medium text-secondary-700 hover:text-primary-600">
         Biography
       </a>
-      <a href="{% url 'signup' %}?feature=insights" class="nav-link px-3 py-2 text-sm font-medium text-secondary-700 hover:text-primary-600">
+      <a href="{% url 'signup' %}?feature=insights" class="nav-link px-2 py-1.5 text-sm font-medium text-secondary-700 hover:text-primary-600">
         Insights
       </a>
-      <a href="{% url 'marketplace' %}" class="nav-link px-3 py-2 text-sm font-medium text-secondary-700 hover:text-primary-600">
+      <a href="{% url 'marketplace' %}" class="nav-link px-2 py-1.5 text-sm font-medium text-secondary-700 hover:text-primary-600">
         Marketplace
       </a>
     </nav>
     {% endif %}
 
     <!-- Right side navigation -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2">
       {% if user.is_authenticated %}
       <!-- User profile shortcut -->
         <a href="{% url 'account_settings' %}" class="hidden sm:flex items-center gap-2 hover:opacity-90 transition group">
-        <div class="h-8 w-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-sm shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="h-7 w-7 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-xs shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
         </div>
         </a>
       {% else %}
       <!-- Auth buttons for non-logged in users (DESKTOP ONLY) -->
-      <div class="hidden md:flex gap-4 items-center">
-        <a href="{% url 'login' %}" class="text-primary-600 hover:text-primary-800 text-sm font-medium transition px-4 py-2 hover:bg-primary-50/70 rounded-full">Log in</a>
-        <a href="{% url 'signup' %}" class="btn-gradient text-white px-4 py-2 rounded-full text-sm font-medium shadow-md">Sign up</a>
+      <div class="hidden md:flex gap-3 items-center">
+        <a href="{% url 'login' %}" class="text-primary-600 hover:text-primary-800 text-sm font-medium transition px-3 py-1.5 hover:bg-primary-50/70 rounded-full">Log in</a>
+        <a href="{% url 'signup' %}" class="btn-gradient text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-md">Sign up</a>
       </div>
       {% endif %}
 
-      <button id="menuToggleBtn" class="relative text-secondary-700 hover:text-primary-600 p-1.5 bg-white rounded-lg shadow-sm hover:bg-primary-50 transition-colors">
+      <button id="menuToggleBtn" class="relative text-secondary-700 hover:text-primary-600 p-1 bg-white rounded-lg shadow-sm hover:bg-primary-50 transition-colors">
         {% if user.is_authenticated and unread_notifications > 0 %}
         <span class="notification-badge">{{ unread_notifications }}</span>
         {% endif %}
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
@@ -1031,69 +1126,69 @@
 <!-- Mobile Navigation -->
 {% if user.is_authenticated %}
 <!-- Mobile Bottom Navigation for logged in users -->
-<nav class="mobile-bottom-nav md:hidden px-2 py-2 flex justify-around">
-  <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-1 px-3 nav-item-mobile {% if request.resolver_match.url_name == 'dashboard' %}text-primary-600 active{% else %}text-secondary-500{% endif %}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<nav class="mobile-bottom-nav md:hidden px-2 py-1.5 flex justify-around">
+  <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile {% if request.resolver_match.url_name == 'dashboard' %}text-primary-600 active{% else %}text-secondary-500{% endif %}">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
     </svg>
-    <span class="text-xs mt-1">Home</span>
+    <span class="text-xs mt-0.5">Home</span>
   </a>
-  <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-1 px-3 nav-item-mobile {% if request.resolver_match.url_name == 'library' %}text-primary-600 active{% else %}text-secondary-500{% endif %}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile {% if request.resolver_match.url_name == 'library' %}text-primary-600 active{% else %}text-secondary-500{% endif %}">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
     </svg>
-    <span class="text-xs mt-1">Library</span>
+    <span class="text-xs mt-0.5">Library</span>
   </a>
-  <div class="flex flex-col items-center justify-center py-1 px-3 opacity-0">
-    <div class="h-6 w-6"></div>
-    <span class="text-xs mt-1">New</span>
+  <div class="flex flex-col items-center justify-center py-1 px-2 opacity-0">
+    <div class="h-5 w-5"></div>
+    <span class="text-xs mt-0.5">New</span>
   </div>
   <!-- Biography Link in Bottom Nav -->
-  <a href="{% url 'biography' %}" class="flex flex-col items-center justify-center py-1 px-3 nav-item-mobile {% if request.resolver_match.url_name == 'biography' %}text-primary-600 active{% else %}text-secondary-500{% endif %}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <a href="{% url 'biography' %}" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile {% if request.resolver_match.url_name == 'biography' %}text-primary-600 active{% else %}text-secondary-500{% endif %}">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
     </svg>
-    <span class="text-xs mt-1">Biography</span>
+    <span class="text-xs mt-0.5">Biography</span>
   </a>
-  <a href="{% url 'marketplace' %}" class="flex flex-col items-center justify-center py-1 px-3 nav-item-mobile {% if request.resolver_match.url_name == 'marketplace' %}text-primary-600 active{% else %}text-secondary-500{% endif %}">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <a href="{% url 'marketplace' %}" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile {% if request.resolver_match.url_name == 'marketplace' %}text-primary-600 active{% else %}text-secondary-500{% endif %}">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
     </svg>
-    <span class="text-xs mt-1">Market</span>
+    <span class="text-xs mt-0.5">Market</span>
   </a>
 </nav>
 <!-- Floating Action Button for creating new entries with improved animation -->
-<a href="{% url 'new_entry' %}" class="mobile-fab md:hidden btn-gradient shadow-lg p-4 rounded-full text-white hover:scale-105 active:scale-95">
-  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<a href="{% url 'new_entry' %}" class="mobile-fab md:hidden btn-gradient shadow-lg p-3 rounded-full text-white hover:scale-105 active:scale-95">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
   </svg>
 </a>
 {% else %}
 <!-- Mobile navigation for non-logged in users -->
-<nav class="mobile-bottom-nav md:hidden px-2 py-2 flex justify-around">
-  <a href="{% url 'signup' %}?feature=journal" class="flex flex-col items-center justify-center py-1 px-3 nav-item-mobile text-secondary-500">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<nav class="mobile-bottom-nav md:hidden px-2 py-1.5 flex justify-around">
+  <a href="{% url 'signup' %}?feature=journal" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile text-secondary-500">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
     </svg>
-    <span class="text-xs mt-1">Journal</span>
+    <span class="text-xs mt-0.5">Journal</span>
   </a>
-  <a href="{% url 'signup' %}?feature=biography" class="flex flex-col items-center justify-center py-1 px-3 nav-item-mobile text-secondary-500">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <a href="{% url 'signup' %}?feature=biography" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile text-secondary-500">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
     </svg>
-    <span class="text-xs mt-1">Biography</span>
+    <span class="text-xs mt-0.5">Biography</span>
   </a>
-  <a href="{% url 'marketplace' %}" class="flex flex-col items-center justify-center py-1 px-3 nav-item-mobile text-secondary-500">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <a href="{% url 'marketplace' %}" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile text-secondary-500">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
     </svg>
-    <span class="text-xs mt-1">Explore</span>
+    <span class="text-xs mt-0.5">Explore</span>
   </a>
-  <a href="{% url 'login' %}" class="flex flex-col items-center justify-center py-1 px-3 nav-item-mobile text-secondary-500">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <a href="{% url 'login' %}" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile text-secondary-500">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
     </svg>
-    <span class="text-xs mt-1">Login</span>
+    <span class="text-xs mt-0.5">Login</span>
   </a>
 </nav>
 {% endif %}
@@ -1337,101 +1432,6 @@
     }
   });
 </script>
-<style>
-  body {
-    transition: opacity 0.3s ease-in-out;
-  }
-
-  body.transition-ready {
-    opacity: 1;
-  }
-
-  body.page-transitioning {
-    opacity: 0;
-  }
-
-  /* Enhanced card hovering effect */
-  .enhanced-hover {
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  .enhanced-hover:hover {
-    transform: translateY(-5px) scale(1.01);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.08);
-  }
-
-  /* Improve accessibility */
-  @media (prefers-reduced-motion: reduce) {
-    * {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-
-    .menu-sheet {
-      transition: none !important;
-    }
-
-    body.page-transitioning {
-      opacity: 1;
-    }
-  }
-
-  /* Dark mode support - basic implementation */
-  @media (prefers-color-scheme: dark) {
-    :root.dark-theme {
-      color-scheme: dark;
-    }
-
-    .dark-theme body {
-      background-color: #1a1a2e;
-      color: #e1e1e6;
-    }
-
-    .dark-theme .glass-effect {
-      background: rgba(26, 26, 46, 0.8);
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-  }
-
-  /* Improved focus ring for accessibility */
-  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
-    outline: 2px solid #8b5cf6;
-    outline-offset: 2px;
-    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
-  }
-
-  /* Print styles for better document printing */
-  @media print {
-    header, footer, .mobile-fab, .mobile-bottom-nav {
-      display: none !important;
-    }
-
-    main {
-      padding: 0 !important;
-      margin: 0 !important;
-    }
-
-    body {
-      background: white !important;
-      color: black !important;
-    }
-
-    .card-hover {
-      box-shadow: none !important;
-      border: 1px solid #eee !important;
-      transform: none !important;
-    }
-
-    /* Ensure full content is visible */
-    .truncate, .line-clamp-2, .line-clamp-3 {
-      white-space: normal !important;
-      overflow: visible !important;
-      text-overflow: initial !important;
-      -webkit-line-clamp: initial !important;
-    }
-  }
-</style>
 {% block extra_js %}{% endblock %}
 </body>
 </html>
