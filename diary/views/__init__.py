@@ -34,5 +34,7 @@ from .user import (
 from .marketplace import (
     marketplace_view, publish_journal, marketplace_monetization,
     marketplace_contest, marketplace_faq, marketplace_journal_detail,
-    marketplace_author_profile
+    marketplace_author_profile, like_journal, tip_author, purchase_journal,
+    quick_view_journal, add_to_wishlist, add_to_comparison,
+    marketplace_search_suggestions
 )
