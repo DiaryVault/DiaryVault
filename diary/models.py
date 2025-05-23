@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django import forms
 from django.apps import apps
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Tag(models.Model):
@@ -47,6 +48,10 @@ class Entry(models.Model):
     mood = models.CharField(max_length=50, blank=True, null=True)
     summary = models.TextField(blank=True, null=True)
     chapter = models.ForeignKey(LifeChapter, on_delete=models.SET_NULL, null=True, blank=True, related_name='entries')
+
+    # Marketplace integration - link to published journal
+    published_in_journal = models.ForeignKey('Journal', on_delete=models.SET_NULL, null=True, blank=True, related_name='published_entries')
+
     class Meta:
         ordering = ['-created_at']
         verbose_name_plural = 'entries'
@@ -63,6 +68,14 @@ class Entry(models.Model):
     def get_month_year(self):
         """Return month and year format for display"""
         return self.created_at.strftime("%b %Y")
+
+    def can_publish(self):
+        """Check if entry meets publishing criteria"""
+        return (
+            len(self.content.strip()) >= 100 and  # Minimum length
+            self.title.strip() and  # Has title
+            not self.published_in_journal  # Not already published
+        )
 
 class SummaryVersion(models.Model):
     """Track different versions of AI-generated summaries"""
@@ -117,7 +130,6 @@ class UserInsight(models.Model):
         ('topic_analysis', 'Topic Analysis')
     ])
     title = models.CharField(max_length=200)
-    # Make sure this field exists
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -180,84 +192,16 @@ class UserPreference(models.Model):
         verbose_name = "User Preference"
         verbose_name_plural = "User Preferences"
 
-class EntryForm(forms.ModelForm):
-    # Add a field for tags that will be processed separately
-    tags = forms.CharField(required=False, help_text="Comma-separated tags")
-    entry_photo = forms.ImageField(required=False)  # Add this field
-
-    class Meta:
-        model = Entry
-        fields = ['title', 'content', 'mood', 'chapter']
-        widgets = {
-            'content': forms.Textarea(attrs={'class': 'diary-font'}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        # Extract user from kwargs so we can use it later
-        self.user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-
-        # If this is an existing entry, populate the tags field
-        if self.instance and self.instance.pk:
-            self.initial['tags'] = ', '.join([tag.name for tag in self.instance.tags.all()])
-
-    def save(self, commit=True, user=None):
-        # Use either the user passed to save() or the one set during initialization
-        user = user or self.user
-        if not user:
-            raise ValueError("User must be provided to save the form")
-
-        # Save the entry but don't commit until we handle the tags
-        entry = super().save(commit=False)
-        entry.user = user
-
-        if commit:
-            entry.save()
-
-            # Handle photo upload if present
-            if 'entry_photo' in self.files:
-                from diary.models import EntryPhoto
-
-                # Create a new EntryPhoto linked to this entry
-                photo = EntryPhoto(
-                    entry=entry,
-                    photo=self.files['entry_photo']
-                )
-                photo.save()
-                print(f"Created new photo for entry #{entry.id}: {photo.photo.url}")
-
-            # Process tags field
-            if 'tags' in self.cleaned_data:
-                tag_names = [t.strip() for t in self.cleaned_data['tags'].split(',') if t.strip()]
-
-                # Clear existing tags for this entry
-                entry.tags.clear()
-
-                # Add each tag, creating new ones as needed
-                for tag_name in tag_names:
-                    tag, created = Tag.objects.get_or_create(
-                        name=tag_name,
-                        user=user  # This links the tag to the user
-                    )
-                    entry.tags.add(tag)
-
-        return entry
-class EntryTag(models.Model):
-    entry = models.ForeignKey(Entry, on_delete=models.CASCADE, related_name='entry_tags')
-    name = models.CharField(max_length=50)
-    tag_type = models.CharField(max_length=20, default='topic', choices=[
-        ('topic', 'Topic'),
-        ('mood', 'Mood'),
-        ('person', 'Person'),
-        ('location', 'Location'),
-        ('other', 'Other')
-    ])
+# Marketplace-specific models
+class JournalTag(models.Model):
+    """Enhanced tags for marketplace journals"""
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(unique=True)
+    description = models.TextField(blank=True)
+    color = models.CharField(max_length=20, default='blue')
 
     def __str__(self):
         return self.name
-
-    class Meta:
-        ordering = ['name']
 
 class Journal(models.Model):
     """Model representing a curated journal that can be published to the marketplace"""
@@ -272,11 +216,25 @@ class Journal(models.Model):
     date_published = models.DateTimeField(null=True, blank=True)
     is_staff_pick = models.BooleanField(default=False)
     featured_rank = models.IntegerField(null=True, blank=True)
+    featured = models.BooleanField(default=False)
+
+    # Marketplace enhancements
+    price = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
+    marketplace_tags = models.ManyToManyField(JournalTag, blank=True)
 
     # Statistics
     view_count = models.PositiveIntegerField(default=0)
     total_tips = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     popularity_score = models.FloatField(default=0)  # Calculated field based on views, likes, comments, etc.
+
+    # Cached counts for performance
+    like_count_cached = models.PositiveIntegerField(default=0)
+    review_count = models.PositiveIntegerField(default=0)
+    entry_count_cached = models.PositiveIntegerField(default=0)
+
+    # Content metadata
+    first_entry_date = models.DateField(null=True, blank=True)
+    last_entry_date = models.DateField(null=True, blank=True)
 
     # Likes (many-to-many relationship with User)
     likes = models.ManyToManyField(User, related_name='liked_journals', blank=True)
@@ -309,16 +267,43 @@ class Journal(models.Model):
     def like_count(self):
         return self.likes.count()
 
+    @property
+    def is_premium(self):
+        return self.price > 0
+
+    @property
+    def author_display_name(self):
+        return self.author.get_full_name() or self.author.username
+
+    def update_cached_counts(self):
+        """Update cached statistics"""
+        self.like_count_cached = self.journal_likes.count() if hasattr(self, 'journal_likes') else self.likes.count()
+        self.review_count = self.reviews.count() if hasattr(self, 'reviews') else 0
+        self.entry_count_cached = self.entries.count()
+
+        # Update entry dates
+        if self.entries.exists():
+            dates = self.entries.aggregate(
+                first=models.Min('date_created'),
+                last=models.Max('date_created')
+            )
+            self.first_entry_date = dates['first'].date() if dates['first'] else None
+            self.last_entry_date = dates['last'].date() if dates['last'] else None
+
+        self.save(update_fields=['like_count_cached', 'review_count', 'entry_count_cached',
+                               'first_entry_date', 'last_entry_date'])
+
     def calculate_popularity(self):
         """Calculate popularity score based on various metrics"""
-        # Example formula: views * 0.2 + likes * 1.0 + comments * 1.5 + tips * 5.0
-        # This would need to be implemented based on your specific requirements
         view_weight = 0.2
         like_weight = 1.0
         comment_weight = 1.5
         tip_weight = 5.0
 
-        comment_count = Comment.objects.filter(journal=self).count()
+        try:
+            comment_count = Comment.objects.filter(journal=self).count()
+        except:
+            comment_count = 0
 
         score = (self.view_count * view_weight +
                 self.likes.count() * like_weight +
@@ -349,6 +334,36 @@ class JournalEntry(models.Model):
     def __str__(self):
         return self.title
 
+class JournalLike(models.Model):
+    """Track likes for journals"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    journal = models.ForeignKey(Journal, on_delete=models.CASCADE, related_name='journal_likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'journal']
+
+class JournalPurchase(models.Model):
+    """Track premium journal purchases"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    journal = models.ForeignKey(Journal, on_delete=models.CASCADE, related_name='purchases')
+    amount = models.DecimalField(max_digits=6, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'journal']
+
+class JournalReview(models.Model):
+    """Reviews and ratings for journals"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    journal = models.ForeignKey(Journal, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    review_text = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'journal']
+
 class Comment(models.Model):
     """Model for comments on journals"""
 
@@ -371,7 +386,9 @@ class Tip(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"${self.amount} tip from {self.tipper.username} to {self.recipient.username}"
+        tipper_name = self.tipper.username if self.tipper else "Anonymous"
+        recipient_name = self.recipient.username if self.recipient else "Unknown"
+        return f"${self.amount} tip from {tipper_name} to {recipient_name}"
 
     def save(self, *args, **kwargs):
         # Update the journal's total_tips field when a new tip is saved
@@ -421,3 +438,82 @@ class EntryPhoto(models.Model):
 
     def __str__(self):
         return f"Photo for {self.entry.title}"
+
+class EntryTag(models.Model):
+    entry = models.ForeignKey(Entry, on_delete=models.CASCADE, related_name='entry_tags')
+    name = models.CharField(max_length=50)
+    tag_type = models.CharField(max_length=20, default='topic', choices=[
+        ('topic', 'Topic'),
+        ('mood', 'Mood'),
+        ('person', 'Person'),
+        ('location', 'Location'),
+        ('other', 'Other')
+    ])
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+
+# Forms
+class EntryForm(forms.ModelForm):
+    # Add a field for tags that will be processed separately
+    tags = forms.CharField(required=False, help_text="Comma-separated tags")
+    entry_photo = forms.ImageField(required=False)  # Add this field
+
+    class Meta:
+        model = Entry
+        fields = ['title', 'content', 'mood', 'chapter']
+        widgets = {
+            'content': forms.Textarea(attrs={'class': 'diary-font'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        # Extract user from kwargs so we can use it later
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        # If this is an existing entry, populate the tags field
+        if self.instance and self.instance.pk:
+            self.initial['tags'] = ', '.join([tag.name for tag in self.instance.tags.all()])
+
+    def save(self, commit=True, user=None):
+        # Use either the user passed to save() or the one set during initialization
+        user = user or self.user
+        if not user:
+            raise ValueError("User must be provided to save the form")
+
+        # Save the entry but don't commit until we handle the tags
+        entry = super().save(commit=False)
+        entry.user = user
+
+        if commit:
+            entry.save()
+
+            # Handle photo upload if present
+            if 'entry_photo' in self.files:
+                # Create a new EntryPhoto linked to this entry
+                photo = EntryPhoto(
+                    entry=entry,
+                    photo=self.files['entry_photo']
+                )
+                photo.save()
+                print(f"Created new photo for entry #{entry.id}: {photo.photo.url}")
+
+            # Process tags field
+            if 'tags' in self.cleaned_data:
+                tag_names = [t.strip() for t in self.cleaned_data['tags'].split(',') if t.strip()]
+
+                # Clear existing tags for this entry
+                entry.tags.clear()
+
+                # Add each tag, creating new ones as needed
+                for tag_name in tag_names:
+                    tag, created = Tag.objects.get_or_create(
+                        name=tag_name,
+                        user=user  # This links the tag to the user
+                    )
+                    entry.tags.add(tag)
+
+        return entry
