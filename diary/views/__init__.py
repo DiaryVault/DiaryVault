@@ -32,7 +32,7 @@ from .user import (
 
 # Marketplace views
 from .marketplace import (
-    marketplace_view, marketplace_publish, marketplace_monetization,
+    marketplace_view, publish_journal, marketplace_monetization,
     marketplace_contest, marketplace_faq, marketplace_journal_detail,
     marketplace_author_profile
 )
