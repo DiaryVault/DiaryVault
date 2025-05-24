@@ -605,6 +605,48 @@
     transform: translateY(0);
   }
 </style>
+<style>
+  /* Enhanced hover effects for featured content */
+  .featured-journal-card {
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  .featured-journal-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Stats counter animation */
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stat-number {
+    animation: countUp 0.8s ease-out forwards;
+  }
+
+  /* Category hover effects */
+  .category-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+  }
+
+  .category-card:hover::before {
+    left: 100%;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -865,6 +907,248 @@
         </div>
       </form>
     </div>
+
+
+<!-- Featured Content Section -->
+<div class="mb-16">
+  <!-- Featured Journal Hero -->
+  {% if featured_journal %}
+  <div class="glass-effect rounded-3xl p-8 mb-12 relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
+    <div class="relative z-10">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold">
+          ⭐ Featured Journal
+        </span>
+        <span class="text-sm text-gray-600">Editor's Pick</span>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <h2 class="text-3xl font-bold diary-font mb-4">{{ featured_journal.title }}</h2>
+          <p class="text-gray-700 text-lg mb-6 leading-relaxed">{{ featured_journal.description|truncatewords:30 }}</p>
+
+          <div class="flex items-center gap-6 mb-6">
+            <div class="flex items-center gap-2">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">
+                {{ featured_journal.author.first_name|first|upper }}{{ featured_journal.author.last_name|first|upper }}
+              </div>
+              <div>
+                <p class="font-semibold text-gray-800">{{ featured_journal.author.get_full_name|default:featured_journal.author.username }}</p>
+                <p class="text-sm text-gray-600">{{ featured_journal.entries.count }} entries</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4 text-sm text-gray-600">
+              <span>👁️ {{ featured_journal.view_count|default:0 }}</span>
+              <span>❤️ {{ featured_journal.likes.count }}</span>
+              {% if featured_journal.total_tips > 0 %}
+                <span>💰 ${{ featured_journal.total_tips|floatformat:0 }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <a href="{% url 'marketplace_journal_detail' featured_journal.id %}"
+               class="btn-gradient px-8 py-4 rounded-xl font-semibold inline-flex items-center gap-2">
+              Read Now
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </a>
+            {% if featured_journal.price == 0 %}
+              <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl font-bold">
+                FREE
+              </span>
+            {% else %}
+              <span class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-6 py-4 rounded-xl font-bold">
+                ${{ featured_journal.price }}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="relative">
+          {% if featured_journal.cover_image %}
+            <img src="{{ featured_journal.cover_image.url }}" alt="{{ featured_journal.title }}"
+                 class="w-full h-80 object-cover rounded-2xl shadow-2xl">
+          {% else %}
+            <div class="w-full h-80 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 rounded-2xl shadow-2xl flex items-center justify-center">
+              <div class="text-white text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <p class="font-bold text-xl">{{ featured_journal.title|truncatewords:3 }}</p>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Top Earning & Popular Free Journals -->
+  <div class="grid md:grid-cols-2 gap-8 mb-12">
+
+    <!-- Top Earning Journals -->
+    {% if top_earning %}
+    <div class="glass-effect rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800">Top Earning</h3>
+        <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">HOT</span>
+      </div>
+
+      <div class="space-y-4">
+        {% for journal in top_earning %}
+          <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-white/50 transition-colors cursor-pointer"
+               onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
+            <div class="flex-shrink-0">
+              {% if journal.cover_image %}
+                <img src="{{ journal.cover_image.url }}" alt="{{ journal.title }}" class="w-12 h-12 object-cover rounded-lg">
+              {% else %}
+                <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                  {{ journal.title|first }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold text-gray-800 truncate">{{ journal.title|truncatewords:4 }}</h4>
+              <p class="text-sm text-gray-600">by {{ journal.author.get_full_name|default:journal.author.username }}</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="font-bold text-green-600">${{ journal.total_tips|floatformat:0 }}</div>
+              <div class="text-xs text-gray-500">{{ journal.likes.count }} likes</div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-gray-200">
+        <a href="{% url 'marketplace' %}?sort=top_earning" class="text-green-600 hover:text-green-700 font-semibold text-sm">
+          View all top earners →
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Popular Free Journals -->
+    {% if popular_free %}
+    <div class="glass-effect rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-full flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800">Popular & Free</h3>
+        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold">FREE</span>
+      </div>
+
+      <div class="space-y-4">
+        {% for journal in popular_free %}
+          <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-white/50 transition-colors cursor-pointer"
+               onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
+            <div class="flex-shrink-0">
+              {% if journal.cover_image %}
+                <img src="{{ journal.cover_image.url }}" alt="{{ journal.title }}" class="w-12 h-12 object-cover rounded-lg">
+              {% else %}
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                  {{ journal.title|first }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold text-gray-800 truncate">{{ journal.title|truncatewords:4 }}</h4>
+              <p class="text-sm text-gray-600">by {{ journal.author.get_full_name|default:journal.author.username }}</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="font-bold text-blue-600">FREE</div>
+              <div class="text-xs text-gray-500">{{ journal.likes.count }} likes</div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-gray-200">
+        <a href="{% url 'marketplace' %}?price=free" class="text-blue-600 hover:text-blue-700 font-semibold text-sm">
+          View all free journals →
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+  <!-- Enhanced Marketplace Stats -->
+  <div class="glass-effect rounded-2xl p-8 mb-12">
+    <div class="text-center mb-8">
+      <h3 class="text-2xl font-bold diary-font text-gray-800 mb-2">DiaryVault Marketplace</h3>
+      <p class="text-gray-600">Connecting authentic stories with readers worldwide</p>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="text-center">
+        <div class="text-3xl font-bold text-blue-600 mb-2">{{ stats.total_journals|default:"1,247" }}</div>
+        <div class="text-sm text-gray-600">Published Journals</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-purple-600 mb-2">{{ stats.total_authors|default:"823" }}</div>
+        <div class="text-sm text-gray-600">Active Authors</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-green-600 mb-2">${{ stats.total_earnings|default:"156,420"|floatformat:0 }}</div>
+        <div class="text-sm text-gray-600">Author Earnings</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-orange-600 mb-2">{{ stats.total_entries|default:"12,450" }}</div>
+        <div class="text-sm text-gray-600">Journal Entries</div>
+      </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-gray-200">
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <p class="text-gray-600 text-center">Ready to share your story?</p>
+        {% if user.is_authenticated %}
+          <a href="{% url 'publish_journal' %}" class="btn-amber px-6 py-3 rounded-xl font-semibold">
+            Publish Your Journal
+          </a>
+        {% else %}
+          <a href="{% url 'signup' %}?feature=marketplace" class="btn-amber px-6 py-3 rounded-xl font-semibold">
+            Start Writing Today
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories Grid (Enhanced) -->
+  {% if categories %}
+  <div class="mb-12">
+    <h3 class="text-2xl font-bold diary-font text-gray-800 mb-6 text-center">Browse by Category</h3>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      {% for category in categories|slice:":10" %}
+        <a href="{% url 'marketplace' %}?category={{ category.slug }}"
+           class="glass-effect p-6 rounded-xl text-center hover:scale-105 transition-transform group">
+          <div class="w-12 h-12 bg-gradient-to-br from-{{ category.color }}-400 to-{{ category.color }}-600 rounded-full mx-auto mb-3 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <span class="text-white font-bold text-lg">{{ category.name|first }}</span>
+          </div>
+          <h4 class="font-semibold text-gray-800 mb-1">{{ category.name }}</h4>
+          <p class="text-sm text-gray-600">{{ category.journal_count }} journal{{ category.journal_count|pluralize }}</p>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+
 
     <!-- Enhanced Products Section -->
     <div class="mb-16">
