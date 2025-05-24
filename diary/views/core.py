@@ -88,7 +88,7 @@ def get_featured_journals():
         # 1. Get staff picks first (up to 6)
         staff_picks = base_query.filter(is_staff_pick=True)[:6]
         for journal in staff_picks:
-            if journal.id not in featured_ids and len(featured_journals) < 18:
+            if journal.id not in featured_ids and len(featured_journals) < 20:
                 featured_journals.append(journal)
                 featured_ids.add(journal.id)
 
@@ -98,7 +98,7 @@ def get_featured_journals():
         ).exclude(id__in=featured_ids).order_by('-like_count', '-view_count')[:6]
 
         for journal in popular_journals:
-            if journal.id not in featured_ids and len(featured_journals) < 18:
+            if journal.id not in featured_ids and len(featured_journals) < 20:
                 featured_journals.append(journal)
                 featured_ids.add(journal.id)
 
@@ -109,13 +109,13 @@ def get_featured_journals():
         ).exclude(id__in=featured_ids).order_by('-created_at')[:6]
 
         for journal in recent_journals:
-            if journal.id not in featured_ids and len(featured_journals) < 18:
+            if journal.id not in featured_ids and len(featured_journals) < 20:
                 featured_journals.append(journal)
                 featured_ids.add(journal.id)
 
         # 4. If we still need more journals, get any published journals
-        if len(featured_journals) < 18:
-            remaining_needed = 18 - len(featured_journals)
+        if len(featured_journals) < 20:
+            remaining_needed = 20 - len(featured_journals)
             remaining_journals = base_query.exclude(
                 id__in=featured_ids
             ).order_by('-created_at')[:remaining_needed]
@@ -124,9 +124,9 @@ def get_featured_journals():
 
         # 5. Alternative approach if we still don't have 18 journals
         # Fill with random selection to ensure we always have content
-        if len(featured_journals) < 18:
+        if len(featured_journals) < 20:
             all_available = base_query.exclude(id__in=featured_ids).order_by('?')
-            remaining_needed = 18 - len(featured_journals)
+            remaining_needed = 20 - len(featured_journals)
             random_journals = all_available[:remaining_needed]
             featured_journals.extend(random_journals)
 
@@ -144,7 +144,7 @@ def get_featured_journals():
         random.shuffle(featured_journals)
 
         # Return exactly 18 journals (or whatever we have)
-        return featured_journals[:18]
+        return featured_journals[:20]
 
     except Exception as e:
         # Fallback: return empty list if there's any error
