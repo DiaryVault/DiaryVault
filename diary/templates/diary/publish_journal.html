@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Publish Your Journal - DiaryVault{% endblock %}
+
+{% block extra_css %}
+<style>
+  .diary-font {
+    font-family: 'Playfair Display', serif;
+  }
+
+  .glass-effect {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+  }
+
+  .btn-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    transition: all 0.3s ease;
+  }
+
+  .btn-gradient:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+  }
+
+  .entry-card {
+    transition: all 0.3s ease;
+  }
+
+  .entry-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  }
+
+  .entry-card.selected {
+    border-color: #6366f1;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Header -->
+  <div class="text-center mb-8">
+    <h1 class="text-3xl md:text-4xl font-bold diary-font mb-4 text-gray-800">
+      Publish Your Journal
+    </h1>
+    <p class="text-gray-600 max-w-2xl mx-auto">
+      Share your authentic stories with the world and start earning. Select your best entries and create a compelling journal that readers will love.
+    </p>
+  </div>
+
+  <!-- Publishing Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="glass-effect rounded-xl p-6 text-center">
+      <div class="text-2xl font-bold text-green-600 mb-2">90%</div>
+      <div class="text-sm text-gray-600">Author Earnings</div>
+    </div>
+    <div class="glass-effect rounded-xl p-6 text-center">
+      <div class="text-2xl font-bold text-blue-600 mb-2">{{ total_entries }}</div>
+      <div class="text-sm text-gray-600">Available Entries</div>
+    </div>
+    <div class="glass-effect rounded-xl p-6 text-center">
+      <div class="text-2xl font-bold text-purple-600 mb-2">24/7</div>
+      <div class="text-sm text-gray-600">Global Sales</div>
+    </div>
+  </div>
+
+  <!-- Publishing Form -->
+  <form method="post" enctype="multipart/form-data" class="space-y-8">
+    {% csrf_token %}
+
+    <!-- Journal Details -->
+    <div class="glass-effect rounded-xl p-8">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Journal Details</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Journal Title *</label>
+          <input type="text" name="title" required
+                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                 placeholder="Give your journal a compelling title">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+          <textarea name="description" rows="4" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Describe what readers can expect from your journal..."></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Price (USD)</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+            <input type="number" name="price" min="0" step="0.01"
+                   class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                   placeholder="0.00">
+          </div>
+          <p class="text-xs text-gray-500 mt-1">Leave as $0.00 for free journals</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Cover Image</label>
+          <input type="file" name="cover_image" accept="image/*"
+                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          <p class="text-xs text-gray-500 mt-1">Optional: Upload a cover image</p>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+          <input type="text" name="tags"
+                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                 placeholder="travel, personal growth, adventure (comma separated)">
+          <p class="text-xs text-gray-500 mt-1">Add tags to help readers discover your journal</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Entry Selection -->
+    <div class="glass-effect rounded-xl p-8">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Select Entries</h2>
+
+      {% if entries %}
+        <div class="mb-4 flex items-center justify-between">
+          <p class="text-gray-600">Choose the entries you want to include in your journal</p>
+          <div class="flex gap-2">
+            <button type="button" onclick="selectAll()" class="text-sm text-blue-600 hover:text-blue-800">Select All</button>
+            <span class="text-gray-300">|</span>
+            <button type="button" onclick="selectNone()" class="text-sm text-blue-600 hover:text-blue-800">Select None</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+          {% for entry in entries %}
+            <label class="entry-card glass-effect rounded-lg p-4 cursor-pointer hover:bg-white/50">
+              <input type="checkbox" name="entries" value="{{ entry.id }}" class="mr-3">
+              <div>
+                <h4 class="font-medium text-gray-800 mb-1">{{ entry.title }}</h4>
+                <p class="text-xs text-gray-600 mb-2">{{ entry.created_at|date:"M j, Y" }}</p>
+                <p class="text-sm text-gray-700 line-clamp-2">{{ entry.content|truncatewords:15 }}</p>
+                <div class="mt-2 flex items-center text-xs text-gray-500">
+                  <span>{{ entry.content|length }} characters</span>
+                  {% if entry.mood %}
+                    <span class="ml-2 px-2 py-1 bg-gray-100 rounded-full">{{ entry.mood }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </label>
+          {% endfor %}
+        </div>
+
+        <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+          <p class="text-sm text-blue-800">
+            <strong>Quality Tip:</strong> Select your most engaging and well-written entries.
+            Journals with 5-15 high-quality entries tend to perform best in the marketplace.
+          </p>
+        </div>
+      {% else %}
+        <div class="text-center py-8">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">No entries available</h3>
+          <p class="text-gray-500 mb-4">You need to create some journal entries before you can publish a journal.</p>
+          <a href="{% url 'journal' %}" class="btn-gradient text-white px-6 py-3 rounded-lg font-medium">
+            Create Your First Entry
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Publishing Options -->
+    <div class="glass-effect rounded-xl p-8">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Publishing Options</h2>
+
+      <div class="space-y-4">
+        <label class="flex items-center">
+          <input type="checkbox" name="featured_submission" class="mr-3">
+          <div>
+            <span class="font-medium">Submit for Staff Pick consideration</span>
+            <p class="text-sm text-gray-500">Our editorial team will review your journal for featuring</p>
+          </div>
+        </label>
+
+        <label class="flex items-center">
+          <input type="checkbox" name="contest_entry" class="mr-3">
+          <div>
+            <span class="font-medium">Enter in weekly contest</span>
+            <p class="text-sm text-gray-500">Compete for $100 prize and featured spotlight</p>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <button type="button" onclick="saveDraft()"
+              class="px-8 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors">
+        Save as Draft
+      </button>
+      <button type="submit"
+              class="btn-gradient text-white px-8 py-3 rounded-xl font-medium shadow-lg flex items-center justify-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+        </svg>
+        Publish Journal
+      </button>
+    </div>
+  </form>
+
+  <!-- Help Section -->
+  <div class="mt-12 glass-effect rounded-xl p-8">
+    <h2 class="text-xl font-bold text-gray-800 mb-6">Publishing Tips</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <h3 class="font-medium text-gray-800 mb-2">📝 Content Quality</h3>
+        <ul class="text-sm text-gray-600 space-y-1">
+          <li>• Choose your most engaging entries</li>
+          <li>• Ensure entries are at least 100 characters</li>
+          <li>• Include a variety of topics and moods</li>
+          <li>• Check for spelling and grammar</li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-medium text-gray-800 mb-2">💰 Pricing Strategy</h3>
+        <ul class="text-sm text-gray-600 space-y-1">
+          <li>• Free journals get more readers</li>
+          <li>• Premium journals ($3-15) earn more</li>
+          <li>• Consider your audience and content quality</li>
+          <li>• You can always adjust pricing later</li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-medium text-gray-800 mb-2">🎯 Discoverability</h3>
+        <ul class="text-sm text-gray-600 space-y-1">
+          <li>• Use relevant, specific tags</li>
+          <li>• Write compelling descriptions</li>
+          <li>• Add an eye-catching cover image</li>
+          <li>• Share on social media</li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-medium text-gray-800 mb-2">📈 Success Metrics</h3>
+        <ul class="text-sm text-gray-600 space-y-1">
+          <li>• Track views and likes</li>
+          <li>• Monitor reader feedback</li>
+          <li>• Update based on performance</li>
+          <li>• Engage with your audience</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function selectAll() {
+  const checkboxes = document.querySelectorAll('input[name="entries"]');
+  checkboxes.forEach(cb => {
+    cb.checked = true;
+    cb.closest('.entry-card').classList.add('selected');
+  });
+}
+
+function selectNone() {
+  const checkboxes = document.querySelectorAll('input[name="entries"]');
+  checkboxes.forEach(cb => {
+    cb.checked = false;
+    cb.closest('.entry-card').classList.remove('selected');
+  });
+}
+
+function saveDraft() {
+  // In a real app, this would save as draft
+  alert('Draft saving functionality would be implemented here');
+}
+
+// Add visual feedback for selected entries
+document.addEventListener('change', function(e) {
+  if (e.target.name === 'entries') {
+    const card = e.target.closest('.entry-card');
+    if (e.target.checked) {
+      card.classList.add('selected');
+    } else {
+      card.classList.remove('selected');
+    }
+  }
+});
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+  const selectedEntries = document.querySelectorAll('input[name="entries"]:checked');
+
+  if (selectedEntries.length === 0) {
+    e.preventDefault();
+    alert('Please select at least one entry to include in your journal.');
+    return;
+  }
+
+  if (selectedEntries.length > 50) {
+    e.preventDefault();
+    alert('Please select no more than 50 entries for optimal reading experience.');
+    return;
+  }
+});
+</script>
+{% endblock %}

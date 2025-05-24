@@ -1,0 +1,796 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ journal.title }} - DiaryVault Marketplace{% endblock %}
+
+{% block extra_css %}
+<style>
+  .diary-font {
+    font-family: 'Playfair Display', serif;
+  }
+
+  .glass-effect {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+  }
+
+  .btn-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    transition: all 0.3s ease;
+  }
+
+  .btn-gradient:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-emerald {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    transition: all 0.3s ease;
+  }
+
+  .btn-emerald:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+  }
+
+  .btn-amber {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    transition: all 0.3s ease;
+  }
+
+  .btn-amber:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);
+  }
+
+  .star-rating {
+    display: flex;
+    gap: 2px;
+  }
+
+  .star {
+    color: #d1d5db;
+    transition: color 0.2s ease;
+  }
+
+  .star.filled {
+    color: #fbbf24;
+  }
+
+  .entry-preview {
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .entry-preview:hover {
+    background: rgba(255, 255, 255, 0.7);
+    transform: translateY(-2px);
+  }
+
+  .blur-content {
+    filter: blur(3px);
+    pointer-events: none;
+  }
+
+  .premium-overlay {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(139, 92, 246, 0.9) 100%);
+  }
+
+  .sticky-purchase {
+    position: sticky;
+    top: 100px;
+    z-index: 10;
+  }
+
+  .heart-filled {
+    color: #ef4444;
+    animation: heartbeat 0.3s ease-in-out;
+  }
+
+  @keyframes heartbeat {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .review-card {
+    transition: all 0.3s ease;
+  }
+
+  .review-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  }
+
+  .progress-bar {
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    transition: width 0.3s ease;
+  }
+
+  @media (max-width: 768px) {
+    .sticky-purchase {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.5);
+      padding: 1rem;
+      border-radius: 20px 20px 0 0;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Breadcrumb -->
+  <div class="flex items-center gap-2 text-sm text-gray-600 mb-6">
+    <a href="{% url 'home' %}" class="hover:text-blue-600">Home</a>
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+    </svg>
+    <a href="{% url 'marketplace' %}" class="hover:text-blue-600">Marketplace</a>
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+    </svg>
+    <span class="text-gray-800">{{ journal.title|truncatechars:30 }}</span>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content -->
+    <div class="lg:col-span-2 space-y-8">
+
+      <!-- Journal Header -->
+      <div class="glass-effect rounded-2xl p-8">
+        <div class="flex items-start justify-between mb-6">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-3">
+              {% if journal.is_staff_pick %}
+                <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                  ⭐ Staff Pick
+                </span>
+              {% endif %}
+              {% if journal.price == 0 %}
+                <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                  FREE
+                </span>
+              {% endif %}
+            </div>
+
+            <h1 class="text-3xl md:text-4xl font-bold diary-font text-gray-800 mb-4">
+              {{ journal.title }}
+            </h1>
+
+            <div class="flex items-center gap-4 mb-4">
+              <div class="flex items-center gap-2">
+                <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">
+                  {{ journal.author.username|first|upper }}
+                </div>
+                <div>
+                  <a href="{% url 'marketplace_author_profile' journal.author.username %}" class="font-medium text-gray-800 hover:text-blue-600">
+                    {{ journal.author.get_full_name|default:journal.author.username }}
+                  </a>
+                  <p class="text-sm text-gray-600">@{{ journal.author.username }}</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-4">
+                <div class="star-rating">
+                  {% for i in "12345" %}
+                    <svg class="w-5 h-5 star filled" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                  {% endfor %}
+                </div>
+                <span class="text-sm text-gray-600">{{ avg_rating|default:"5.0" }} ({{ reviews.count }} reviews)</span>
+              </div>
+            </div>
+
+            <p class="text-gray-700 text-lg leading-relaxed">
+              {{ journal.description }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Journal Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-gray-200">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-gray-800">{{ entry_count }}</div>
+            <div class="text-sm text-gray-600">Entries</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-blue-600">{{ journal.view_count|default:0 }}</div>
+            <div class="text-sm text-gray-600">Views</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-red-600">{{ like_count }}</div>
+            <div class="text-sm text-gray-600">Likes</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-green-600">${{ journal.total_tips|default:0|floatformat:0 }}</div>
+            <div class="text-sm text-gray-600">Earned</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Journal Cover Image -->
+      {% if journal.cover_image %}
+      <div class="glass-effect rounded-2xl overflow-hidden">
+        <img src="{{ journal.cover_image.url }}" alt="{{ journal.title }}" class="w-full h-64 md:h-80 object-cover">
+      </div>
+      {% endif %}
+
+      <!-- Entry Previews -->
+      <div class="glass-effect rounded-2xl p-8">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">Journal Entries</h2>
+          <span class="text-sm text-gray-600">{{ entry_count }} entries</span>
+        </div>
+
+        <div class="space-y-6">
+          {% for entry in entries|slice:":3" %}
+            <div class="entry-preview rounded-xl p-6 {% if not has_access and journal.price > 0 and forloop.counter > 1 %}blur-content{% endif %}">
+              <div class="flex items-start justify-between mb-4">
+                <h3 class="text-xl font-semibold text-gray-800">{{ entry.title }}</h3>
+                <span class="text-sm text-gray-500">{{ entry.date_created|date:"M j, Y" }}</span>
+              </div>
+
+              <div class="prose prose-gray max-w-none">
+                {% if has_access or forloop.counter == 1 %}
+                  <p>{{ entry.content|truncatewords:50 }}</p>
+                {% else %}
+                  <p>{{ entry.content|truncatewords:20 }}</p>
+                {% endif %}
+              </div>
+
+              {% if not has_access and journal.price > 0 and forloop.counter > 1 %}
+                <div class="absolute inset-0 premium-overlay rounded-xl flex items-center justify-center">
+                  <div class="text-center text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <p class="font-semibold">Premium Content</p>
+                    <p class="text-sm opacity-90">Purchase to read full entries</p>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          {% empty %}
+            <div class="text-center py-8 text-gray-500">
+              <p>No entries available in this journal.</p>
+            </div>
+          {% endfor %}
+
+          {% if entries.count > 3 %}
+            <div class="text-center pt-4">
+              <p class="text-gray-600">
+                {% if has_access %}
+                  + {{ entries.count|add:"-3" }} more entries in this journal
+                {% else %}
+                  + {{ entries.count|add:"-3" }} more entries available after purchase
+                {% endif %}
+              </p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Reviews Section -->
+      <div class="glass-effect rounded-2xl p-8">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">Reviews & Ratings</h2>
+          {% if user.is_authenticated and user != journal.author %}
+            <button onclick="openReviewModal()" class="text-blue-600 hover:text-blue-800 font-medium">
+              Write a Review
+            </button>
+          {% endif %}
+        </div>
+
+        <!-- Rating Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div class="text-center">
+            <div class="text-4xl font-bold text-gray-800 mb-2">{{ avg_rating|default:"5.0" }}</div>
+            <div class="star-rating justify-center mb-2">
+              {% for i in "12345" %}
+                <svg class="w-6 h-6 star filled" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+              {% endfor %}
+            </div>
+            <p class="text-gray-600">Based on {{ reviews.count }} reviews</p>
+          </div>
+
+          <div class="space-y-2">
+            {% for rating in "54321" %}
+              <div class="flex items-center gap-2">
+                <span class="text-sm w-8">{{ rating }} ⭐</span>
+                <div class="flex-1 bg-gray-200 rounded-full h-2">
+                  <div class="progress-bar h-2 rounded-full" style="width: {% cycle '80' '60' '40' '20' '10' %}%"></div>
+                </div>
+                <span class="text-sm text-gray-600 w-12">{% cycle '80' '60' '40' '20' '10' %}%</span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Individual Reviews -->
+        <div class="space-y-4">
+          {% for review in reviews|slice:":3" %}
+            <div class="review-card glass-effect rounded-lg p-6">
+              <div class="flex items-start gap-4">
+                <div class="h-10 w-10 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white font-bold">
+                  {{ review.user.username|first|upper }}
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="font-medium text-gray-800">{{ review.user.username }}</span>
+                    <div class="star-rating">
+                      {% for i in "12345" %}
+                        <svg class="w-4 h-4 star {% if forloop.counter <= review.rating %}filled{% endif %}" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                      {% endfor %}
+                    </div>
+                    <span class="text-sm text-gray-500">{{ review.created_at|timesince }} ago</span>
+                  </div>
+                  <p class="text-gray-700">{{ review.review_text }}</p>
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <div class="text-center py-8 text-gray-500">
+              <p>No reviews yet. Be the first to review this journal!</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Related Journals -->
+      {% if related_journals %}
+      <div class="glass-effect rounded-2xl p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">More from {{ journal.author.username }}</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {% for related in related_journals %}
+            <div class="glass-effect rounded-lg p-4 hover:bg-white/50 transition-all">
+              <div class="flex gap-4">
+                <div class="h-16 w-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-semibold text-gray-800 mb-1">
+                    <a href="{% url 'marketplace_journal_detail' related.id %}" class="hover:text-blue-600">
+                      {{ related.title|truncatechars:50 }}
+                    </a>
+                  </h3>
+                  <p class="text-sm text-gray-600 mb-2">{{ related.entries.count }} entries</p>
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-green-600">
+                      {% if related.price > 0 %}${{ related.price }}{% else %}FREE{% endif %}
+                    </span>
+                    <div class="star-rating">
+                      {% for i in "12345" %}
+                        <svg class="w-3 h-3 star filled" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar - Purchase Card -->
+    <div class="lg:col-span-1">
+      <div class="sticky-purchase glass-effect rounded-2xl p-6 shadow-lg">
+
+        <!-- Price -->
+        <div class="text-center mb-6">
+          {% if journal.price > 0 %}
+            <div class="text-3xl font-bold text-green-600 mb-2">${{ journal.price }}</div>
+            <p class="text-sm text-gray-600">One-time purchase • Instant access</p>
+          {% else %}
+            <div class="text-3xl font-bold text-green-600 mb-2">FREE</div>
+            <p class="text-sm text-gray-600">Download instantly</p>
+          {% endif %}
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-3 mb-6">
+          {% if user.is_authenticated %}
+            {% if journal.author == user %}
+              <div class="text-center p-4 bg-blue-50 rounded-lg">
+                <p class="text-sm text-blue-800 mb-2">This is your journal</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Edit Journal</a>
+              </div>
+            {% elif can_purchase %}
+              <button onclick="purchaseJournal({{ journal.id }})" class="w-full btn-emerald text-white py-3 rounded-lg font-semibold shadow-lg">
+                {% if journal.price > 0 %}Purchase Journal{% else %}Get Free Journal{% endif %}
+              </button>
+            {% else %}
+              <div class="text-center p-4 bg-green-50 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto text-green-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-sm text-green-800 font-medium">You own this journal</p>
+              </div>
+            {% endif %}
+
+            {% if journal.author != user %}
+              <div class="flex gap-2">
+                <button onclick="toggleLike({{ journal.id }})" class="flex-1 glass-effect border border-white/50 py-3 rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-white/50 transition-colors {% if user_liked %}text-red-600{% else %}text-gray-700{% endif %}">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {% if user_liked %}heart-filled{% endif %}" fill="{% if user_liked %}currentColor{% else %}none{% endif %}" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                  <span id="likeCount">{{ like_count }}</span>
+                </button>
+                <button onclick="openTipModal()" class="flex-1 btn-amber text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                  Tip Author
+                </button>
+              </div>
+            {% endif %}
+          {% else %}
+            <a href="{% url 'login' %}" class="w-full btn-emerald text-white py-3 rounded-lg font-semibold shadow-lg text-center block">
+              Sign In to {% if journal.price > 0 %}Purchase{% else %}Download{% endif %}
+            </a>
+            <div class="text-center">
+              <span class="text-sm text-gray-600">Don't have an account? </span>
+              <a href="{% url 'signup' %}" class="text-blue-600 hover:text-blue-800 font-medium">Sign up free</a>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Features -->
+        <div class="space-y-3 text-sm">
+          <div class="flex items-center gap-3 text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span>Instant download</span>
+          </div>
+          <div class="flex items-center gap-3 text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <span>Secure payment</span>
+          </div>
+          <div class="flex items-center gap-3 text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <span>Support the author</span>
+          </div>
+        </div>
+
+        <!-- Share -->
+        <div class="mt-6 pt-6 border-t border-gray-200">
+          <p class="text-sm font-medium text-gray-700 mb-3">Share this journal:</p>
+          <div class="flex gap-2">
+            <button onclick="shareJournal('twitter')" class="flex-1 bg-blue-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors">
+              Twitter
+            </button>
+            <button onclick="shareJournal('facebook')" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+              Facebook
+            </button>
+            <button onclick="shareJournal('copy')" class="flex-1 glass-effect border border-white/50 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-white/50 transition-colors">
+              Copy Link
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tip Modal -->
+<div id="tipModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-bold text-gray-800">Tip the Author</h3>
+        <button onclick="closeTipModal()" class="text-gray-500 hover:text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="p-6">
+      <div class="text-center mb-6">
+        <div class="h-16 w-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mx-auto mb-3">
+          <span class="text-2xl">💰</span>
+        </div>
+        <p class="text-gray-600">Show your appreciation for <strong>{{ journal.author.username }}</strong>'s work</p>
+      </div>
+
+      <form onsubmit="sendTip(event)">
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <button type="button" onclick="selectTipAmount(1)" class="tip-amount-btn p-3 border border-gray-300 rounded-lg hover:border-amber-500 hover:bg-amber-50 transition-colors">
+            $1
+          </button>
+          <button type="button" onclick="selectTipAmount(3)" class="tip-amount-btn p-3 border border-gray-300 rounded-lg hover:border-amber-500 hover:bg-amber-50 transition-colors">
+            $3
+          </button>
+          <button type="button" onclick="selectTipAmount(5)" class="tip-amount-btn p-3 border border-gray-300 rounded-lg hover:border-amber-500 hover:bg-amber-50 transition-colors">
+            $5
+          </button>
+          <button type="button" onclick="selectTipAmount(10)" class="tip-amount-btn p-3 border border-gray-300 rounded-lg hover:border-amber-500 hover:bg-amber-50 transition-colors">
+            $10
+          </button>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Custom amount</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+            <input type="number" id="customTipAmount" min="0.50" step="0.01"
+                   class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                   placeholder="0.00">
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Message (optional)</label>
+          <textarea id="tipMessage" rows="3"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    placeholder="Thank you for sharing your story..."></textarea>
+        </div>
+
+        <button type="submit" class="w-full btn-amber text-white py-3 rounded-lg font-semibold">
+          Send Tip
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Review Modal -->
+<div id="reviewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-bold text-gray-800">Write a Review</h3>
+        <button onclick="closeReviewModal()" class="text-gray-500 hover:text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="p-6">
+      <form onsubmit="submitReview(event)">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+          <div class="flex gap-1" id="ratingStars">
+            {% for i in "12345" %}
+              <button type="button" onclick="setRating({{ i }})" class="star-btn text-gray-300 hover:text-yellow-400 transition-colors">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+              </button>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Your Review</label>
+          <textarea id="reviewText" rows="4" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Share your thoughts about this journal..."></textarea>
+        </div>
+
+        <button type="submit" class="w-full btn-gradient text-white py-3 rounded-lg font-semibold">
+          Submit Review
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedRating = 0;
+let selectedTipAmount = 0;
+
+// Like functionality
+function toggleLike(journalId) {
+  fetch(`/marketplace/like/${journalId}/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+      'Content-Type': 'application/json',
+    },
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById('likeCount').textContent = data.like_count;
+      const heartIcon = document.querySelector('[onclick="toggleLike(' + journalId + ')"] svg');
+      if (data.liked) {
+        heartIcon.classList.add('heart-filled');
+        heartIcon.setAttribute('fill', 'currentColor');
+      } else {
+        heartIcon.classList.remove('heart-filled');
+        heartIcon.setAttribute('fill', 'none');
+      }
+    }
+  })
+  .catch(error => console.error('Error:', error));
+}
+
+// Purchase functionality
+function purchaseJournal(journalId) {
+  // In a real app, this would integrate with a payment processor
+  if (confirm('{% if journal.price > 0 %}Purchase this journal for ${{ journal.price }}?{% else %}Download this free journal?{% endif %}')) {
+    // Simulate purchase
+    alert('{% if journal.price > 0 %}Purchase successful! You now have access to this journal.{% else %}Download started! You now have access to this journal.{% endif %}');
+    // Reload page to update UI
+    window.location.reload();
+  }
+}
+
+// Tip modal functions
+function openTipModal() {
+  document.getElementById('tipModal').classList.remove('hidden');
+}
+
+function closeTipModal() {
+  document.getElementById('tipModal').classList.add('hidden');
+  selectedTipAmount = 0;
+  document.getElementById('customTipAmount').value = '';
+  document.getElementById('tipMessage').value = '';
+  document.querySelectorAll('.tip-amount-btn').forEach(btn => {
+    btn.classList.remove('bg-amber-500', 'text-white', 'border-amber-500');
+  });
+}
+
+function selectTipAmount(amount) {
+  selectedTipAmount = amount;
+  document.getElementById('customTipAmount').value = amount;
+
+  document.querySelectorAll('.tip-amount-btn').forEach(btn => {
+    btn.classList.remove('bg-amber-500', 'text-white', 'border-amber-500');
+  });
+
+  event.target.classList.add('bg-amber-500', 'text-white', 'border-amber-500');
+}
+
+function sendTip(event) {
+  event.preventDefault();
+
+  const amount = document.getElementById('customTipAmount').value;
+  const message = document.getElementById('tipMessage').value;
+
+  if (!amount || amount < 0.50) {
+    alert('Please enter a tip amount of at least $0.50');
+    return;
+  }
+
+  fetch(`/marketplace/tip/{{ journal.id }}/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `amount=${amount}&message=${encodeURIComponent(message)}`
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert(data.message);
+      closeTipModal();
+    } else {
+      alert(data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Failed to send tip. Please try again.');
+  });
+}
+
+// Review modal functions
+function openReviewModal() {
+  document.getElementById('reviewModal').classList.remove('hidden');
+}
+
+function closeReviewModal() {
+  document.getElementById('reviewModal').classList.add('hidden');
+  selectedRating = 0;
+  document.getElementById('reviewText').value = '';
+  updateRatingStars();
+}
+
+function setRating(rating) {
+  selectedRating = rating;
+  updateRatingStars();
+}
+
+function updateRatingStars() {
+  const stars = document.querySelectorAll('#ratingStars .star-btn');
+  stars.forEach((star, index) => {
+    if (index < selectedRating) {
+      star.classList.remove('text-gray-300');
+      star.classList.add('text-yellow-400');
+    } else {
+      star.classList.remove('text-yellow-400');
+      star.classList.add('text-gray-300');
+    }
+  });
+}
+
+function submitReview(event) {
+  event.preventDefault();
+
+  if (selectedRating === 0) {
+    alert('Please select a rating');
+    return;
+  }
+
+  const reviewText = document.getElementById('reviewText').value;
+
+  // In a real app, this would submit to the server
+  alert('Review submitted successfully!');
+  closeReviewModal();
+}
+
+// Share functionality
+function shareJournal(platform) {
+  const url = window.location.href;
+  const title = '{{ journal.title|escapejs }}';
+
+  switch(platform) {
+    case 'twitter':
+      window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent('Check out this journal: ' + title)}`, '_blank');
+      break;
+    case 'facebook':
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+      break;
+    case 'copy':
+      navigator.clipboard.writeText(url).then(() => {
+        alert('Link copied to clipboard!');
+      });
+      break;
+  }
+}
+
+// Close modals on escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeTipModal();
+    closeReviewModal();
+  }
+});
+
+// Track journal view
+window.addEventListener('load', function() {
+  // In a real app, this would track the view
+  console.log('Journal view tracked');
+});
+</script>
+{% endblock %}
