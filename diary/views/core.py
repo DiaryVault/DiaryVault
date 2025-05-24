@@ -3,6 +3,7 @@ import logging
 import json
 import random
 
+from ..models import Journal, MarketplaceTag, Wishlist
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
@@ -73,7 +74,7 @@ def get_featured_journals():
             from ..models import Journal
         except ImportError:
             try:
-                from .models import Journal
+                from ..models import Journal
             except ImportError:
                 from diary.models import Journal
 
@@ -184,7 +185,7 @@ def get_marketplace_stats():
             User = get_user_model()
         except ImportError:
             try:
-                from .models import Journal
+                from ..models import Journal
                 from django.contrib.auth import get_user_model
                 User = get_user_model()
             except ImportError:
@@ -469,7 +470,7 @@ def track_journal_view(request, journal_id):
             from ..models import Journal
         except ImportError:
             try:
-                from .models import Journal
+                from ..models import Journal
             except ImportError:
                 from diary.models import Journal
 
@@ -500,7 +501,7 @@ def add_to_wishlist(request):
             from ..models import Journal
         except ImportError:
             try:
-                from .models import Journal
+                from ..models import Journal
             except ImportError:
                 from diary.models import Journal
 
@@ -519,7 +520,7 @@ def add_to_wishlist(request):
                 from ..models import Wishlist
             except ImportError:
                 try:
-                    from .models import Wishlist
+                    from ..models import Wishlist
                 except ImportError:
                     from diary.models import Wishlist
 
@@ -550,7 +551,7 @@ def remove_from_wishlist(request):
             from ..models import Journal
         except ImportError:
             try:
-                from .models import Journal
+                from ..models import Journal
             except ImportError:
                 from diary.models import Journal
 
@@ -568,7 +569,7 @@ def remove_from_wishlist(request):
                 from ..models import Wishlist
             except ImportError:
                 try:
-                    from .models import Wishlist
+                    from ..models import Wishlist
                 except ImportError:
                     from diary.models import Wishlist
 
@@ -592,7 +593,7 @@ def journal_preview(request, journal_id):
             from ..models import Journal
         except ImportError:
             try:
-                from .models import Journal
+                from ..models import Journal
             except ImportError:
                 from diary.models import Journal
 
@@ -639,7 +640,7 @@ def marketplace_stats(request):
             from ..models import Journal
         except ImportError:
             try:
-                from .models import Journal
+                from ..models import Journal
             except ImportError:
                 from diary.models import Journal
 
