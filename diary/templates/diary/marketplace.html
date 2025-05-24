@@ -1,1624 +1,802 @@
-{% extends "base.html" %}
-{% load static %}
-
-{% block title %}DiaryVault - Journal Marketplace{% endblock %}
-
-{% block extra_css %}
-<style>
-  /* Enhanced Core Branding */
-  .diary-font {
-    font-family: 'Playfair Display', serif;
-    letter-spacing: -0.02em;
-  }
-
-  .handwritten {
-    font-family: 'Satisfy', cursive;
-  }
-
-  /* Modern Glass Effects */
-  .glass-effect {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  }
-
-  .glass-effect:hover {
-    background: rgba(255, 255, 255, 0.9);
-    transform: translateY(-2px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  }
-
-  /* Enhanced Gradient Buttons */
-  .btn-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    font-weight: 600;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-  }
-
-  .btn-gradient::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s;
-  }
-
-  .btn-gradient:hover::before {
-    left: 100%;
-  }
-
-  .btn-gradient:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-  }
-
-  .btn-amber {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  }
-
-  .btn-amber:hover {
-    box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
-  }
-
-  .btn-emerald {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  }
-
-  .btn-emerald:hover {
-    box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
-  }
-
-  /* Enhanced Search Container with Integrated Categories */
-  .search-container {
-    position: relative;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  .search-wrapper {
-    position: relative;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(30px);
-    border-radius: 24px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
-    transition: all 0.3s ease;
-  }
-
-  .search-wrapper:focus-within {
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1), 0 12px 40px rgba(0, 0, 0, 0.15);
-  }
-
-  .search-input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-
-  .search-input {
-    width: 100%;
-    padding: 20px 24px 20px 56px;
-    border: none;
-    background: transparent;
-    font-size: 16px;
-    outline: none;
-    color: #374151;
-    font-weight: 500;
-  }
-
-  .search-input::placeholder {
-    color: #9ca3af;
-  }
-
-  .search-icon {
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #6b7280;
-    z-index: 10;
-  }
-
-  .search-categories {
-    padding: 16px 20px 20px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    background: rgba(255, 255, 255, 0.5);
-  }
-
-  .categories-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 12px;
-  }
-
-  .categories-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 8px;
-  }
-
-  .category-pill {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    background: rgba(255, 255, 255, 0.7);
-    border: 1.5px solid rgba(0, 0, 0, 0.06);
-    border-radius: 50px;
-    text-decoration: none;
-    color: #374151;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .category-pill::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    opacity: 0;
-    transition: opacity 0.25s ease;
-  }
-
-  .category-pill:hover::before {
-    opacity: 0.1;
-  }
-
-  .category-pill:hover {
-    transform: translateY(-2px);
-    border-color: #667eea;
-    color: #667eea;
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
-  }
-
-  .category-pill.active {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    border-color: transparent;
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-  }
-
-  .category-icon {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    opacity: 0.8;
-  }
-
-  .category-count {
-    font-size: 12px;
-    opacity: 0.7;
-    margin-left: auto;
-  }
-
-  /* Mobile Responsive Categories */
-  @media (max-width: 640px) {
-    .categories-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
-    }
-
-    .category-pill {
-      padding: 8px 12px;
-      font-size: 13px;
-    }
-
-    .category-icon {
-      width: 16px;
-      height: 16px;
-    }
-
-    .search-input {
-      padding: 16px 20px 16px 48px;
-      font-size: 15px;
-    }
-
-    .search-icon {
-      left: 16px;
-    }
-
-    .search-categories {
-      padding: 12px 16px 16px;
-    }
-  }
-
-  /* Tablet View */
-  @media (max-width: 768px) and (min-width: 641px) {
-    .categories-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
-  /* Enhanced Quick Category Access */
-  .quick-categories {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-  }
-
-  .quick-category {
-    padding: 6px 12px;
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-
-  .quick-category:hover {
-    background: rgba(102, 126, 234, 0.2);
-    transform: translateY(-1px);
-  }
-
-  /* Floating Action Buttons */
-  .floating-actions {
-    position: fixed;
-    top: 50%;
-    right: 24px;
-    transform: translateY(-50%);
-    z-index: 50;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .floating-btn {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-    position: relative;
-  }
-
-  .floating-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
-  }
-
-  .floating-btn .badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-    color: white;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    animation: pulse 2s infinite;
-  }
-
-  /* Enhanced Product Cards */
-  .product-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-    position: relative;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .product-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  }
-
-  .product-card .image-container {
-    position: relative;
-    height: 200px;
-    overflow: hidden;
-  }
-
-  .product-card .image-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(45deg, rgba(0,0,0,0.1), transparent);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .product-card:hover .image-overlay {
-    opacity: 1;
-  }
-
-  .product-card .quick-actions {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    opacity: 0;
-    transform: translateX(-20px);
-    transition: all 0.3s ease;
-  }
-
-  .product-card:hover .quick-actions {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  .quick-action-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-  }
-
-  .quick-action-btn:hover {
-    transform: scale(1.1);
-    background: rgba(255, 255, 255, 1);
-  }
-
-  /* Enhanced Filters - Now Compact */
-  .compact-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: center;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    background: rgba(255, 255, 255, 0.3);
-    padding: 16px 20px;
-    border-radius: 0 0 20px 20px;
-    margin: 0 -2px -2px -2px;
-  }
-
-  .filter-select {
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
-    padding: 8px 12px;
-    font-size: 14px;
-    color: #374151;
-    outline: none;
-    transition: all 0.2s ease;
-    min-width: 120px;
-  }
-
-  .filter-select:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  }
-
-  .filter-toggle-btn {
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
-    padding: 8px 16px;
-    font-size: 14px;
-    color: #374151;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-  }
-
-  .filter-toggle-btn:hover {
-    background: rgba(255, 255, 255, 1);
-    border-color: #667eea;
-  }
-
-  .search-btn {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 8px 20px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-left: auto;
-  }
-
-  .search-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
-  }
-
-  /* Advanced Filters Dropdown */
-  .advanced-filters-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(30px);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    z-index: 100;
-    margin-top: 8px;
-    opacity: 0;
-    transform: translateY(-10px);
-    visibility: hidden;
-    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-  }
-
-  .advanced-filters-dropdown.active {
-    opacity: 1;
-    transform: translateY(0);
-    visibility: visible;
-  }
-
-  /* Rest of existing styles remain the same... */
-  /* (I'll include key styles but truncate for brevity) */
-
-  /* Enhanced Animations */
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slideInRight {
-    from {
-      opacity: 0;
-      transform: translateX(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
-
-  .animate-fade-in-up {
-    animation: fadeInUp 0.8s ease forwards;
-  }
-
-  .animate-slide-in-right {
-    animation: slideInRight 0.6s ease forwards;
-  }
-
-  /* Mobile Optimizations */
-  @media (max-width: 768px) {
-    .floating-actions {
-      position: fixed;
-      bottom: 80px;
-      right: 16px;
-      top: auto;
-      transform: none;
-      flex-direction: row;
-      gap: 12px;
-    }
-
-    .floating-btn {
-      width: 48px;
-      height: 48px;
-    }
-
-    .compact-filters {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 8px;
-    }
-
-    .search-btn {
-      margin-left: 0;
-      margin-top: 8px;
-    }
-
-    .filter-select {
-      min-width: auto;
-    }
-  }
-
-  /* Success/Error States */
-  .toast {
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    padding: 16px 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    z-index: 1000;
-    animation: slideInRight 0.3s ease;
-  }
-
-  .toast.success {
-    border-left: 4px solid #10b981;
-  }
-
-  .toast.error {
-    border-left: 4px solid #ef4444;
-  }
-
-  .toast.warning {
-    border-left: 4px solid #f59e0b;
-  }
-
-  /* Enhanced Typography */
-  .text-gradient {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* Interactive Elements */
-  .interactive-element {
-    transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
-  }
-
-  .interactive-element:hover {
-    transform: translateY(-1px);
-  }
-
-  .interactive-element:active {
-    transform: translateY(0);
-  }
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-
-  <!-- Enhanced Floating Actions -->
-  {% if user.is_authenticated %}
-  <div class="floating-actions">
-    <!-- Shopping Cart -->
-    <button onclick="toggleCart()" class="floating-btn glass-effect" title="Shopping Cart">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
-      </svg>
-      <span id="cartCount" class="badge">0</span>
-    </button>
-
-    <!-- Wishlist -->
-    <button onclick="toggleWishlist()" class="floating-btn glass-effect" title="Wishlist">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-      </svg>
-      <span id="wishlistCount" class="badge">0</span>
-    </button>
-
-    <!-- Compare -->
-    <button onclick="toggleCompare()" class="floating-btn glass-effect" title="Compare">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>
-      <span id="compareCount" class="badge">0</span>
-    </button>
-  </div>
-  {% endif %}
-
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-    <!-- Enhanced Search Section with Integrated Categories -->
-    <div id="explore" class="mb-12 animate-fade-in-up">
-      <div class="text-center mb-8">
-        <h1 class="text-4xl md:text-5xl font-bold diary-font mb-4 text-gradient">
-          Discover Amazing Stories
-        </h1>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-          Explore authentic journals from real people sharing their experiences, insights, and journeys.
-        </p>
-      </div>
-
-      <form method="GET" action="{% url 'marketplace' %}" class="search-container">
-        <div class="search-wrapper">
-
-          <!-- Main Search Input -->
-          <div class="search-input-wrapper">
-            <input type="text"
-                   name="search"
-                   value="{{ search_query }}"
-                   placeholder="Search journals, authors, topics, or experiences..."
-                   class="search-input"
-                   autocomplete="off">
-            <svg xmlns="http://www.w3.org/2000/svg" class="search-icon h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-
-          <!-- Integrated Categories Section -->
-          <div class="search-categories">
-            <div class="categories-label">Browse by Category</div>
-            <div class="categories-grid">
-              {% for category in categories %}
-                <a href="{% url 'marketplace' %}?category={{ category.slug }}"
-                   class="category-pill {% if current_category == category.slug %}active{% endif %}">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <!-- Dynamic icon based on category - you can customize these -->
-                    {% if category.name == "Personal Growth" %}
-                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    {% elif category.name == "Travel" %}
-                      <path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>
-                    {% elif category.name == "Health" %}
-                      <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                    {% else %}
-                      <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
-                    {% endif %}
-                  </svg>
-                  <span>{{ category.name }}</span>
-                  <span class="category-count">{{ category.journal_count }}</span>
-                </a>
-              {% empty %}
-                <!-- Default categories when none exist -->
-                <a href="{% url 'marketplace' %}?category=personal-growth" class="category-pill">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span>Personal Growth</span>
-                  <span class="category-count">{{ stats.total_journals|default:"12" }}</span>
-                </a>
-                <a href="{% url 'marketplace' %}?category=travel" class="category-pill">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>
-                  </svg>
-                  <span>Travel</span>
-                  <span class="category-count">8</span>
-                </a>
-                <a href="{% url 'marketplace' %}?category=health" class="category-pill">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                  </svg>
-                  <span>Health & Wellness</span>
-                  <span class="category-count">15</span>
-                </a>
-                <a href="{% url 'marketplace' %}?category=career" class="category-pill">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
-                  </svg>
-                  <span>Career</span>
-                  <span class="category-count">6</span>
-                </a>
-                <a href="{% url 'marketplace' %}?category=relationships" class="category-pill">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
-                  </svg>
-                  <span>Relationships</span>
-                  <span class="category-count">9</span>
-                </a>
-                <a href="{% url 'marketplace' %}?category=creativity" class="category-pill">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
-                  </svg>
-                  <span>Creativity</span>
-                  <span class="category-count">11</span>
-                </a>
-              {% endfor %}
-            </div>
-
-            <!-- Quick trending categories -->
-            <div class="quick-categories">
-              <span class="text-xs font-semibold text-gray-500 mr-2">Trending:</span>
-              <a href="{% url 'marketplace' %}?search=mental health" class="quick-category">Mental Health</a>
-              <a href="{% url 'marketplace' %}?search=startup journey" class="quick-category">Startup Journey</a>
-              <a href="{% url 'marketplace' %}?search=motherhood" class="quick-category">Motherhood</a>
-              <a href="{% url 'marketplace' %}?search=recovery" class="quick-category">Recovery</a>
-            </div>
-          </div>
-
-          <!-- Compact Filter Controls -->
-          <div class="compact-filters">
-            <select name="sort" class="filter-select">
-              <option value="trending" {% if current_sort == 'trending' %}selected{% endif %}>🔥 Trending</option>
-              <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>🆕 Newest</option>
-              <option value="topRated" {% if current_sort == 'topRated' %}selected{% endif %}>⭐ Top Rated</option>
-              <option value="bestSelling" {% if current_sort == 'bestSelling' %}selected{% endif %}>💰 Best Selling</option>
-              <option value="priceLow" {% if current_sort == 'priceLow' %}selected{% endif %}>💲 Price: Low to High</option>
-              <option value="priceHigh" {% if current_sort == 'priceHigh' %}selected{% endif %}>💲 Price: High to Low</option>
-            </select>
-
-            <select name="priceRange" class="filter-select">
-              <option value="all">All Prices</option>
-              <option value="free" {% if request.GET.priceRange == 'free' %}selected{% endif %}>Free Only</option>
-              <option value="under10" {% if request.GET.priceRange == 'under10' %}selected{% endif %}>Under $10</option>
-              <option value="10to25" {% if request.GET.priceRange == '10to25' %}selected{% endif %}>$10 - $25</option>
-              <option value="over25" {% if request.GET.priceRange == 'over25' %}selected{% endif %}>$25+</option>
-            </select>
-
-            <select name="rating" class="filter-select">
-              <option value="all">All Ratings</option>
-              <option value="4plus" {% if request.GET.rating == '4plus' %}selected{% endif %}>4+ Stars</option>
-              <option value="3plus" {% if request.GET.rating == '3plus' %}selected{% endif %}>3+ Stars</option>
-            </select>
-
-            <button type="button" onclick="toggleAdvancedFilters()" class="filter-toggle-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"/>
-              </svg>
-              More Filters
-              <span class="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" id="activeFiltersCount">0</span>
-            </button>
-
-            <button type="submit" class="search-btn">
-              Search Journals
-            </button>
-          </div>
-        </div>
-
-        <!-- Advanced Filters Dropdown -->
-        <div id="advancedFiltersDropdown" class="advanced-filters-dropdown">
-          <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <!-- Journal Length -->
-              <div>
-                <h4 class="font-semibold text-gray-800 mb-3">Journal Length</h4>
-                <div class="space-y-2">
-                  <label class="flex items-center">
-                    <input type="checkbox" name="length" value="short" class="mr-2 accent-blue-500">
-                    <span class="text-sm">Short (1-10 entries)</span>
-                  </label>
-                  <label class="flex items-center">
-                    <input type="checkbox" name="length" value="medium" class="mr-2 accent-blue-500">
-                    <span class="text-sm">Medium (11-50 entries)</span>
-                  </label>
-                  <label class="flex items-center">
-                    <input type="checkbox" name="length" value="long" class="mr-2 accent-blue-500">
-                    <span class="text-sm">Long (50+ entries)</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Special Offers -->
-              <div>
-                <h4 class="font-semibold text-gray-800 mb-3">Special Offers</h4>
-                <div class="space-y-2">
-                  <label class="flex items-center">
-                    <input type="checkbox" name="offers" value="bestseller" class="mr-2 accent-blue-500">
-                    <span class="text-sm">⭐ Bestsellers</span>
-                  </label>
-                  <label class="flex items-center">
-                    <input type="checkbox" name="offers" value="new" class="mr-2 accent-blue-500">
-                    <span class="text-sm">🆕 New Releases</span>
-                  </label>
-                  <label class="flex items-center">
-                    <input type="checkbox" name="offers" value="staff-pick" class="mr-2 accent-blue-500">
-                    <span class="text-sm">👑 Staff Picks</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Author -->
-              <div>
-                <h4 class="font-semibold text-gray-800 mb-3">Author Type</h4>
-                <div class="space-y-2">
-                  <label class="flex items-center">
-                    <input type="checkbox" name="author_type" value="verified" class="mr-2 accent-blue-500">
-                    <span class="text-sm">✓ Verified Authors</span>
-                  </label>
-                  <label class="flex items-center">
-                    <input type="checkbox" name="author_type" value="professional" class="mr-2 accent-blue-500">
-                    <span class="text-sm">👔 Professional Writers</span>
-                  </label>
-                  <label class="flex items-center">
-                    <input type="checkbox" name="author_type" value="community" class="mr-2 accent-blue-500">
-                    <span class="text-sm">🏠 Community Members</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
-              <button type="button" onclick="clearAllFilters()" class="text-gray-600 hover:text-gray-800 font-medium">
-                Clear all filters
-              </button>
-              <div class="flex gap-3">
-                <button type="button" onclick="toggleAdvancedFilters()" class="px-4 py-2 text-gray-600 hover:text-gray-800">
-                  Cancel
-                </button>
-                <button type="submit" class="btn-gradient px-6 py-2 rounded-xl text-white">
-                  Apply Filters
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </form>
-    </div>
-
-    <!-- Enhanced Products Section -->
-    <div class="mb-16">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h2 class="text-2xl font-bold diary-font text-gray-800">
-            {% if search_query %}
-              Search Results for "{{ search_query }}"
-            {% elif current_category and current_category != 'all' %}
-              {{ current_category|title }} Journals
-            {% else %}
-              Featured Journals
-            {% endif %}
-          </h2>
-          <p class="text-gray-600 mt-1">{{ total_results|default:journals.count }} result{{ total_results|pluralize }}</p>
-        </div>
-
-        <!-- View Toggle -->
-        <div class="glass-effect rounded-xl p-1 flex">
-          <button onclick="setGridView('grid')" id="gridViewBtn"
-                  class="px-4 py-2 rounded-lg bg-blue-500 text-white transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
-          </button>
-          <button onclick="setGridView('list')" id="listViewBtn"
-                  class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Products Grid -->
-      {% if journals %}
-        <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {% for journal in journals %}
-            <div class="product-card animate-fade-in-up" data-journal-id="{{ journal.id }}" style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms">
-
-              <!-- Image Container -->
-              <div class="image-container">
-                <div class="image-overlay"></div>
-
-                <!-- Quick Actions -->
-                <div class="quick-actions">
-                  {% if user.is_authenticated %}
-                    <button onclick="toggleWishlist({{ journal.id }})" class="quick-action-btn" title="Add to Wishlist">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                      </svg>
-                    </button>
-                    <button onclick="quickView({{ journal.id }})" class="quick-action-btn" title="Quick View">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    </button>
-                    <button onclick="addToCompare({{ journal.id }})" class="quick-action-btn" title="Compare">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                    </button>
-                  {% endif %}
-                </div>
-
-                <!-- Journal Cover -->
-                {% if journal.cover_image %}
-                  <img src="{{ journal.cover_image.url }}" alt="{{ journal.title }}" class="w-full h-full object-cover cursor-pointer" onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
-                {% else %}
-                  <div class="w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center cursor-pointer" onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
-                    <div class="text-white text-center p-6">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                      </svg>
-                      <p class="font-medium text-sm">{{ journal.title|truncatewords:4 }}</p>
-                    </div>
-                  </div>
-                {% endif %}
-
-                <!-- Price Badge -->
-                <div class="absolute top-4 right-4">
-                  {% if journal.price > 0 %}
-                    <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-lg">
-                      ${{ journal.price }}
-                    </span>
-                  {% else %}
-                    <span class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-lg">
-                      FREE
-                    </span>
-                  {% endif %}
-                </div>
-
-                <!-- Staff Pick Badge -->
-                {% if journal.is_staff_pick %}
-                  <div class="absolute top-4 left-4">
-                    <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">
-                      ⭐ Staff Pick
-                    </span>
-                  </div>
-                {% endif %}
-              </div>
-
-              <!-- Product Details -->
-              <div class="p-6">
-                <!-- Author Info -->
-                <div class="flex items-center gap-3 mb-3">
-                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
-                    {{ journal.author.username|first|upper }}
-                  </div>
-                  <div>
-                    <p class="text-sm font-medium text-gray-800">{{ journal.author.get_full_name|default:journal.author.username }}</p>
-                    <p class="text-xs text-gray-500">@{{ journal.author.username }}</p>
-                  </div>
-                  <div class="ml-auto flex items-center text-xs text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    {{ journal.view_count|default:0 }}
-                  </div>
-                </div>
-
-                <!-- Title -->
-                <h3 class="font-bold text-gray-800 mb-2 text-lg line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors" onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
-                  {{ journal.title }}
-                </h3>
-
-                <!-- Description -->
-                <p class="text-gray-600 text-sm mb-3 line-clamp-2">
-                  {{ journal.description|truncatewords:15 }}
-                </p>
-
-                <!-- Rating -->
-                <div class="flex items-center gap-2 mb-3">
-                  <div class="flex">
-                    {% for i in "12345" %}
-                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                      </svg>
-                    {% endfor %}
-                  </div>
-                  <span class="text-sm text-gray-600">({{ journal.likes.count|default:0 }})</span>
-                </div>
-
-                <!-- Tags -->
-                <div class="flex flex-wrap gap-2 mb-4">
-                  {% for tag in journal.marketplace_tags.all|slice:":2" %}
-                    <span class="glass-effect text-xs px-3 py-1 rounded-full text-gray-700 border border-gray-200">
-                      {{ tag.name }}
-                    </span>
-                  {% empty %}
-                    <span class="glass-effect text-xs px-3 py-1 rounded-full text-gray-700 border border-gray-200">
-                      Journal
-                    </span>
-                  {% endfor %}
-                </div>
-
-                <!-- Purchase Section -->
-                <div class="flex items-center justify-between">
-                  <div>
-                    {% if journal.price > 0 %}
-                      <div class="text-2xl font-bold text-green-600">${{ journal.price }}</div>
-                      {% if journal.total_tips > 0 %}
-                        <div class="text-xs text-gray-500">${{ journal.total_tips|floatformat:0 }} earned</div>
-                      {% endif %}
-                    {% else %}
-                      <div class="text-2xl font-bold text-blue-600">FREE</div>
-                      <div class="text-xs text-gray-500">{{ journal.entries.count|default:0 }} entries</div>
-                    {% endif %}
-                  </div>
-
-                  {% if user.is_authenticated %}
-                    <button onclick="addToCart({{ journal.id }})" class="btn-emerald px-6 py-3 rounded-xl font-semibold shadow-lg interactive-element">
-                      {% if journal.price > 0 %}Buy Now{% else %}Get Free{% endif %}
-                    </button>
-                  {% else %}
-                    <a href="{% url 'signup' %}" class="btn-emerald px-6 py-3 rounded-xl font-semibold shadow-lg inline-block">
-                      Sign Up
-                    </a>
-                  {% endif %}
-                </div>
-
-                <!-- Instant Access Badge -->
-                {% if journal.is_staff_pick %}
-                  <div class="mt-3 flex items-center text-xs text-blue-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    Instant Access
-                  </div>
-                {% endif %}
-              </div>
-            </div>
-          {% endfor %}
-        </div>
-
-        <!-- Pagination -->
-        {% if journals.has_other_pages %}
-        <div class="mt-16 flex justify-center">
-          <nav class="glass-effect rounded-2xl p-2 flex items-center gap-2">
-            {% if journals.has_previous %}
-              <a href="?page={{ journals.previous_page_number }}" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-white/50 transition-colors">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-              </a>
-            {% endif %}
-
-            {% for i in journals.paginator.page_range %}
-              {% if journals.number == i %}
-                <span class="px-4 py-2 rounded-xl bg-blue-500 text-white font-medium">{{ i }}</span>
-              {% else %}
-                <a href="?page={{ i }}" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-white/50 transition-colors">{{ i }}</a>
-              {% endif %}
-            {% endfor %}
-
-            {% if journals.has_next %}
-              <a href="?page={{ journals.next_page_number }}" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-white/50 transition-colors">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-            {% endif %}
-          </nav>
-        </div>
-        {% endif %}
-
-      {% else %}
-        <!-- Enhanced Empty State -->
-        <div class="text-center py-20">
-          <div class="glass-effect rounded-3xl p-16 max-w-2xl mx-auto">
-            <div class="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold diary-font text-gray-900 mb-4">No journals found</h3>
-            <p class="text-gray-600 mb-8 text-lg">
-              {% if search_query %}
-                No journals match your search for "{{ search_query }}". Try different keywords or browse our categories.
-              {% else %}
-                Be the first to share your story and inspire others!
-              {% endif %}
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-              {% if search_query %}
-                <a href="{% url 'marketplace' %}" class="btn-gradient px-8 py-4 rounded-xl font-semibold">
-                  Browse All Journals
-                </a>
-              {% endif %}
-              {% if user.is_authenticated %}
-                <a href="{% url 'publish_journal' %}" class="btn-amber px-8 py-4 rounded-xl font-semibold">
-                  Publish Your Journal
-                </a>
-              {% else %}
-                <a href="{% url 'signup' %}" class="btn-amber px-8 py-4 rounded-xl font-semibold">
-                  Start Selling Your Story
-                </a>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-      {% endif %}
-    </div>
-
-  </div>
-</div>
-
-<!-- Enhanced Shopping Cart Sidebar (keeping existing cart functionality) -->
-{% if user.is_authenticated %}
-<div id="cartSidebar" class="fixed top-0 right-0 h-full w-96 cart-sidebar shadow-2xl transform translate-x-full transition-transform duration-300 z-50 overflow-y-auto" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(30px); border-left: 1px solid rgba(255, 255, 255, 0.2);">
-  <div class="p-6 border-b border-gray-200/50">
-    <div class="flex items-center justify-between">
-      <h3 class="text-xl font-bold text-gray-800">Shopping Cart</h3>
-      <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-    </div>
-  </div>
-
-  <div id="cartItems" class="p-6 flex-1">
-    <div class="text-center text-gray-500 py-16">
-      <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
-        </svg>
-      </div>
-      <h4 class="font-semibold text-gray-700 mb-2">Your cart is empty</h4>
-      <p class="text-sm">Add some journals to get started!</p>
-    </div>
-  </div>
-
-  <div id="cartFooter" class="p-6 border-t border-gray-200/50 hidden">
-    <div class="flex justify-between items-center mb-6">
-      <span class="text-lg font-semibold text-gray-800">Total:</span>
-      <span id="cartTotal" class="text-2xl font-bold text-green-600">$0.00</span>
-    </div>
-    <button onclick="checkout()" class="w-full btn-emerald py-4 rounded-xl font-semibold text-lg shadow-lg">
-      Proceed to Checkout
-    </button>
-  </div>
-</div>
-
-<!-- Cart Overlay -->
-<div id="cartOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden" onclick="toggleCart()"></div>
-{% endif %}
-
-<!-- Toast Notification Container -->
-<div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
-
-{% endblock %}
-
-{% block extra_js %}
-<script>
-// Enhanced JavaScript with better UX
-let cart = JSON.parse(localStorage.getItem('diaryvault_cart') || '[]');
-let wishlist = JSON.parse(localStorage.getItem('diaryvault_wishlist') || '[]');
-let comparison = JSON.parse(localStorage.getItem('diaryvault_comparison') || '[]');
-
-// Initialize
-document.addEventListener('DOMContentLoaded', function() {
-  updateCartCount();
-  updateWishlistCount();
-  updateCompareCount();
-  initializeAnimations();
-  initializeSearch();
-});
-
-// Initialize search functionality
-function initializeSearch() {
-  const searchInput = document.querySelector('.search-input');
-
-  // Add search suggestions (you can enhance this with real data)
-  searchInput.addEventListener('input', function(e) {
-    const query = e.target.value.toLowerCase();
-    if (query.length > 2) {
-      // Here you could implement real-time search suggestions
-      // For now, we'll just add some visual feedback
-      this.classList.add('searching');
-      setTimeout(() => {
-        this.classList.remove('searching');
-      }, 500);
-    }
-  });
-
-  // Handle category pill clicks
-  document.querySelectorAll('.category-pill').forEach(pill => {
-    pill.addEventListener('click', function(e) {
-      e.preventDefault();
-
-      // Remove active class from all pills
-      document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
-
-      // Add active class to clicked pill
-      this.classList.add('active');
-
-      // Update search or redirect
-      const href = this.href;
-      window.location.href = href;
-    });
-  });
-
-  // Handle quick category clicks
-  document.querySelectorAll('.quick-category').forEach(quickCat => {
-    quickCat.addEventListener('click', function(e) {
-      e.preventDefault();
-      searchInput.value = this.textContent;
-      searchInput.focus();
-
-      // Optionally submit the form automatically
-      setTimeout(() => {
-        document.querySelector('form').submit();
-      }, 500);
-    });
-  });
-}
-
-// Advanced filters toggle
-function toggleAdvancedFilters() {
-  const dropdown = document.getElementById('advancedFiltersDropdown');
-  dropdown.classList.toggle('active');
-}
-
-// Clear all filters
-function clearAllFilters() {
-  const form = document.querySelector('form');
-
-  // Reset all form elements except search
-  const searchValue = form.querySelector('[name="search"]').value;
-  form.reset();
-  form.querySelector('[name="search"]').value = searchValue;
-
-  // Remove active category
-  document.querySelectorAll('.category-pill').forEach(pill => {
-    pill.classList.remove('active');
-  });
-
-  updateActiveFiltersCount();
-  showToast('Filters cleared', 'info');
-}
-
-// Update active filters count
-function updateActiveFiltersCount() {
-  let count = 0;
-  const form = document.querySelector('form');
-
-  // Count checkboxes and radios
-  const checkedInputs = form.querySelectorAll('input[type="checkbox"]:checked, input[type="radio"]:checked');
-  count += checkedInputs.length;
-
-  // Count non-default selects
-  const selects = form.querySelectorAll('select');
-  selects.forEach(select => {
-    if (select.value && select.value !== 'all' && select.value !== 'trending') {
-      count++;
-    }
-  });
-
-  // Count active category
-  if (document.querySelector('.category-pill.active')) {
-    count++;
-  }
-
-  document.getElementById('activeFiltersCount').textContent = count;
-}
-
-// Enhanced toast notifications
-function showToast(message, type = 'info', duration = 3000) {
-  const toast = document.createElement('div');
-  toast.className = `toast ${type} transform translate-x-full`;
-
-  const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
-
-  toast.innerHTML = `
-    <div class="flex items-center gap-3">
-      <span class="text-lg">${icon}</span>
-      <span class="font-medium">${message}</span>
-    </div>
-  `;
-
-  document.getElementById('toastContainer').appendChild(toast);
-
-  // Animate in
-  setTimeout(() => toast.classList.remove('translate-x-full'), 100);
-
-  // Animate out and remove
-  setTimeout(() => {
-    toast.classList.add('translate-x-full');
-    setTimeout(() => toast.remove(), 300);
-  }, duration);
-}
-
-// Enhanced shopping cart functions
-function addToCart(journalId) {
-  if (!cart.find(item => item.id === journalId)) {
-    cart.push({
-      id: journalId,
-      title: `Journal ${journalId}`,
-      price: 9.99,
-      quantity: 1
-    });
-
-    localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
-    updateCartCount();
-    showCartAnimation();
-    showToast('Added to cart! 🛒', 'success');
-  } else {
-    showToast('Already in cart!', 'info');
-  }
-}
-
-function removeFromCart(journalId) {
-  cart = cart.filter(item => item.id !== journalId);
-  localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
-  updateCartCount();
-  renderCartItems();
-  showToast('Removed from cart', 'info');
-}
-
-function updateCartCount() {
-  const count = cart.length;
-  document.getElementById('cartCount').textContent = count;
-}
-
-function toggleCart() {
-  const sidebar = document.getElementById('cartSidebar');
-  const overlay = document.getElementById('cartOverlay');
-
-  if (sidebar.classList.contains('translate-x-full')) {
-    sidebar.classList.remove('translate-x-full');
-    overlay.classList.remove('hidden');
-    renderCartItems();
-  } else {
-    sidebar.classList.add('translate-x-full');
-    overlay.classList.add('hidden');
-  }
-}
-
-function renderCartItems() {
-  const container = document.getElementById('cartItems');
-  const footer = document.getElementById('cartFooter');
-
-  if (cart.length === 0) {
-    container.innerHTML = `
-      <div class="text-center text-gray-500 py-16">
-        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
-          </svg>
-        </div>
-        <h4 class="font-semibold text-gray-700 mb-2">Your cart is empty</h4>
-        <p class="text-sm">Add some journals to get started!</p>
-      </div>`;
-    footer.classList.add('hidden');
-  } else {
-    container.innerHTML = cart.map(item => `
-      <div style="background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(255, 255, 255, 0.3);">
-        <div class="flex items-center gap-4">
-          <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <div class="flex-1">
-            <h4 class="font-semibold text-gray-800">${item.title}</h4>
-            <p class="text-sm text-gray-600">${item.price}</p>
-          </div>
-          <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    `).join('');
-
-    const total = cart.reduce((sum, item) => sum + item.price, 0);
-    document.getElementById('cartTotal').textContent = `${total.toFixed(2)}`;
-    footer.classList.remove('hidden');
-  }
-}
-
-// Wishlist functions
-function toggleWishlist(journalId) {
-  const index = wishlist.indexOf(journalId);
-  if (index === -1) {
-    wishlist.push(journalId);
-    showToast('Added to wishlist! ❤️', 'success');
-  } else {
-    wishlist.splice(index, 1);
-    showToast('Removed from wishlist', 'info');
-  }
-
-  localStorage.setItem('diaryvault_wishlist', JSON.stringify(wishlist));
-  updateWishlistCount();
-}
-
-function updateWishlistCount() {
-  const count = wishlist.length;
-  document.getElementById('wishlistCount').textContent = count;
-}
-
-// Comparison functions
-function addToCompare(journalId) {
-  if (comparison.length >= 4) {
-    showToast('Maximum 4 items can be compared!', 'warning');
-    return;
-  }
-
-  if (!comparison.includes(journalId)) {
-    comparison.push(journalId);
-    localStorage.setItem('diaryvault_comparison', JSON.stringify(comparison));
-    updateCompareCount();
-    showToast('Added to comparison!', 'success');
-  }
-}
-
-function updateCompareCount() {
-  const count = comparison.length;
-  document.getElementById('compareCount').textContent = count;
-}
-
-function toggleCompare() {
-  if (comparison.length === 0) {
-    showToast('No items to compare!', 'info');
-    return;
-  }
-  // Implementation for comparison modal would go here
-  showToast('Comparison feature coming soon!', 'info');
-}
-
-// Quick view function
-function quickView(journalId) {
-  showToast('Quick view feature coming soon!', 'info');
-}
-
-// Grid view toggle
-function setGridView(view) {
-  const grid = document.getElementById('productsGrid');
-  const gridBtn = document.getElementById('gridViewBtn');
-  const listBtn = document.getElementById('listViewBtn');
-
-  if (view === 'list') {
-    grid.className = 'space-y-6';
-    gridBtn.classList.remove('bg-blue-500', 'text-white');
-    gridBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
-    listBtn.classList.add('bg-blue-500', 'text-white');
-    listBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
-  } else {
-    grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8';
-    gridBtn.classList.add('bg-blue-500', 'text-white');
-    gridBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
-    listBtn.classList.remove('bg-blue-500', 'text-white');
-    listBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
-  }
-}
-
-// Animation initialization
-function initializeAnimations() {
-  // Stagger animations for product cards
-  const cards = document.querySelectorAll('.product-card');
-  cards.forEach((card, index) => {
-    card.style.animationDelay = `${index * 100}ms`;
-  });
-
-  // Intersection Observer for scroll animations
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('animate-fade-in-up');
-      }
-    });
-  }, { threshold: 0.1 });
-
-  document.querySelectorAll('.animate-fade-in-up').forEach(el => {
-    observer.observe(el);
-  });
-}
-
-// Cart animation
-function showCartAnimation() {
-  const cartBtn = document.querySelector('[onclick="toggleCart()"]');
-  if (cartBtn) {
-    cartBtn.style.animation = 'pulse 0.6s ease-in-out';
-    setTimeout(() => {
-      cartBtn.style.animation = '';
-    }, 600);
-  }
-}
-
-// Checkout function
-function checkout() {
-  if (cart.length === 0) {
-    showToast('Your cart is empty!', 'warning');
-    return;
-  }
-
-  showToast('Redirecting to checkout...', 'info');
-
-  // Simulate checkout process
-  setTimeout(() => {
-    cart = [];
-    localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
-    updateCartCount();
-    toggleCart();
-    showToast('Order placed successfully! 🎉', 'success', 5000);
-  }, 2000);
-}
-
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-  // Escape key closes modals
-  if (e.key === 'Escape') {
-    if (!document.getElementById('cartSidebar').classList.contains('translate-x-full')) {
-      toggleCart();
-    }
-    if (document.getElementById('advancedFiltersDropdown').classList.contains('active')) {
-      toggleAdvancedFilters();
-    }
-  }
-
-  // Ctrl/Cmd + K for search focus
-  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-    e.preventDefault();
-    document.querySelector('.search-input').focus();
-  }
-});
-
-// Form submission with loading states
-document.addEventListener('submit', function(e) {
-  const form = e.target;
-  if (form.tagName === 'FORM') {
-    const submitBtn = form.querySelector('button[type="submit"]');
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `
-        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        Searching...
-      `;
-    }
-  }
-});
-
-// Close dropdowns when clicking outside
-document.addEventListener('click', function(e) {
-  const dropdown = document.getElementById('advancedFiltersDropdown');
-  const filterBtn = document.querySelector('[onclick="toggleAdvancedFilters()"]');
-
-  if (dropdown && dropdown.classList.contains('active')) {
-    if (!dropdown.contains(e.target) && !filterBtn.contains(e.target)) {
-      dropdown.classList.remove('active');
-    }
-  }
-});
-
-// Update filter count on page load
-document.addEventListener('DOMContentLoaded', function() {
-  updateActiveFiltersCount();
-});
-
-// Performance optimization - lazy loading for images
-if ('IntersectionObserver' in window) {
-  const imageObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const img = entry.target;
-        if (img.dataset.src) {
-          img.src = img.dataset.src;
-          img.removeAttribute('data-src');
-          imageObserver.unobserve(img);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiaryVault - Journal Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Satisfy&display=swap" rel="stylesheet">
+    <style>
+        /* Enhanced Core Branding */
+        .diary-font {
+            font-family: 'Playfair Display', serif;
+            letter-spacing: -0.02em;
         }
-      }
+
+        .handwritten {
+            font-family: 'Satisfy', cursive;
+        }
+
+        /* Modern Glass Effects */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .glass-effect:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Enhanced Gradient Buttons */
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-gradient:hover::before {
+            left: 100%;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-emerald {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .btn-emerald:hover {
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
+        }
+
+        /* Enhanced Search Container with Scrollable Categories */
+        .search-container {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-wrapper {
+            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(30px);
+            border-radius: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .search-wrapper:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1), 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 20px 24px 20px 56px;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            outline: none;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .search-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            z-index: 10;
+        }
+
+        /* Enhanced Scrollable Categories Section */
+        .search-categories {
+            padding: 16px 20px 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .categories-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .categories-scroll-container {
+            position: relative;
+        }
+
+        .categories-scroll-wrapper {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            gap: 8px;
+            padding: 4px 0 8px 0;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        .categories-scroll-wrapper::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        .scroll-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .scroll-button:hover {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .scroll-button.left {
+            left: -8px;
+        }
+
+        .scroll-button.right {
+            right: -8px;
+        }
+
+        .scroll-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .category-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1.5px solid rgba(0, 0, 0, 0.06);
+            border-radius: 50px;
+            text-decoration: none;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            flex-shrink: 0;
+            min-width: 140px;
+        }
+
+        .category-pill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .category-pill:hover::before {
+            opacity: 0.1;
+        }
+
+        .category-pill:hover {
+            transform: translateY(-2px);
+            border-color: #667eea;
+            color: #667eea;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .category-pill.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .category-icon {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            opacity: 0.8;
+        }
+
+        .category-count {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-left: auto;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .category-pill.active .category-count {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Scroll indicators */
+        .scroll-indicator {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .scroll-indicator.left {
+            left: 0;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.8), transparent);
+        }
+
+        .scroll-indicator.right {
+            right: 0;
+            background: linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent);
+        }
+
+        /* Mobile Responsive Categories */
+        @media (max-width: 640px) {
+            .category-pill {
+                padding: 8px 12px;
+                font-size: 13px;
+                min-width: 120px;
+            }
+
+            .category-icon {
+                width: 16px;
+                height: 16px;
+            }
+
+            .search-input {
+                padding: 16px 20px 16px 48px;
+                font-size: 15px;
+            }
+
+            .search-icon {
+                left: 16px;
+            }
+
+            .search-categories {
+                padding: 12px 16px 16px;
+            }
+
+            .categories-scroll-wrapper {
+                gap: 6px;
+            }
+        }
+
+        /* Quick trending categories */
+        .quick-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .quick-category {
+            padding: 4px 10px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .quick-category:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        /* Text gradient */
+        .text-gradient {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Product card styles */
+        .product-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Enhanced Search Section with Scrollable Categories -->
+    <div class="mb-12 animate-fade-in-up">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold diary-font mb-4 text-gradient">
+                Discover Amazing Stories
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Explore authentic journals from real people sharing their experiences, insights, and journeys.
+            </p>
+        </div>
+
+        <form class="search-container">
+            <div class="search-wrapper">
+
+                <!-- Main Search Input -->
+                <div class="search-input-wrapper">
+                    <input type="text"
+                           name="search"
+                           placeholder="Search journals, authors, topics, or experiences..."
+                           class="search-input"
+                           autocomplete="off">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="search-icon h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+
+                <!-- Enhanced Scrollable Categories Section -->
+                <div class="search-categories">
+                    <div class="categories-label">
+                        <span>Browse by Category</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs opacity-70">Scroll to see more →</span>
+                        </div>
+                    </div>
+
+                    <div class="categories-scroll-container">
+                        <!-- Left scroll button -->
+                        <button type="button" class="scroll-button left" id="scrollLeft" onclick="scrollCategories('left')">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+
+                        <!-- Right scroll button -->
+                        <button type="button" class="scroll-button right" id="scrollRight" onclick="scrollCategories('right')">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+
+                        <!-- Scroll indicators -->
+                        <div class="scroll-indicator left" id="leftIndicator"></div>
+                        <div class="scroll-indicator right" id="rightIndicator"></div>
+
+                        <!-- Scrollable categories wrapper -->
+                        <div class="categories-scroll-wrapper" id="categoriesWrapper">
+                            <!-- Sample categories -->
+                            <a href="#" class="category-pill active">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>Personal Growth</span>
+                                <span class="category-count">24</span>
+                            </a>
+
+                            <a href="#" class="category-pill">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>
+                                </svg>
+                                <span>Travel Adventures</span>
+                                <span class="category-count">18</span>
+                            </a>
+
+                            <a href="#" class="category-pill">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                </svg>
+                                <span>Health & Wellness</span>
+                                <span class="category-count">31</span>
+                            </a>
+
+                            <a href="#" class="category-pill">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                                </svg>
+                                <span>Career Journey</span>
+                                <span class="category-count">15</span>
+                            </a>
+
+                            <a href="#" class="category-pill">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                                </svg>
+                                <span>Relationships</span>
+                                <span class="category-count">27</span>
+                            </a>
+
+                            <a href="#" class="category-pill">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                                </svg>
+                                <span>Creative Writing</span>
+                                <span class="category-count">19</span>
+                            </a>
+
+                            <a href="#" class="category-pill">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257L11 5.697l5.394 2.097a.999.999 0 01.356.257l2.644-1.131a1 1 0 000-1.84l-7-3z"/>
+                                    <path d="M17.947 9.205a1 1 0 00-1.506-.872L11 10.48l-5.441-2.147a1 1 0 00-1.506.872L5.395 14.2a1 1 0 00.593.806L11 17.472l5.012-2.466a1 1 0 00.593-.806l1.342-5.001z"/>
+                                </svg>
+                                <span>Education</span>
+                                <span class="category-count">12</span>
+                            </a>
+
+                            <a href="#" class="category-pill">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>Parenting</span>
+                                <span class="category-count">33</span>
+                            </a>
+
+                            <a href="#" class="category-pill">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/>
+                                    <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"/>
+                                </svg>
+                                <span>Business</span>
+                                <span class="category-count">8</span>
+                            </a>
+
+                            <a href="#" class="category-pill">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="category-icon" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                    <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 102 0V3a2 2 0 012 2v6a2 2 0 002 2h6a2 2 0 002-2V5a2 2 0 00-2-2v1a1 1 0 10-2 0V3a2 2 0 00-2 2 1 1 0 00-1 1v4H7V6a1 1 0 00-1-1H4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>Mental Health</span>
+                                <span class="category-count">42</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Quick trending categories -->
+                    <div class="quick-categories">
+                        <span class="text-xs font-semibold text-gray-500 mr-2">Trending:</span>
+                        <a href="#" class="quick-category">Mental Health</a>
+                        <a href="#" class="quick-category">Startup Journey</a>
+                        <a href="#" class="quick-category">Motherhood</a>
+                        <a href="#" class="quick-category">Recovery</a>
+                        <a href="#" class="quick-category">Self-Discovery</a>
+                        <a href="#" class="quick-category">Mindfulness</a>
+                    </div>
+                </div>
+
+                <!-- Search button -->
+                <div class="p-4 text-center">
+                    <button type="submit" class="btn-gradient px-8 py-3 rounded-xl font-semibold shadow-lg">
+                        Search Journals
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sample Results Section -->
+    <div class="mb-16">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h2 class="text-2xl font-bold diary-font text-gray-800">Featured Journals</h2>
+                <p class="text-gray-600 mt-1">147 results</p>
+            </div>
+        </div>
+
+        <!-- Sample Product Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <!-- Sample Product Cards -->
+            <div class="product-card">
+                <div class="h-48 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center">
+                    <div class="text-white text-center p-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <p class="font-medium text-sm">My Journey Through Grief</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                            S
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Sarah Johnson</p>
+                            <p class="text-xs text-gray-500">@sarahj</p>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2 text-lg">My Journey Through Grief</h3>
+                    <p class="text-gray-600 text-sm mb-3">A deeply personal account of loss, healing, and finding hope again...</p>
+                    <div class="flex items-center justify-between">
+                        <div class="text-2xl font-bold text-green-600">$12.99</div>
+                        <button class="btn-emerald px-6 py-3 rounded-xl font-semibold shadow-lg">
+                            Buy Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- More sample cards would go here -->
+            <div class="product-card">
+                <div class="h-48 bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 flex items-center justify-center">
+                    <div class="text-white text-center p-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>
+                        </svg>
+                        <p class="font-medium text-sm">Backpacking Europe Solo</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
+                            M
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Mike Chen</p>
+                            <p class="text-xs text-gray-500">@mikec</p>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2 text-lg">Backpacking Europe Solo</h3>
+                    <p class="text-gray-600 text-sm mb-3">Adventures, mishaps, and discoveries across 15 countries in 3 months...</p>
+                    <div class="flex items-center justify-between">
+                        <div class="text-2xl font-bold text-blue-600">FREE</div>
+                        <button class="btn-emerald px-6 py-3 rounded-xl font-semibold shadow-lg">
+                            Get Free
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Enhanced category scrolling functionality
+let currentScrollPosition = 0;
+const scrollAmount = 200;
+
+function scrollCategories(direction) {
+    const wrapper = document.getElementById('categoriesWrapper');
+    const scrollButtons = {
+        left: document.getElementById('scrollLeft'),
+        right: document.getElementById('scrollRight')
+    };
+
+    if (direction === 'left') {
+        wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    } else {
+        wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+
+    // Update button states after scroll animation
+    setTimeout(() => updateScrollButtons(), 300);
+}
+
+function updateScrollButtons() {
+    const wrapper = document.getElementById('categoriesWrapper');
+    const scrollButtons = {
+        left: document.getElementById('scrollLeft'),
+        right: document.getElementById('scrollRight')
+    };
+    const indicators = {
+        left: document.getElementById('leftIndicator'),
+        right: document.getElementById('rightIndicator')
+    };
+
+    const isAtStart = wrapper.scrollLeft <= 0;
+    const isAtEnd = wrapper.scrollLeft >= (wrapper.scrollWidth - wrapper.clientWidth);
+
+    // Update button states
+    scrollButtons.left.disabled = isAtStart;
+    scrollButtons.right.disabled = isAtEnd;
+
+    // Update button opacity
+    scrollButtons.left.style.opacity = isAtStart ? '0.3' : '1';
+    scrollButtons.right.style.opacity = isAtEnd ? '0.3' : '1';
+
+    // Update scroll indicators
+    indicators.left.style.opacity = isAtStart ? '0' : '1';
+    indicators.right.style.opacity = isAtEnd ? '0' : '1';
+}
+
+// Category pill interactions
+function initializeCategoryPills() {
+    const categoryPills = document.querySelectorAll('.category-pill');
+
+    categoryPills.forEach(pill => {
+        pill.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Remove active class from all pills
+            categoryPills.forEach(p => p.classList.remove('active'));
+
+            // Add active class to clicked pill
+            this.classList.add('active');
+
+            // Optional: scroll to show active pill if it's partially hidden
+            const wrapper = document.getElementById('categoriesWrapper');
+            const pillRect = this.getBoundingClientRect();
+            const wrapperRect = wrapper.getBoundingClientRect();
+
+            if (pillRect.left < wrapperRect.left) {
+                wrapper.scrollBy({ left: pillRect.left - wrapperRect.left - 20, behavior: 'smooth' });
+            } else if (pillRect.right > wrapperRect.right) {
+                wrapper.scrollBy({ left: pillRect.right - wrapperRect.right + 20, behavior: 'smooth' });
+            }
+
+            // You can add form submission or filtering logic here
+            console.log('Selected category:', this.textContent.trim());
+        });
     });
-  });
-
-  document.querySelectorAll('img[data-src]').forEach(img => {
-    imageObserver.observe(img);
-  });
 }
 
-// Service Worker registration for offline support (optional)
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => console.log('SW registered'))
-      .catch(error => console.log('SW registration failed'));
-  });
+// Touch/swipe support for mobile
+function initializeTouchSupport() {
+    const wrapper = document.getElementById('categoriesWrapper');
+    let startX = 0;
+    let scrollLeft = 0;
+    let isDown = false;
+
+    wrapper.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - wrapper.offsetLeft;
+        scrollLeft = wrapper.scrollLeft;
+        wrapper.style.cursor = 'grabbing';
+    });
+
+    wrapper.addEventListener('mouseleave', () => {
+        isDown = false;
+        wrapper.style.cursor = 'grab';
+    });
+
+    wrapper.addEventListener('mouseup', () => {
+        isDown = false;
+        wrapper.style.cursor = 'grab';
+    });
+
+    wrapper.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - wrapper.offsetLeft;
+        const walk = (x - startX) * 2;
+        wrapper.scrollLeft = scrollLeft - walk;
+    });
+
+    // Touch events for mobile
+    wrapper.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].pageX - wrapper.offsetLeft;
+        scrollLeft = wrapper.scrollLeft;
+    });
+
+    wrapper.addEventListener('touchmove', (e) => {
+        const x = e.touches[0].pageX - wrapper.offsetLeft;
+        const walk = (x - startX) * 2;
+        wrapper.scrollLeft = scrollLeft - walk;
+    });
 }
+
+// Keyboard navigation
+function initializeKeyboardNavigation() {
+    const wrapper = document.getElementById('categoriesWrapper');
+
+    wrapper.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+            scrollCategories('left');
+            e.preventDefault();
+        } else if (e.key === 'ArrowRight') {
+            scrollCategories('right');
+            e.preventDefault();
+        }
+    });
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    updateScrollButtons();
+    initializeCategoryPills();
+    initializeTouchSupport();
+    initializeKeyboardNavigation();
+
+    // Update scroll buttons on scroll
+    const wrapper = document.getElementById('categoriesWrapper');
+    wrapper.addEventListener('scroll', updateScrollButtons);
+
+    // Handle window resize
+    window.addEventListener('resize', updateScrollButtons);
+});
+
+// Smooth scrolling behavior
+window.addEventListener('load', function() {
+    const wrapper = document.getElementById('categoriesWrapper');
+    wrapper.style.scrollBehavior = 'smooth';
+});
 </script>
 
-{% endblock %}
+</body>
+</html>
