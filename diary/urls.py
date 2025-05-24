@@ -4,6 +4,8 @@ from django.views.generic import RedirectView
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.conf import settings
 from django.conf.urls.static import static
+from .views import core
+from .views.core import CustomLoginView 
 
 from . import views
 from .views import CustomLoginView
@@ -103,11 +105,11 @@ urlpatterns = [
     path('api/entry/<int:entry_id>/regenerate-summary/', views.regenerate_summary_ajax, name='regenerate_summary_ajax'),
 
     # Marketplace API (New - from your core.py)
-    # path('api/track-view/<int:journal_id>/', views.track_journal_view, name='track_journal_view'),
-    path('api/wishlist/add/', views.add_to_wishlist, name='add_to_wishlist'),
-    path('api/wishlist/remove/', views.remove_from_wishlist, name='remove_from_wishlist'),
-    path('api/journal-preview/<int:journal_id>/', views.journal_preview, name='journal_preview'),
-    path('api/marketplace-stats/', views.marketplace_stats, name='marketplace_stats'),
+    path('api/track-view/<int:journal_id>/', core.track_journal_view, name='track_journal_view'),
+    path('api/wishlist/add/', core.add_to_wishlist, name='add_to_wishlist'),
+    path('api/wishlist/remove/', core.remove_from_wishlist, name='remove_from_wishlist'),
+    path('api/journal-preview/<int:journal_id>/', core.journal_preview, name='journal_preview'),
+    path('api/marketplace-stats/', core.marketplace_stats, name='marketplace_stats'),
 
     # ============================================================================
     # Static File Handling
