@@ -5,322 +5,434 @@
 
 {% block extra_css %}
 <style>
-  /* Core branding elements */
+  /* Enhanced Core Branding */
   .diary-font {
     font-family: 'Playfair Display', serif;
+    letter-spacing: -0.02em;
   }
 
   .handwritten {
     font-family: 'Satisfy', cursive;
   }
 
-  /* Glass effect from dashboard */
+  /* Modern Glass Effects */
   .glass-effect {
-    background-color: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   }
 
   .glass-effect:hover {
-    background-color: rgba(255, 255, 255, 0.85);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   }
 
-  /* Enhanced buttons */
+  /* Enhanced Gradient Buttons */
   .btn-gradient {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
     transition: all 0.3s ease;
+  }
+
+  .btn-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-gradient:hover::before {
+    left: 100%;
   }
 
   .btn-gradient:hover {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
     transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
   }
 
   .btn-amber {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   }
 
   .btn-amber:hover {
-    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
   }
 
   .btn-emerald {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   }
 
   .btn-emerald:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
   }
 
-  /* Shopping cart badge */
-  .cart-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
+  /* Floating Action Buttons */
+  .floating-actions {
+    position: fixed;
+    top: 50%;
+    right: 24px;
+    transform: translateY(-50%);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .floating-btn {
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+  }
+
+  .floating-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+  }
+
+  .floating-btn .badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
     font-weight: bold;
     animation: pulse 2s infinite;
   }
 
-  /* Wishlist heart animation */
-  .heart-filled {
-    color: #ef4444;
-    animation: heartbeat 0.3s ease-in-out;
-  }
-
-  @keyframes heartbeat {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-  }
-
-  /* Rating stars */
-  .star-rating {
-    display: flex;
-    gap: 2px;
-  }
-
-  .star {
-    color: #d1d5db;
-    transition: color 0.2s ease;
-  }
-
-  .star.filled {
-    color: #fbbf24;
-  }
-
-  .star.half-filled {
-    background: linear-gradient(90deg, #fbbf24 50%, #d1d5db 50%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* Enhanced marketplace cards */
-  .marketplace-card {
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  /* Enhanced Product Cards */
+  .product-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
-  .marketplace-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+  .product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   }
 
-  .marketplace-card .quick-actions {
+  .product-card .image-container {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+  }
+
+  .product-card .image-overlay {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    opacity: 0;
-    transform: translateX(-10px);
-    transition: all 0.3s ease;
-    z-index: 10;
-  }
-
-  .marketplace-card:hover .quick-actions {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  /* Quick action buttons */
-  .quick-action-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-  }
-
-  .quick-action-btn:hover {
-    transform: scale(1.1);
-  }
-
-  /* Comparison checkbox */
-  .compare-checkbox {
-    position: absolute;
-    top: 10px;
-    right: 10px;
+    inset: 0;
+    background: linear-gradient(45deg, rgba(0,0,0,0.1), transparent);
     opacity: 0;
     transition: opacity 0.3s ease;
   }
 
-  .marketplace-card:hover .compare-checkbox {
+  .product-card:hover .image-overlay {
     opacity: 1;
   }
 
-  /* Discount badges */
-  .discount-badge {
+  .product-card .quick-actions {
     position: absolute;
-    top: -5px;
-    left: 10px;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 0 0 8px 8px;
-    font-size: 0.75rem;
-    font-weight: bold;
-    z-index: 10;
+    top: 16px;
+    left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all 0.3s ease;
   }
 
-  /* Recently viewed section */
-  .recently-viewed {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
-    border: 1px solid rgba(99, 102, 241, 0.1);
+  .product-card:hover .quick-actions {
+    opacity: 1;
+    transform: translateX(0);
   }
 
-  /* Advanced filters */
-  .filter-section {
+  .quick-action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .quick-action-btn:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 1);
+  }
+
+  /* Enhanced Search Bar */
+  .search-container {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 16px 24px 16px 56px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+  }
+
+  /* Enhanced Categories Grid */
+  .category-card {
     background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
   }
 
-  .filter-toggle.active {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  .category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #4facfe);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+    transform-origin: left;
+  }
+
+  .category-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  .category-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    transition: transform 0.3s ease;
+  }
+
+  .category-card:hover .category-icon {
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  /* Enhanced Hero Section */
+  .hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
     color: white;
+    margin-bottom: 48px;
   }
 
-  /* Price slider */
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 80px 32px;
+    text-align: center;
+  }
+
+  .hero-stats {
+    display: inline-flex;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 50px;
+    padding: 12px 24px;
+    margin-bottom: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  /* Enhanced Filters */
+  .filter-sidebar {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: sticky;
+    top: 120px;
+  }
+
+  .filter-group {
+    margin-bottom: 32px;
+  }
+
+  .filter-title {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 16px;
+    font-size: 18px;
+  }
+
+  .filter-option {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .filter-option:hover {
+    color: #667eea;
+  }
+
+  .filter-option input[type="checkbox"],
+  .filter-option input[type="radio"] {
+    margin-right: 12px;
+    accent-color: #667eea;
+  }
+
+  /* Price Range Slider */
   .price-slider {
     -webkit-appearance: none;
     width: 100%;
-    height: 6px;
-    border-radius: 3px;
-    background: linear-gradient(to right, #6366f1, #8b5cf6);
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(to right, #667eea, #764ba2);
     outline: none;
+    margin: 16px 0;
   }
 
   .price-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    background: #ffffff;
-    border: 2px solid #6366f1;
+    background: white;
+    border: 3px solid #667eea;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
   }
 
-  /* Product comparison table */
-  .comparison-table {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+  .price-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
   }
 
-  /* Recommendation cards */
-  .recommendation-card {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(217, 119, 6, 0.05) 100%);
-    border: 1px solid rgba(245, 158, 11, 0.2);
+  /* Shopping Cart Sidebar Enhancement */
+  .cart-sidebar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(30px);
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
   }
 
-  /* Breadcrumb navigation */
-  .breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #6b7280;
-    font-size: 0.875rem;
+  .cart-item {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
   }
 
-  .breadcrumb a {
-    color: #6366f1;
-    text-decoration: none;
-    transition: color 0.2s ease;
+  /* Enhanced Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
-  .breadcrumb a:hover {
-    color: #4f46e5;
-  }
-
-  /* Animations */
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes bounce {
-    0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
-    40%, 43% { transform: translate3d(0, -8px, 0); }
-    70% { transform: translate3d(0, -4px, 0); }
-    90% { transform: translate3d(0, -2px, 0); }
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.8s ease forwards;
-  }
-
-  .animate-slide-down {
-    animation: slideDown 0.3s ease forwards;
-  }
-
-  .animate-bounce {
-    animation: bounce 1s ease-in-out;
-  }
-
-  /* Mobile optimizations */
-  @media (max-width: 640px) {
-    .marketplace-card .quick-actions {
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
       opacity: 1;
       transform: translateX(0);
-      top: 5px;
-      left: 5px;
-      gap: 4px;
-    }
-
-    .quick-action-btn {
-      width: 32px;
-      height: 32px;
-    }
-
-    .mobile-sticky-actions {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(255, 255, 255, 0.5);
-      padding: 1rem;
-      z-index: 40;
-      display: flex;
-      gap: 0.5rem;
     }
   }
 
-  /* Loading states */
-  .loading-skeleton {
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease forwards;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.6s ease forwards;
+  }
+
+  /* Loading States */
+  .skeleton {
     background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
@@ -331,123 +443,175 @@
     100% { background-position: -200% 0; }
   }
 
-  /* Cart icon pulse */
-  .cart-icon-pulse {
-    animation: pulse 0.5s ease-in-out;
+  /* Mobile Optimizations */
+  @media (max-width: 768px) {
+    .floating-actions {
+      position: fixed;
+      bottom: 80px;
+      right: 16px;
+      top: auto;
+      transform: none;
+      flex-direction: row;
+      gap: 12px;
+    }
+
+    .floating-btn {
+      width: 48px;
+      height: 48px;
+    }
+
+    .hero-content {
+      padding: 48px 24px;
+    }
+
+    .product-card .quick-actions {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .category-card {
+      padding: 20px 16px;
+    }
+
+    .filter-sidebar {
+      position: static;
+      margin-bottom: 24px;
+    }
   }
 
-  @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+  /* Dark Mode Support */
+  @media (prefers-color-scheme: dark) {
+    .glass-effect {
+      background: rgba(30, 30, 30, 0.8);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .product-card {
+      background: rgba(30, 30, 30, 0.9);
+      color: #f9fafb;
+    }
+
+    .search-input {
+      background: rgba(30, 30, 30, 0.8);
+      color: #f9fafb;
+    }
+  }
+
+  /* Success/Error States */
+  .toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 16px 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 1000;
+    animation: slideInRight 0.3s ease;
+  }
+
+  .toast.success {
+    border-left: 4px solid #10b981;
+  }
+
+  .toast.error {
+    border-left: 4px solid #ef4444;
+  }
+
+  .toast.warning {
+    border-left: 4px solid #f59e0b;
+  }
+
+  /* Enhanced Typography */
+  .text-gradient {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Micro Interactions */
+  .interactive-element {
+    transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  .interactive-element:hover {
+    transform: translateY(-1px);
+  }
+
+  .interactive-element:active {
+    transform: translateY(0);
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative pb-20">
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
 
-  <!-- Shopping Cart/Wishlist Quick Access Bar -->
+  <!-- Enhanced Floating Actions -->
   {% if user.is_authenticated %}
-  <div class="fixed top-20 right-4 z-50 flex flex-col gap-2">
+  <div class="floating-actions">
     <!-- Shopping Cart -->
-    <div class="relative">
-      <button onclick="toggleCart()" class="glass-effect p-3 rounded-full shadow-lg hover:scale-110 transition-all">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
-        </svg>
-        <span id="cartCount" class="cart-badge">0</span>
-      </button>
-    </div>
+    <button onclick="toggleCart()" class="floating-btn glass-effect" title="Shopping Cart">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
+      </svg>
+      <span id="cartCount" class="badge">0</span>
+    </button>
 
     <!-- Wishlist -->
-    <div class="relative">
-      <button onclick="toggleWishlist()" class="glass-effect p-3 rounded-full shadow-lg hover:scale-110 transition-all">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-        </svg>
-        <span id="wishlistCount" class="cart-badge bg-pink-500">0</span>
-      </button>
-    </div>
+    <button onclick="toggleWishlist()" class="floating-btn glass-effect" title="Wishlist">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+      </svg>
+      <span id="wishlistCount" class="badge">0</span>
+    </button>
 
     <!-- Compare -->
-    <div class="relative">
-      <button onclick="toggleCompare()" class="glass-effect p-3 rounded-full shadow-lg hover:scale-110 transition-all">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-        <span id="compareCount" class="cart-badge bg-blue-500">0</span>
-      </button>
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- Breadcrumb Navigation -->
-  <div class="breadcrumb mb-6">
-    <a href="{% url 'home' %}">Home</a>
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-    </svg>
-    <span>Marketplace</span>
-    {% if current_category and current_category != 'all' %}
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+    <button onclick="toggleCompare()" class="floating-btn glass-effect" title="Compare">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
       </svg>
-      <span>{{ current_category|title }}</span>
-    {% endif %}
+      <span id="compareCount" class="badge">0</span>
+    </button>
   </div>
-
-  <!-- Success Messages -->
-  {% if messages %}
-    {% for message in messages %}
-      <div id="successMessage" class="mb-6 glass-effect rounded-xl border border-green-200 text-green-800 p-4 animate-slide-down">
-        <div class="flex gap-3 items-start">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-          </svg>
-          <div>
-            <h4 class="font-medium text-green-800">{{ message.tags|title }}</h4>
-            <p class="text-sm">{{ message }}</p>
-          </div>
-          <button class="ml-auto" onclick="this.parentElement.parentElement.classList.add('hidden')">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    {% endfor %}
   {% endif %}
 
-  <!-- Enhanced Hero Section with Marketplace Features -->
-  <div class="relative z-10 animate-fade-in mb-8">
-    <div class="rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl relative glass-effect">
-      <div class="absolute inset-0 bg-gradient-to-r from-secondary-800/60 to-primary-800/60 z-10"></div>
-      <img src="https://images.unsplash.com/photo-1517842645767-c639042777db?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Journal Marketplace" class="w-full h-96 object-cover">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-      <div class="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center">
-        <span class="px-4 py-1.5 bg-white/20 backdrop-blur-sm text-white text-sm rounded-full mb-6 font-medium">
-          📚 Over {{ stats.total_journals|default:"1000" }} Journals • 💰 ${{ stats.total_earnings|floatformat:0|default:"50000" }}+ Earned • ⭐ Rated Stories
-        </span>
+    <!-- Enhanced Hero Section -->
+    <div class="hero-section animate-fade-in-up">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-stats">
+          <span class="flex items-center gap-2">
+            📚 {{ stats.total_journals|default:"1000" }}+ Journals •
+            💰 ${{ stats.total_earnings|floatformat:0|default:"50000" }}+ Earned •
+            ⭐ {{ stats.avg_rating|default:"4.8" }} Rating
+          </span>
+        </div>
 
-        <h1 class="text-3xl md:text-6xl font-bold diary-font mb-6 text-white max-w-4xl">
-          Discover & Collect Authentic Stories
+        <h1 class="text-4xl md:text-6xl font-bold diary-font mb-6 leading-tight">
+          Discover Authentic
+          <span class="block text-gradient">Life Stories</span>
         </h1>
 
-        <p class="text-white/90 text-base md:text-xl max-w-2xl mb-8 leading-relaxed">
-          Shop curated journals, build your personal library, and support storytellers worldwide. Every purchase helps authors earn and create more.
+        <p class="text-xl opacity-90 max-w-2xl mx-auto mb-8 leading-relaxed">
+          Shop curated journals, build your personal library, and support storytellers worldwide.
+          Every purchase helps authors earn and create more authentic content.
         </p>
 
-        <!-- Enhanced CTA Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center w-full max-w-lg">
-          <a href="#explore" class="btn-gradient text-white px-6 py-3 rounded-full font-medium shadow-lg flex items-center justify-center gap-2">
+        <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+          <a href="#explore" class="btn-gradient px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
             </svg>
             Shop Journals
           </a>
           {% if user.is_authenticated %}
-            <a href="{% url 'publish_journal' %}" class="btn-amber text-white px-6 py-3 rounded-full font-medium shadow-lg flex items-center justify-center gap-2">
+            <a href="{% url 'publish_journal' %}" class="btn-amber px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
                 <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
@@ -455,620 +619,467 @@
               Sell Your Story
             </a>
           {% else %}
-            <a href="{% url 'signup' %}" class="btn-amber text-white px-6 py-3 rounded-full font-medium shadow-lg flex items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
-              </svg>
-              Join & Sell
+            <a href="{% url 'signup' %}" class="btn-amber px-8 py-4 rounded-full font-semibold flex items-center justify-center gap-2">
+              Join & Start Selling
             </a>
           {% endif %}
         </div>
-
-        <!-- Trust badges -->
-        <div class="flex items-center gap-6 mt-8 text-white/80 text-sm">
-          <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            Secure Payments
-          </div>
-          <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            Satisfaction Guaranteed
-          </div>
-          <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Instant Access
-          </div>
-        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Advanced Search & Filter Bar -->
-  <div id="explore" class="mb-8 relative z-20">
-    <div class="glass-effect rounded-xl shadow-lg p-6">
-      <form method="GET" action="{% url 'marketplace' %}" class="space-y-4">
+    <!-- Enhanced Search Section -->
+    <div id="explore" class="mb-12 animate-fade-in-up">
+      <div class="glass-effect rounded-3xl p-8">
+        <form method="GET" action="{% url 'marketplace' %}" class="space-y-6">
 
-        <!-- Main search row -->
-        <div class="flex flex-col lg:flex-row gap-4 items-center">
-          <div class="flex-1 relative">
-            <input type="text" name="search" value="{{ search_query }}" placeholder="Search journals, authors, or topics..." class="w-full pl-12 pr-4 py-3 rounded-full bg-white/80 backdrop-filter backdrop-blur-sm border border-white/50 focus:border-secondary-400 focus:ring focus:ring-secondary-200 focus:ring-opacity-50 shadow-sm transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-
-          <div class="flex items-center gap-3">
-            <!-- Sort dropdown -->
-            <select name="sort" class="glass-effect text-gray-700 rounded-lg px-4 py-3 border border-white/50 focus:ring-secondary-500 focus:border-secondary-500">
-              <option value="trending" {% if current_sort == 'trending' %}selected{% endif %}>🔥 Trending</option>
-              <option value="bestSelling" {% if current_sort == 'bestSelling' %}selected{% endif %}>💰 Best Selling</option>
-              <option value="topRated" {% if current_sort == 'topRated' %}selected{% endif %}>⭐ Top Rated</option>
-              <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>🆕 Newest</option>
-              <option value="priceHigh" {% if current_sort == 'priceHigh' %}selected{% endif %}>💲 Price: High to Low</option>
-              <option value="priceLow" {% if current_sort == 'priceLow' %}selected{% endif %}>💲 Price: Low to High</option>
-            </select>
-
-            <!-- Filter toggle -->
-            <button type="button" onclick="toggleFilters()" class="glass-effect px-4 py-3 rounded-lg border border-white/50 hover:bg-white/50 transition-colors flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          <!-- Main Search Bar -->
+          <div class="search-container">
+            <div class="relative">
+              <input type="text" name="search" value="{{ search_query }}"
+                     placeholder="Search for journals, authors, or topics..."
+                     class="search-input">
+              <svg xmlns="http://www.w3.org/2000/svg" class="search-icon h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              Filters
-              <span class="bg-secondary-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" id="activeFiltersCount">0</span>
-            </button>
+            </div>
+          </div>
 
-            <button type="submit" class="btn-gradient text-white px-6 py-3 rounded-lg font-medium shadow-sm">
-              Search
+          <!-- Search Controls -->
+          <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="flex items-center gap-4">
+              <!-- Sort Dropdown -->
+              <select name="sort" class="glass-effect rounded-xl px-4 py-3 border-0 focus:ring-2 focus:ring-blue-500">
+                <option value="trending" {% if current_sort == 'trending' %}selected{% endif %}>🔥 Trending</option>
+                <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>🆕 Newest</option>
+                <option value="topRated" {% if current_sort == 'topRated' %}selected{% endif %}>⭐ Top Rated</option>
+                <option value="bestSelling" {% if current_sort == 'bestSelling' %}selected{% endif %}>💰 Best Selling</option>
+                <option value="priceLow" {% if current_sort == 'priceLow' %}selected{% endif %}>💲 Price: Low to High</option>
+                <option value="priceHigh" {% if current_sort == 'priceHigh' %}selected{% endif %}>💲 Price: High to Low</option>
+              </select>
+
+              <!-- Filter Toggle -->
+              <button type="button" onclick="toggleFilters()"
+                      class="glass-effect px-6 py-3 rounded-xl font-medium flex items-center gap-2 interactive-element">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filters
+                <span class="bg-blue-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center" id="activeFiltersCount">0</span>
+              </button>
+            </div>
+
+            <button type="submit" class="btn-gradient px-8 py-3 rounded-xl font-semibold">
+              Search Journals
             </button>
           </div>
-        </div>
 
-        <!-- Advanced filters (collapsible) -->
-        <div id="advancedFilters" class="hidden border-t border-white/20 pt-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Advanced Filters (Collapsible) -->
+          <div id="advancedFilters" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-6 border-t border-gray-200">
 
-            <!-- Price range -->
-            <div class="filter-section rounded-lg p-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
-              <div class="space-y-2">
+              <!-- Price Range -->
+              <div class="filter-group">
+                <div class="filter-title">Price Range</div>
                 <input type="range" name="maxPrice" min="0" max="50" value="{{ request.GET.maxPrice|default:'50' }}" class="price-slider">
-                <div class="flex justify-between text-xs text-gray-500">
+                <div class="flex justify-between text-sm text-gray-600 mt-2">
                   <span>Free</span>
                   <span>$<span id="maxPriceValue">{{ request.GET.maxPrice|default:'50' }}</span></span>
                 </div>
               </div>
-            </div>
 
-            <!-- Rating filter -->
-            <div class="filter-section rounded-lg p-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Rating</label>
-              <div class="space-y-2">
-                {% for rating in "54321" %}
-                  <label class="flex items-center">
-                    <input type="radio" name="minRating" value="{{ rating }}" {% if request.GET.minRating == rating %}checked{% endif %} class="mr-2">
-                    <div class="star-rating">
-                      {% for i in "12345" %}
-                        <svg class="w-4 h-4 star {% if forloop.counter <= rating|add:0 %}filled{% endif %}" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      {% endfor %}
-                    </div>
-                    <span class="ml-2 text-sm">& up</span>
+              <!-- Rating Filter -->
+              <div class="filter-group">
+                <div class="filter-title">Minimum Rating</div>
+                <div class="space-y-2">
+                  {% for rating in "54321" %}
+                    <label class="filter-option">
+                      <input type="radio" name="minRating" value="{{ rating }}" {% if request.GET.minRating == rating %}checked{% endif %}>
+                      <div class="flex items-center">
+                        <div class="flex mr-2">
+                          {% for i in "12345" %}
+                            <svg class="w-4 h-4 {% if forloop.counter <= rating|add:0 %}text-yellow-400{% else %}text-gray-300{% endif %}" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                          {% endfor %}
+                        </div>
+                        <span class="text-sm">& up</span>
+                      </div>
+                    </label>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <!-- Journal Length -->
+              <div class="filter-group">
+                <div class="filter-title">Journal Length</div>
+                <div class="space-y-2">
+                  <label class="filter-option">
+                    <input type="checkbox" name="length" value="short" {% if 'short' in request.GET.length %}checked{% endif %}>
+                    <span>Short (1-10 entries)</span>
                   </label>
-                {% endfor %}
+                  <label class="filter-option">
+                    <input type="checkbox" name="length" value="medium" {% if 'medium' in request.GET.length %}checked{% endif %}>
+                    <span>Medium (11-50 entries)</span>
+                  </label>
+                  <label class="filter-option">
+                    <input type="checkbox" name="length" value="long" {% if 'long' in request.GET.length %}checked{% endif %}>
+                    <span>Long (50+ entries)</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Special Offers -->
+              <div class="filter-group">
+                <div class="filter-title">Special Offers</div>
+                <div class="space-y-2">
+                  <label class="filter-option">
+                    <input type="checkbox" name="offers" value="free" {% if 'free' in request.GET.offers %}checked{% endif %}>
+                    <span>Free Journals</span>
+                  </label>
+                  <label class="filter-option">
+                    <input type="checkbox" name="offers" value="bestseller" {% if 'bestseller' in request.GET.offers %}checked{% endif %}>
+                    <span>Bestsellers</span>
+                  </label>
+                  <label class="filter-option">
+                    <input type="checkbox" name="offers" value="new" {% if 'new' in request.GET.offers %}checked{% endif %}>
+                    <span>New Releases</span>
+                  </label>
+                </div>
               </div>
             </div>
 
-            <!-- Journal length -->
-            <div class="filter-section rounded-lg p-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Journal Length</label>
-              <div class="space-y-2">
-                <label class="flex items-center">
-                  <input type="checkbox" name="length" value="short" {% if 'short' in request.GET.length %}checked{% endif %} class="mr-2">
-                  <span class="text-sm">Short (1-10 entries)</span>
-                </label>
-                <label class="flex items-center">
-                  <input type="checkbox" name="length" value="medium" {% if 'medium' in request.GET.length %}checked{% endif %} class="mr-2">
-                  <span class="text-sm">Medium (11-50 entries)</span>
-                </label>
-                <label class="flex items-center">
-                  <input type="checkbox" name="length" value="long" {% if 'long' in request.GET.length %}checked{% endif %} class="mr-2">
-                  <span class="text-sm">Long (50+ entries)</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Special offers -->
-            <div class="filter-section rounded-lg p-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Special Offers</label>
-              <div class="space-y-2">
-                <label class="flex items-center">
-                  <input type="checkbox" name="offers" value="free" {% if 'free' in request.GET.offers %}checked{% endif %} class="mr-2">
-                  <span class="text-sm">Free Journals</span>
-                </label>
-                <label class="flex items-center">
-                  <input type="checkbox" name="offers" value="bestseller" {% if 'bestseller' in request.GET.offers %}checked{% endif %} class="mr-2">
-                  <span class="text-sm">Bestsellers</span>
-                </label>
-                <label class="flex items-center">
-                  <input type="checkbox" name="offers" value="new" {% if 'new' in request.GET.offers %}checked{% endif %} class="mr-2">
-                  <span class="text-sm">New Releases</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex justify-between items-center mt-4 pt-4 border-t border-white/20">
-            <button type="button" onclick="clearFilters()" class="text-sm text-gray-600 hover:text-gray-800">Clear all filters</button>
-            <div class="flex gap-2">
-              <button type="button" onclick="toggleFilters()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">Cancel</button>
-              <button type="submit" class="btn-gradient text-white px-4 py-2 rounded-lg">Apply Filters</button>
-            </div>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Categories with Shopping Features -->
-  <div class="mb-12 relative z-10">
-    <div class="text-center mb-8">
-      <h2 class="text-2xl md:text-3xl font-bold diary-font mb-3 text-gray-800">Shop by Category</h2>
-      <p class="text-gray-600 max-w-2xl mx-auto">Discover curated collections of authentic stories from various genres and topics.</p>
-    </div>
-
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-      {% for category in categories %}
-        <a href="{% url 'marketplace' %}?category={{ category.slug }}" class="glass-effect rounded-xl p-5 shadow-md flex flex-col items-center text-center hover:shadow-lg transition border border-white/30 group relative">
-          <div class="h-16 w-16 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <h3 class="font-medium text-gray-800 mb-1 text-sm group-hover:text-blue-600 transition-colors">{{ category.name }}</h3>
-          <p class="text-xs text-gray-500">{{ category.journal_count }} journal{{ category.journal_count|pluralize }}</p>
-
-          <!-- Bestseller badge for categories with high sales -->
-          {% if category.journal_count > 50 %}
-            <div class="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-              Hot
-            </div>
-          {% endif %}
-        </a>
-      {% empty %}
-        <!-- Default categories -->
-        <a href="#" class="glass-effect rounded-xl p-5 shadow-md flex flex-col items-center text-center hover:shadow-lg transition border border-white/30 group">
-          <div class="h-16 w-16 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <h3 class="font-medium text-gray-800 mb-1 text-sm group-hover:text-blue-600 transition-colors">Travel & Adventure</h3>
-          <p class="text-xs text-gray-500">{{ stats.total_journals|default:"0" }} journals</p>
-        </a>
-        <!-- Add more default categories... -->
-      {% endfor %}
-    </div>
-  </div>
-
-  <!-- Featured Deal of the Day -->
-  {% if featured_journal %}
-  <div class="mb-12 relative z-10">
-    <div class="glass-effect rounded-2xl overflow-hidden shadow-2xl border border-white/30 bg-gradient-to-br from-amber-50/50 to-orange-100/50">
-      <div class="absolute top-4 left-4 bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full font-bold animate-pulse">
-        🔥 Deal of the Day
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
-        <!-- Product image/info -->
-        <div class="p-8">
-          <div class="mb-6">
-            <span class="text-sm text-orange-600 font-medium">LIMITED TIME OFFER</span>
-            <h2 class="text-3xl font-bold diary-font text-gray-800 mb-2">{{ featured_journal.title }}</h2>
-            <p class="text-gray-600 mb-4">{{ featured_journal.description|truncatewords:20 }}</p>
-
-            <!-- Rating -->
-            <div class="flex items-center gap-2 mb-4">
-              <div class="star-rating">
-                {% for i in "12345" %}
-                  <svg class="w-5 h-5 star filled" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                  </svg>
-                {% endfor %}
-              </div>
-              <span class="text-sm text-gray-600">({{ featured_journal.likes.count }} reviews)</span>
-            </div>
-
-            <!-- Pricing -->
-            <div class="flex items-baseline gap-2 mb-6">
-              {% if featured_journal.price > 0 %}
-                <span class="text-3xl font-bold text-green-600">${{ featured_journal.price }}</span>
-                <span class="text-lg text-gray-500 line-through">${{ featured_journal.price|floatformat:2|add:"5.00" }}</span>
-                <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-medium">Save 40%</span>
-              {% else %}
-                <span class="text-3xl font-bold text-green-600">FREE</span>
-                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">100% Off</span>
-              {% endif %}
-            </div>
-
-            <!-- Action buttons -->
-            <div class="flex gap-3">
-              {% if user.is_authenticated %}
-                <button onclick="addToCart({{ featured_journal.id }})" class="btn-emerald text-white px-6 py-3 rounded-lg font-medium shadow-lg flex items-center gap-2 flex-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
-                  </svg>
-                  Add to Cart
+            <div class="flex justify-between items-center mt-6 pt-6 border-t border-gray-200">
+              <button type="button" onclick="clearFilters()" class="text-gray-600 hover:text-gray-800 font-medium">
+                Clear all filters
+              </button>
+              <div class="flex gap-3">
+                <button type="button" onclick="toggleFilters()" class="glass-effect px-6 py-2 rounded-xl">
+                  Cancel
                 </button>
-                <button onclick="toggleWishlist({{ featured_journal.id }})" class="glass-effect border border-white/50 p-3 rounded-lg hover:bg-white/50 transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
+                <button type="submit" class="btn-gradient px-6 py-2 rounded-xl text-white">
+                  Apply Filters
                 </button>
-              {% else %}
-                <a href="{% url 'signup' %}" class="btn-emerald text-white px-6 py-3 rounded-lg font-medium shadow-lg flex items-center gap-2 flex-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  Sign Up to Purchase
-                </a>
-              {% endif %}
-            </div>
-
-            <!-- Deal countdown timer -->
-            <div class="mt-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-100">
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-medium text-red-800">Deal ends in:</span>
-                <div id="countdown" class="text-lg font-bold text-red-600">23:59:45</div>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Author info -->
-        <div class="p-8 bg-white/50">
-          <div class="text-center">
-            <div class="h-24 w-24 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 p-1 mx-auto mb-4">
-              <div class="h-full w-full rounded-full bg-gray-300 flex items-center justify-center text-2xl font-bold text-gray-600">
-                {{ featured_journal.author.username|first|upper }}
-              </div>
-            </div>
-
-            <h3 class="text-xl font-bold text-gray-800 mb-1">{{ featured_journal.author.get_full_name|default:featured_journal.author.username }}</h3>
-            <p class="text-gray-600 mb-4">@{{ featured_journal.author.username }}</p>
-
-            <div class="grid grid-cols-2 gap-4 mb-6">
-              <div class="text-center">
-                <div class="text-2xl font-bold text-gray-800">{{ featured_journal.entries.count }}</div>
-                <div class="text-sm text-gray-600">Entries</div>
-              </div>
-              <div class="text-center">
-                <div class="text-2xl font-bold text-amber-600">${{ featured_journal.total_tips|floatformat:0 }}</div>
-                <div class="text-sm text-gray-600">Earned</div>
-              </div>
-            </div>
-
-            <a href="{% url 'marketplace_author_profile' featured_journal.author.username %}" class="glass-effect border border-white/50 text-gray-700 hover:bg-white/50 px-4 py-2 rounded-lg text-sm font-medium transition-all">
-              View Author Profile
-            </a>
-          </div>
-        </div>
+        </form>
       </div>
     </div>
-  </div>
-  {% endif %}
 
-  <!-- Recently Viewed (for logged in users) -->
-  {% if user.is_authenticated %}
-  <div class="mb-12 recently-viewed rounded-2xl p-6">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-bold text-gray-800">Recently Viewed</h2>
-      <button onclick="clearRecentlyViewed()" class="text-sm text-gray-600 hover:text-gray-800">Clear all</button>
+    <!-- Enhanced Categories Section -->
+    <div class="mb-16 animate-fade-in-up">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold diary-font mb-4 text-gradient">
+          Shop by Category
+        </h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Discover curated collections of authentic stories from various genres and topics.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+        {% for category in categories %}
+          <a href="{% url 'marketplace' %}?category={{ category.slug }}" class="category-card interactive-element">
+            <div class="category-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">{{ category.name }}</h3>
+            <p class="text-sm text-gray-600">
+              {{ category.journal_count }} journal{{ category.journal_count|pluralize }}
+            </p>
+          </a>
+        {% empty %}
+          <!-- Default categories -->
+          <div class="category-card">
+            <div class="category-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">Personal Growth</h3>
+            <p class="text-sm text-gray-600">{{ stats.total_journals|default:"0" }} journals</p>
+          </div>
+        {% endfor %}
+      </div>
     </div>
 
-    <div id="recentlyViewedList" class="flex gap-4 overflow-x-auto pb-4">
-      <!-- Will be populated by JavaScript -->
-    </div>
-  </div>
-  {% endif %}
+    <!-- Enhanced Products Section -->
+    <div class="mb-16">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="text-2xl font-bold diary-font text-gray-800">
+            {% if search_query %}
+              Search Results for "{{ search_query }}"
+            {% elif current_category and current_category != 'all' %}
+              {{ current_category|title }} Journals
+            {% else %}
+              Featured Journals
+            {% endif %}
+          </h2>
+          <p class="text-gray-600 mt-1">{{ total_results|default:journals.count }} result{{ total_results|pluralize }}</p>
+        </div>
 
-  <!-- Main Products Grid -->
-  <div class="mb-12 relative z-10">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-bold diary-font text-gray-800">
-        {% if search_query %}
-          Search Results for "{{ search_query }}"
-        {% elif current_category and current_category != 'all' %}
-          {{ current_category|title }} Journals
-        {% else %}
-          All Journals
-        {% endif %}
-      </h2>
-      <div class="flex items-center gap-4">
-        <span class="text-sm text-gray-500">{{ total_results }} result{{ total_results|pluralize }}</span>
-        <!-- View toggle -->
-        <div class="flex border border-gray-200 rounded-lg overflow-hidden">
-          <button onclick="setGridView('grid')" id="gridViewBtn" class="px-3 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+        <!-- View Toggle -->
+        <div class="glass-effect rounded-xl p-1 flex">
+          <button onclick="setGridView('grid')" id="gridViewBtn"
+                  class="px-4 py-2 rounded-lg bg-blue-500 text-white transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
             </svg>
           </button>
-          <button onclick="setGridView('list')" id="listViewBtn" class="px-3 py-2 text-gray-600 hover:bg-gray-100 transition-colors">
+          <button onclick="setGridView('list')" id="listViewBtn"
+                  class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
             </svg>
           </button>
         </div>
       </div>
-    </div>
 
-    <!-- Products Grid -->
-    {% if journals %}
-      <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {% for journal in journals %}
-          <div class="marketplace-card glass-effect rounded-xl shadow-lg overflow-hidden border border-white/30 relative group" data-journal-id="{{ journal.id }}">
+      <!-- Products Grid -->
+      {% if journals %}
+        <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {% for journal in journals %}
+            <div class="product-card animate-fade-in-up" data-journal-id="{{ journal.id }}" style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms">
 
-            <!-- Quick actions overlay -->
-            <div class="quick-actions">
-              {% if user.is_authenticated %}
-                <button onclick="toggleWishlist({{ journal.id }})" class="quick-action-btn glass-effect bg-white/80 hover:bg-pink-100 text-gray-700 hover:text-pink-600" title="Add to Wishlist">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                </button>
-                <button onclick="quickView({{ journal.id }})" class="quick-action-btn glass-effect bg-white/80 hover:bg-blue-100 text-gray-700 hover:text-blue-600" title="Quick View">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </button>
-                <button onclick="addToCompare({{ journal.id }})" class="quick-action-btn glass-effect bg-white/80 hover:bg-green-100 text-gray-700 hover:text-green-600" title="Compare">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </button>
-              {% endif %}
-            </div>
+              <!-- Image Container -->
+              <div class="image-container">
+                <div class="image-overlay"></div>
 
-            <!-- Compare checkbox -->
-            <div class="compare-checkbox">
-              <input type="checkbox" class="compare-item" data-journal-id="{{ journal.id }}" onchange="updateCompareCount()">
-            </div>
-
-            <!-- Badges -->
-            {% if journal.is_staff_pick %}
-              <div class="discount-badge">Staff Pick</div>
-            {% endif %}
-
-            <!-- Product image -->
-            <div class="relative h-48 bg-gray-200 cursor-pointer" onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
-              {% if journal.cover_image %}
-                <img src="{{ journal.cover_image.url }}" alt="{{ journal.title }}" class="w-full h-full object-cover">
-              {% else %}
-                <div class="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                  <div class="text-white text-center p-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                    <p class="text-sm font-medium">{{ journal.title|truncatewords:3 }}</p>
-                  </div>
-                </div>
-              {% endif %}
-
-              <!-- Price tag -->
-              {% if journal.price > 0 %}
-                <div class="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-                  ${{ journal.price }}
-                </div>
-              {% else %}
-                <div class="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-                  FREE
-                </div>
-              {% endif %}
-            </div>
-
-            <!-- Product details -->
-            <div class="p-4">
-              <!-- Author info -->
-              <div class="flex items-center gap-2 mb-2">
-                <div class="h-6 w-6 rounded-full bg-gradient-to-br from-secondary-400 to-primary-500 flex items-center justify-center text-white font-bold text-xs">
-                  {{ journal.author.username|first|upper }}
-                </div>
-                <span class="text-xs text-gray-600">{{ journal.author.username }}</span>
-                <div class="ml-auto flex items-center text-xs text-gray-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  {{ journal.view_count }}
-                </div>
-              </div>
-
-              <!-- Title -->
-              <h3 class="font-semibold text-gray-800 mb-2 text-sm line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors" onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
-                {{ journal.title }}
-              </h3>
-
-              <!-- Rating -->
-              <div class="flex items-center gap-2 mb-2">
-                <div class="star-rating">
-                  {% for i in "12345" %}
-                    <svg class="w-3 h-3 star filled" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                    </svg>
-                  {% endfor %}
-                </div>
-                <span class="text-xs text-gray-600">({{ journal.likes.count }})</span>
-              </div>
-
-              <!-- Tags -->
-              <div class="flex flex-wrap gap-1 mb-3">
-                {% for tag in journal.marketplace_tags.all|slice:":2" %}
-                  <span class="text-xs glass-effect bg-gray-50/80 text-gray-700 px-2 py-1 rounded-full">{{ tag.name }}</span>
-                {% empty %}
-                  <span class="text-xs glass-effect bg-gray-50/80 text-gray-700 px-2 py-1 rounded-full">Journal</span>
-                {% endfor %}
-              </div>
-
-              <!-- Pricing and actions -->
-              <div class="flex items-center justify-between">
-                <div class="flex flex-col">
-                  {% if journal.price > 0 %}
-                    <span class="text-lg font-bold text-green-600">${{ journal.price }}</span>
-                    {% if journal.total_tips > 0 %}
-                      <span class="text-xs text-gray-500">${{ journal.total_tips|floatformat:0 }} earned</span>
-                    {% endif %}
-                  {% else %}
-                    <span class="text-lg font-bold text-green-600">FREE</span>
-                    <span class="text-xs text-emerald-600">{{ journal.entries.count }} entries</span>
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                  {% if user.is_authenticated %}
+                    <button onclick="toggleWishlist({{ journal.id }})" class="quick-action-btn" title="Add to Wishlist">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                    </button>
+                    <button onclick="quickView({{ journal.id }})" class="quick-action-btn" title="Quick View">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
+                    <button onclick="addToCompare({{ journal.id }})" class="quick-action-btn" title="Compare">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </button>
                   {% endif %}
                 </div>
 
-                {% if user.is_authenticated %}
-                  <div class="flex gap-1">
-                    <button onclick="addToCart({{ journal.id }})" class="btn-emerald text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-sm hover:shadow-md transition-all">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
-                      </svg>
-                      {% if journal.price > 0 %}Buy{% else %}Get{% endif %}
-                    </button>
-                  </div>
+                <!-- Journal Cover -->
+                {% if journal.cover_image %}
+                  <img src="{{ journal.cover_image.url }}" alt="{{ journal.title }}" class="w-full h-full object-cover cursor-pointer" onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
                 {% else %}
-                  <a href="{% url 'signup' %}" class="btn-emerald text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-sm">
-                    Sign Up
-                  </a>
+                  <div class="w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center cursor-pointer" onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
+                    <div class="text-white text-center p-6">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                      <p class="font-medium text-sm">{{ journal.title|truncatewords:4 }}</p>
+                    </div>
+                  </div>
+                {% endif %}
+
+                <!-- Price Badge -->
+                <div class="absolute top-4 right-4">
+                  {% if journal.price > 0 %}
+                    <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-lg">
+                      ${{ journal.price }}
+                    </span>
+                  {% else %}
+                    <span class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-lg">
+                      FREE
+                    </span>
+                  {% endif %}
+                </div>
+
+                <!-- Staff Pick Badge -->
+                {% if journal.is_staff_pick %}
+                  <div class="absolute top-4 left-4">
+                    <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">
+                      ⭐ Staff Pick
+                    </span>
+                  </div>
                 {% endif %}
               </div>
 
-              <!-- Prime/Fast delivery indicator -->
-              {% if journal.is_staff_pick %}
-                <div class="mt-2 flex items-center text-xs text-blue-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Instant Access
+              <!-- Product Details -->
+              <div class="p-6">
+                <!-- Author Info -->
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                    {{ journal.author.username|first|upper }}
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-800">{{ journal.author.get_full_name|default:journal.author.username }}</p>
+                    <p class="text-xs text-gray-500">@{{ journal.author.username }}</p>
+                  </div>
+                  <div class="ml-auto flex items-center text-xs text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    {{ journal.view_count|default:0 }}
+                  </div>
                 </div>
+
+                <!-- Title -->
+                <h3 class="font-bold text-gray-800 mb-2 text-lg line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors" onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
+                  {{ journal.title }}
+                </h3>
+
+                <!-- Description -->
+                <p class="text-gray-600 text-sm mb-3 line-clamp-2">
+                  {{ journal.description|truncatewords:15 }}
+                </p>
+
+                <!-- Rating -->
+                <div class="flex items-center gap-2 mb-3">
+                  <div class="flex">
+                    {% for i in "12345" %}
+                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                      </svg>
+                    {% endfor %}
+                  </div>
+                  <span class="text-sm text-gray-600">({{ journal.likes.count|default:0 }})</span>
+                </div>
+
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                  {% for tag in journal.marketplace_tags.all|slice:":2" %}
+                    <span class="glass-effect text-xs px-3 py-1 rounded-full text-gray-700 border border-gray-200">
+                      {{ tag.name }}
+                    </span>
+                  {% empty %}
+                    <span class="glass-effect text-xs px-3 py-1 rounded-full text-gray-700 border border-gray-200">
+                      Journal
+                    </span>
+                  {% endfor %}
+                </div>
+
+                <!-- Purchase Section -->
+                <div class="flex items-center justify-between">
+                  <div>
+                    {% if journal.price > 0 %}
+                      <div class="text-2xl font-bold text-green-600">${{ journal.price }}</div>
+                      {% if journal.total_tips > 0 %}
+                        <div class="text-xs text-gray-500">${{ journal.total_tips|floatformat:0 }} earned</div>
+                      {% endif %}
+                    {% else %}
+                      <div class="text-2xl font-bold text-blue-600">FREE</div>
+                      <div class="text-xs text-gray-500">{{ journal.entries.count|default:0 }} entries</div>
+                    {% endif %}
+                  </div>
+
+                  {% if user.is_authenticated %}
+                    <button onclick="addToCart({{ journal.id }})" class="btn-emerald px-6 py-3 rounded-xl font-semibold shadow-lg interactive-element">
+                      {% if journal.price > 0 %}Buy Now{% else %}Get Free{% endif %}
+                    </button>
+                  {% else %}
+                    <a href="{% url 'signup' %}" class="btn-emerald px-6 py-3 rounded-xl font-semibold shadow-lg inline-block">
+                      Sign Up
+                    </a>
+                  {% endif %}
+                </div>
+
+                <!-- Instant Access Badge -->
+                {% if journal.is_staff_pick %}
+                  <div class="mt-3 flex items-center text-xs text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Instant Access
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if journals.has_other_pages %}
+        <div class="mt-16 flex justify-center">
+          <nav class="glass-effect rounded-2xl p-2 flex items-center gap-2">
+            {% if journals.has_previous %}
+              <a href="?page={{ journals.previous_page_number }}" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-white/50 transition-colors">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+              </a>
+            {% endif %}
+
+            {% for i in journals.paginator.page_range %}
+              {% if journals.number == i %}
+                <span class="px-4 py-2 rounded-xl bg-blue-500 text-white font-medium">{{ i }}</span>
+              {% else %}
+                <a href="?page={{ i }}" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-white/50 transition-colors">{{ i }}</a>
+              {% endif %}
+            {% endfor %}
+
+            {% if journals.has_next %}
+              <a href="?page={{ journals.next_page_number }}" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-white/50 transition-colors">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            {% endif %}
+          </nav>
+        </div>
+        {% endif %}
+
+      {% else %}
+        <!-- Enhanced Empty State -->
+        <div class="text-center py-20">
+          <div class="glass-effect rounded-3xl p-16 max-w-2xl mx-auto">
+            <div class="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold diary-font text-gray-900 mb-4">No journals found</h3>
+            <p class="text-gray-600 mb-8 text-lg">
+              {% if search_query %}
+                No journals match your search for "{{ search_query }}". Try different keywords or browse our categories.
+              {% else %}
+                Be the first to share your story and inspire others!
+              {% endif %}
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              {% if search_query %}
+                <a href="{% url 'marketplace' %}" class="btn-gradient px-8 py-4 rounded-xl font-semibold">
+                  Browse All Journals
+                </a>
+              {% endif %}
+              {% if user.is_authenticated %}
+                <a href="{% url 'publish_journal' %}" class="btn-amber px-8 py-4 rounded-xl font-semibold">
+                  Publish Your Journal
+                </a>
+              {% else %}
+                <a href="{% url 'signup' %}" class="btn-amber px-8 py-4 rounded-xl font-semibold">
+                  Start Selling Your Story
+                </a>
               {% endif %}
             </div>
           </div>
-        {% endfor %}
-      </div>
-
-      <!-- Pagination -->
-      {% if journals.has_other_pages %}
-      <div class="mt-12 flex justify-center">
-        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px glass-effect p-2" aria-label="Pagination">
-          {% if journals.has_previous %}
-            <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&{% endif %}{% if request.GET.price %}price={{ request.GET.price }}&{% endif %}page={{ journals.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-              <span class="sr-only">Previous</span>
-              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-            </a>
-          {% endif %}
-
-          {% for i in journals.paginator.page_range %}
-            {% if journals.number == i %}
-              <span aria-current="page" class="z-10 bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">{{ i }}</span>
-            {% else %}
-              <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&{% endif %}{% if request.GET.price %}price={{ request.GET.price }}&{% endif %}page={{ i }}" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">{{ i }}</a>
-            {% endif %}
-          {% endfor %}
-
-          {% if journals.has_next %}
-            <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&{% endif %}{% if request.GET.price %}price={{ request.GET.price }}&{% endif %}page={{ journals.next_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-              <span class="sr-only">Next</span>
-              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-              </svg>
-            </a>
-          {% endif %}
-        </nav>
-      </div>
+        </div>
       {% endif %}
-
-    {% else %}
-      <!-- Empty state -->
-      <div class="text-center py-16">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <h3 class="text-xl font-medium text-gray-900 mb-2">No journals found</h3>
-        <p class="text-gray-500 mb-6">
-          {% if search_query %}
-            No journals match your search for "{{ search_query }}". Try different keywords or browse categories.
-          {% else %}
-            Be the first to publish your story and start earning!
-          {% endif %}
-        </p>
-        <div class="flex justify-center gap-4">
-          {% if search_query %}
-            <a href="{% url 'marketplace' %}" class="btn-gradient text-white px-6 py-3 rounded-lg font-medium">
-              Browse All Journals
-            </a>
-          {% endif %}
-          {% if user.is_authenticated %}
-            <a href="{% url 'publish_journal' %}" class="btn-amber text-white px-6 py-3 rounded-lg font-medium">
-              Publish Your Journal
-            </a>
-          {% else %}
-            <a href="{% url 'signup' %}" class="btn-amber text-white px-6 py-3 rounded-lg font-medium">
-              Start Selling
-            </a>
-          {% endif %}
-        </div>
-      </div>
-    {% endif %}
-  </div>
-
-  <!-- Recommendations Section -->
-  {% if user.is_authenticated and journals %}
-  <div class="mb-12 recommendation-card rounded-2xl p-6">
-    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-      </svg>
-      Recommended for You
-    </h2>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {% for journal in journals|slice:":4" %}
-        <div class="glass-effect rounded-lg p-4 border border-amber-100">
-          <div class="h-24 w-full bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg mb-3 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <h4 class="font-medium text-gray-800 text-sm mb-1 line-clamp-2">{{ journal.title }}</h4>
-          <p class="text-xs text-gray-600 mb-2">{{ journal.author.username }}</p>
-          <div class="flex justify-between items-center">
-            <span class="text-sm font-bold text-green-600">{% if journal.price > 0 %}${{ journal.price }}{% else %}FREE{% endif %}</span>
-            <button onclick="addToCart({{ journal.id }})" class="text-xs bg-amber-500 text-white px-2 py-1 rounded hover:bg-amber-600 transition-colors">
-              Add
-            </button>
-          </div>
-        </div>
-      {% endfor %}
     </div>
-  </div>
-  {% endif %}
 
+  </div>
 </div>
 
-<!-- Shopping Cart Sidebar -->
+<!-- Enhanced Shopping Cart Sidebar -->
 {% if user.is_authenticated %}
-<div id="cartSidebar" class="fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
-  <div class="p-6 border-b border-gray-200">
+<div id="cartSidebar" class="fixed top-0 right-0 h-full w-96 cart-sidebar shadow-2xl transform translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
+  <div class="p-6 border-b border-gray-200/50">
     <div class="flex items-center justify-between">
-      <h3 class="text-lg font-bold text-gray-800">Shopping Cart</h3>
-      <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700">
+      <h3 class="text-xl font-bold text-gray-800">Shopping Cart</h3>
+      <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
@@ -1077,131 +1088,93 @@
   </div>
 
   <div id="cartItems" class="p-6 flex-1">
-    <div class="text-center text-gray-500 py-8">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
-      </svg>
-      <p>Your cart is empty</p>
+    <div class="text-center text-gray-500 py-16">
+      <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
+        </svg>
+      </div>
+      <h4 class="font-semibold text-gray-700 mb-2">Your cart is empty</h4>
+      <p class="text-sm">Add some journals to get started!</p>
     </div>
   </div>
 
-  <div id="cartFooter" class="p-6 border-t border-gray-200 hidden">
-    <div class="flex justify-between items-center mb-4">
-      <span class="text-lg font-bold">Total:</span>
-      <span id="cartTotal" class="text-xl font-bold text-green-600">$0.00</span>
+  <div id="cartFooter" class="p-6 border-t border-gray-200/50 hidden">
+    <div class="flex justify-between items-center mb-6">
+      <span class="text-lg font-semibold text-gray-800">Total:</span>
+      <span id="cartTotal" class="text-2xl font-bold text-green-600">$0.00</span>
     </div>
-    <button onclick="checkout()" class="w-full btn-emerald text-white py-3 rounded-lg font-medium">
+    <button onclick="checkout()" class="w-full btn-emerald py-4 rounded-xl font-semibold text-lg shadow-lg">
       Proceed to Checkout
     </button>
   </div>
 </div>
 
-<!-- Cart overlay -->
-<div id="cartOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="toggleCart()"></div>
+<!-- Cart Overlay -->
+<div id="cartOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden" onclick="toggleCart()"></div>
 {% endif %}
 
-<!-- Quick View Modal -->
-<div id="quickViewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-    <div class="p-6 border-b border-gray-200">
-      <div class="flex items-center justify-between">
-        <h3 class="text-2xl font-bold text-gray-800">Quick View</h3>
-        <button onclick="closeQuickView()" class="text-gray-500 hover:text-gray-700">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <div id="quickViewContent" class="p-6">
-      <!-- Content will be loaded dynamically -->
-    </div>
-  </div>
-</div>
-
-<!-- Comparison Modal -->
-<div id="comparisonModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-    <div class="p-6 border-b border-gray-200">
-      <div class="flex items-center justify-between">
-        <h3 class="text-2xl font-bold text-gray-800">Compare Journals</h3>
-        <button onclick="closeComparison()" class="text-gray-500 hover:text-gray-700">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <div id="comparisonContent" class="p-6">
-      <div class="comparison-table rounded-lg p-6">
-        <div class="text-center text-gray-500 py-8">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-          <p>Select journals to compare</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Mobile sticky actions -->
-<div class="mobile-sticky-actions md:hidden">
-  <button onclick="toggleFilters()" class="flex-1 glass-effect border border-white/50 text-gray-700 py-3 rounded-lg font-medium flex items-center justify-center gap-2">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-    </svg>
-    Filter
-  </button>
-  {% if user.is_authenticated %}
-    <button onclick="toggleCart()" class="flex-1 btn-emerald text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
-      </svg>
-      Cart (<span id="mobileCartCount">0</span>)
-    </button>
-  {% endif %}
-</div>
+<!-- Toast Notification Container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Shopping cart management
+// Enhanced JavaScript with better UX
 let cart = JSON.parse(localStorage.getItem('diaryvault_cart') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('diaryvault_wishlist') || '[]');
 let comparison = JSON.parse(localStorage.getItem('diaryvault_comparison') || '[]');
-let recentlyViewed = JSON.parse(localStorage.getItem('diaryvault_recently_viewed') || '[]');
 
-// Initialize page
+// Initialize
 document.addEventListener('DOMContentLoaded', function() {
   updateCartCount();
   updateWishlistCount();
   updateCompareCount();
-  loadRecentlyViewed();
-  startCountdown();
   initializePriceSlider();
+  initializeAnimations();
 });
 
-// Shopping cart functions
+// Enhanced toast notifications
+function showToast(message, type = 'info', duration = 3000) {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type} transform translate-x-full`;
+
+  const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+
+  toast.innerHTML = `
+    <div class="flex items-center gap-3">
+      <span class="text-lg">${icon}</span>
+      <span class="font-medium">${message}</span>
+    </div>
+  `;
+
+  document.getElementById('toastContainer').appendChild(toast);
+
+  // Animate in
+  setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+
+  // Animate out and remove
+  setTimeout(() => {
+    toast.classList.add('translate-x-full');
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+// Enhanced shopping cart functions
 function addToCart(journalId) {
   if (!cart.find(item => item.id === journalId)) {
-    // In a real app, you'd fetch journal details from API
     cart.push({
       id: journalId,
       title: `Journal ${journalId}`,
-      price: 9.99, // This would come from the actual journal data
+      price: 9.99,
       quantity: 1
     });
 
     localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
     updateCartCount();
     showCartAnimation();
-
-    // Show success message
-    showToast('Added to cart!', 'success');
+    showToast('Added to cart! 🛒', 'success');
   } else {
     showToast('Already in cart!', 'info');
   }
@@ -1212,13 +1185,12 @@ function removeFromCart(journalId) {
   localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
   updateCartCount();
   renderCartItems();
+  showToast('Removed from cart', 'info');
 }
 
 function updateCartCount() {
   const count = cart.length;
   document.getElementById('cartCount').textContent = count;
-  const mobileCount = document.getElementById('mobileCartCount');
-  if (mobileCount) mobileCount.textContent = count;
 }
 
 function toggleCart() {
@@ -1241,30 +1213,35 @@ function renderCartItems() {
 
   if (cart.length === 0) {
     container.innerHTML = `
-      <div class="text-center text-gray-500 py-8">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
-        </svg>
-        <p>Your cart is empty</p>
+      <div class="text-center text-gray-500 py-16">
+        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
+          </svg>
+        </div>
+        <h4 class="font-semibold text-gray-700 mb-2">Your cart is empty</h4>
+        <p class="text-sm">Add some journals to get started!</p>
       </div>`;
     footer.classList.add('hidden');
   } else {
     container.innerHTML = cart.map(item => `
-      <div class="flex items-center gap-4 p-4 border-b border-gray-100">
-        <div class="h-16 w-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
+      <div class="cart-item">
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-semibold text-gray-800">${item.title}</h4>
+            <p class="text-sm text-gray-600">${item.price}</p>
+          </div>
+          <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
         </div>
-        <div class="flex-1">
-          <h4 class="font-medium text-gray-800">${item.title}</h4>
-          <p class="text-sm text-gray-600">${item.price}</p>
-        </div>
-        <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </button>
       </div>
     `).join('');
 
@@ -1279,10 +1256,10 @@ function toggleWishlist(journalId) {
   const index = wishlist.indexOf(journalId);
   if (index === -1) {
     wishlist.push(journalId);
-    showToast('Added to wishlist!', 'success');
+    showToast('Added to wishlist! ❤️', 'success');
   } else {
     wishlist.splice(index, 1);
-    showToast('Removed from wishlist!', 'info');
+    showToast('Removed from wishlist', 'info');
   }
 
   localStorage.setItem('diaryvault_wishlist', JSON.stringify(wishlist));
@@ -1319,82 +1296,13 @@ function toggleCompare() {
     showToast('No items to compare!', 'info');
     return;
   }
-
-  document.getElementById('comparisonModal').classList.remove('hidden');
-  renderComparison();
+  // Implementation for comparison modal would go here
+  showToast('Comparison feature coming soon!', 'info');
 }
 
-function closeComparison() {
-  document.getElementById('comparisonModal').classList.add('hidden');
-}
-
-function renderComparison() {
-  // This would render comparison table in a real app
-  console.log('Rendering comparison for items:', comparison);
-}
-
-// Recently viewed
-function addToRecentlyViewed(journalId) {
-  recentlyViewed = recentlyViewed.filter(id => id !== journalId);
-  recentlyViewed.unshift(journalId);
-  recentlyViewed = recentlyViewed.slice(0, 10); // Keep only last 10
-
-  localStorage.setItem('diaryvault_recently_viewed', JSON.stringify(recentlyViewed));
-  loadRecentlyViewed();
-}
-
-function loadRecentlyViewed() {
-  const container = document.getElementById('recentlyViewedList');
-  if (!container || recentlyViewed.length === 0) return;
-
-  // In a real app, you'd fetch journal details for these IDs
-  container.innerHTML = recentlyViewed.map(id => `
-    <div class="flex-shrink-0 w-32">
-      <div class="h-20 w-full bg-gradient-to-br from-gray-400 to-gray-600 rounded-lg mb-2"></div>
-      <p class="text-xs text-gray-600">Journal ${id}</p>
-    </div>
-  `).join('');
-}
-
-function clearRecentlyViewed() {
-  recentlyViewed = [];
-  localStorage.setItem('diaryvault_recently_viewed', JSON.stringify(recentlyViewed));
-  loadRecentlyViewed();
-}
-
-// Quick view modal
+// Quick view function
 function quickView(journalId) {
-  document.getElementById('quickViewModal').classList.remove('hidden');
-
-  // In a real app, you'd fetch journal details via API
-  document.getElementById('quickViewContent').innerHTML = `
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <div class="h-64 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg mb-4"></div>
-      </div>
-      <div>
-        <h3 class="text-2xl font-bold mb-4">Journal ${journalId}</h3>
-        <div class="star-rating mb-4">
-          ${Array(5).fill().map(() => `
-            <svg class="w-5 h-5 star filled" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-            </svg>
-          `).join('')}
-        </div>
-        <p class="text-gray-600 mb-6">Sample journal description with compelling details about the content...</p>
-        <div class="text-2xl font-bold text-green-600 mb-6">$9.99</div>
-        <button onclick="addToCart(${journalId}); closeQuickView();" class="w-full btn-emerald text-white py-3 rounded-lg font-medium">
-          Add to Cart
-        </button>
-      </div>
-    </div>
-  `;
-
-  addToRecentlyViewed(journalId);
-}
-
-function closeQuickView() {
-  document.getElementById('quickViewModal').classList.remove('hidden');
+  showToast('Quick view feature coming soon!', 'info');
 }
 
 // Filter functions
@@ -1404,15 +1312,21 @@ function toggleFilters() {
 }
 
 function clearFilters() {
-  // Reset all form inputs
   document.querySelector('form').reset();
   updateActiveFiltersCount();
+  showToast('Filters cleared', 'info');
 }
 
 function updateActiveFiltersCount() {
-  // Count active filters and update badge
+  // Count active filters
   let count = 0;
-  // Implementation would count checked inputs, selected options, etc.
+  const form = document.querySelector('form');
+  const inputs = form.querySelectorAll('input[type="checkbox"]:checked, input[type="radio"]:checked');
+  count = inputs.length;
+
+  if (form.querySelector('input[name="search"]').value) count++;
+  if (form.querySelector('select[name="sort"]').value !== 'trending') count++;
+
   document.getElementById('activeFiltersCount').textContent = count;
 }
 
@@ -1433,60 +1347,50 @@ function setGridView(view) {
   const listBtn = document.getElementById('listViewBtn');
 
   if (view === 'list') {
-    grid.className = 'space-y-4';
-    gridBtn.classList.remove('bg-gray-100');
-    listBtn.classList.add('bg-gray-100');
+    grid.className = 'space-y-6';
+    gridBtn.classList.remove('bg-blue-500', 'text-white');
+    gridBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
+    listBtn.classList.add('bg-blue-500', 'text-white');
+    listBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
   } else {
-    grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6';
-    gridBtn.classList.add('bg-gray-100');
-    listBtn.classList.remove('bg-gray-100');
+    grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8';
+    gridBtn.classList.add('bg-blue-500', 'text-white');
+    gridBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+    listBtn.classList.remove('bg-blue-500', 'text-white');
+    listBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
   }
 }
 
-// Countdown timer for deals
-function startCountdown() {
-  const countdownElement = document.getElementById('countdown');
-  if (!countdownElement) return;
+// Animation initialization
+function initializeAnimations() {
+  // Stagger animations for product cards
+  const cards = document.querySelectorAll('.product-card');
+  cards.forEach((card, index) => {
+    card.style.animationDelay = `${index * 100}ms`;
+  });
 
-  let timeLeft = 24 * 60 * 60; // 24 hours in seconds
+  // Intersection Observer for scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-fade-in-up');
+      }
+    });
+  }, { threshold: 0.1 });
 
-  setInterval(() => {
-    const hours = Math.floor(timeLeft / 3600);
-    const minutes = Math.floor((timeLeft % 3600) / 60);
-    const seconds = timeLeft % 60;
-
-    countdownElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-    timeLeft--;
-    if (timeLeft < 0) timeLeft = 24 * 60 * 60; // Reset to 24 hours
-  }, 1000);
+  document.querySelectorAll('.animate-fade-in-up').forEach(el => {
+    observer.observe(el);
+  });
 }
 
-// Utility functions
-function showToast(message, type = 'info') {
-  const toast = document.createElement('div');
-  toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-down ${
-    type === 'success' ? 'bg-green-500 text-white' :
-    type === 'error' ? 'bg-red-500 text-white' :
-    type === 'warning' ? 'bg-yellow-500 text-white' :
-    'bg-blue-500 text-white'
-  }`;
-  toast.textContent = message;
-
-  document.body.appendChild(toast);
-
-  setTimeout(() => {
-    toast.remove();
-  }, 3000);
-}
-
+// Cart animation
 function showCartAnimation() {
-  const cartIcon = document.querySelector('[onclick="toggleCart()"]');
-  if (cartIcon) {
-    cartIcon.classList.add('cart-icon-pulse');
+  const cartBtn = document.querySelector('[onclick="toggleCart()"]');
+  if (cartBtn) {
+    cartBtn.classList.add('animate-bounce');
     setTimeout(() => {
-      cartIcon.classList.remove('cart-icon-pulse');
-    }, 500);
+      cartBtn.classList.remove('animate-bounce');
+    }, 1000);
   }
 }
 
@@ -1497,7 +1401,6 @@ function checkout() {
     return;
   }
 
-  // In a real app, this would redirect to checkout page
   showToast('Redirecting to checkout...', 'info');
 
   // Simulate checkout process
@@ -1506,19 +1409,77 @@ function checkout() {
     localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
     updateCartCount();
     toggleCart();
-    showToast('Order placed successfully!', 'success');
+    showToast('Order placed successfully! 🎉', 'success', 5000);
   }, 2000);
 }
 
-// Close modals on escape key
+// Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
+  // Escape key closes modals
   if (e.key === 'Escape') {
-    closeQuickView();
-    closeComparison();
     if (!document.getElementById('cartSidebar').classList.contains('translate-x-full')) {
       toggleCart();
     }
   }
+
+  // Ctrl/Cmd + K for search focus
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    document.querySelector('.search-input').focus();
+  }
 });
+
+// Form submission with loading states
+document.addEventListener('submit', function(e) {
+  const form = e.target;
+  if (form.tagName === 'FORM') {
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Searching...
+      `;
+    }
+  }
+});
+
+// Enhanced error handling
+window.addEventListener('error', function(e) {
+  console.error('JavaScript error:', e.error);
+  showToast('Something went wrong. Please try again.', 'error');
+});
+
+// Performance optimization - lazy loading for images
+if ('IntersectionObserver' in window) {
+  const imageObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        if (img.dataset.src) {
+          img.src = img.dataset.src;
+          img.removeAttribute('data-src');
+          imageObserver.unobserve(img);
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('img[data-src]').forEach(img => {
+    imageObserver.observe(img);
+  });
+}
+
+// Service Worker registration for offline support (optional)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => console.log('SW registered'))
+      .catch(error => console.log('SW registration failed'));
+  });
+}
 </script>
 {% endblock %}
