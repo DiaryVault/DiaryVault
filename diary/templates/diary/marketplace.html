@@ -1,1094 +1,1433 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DiaryVault - Mobile Marketplace</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .diary-font { font-family: 'Playfair Display', serif; }
-        .inter-font { font-family: 'Inter', sans-serif; }
+{% extends "base.html" %}
+{% load static %}
 
-        /* Enhanced Mobile-First Styles */
-        .mobile-search-container {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            border-radius: 0 0 32px 32px;
-            padding: 20px 16px 32px;
-            margin: -8px -16px 24px;
-        }
+{% block title %}DiaryVault - Journal Marketplace{% endblock %}
 
-        .mobile-search-bar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
+{% block extra_css %}
+<style>
+  /* Enhanced Core Branding */
+  .diary-font {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.02em;
+  }
 
-        .mobile-search-bar:focus-within {
-            background: white;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-            transform: translateY(-2px);
-        }
+  .handwritten {
+    font-family: 'Satisfy', cursive;
+  }
 
-        .mobile-category-scroll {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 16px 0;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-        }
+  /* Modern Glass Effects */
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
 
-        .mobile-category-scroll::-webkit-scrollbar {
-            display: none;
-        }
+  .glass-effect:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
 
-        .mobile-category-pill {
-            flex-shrink: 0;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 50px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            scroll-snap-align: start;
-            white-space: nowrap;
-            min-width: fit-content;
-        }
+  /* Enhanced Gradient Buttons */
+  .btn-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
 
-        .mobile-category-pill.active {
-            background: rgba(255, 255, 255, 0.9);
-            color: #667eea;
-            font-weight: 600;
-        }
+  .btn-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
 
-        .mobile-floating-actions {
-            position: fixed;
-            bottom: 24px;
-            right: 16px;
-            z-index: 50;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+  .btn-gradient:hover::before {
+    left: 100%;
+  }
 
-        .mobile-fab {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-        }
+  .btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+  }
 
-        .mobile-fab:hover {
-            transform: scale(1.1);
-            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
-        }
+  .btn-amber {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
 
-        .mobile-fab .badge {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            animation: pulse 2s infinite;
-        }
+  .btn-amber:hover {
+    box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+  }
 
-        .mobile-filters-toggle {
-            position: fixed;
-            top: 50%;
-            left: 16px;
-            transform: translateY(-50%);
-            z-index: 40;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
+  .btn-emerald {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
 
-        .mobile-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-            overflow: hidden;
-        }
+  .btn-emerald:hover {
+    box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
+  }
 
-        .mobile-card:active {
-            transform: scale(0.98);
-        }
+  /* Floating Action Buttons */
+  .floating-actions {
+    position: fixed;
+    top: 50%;
+    right: 24px;
+    transform: translateY(-50%);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 
-        .mobile-card-image {
-            position: relative;
-            height: 200px;
-            overflow: hidden;
-        }
+  .floating-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+  }
 
-        .mobile-quick-actions {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            display: flex;
-            gap: 8px;
-        }
+  .floating-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+  }
 
-        .mobile-action-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
+  .floating-btn .badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+  }
 
-        .mobile-action-btn:active {
-            transform: scale(0.9);
-        }
+  /* Enhanced Product Cards */
+  .product-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
 
-        .mobile-stats {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-            padding: 0 16px;
-        }
+  .product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  }
 
-        .mobile-stat {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.9);
-        }
+  .product-card .image-container {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+  }
 
-        .mobile-stat-number {
-            font-size: 18px;
-            font-weight: 700;
-            display: block;
-        }
+  .product-card .image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, rgba(0,0,0,0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
 
-        .mobile-stat-label {
-            font-size: 12px;
-            opacity: 0.8;
-        }
+  .product-card:hover .image-overlay {
+    opacity: 1;
+  }
 
-        .mobile-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-            padding: 0 16px;
-        }
+  .product-card .quick-actions {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all 0.3s ease;
+  }
 
-        .mobile-bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
-            padding: 12px 16px 24px;
-            z-index: 30;
-        }
+  .product-card:hover .quick-actions {
+    opacity: 1;
+    transform: translateX(0);
+  }
 
-        .mobile-nav-items {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-        }
+  .quick-action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
 
-        .mobile-nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 8px 12px;
-            border-radius: 12px;
-            transition: all 0.2s ease;
-            min-width: 60px;
-        }
+  .quick-action-btn:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 1);
+  }
 
-        .mobile-nav-item.active {
-            background: rgba(102, 126, 234, 0.1);
-            color: #667eea;
-        }
+  /* Enhanced Search Bar */
+  .search-container {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+  }
 
-        .mobile-nav-item span {
-            font-size: 11px;
-            font-weight: 500;
-        }
+  .search-input {
+    width: 100%;
+    padding: 16px 24px 16px 56px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
 
-        .mobile-filters-drawer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-radius: 24px 24px 0 0;
-            transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 60;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
+  .search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  }
 
-        .mobile-filters-drawer.open {
-            transform: translateY(0);
-        }
+  .search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+  }
 
-        .mobile-sort-tabs {
-            display: flex;
-            overflow-x: auto;
-            gap: 12px;
-            padding: 16px;
-            background: rgba(248, 250, 252, 0.8);
-            backdrop-filter: blur(10px);
-            margin: 0 -16px 16px;
-        }
+  /* Enhanced Categories Grid */
+  .category-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
 
-        .mobile-sort-tabs::-webkit-scrollbar {
-            display: none;
-        }
+  .category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #4facfe);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+    transform-origin: left;
+  }
 
-        .mobile-sort-tab {
-            flex-shrink: 0;
-            background: white;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: 50px;
-            padding: 8px 16px;
-            font-size: 14px;
-            font-weight: 500;
-            color: #6b7280;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
+  .category-card:hover::before {
+    transform: scaleX(1);
+  }
 
-        .mobile-sort-tab.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
+  .category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+  }
 
-        /* Pull-to-Refresh Animation */
-        .pull-to-refresh {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 60px;
-            color: #667eea;
-            font-weight: 500;
-            transform: translateY(-60px);
-            transition: transform 0.3s ease;
-        }
+  .category-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    transition: transform 0.3s ease;
+  }
 
-        .pull-to-refresh.show {
-            transform: translateY(0);
-        }
+  .category-card:hover .category-icon {
+    transform: scale(1.1) rotate(5deg);
+  }
 
-        /* Touch-friendly improvements */
-        .touch-target {
-            min-height: 44px;
-            min-width: 44px;
-        }
+  /* Enhanced Hero Section */
+  .hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
+    color: white;
+    margin-bottom: 48px;
+  }
 
-        /* Loading skeleton for mobile */
-        .mobile-skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-            border-radius: 12px;
-        }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+  }
 
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 80px 32px;
+    text-align: center;
+  }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
+  .hero-stats {
+    display: inline-flex;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 50px;
+    padding: 12px 24px;
+    margin-bottom: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
 
-        /* Improved touch feedback */
-        .touch-feedback:active {
-            transform: scale(0.98);
-            opacity: 0.8;
-        }
+  /* Enhanced Filters */
+  .filter-sidebar {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: sticky;
+    top: 120px;
+  }
 
-        /* Safe area handling for newer phones */
-        .safe-area-bottom {
-            padding-bottom: env(safe-area-inset-bottom);
-        }
+  .filter-group {
+    margin-bottom: 32px;
+  }
 
-        .safe-area-top {
-            padding-top: env(safe-area-inset-top);
-        }
+  .filter-title {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 16px;
+    font-size: 18px;
+  }
 
-        /* Swipe indicators */
-        .swipe-indicator {
-            position: absolute;
-            bottom: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 4px;
-        }
+  .filter-option {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
 
-        .swipe-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            transition: all 0.2s ease;
-        }
+  .filter-option:hover {
+    color: #667eea;
+  }
 
-        .swipe-dot.active {
-            background: white;
-            transform: scale(1.2);
-        }
-    </style>
-</head>
-<body class="bg-gradient-to-br from-blue-50 via-white to-purple-50 inter-font">
-    <!-- Pull to Refresh -->
-    <div class="pull-to-refresh" id="pullToRefresh">
-        <div class="flex items-center gap-2">
-            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span>Pull to refresh</span>
-        </div>
-    </div>
+  .filter-option input[type="checkbox"],
+  .filter-option input[type="radio"] {
+    margin-right: 12px;
+    accent-color: #667eea;
+  }
 
-    <!-- Mobile Header with Search -->
-    <div class="mobile-search-container safe-area-top">
-        <!-- Status Bar Spacer -->
-        <div class="h-6"></div>
+  /* Price Range Slider */
+  .price-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(to right, #667eea, #764ba2);
+    outline: none;
+    margin: 16px 0;
+  }
 
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h1 class="text-2xl font-bold text-white diary-font">DiaryVault</h1>
-                <p class="text-white/80 text-sm">Discover Amazing Stories</p>
+  .price-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #667eea;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
+  }
+
+  .price-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+
+  /* Shopping Cart Sidebar Enhancement */
+  .cart-sidebar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(30px);
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .cart-item {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  /* Enhanced Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease forwards;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.6s ease forwards;
+  }
+
+  /* Loading States */
+  .skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+
+  @keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Mobile Optimizations */
+  @media (max-width: 768px) {
+    .floating-actions {
+      position: fixed;
+      bottom: 80px;
+      right: 16px;
+      top: auto;
+      transform: none;
+      flex-direction: row;
+      gap: 12px;
+    }
+
+    .floating-btn {
+      width: 48px;
+      height: 48px;
+    }
+
+    .hero-content {
+      padding: 48px 24px;
+    }
+
+    .product-card .quick-actions {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .category-card {
+      padding: 20px 16px;
+    }
+
+    .filter-sidebar {
+      position: static;
+      margin-bottom: 24px;
+    }
+  }
+
+  /* Dark Mode Support */
+  @media (prefers-color-scheme: dark) {
+    .glass-effect {
+      background: rgba(30, 30, 30, 0.8);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .product-card {
+      background: rgba(30, 30, 30, 0.9);
+      color: #f9fafb;
+    }
+
+    .search-input {
+      background: rgba(30, 30, 30, 0.8);
+      color: #f9fafb;
+    }
+  }
+
+  /* Success/Error States */
+  .toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 16px 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 1000;
+    animation: slideInRight 0.3s ease;
+  }
+
+  .toast.success {
+    border-left: 4px solid #10b981;
+  }
+
+  .toast.error {
+    border-left: 4px solid #ef4444;
+  }
+
+  .toast.warning {
+    border-left: 4px solid #f59e0b;
+  }
+
+  /* Enhanced Typography */
+  .text-gradient {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Micro Interactions */
+  .interactive-element {
+    transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  .interactive-element:hover {
+    transform: translateY(-1px);
+  }
+
+  .interactive-element:active {
+    transform: translateY(0);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+
+  <!-- Enhanced Floating Actions -->
+  {% if user.is_authenticated %}
+  <div class="floating-actions">
+    <!-- Shopping Cart -->
+    <button onclick="toggleCart()" class="floating-btn glass-effect" title="Shopping Cart">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
+      </svg>
+      <span id="cartCount" class="badge">0</span>
+    </button>
+
+    <!-- Wishlist -->
+    <button onclick="toggleWishlist()" class="floating-btn glass-effect" title="Wishlist">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+      </svg>
+      <span id="wishlistCount" class="badge">0</span>
+    </button>
+
+    <!-- Compare -->
+    <button onclick="toggleCompare()" class="floating-btn glass-effect" title="Compare">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+      <span id="compareCount" class="badge">0</span>
+    </button>
+  </div>
+  {% endif %}
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Enhanced Search Section -->
+    <div id="explore" class="mb-12 animate-fade-in-up">
+      <div class="glass-effect rounded-3xl p-8">
+        <form method="GET" action="{% url 'marketplace' %}" class="space-y-6">
+
+          <!-- Main Search Bar -->
+          <div class="search-container">
+            <div class="relative">
+              <input type="text" name="search" value="{{ search_query }}"
+                     placeholder="Search for journals, authors, or topics..."
+                     class="search-input">
+              <svg xmlns="http://www.w3.org/2000/svg" class="search-icon h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
             </div>
-            <button class="p-2 rounded-full bg-white/20 backdrop-blur-sm">
-                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5-5 5-5h-5m-6 10v-3H7v3h2zm0-6V7H7v4h2zm6 0V7h-2v4h2z"/>
+          </div>
+
+          <!-- Search Controls -->
+          <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="flex items-center gap-4">
+              <!-- Sort Dropdown -->
+              <select name="sort" class="glass-effect rounded-xl px-4 py-3 border-0 focus:ring-2 focus:ring-blue-500">
+                <option value="trending" {% if current_sort == 'trending' %}selected{% endif %}>🔥 Trending</option>
+                <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>🆕 Newest</option>
+                <option value="topRated" {% if current_sort == 'topRated' %}selected{% endif %}>⭐ Top Rated</option>
+                <option value="bestSelling" {% if current_sort == 'bestSelling' %}selected{% endif %}>💰 Best Selling</option>
+                <option value="priceLow" {% if current_sort == 'priceLow' %}selected{% endif %}>💲 Price: Low to High</option>
+                <option value="priceHigh" {% if current_sort == 'priceHigh' %}selected{% endif %}>💲 Price: High to Low</option>
+              </select>
+
+              <!-- Filter Toggle -->
+              <button type="button" onclick="toggleFilters()"
+                      class="glass-effect px-6 py-3 rounded-xl font-medium flex items-center gap-2 interactive-element">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
+                Filters
+                <span class="bg-blue-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center" id="activeFiltersCount">0</span>
+              </button>
+            </div>
+
+            <button type="submit" class="btn-gradient px-8 py-3 rounded-xl font-semibold">
+              Search Journals
             </button>
-        </div>
+          </div>
 
-        <!-- Enhanced Mobile Search Bar -->
-        <div class="mobile-search-bar p-4 flex items-center gap-3">
-            <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-            <input
-                type="text"
-                placeholder="Search journals, authors..."
-                class="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-500"
-                id="mobileSearchInput"
-            >
-            <button class="p-2 -mr-2 rounded-full hover:bg-gray-100 transition-colors">
-                <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"/>
-                </svg>
-            </button>
-        </div>
+          <!-- Advanced Filters (Collapsible) -->
+          <div id="advancedFilters" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-6 border-t border-gray-200">
 
-        <!-- Mobile Category Scroll -->
-        <div class="mobile-category-scroll">
-            <div class="mobile-category-pill active">
-                <span>All</span>
-            </div>
-            <div class="mobile-category-pill">
-                <span>Personal Growth</span>
-            </div>
-            <div class="mobile-category-pill">
-                <span>Travel</span>
-            </div>
-            <div class="mobile-category-pill">
-                <span>Relationships</span>
-            </div>
-            <div class="mobile-category-pill">
-                <span>Career</span>
-            </div>
-            <div class="mobile-category-pill">
-                <span>Mental Health</span>
-            </div>
-            <div class="mobile-category-pill">
-                <span>Creativity</span>
-            </div>
-        </div>
-
-        <!-- Mobile Stats -->
-        <div class="mobile-stats">
-            <div class="mobile-stat">
-                <span class="mobile-stat-number">1,247</span>
-                <span class="mobile-stat-label">Journals</span>
-            </div>
-            <div class="mobile-stat">
-                <span class="mobile-stat-number">823</span>
-                <span class="mobile-stat-label">Authors</span>
-            </div>
-            <div class="mobile-stat">
-                <span class="mobile-stat-number">12</span>
-                <span class="mobile-stat-label">Categories</span>
-            </div>
-            <div class="mobile-stat">
-                <span class="mobile-stat-number">456</span>
-                <span class="mobile-stat-label">Free</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mobile Sort Tabs -->
-    <div class="mobile-sort-tabs">
-        <div class="mobile-sort-tab active">🔥 Trending</div>
-        <div class="mobile-sort-tab">🆕 Newest</div>
-        <div class="mobile-sort-tab">⭐ Popular</div>
-        <div class="mobile-sort-tab">💲 Price: Low</div>
-        <div class="mobile-sort-tab">📈 Rating</div>
-    </div>
-
-    <!-- Results Header -->
-    <div class="px-4 mb-4">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="text-lg font-bold text-gray-900">All Journals</h2>
-                <p class="text-sm text-gray-600">1,247 journals found</p>
-            </div>
-            <button onclick="toggleFilters()" class="flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-white/30 rounded-xl px-3 py-2 text-sm font-medium">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"/>
-                </svg>
-                Filter
-            </button>
-        </div>
-    </div>
-
-    <!-- Mobile Journal Grid -->
-    <div class="mobile-grid mb-20">
-        <!-- Journal Card 1 -->
-        <div class="mobile-card touch-feedback" onclick="openJournal(1)">
-            <div class="mobile-card-image">
-                <div class="w-full h-full bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 flex items-center justify-center">
-                    <div class="text-white text-center p-6">
-                        <svg class="h-12 w-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                        </svg>
-                        <h3 class="font-bold text-sm">My Travel Adventures</h3>
-                    </div>
+              <!-- Price Range -->
+              <div class="filter-group">
+                <div class="filter-title">Price Range</div>
+                <input type="range" name="maxPrice" min="0" max="50" value="{{ request.GET.maxPrice|default:'50' }}" class="price-slider">
+                <div class="flex justify-between text-sm text-gray-600 mt-2">
+                  <span>Free</span>
+                  <span>$<span id="maxPriceValue">{{ request.GET.maxPrice|default:'50' }}</span></span>
                 </div>
+              </div>
 
-                <!-- Price Badge -->
-                <div class="absolute top-3 left-3">
-                    <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        $12.99
-                    </span>
+              <!-- Rating Filter -->
+              <div class="filter-group">
+                <div class="filter-title">Minimum Rating</div>
+                <div class="space-y-2">
+                  {% for rating in "54321" %}
+                    <label class="filter-option">
+                      <input type="radio" name="minRating" value="{{ rating }}" {% if request.GET.minRating == rating %}checked{% endif %}>
+                      <div class="flex items-center">
+                        <div class="flex mr-2">
+                          {% for i in "12345" %}
+                            <svg class="w-4 h-4 {% if forloop.counter <= rating|add:0 %}text-yellow-400{% else %}text-gray-300{% endif %}" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                          {% endfor %}
+                        </div>
+                        <span class="text-sm">& up</span>
+                      </div>
+                    </label>
+                  {% endfor %}
                 </div>
+              </div>
+
+              <!-- Journal Length -->
+              <div class="filter-group">
+                <div class="filter-title">Journal Length</div>
+                <div class="space-y-2">
+                  <label class="filter-option">
+                    <input type="checkbox" name="length" value="short" {% if 'short' in request.GET.length %}checked{% endif %}>
+                    <span>Short (1-10 entries)</span>
+                  </label>
+                  <label class="filter-option">
+                    <input type="checkbox" name="length" value="medium" {% if 'medium' in request.GET.length %}checked{% endif %}>
+                    <span>Medium (11-50 entries)</span>
+                  </label>
+                  <label class="filter-option">
+                    <input type="checkbox" name="length" value="long" {% if 'long' in request.GET.length %}checked{% endif %}>
+                    <span>Long (50+ entries)</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Special Offers -->
+              <div class="filter-group">
+                <div class="filter-title">Special Offers</div>
+                <div class="space-y-2">
+                  <label class="filter-option">
+                    <input type="checkbox" name="offers" value="free" {% if 'free' in request.GET.offers %}checked{% endif %}>
+                    <span>Free Journals</span>
+                  </label>
+                  <label class="filter-option">
+                    <input type="checkbox" name="offers" value="bestseller" {% if 'bestseller' in request.GET.offers %}checked{% endif %}>
+                    <span>Bestsellers</span>
+                  </label>
+                  <label class="filter-option">
+                    <input type="checkbox" name="offers" value="new" {% if 'new' in request.GET.offers %}checked{% endif %}>
+                    <span>New Releases</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-between items-center mt-6 pt-6 border-t border-gray-200">
+              <button type="button" onclick="clearFilters()" class="text-gray-600 hover:text-gray-800 font-medium">
+                Clear all filters
+              </button>
+              <div class="flex gap-3">
+                <button type="button" onclick="toggleFilters()" class="glass-effect px-6 py-2 rounded-xl">
+                  Cancel
+                </button>
+                <button type="submit" class="btn-gradient px-6 py-2 rounded-xl text-white">
+                  Apply Filters
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Enhanced Categories Section -->
+    <div class="mb-16 animate-fade-in-up">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold diary-font mb-4 text-gradient">
+          Shop by Category
+        </h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Discover curated collections of authentic stories from various genres and topics.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+        {% for category in categories %}
+          <a href="{% url 'marketplace' %}?category={{ category.slug }}" class="category-card interactive-element">
+            <div class="category-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">{{ category.name }}</h3>
+            <p class="text-sm text-gray-600">
+              {{ category.journal_count }} journal{{ category.journal_count|pluralize }}
+            </p>
+          </a>
+        {% empty %}
+          <!-- Default categories -->
+          <div class="category-card">
+            <div class="category-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-2">Personal Growth</h3>
+            <p class="text-sm text-gray-600">{{ stats.total_journals|default:"0" }} journals</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Enhanced Products Section -->
+    <div class="mb-16">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="text-2xl font-bold diary-font text-gray-800">
+            {% if search_query %}
+              Search Results for "{{ search_query }}"
+            {% elif current_category and current_category != 'all' %}
+              {{ current_category|title }} Journals
+            {% else %}
+              Featured Journals
+            {% endif %}
+          </h2>
+          <p class="text-gray-600 mt-1">{{ total_results|default:journals.count }} result{{ total_results|pluralize }}</p>
+        </div>
+
+        <!-- View Toggle -->
+        <div class="glass-effect rounded-xl p-1 flex">
+          <button onclick="setGridView('grid')" id="gridViewBtn"
+                  class="px-4 py-2 rounded-lg bg-blue-500 text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+          </button>
+          <button onclick="setGridView('list')" id="listViewBtn"
+                  class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      {% if journals %}
+        <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {% for journal in journals %}
+            <div class="product-card animate-fade-in-up" data-journal-id="{{ journal.id }}" style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms">
+
+              <!-- Image Container -->
+              <div class="image-container">
+                <div class="image-overlay"></div>
 
                 <!-- Quick Actions -->
-                <div class="mobile-quick-actions">
-                    <button class="mobile-action-btn touch-target" onclick="event.stopPropagation(); toggleWishlist(1)">
-                        <svg class="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                        </svg>
+                <div class="quick-actions">
+                  {% if user.is_authenticated %}
+                    <button onclick="toggleWishlist({{ journal.id }})" class="quick-action-btn" title="Add to Wishlist">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
                     </button>
-                    <button class="mobile-action-btn touch-target" onclick="event.stopPropagation(); shareJournal(1)">
-                        <svg class="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
-                        </svg>
+                    <button onclick="quickView({{ journal.id }})" class="quick-action-btn" title="Quick View">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
                     </button>
-                </div>
-            </div>
-
-            <div class="p-4">
-                <!-- Author -->
-                <div class="flex items-center gap-2 mb-3">
-                    <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
-                        <span class="text-white text-xs font-bold">SJ</span>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-800">Sarah Johnson</p>
-                        <p class="text-xs text-gray-500">2.3k views</p>
-                    </div>
-                    <div class="text-right">
-                        <div class="flex items-center gap-1">
-                            <svg class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                            <span class="text-xs text-gray-600">4.8</span>
-                        </div>
-                        <p class="text-xs text-gray-500">(124)</p>
-                    </div>
+                    <button onclick="addToCompare({{ journal.id }})" class="quick-action-btn" title="Compare">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </button>
+                  {% endif %}
                 </div>
 
-                <!-- Title & Description -->
-                <h3 class="font-bold text-gray-900 mb-2 line-clamp-2">My Journey Through Southeast Asia: A Digital Nomad's Tale</h3>
-                <p class="text-sm text-gray-600 mb-3 line-clamp-2">Follow my adventures across Thailand, Vietnam, and Indonesia as I discover hidden gems, local cultures, and personal growth...</p>
-
-                <!-- Tags -->
-                <div class="flex gap-2 mb-4">
-                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-lg text-xs font-medium">Travel</span>
-                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-lg text-xs font-medium">Adventure</span>
-                </div>
-
-                <!-- Action Button -->
-                <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-semibold transition-all duration-200 active:scale-95" onclick="event.stopPropagation(); addToCart(1)">
-                    Buy for $12.99
-                </button>
-            </div>
-        </div>
-
-        <!-- Journal Card 2 -->
-        <div class="mobile-card touch-feedback" onclick="openJournal(2)">
-            <div class="mobile-card-image">
-                <div class="w-full h-full bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 flex items-center justify-center">
+                <!-- Journal Cover -->
+                {% if journal.cover_image %}
+                  <img src="{{ journal.cover_image.url }}" alt="{{ journal.title }}" class="w-full h-full object-cover cursor-pointer" onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
+                {% else %}
+                  <div class="w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center cursor-pointer" onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
                     <div class="text-white text-center p-6">
-                        <svg class="h-12 w-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                        </svg>
-                        <h3 class="font-bold text-sm">Love Letters to Self</h3>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                      <p class="font-medium text-sm">{{ journal.title|truncatewords:4 }}</p>
                     </div>
-                </div>
+                  </div>
+                {% endif %}
 
-                <!-- Free Badge -->
-                <div class="absolute top-3 left-3">
-                    <span class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        FREE
+                <!-- Price Badge -->
+                <div class="absolute top-4 right-4">
+                  {% if journal.price > 0 %}
+                    <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-lg">
+                      ${{ journal.price }}
                     </span>
+                  {% else %}
+                    <span class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-lg">
+                      FREE
+                    </span>
+                  {% endif %}
                 </div>
 
                 <!-- Staff Pick Badge -->
-                <div class="absolute top-3 right-3">
-                    <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold">
-                        ⭐ Staff Pick
+                {% if journal.is_staff_pick %}
+                  <div class="absolute top-4 left-4">
+                    <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">
+                      ⭐ Staff Pick
                     </span>
-                </div>
-            </div>
+                  </div>
+                {% endif %}
+              </div>
 
-            <div class="p-4">
-                <!-- Author -->
+              <!-- Product Details -->
+              <div class="p-6">
+                <!-- Author Info -->
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                    {{ journal.author.username|first|upper }}
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-800">{{ journal.author.get_full_name|default:journal.author.username }}</p>
+                    <p class="text-xs text-gray-500">@{{ journal.author.username }}</p>
+                  </div>
+                  <div class="ml-auto flex items-center text-xs text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    {{ journal.view_count|default:0 }}
+                  </div>
+                </div>
+
+                <!-- Title -->
+                <h3 class="font-bold text-gray-800 mb-2 text-lg line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors" onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
+                  {{ journal.title }}
+                </h3>
+
+                <!-- Description -->
+                <p class="text-gray-600 text-sm mb-3 line-clamp-2">
+                  {{ journal.description|truncatewords:15 }}
+                </p>
+
+                <!-- Rating -->
                 <div class="flex items-center gap-2 mb-3">
-                    <div class="w-8 h-8 bg-gradient-to-br from-pink-400 to-red-500 rounded-full flex items-center justify-center">
-                        <span class="text-white text-xs font-bold">MC</span>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-800">Maya Chen</p>
-                        <p class="text-xs text-gray-500">5.7k views</p>
-                    </div>
-                    <div class="text-right">
-                        <div class="flex items-center gap-1">
-                            <svg class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                            <span class="text-xs text-gray-600">4.9</span>
-                        </div>
-                        <p class="text-xs text-gray-500">(287)</p>
-                    </div>
+                  <div class="flex">
+                    {% for i in "12345" %}
+                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                      </svg>
+                    {% endfor %}
+                  </div>
+                  <span class="text-sm text-gray-600">({{ journal.likes.count|default:0 }})</span>
                 </div>
-
-                <!-- Title & Description -->
-                <h3 class="font-bold text-gray-900 mb-2 line-clamp-2">Learning to Love Myself: A Year of Self-Discovery</h3>
-                <p class="text-sm text-gray-600 mb-3 line-clamp-2">My journey from self-doubt to self-acceptance through daily affirmations, therapy, and mindful practices...</p>
 
                 <!-- Tags -->
-                <div class="flex gap-2 mb-4">
-                    <span class="bg-pink-100 text-pink-800 px-2 py-1 rounded-lg text-xs font-medium">Self-Love</span>
-                    <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-lg text-xs font-medium">Growth</span>
-                </div>
-
-                <!-- Action Button -->
-                <button class="w-full bg-gradient-to-r from-blue-500 to-cyan-600 text-white py-3 rounded-xl font-semibold transition-all duration-200 active:scale-95" onclick="event.stopPropagation(); addToCart(2)">
-                    Get Free
-                </button>
-            </div>
-        </div>
-
-        <!-- Journal Card 3 -->
-        <div class="mobile-card touch-feedback" onclick="openJournal(3)">
-            <div class="mobile-card-image">
-                <div class="w-full h-full bg-gradient-to-br from-orange-400 via-red-500 to-pink-600 flex items-center justify-center">
-                    <div class="text-white text-center p-6">
-                        <svg class="h-12 w-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6"/>
-                        </svg>
-                        <h3 class="font-bold text-sm">Startup Hustle</h3>
-                    </div>
-                </div>
-
-                <!-- Price Badge -->
-                <div class="absolute top-3 left-3">
-                    <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        $8.99
+                <div class="flex flex-wrap gap-2 mb-4">
+                  {% for tag in journal.marketplace_tags.all|slice:":2" %}
+                    <span class="glass-effect text-xs px-3 py-1 rounded-full text-gray-700 border border-gray-200">
+                      {{ tag.name }}
                     </span>
+                  {% empty %}
+                    <span class="glass-effect text-xs px-3 py-1 rounded-full text-gray-700 border border-gray-200">
+                      Journal
+                    </span>
+                  {% endfor %}
                 </div>
+
+                <!-- Purchase Section -->
+                <div class="flex items-center justify-between">
+                  <div>
+                    {% if journal.price > 0 %}
+                      <div class="text-2xl font-bold text-green-600">${{ journal.price }}</div>
+                      {% if journal.total_tips > 0 %}
+                        <div class="text-xs text-gray-500">${{ journal.total_tips|floatformat:0 }} earned</div>
+                      {% endif %}
+                    {% else %}
+                      <div class="text-2xl font-bold text-blue-600">FREE</div>
+                      <div class="text-xs text-gray-500">{{ journal.entries.count|default:0 }} entries</div>
+                    {% endif %}
+                  </div>
+
+                  {% if user.is_authenticated %}
+                    <button onclick="addToCart({{ journal.id }})" class="btn-emerald px-6 py-3 rounded-xl font-semibold shadow-lg interactive-element">
+                      {% if journal.price > 0 %}Buy Now{% else %}Get Free{% endif %}
+                    </button>
+                  {% else %}
+                    <a href="{% url 'signup' %}" class="btn-emerald px-6 py-3 rounded-xl font-semibold shadow-lg inline-block">
+                      Sign Up
+                    </a>
+                  {% endif %}
+                </div>
+
+                <!-- Instant Access Badge -->
+                {% if journal.is_staff_pick %}
+                  <div class="mt-3 flex items-center text-xs text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Instant Access
+                  </div>
+                {% endif %}
+              </div>
             </div>
-
-            <div class="p-4">
-                <!-- Author -->
-                <div class="flex items-center gap-2 mb-3">
-                    <div class="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center">
-                        <span class="text-white text-xs font-bold">DB</span>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-800">David Brown</p>
-                        <p class="text-xs text-gray-500">1.2k views</p>
-                    </div>
-                    <div class="text-right">
-                        <div class="flex items-center gap-1">
-                            <svg class="h-3 w-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                            <span class="text-xs text-gray-600">4.7</span>
-                        </div>
-                        <p class="text-xs text-gray-500">(89)</p>
-                    </div>
-                </div>
-
-                <!-- Title & Description -->
-                <h3 class="font-bold text-gray-900 mb-2 line-clamp-2">From Idea to IPO: My Startup Journey</h3>
-                <p class="text-sm text-gray-600 mb-3 line-clamp-2">The raw, unfiltered story of building a tech startup from my garage to a billion-dollar company...</p>
-
-                <!-- Tags -->
-                <div class="flex gap-2 mb-4">
-                    <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-lg text-xs font-medium">Business</span>
-                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded-lg text-xs font-medium">Startup</span>
-                </div>
-
-                <!-- Action Button -->
-                <button class="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-xl font-semibold transition-all duration-200 active:scale-95" onclick="event.stopPropagation(); addToCart(3)">
-                    Buy for $8.99
-                </button>
-            </div>
+          {% endfor %}
         </div>
 
-        <!-- Loading Skeletons -->
-        <div class="mobile-card">
-            <div class="mobile-skeleton h-48"></div>
-            <div class="p-4 space-y-3">
-                <div class="mobile-skeleton h-4 w-3/4"></div>
-                <div class="mobile-skeleton h-3 w-full"></div>
-                <div class="mobile-skeleton h-3 w-2/3"></div>
-                <div class="mobile-skeleton h-10 w-full rounded-xl"></div>
-            </div>
+        <!-- Pagination -->
+        {% if journals.has_other_pages %}
+        <div class="mt-16 flex justify-center">
+          <nav class="glass-effect rounded-2xl p-2 flex items-center gap-2">
+            {% if journals.has_previous %}
+              <a href="?page={{ journals.previous_page_number }}" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-white/50 transition-colors">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+              </a>
+            {% endif %}
+
+            {% for i in journals.paginator.page_range %}
+              {% if journals.number == i %}
+                <span class="px-4 py-2 rounded-xl bg-blue-500 text-white font-medium">{{ i }}</span>
+              {% else %}
+                <a href="?page={{ i }}" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-white/50 transition-colors">{{ i }}</a>
+              {% endif %}
+            {% endfor %}
+
+            {% if journals.has_next %}
+              <a href="?page={{ journals.next_page_number }}" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-white/50 transition-colors">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            {% endif %}
+          </nav>
         </div>
+        {% endif %}
+
+      {% else %}
+        <!-- Enhanced Empty State -->
+        <div class="text-center py-20">
+          <div class="glass-effect rounded-3xl p-16 max-w-2xl mx-auto">
+            <div class="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold diary-font text-gray-900 mb-4">No journals found</h3>
+            <p class="text-gray-600 mb-8 text-lg">
+              {% if search_query %}
+                No journals match your search for "{{ search_query }}". Try different keywords or browse our categories.
+              {% else %}
+                Be the first to share your story and inspire others!
+              {% endif %}
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              {% if search_query %}
+                <a href="{% url 'marketplace' %}" class="btn-gradient px-8 py-4 rounded-xl font-semibold">
+                  Browse All Journals
+                </a>
+              {% endif %}
+              {% if user.is_authenticated %}
+                <a href="{% url 'publish_journal' %}" class="btn-amber px-8 py-4 rounded-xl font-semibold">
+                  Publish Your Journal
+                </a>
+              {% else %}
+                <a href="{% url 'signup' %}" class="btn-amber px-8 py-4 rounded-xl font-semibold">
+                  Start Selling Your Story
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
     </div>
 
-    <!-- Mobile Floating Actions -->
-    <div class="mobile-floating-actions">
-        <button class="mobile-fab" onclick="toggleCart()" title="Shopping Cart">
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0"/>
+  </div>
+</div>
+
+<!-- Enhanced Shopping Cart Sidebar -->
+{% if user.is_authenticated %}
+<div id="cartSidebar" class="fixed top-0 right-0 h-full w-96 cart-sidebar shadow-2xl transform translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
+  <div class="p-6 border-b border-gray-200/50">
+    <div class="flex items-center justify-between">
+      <h3 class="text-xl font-bold text-gray-800">Shopping Cart</h3>
+      <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="cartItems" class="p-6 flex-1">
+    <div class="text-center text-gray-500 py-16">
+      <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
+        </svg>
+      </div>
+      <h4 class="font-semibold text-gray-700 mb-2">Your cart is empty</h4>
+      <p class="text-sm">Add some journals to get started!</p>
+    </div>
+  </div>
+
+  <div id="cartFooter" class="p-6 border-t border-gray-200/50 hidden">
+    <div class="flex justify-between items-center mb-6">
+      <span class="text-lg font-semibold text-gray-800">Total:</span>
+      <span id="cartTotal" class="text-2xl font-bold text-green-600">$0.00</span>
+    </div>
+    <button onclick="checkout()" class="w-full btn-emerald py-4 rounded-xl font-semibold text-lg shadow-lg">
+      Proceed to Checkout
+    </button>
+  </div>
+</div>
+
+<!-- Cart Overlay -->
+<div id="cartOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden" onclick="toggleCart()"></div>
+{% endif %}
+
+<!-- Toast Notification Container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enhanced JavaScript with better UX
+let cart = JSON.parse(localStorage.getItem('diaryvault_cart') || '[]');
+let wishlist = JSON.parse(localStorage.getItem('diaryvault_wishlist') || '[]');
+let comparison = JSON.parse(localStorage.getItem('diaryvault_comparison') || '[]');
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  updateCartCount();
+  updateWishlistCount();
+  updateCompareCount();
+  initializePriceSlider();
+  initializeAnimations();
+});
+
+// Enhanced toast notifications
+function showToast(message, type = 'info', duration = 3000) {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type} transform translate-x-full`;
+
+  const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+
+  toast.innerHTML = `
+    <div class="flex items-center gap-3">
+      <span class="text-lg">${icon}</span>
+      <span class="font-medium">${message}</span>
+    </div>
+  `;
+
+  document.getElementById('toastContainer').appendChild(toast);
+
+  // Animate in
+  setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+
+  // Animate out and remove
+  setTimeout(() => {
+    toast.classList.add('translate-x-full');
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+// Enhanced shopping cart functions
+function addToCart(journalId) {
+  if (!cart.find(item => item.id === journalId)) {
+    cart.push({
+      id: journalId,
+      title: `Journal ${journalId}`,
+      price: 9.99,
+      quantity: 1
+    });
+
+    localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
+    updateCartCount();
+    showCartAnimation();
+    showToast('Added to cart! 🛒', 'success');
+  } else {
+    showToast('Already in cart!', 'info');
+  }
+}
+
+function removeFromCart(journalId) {
+  cart = cart.filter(item => item.id !== journalId);
+  localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
+  updateCartCount();
+  renderCartItems();
+  showToast('Removed from cart', 'info');
+}
+
+function updateCartCount() {
+  const count = cart.length;
+  document.getElementById('cartCount').textContent = count;
+}
+
+function toggleCart() {
+  const sidebar = document.getElementById('cartSidebar');
+  const overlay = document.getElementById('cartOverlay');
+
+  if (sidebar.classList.contains('translate-x-full')) {
+    sidebar.classList.remove('translate-x-full');
+    overlay.classList.remove('hidden');
+    renderCartItems();
+  } else {
+    sidebar.classList.add('translate-x-full');
+    overlay.classList.add('hidden');
+  }
+}
+
+function renderCartItems() {
+  const container = document.getElementById('cartItems');
+  const footer = document.getElementById('cartFooter');
+
+  if (cart.length === 0) {
+    container.innerHTML = `
+      <div class="text-center text-gray-500 py-16">
+        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
+          </svg>
+        </div>
+        <h4 class="font-semibold text-gray-700 mb-2">Your cart is empty</h4>
+        <p class="text-sm">Add some journals to get started!</p>
+      </div>`;
+    footer.classList.add('hidden');
+  } else {
+    container.innerHTML = cart.map(item => `
+      <div class="cart-item">
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
-            <span class="badge" id="cartCount">2</span>
-        </button>
-
-        <button class="mobile-fab" onclick="scrollToTop()" title="Back to Top">
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-semibold text-gray-800">${item.title}</h4>
+            <p class="text-sm text-gray-600">${item.price}</p>
+          </div>
+          <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
-        </button>
-    </div>
-
-    <!-- Mobile Bottom Navigation -->
-    <div class="mobile-bottom-nav safe-area-bottom">
-        <div class="mobile-nav-items">
-            <div class="mobile-nav-item active">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/>
-                </svg>
-                <span>Browse</span>
-            </div>
-            <div class="mobile-nav-item">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                <span>Search</span>
-            </div>
-            <div class="mobile-nav-item">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                </svg>
-                <span>Wishlist</span>
-            </div>
-            <div class="mobile-nav-item">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM16 11a4 4 0 100-8 4 4 0 01-4 4 4 4 0 01-4 4 4 4 0 000 8 4 4 0 014-4z"/>
-                </svg>
-                <span>Profile</span>
-            </div>
+          </button>
         </div>
-    </div>
+      </div>
+    `).join('');
 
-    <!-- Mobile Filters Drawer -->
-    <div class="mobile-filters-drawer" id="filtersDrawer">
-        <div class="p-6">
-            <!-- Drawer Handle -->
-            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    document.getElementById('cartTotal').textContent = `${total.toFixed(2)}`;
+    footer.classList.remove('hidden');
+  }
+}
 
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold">Filters</h3>
-                <button onclick="clearFilters()" class="text-blue-600 font-medium">Clear All</button>
-            </div>
+// Wishlist functions
+function toggleWishlist(journalId) {
+  const index = wishlist.indexOf(journalId);
+  if (index === -1) {
+    wishlist.push(journalId);
+    showToast('Added to wishlist! ❤️', 'success');
+  } else {
+    wishlist.splice(index, 1);
+    showToast('Removed from wishlist', 'info');
+  }
 
-            <!-- Price Range -->
-            <div class="mb-6">
-                <h4 class="font-semibold mb-3">Price Range</h4>
-                <div class="flex gap-4">
-                    <button class="flex-1 border border-gray-200 rounded-xl p-3 text-center font-medium">Free</button>
-                    <button class="flex-1 border border-gray-200 rounded-xl p-3 text-center font-medium">$1-10</button>
-                    <button class="flex-1 border border-gray-200 rounded-xl p-3 text-center font-medium">$10+</button>
-                </div>
-            </div>
+  localStorage.setItem('diaryvault_wishlist', JSON.stringify(wishlist));
+  updateWishlistCount();
+}
 
-            <!-- Rating -->
-            <div class="mb-6">
-                <h4 class="font-semibold mb-3">Rating</h4>
-                <div class="space-y-2">
-                    <label class="flex items-center gap-3 p-2">
-                        <input type="radio" name="rating" class="accent-blue-600">
-                        <div class="flex text-yellow-400">
-                            <span>⭐⭐⭐⭐⭐</span>
-                        </div>
-                        <span class="text-sm text-gray-600">& up</span>
-                    </label>
-                    <label class="flex items-center gap-3 p-2">
-                        <input type="radio" name="rating" class="accent-blue-600">
-                        <div class="flex text-yellow-400">
-                            <span>⭐⭐⭐⭐</span>
-                        </div>
-                        <span class="text-sm text-gray-600">& up</span>
-                    </label>
-                </div>
-            </div>
+function updateWishlistCount() {
+  const count = wishlist.length;
+  document.getElementById('wishlistCount').textContent = count;
+}
 
-            <!-- Special Features -->
-            <div class="mb-6">
-                <h4 class="font-semibold mb-3">Special Features</h4>
-                <div class="space-y-2">
-                    <label class="flex items-center gap-3 p-2">
-                        <input type="checkbox" class="accent-blue-600">
-                        <span>⭐ Staff Picks</span>
-                    </label>
-                    <label class="flex items-center gap-3 p-2">
-                        <input type="checkbox" class="accent-blue-600">
-                        <span>🔥 Bestsellers</span>
-                    </label>
-                    <label class="flex items-center gap-3 p-2">
-                        <input type="checkbox" class="accent-blue-600">
-                        <span>🆕 New This Week</span>
-                    </label>
-                </div>
-            </div>
+// Comparison functions
+function addToCompare(journalId) {
+  if (comparison.length >= 4) {
+    showToast('Maximum 4 items can be compared!', 'warning');
+    return;
+  }
 
-            <!-- Apply Button -->
-            <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-xl font-semibold" onclick="applyFilters()">
-                Apply Filters
-            </button>
-        </div>
-    </div>
+  if (!comparison.includes(journalId)) {
+    comparison.push(journalId);
+    localStorage.setItem('diaryvault_comparison', JSON.stringify(comparison));
+    updateCompareCount();
+    showToast('Added to comparison!', 'success');
+  }
+}
 
-    <!-- Overlay -->
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden" id="overlay" onclick="closeDrawers()"></div>
+function updateCompareCount() {
+  const count = comparison.length;
+  document.getElementById('compareCount').textContent = count;
+}
 
-    <script>
-        // Mobile-specific JavaScript
-        let startY = 0;
-        let currentY = 0;
-        let isPulling = false;
+function toggleCompare() {
+  if (comparison.length === 0) {
+    showToast('No items to compare!', 'info');
+    return;
+  }
+  // Implementation for comparison modal would go here
+  showToast('Comparison feature coming soon!', 'info');
+}
 
-        // Pull to refresh functionality
-        document.addEventListener('touchstart', (e) => {
-            if (window.scrollY === 0) {
-                startY = e.touches[0].pageY;
-                isPulling = true;
-            }
-        });
+// Quick view function
+function quickView(journalId) {
+  showToast('Quick view feature coming soon!', 'info');
+}
 
-        document.addEventListener('touchmove', (e) => {
-            if (!isPulling) return;
+// Filter functions
+function toggleFilters() {
+  const filters = document.getElementById('advancedFilters');
+  filters.classList.toggle('hidden');
+}
 
-            currentY = e.touches[0].pageY;
-            const diff = currentY - startY;
+function clearFilters() {
+  document.querySelector('form').reset();
+  updateActiveFiltersCount();
+  showToast('Filters cleared', 'info');
+}
 
-            if (diff > 0 && diff < 100) {
-                document.getElementById('pullToRefresh').style.transform = `translateY(${diff - 60}px)`;
-            }
-        });
+function updateActiveFiltersCount() {
+  // Count active filters
+  let count = 0;
+  const form = document.querySelector('form');
+  const inputs = form.querySelectorAll('input[type="checkbox"]:checked, input[type="radio"]:checked');
+  count = inputs.length;
 
-        document.addEventListener('touchend', (e) => {
-            if (!isPulling) return;
+  if (form.querySelector('input[name="search"]').value) count++;
+  if (form.querySelector('select[name="sort"]').value !== 'trending') count++;
 
-            const diff = currentY - startY;
-            if (diff > 80) {
-                // Trigger refresh
-                document.getElementById('pullToRefresh').classList.add('show');
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
-            } else {
-                document.getElementById('pullToRefresh').style.transform = 'translateY(-60px)';
-            }
-            isPulling = false;
-        });
+  document.getElementById('activeFiltersCount').textContent = count;
+}
 
-        // Touch feedback for better UX
-        function addTouchFeedback() {
-            document.querySelectorAll('.touch-feedback').forEach(el => {
-                el.addEventListener('touchstart', function() {
-                    this.style.transform = 'scale(0.98)';
-                });
+// Price slider
+function initializePriceSlider() {
+  const slider = document.querySelector('.price-slider');
+  if (slider) {
+    slider.addEventListener('input', function() {
+      document.getElementById('maxPriceValue').textContent = this.value;
+    });
+  }
+}
 
-                el.addEventListener('touchend', function() {
-                    setTimeout(() => {
-                        this.style.transform = '';
-                    }, 150);
-                });
-            });
+// Grid view toggle
+function setGridView(view) {
+  const grid = document.getElementById('productsGrid');
+  const gridBtn = document.getElementById('gridViewBtn');
+  const listBtn = document.getElementById('listViewBtn');
+
+  if (view === 'list') {
+    grid.className = 'space-y-6';
+    gridBtn.classList.remove('bg-blue-500', 'text-white');
+    gridBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
+    listBtn.classList.add('bg-blue-500', 'text-white');
+    listBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+  } else {
+    grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8';
+    gridBtn.classList.add('bg-blue-500', 'text-white');
+    gridBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+    listBtn.classList.remove('bg-blue-500', 'text-white');
+    listBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
+  }
+}
+
+// Animation initialization
+function initializeAnimations() {
+  // Stagger animations for product cards
+  const cards = document.querySelectorAll('.product-card');
+  cards.forEach((card, index) => {
+    card.style.animationDelay = `${index * 100}ms`;
+  });
+
+  // Intersection Observer for scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-fade-in-up');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.animate-fade-in-up').forEach(el => {
+    observer.observe(el);
+  });
+}
+
+// Cart animation
+function showCartAnimation() {
+  const cartBtn = document.querySelector('[onclick="toggleCart()"]');
+  if (cartBtn) {
+    cartBtn.classList.add('animate-bounce');
+    setTimeout(() => {
+      cartBtn.classList.remove('animate-bounce');
+    }, 1000);
+  }
+}
+
+// Checkout function
+function checkout() {
+  if (cart.length === 0) {
+    showToast('Your cart is empty!', 'warning');
+    return;
+  }
+
+  showToast('Redirecting to checkout...', 'info');
+
+  // Simulate checkout process
+  setTimeout(() => {
+    cart = [];
+    localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
+    updateCartCount();
+    toggleCart();
+    showToast('Order placed successfully! 🎉', 'success', 5000);
+  }, 2000);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+  // Escape key closes modals
+  if (e.key === 'Escape') {
+    if (!document.getElementById('cartSidebar').classList.contains('translate-x-full')) {
+      toggleCart();
+    }
+  }
+
+  // Ctrl/Cmd + K for search focus
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    document.querySelector('.search-input').focus();
+  }
+});
+
+// Form submission with loading states
+document.addEventListener('submit', function(e) {
+  const form = e.target;
+  if (form.tagName === 'FORM') {
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Searching...
+      `;
+    }
+  }
+});
+
+// Performance optimization - lazy loading for images
+if ('IntersectionObserver' in window) {
+  const imageObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        if (img.dataset.src) {
+          img.src = img.dataset.src;
+          img.removeAttribute('data-src');
+          imageObserver.unobserve(img);
         }
+      }
+    });
+  });
 
-        // Category pill scroll behavior
-        function setupCategoryScroll() {
-            const container = document.querySelector('.mobile-category-scroll');
-            const pills = document.querySelectorAll('.mobile-category-pill');
+  document.querySelectorAll('img[data-src]').forEach(img => {
+    imageObserver.observe(img);
+  });
+}
 
-            pills.forEach(pill => {
-                pill.addEventListener('click', function() {
-                    pills.forEach(p => p.classList.remove('active'));
-                    this.classList.add('active');
-
-                    // Scroll active pill into view
-                    this.scrollIntoView({ behavior: 'smooth', inline: 'center' });
-                });
-            });
-        }
-
-        // Filters drawer
-        function toggleFilters() {
-            const drawer = document.getElementById('filtersDrawer');
-            const overlay = document.getElementById('overlay');
-
-            drawer.classList.toggle('open');
-            overlay.classList.toggle('hidden');
-        }
-
-        function closeDrawers() {
-            document.getElementById('filtersDrawer').classList.remove('open');
-            document.getElementById('overlay').classList.add('hidden');
-        }
-
-        function applyFilters() {
-            closeDrawers();
-            showToast('Filters applied successfully!');
-        }
-
-        function clearFilters() {
-            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-                cb.checked = false;
-            });
-            document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
-                radio.checked = false;
-            });
-            showToast('All filters cleared');
-        }
-
-        // Sort tabs
-        function setupSortTabs() {
-            document.querySelectorAll('.mobile-sort-tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    document.querySelectorAll('.mobile-sort-tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    showToast(`Sorted by ${this.textContent}`);
-                });
-            });
-        }
-
-        // Bottom navigation
-        function setupBottomNav() {
-            document.querySelectorAll('.mobile-nav-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-        }
-
-        // Journal actions
-        function openJournal(id) {
-            showToast(`Opening journal ${id}...`);
-        }
-
-        function addToCart(id) {
-            const count = document.getElementById('cartCount');
-            count.textContent = parseInt(count.textContent) + 1;
-            showToast('Added to cart!');
-        }
-
-        function toggleWishlist(id) {
-            showToast('Added to wishlist!');
-        }
-
-        function shareJournal(id) {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Check out this journal!',
-                    url: window.location.href
-                });
-            } else {
-                showToast('Share feature coming soon!');
-            }
-        }
-
-        function toggleCart() {
-            showToast('Opening cart...');
-        }
-
-        function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // Toast notifications
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 left-4 right-4 bg-black/80 text-white px-4 py-3 rounded-xl z-50 transform translate-y-[-100px] transition-transform duration-300';
-            toast.textContent = message;
-
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.transform = 'translateY(0)';
-            }, 100);
-
-            setTimeout(() => {
-                toast.style.transform = 'translateY(-100px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 2000);
-        }
-
-        // Enhanced search with mobile keyboard handling
-        function setupMobileSearch() {
-            const searchInput = document.getElementById('mobileSearchInput');
-
-            searchInput.addEventListener('input', function() {
-                // Auto-search or show suggestions on mobile
-                if (this.value.length > 2) {
-                    // Simulate search suggestions or results
-                    console.log('Searching for:', this.value);
-                }
-            });
-
-            // Handle mobile keyboard
-            searchInput.addEventListener('focus', function() {
-                // Scroll to keep input visible when keyboard opens
-                setTimeout(() => {
-                    this.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300);
-            });
-        }
-
-        // Infinite scroll for mobile
-        function setupInfiniteScroll() {
-            let loading = false;
-
-            window.addEventListener('scroll', () => {
-                if (loading) return;
-
-                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000) {
-                    loading = true;
-                    loadMoreContent();
-                }
-            });
-        }
-
-        function loadMoreContent() {
-            showToast('Loading more journals...');
-
-            // Simulate loading more content
-            setTimeout(() => {
-                const grid = document.querySelector('.mobile-grid');
-                const skeleton = grid.querySelector('.mobile-card:last-child');
-
-                // Remove skeleton and add new content
-                skeleton.remove();
-
-                showToast('More journals loaded!');
-                loading = false;
-            }, 1500);
-        }
-
-        // Initialize everything
-        document.addEventListener('DOMContentLoaded', function() {
-            addTouchFeedback();
-            setupCategoryScroll();
-            setupSortTabs();
-            setupBottomNav();
-            setupMobileSearch();
-            setupInfiniteScroll();
-
-            // Add mobile-specific optimizations
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js');
-            }
-
-            // Prevent zoom on double tap for better UX
-            let lastTouchEnd = 0;
-            document.addEventListener('touchend', function (event) {
-                const now = (new Date()).getTime();
-                if (now - lastTouchEnd <= 300) {
-                    event.preventDefault();
-                }
-                lastTouchEnd = now;
-            }, false);
-        });
-
-        // Performance optimizations
-        let ticking = false;
-        function updateOnScroll() {
-            if (!ticking) {
-                requestAnimationFrame(() => {
-                    // Update scroll-dependent elements
-                    const scrolled = window.scrollY > 100;
-                    document.body.classList.toggle('scrolled', scrolled);
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        }
-
-        window.addEventListener('scroll', updateOnScroll);
-    </script>
-</body>
-</html>
+// Service Worker registration for offline support (optional)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => console.log('SW registered'))
+      .catch(error => console.log('SW registration failed'));
+  });
+}
+</script>
+{% endblock %}
