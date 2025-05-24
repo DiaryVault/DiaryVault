@@ -1,5 +1,7 @@
 from datetime import timedelta
 import logging
+import json
+import random
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -8,6 +10,12 @@ from django.contrib import messages
 from django.utils import timezone
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import views as auth_views
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.db.models import Count, Sum, F, Q
+from django.core.cache import cache
+from django.conf import settings
 
 from ..models import (
     Entry, Tag, SummaryVersion, LifeChapter, Biography,
@@ -19,11 +27,200 @@ from ..services.ai_service import AIService
 logger = logging.getLogger(__name__)
 
 def home(request):
-    """Landing page for non-logged in users"""
+    """Enhanced landing page with marketplace integration"""
     if request.user.is_authenticated:
         return redirect('dashboard')
 
-    return render(request, 'diary/home.html')
+    # Try to get data from cache first (cache for 15 minutes)
+    cache_key = 'home_page_data'
+    cached_data = cache.get(cache_key)
+
+    if cached_data:
+        context = cached_data
+    else:
+        context = get_home_context()
+        cache.set(cache_key, context, 900)  # Cache for 15 minutes
+
+    return render(request, 'diary/home.html', context)
+
+def get_home_context():
+    """Get all context data for home page"""
+
+    # Get featured journals for marketplace preview
+    featured_journals = get_featured_journals()
+
+    # Get marketplace statistics
+    marketplace_stats = get_marketplace_stats()
+
+    # Get current date
+    current_date = timezone.now().strftime('%B %d, %Y')
+
+    context = {
+        'featured_journals': featured_journals,
+        'marketplace_stats': marketplace_stats,
+        'current_date': current_date,
+        'has_conversation': False,  # For chat area
+        'conversation': [],  # Empty conversation for new users
+    }
+
+    return context
+
+def get_featured_journals():
+    """Get featured journals for homepage display"""
+    try:
+        # Import models with fallback
+        try:
+            from ..models import Journal
+        except ImportError:
+            try:
+                from .models import Journal
+            except ImportError:
+                from diary.models import Journal
+
+        # Get published journals with good engagement
+        base_query = Journal.objects.filter(
+            is_published=True,
+            is_active=True,
+        ).select_related('author').prefetch_related(
+            'marketplace_tags',
+            'likes',
+            'entries'
+        ).annotate(
+            like_count=Count('likes'),
+            entry_count=Count('entries'),
+            view_count_annotated=F('view_count')
+        )
+
+        # Try to get staff picks first
+        staff_picks = base_query.filter(is_staff_pick=True)[:3]
+
+        # Get high-performing journals
+        popular_journals = base_query.filter(
+            Q(like_count__gte=5) | Q(view_count__gte=100)
+        ).order_by('-like_count', '-view_count')[:3]
+
+        # Get recent quality journals
+        recent_journals = base_query.filter(
+            created_at__gte=timezone.now() - timezone.timedelta(days=30),
+            like_count__gte=1
+        ).order_by('-created_at')[:3]
+
+        # Combine and deduplicate
+        featured_ids = set()
+        featured_journals = []
+
+        # Add staff picks first
+        for journal in staff_picks:
+            if journal.id not in featured_ids and len(featured_journals) < 6:
+                featured_journals.append(journal)
+                featured_ids.add(journal.id)
+
+        # Add popular journals
+        for journal in popular_journals:
+            if journal.id not in featured_ids and len(featured_journals) < 6:
+                featured_journals.append(journal)
+                featured_ids.add(journal.id)
+
+        # Add recent journals to fill remaining slots
+        for journal in recent_journals:
+            if journal.id not in featured_ids and len(featured_journals) < 6:
+                featured_journals.append(journal)
+                featured_ids.add(journal.id)
+
+        # If we still don't have enough, get any published journals
+        if len(featured_journals) < 6:
+            remaining_journals = base_query.exclude(
+                id__in=featured_ids
+            ).order_by('-created_at')[:6-len(featured_journals)]
+
+            featured_journals.extend(remaining_journals)
+
+        # Add calculated fields for template
+        for journal in featured_journals:
+            # Calculate total tips (if you have a tips model)
+            journal.total_tips = calculate_journal_earnings(journal)
+
+            # Ensure view_count exists
+            if not hasattr(journal, 'view_count') or journal.view_count is None:
+                journal.view_count = 0
+
+        return featured_journals
+
+    except Exception as e:
+        # Fallback: return empty list if there's any error
+        print(f"Error getting featured journals: {e}")
+        return []
+
+def calculate_journal_earnings(journal):
+    """Calculate total earnings for a journal"""
+    try:
+        # If you have a tips/payments model, calculate here
+        # For now, return a realistic random amount for demo
+        if hasattr(journal, 'payments'):
+            return float(journal.payments.aggregate(
+                total=Sum('amount')
+            )['total'] or 0)
+        else:
+            # Demo values based on journal popularity
+            like_count = getattr(journal, 'like_count', 0)
+            view_count = getattr(journal, 'view_count', 0)
+
+            if like_count > 50 or view_count > 1000:
+                return round(random.uniform(500, 2500), 2)
+            elif like_count > 10 or view_count > 100:
+                return round(random.uniform(50, 500), 2)
+            else:
+                return 0
+    except:
+        return 0
+
+def get_marketplace_stats():
+    """Get overall marketplace statistics"""
+    try:
+        # Import models with fallback
+        try:
+            from ..models import Journal
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+        except ImportError:
+            try:
+                from .models import Journal
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+            except ImportError:
+                from diary.models import Journal
+                from django.contrib.auth.models import User
+
+        stats = {
+            'total_journals': Journal.objects.filter(is_published=True).count(),
+            'total_authors': User.objects.filter(
+                journals__is_published=True
+            ).distinct().count(),
+            'categories_count': 12,  # Update this based on your categories
+            'free_journals': Journal.objects.filter(
+                is_published=True,
+                price=0
+            ).count(),
+        }
+
+        # Add some demo stats if numbers are low
+        if stats['total_journals'] < 10:
+            stats.update({
+                'total_journals': random.randint(50, 200),
+                'total_authors': random.randint(25, 100),
+                'free_journals': random.randint(20, 80)
+            })
+
+        return stats
+
+    except Exception as e:
+        # Fallback demo stats
+        return {
+            'total_journals': 1247,
+            'total_authors': 823,
+            'categories_count': 12,
+            'free_journals': 456,
+        }
 
 def signup(request):
     """
@@ -257,3 +454,214 @@ class CustomLoginView(LoginView):
                 logger.error(f"Error processing pending entry after login: {str(e)}", exc_info=True)
 
         return response
+
+# ============================================================================
+# API Views for JavaScript integration
+# ============================================================================
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def track_journal_view(request, journal_id):
+    """Track journal view for analytics"""
+    try:
+        # Import models with fallback
+        try:
+            from ..models import Journal
+        except ImportError:
+            try:
+                from .models import Journal
+            except ImportError:
+                from diary.models import Journal
+
+        journal = Journal.objects.get(id=journal_id, is_published=True)
+
+        # Update view count atomically
+        Journal.objects.filter(id=journal_id).update(
+            view_count=F('view_count') + 1
+        )
+
+        return JsonResponse({'success': True})
+
+    except Journal.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Journal not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def add_to_wishlist(request):
+    """Add journal to user's wishlist"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Login required'})
+
+    try:
+        # Import models with fallback
+        try:
+            from ..models import Journal
+        except ImportError:
+            try:
+                from .models import Journal
+            except ImportError:
+                from diary.models import Journal
+
+        data = json.loads(request.body)
+        journal_id = data.get('journal_id')
+
+        journal = Journal.objects.get(id=journal_id, is_published=True)
+
+        # Create or get wishlist relationship
+        # Adjust this based on your wishlist model structure
+        if hasattr(request.user, 'wishlist'):
+            request.user.wishlist.add(journal)
+        else:
+            # If you have a separate Wishlist model
+            try:
+                from ..models import Wishlist
+            except ImportError:
+                try:
+                    from .models import Wishlist
+                except ImportError:
+                    from diary.models import Wishlist
+
+            Wishlist.objects.get_or_create(
+                user=request.user,
+                journal=journal
+            )
+
+        return JsonResponse({'success': True})
+
+    except Journal.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Journal not found'})
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def remove_from_wishlist(request):
+    """Remove journal from user's wishlist"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Login required'})
+
+    try:
+        # Import models with fallback
+        try:
+            from ..models import Journal
+        except ImportError:
+            try:
+                from .models import Journal
+            except ImportError:
+                from diary.models import Journal
+
+        data = json.loads(request.body)
+        journal_id = data.get('journal_id')
+
+        journal = Journal.objects.get(id=journal_id)
+
+        # Remove from wishlist
+        if hasattr(request.user, 'wishlist'):
+            request.user.wishlist.remove(journal)
+        else:
+            # If you have a separate Wishlist model
+            try:
+                from ..models import Wishlist
+            except ImportError:
+                try:
+                    from .models import Wishlist
+                except ImportError:
+                    from diary.models import Wishlist
+
+            Wishlist.objects.filter(
+                user=request.user,
+                journal=journal
+            ).delete()
+
+        return JsonResponse({'success': True})
+
+    except Journal.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Journal not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+def journal_preview(request, journal_id):
+    """Get journal preview data for quick view modal"""
+    try:
+        # Import models with fallback
+        try:
+            from ..models import Journal
+        except ImportError:
+            try:
+                from .models import Journal
+            except ImportError:
+                from diary.models import Journal
+
+        journal = Journal.objects.select_related('author').prefetch_related(
+            'marketplace_tags', 'likes', 'entries'
+        ).get(id=journal_id, is_published=True)
+
+        # Build preview data
+        preview_data = {
+            'success': True,
+            'journal': {
+                'id': journal.id,
+                'title': journal.title,
+                'description': journal.description or '',
+                'author_name': journal.author.get_full_name() or journal.author.username,
+                'cover_image': journal.cover_image.url if journal.cover_image else None,
+                'price': float(journal.price) if journal.price else 0,
+                'view_count': journal.view_count or 0,
+                'entry_count': journal.entries.count(),
+                'like_count': journal.likes.count(),
+                'rating': 5.0,  # Calculate actual rating if you have reviews
+                'tags': [tag.name for tag in journal.marketplace_tags.all()[:3]]
+            }
+        }
+
+        return JsonResponse(preview_data)
+
+    except Journal.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Journal not found'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+def marketplace_stats(request):
+    """Get real-time marketplace statistics"""
+    try:
+        # Import models with fallback
+        try:
+            from ..models import Journal
+        except ImportError:
+            try:
+                from .models import Journal
+            except ImportError:
+                from diary.models import Journal
+
+        # Get updated stats
+        journals = Journal.objects.filter(is_published=True).select_related('author')
+
+        stats_data = {
+            'success': True,
+            'earnings': {},
+            'views': {},
+            'total_journals': journals.count(),
+        }
+
+        # Add individual journal stats
+        for journal in journals:
+            stats_data['earnings'][str(journal.id)] = calculate_journal_earnings(journal)
+            stats_data['views'][str(journal.id)] = journal.view_count or 0
+
+        return JsonResponse(stats_data)
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })

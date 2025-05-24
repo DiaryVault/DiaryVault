@@ -73,6 +73,14 @@ urlpatterns = [
     path('marketplace/monetization/', views.marketplace_monetization, name='marketplace_monetization'),
     path('marketplace/contest/', views.marketplace_contest, name='marketplace_contest'),
     path('marketplace/faq/', views.marketplace_faq, name='marketplace_faq'),
+
+
+    path('api/track-view/<int:journal_id>/', views.track_journal_view, name='track_journal_view'),
+    path('api/wishlist/add/', views.add_to_wishlist, name='add_to_wishlist'),
+    path('api/wishlist/remove/', views.remove_from_wishlist, name='remove_from_wishlist'),
+    path('api/journal-preview/<int:journal_id>/', views.journal_preview, name='journal_preview'),
+    path('api/marketplace-stats/', views.marketplace_stats, name='marketplace_stats'),
+
 ]
 
 if settings.DEBUG:
