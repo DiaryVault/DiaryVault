@@ -46,8 +46,7 @@ def home(request):
 
 def get_home_context():
     """Get all context data for home page"""
-
-    # Get featured journals for marketplace preview
+    # Get featured journals for marketplace preview (now 18)
     featured_journals = get_featured_journals()
 
     # Get marketplace statistics
@@ -67,12 +66,11 @@ def get_home_context():
     return context
 
 def get_featured_journals():
-    """Get featured journals for homepage display"""
+    """Get featured journals for homepage display - now returns 18 instead of 6"""
     try:
         # Get published journals with good engagement
         base_query = Journal.objects.filter(
             is_published=True,
-            # Remove is_active=True since it's not in your model
         ).select_related('author').prefetch_related(
             'marketplace_tags',  # This should work with your JournalTag relationship
             'likes',
@@ -83,50 +81,54 @@ def get_featured_journals():
             view_count_annotated=F('view_count')
         )
 
+        # Strategy: Get a diverse mix of 18 journals
+        featured_journals = []
+        featured_ids = set()
 
-        # Try to get staff picks first
-        staff_picks = base_query.filter(is_staff_pick=True)[:3]
+        # 1. Get staff picks first (up to 6)
+        staff_picks = base_query.filter(is_staff_pick=True)[:6]
+        for journal in staff_picks:
+            if journal.id not in featured_ids and len(featured_journals) < 18:
+                featured_journals.append(journal)
+                featured_ids.add(journal.id)
 
-        # Get high-performing journals
+        # 2. Get high-performing journals (up to 6 more)
         popular_journals = base_query.filter(
             Q(like_count__gte=5) | Q(view_count__gte=100)
-        ).order_by('-like_count', '-view_count')[:3]
+        ).exclude(id__in=featured_ids).order_by('-like_count', '-view_count')[:6]
 
-        # Get recent quality journals
+        for journal in popular_journals:
+            if journal.id not in featured_ids and len(featured_journals) < 18:
+                featured_journals.append(journal)
+                featured_ids.add(journal.id)
+
+        # 3. Get recent quality journals (up to 6 more)
         recent_journals = base_query.filter(
             created_at__gte=timezone.now() - timezone.timedelta(days=30),
             like_count__gte=1
-        ).order_by('-created_at')[:3]
+        ).exclude(id__in=featured_ids).order_by('-created_at')[:6]
 
-        # Combine and deduplicate
-        featured_ids = set()
-        featured_journals = []
-
-        # Add staff picks first
-        for journal in staff_picks:
-            if journal.id not in featured_ids and len(featured_journals) < 6:
-                featured_journals.append(journal)
-                featured_ids.add(journal.id)
-
-        # Add popular journals
-        for journal in popular_journals:
-            if journal.id not in featured_ids and len(featured_journals) < 6:
-                featured_journals.append(journal)
-                featured_ids.add(journal.id)
-
-        # Add recent journals to fill remaining slots
         for journal in recent_journals:
-            if journal.id not in featured_ids and len(featured_journals) < 6:
+            if journal.id not in featured_ids and len(featured_journals) < 18:
                 featured_journals.append(journal)
                 featured_ids.add(journal.id)
 
-        # If we still don't have enough, get any published journals
-        if len(featured_journals) < 6:
+        # 4. If we still need more journals, get any published journals
+        if len(featured_journals) < 18:
+            remaining_needed = 18 - len(featured_journals)
             remaining_journals = base_query.exclude(
                 id__in=featured_ids
-            ).order_by('-created_at')[:6-len(featured_journals)]
+            ).order_by('-created_at')[:remaining_needed]
 
             featured_journals.extend(remaining_journals)
+
+        # 5. Alternative approach if we still don't have 18 journals
+        # Fill with random selection to ensure we always have content
+        if len(featured_journals) < 18:
+            all_available = base_query.exclude(id__in=featured_ids).order_by('?')
+            remaining_needed = 18 - len(featured_journals)
+            random_journals = all_available[:remaining_needed]
+            featured_journals.extend(random_journals)
 
         # Add calculated fields for template
         for journal in featured_journals:
@@ -137,7 +139,12 @@ def get_featured_journals():
             if not hasattr(journal, 'view_count') or journal.view_count is None:
                 journal.view_count = 0
 
-        return featured_journals
+        # Shuffle the final list for variety on each page load
+        import random
+        random.shuffle(featured_journals)
+
+        # Return exactly 18 journals (or whatever we have)
+        return featured_journals[:18]
 
     except Exception as e:
         # Fallback: return empty list if there's any error
@@ -145,30 +152,42 @@ def get_featured_journals():
         return []
 
 def calculate_journal_earnings(journal):
-    """Calculate total earnings for a journal"""
+    """Calculate total earnings for a journal - enhanced for more realistic demo data"""
     try:
         # If you have a tips/payments model, calculate here
-        # For now, return a realistic random amount for demo
         if hasattr(journal, 'payments'):
             return float(journal.payments.aggregate(
                 total=Sum('amount')
             )['total'] or 0)
         else:
-            # Demo values based on journal popularity
+            # Enhanced demo values based on journal popularity and age
             like_count = getattr(journal, 'like_count', 0)
             view_count = getattr(journal, 'view_count', 0)
+            entry_count = getattr(journal, 'entry_count', 0)
 
-            if like_count > 50 or view_count > 1000:
-                return round(random.uniform(500, 2500), 2)
-            elif like_count > 10 or view_count > 100:
-                return round(random.uniform(50, 500), 2)
+            # Calculate days since creation for aging factor
+            days_old = (timezone.now() - journal.created_at).days if hasattr(journal, 'created_at') else 30
+
+            # More sophisticated earning calculation
+            base_score = (like_count * 10) + (view_count * 0.1) + (entry_count * 5)
+            age_multiplier = min(days_old / 30, 3)  # Cap at 3x for very old journals
+
+            if base_score > 500:
+                earnings = random.uniform(1000, 5000) * age_multiplier
+            elif base_score > 100:
+                earnings = random.uniform(200, 1000) * age_multiplier
+            elif base_score > 20:
+                earnings = random.uniform(25, 200) * age_multiplier
             else:
-                return 0
+                # Some journals have no earnings
+                earnings = 0 if random.random() < 0.4 else random.uniform(5, 25)
+
+            return round(earnings, 2)
     except:
         return 0
 
 def get_marketplace_stats():
-    """Get overall marketplace statistics"""
+    """Get overall marketplace statistics - enhanced for 18+ journals"""
     try:
         # Import models with fallback
         try:
@@ -184,35 +203,55 @@ def get_marketplace_stats():
                 from diary.models import Journal
                 from django.contrib.auth.models import User
 
+        # Get real stats
+        total_journals = Journal.objects.filter(is_published=True).count()
+        total_authors = User.objects.filter(
+            journals__is_published=True
+        ).distinct().count()
+        free_journals = Journal.objects.filter(
+            is_published=True,
+            price=0
+        ).count()
+
+        # Calculate total earnings from all journals
+        all_journals = Journal.objects.filter(is_published=True)
+        total_earnings = sum(calculate_journal_earnings(j) for j in all_journals)
+
+        # Calculate total entries
+        total_entries = 0
+        for journal in all_journals:
+            total_entries += journal.entries.count()
+
         stats = {
-            'total_journals': Journal.objects.filter(is_published=True).count(),
-            'total_authors': User.objects.filter(
-                journals__is_published=True
-            ).distinct().count(),
+            'total_journals': total_journals,
+            'total_authors': total_authors,
+            'total_earnings': total_earnings,
+            'total_entries': total_entries,
             'categories_count': 12,  # Update this based on your categories
-            'free_journals': Journal.objects.filter(
-                is_published=True,
-                price=0
-            ).count(),
+            'free_journals': free_journals,
         }
 
-        # Add some demo stats if numbers are low
-        if stats['total_journals'] < 10:
+        # Enhance stats if numbers are too low for a good demo
+        if stats['total_journals'] < 18:
             stats.update({
-                'total_journals': random.randint(50, 200),
-                'total_authors': random.randint(25, 100),
-                'free_journals': random.randint(20, 80)
+                'total_journals': random.randint(150, 300),
+                'total_authors': random.randint(75, 150),
+                'total_earnings': random.randint(50000, 200000),
+                'total_entries': random.randint(1000, 5000),
+                'free_journals': random.randint(50, 120)
             })
 
         return stats
 
     except Exception as e:
-        # Fallback demo stats
+        # Fallback demo stats for a thriving marketplace
         return {
-            'total_journals': 1247,
-            'total_authors': 823,
+            'total_journals': random.randint(200, 400),
+            'total_authors': random.randint(100, 200),
+            'total_earnings': random.randint(75000, 250000),
+            'total_entries': random.randint(2000, 8000),
             'categories_count': 12,
-            'free_journals': 456,
+            'free_journals': random.randint(80, 150),
         }
 
 def signup(request):

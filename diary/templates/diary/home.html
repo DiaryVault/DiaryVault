@@ -973,24 +973,26 @@
     </div>
   </div>
 
-  <!-- Enhanced Real Marketplace Preview Section with Real Data -->
+  <!-- Enhanced Real Marketplace Preview Section with 18 Journals -->
   <div class="mt-16 animate-fade-in animation-delay-300">
     <div class="text-center mb-8 relative z-10">
       <div class="inline-block mb-3">
         <span class="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-secondary-600 shadow-sm border border-white/50">
-          PREMIUM FEATURE
+          DISCOVER STORIES
         </span>
       </div>
       <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2">
-        Discover Amazing Stories
+        Amazing Journals from Real People
       </h2>
-      <p class="text-gray-600 text-sm max-w-xl mx-auto">Written by everyday people. Felt by everyone.</p>
+      <p class="text-gray-600 text-sm max-w-xl mx-auto">Read authentic stories, experiences, and insights shared by our community.</p>
     </div>
 
-    <!-- Enhanced Marketplace Cards with Real Data -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Enhanced Marketplace Cards with 18 Journals in responsive grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
       {% for journal in featured_journals %}
-        <div class="real-marketplace-card animate-fade-in-up" style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms">
+        <div class="real-marketplace-card animate-fade-in-up cursor-pointer"
+            style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms"
+            onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
 
           <!-- Image Container -->
           <div class="real-image-container">
@@ -999,12 +1001,12 @@
             <!-- Quick Actions -->
             <div class="real-quick-actions">
               {% if user.is_authenticated %}
-                <button onclick="toggleWishlist({{ journal.id }})" class="real-action-btn" title="Add to Wishlist">
+                <button onclick="event.stopPropagation(); toggleWishlist({{ journal.id }})" class="real-action-btn" title="Add to Wishlist">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
                 </button>
-                <button onclick="quickView({{ journal.id }})" class="real-action-btn" title="Quick View">
+                <button onclick="event.stopPropagation(); quickView({{ journal.id }})" class="real-action-btn" title="Quick View">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -1015,9 +1017,9 @@
 
             <!-- Journal Cover -->
             {% if journal.cover_image %}
-              <img src="{{ journal.cover_image.url }}" alt="{{ journal.title }}" class="w-full h-full object-cover cursor-pointer" onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
+              <img src="{{ journal.cover_image.url }}" alt="{{ journal.title }}" class="w-full h-full object-cover">
             {% else %}
-              <div class="w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center cursor-pointer" onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
+              <div class="w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center">
                 <div class="text-white text-center p-4">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -1082,7 +1084,7 @@
             </div>
 
             <!-- Title -->
-            <h3 class="real-title cursor-pointer hover:text-blue-600 transition-colors" onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
+            <h3 class="real-title hover:text-blue-600 transition-colors">
               {{ journal.title }}
             </h3>
 
@@ -1134,203 +1136,96 @@
           </div>
         </div>
       {% empty %}
-        <!-- Fallback content if no featured journals -->
-        <div class="real-marketplace-card">
-          <div class="real-image-container">
-            <div class="w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center">
-              <div class="text-white text-center p-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                <p class="text-sm font-medium">Travel Adventures</p>
-              </div>
-            </div>
-            <div class="absolute top-3 left-3">
-              <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-                $12.99
-              </span>
-            </div>
-            <div class="absolute bottom-3 right-3 bg-amber-500 text-white text-xs font-bold py-1 px-2 rounded-lg shadow-md flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              $2,450 earned
-            </div>
-          </div>
-          <div class="real-content">
-            <div class="real-author">
-              <div class="real-avatar">A</div>
-              <div class="real-author-name">@adventurer</div>
-              <div class="ml-auto real-stats">
-                <div class="real-stat-item">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  4,520
-                </div>
-              </div>
-            </div>
-            <h3 class="real-title">Around the World in 80 Days</h3>
-            <p class="real-description">A travel journal chronicling adventures across six continents and fifteen countries with stunning photography.</p>
-            <div class="real-rating">
-              <div class="real-stars">
-                {% for i in "12345" %}
-                  <svg class="real-star text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                  </svg>
-                {% endfor %}
-              </div>
-              <span class="real-rating-count">(4,520)</span>
-            </div>
-            <div class="real-tags">
-              <span class="real-tag">Travel</span>
-              <span class="real-tag">Adventure</span>
-            </div>
-            <div class="real-footer">
-              <div class="real-price">$12.99</div>
-              <div class="real-stats">
-                <div class="real-stat-item">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  42 entries
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Fallback: Show 18 sample journals if no real data -->
+        {% for i in "123456789012345678" %}
+          <div class="real-marketplace-card animate-fade-in-up cursor-pointer"
+              style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms"
+              onclick="window.location.href='/marketplace/'">
 
-        <div class="real-marketplace-card">
-          <div class="real-image-container">
-            <div class="w-full h-full bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 flex items-center justify-center">
-              <div class="text-white text-center p-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                <p class="text-sm font-medium">Mindfulness Journey</p>
-              </div>
-            </div>
-            <div class="absolute top-3 left-3">
-              <span class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-                FREE
-              </span>
-            </div>
-            <div class="absolute bottom-3 right-3 bg-amber-500 text-white text-xs font-bold py-1 px-2 rounded-lg shadow-md flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              $1,870 earned
-            </div>
-          </div>
-          <div class="real-content">
-            <div class="real-author">
-              <div class="real-avatar">M</div>
-              <div class="real-author-name">@mindful_me</div>
-              <div class="ml-auto real-stats">
-                <div class="real-stat-item">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  3,180
-                </div>
-              </div>
-            </div>
-            <h3 class="real-title">Mindfulness Journey</h3>
-            <p class="real-description">A year of daily meditations and mindfulness practices documented with deep reflections and growth insights.</p>
-            <div class="real-rating">
-              <div class="real-stars">
-                {% for i in "12345" %}
-                  <svg class="real-star text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                  </svg>
-                {% endfor %}
-              </div>
-              <span class="real-rating-count">(3,180)</span>
-            </div>
-            <div class="real-tags">
-              <span class="real-tag">Mindfulness</span>
-              <span class="real-tag">Wellness</span>
-            </div>
-            <div class="real-footer">
-              <div class="real-price free">FREE</div>
-              <div class="real-stats">
-                <div class="real-stat-item">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  365 entries
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+            <div class="real-image-container">
+              <div class="real-image-overlay"></div>
 
-        <div class="real-marketplace-card">
-          <div class="real-image-container">
-            <div class="w-full h-full bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 flex items-center justify-center">
-              <div class="text-white text-center p-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                <p class="text-sm font-medium">Love & Growth</p>
-              </div>
-            </div>
-            <div class="absolute top-3 left-3">
-              <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-                $8.99
-              </span>
-            </div>
-            <div class="absolute top-3 right-3">
-              <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">
-                ⭐
-              </span>
-            </div>
-          </div>
-          <div class="real-content">
-            <div class="real-author">
-              <div class="real-avatar">S</div>
-              <div class="real-author-name">@sarah_writes</div>
-              <div class="ml-auto real-stats">
-                <div class="real-stat-item">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              {% if forloop.counter0 < 6 %}
+                <div class="w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center">
+              {% elif forloop.counter0 < 12 %}
+                <div class="w-full h-full bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 flex items-center justify-center">
+              {% else %}
+                <div class="w-full h-full bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 flex items-center justify-center">
+              {% endif %}
+                <div class="text-white text-center p-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
-                  2,890
+                  <p class="text-sm font-medium">Sample Journal {{ forloop.counter }}</p>
+                </div>
+              </div>
+
+              <!-- Sample badges -->
+              <div class="absolute top-3 left-3">
+                {% if forloop.counter0|divisibleby:3 %}
+                  <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">$9.99</span>
+                {% else %}
+                  <span class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">FREE</span>
+                {% endif %}
+              </div>
+
+              {% if forloop.counter0|divisibleby:4 %}
+                <div class="absolute top-3 right-3">
+                  <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg">⭐</span>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="real-content">
+              <div class="real-author">
+                <div class="real-avatar">{{ forloop.counter|first }}</div>
+                <div class="real-author-name">Sample Author {{ forloop.counter }}</div>
+                <div class="ml-auto real-stats">
+                  <div class="real-stat-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    {{ forloop.counter }}{{ forloop.counter }}0
+                  </div>
+                </div>
+              </div>
+
+              <h3 class="real-title hover:text-blue-600 transition-colors">Sample Journal Title {{ forloop.counter }}</h3>
+              <p class="real-description">This is a sample journal description that showcases what a real journal entry might look like in our marketplace.</p>
+
+              <div class="real-rating">
+                <div class="real-stars">
+                  {% for j in "12345" %}
+                    <svg class="real-star text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                  {% endfor %}
+                </div>
+                <span class="real-rating-count">({{ forloop.counter }}5)</span>
+              </div>
+
+              <div class="real-tags">
+                <span class="real-tag">Sample</span>
+                <span class="real-tag">Journal</span>
+              </div>
+
+              <div class="real-footer">
+                <div class="real-price {% if forloop.counter0|divisibleby:3 %}{% else %}free{% endif %}">
+                  {% if forloop.counter0|divisibleby:3 %}$9.99{% else %}FREE{% endif %}
+                </div>
+                <div class="real-stats">
+                  <div class="real-stat-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    {{ forloop.counter }}{{ forloop.counter }} entries
+                  </div>
                 </div>
               </div>
             </div>
-            <h3 class="real-title">Love & Growth</h3>
-            <p class="real-description">An intimate journey through relationships, heartbreak, healing, and finding self-love through personal growth.</p>
-            <div class="real-rating">
-              <div class="real-stars">
-                {% for i in "12345" %}
-                  <svg class="real-star text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                  </svg>
-                {% endfor %}
-              </div>
-              <span class="real-rating-count">(2,890)</span>
-            </div>
-            <div class="real-tags">
-              <span class="real-tag">Love</span>
-              <span class="real-tag">Growth</span>
-            </div>
-            <div class="real-footer">
-              <div class="real-price">$8.99</div>
-              <div class="real-stats">
-                <div class="real-stat-item">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  28 entries
-                </div>
-              </div>
-            </div>
           </div>
-        </div>
+        {% endfor %}
       {% endfor %}
     </div>
 
@@ -1345,8 +1240,8 @@
           <span class="absolute inset-x-0 bottom-0 h-0.5 bg-white/50 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
         </span>
       </a>
-
-
+    </div>
+  </div>
 
 
 <script>
