@@ -145,35 +145,17 @@
     margin-bottom: 12px;
   }
 
-  .categories-container {
-    position: relative;
-  }
-
-  .categories-scroll-wrapper {
-    position: relative;
-    overflow: hidden;
-    border-radius: 16px;
-  }
-
   .categories-grid {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding: 4px 0 8px 0;
-  }
-
-  .categories-grid::-webkit-scrollbar {
-    display: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
   }
 
   .category-pill {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 18px;
+    padding: 10px 16px;
     background: rgba(255, 255, 255, 0.7);
     border: 1.5px solid rgba(0, 0, 0, 0.06);
     border-radius: 50px;
@@ -184,9 +166,6 @@
     transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
     position: relative;
     overflow: hidden;
-    white-space: nowrap;
-    flex-shrink: 0;
-    min-width: 140px;
   }
 
   .category-pill::before {
@@ -232,94 +211,16 @@
     margin-left: auto;
   }
 
-  /* Scroll Navigation Buttons */
-  .scroll-nav-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    z-index: 10;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  .scroll-nav-btn.visible {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .scroll-nav-btn:hover {
-    background: rgba(255, 255, 255, 1);
-    transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-  }
-
-  .scroll-nav-btn.left {
-    left: -8px;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.3) 100%);
-  }
-
-  .scroll-nav-btn.right {
-    right: -8px;
-    background: linear-gradient(270deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.3) 100%);
-  }
-
-  .scroll-nav-btn svg {
-    width: 16px;
-    height: 16px;
-    color: #374151;
-  }
-
-  /* Fade gradients for scroll indicators */
-  .categories-scroll-wrapper::before,
-  .categories-scroll-wrapper::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 20px;
-    z-index: 5;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-
-  .categories-scroll-wrapper::before {
-    left: 0;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.8) 0%, transparent 100%);
-    opacity: 0;
-  }
-
-  .categories-scroll-wrapper::after {
-    right: 0;
-    background: linear-gradient(270deg, rgba(255, 255, 255, 0.8) 0%, transparent 100%);
-    opacity: 0;
-  }
-
-  .categories-scroll-wrapper.show-left-fade::before {
-    opacity: 1;
-  }
-
-  .categories-scroll-wrapper.show-right-fade::after {
-    opacity: 1;
-  }
-
   /* Mobile Responsive Categories */
   @media (max-width: 640px) {
+    .categories-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
     .category-pill {
-      padding: 10px 16px;
+      padding: 8px 12px;
       font-size: 13px;
-      min-width: 120px;
     }
 
     .category-icon {
@@ -339,17 +240,16 @@
     .search-categories {
       padding: 12px 16px 16px;
     }
+  }
 
-    .scroll-nav-btn {
-      width: 28px;
-      height: 28px;
-    }
-
-    .scroll-nav-btn svg {
-      width: 14px;
-      height: 14px;
+  /* Tablet View */
+  @media (max-width: 768px) and (min-width: 641px) {
+    .categories-grid {
+      grid-template-columns: repeat(3, 1fr);
     }
   }
+
+  /* Enhanced Quick Category Access */
   .quick-categories {
     display: flex;
     flex-wrap: wrap;
@@ -771,22 +671,7 @@
           <!-- Integrated Categories Section -->
           <div class="search-categories">
             <div class="categories-label">Browse by Category</div>
-            <div class="categories-container">
-              <div class="categories-scroll-wrapper" id="categoriesScrollWrapper">
-                <!-- Scroll Navigation Buttons -->
-                <button type="button" class="scroll-nav-btn left" id="scrollLeftBtn" onclick="scrollCategories('left')">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-
-                <button type="button" class="scroll-nav-btn right" id="scrollRightBtn" onclick="scrollCategories('right')">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-
-                <div class="categories-grid" id="categoriesGrid">
+            <div class="categories-grid">
               {% for category in categories %}
                 <a href="{% url 'marketplace' %}?category={{ category.slug }}"
                    class="category-pill {% if current_category == category.slug %}active{% endif %}">
@@ -1137,8 +1022,6 @@
                     </span>
                   {% endfor %}
                 </div>
-              </div>
-            </div>
 
                 <!-- Purchase Section -->
                 <div class="flex items-center justify-between">
@@ -1360,78 +1243,9 @@ function initializeSearch() {
       }, 500);
     });
   });
-
-  // Initialize category scrolling
-  initializeCategoryScroll();
 }
 
-// Initialize category horizontal scrolling
-function initializeCategoryScroll() {
-  const grid = document.getElementById('categoriesGrid');
-  const wrapper = document.getElementById('categoriesScrollWrapper');
-  const leftBtn = document.getElementById('scrollLeftBtn');
-  const rightBtn = document.getElementById('scrollRightBtn');
-
-  if (!grid || !wrapper) return;
-
-  // Update scroll button visibility and fade indicators
-  function updateScrollButtons() {
-    const scrollLeft = grid.scrollLeft;
-    const scrollWidth = grid.scrollWidth;
-    const clientWidth = grid.clientWidth;
-    const maxScroll = scrollWidth - clientWidth;
-
-    // Show/hide left button
-    if (scrollLeft > 10) {
-      leftBtn.classList.add('visible');
-      wrapper.classList.add('show-left-fade');
-    } else {
-      leftBtn.classList.remove('visible');
-      wrapper.classList.remove('show-left-fade');
-    }
-
-    // Show/hide right button
-    if (scrollLeft < maxScroll - 10) {
-      rightBtn.classList.add('visible');
-      wrapper.classList.add('show-right-fade');
-    } else {
-      rightBtn.classList.remove('visible');
-      wrapper.classList.remove('show-right-fade');
-    }
-  }
-
-  // Listen for scroll events
-  grid.addEventListener('scroll', updateScrollButtons);
-
-  // Initial check
-  setTimeout(updateScrollButtons, 100);
-
-  // Handle window resize
-  window.addEventListener('resize', () => {
-    setTimeout(updateScrollButtons, 100);
-  });
-}
-
-// Scroll categories function
-function scrollCategories(direction) {
-  const grid = document.getElementById('categoriesGrid');
-  if (!grid) return;
-
-  const scrollAmount = 200; // Adjust based on category pill width
-  const currentScroll = grid.scrollLeft;
-
-  if (direction === 'left') {
-    grid.scrollTo({
-      left: currentScroll - scrollAmount,
-      behavior: 'smooth'
-    });
-  } else {
-    grid.scrollTo({
-      left: currentScroll + scrollAmount,
-      behavior: 'smooth'
-    });
-  }
-}
+// Advanced filters toggle
 function toggleAdvancedFilters() {
   const dropdown = document.getElementById('advancedFiltersDropdown');
   dropdown.classList.toggle('active');
@@ -1806,4 +1620,5 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
 {% endblock %}
