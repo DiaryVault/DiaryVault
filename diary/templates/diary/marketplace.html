@@ -291,6 +291,33 @@
             background: linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent);
         }
 
+        /* Quick trending categories */
+        .quick-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .quick-category {
+            padding: 4px 10px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .quick-category:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-1px);
+        }
+
         /* Mobile Responsive Categories */
         @media (max-width: 640px) {
             .category-pill {
@@ -669,6 +696,8 @@ function updateScrollButtons() {
         right: document.getElementById('rightIndicator')
     };
 
+    if (!wrapper || !scrollButtons.left || !scrollButtons.right) return;
+
     const isAtStart = wrapper.scrollLeft <= 0;
     const isAtEnd = wrapper.scrollLeft >= (wrapper.scrollWidth - wrapper.clientWidth);
 
@@ -681,8 +710,10 @@ function updateScrollButtons() {
     scrollButtons.right.style.opacity = isAtEnd ? '0.3' : '1';
 
     // Update scroll indicators
-    indicators.left.style.opacity = isAtStart ? '0' : '1';
-    indicators.right.style.opacity = isAtEnd ? '0' : '1';
+    if (indicators.left && indicators.right) {
+        indicators.left.style.opacity = isAtStart ? '0' : '1';
+        indicators.right.style.opacity = isAtEnd ? '0' : '1';
+    }
 }
 
 // Category pill interactions
@@ -691,7 +722,8 @@ function initializeCategoryPills() {
 
     categoryPills.forEach(pill => {
         pill.addEventListener('click', function(e) {
-            e.preventDefault();
+            // Don't prevent default - let Django handle the navigation
+            // Just add visual feedback
 
             // Remove active class from all pills
             categoryPills.forEach(p => p.classList.remove('active'));
@@ -701,17 +733,16 @@ function initializeCategoryPills() {
 
             // Optional: scroll to show active pill if it's partially hidden
             const wrapper = document.getElementById('categoriesWrapper');
-            const pillRect = this.getBoundingClientRect();
-            const wrapperRect = wrapper.getBoundingClientRect();
+            if (wrapper) {
+                const pillRect = this.getBoundingClientRect();
+                const wrapperRect = wrapper.getBoundingClientRect();
 
-            if (pillRect.left < wrapperRect.left) {
-                wrapper.scrollBy({ left: pillRect.left - wrapperRect.left - 20, behavior: 'smooth' });
-            } else if (pillRect.right > wrapperRect.right) {
-                wrapper.scrollBy({ left: pillRect.right - wrapperRect.right + 20, behavior: 'smooth' });
+                if (pillRect.left < wrapperRect.left) {
+                    wrapper.scrollBy({ left: pillRect.left - wrapperRect.left - 20, behavior: 'smooth' });
+                } else if (pillRect.right > wrapperRect.right) {
+                    wrapper.scrollBy({ left: pillRect.right - wrapperRect.right + 20, behavior: 'smooth' });
+                }
             }
-
-            // You can add form submission or filtering logic here
-            console.log('Selected category:', this.textContent.trim());
         });
     });
 }
@@ -719,6 +750,8 @@ function initializeCategoryPills() {
 // Touch/swipe support for mobile
 function initializeTouchSupport() {
     const wrapper = document.getElementById('categoriesWrapper');
+    if (!wrapper) return;
+
     let startX = 0;
     let scrollLeft = 0;
     let isDown = false;
@@ -764,6 +797,7 @@ function initializeTouchSupport() {
 // Keyboard navigation
 function initializeKeyboardNavigation() {
     const wrapper = document.getElementById('categoriesWrapper');
+    if (!wrapper) return;
 
     wrapper.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') {
@@ -774,6 +808,23 @@ function initializeKeyboardNavigation() {
             e.preventDefault();
         }
     });
+}
+
+// Initialize category scrolling functionality
+function initializeCategoryScrolling() {
+    updateScrollButtons();
+    initializeCategoryPills();
+    initializeTouchSupport();
+    initializeKeyboardNavigation();
+
+    // Update scroll buttons on scroll
+    const wrapper = document.getElementById('categoriesWrapper');
+    if (wrapper) {
+        wrapper.addEventListener('scroll', updateScrollButtons);
+    }
+
+    // Handle window resize
+    window.addEventListener('resize', updateScrollButtons);
 }
 
 // Initialize everything when DOM is loaded
