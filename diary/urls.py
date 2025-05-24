@@ -103,7 +103,7 @@ urlpatterns = [
     path('api/entry/<int:entry_id>/regenerate-summary/', views.regenerate_summary_ajax, name='regenerate_summary_ajax'),
 
     # Marketplace API (New - from your core.py)
-    path('api/track-view/<int:journal_id>/', views.track_journal_view, name='track_journal_view'),
+    # path('api/track-view/<int:journal_id>/', views.track_journal_view, name='track_journal_view'),
     path('api/wishlist/add/', views.add_to_wishlist, name='add_to_wishlist'),
     path('api/wishlist/remove/', views.remove_from_wishlist, name='remove_from_wishlist'),
     path('api/journal-preview/<int:journal_id>/', views.journal_preview, name='journal_preview'),
