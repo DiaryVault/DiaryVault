@@ -3,6 +3,7 @@ import logging
 import json
 import random
 
+from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
@@ -658,7 +659,41 @@ def marketplace_stats(request):
             'error': str(e)
         })
 
+@csrf_exempt
+@require_POST
 def track_journal_view(request, journal_id):
-    # Your view logic here
-    # For now, you can return a simple response
-    return JsonResponse({'status': 'success', 'journal_id': journal_id})
+    """
+    API endpoint to track journal views.
+    This is a placeholder implementation - you can customize the logic as needed.
+    """
+    try:
+        # Parse request data if needed
+        if request.body:
+            data = json.loads(request.body)
+        else:
+            data = {}
+
+        # Here you could implement your tracking logic, such as:
+        # - Log the view to a database
+        # - Update view counts
+        # - Track user analytics
+        # - etc.
+
+        # For now, just return a success response
+        return JsonResponse({
+            'status': 'success',
+            'message': f'Journal {journal_id} view tracked successfully',
+            'journal_id': journal_id
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Invalid JSON data'
+        }, status=400)
+
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
