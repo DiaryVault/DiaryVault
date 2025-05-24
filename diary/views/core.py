@@ -3,7 +3,6 @@ import logging
 import json
 import random
 
-from ..models import Journal, MarketplaceTag, Wishlist
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
@@ -20,7 +19,7 @@ from django.conf import settings
 
 from ..models import (
     Entry, Tag, SummaryVersion, LifeChapter, Biography,
-    UserInsight, EntryTag, UserPreference
+    UserInsight, EntryTag, UserPreference, Journal, JournalTag
 )
 from ..forms import EntryForm, SignUpForm, LifeChapterForm
 from ..services.ai_service import AIService
@@ -69,21 +68,12 @@ def get_home_context():
 def get_featured_journals():
     """Get featured journals for homepage display"""
     try:
-        # Import models with fallback
-        try:
-            from ..models import Journal
-        except ImportError:
-            try:
-                from ..models import Journal
-            except ImportError:
-                from diary.models import Journal
-
         # Get published journals with good engagement
         base_query = Journal.objects.filter(
             is_published=True,
-            is_active=True,
+            # Remove is_active=True since it's not in your model
         ).select_related('author').prefetch_related(
-            'marketplace_tags',
+            'marketplace_tags',  # This should work with your JournalTag relationship
             'likes',
             'entries'
         ).annotate(
@@ -91,6 +81,7 @@ def get_featured_journals():
             entry_count=Count('entries'),
             view_count_annotated=F('view_count')
         )
+
 
         # Try to get staff picks first
         staff_picks = base_query.filter(is_staff_pick=True)[:3]
