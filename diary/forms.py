@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
-from .models import Entry, Tag, LifeChapter, Biography, Journal, JournalTag, JournalReview
+from .models import Entry, Tag, LifeChapter, Biography, Journal, JournalTag, JournalReview, EntryPhoto
 from django.db import models
 
 def auto_generate_tags(content, mood=None):
@@ -84,7 +84,6 @@ class EntryForm(forms.ModelForm):
 
             # Handle photo upload if present
             if 'entry_photo' in self.files:
-                from .models import EntryPhoto
                 photo = EntryPhoto(
                     entry=entry,
                     photo=self.files['entry_photo']

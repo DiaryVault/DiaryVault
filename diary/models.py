@@ -2,8 +2,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-from django import forms
-from django.apps import apps
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
@@ -109,6 +107,7 @@ class Biography(models.Model):
 
     def completion_percentage(self):
         """Calculate biography completion percentage"""
+        from django.apps import apps
         Entry = apps.get_model('diary', 'Entry')
         total_entries = Entry.objects.filter(user=self.user).count()
         if total_entries == 0:
@@ -455,65 +454,3 @@ class EntryTag(models.Model):
 
     class Meta:
         ordering = ['name']
-
-# Forms
-class EntryForm(forms.ModelForm):
-    # Add a field for tags that will be processed separately
-    tags = forms.CharField(required=False, help_text="Comma-separated tags")
-    entry_photo = forms.ImageField(required=False)  # Add this field
-
-    class Meta:
-        model = Entry
-        fields = ['title', 'content', 'mood', 'chapter']
-        widgets = {
-            'content': forms.Textarea(attrs={'class': 'diary-font'}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        # Extract user from kwargs so we can use it later
-        self.user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-
-        # If this is an existing entry, populate the tags field
-        if self.instance and self.instance.pk:
-            self.initial['tags'] = ', '.join([tag.name for tag in self.instance.tags.all()])
-
-    def save(self, commit=True, user=None):
-        # Use either the user passed to save() or the one set during initialization
-        user = user or self.user
-        if not user:
-            raise ValueError("User must be provided to save the form")
-
-        # Save the entry but don't commit until we handle the tags
-        entry = super().save(commit=False)
-        entry.user = user
-
-        if commit:
-            entry.save()
-
-            # Handle photo upload if present
-            if 'entry_photo' in self.files:
-                # Create a new EntryPhoto linked to this entry
-                photo = EntryPhoto(
-                    entry=entry,
-                    photo=self.files['entry_photo']
-                )
-                photo.save()
-                print(f"Created new photo for entry #{entry.id}: {photo.photo.url}")
-
-            # Process tags field
-            if 'tags' in self.cleaned_data:
-                tag_names = [t.strip() for t in self.cleaned_data['tags'].split(',') if t.strip()]
-
-                # Clear existing tags for this entry
-                entry.tags.clear()
-
-                # Add each tag, creating new ones as needed
-                for tag_name in tag_names:
-                    tag, created = Tag.objects.get_or_create(
-                        name=tag_name,
-                        user=user  # This links the tag to the user
-                    )
-                    entry.tags.add(tag)
-
-        return entry
