@@ -1,0 +1,1542 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Favicon and App Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/static/android-chrome-512x512.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="msapplication-config" content="/static/browserconfig.xml">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>{% block title %}DiaryVault - Your Daily Journal{% endblock %}</title>
+<meta name="theme-color" content="#667eea" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.3/cdn.min.js" defer></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&family=Satisfy:wght@400;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          serif: ['Playfair Display', 'serif'],
+          handwritten: ['Satisfy', 'cursive'],
+        },
+        colors: {
+          primary: {
+            50: '#f0f4ff',
+            100: '#e0e9ff',
+            200: '#c7d2fe',
+            300: '#a5b4fc',
+            400: '#818cf8',
+            500: '#667eea',
+            600: '#5a67d8',
+            700: '#4c51bf',
+            800: '#434190',
+            900: '#3c366b',
+          },
+          secondary: {
+            50: '#f8fafc',
+            100: '#f1f5f9',
+            200: '#e2e8f0',
+            300: '#cbd5e1',
+            400: '#94a3b8',
+            500: '#64748b',
+            600: '#475569',
+            700: '#334155',
+            800: '#1e293b',
+            900: '#0f172a',
+          },
+          accent: {
+            50: '#fef2f2',
+            100: '#fee2e2',
+            200: '#fecaca',
+            300: '#fca5a5',
+            400: '#f87171',
+            500: '#ef4444',
+            600: '#dc2626',
+            700: '#b91c1c',
+            800: '#991b1b',
+            900: '#7f1d1d',
+          }
+        },
+        animation: {
+          'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          'bounce-slow': 'bounce 3s infinite',
+          'wiggle': 'wiggle 1s ease-in-out infinite',
+          'fade-in': 'fadeIn 0.8s ease-out forwards',
+          'slide-up': 'slideUp 0.5s ease-out forwards',
+          'slide-down': 'slideDown 0.3s ease-out forwards',
+          'gradient-shift': 'gradientShift 8s ease-in-out infinite',
+        },
+        keyframes: {
+          wiggle: {
+            '0%, 100%': { transform: 'rotate(-1deg)' },
+            '50%': { transform: 'rotate(1deg)' },
+          },
+          blob: {
+            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+            '33%': { transform: 'translate(20px, -10px) scale(1.1)' },
+            '66%': { transform: 'translate(-10px, 10px) scale(0.9)' },
+            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+          },
+          fadeIn: {
+            '0%': { opacity: '0', transform: 'translateY(10px)' },
+            '100%': { opacity: '1', transform: 'translateY(0)' },
+          },
+          slideUp: {
+            '0%': { transform: 'translateY(20px)', opacity: '0' },
+            '100%': { transform: 'translateY(0)', opacity: '1' },
+          },
+          slideDown: {
+            '0%': { transform: 'translateY(-100%)', opacity: '0' },
+            '100%': { transform: 'translateY(0)', opacity: '1' },
+          },
+          gradientShift: {
+            '0%, 100%': {
+              'background-position': '0% 50%'
+            },
+            '50%': {
+              'background-position': '100% 50%'
+            }
+          }
+        }
+      },
+    },
+  }
+</script>
+<style>
+  /* Base styles */
+  body {
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    background: linear-gradient(135deg, #f0f4ff 0%, #e0e9ff 25%, #ffffff 50%, #f0f4ff 75%, #e0e9ff 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 12s ease-in-out infinite;
+    width: 100%;
+    position: relative;
+    transition: background-color 0.3s ease;
+  }
+
+  /* Enhanced Typography */
+  .diary-font {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.02em;
+  }
+
+  .handwritten {
+    font-family: 'Satisfy', cursive;
+  }
+
+  html {
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+
+  /* Modern Glass Effects - Matching Marketplace */
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  .glass-effect:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .frosted-glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+  }
+
+  .frosted-glass:hover {
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Enhanced Gradient Buttons - Matching Marketplace */
+  .btn-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .btn-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-gradient:hover::before {
+    left: 100%;
+  }
+
+  .btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    transition: all 0.3s ease;
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.4);
+  }
+
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.9);
+    color: #475569;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  }
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 1);
+    border-color: #667eea;
+    color: #334155;
+    transform: translateY(-1px);
+  }
+
+  /* Enhanced Header with Smart Scroll */
+  .header-main {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    transform: translateY(0);
+  }
+
+  .header-main.header-hidden {
+    transform: translateY(-100%);
+  }
+
+  .header-main.header-scrolled {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(30px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Animation and transitions */
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease forwards;
+  }
+  .animate-scale-in {
+    animation: scaleIn 0.5s ease forwards;
+  }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  /* Animation delays */
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+  .animation-delay-700 { animation-delay: 700ms; }
+  .animation-delay-2000 { animation-delay: 2s; }
+  .animation-delay-4000 { animation-delay: 4s; }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  @keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(20px, -10px) scale(1.1); }
+    66% { transform: translate(-10px, 10px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* Custom scroll */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #c4b5fd;
+    border-radius: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #a78bfa;
+  }
+
+  /* Enhanced Card Effects */
+  .card-hover {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+  }
+
+  .enhanced-card {
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  .enhanced-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+  }
+
+  /* Enhanced Beta Badge */
+  .beta-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    transform: rotate(-2deg) translateY(-0.1rem);
+    display: inline-flex;
+    animation: pulse 3s infinite;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  }
+
+  /* Navigation Enhancements */
+  .nav-link {
+    position: relative;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+    border-radius: 2px;
+  }
+
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    width: 80%;
+  }
+
+  .nav-link:hover {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+  }
+
+  .nav-link.active {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+    font-weight: 600;
+  }
+
+  /* Enhanced Mobile Menu */
+  .menu-sheet {
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 85vh;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .menu-sheet.open {
+    transform: translateY(0);
+  }
+
+  /* Menu overlay */
+  .menu-overlay {
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    backdrop-filter: blur(0px);
+  }
+
+  .menu-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+    backdrop-filter: blur(8px);
+  }
+
+  /* Menu items styling */
+  .menu-category {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .menu-item {
+    transition: all 0.2s ease;
+  }
+
+  .menu-item:active {
+    transform: scale(0.98);
+  }
+
+  /* Staggered animation for menu items */
+  .menu-item-animate {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .menu-open .menu-item-animate {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Active menu indicator */
+  .active-pill {
+    position: absolute;
+    left: 4px;
+    height: 85%;
+    width: 3px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+
+  /* Bottom sheet pull indicator */
+  .pull-indicator {
+    width: 36px;
+    height: 5px;
+    border-radius: 3px;
+    background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+    margin: 8px auto;
+  }
+
+  /* Text Gradient */
+  .text-gradient {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chat bubble styling (for AI interface) - from template 2 */
+  .chat-bubble {
+    position: relative;
+    padding: 1rem 1.5rem;
+    border-radius: 1.25rem;
+    max-width: 85%;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  .chat-bubble.ai {
+    background-color: rgba(243, 244, 246, 0.8);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    align-self: flex-start;
+    border-bottom-left-radius: 0.25rem;
+    margin-right: 2rem;
+  }
+  .chat-bubble.user {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 0.25rem;
+    margin-left: auto;
+    margin-left: 2rem;
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 640px) {
+    .mobile-safe-area {
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    .mobile-bottom-nav {
+      background: rgba(255, 255, 255, 0.95);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+      padding-bottom: env(safe-area-inset-bottom, 12px);
+      height: 70px;
+      display: flex;
+      align-items: center;
+    }
+
+    .mobile-fab {
+      position: fixed;
+      bottom: 85px;
+      right: 20px;
+      z-index: 30;
+      transform-origin: center;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .mobile-fab:active {
+      transform: scale(0.95);
+    }
+
+    .nav-item-mobile {
+      transition: all 0.2s ease;
+    }
+    .nav-item-mobile.active {
+      transform: translateY(-2px);
+    }
+    .nav-item-mobile.active svg {
+      filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.4));
+    }
+
+    /* Add padding to body for mobile nav */
+    body {
+      padding-bottom: 80px !important;
+    }
+
+    /* Ensure main content doesn't get cut off */
+    main {
+      margin-bottom: 0;
+      padding-bottom: 2rem;
+    }
+  }
+
+  /* Notification badge */
+  .notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  }
+
+  /* Loading animation */
+  .loading-dots:after {
+    content: '.';
+    animation: dots 1.5s steps(5, end) infinite;
+  }
+  @keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60% { content: '...'; }
+    80%, 100% { content: ''; }
+  }
+
+  /* Input styles */
+  .input-area {
+    min-height: 180px;
+    resize: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    outline: 2px solid rgba(102, 126, 234, 0.4);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  }
+
+  /* Pretty Checkboxes */
+  input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1.2em;
+    height: 1.2em;
+    border-radius: 4px;
+    margin-right: 0.5em;
+    border: 1px solid #cbd5e1;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    background-color: white;
+  }
+
+  input[type="checkbox"]:checked {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: #667eea;
+  }
+
+  input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 0.3em;
+    top: 0.15em;
+    width: 0.5em;
+    height: 0.7em;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  input[type="checkbox"]:focus {
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+  }
+
+  /* Page transitions */
+  body {
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  body.transition-ready {
+    opacity: 1;
+  }
+
+  body.page-transitioning {
+    opacity: 0;
+  }
+
+  /* Enhanced Focus Styles for Accessibility */
+  :focus-visible {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+  }
+
+  /* Improve accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    .menu-sheet {
+      transition: none !important;
+    }
+
+    body.page-transitioning {
+      opacity: 1;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    header, footer, .mobile-fab, .mobile-bottom-nav {
+      display: none !important;
+    }
+
+    main {
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    body {
+      background: white !important;
+      color: black !important;
+    }
+
+    .card-hover {
+      box-shadow: none !important;
+      border: 1px solid #eee !important;
+      transform: none !important;
+    }
+  }
+
+  /* Content spacing for fixed header */
+  .main-content {
+    padding-top: 90px;
+  }
+
+  /* Ensure body has proper top padding */
+  body {
+    padding-top: 80px;
+  }
+
+  /* Remove body padding on mobile and add bottom padding for nav */
+  @media (max-width: 768px) {
+    body {
+      padding-top: 80px;
+      padding-bottom: 0; /* Remove bottom padding to fix mobile nav */
+    }
+  }
+
+  /* Smooth header transitions */
+  .header-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Header height consistency */
+  .header-main {
+    height: 80px;
+    display: flex;
+    align-items: center;
+  }
+</style>
+
+{% block extra_css %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col text-secondary-800 custom-scrollbar transition-all">
+
+<!-- Enhanced Header with Smart Scroll -->
+<header class="header-main header-transition"
+        x-data="{
+          scrolled: false,
+          lastScrollY: 0,
+          hidden: false,
+          init() {
+            let ticking = false;
+            const handleScroll = () => {
+              if (!ticking) {
+                requestAnimationFrame(() => {
+                  const currentScrollY = window.scrollY;
+                  this.scrolled = currentScrollY > 10;
+
+                  // Show/hide logic
+                  if (currentScrollY > this.lastScrollY && currentScrollY > 100) {
+                    // Scrolling down & past threshold - hide
+                    this.hidden = true;
+                  } else if (currentScrollY < this.lastScrollY || currentScrollY <= 100) {
+                    // Scrolling up or at top - show
+                    this.hidden = false;
+                  }
+
+                  this.lastScrollY = currentScrollY;
+                  ticking = false;
+                });
+                ticking = true;
+              }
+            };
+
+            window.addEventListener('scroll', handleScroll, { passive: true });
+          }
+        }"
+        :class="{
+          'header-scrolled': scrolled,
+          'header-hidden': hidden
+        }">
+  <div class="container max-w-6xl mx-auto px-4 h-full flex items-center justify-between">
+    <!-- Logo Section -->
+    <div class="flex items-center gap-2">
+      <a href="{% url 'home' %}" class="flex items-center gap-2 group">
+        <div class="p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <div class="flex items-center">
+          <h1 class="text-xl font-bold text-gradient diary-font">DiaryVault</h1>
+          <span class="beta-badge ml-2">Beta</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Desktop Navigation -->
+    {% if user.is_authenticated %}
+    <nav class="hidden md:flex items-center gap-1 absolute left-1/2 transform -translate-x-1/2">
+      <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        Dashboard
+      </a>
+      <a href="{% url 'library' %}" class="nav-link {% if request.resolver_match.url_name == 'library' %}active{% endif %}">
+        Library
+      </a>
+      <a href="{% url 'new_entry' %}" class="nav-link {% if request.resolver_match.url_name == 'new_entry' %}active{% endif %}">
+        Journal
+      </a>
+      <a href="{% url 'biography' %}" class="nav-link {% if request.resolver_match.url_name == 'biography' %}active{% endif %}">
+        Biography
+      </a>
+      <a href="{% url 'insights' %}" class="nav-link {% if request.resolver_match.url_name == 'insights' %}active{% endif %}">
+        Insights
+      </a>
+      <a href="{% url 'marketplace' %}" class="nav-link {% if request.resolver_match.url_name == 'marketplace' %}active{% endif %}">
+        Marketplace
+      </a>
+    </nav>
+    {% else %}
+    <nav class="hidden md:flex items-center gap-1 absolute left-1/2 transform -translate-x-1/2">
+      <a href="{% url 'signup' %}?feature=journal" class="nav-link">Journal</a>
+      <a href="{% url 'signup' %}?feature=library" class="nav-link">Library</a>
+      <a href="{% url 'signup' %}?feature=biography" class="nav-link">Biography</a>
+      <a href="{% url 'signup' %}?feature=insights" class="nav-link">Insights</a>
+      <a href="{% url 'marketplace' %}" class="nav-link {% if request.resolver_match.url_name == 'marketplace' %}active{% endif %}">Marketplace</a>
+    </nav>
+    {% endif %}
+
+    <!-- Right side navigation -->
+    <div class="flex items-center gap-3">
+      {% if user.is_authenticated %}
+      <a href="{% url 'account_settings' %}" class="hidden sm:flex items-center gap-2 hover:opacity-90 transition-all duration-300 group">
+        <div class="h-8 w-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all">
+          {{ user.username|first|upper }}
+        </div>
+      </a>
+      {% else %}
+      <div class="hidden md:flex gap-3 items-center">
+        <a href="{% url 'login' %}" class="text-primary-600 hover:text-primary-800 text-sm font-medium transition-all px-4 py-2 hover:bg-primary-50/70 rounded-full">Log in</a>
+        <a href="{% url 'signup' %}" class="btn-gradient text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg hover:shadow-xl">Sign up</a>
+      </div>
+      {% endif %}
+
+      <button id="menuToggleBtn" class="relative text-secondary-700 hover:text-primary-600 p-2 glass-effect rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+        {% if user.is_authenticated and unread_notifications > 0 %}
+        <span class="notification-badge">{{ unread_notifications }}</span>
+        {% endif %}
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Enhanced Mobile Menu with Marketplace Style - RESTORED FUNCTIONALITY -->
+<div id="menuOverlay" class="menu-overlay fixed inset-0 bg-black/40 z-50 hidden">
+  <div id="menuSheet" class="menu-sheet fixed bottom-0 left-0 right-0 rounded-t-3xl shadow-2xl z-50">
+    <div class="pull-indicator"></div>
+
+    <div class="px-6 pt-2 pb-3 flex justify-between items-center">
+      <h2 class="font-bold text-xl text-gradient diary-font">DiaryVault</h2>
+      <button id="closeMenuBtn" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    {% if user.is_authenticated %}
+    <!-- User Profile Section -->
+    <div class="px-6 pb-6">
+      <a href="{% url 'account_settings' %}" class="block">
+        <div class="flex items-center p-4 glass-effect rounded-2xl border border-primary-100/50">
+          <div class="h-12 w-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+            {{ user.username|first|upper }}
+          </div>
+          <div class="ml-4">
+            <div class="font-medium text-gray-800">{{ user.username }}</div>
+            <div class="text-sm text-gray-500">{{ total_entries|default:'0' }} journal entries</div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="px-6 pb-6">
+      <div class="grid grid-cols-4 gap-3">
+        <a href="{% url 'new_entry' %}" class="menu-item-animate delay-100 flex flex-col items-center p-3 glass-effect rounded-2xl border border-gray-100 shadow-sm menu-item">
+          <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </div>
+          <span class="text-xs font-medium">New Entry</span>
+        </a>
+        <a href="{% url 'library' %}" class="menu-item-animate delay-150 flex flex-col items-center p-3 glass-effect rounded-2xl border border-gray-100 shadow-sm menu-item">
+          <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <span class="text-xs font-medium">Calendar</span>
+        </a>
+        <a href="{% url 'marketplace' %}" class="menu-item-animate delay-200 flex flex-col items-center p-3 glass-effect rounded-2xl border border-gray-100 shadow-sm menu-item">
+          <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+          </div>
+          <span class="text-xs font-medium">Market</span>
+        </a>
+        <a href="{% url 'preferences' %}" class="menu-item-animate delay-250 flex flex-col items-center p-3 glass-effect rounded-2xl border border-gray-100 shadow-sm menu-item">
+          <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <span class="text-xs font-medium">Images</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Menu -->
+    <div class="px-6 pb-6">
+      <h3 class="text-xs uppercase text-gray-500 font-semibold mb-3 px-1 tracking-wider">Navigation</h3>
+
+      <div class="space-y-2">
+        <a href="{% url 'dashboard' %}" class="menu-item-animate delay-100 menu-category relative flex items-center py-3 px-4 {% if request.resolver_match.url_name == 'dashboard' %}bg-primary-50/80 text-primary-600 border-primary-200/50{% else %}hover:bg-gray-50/80 border-transparent{% endif %} rounded-xl border transition-all">
+          {% if request.resolver_match.url_name == 'dashboard' %}<div class="active-pill"></div>{% endif %}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+          </svg>
+          <span class="font-medium">Dashboard</span>
+        </a>
+
+        <a href="{% url 'library' %}" class="menu-item-animate delay-150 menu-category relative flex items-center py-3 px-4 {% if request.resolver_match.url_name == 'library' %}bg-primary-50/80 text-primary-600 border-primary-200/50{% else %}hover:bg-gray-50/80 border-transparent{% endif %} rounded-xl border transition-all">
+          {% if request.resolver_match.url_name == 'library' %}<div class="active-pill"></div>{% endif %}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+          </svg>
+          <span class="font-medium">Library</span>
+        </a>
+
+        <a href="{% url 'biography' %}" class="menu-item-animate delay-200 menu-category relative flex items-center py-3 px-4 {% if request.resolver_match.url_name == 'biography' %}bg-primary-50/80 text-primary-600 border-primary-200/50{% else %}hover:bg-gray-50/80 border-transparent{% endif %} rounded-xl border transition-all">
+          {% if request.resolver_match.url_name == 'biography' %}<div class="active-pill"></div>{% endif %}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span class="font-medium">Biography</span>
+        </a>
+
+        <a href="{% url 'insights' %}" class="menu-item-animate delay-250 menu-category relative flex items-center py-3 px-4 {% if request.resolver_match.url_name == 'insights' %}bg-primary-50/80 text-primary-600 border-primary-200/50{% else %}hover:bg-gray-50/80 border-transparent{% endif %} rounded-xl border transition-all">
+          {% if request.resolver_match.url_name == 'insights' %}<div class="active-pill"></div>{% endif %}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span class="font-medium">Insights</span>
+        </a>
+
+        <a href="{% url 'marketplace' %}" class="menu-item-animate delay-300 menu-category relative flex items-center py-3 px-4 {% if request.resolver_match.url_name == 'marketplace' %}bg-primary-50/80 text-primary-600 border-primary-200/50{% else %}hover:bg-gray-50/80 border-transparent{% endif %} rounded-xl border transition-all">
+          {% if request.resolver_match.url_name == 'marketplace' %}<div class="active-pill"></div>{% endif %}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span class="font-medium">Marketplace</span>
+        </a>
+      </div>
+
+      <h3 class="text-xs uppercase text-gray-500 font-semibold mt-6 mb-3 px-1 tracking-wider">Settings</h3>
+
+      <div class="space-y-2">
+        <a href="{% url 'account_settings' %}" class="menu-item-animate delay-350 menu-category relative flex items-center py-3 px-4 {% if request.resolver_match.url_name == 'account_settings' %}bg-primary-50/80 text-primary-600 border-primary-200/50{% else %}hover:bg-gray-50/80 border-transparent{% endif %} rounded-xl border transition-all">
+          {% if request.resolver_match.url_name == 'account_settings' %}<div class="active-pill"></div>{% endif %}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span class="font-medium">Account Settings</span>
+        </a>
+
+        <a href="{% url 'preferences' %}" class="menu-item-animate delay-350 menu-category relative flex items-center py-3 px-4 {% if request.resolver_match.url_name == 'preferences' %}bg-primary-50/80 text-primary-600 border-primary-200/50{% else %}hover:bg-gray-50/80 border-transparent{% endif %} rounded-xl border transition-all">
+          {% if request.resolver_match.url_name == 'preferences' %}<div class="active-pill"></div>{% endif %}
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          </svg>
+          <span class="font-medium">Journal Preferences</span>
+        </a>
+      </div>
+
+      <!-- Logout Button -->
+      <div class="mt-8">
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="w-full py-3 px-4 bg-red-50/80 hover:bg-red-100/80 text-red-600 rounded-xl flex items-center justify-center transition-all font-medium">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span>Logout</span>
+          </button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <!-- Enhanced Menu for non-logged in users -->
+    <div class="px-6 pb-6">
+      <h3 class="text-xs uppercase text-gray-500 font-semibold mb-4 px-1 tracking-wider">Discover DiaryVault</h3>
+
+      <div class="space-y-3 mb-8">
+        <a href="{% url 'signup' %}?feature=journal" class="menu-item-animate delay-100 flex items-center gap-4 p-4 glass-effect border-transparent hover:border-primary-200/30 rounded-xl transition-all border hover:shadow-md group">
+          <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <span class="font-semibold text-gray-800">Journal</span>
+            <span class="text-sm text-primary-600 block">Create daily entries</span>
+          </div>
+          <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1 rounded-full font-semibold opacity-0 group-hover:opacity-100 transition-opacity">Try it</span>
+        </a>
+
+        <a href="{% url 'signup' %}?feature=library" class="menu-item-animate delay-150 flex items-center gap-4 p-4 glass-effect border-transparent hover:border-primary-200/30 rounded-xl transition-all border hover:shadow-md group">
+          <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <span class="font-semibold text-gray-800">Library</span>
+            <span class="text-sm text-primary-600 block">Organize your memories</span>
+          </div>
+          <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1 rounded-full font-semibold opacity-0 group-hover:opacity-100 transition-opacity">Explore</span>
+        </a>
+
+        <a href="{% url 'signup' %}?feature=biography" class="menu-item-animate delay-200 flex items-center gap-4 p-4 glass-effect border-transparent hover:border-primary-200/30 rounded-xl transition-all border hover:shadow-md group">
+          <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <span class="font-semibold text-gray-800">Biography</span>
+            <span class="text-sm text-primary-600 block">Your life story</span>
+          </div>
+          <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1 rounded-full font-semibold opacity-0 group-hover:opacity-100 transition-opacity">Create</span>
+        </a>
+      </div>
+
+      <h3 class="text-xs uppercase text-gray-500 font-semibold mb-4 px-1 tracking-wider">Explore</h3>
+
+      <div class="space-y-2 mb-8">
+        <a href="{% url 'marketplace' %}" class="menu-item-animate delay-300 flex items-center py-3 px-4 {% if request.resolver_match.url_name == 'marketplace' %}bg-primary-50/80 text-primary-600 border-primary-200/50{% else %}hover:bg-gray-50/80 border-transparent{% endif %} rounded-xl border transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span class="font-medium">Marketplace</span>
+        </a>
+
+        <a href="{% url 'home' %}" class="menu-item-animate delay-350 flex items-center py-3 px-4 {% if request.resolver_match.url_name == 'home' %}bg-primary-50/80 text-primary-600 border-primary-200/50{% else %}hover:bg-gray-50/80 border-transparent{% endif %} rounded-xl border transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="font-medium">About DiaryVault</span>
+        </a>
+      </div>
+
+      <!-- Auth section -->
+      <div class="space-y-4">
+        <a href="{% url 'login' %}" class="menu-item-animate delay-400 flex items-center justify-center gap-3 py-3 px-4 glass-effect hover:bg-gray-50/80 rounded-xl transition-all border border-gray-200/50 hover:shadow-md font-medium">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+          </svg>
+          <span>Log in</span>
+        </a>
+
+        <a href="{% url 'signup' %}" class="menu-item-animate delay-450 flex items-center justify-center gap-3 py-3 px-4 btn-gradient rounded-xl transition-all border border-transparent shadow-lg font-medium hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+          </svg>
+          <span>Sign up for free</span>
+        </a>
+      </div>
+
+      <div class="mt-8 p-4 glass-effect rounded-2xl border border-primary-100/50 shadow-sm">
+        <p class="text-sm text-secondary-600 leading-relaxed text-center">Start your journaling journey today with DiaryVault. Create unlimited entries and discover insights about yourself.</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="h-6"></div>
+  </div>
+</div>
+
+<!-- Main Content with proper spacing -->
+<main class="flex-1 p-4 sm:p-6 lg:p-8 pb-6 sm:pb-6 flex flex-col items-center" style="margin-top: 0; padding-top: 2rem;">
+  {% block content %}
+  <!-- Page content will go here -->
+  {% endblock %}
+</main>
+
+<!-- Enhanced Mobile Navigation -->
+{% if user.is_authenticated %}
+<nav class="mobile-bottom-nav md:hidden px-2 py-2 flex justify-around">
+  <a href="{% url 'dashboard' %}" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile {% if request.resolver_match.url_name == 'dashboard' %}text-primary-600 active{% else %}text-secondary-500{% endif %} transition-all">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+    </svg>
+    <span class="text-xs mt-1 font-medium">Home</span>
+  </a>
+  <a href="{% url 'library' %}" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile {% if request.resolver_match.url_name == 'library' %}text-primary-600 active{% else %}text-secondary-500{% endif %} transition-all">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+    </svg>
+    <span class="text-xs mt-1 font-medium">Library</span>
+  </a>
+  <div class="flex flex-col items-center justify-center py-1 px-2 opacity-0 pointer-events-none">
+    <div class="h-5 w-5"></div>
+    <span class="text-xs mt-1 font-medium">New</span>
+  </div>
+  <a href="{% url 'biography' %}" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile {% if request.resolver_match.url_name == 'biography' %}text-primary-600 active{% else %}text-secondary-500{% endif %} transition-all">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+    <span class="text-xs mt-1 font-medium">Biography</span>
+  </a>
+  <a href="{% url 'marketplace' %}" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile {% if request.resolver_match.url_name == 'marketplace' %}text-primary-600 active{% else %}text-secondary-500{% endif %} transition-all">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+    <span class="text-xs mt-1 font-medium">Market</span>
+  </a>
+</nav>
+
+<!-- Floating Action Button -->
+<a href="{% url 'new_entry' %}" class="mobile-fab md:hidden btn-gradient shadow-xl p-4 rounded-full text-white hover:scale-105 active:scale-95 transition-all">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+  </svg>
+</a>
+{% else %}
+<!-- Mobile navigation for non-logged in users -->
+<nav class="mobile-bottom-nav md:hidden px-2 py-2 flex justify-around">
+  <a href="{% url 'signup' %}?feature=journal" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile text-secondary-500 transition-all">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+    </svg>
+    <span class="text-xs mt-1 font-medium">Journal</span>
+  </a>
+  <a href="{% url 'signup' %}?feature=biography" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile text-secondary-500 transition-all">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+    <span class="text-xs mt-1 font-medium">Biography</span>
+  </a>
+  <a href="{% url 'marketplace' %}" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile {% if request.resolver_match.url_name == 'marketplace' %}text-primary-600 active{% else %}text-secondary-500{% endif %} transition-all">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+    <span class="text-xs mt-1 font-medium">Explore</span>
+  </a>
+  <a href="{% url 'login' %}" class="flex flex-col items-center justify-center py-1 px-2 nav-item-mobile text-secondary-500 transition-all">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+    </svg>
+    <span class="text-xs mt-1 font-medium">Login</span>
+  </a>
+</nav>
+{% endif %}
+
+<!-- Enhanced footer with new branding -->
+<footer class="py-4 mt-8 glass-effect border-t border-primary-100/30 pb-safe">
+  <div class="w-full max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center">
+    <div class="mb-4 sm:mb-0 text-center sm:text-left">
+      <a href="{% url 'home' %}" class="flex items-center justify-center sm:justify-start mb-2 hover:opacity-90 transition-all duration-300 group">
+        <div class="glass-effect p-2 rounded-xl shadow-sm mr-3 group-hover:shadow-md group-hover:scale-105 transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <div class="flex items-center">
+          <h2 class="text-lg font-bold text-gradient diary-font">DiaryVault</h2>
+          <span class="beta-badge ml-2 scale-75">Beta</span>
+        </div>
+      </a>
+      <p class="text-xs text-secondary-500">© 2025 DiaryVault. All rights reserved.</p>
+    </div>
+    <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-sm font-medium">
+      <a href="https://crene.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-all duration-300 px-3 py-2 rounded-full hover:bg-primary-50/50 glass-effect">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span>Crene.com</span>
+      </a>
+      <a href="https://euphorie.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-all duration-300 px-3 py-2 rounded-full hover:bg-primary-50/50 glass-effect">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <span>Euphorie.com</span>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<!-- Enhanced JavaScript -->
+<script>
+// RESTORED: Universal menu toggle function - WORKING VERSION with all functionalities
+document.addEventListener('DOMContentLoaded', function() {
+  const menuToggleBtn = document.getElementById('menuToggleBtn');
+  const closeMenuBtn = document.getElementById('closeMenuBtn');
+  const menuOverlay = document.getElementById('menuOverlay');
+  const menuSheet = document.getElementById('menuSheet');
+
+  if (menuToggleBtn && closeMenuBtn && menuOverlay) {
+    function toggleMenu() {
+      if (menuOverlay.classList.contains('hidden')) {
+        // Show the menu
+        menuOverlay.classList.remove('hidden');
+
+        // Small delay to allow the display:block to take effect before animation
+        setTimeout(() => {
+          menuOverlay.classList.add('active');
+          menuSheet.classList.add('open', 'menu-open');
+        }, 10);
+      } else {
+        // Hide the menu
+        menuSheet.classList.remove('open', 'menu-open');
+        menuOverlay.classList.remove('active');
+
+        // Wait for animation to complete before hiding the menu
+        setTimeout(() => {
+          menuOverlay.classList.add('hidden');
+        }, 300);
+      }
+    }
+
+    // Add event listeners to buttons
+    menuToggleBtn.addEventListener('click', toggleMenu);
+    closeMenuBtn.addEventListener('click', toggleMenu);
+
+    // Close menu when clicking outside
+    menuOverlay.addEventListener('click', function(event) {
+      if (!menuOverlay.classList.contains('hidden') &&
+          !menuSheet.contains(event.target) &&
+          !menuToggleBtn.contains(event.target) &&
+          event.target === menuOverlay) {
+        toggleMenu();
+      }
+    });
+
+    // Handle escape key to close menu
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !menuOverlay.classList.contains('hidden')) {
+        toggleMenu();
+      }
+    });
+
+    // Support for swipe down to close the bottom sheet menu
+    let startY = 0;
+    let currentY = 0;
+
+    menuSheet.addEventListener('touchstart', function(e) {
+        startY = e.touches[0].clientY;
+    });
+
+    menuSheet.addEventListener('touchmove', function(e) {
+        currentY = e.touches[0].clientY;
+        const diff = currentY - startY;
+
+        if (diff > 0) {
+            menuSheet.style.transform = `translateY(${diff}px)`;
+            e.preventDefault();
+        }
+    });
+
+    menuSheet.addEventListener('touchend', function() {
+        const diff = currentY - startY;
+
+        if (diff > 80) {
+            toggleMenu();
+        } else {
+            menuSheet.style.transform = '';
+        }
+    });
+  }
+
+  // Initialize other functionality
+  initializeAnimations();
+  initializePageTransitions();
+});
+
+// Initialize animation system
+function initializeAnimations() {
+  const animateElements = document.querySelectorAll('.animate-on-load');
+  if (animateElements.length > 0) {
+    animateElements.forEach((element, index) => {
+      setTimeout(() => {
+        element.classList.add('animate-fade-in');
+      }, 100 * index);
+    });
+  }
+
+  // Intersection Observer for scroll animations
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-fade-in');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('[class*="animate-"]').forEach(el => {
+      observer.observe(el);
+    });
+  }
+}
+
+// Enhanced page transitions - RESTORED with keyboard navigation and accessibility features
+function initializePageTransitions() {
+  // Apply transition to all internal navigation links
+  document.querySelectorAll('a[href^="/"]').forEach(link => {
+    // Skip certain types of links
+    if (link.getAttribute('href').includes('://') ||
+        link.getAttribute('href').startsWith('#') ||
+        link.classList.contains('no-transition') ||
+        link.hasAttribute('download')) {
+      return;
+    }
+
+    link.addEventListener('click', function(e) {
+      // Skip if modifier keys are pressed or it's a special case
+      if (e.metaKey || e.ctrlKey || e.shiftKey ||
+          this.tagName === 'BUTTON' ||
+          this.getAttribute('target') === '_blank' ||
+          this.classList.contains('no-transition')) {
+        return;
+      }
+
+      e.preventDefault();
+      const target = this.getAttribute('href');
+
+      // Fade out
+      document.body.classList.add('page-transitioning');
+
+      // Navigate after transition
+      setTimeout(() => {
+        window.location.href = target;
+      }, 300);
+    });
+  });
+
+  // Handle form submissions with animation
+  document.querySelectorAll('form:not(.no-transition)').forEach(form => {
+    form.addEventListener('submit', function(e) {
+      if (form.classList.contains('ajax-form') ||
+          form.getAttribute('data-no-animate') ||
+          form.method.toLowerCase() === 'get') {
+        return;
+      }
+
+      // For regular form submissions, add transition
+      document.body.classList.add('page-transitioning');
+    });
+  });
+}
+
+// Enhanced mobile navigation animations
+const mobileNavItems = document.querySelectorAll('.nav-item-mobile');
+mobileNavItems.forEach(item => {
+  item.addEventListener('click', function() {
+    if (!this.classList.contains('active')) {
+      // Create ripple effect
+      const ripple = document.createElement('div');
+      ripple.style.cssText = `
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.3);
+        transform: scale(0);
+        animation: ripple 0.6s linear;
+        pointer-events: none;
+      `;
+
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = '50%';
+      ripple.style.top = '50%';
+      ripple.style.transform = 'translate(-50%, -50%) scale(0)';
+
+      this.style.position = 'relative';
+      this.appendChild(ripple);
+
+      setTimeout(() => ripple.remove(), 600);
+    }
+  });
+});
+
+// Add ripple animation CSS
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes ripple {
+    to {
+      transform: translate(-50%, -50%) scale(4);
+      opacity: 0;
+    }
+  }
+`;
+document.head.appendChild(style);
+
+// Handle browser back button with animation
+window.addEventListener('pageshow', function(event) {
+  if (event.persisted) {
+    document.body.style.opacity = '1';
+    document.body.style.transform = 'scale(1)';
+  }
+});
+
+// Enhanced keyboard navigation - keeping all functionality from template 2
+document.addEventListener('keydown', function(e) {
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+
+  // Keyboard shortcuts
+  if (e.key === 'n' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    const newEntryLink = document.querySelector('a[href*="new_entry"]');
+    if (newEntryLink) newEntryLink.click();
+  }
+
+  if (e.key === 'm' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    const menuButton = document.getElementById('menuToggleBtn');
+    if (menuButton) menuButton.click();
+  }
+
+  if (e.key === 'd' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    const dashboardLink = document.querySelector('a[href*="dashboard"]');
+    if (dashboardLink) dashboardLink.click();
+  }
+
+  // Arrow key navigation for mobile nav
+  if (window.innerWidth <= 768) {
+    const activeNavItem = document.querySelector('.nav-item-mobile.active');
+    const navItems = Array.from(document.querySelectorAll('.nav-item-mobile'));
+
+    if (activeNavItem && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      e.preventDefault();
+      const currentIndex = navItems.indexOf(activeNavItem);
+      let nextIndex;
+
+      if (e.key === 'ArrowLeft') {
+        nextIndex = currentIndex > 0 ? currentIndex - 1 : navItems.length - 1;
+      } else {
+        nextIndex = currentIndex < navItems.length - 1 ? currentIndex + 1 : 0;
+      }
+
+      navItems[nextIndex].click();
+    }
+  }
+});
+
+// Service Worker registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => console.log('SW registered'))
+      .catch(error => console.log('SW registration failed'));
+  });
+}
+
+// Performance optimization - lazy loading for images
+if ('IntersectionObserver' in window) {
+  const imageObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        if (img.dataset.src) {
+          img.src = img.dataset.src;
+          img.removeAttribute('data-src');
+          imageObserver.unobserve(img);
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('img[data-src]').forEach(img => {
+    imageObserver.observe(img);
+  });
+}
+
+// Smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]:not(.no-smooth-scroll)').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const targetId = this.getAttribute('href');
+    if (targetId === '#') return;
+
+    const targetElement = document.querySelector(targetId);
+    if (targetElement) {
+      targetElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  });
+});
+
+// Toast notification system - preserving from template 1
+function showToast(message, type = 'info', duration = 3000) {
+  const toast = document.createElement('div');
+  toast.className = `fixed top-4 right-4 z-50 glass-effect rounded-xl p-4 shadow-lg transform translate-x-full transition-transform duration-300`;
+
+  const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+
+  toast.innerHTML = `
+    <div class="flex items-center gap-3">
+      <span class="text-lg">${icon}</span>
+      <span class="font-medium text-gray-800">${message}</span>
+    </div>
+  `;
+
+  document.body.appendChild(toast);
+
+  // Animate in
+  setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+
+  // Animate out and remove
+  setTimeout(() => {
+    toast.classList.add('translate-x-full');
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+// Global toast function for easy access
+window.showToast = showToast;
+
+// Handle connection status
+window.addEventListener('online', () => showToast('Connection restored', 'success'));
+window.addEventListener('offline', () => showToast('You are offline', 'warning'));
+
+// Initialize everything when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  // Add smooth loading animation to body
+  document.body.style.opacity = '0';
+  document.body.style.transform = 'translateY(10px)';
+
+  setTimeout(() => {
+    document.body.style.transition = 'all 0.6s ease';
+    document.body.style.opacity = '1';
+    document.body.style.transform = 'translateY(0)';
+  }, 100);
+});
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>
