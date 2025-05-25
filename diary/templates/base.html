@@ -1207,7 +1207,7 @@
 
 <!-- Enhanced JavaScript -->
 <script>
-// FIXED: Universal menu toggle function - Preventing event bubbling issues
+// FIXED: Universal menu toggle function - Ensuring proper functionality
 function initializeMenu() {
   const menuToggleBtn = document.getElementById('menuToggleBtn');
   const closeMenuBtn = document.getElementById('closeMenuBtn');
@@ -1226,12 +1226,7 @@ function initializeMenu() {
     return;
   }
 
-  let isToggling = false; // Prevent rapid toggling
-
   function toggleMenu() {
-    if (isToggling) return;
-    isToggling = true;
-
     console.log('Toggle menu called, current state:', menuOverlay.classList.contains('hidden') ? 'hidden' : 'visible');
 
     if (menuOverlay.classList.contains('hidden')) {
@@ -1243,7 +1238,6 @@ function initializeMenu() {
       requestAnimationFrame(() => {
         menuOverlay.classList.add('active');
         menuSheet.classList.add('open', 'menu-open');
-        setTimeout(() => { isToggling = false; }, 100); // Reset flag after animation starts
       });
     } else {
       // Hide the menu
@@ -1254,12 +1248,11 @@ function initializeMenu() {
       // Wait for animation to complete before hiding the menu
       setTimeout(() => {
         menuOverlay.classList.add('hidden');
-        isToggling = false; // Reset flag after animation completes
       }, 400);
     }
   }
 
-  // Add event listeners with proper event handling
+  // Add event listeners with proper error handling
   menuToggleBtn.addEventListener('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -1272,20 +1265,6 @@ function initializeMenu() {
     e.stopPropagation();
     console.log('Close menu button clicked');
     toggleMenu();
-  });
-
-  // FIXED: Close menu when clicking on overlay (not on menu content) with proper event handling
-  menuOverlay.addEventListener('click', function(event) {
-    // Only close if clicking directly on the overlay, not on its children
-    if (event.target === menuOverlay && !menuOverlay.classList.contains('hidden')) {
-      console.log('Clicked on overlay background, closing menu');
-      toggleMenu();
-    }
-  });
-
-  // Prevent clicks inside the menu from bubbling to overlay
-  menuSheet.addEventListener('click', function(e) {
-    e.stopPropagation();
   });
 
   // Handle escape key to close menu
