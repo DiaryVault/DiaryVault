@@ -653,13 +653,24 @@
 
       /* Reduced Motion */
       @media (prefers-reduced-motion: reduce) {
-        * {
-          animation-duration: 0.01ms !important;
-          animation-iteration-count: 1 !important;
-          transition-duration: 0.01ms !important;
-        }
-      }
+          * {
+              animation-duration: 0.01ms !important;
+              animation-iteration-count: 1 !important;
+              transition-duration: 0.01ms !important;
+              /* Remove scroll-behavior override */
+          }
 
+        html {
+            scroll-behavior: smooth;
+            /* Remove overflow-x: hidden if present */
+        }
+
+        .glass-nav, .glass-card {
+            will-change: transform;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+        
       /* High Contrast Mode */
       @media (prefers-contrast: high) {
         .glass-card, .glass-nav {
