@@ -844,57 +844,74 @@
 <div class="mb-16">
   <!-- Featured Journal Hero -->
   {% if featured_journal %}
-  <div class="glass-effect rounded-3xl p-8 mb-12 relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-300"
+  <div class="glass-effect rounded-3xl p-8 mb-12 relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-all duration-300 hover:shadow-2xl group"
       onclick="window.location.href='{% url 'marketplace_journal_detail' featured_journal.id %}'">
-    <div class="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
+
+    <!-- Hover overlay for better visual feedback -->
+    <div class="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 group-hover:from-blue-600/30 group-hover:to-purple-600/30 transition-all duration-300"></div>
+
     <div class="relative z-10">
       <div class="flex items-center gap-3 mb-4">
-        <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold">
+        <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold group-hover:scale-105 transition-transform">
           ⭐ Featured Journal
         </span>
-        <span class="text-sm text-gray-600">Editor's Pick</span>
+        <span class="text-sm text-gray-600 group-hover:text-gray-800 transition-colors">Editor's Pick</span>
       </div>
 
       <div class="grid md:grid-cols-2 gap-8 items-center">
         <div>
-          <h2 class="text-3xl font-bold diary-font mb-4 hover:text-blue-600 transition-colors">{{ featured_journal.title }}</h2>
-          <p class="text-gray-700 text-lg mb-6 leading-relaxed">{{ featured_journal.description|truncatewords:30 }}</p>
+          <h2 class="text-3xl font-bold diary-font mb-4 group-hover:text-blue-600 transition-colors">{{ featured_journal.title }}</h2>
+          <p class="text-gray-700 text-lg mb-6 leading-relaxed group-hover:text-gray-800 transition-colors">{{ featured_journal.description|truncatewords:30 }}</p>
 
           <div class="flex items-center gap-6 mb-6">
             <div class="flex items-center gap-2">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform">
                 {{ featured_journal.author.first_name|first|upper }}{{ featured_journal.author.last_name|first|upper }}
               </div>
               <div>
-                <p class="font-semibold text-gray-800">{{ featured_journal.author.get_full_name|default:featured_journal.author.username }}</p>
-                <p class="text-sm text-gray-600">{{ featured_journal.entries.count }} entries</p>
+                <p class="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">{{ featured_journal.author.get_full_name|default:featured_journal.author.username }}</p>
+                <p class="text-sm text-gray-600 group-hover:text-gray-700 transition-colors">{{ featured_journal.entries.count }} entries</p>
               </div>
             </div>
 
-            <div class="flex items-center gap-4 text-sm text-gray-600">
-              <span>👁️ {{ featured_journal.view_count|default:0 }}</span>
-              <span>❤️ {{ featured_journal.likes.count }}</span>
+            <div class="flex items-center gap-4 text-sm text-gray-600 group-hover:text-gray-700 transition-colors">
+              <span class="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                {{ featured_journal.view_count|default:0 }}
+              </span>
+              <span class="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                {{ featured_journal.likes.count }}
+              </span>
               {% if featured_journal.total_tips > 0 %}
-                <span>💰 ${{ featured_journal.total_tips|floatformat:0 }}</span>
+                <span class="flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0-2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  ${{ featured_journal.total_tips|floatformat:0 }}
+                </span>
               {% endif %}
             </div>
           </div>
 
           <div class="flex gap-4">
-            <a href="{% url 'marketplace_journal_detail' featured_journal.id %}"
-              class="btn-gradient px-8 py-4 rounded-xl font-semibold inline-flex items-center gap-2 hover:scale-105 transition-transform"
-              onclick="event.stopPropagation();">
+            <span class="btn-gradient px-8 py-4 rounded-xl font-semibold inline-flex items-center gap-2 group-hover:scale-105 transition-transform pointer-events-none">
               Read Now
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
               </svg>
-            </a>
+            </span>
             {% if featured_journal.price == 0 %}
-              <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl font-bold">
+              <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl font-bold pointer-events-none">
                 FREE
               </span>
             {% else %}
-              <span class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-6 py-4 rounded-xl font-bold">
+              <span class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-6 py-4 rounded-xl font-bold pointer-events-none">
                 ${{ featured_journal.price }}
               </span>
             {% endif %}
@@ -904,11 +921,11 @@
         <div class="relative">
           {% if featured_journal.cover_image %}
             <img src="{{ featured_journal.cover_image.url }}" alt="{{ featured_journal.title }}"
-                class="w-full h-80 object-cover rounded-2xl shadow-2xl hover:scale-105 transition-transform duration-300">
+                class="w-full h-80 object-cover rounded-2xl shadow-2xl group-hover:scale-105 transition-transform duration-300">
           {% else %}
-            <div class="w-full h-80 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 rounded-2xl shadow-2xl flex items-center justify-center hover:scale-105 transition-transform duration-300">
+            <div class="w-full h-80 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 rounded-2xl shadow-2xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
               <div class="text-white text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
                 <p class="font-bold text-xl">{{ featured_journal.title|truncatewords:3 }}</p>
