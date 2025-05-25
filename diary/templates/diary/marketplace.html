@@ -844,7 +844,8 @@
 <div class="mb-16">
   <!-- Featured Journal Hero -->
   {% if featured_journal %}
-  <div class="glass-effect rounded-3xl p-8 mb-12 relative overflow-hidden">
+  <div class="glass-effect rounded-3xl p-8 mb-12 relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform duration-300"
+      onclick="window.location.href='{% url 'marketplace_journal_detail' featured_journal.id %}'">
     <div class="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
     <div class="relative z-10">
       <div class="flex items-center gap-3 mb-4">
@@ -856,7 +857,7 @@
 
       <div class="grid md:grid-cols-2 gap-8 items-center">
         <div>
-          <h2 class="text-3xl font-bold diary-font mb-4">{{ featured_journal.title }}</h2>
+          <h2 class="text-3xl font-bold diary-font mb-4 hover:text-blue-600 transition-colors">{{ featured_journal.title }}</h2>
           <p class="text-gray-700 text-lg mb-6 leading-relaxed">{{ featured_journal.description|truncatewords:30 }}</p>
 
           <div class="flex items-center gap-6 mb-6">
@@ -881,7 +882,8 @@
 
           <div class="flex gap-4">
             <a href="{% url 'marketplace_journal_detail' featured_journal.id %}"
-               class="btn-gradient px-8 py-4 rounded-xl font-semibold inline-flex items-center gap-2">
+              class="btn-gradient px-8 py-4 rounded-xl font-semibold inline-flex items-center gap-2 hover:scale-105 transition-transform"
+              onclick="event.stopPropagation();">
               Read Now
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -902,9 +904,9 @@
         <div class="relative">
           {% if featured_journal.cover_image %}
             <img src="{{ featured_journal.cover_image.url }}" alt="{{ featured_journal.title }}"
-                 class="w-full h-80 object-cover rounded-2xl shadow-2xl">
+                class="w-full h-80 object-cover rounded-2xl shadow-2xl hover:scale-105 transition-transform duration-300">
           {% else %}
-            <div class="w-full h-80 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 rounded-2xl shadow-2xl flex items-center justify-center">
+            <div class="w-full h-80 bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 rounded-2xl shadow-2xl flex items-center justify-center hover:scale-105 transition-transform duration-300">
               <div class="text-white text-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -937,31 +939,32 @@
 
       <div class="space-y-4">
         {% for journal in top_earning %}
-          <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-white/50 transition-colors cursor-pointer"
-               onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
-            <div class="flex-shrink-0">
-              {% if journal.cover_image %}
-                <img src="{{ journal.cover_image.url }}" alt="{{ journal.title }}" class="w-12 h-12 object-cover rounded-lg">
-              {% else %}
-                <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                  {{ journal.title|first }}
-                </div>
-              {% endif %}
+          <a href="{% url 'marketplace_journal_detail' journal.id %}" class="block">
+            <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-white/50 transition-all duration-200 cursor-pointer hover:scale-[1.02] hover:shadow-md">
+              <div class="flex-shrink-0">
+                {% if journal.cover_image %}
+                  <img src="{{ journal.cover_image.url }}" alt="{{ journal.title }}" class="w-12 h-12 object-cover rounded-lg">
+                {% else %}
+                  <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                    {{ journal.title|first }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-semibold text-gray-800 truncate hover:text-blue-600 transition-colors">{{ journal.title|truncatewords:4 }}</h4>
+                <p class="text-sm text-gray-600">by {{ journal.author.get_full_name|default:journal.author.username }}</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <div class="font-bold text-green-600">${{ journal.total_tips|floatformat:0 }}</div>
+                <div class="text-xs text-gray-500">{{ journal.likes.count }} likes</div>
+              </div>
             </div>
-            <div class="flex-1 min-w-0">
-              <h4 class="font-semibold text-gray-800 truncate">{{ journal.title|truncatewords:4 }}</h4>
-              <p class="text-sm text-gray-600">by {{ journal.author.get_full_name|default:journal.author.username }}</p>
-            </div>
-            <div class="text-right flex-shrink-0">
-              <div class="font-bold text-green-600">${{ journal.total_tips|floatformat:0 }}</div>
-              <div class="text-xs text-gray-500">{{ journal.likes.count }} likes</div>
-            </div>
-          </div>
+          </a>
         {% endfor %}
       </div>
 
       <div class="mt-4 pt-4 border-t border-gray-200">
-        <a href="{% url 'marketplace' %}?sort=top_earning" class="text-green-600 hover:text-green-700 font-semibold text-sm">
+        <a href="{% url 'marketplace' %}?sort=top_earning" class="text-green-600 hover:text-green-700 font-semibold text-sm hover:underline transition-colors">
           View all top earners →
         </a>
       </div>
@@ -983,31 +986,32 @@
 
       <div class="space-y-4">
         {% for journal in popular_free %}
-          <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-white/50 transition-colors cursor-pointer"
-               onclick="window.location.href='{% url 'marketplace_journal_detail' journal.id %}'">
-            <div class="flex-shrink-0">
-              {% if journal.cover_image %}
-                <img src="{{ journal.cover_image.url }}" alt="{{ journal.title }}" class="w-12 h-12 object-cover rounded-lg">
-              {% else %}
-                <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                  {{ journal.title|first }}
-                </div>
-              {% endif %}
+          <a href="{% url 'marketplace_journal_detail' journal.id %}" class="block">
+            <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-white/50 transition-all duration-200 cursor-pointer hover:scale-[1.02] hover:shadow-md">
+              <div class="flex-shrink-0">
+                {% if journal.cover_image %}
+                  <img src="{{ journal.cover_image.url }}" alt="{{ journal.title }}" class="w-12 h-12 object-cover rounded-lg">
+                {% else %}
+                  <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                    {{ journal.title|first }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-semibold text-gray-800 truncate hover:text-blue-600 transition-colors">{{ journal.title|truncatewords:4 }}</h4>
+                <p class="text-sm text-gray-600">by {{ journal.author.get_full_name|default:journal.author.username }}</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <div class="font-bold text-blue-600">FREE</div>
+                <div class="text-xs text-gray-500">{{ journal.likes.count }} likes</div>
+              </div>
             </div>
-            <div class="flex-1 min-w-0">
-              <h4 class="font-semibold text-gray-800 truncate">{{ journal.title|truncatewords:4 }}</h4>
-              <p class="text-sm text-gray-600">by {{ journal.author.get_full_name|default:journal.author.username }}</p>
-            </div>
-            <div class="text-right flex-shrink-0">
-              <div class="font-bold text-blue-600">FREE</div>
-              <div class="text-xs text-gray-500">{{ journal.likes.count }} likes</div>
-            </div>
-          </div>
+          </a>
         {% endfor %}
       </div>
 
       <div class="mt-4 pt-4 border-t border-gray-200">
-        <a href="{% url 'marketplace' %}?price=free" class="text-blue-600 hover:text-blue-700 font-semibold text-sm">
+        <a href="{% url 'marketplace' %}?price=free" class="text-blue-600 hover:text-blue-700 font-semibold text-sm hover:underline transition-colors">
           View all free journals →
         </a>
       </div>
@@ -1065,11 +1069,11 @@
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       {% for category in categories|slice:":10" %}
         <a href="{% url 'marketplace' %}?category={{ category.slug }}"
-           class="glass-effect p-6 rounded-xl text-center hover:scale-105 transition-transform group">
+          class="glass-effect p-6 rounded-xl text-center hover:scale-105 transition-all duration-200 group cursor-pointer hover:shadow-lg">
           <div class="w-12 h-12 bg-gradient-to-br from-{{ category.color }}-400 to-{{ category.color }}-600 rounded-full mx-auto mb-3 flex items-center justify-center group-hover:scale-110 transition-transform">
             <span class="text-white font-bold text-lg">{{ category.name|first }}</span>
           </div>
-          <h4 class="font-semibold text-gray-800 mb-1">{{ category.name }}</h4>
+          <h4 class="font-semibold text-gray-800 mb-1 group-hover:text-blue-600 transition-colors">{{ category.name }}</h4>
           <p class="text-sm text-gray-600">{{ category.journal_count }} journal{{ category.journal_count|pluralize }}</p>
         </a>
       {% endfor %}
