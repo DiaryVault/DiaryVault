@@ -652,12 +652,24 @@
 
   /* Content spacing for fixed header */
   .main-content {
+    padding-top: 90px;
+  }
+
+  /* Ensure body has proper top padding */
+  body {
     padding-top: 80px;
   }
 
   /* Smooth header transitions */
   .header-transition {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Header height consistency */
+  .header-main {
+    height: 80px;
+    display: flex;
+    align-items: center;
   }
 </style>
 
@@ -670,30 +682,39 @@
         x-data="{
           scrolled: false,
           lastScrollY: 0,
-          hidden: false
+          hidden: false,
+          init() {
+            let ticking = false;
+            const handleScroll = () => {
+              if (!ticking) {
+                requestAnimationFrame(() => {
+                  const currentScrollY = window.scrollY;
+                  this.scrolled = currentScrollY > 10;
+
+                  // Show/hide logic
+                  if (currentScrollY > this.lastScrollY && currentScrollY > 100) {
+                    // Scrolling down & past threshold - hide
+                    this.hidden = true;
+                  } else if (currentScrollY < this.lastScrollY || currentScrollY <= 100) {
+                    // Scrolling up or at top - show
+                    this.hidden = false;
+                  }
+
+                  this.lastScrollY = currentScrollY;
+                  ticking = false;
+                });
+                ticking = true;
+              }
+            };
+
+            window.addEventListener('scroll', handleScroll, { passive: true });
+          }
         }"
-        x-init="
-          window.addEventListener('scroll', () => {
-            const currentScrollY = window.scrollY;
-            scrolled = currentScrollY > 10;
-
-            // Show/hide logic
-            if (currentScrollY > lastScrollY && currentScrollY > 100) {
-              // Scrolling down & past threshold - hide
-              hidden = true;
-            } else if (currentScrollY < lastScrollY || currentScrollY <= 100) {
-              // Scrolling up or at top - show
-              hidden = false;
-            }
-
-            lastScrollY = currentScrollY;
-          })
-        "
         :class="{
           'header-scrolled': scrolled,
           'header-hidden': hidden
         }">
-  <div class="container max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+  <div class="container max-w-6xl mx-auto px-4 h-full flex items-center justify-between">
     <!-- Logo Section -->
     <div class="flex items-center gap-2">
       <a href="{% url 'home' %}" class="flex items-center gap-2 group">
@@ -1008,7 +1029,7 @@
 </div>
 
 <!-- Main Content with proper spacing -->
-<main class="main-content flex-1 p-4 sm:p-6 lg:p-8 pb-6 sm:pb-6 flex flex-col items-center">
+<main class="flex-1 p-4 sm:p-6 lg:p-8 pb-6 sm:pb-6 flex flex-col items-center" style="margin-top: 0; padding-top: 2rem;">
   {% block content %}
   <!-- Page content will go here -->
   {% endblock %}
@@ -1119,99 +1140,120 @@
 
 <!-- Enhanced JavaScript -->
 <script>
-// Enhanced menu toggle with smart scroll header
+// Enhanced menu toggle with proper event handling
 document.addEventListener('DOMContentLoaded', function() {
   const menuToggleBtn = document.getElementById('menuToggleBtn');
   const closeMenuBtn = document.getElementById('closeMenuBtn');
   const menuOverlay = document.getElementById('menuOverlay');
   const menuSheet = document.getElementById('menuSheet');
 
-  if (menuToggleBtn && closeMenuBtn && menuOverlay) {
-    function toggleMenu() {
-      if (menuOverlay.classList.contains('hidden')) {
-        // Show the menu
-        menuOverlay.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+  // Check if elements exist before adding event listeners
+  if (!menuToggleBtn || !closeMenuBtn || !menuOverlay || !menuSheet) {
+    console.warn('Menu elements not found');
+    return;
+  }
 
-        // Small delay to allow the display:block to take effect before animation
-        setTimeout(() => {
-          menuOverlay.classList.add('active');
-          menuSheet.classList.add('open', 'menu-open');
-        }, 10);
-      } else {
-        // Hide the menu
-        menuSheet.classList.remove('open', 'menu-open');
-        menuOverlay.classList.remove('active');
-        document.body.style.overflow = '';
+  function toggleMenu() {
+    const isHidden = menuOverlay.classList.contains('hidden');
 
-        // Wait for animation to complete before hiding the menu
-        setTimeout(() => {
-          menuOverlay.classList.add('hidden');
-        }, 300);
+    if (isHidden) {
+      // Show the menu
+      menuOverlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+
+      // Force reflow before adding classes
+      menuOverlay.offsetHeight;
+
+      // Small delay to allow the display:block to take effect before animation
+      requestAnimationFrame(() => {
+        menuOverlay.classList.add('active');
+        menuSheet.classList.add('open', 'menu-open');
+      });
+    } else {
+      // Hide the menu
+      menuSheet.classList.remove('open', 'menu-open');
+      menuOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+
+      // Wait for animation to complete before hiding the menu
+      setTimeout(() => {
+        menuOverlay.classList.add('hidden');
+      }, 400);
+    }
+  }
+
+  // Add event listeners
+  menuToggleBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleMenu();
+  });
+
+  closeMenuBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleMenu();
+  });
+
+  // Close menu when clicking outside
+  menuOverlay.addEventListener('click', function(event) {
+    if (event.target === menuOverlay) {
+      toggleMenu();
+    }
+  });
+
+  // Prevent menu sheet clicks from closing the menu
+  menuSheet.addEventListener('click', function(e) {
+    e.stopPropagation();
+  });
+
+  // Handle escape key to close menu
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !menuOverlay.classList.contains('hidden')) {
+      toggleMenu();
+    }
+  });
+
+  // Enhanced touch support for mobile menu
+  let startY = 0;
+  let currentY = 0;
+  let isDragging = false;
+
+  menuSheet.addEventListener('touchstart', function(e) {
+    startY = e.touches[0].clientY;
+    isDragging = true;
+  }, { passive: true });
+
+  menuSheet.addEventListener('touchmove', function(e) {
+    if (!isDragging) return;
+
+    currentY = e.touches[0].clientY;
+    const diff = currentY - startY;
+
+    if (diff > 0) {
+      const transform = Math.min(diff, 200);
+      menuSheet.style.transform = `translateY(${transform}px)`;
+
+      // Add resistance
+      if (diff > 50) {
+        e.preventDefault();
       }
     }
+  }, { passive: false });
 
-    // Add event listeners to buttons
-    menuToggleBtn.addEventListener('click', toggleMenu);
-    closeMenuBtn.addEventListener('click', toggleMenu);
+  menuSheet.addEventListener('touchend', function() {
+    if (!isDragging) return;
 
-    // Close menu when clicking outside
-    menuOverlay.addEventListener('click', function(event) {
-      if (!menuOverlay.classList.contains('hidden') &&
-          !menuSheet.contains(event.target) &&
-          !menuToggleBtn.contains(event.target) &&
-          event.target === menuOverlay) {
-        toggleMenu();
-      }
-    });
+    const diff = currentY - startY;
+    isDragging = false;
 
-    // Handle escape key to close menu
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && !menuOverlay.classList.contains('hidden')) {
-        toggleMenu();
-      }
-    });
-
-    // Support for swipe down to close the bottom sheet menu
-    let startY = 0;
-    let currentY = 0;
-    let isDragging = false;
-
-    menuSheet.addEventListener('touchstart', function(e) {
-      startY = e.touches[0].clientY;
-      isDragging = true;
-    });
-
-    menuSheet.addEventListener('touchmove', function(e) {
-      if (!isDragging) return;
-
-      currentY = e.touches[0].clientY;
-      const diff = currentY - startY;
-
-      if (diff > 0) {
-        const transform = Math.min(diff, 200);
-        menuSheet.style.transform = `translateY(${transform}px)`;
-
-        // Add resistance
-        if (diff > 50) {
-          e.preventDefault();
-        }
-      }
-    });
-
-    menuSheet.addEventListener('touchend', function() {
-      if (!isDragging) return;
-
-      const diff = currentY - startY;
-      isDragging = false;
-
-      if (diff > 80) {
-        toggleMenu();
-      } else {
-        menuSheet.style.transform = '';
-      }
-    });
-  }
+    if (diff > 80) {
+      toggleMenu();
+    } else {
+      // Reset transform
+      menuSheet.style.transform = '';
+    }
+  }, { passive: true });
 
   // Initialize animations
   initializeAnimations();
@@ -1232,53 +1274,67 @@ function initializeAnimations() {
   }
 
   // Intersection Observer for scroll animations
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('animate-fade-in');
-      }
-    });
-  }, { threshold: 0.1 });
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-fade-in');
+        }
+      });
+    }, { threshold: 0.1 });
 
-  document.querySelectorAll('[class*="animate-"]').forEach(el => {
-    observer.observe(el);
-  });
+    document.querySelectorAll('[class*="animate-"]').forEach(el => {
+      observer.observe(el);
+    });
+  }
 }
 
 // Enhanced page transitions
 function initializePageTransitions() {
   // Apply transition to all internal navigation links
   document.querySelectorAll('a[href^="/"]').forEach(link => {
-    if (!link.getAttribute('href').includes('://') &&
-        !link.getAttribute('href').startsWith('#') &&
-        !link.classList.contains('no-transition')) {
-
-      link.addEventListener('click', function(e) {
-        if (e.metaKey || e.ctrlKey || e.shiftKey || this.tagName === 'BUTTON' ||
-            this.getAttribute('target') === '_blank') return;
-
-        e.preventDefault();
-        const target = this.getAttribute('href');
-
-        // Add loading state to clicked element
-        this.style.opacity = '0.7';
-        this.style.transform = 'scale(0.98)';
-
-        // Fade out with stagger
-        document.body.style.opacity = '0.95';
-        document.body.style.transform = 'scale(0.998)';
-
-        setTimeout(() => {
-          window.location.href = target;
-        }, 150);
-      });
+    // Skip certain types of links
+    if (link.getAttribute('href').includes('://') ||
+        link.getAttribute('href').startsWith('#') ||
+        link.classList.contains('no-transition') ||
+        link.hasAttribute('download')) {
+      return;
     }
+
+    link.addEventListener('click', function(e) {
+      // Skip if modifier keys are pressed or it's a special case
+      if (e.metaKey || e.ctrlKey || e.shiftKey ||
+          this.tagName === 'BUTTON' ||
+          this.getAttribute('target') === '_blank' ||
+          this.classList.contains('no-transition')) {
+        return;
+      }
+
+      e.preventDefault();
+      const target = this.getAttribute('href');
+
+      // Add loading state to clicked element
+      this.style.opacity = '0.7';
+      this.style.transform = 'scale(0.98)';
+
+      // Fade out with subtle animation
+      document.body.style.transition = 'opacity 0.2s ease';
+      document.body.style.opacity = '0.95';
+
+      setTimeout(() => {
+        window.location.href = target;
+      }, 150);
+    });
   });
 
   // Handle form submissions with animation
   document.querySelectorAll('form:not(.no-transition)').forEach(form => {
     form.addEventListener('submit', function(e) {
-      if (form.classList.contains('ajax-form') || form.getAttribute('data-no-animate')) return;
+      if (form.classList.contains('ajax-form') ||
+          form.getAttribute('data-no-animate') ||
+          form.method.toLowerCase() === 'get') {
+        return;
+      }
 
       const submitBtn = form.querySelector('button[type="submit"]');
       if (submitBtn) {
@@ -1286,6 +1342,7 @@ function initializePageTransitions() {
         submitBtn.style.transform = 'scale(0.98)';
       }
 
+      document.body.style.transition = 'opacity 0.2s ease';
       document.body.style.opacity = '0.95';
     });
   });
