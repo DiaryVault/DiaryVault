@@ -137,7 +137,7 @@ def get_featured_journals():
 
             # Ensure view_count exists
             if not hasattr(journal, 'view_count') or journal.view_count is None:
-                journal.view_count = 0
+                journal.view_codeunt = 0
 
         # Shuffle the final list for variety on each page load
         import random
