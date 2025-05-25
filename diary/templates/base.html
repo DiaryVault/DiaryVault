@@ -414,6 +414,67 @@
         pointer-events: auto;
       }
 
+      .menu-category {
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+
+      .menu-category::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+        transition: left 0.5s;
+      }
+
+      .menu-category:hover::before {
+        left: 100%;
+      }
+
+      .menu-item {
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+      }
+
+      .menu-item:hover {
+        transform: scale(1.02);
+        background: rgba(99, 102, 241, 0.08);
+      }
+
+      .menu-item:active {
+        transform: scale(0.98);
+      }
+
+      /* Staggered animation for menu items */
+      .menu-item-animate {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+      }
+
+      .menu-open .menu-item-animate {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Active menu indicator */
+      .active-pill {
+        position: absolute;
+        left: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 70%;
+        width: 4px;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        border-radius: 6px;
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+        box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+      }
+
       /* Enhanced Form Elements */
       .form-input {
         background: rgba(255, 255, 255, 0.9);
@@ -770,43 +831,43 @@
         </div>
     </header>
 
-    <!-- Enhanced Mobile Menu -->
-    <div id="menuOverlay" class="menu-overlay fixed inset-0 z-40 hidden">
-        <div id="menuSheet" class="mobile-menu fixed bottom-0 left-0 right-0 rounded-t-3xl max-h-[90vh] overflow-y-auto">
+    <!-- Enhanced Mobile Menu (Restored Original Structure) -->
+    <div id="menuOverlay" class="menu-overlay fixed inset-0 bg-black/40 z-50 hidden">
+        <div id="menuSheet" class="mobile-menu fixed bottom-0 left-0 right-0 rounded-t-3xl shadow-2xl z-50 max-h-[85vh] overflow-y-auto">
             <!-- Pull Indicator -->
-            <div class="w-12 h-1.5 bg-secondary-300 rounded-full mx-auto mt-4 mb-6"></div>
+            <div class="w-10 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-2"></div>
 
-            <!-- Menu Header -->
-            <div class="px-6 pb-6 flex justify-between items-center">
+            <!-- Enhanced Menu Header -->
+            <div class="px-6 pt-2 pb-4 flex justify-between items-center border-b border-gray-100">
                 <div class="flex items-center gap-3">
-                    <div class="p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-soft">
+                    <div class="p-1.5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                     </div>
-                    <h2 class="font-bold text-xl text-gradient diary-font">DiaryVault</h2>
+                    <h2 class="font-bold text-lg text-gradient diary-font">DiaryVault</h2>
                 </div>
-                <button id="closeMenuBtn" class="p-2.5 hover:bg-secondary-100 rounded-xl transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button id="closeMenuBtn" class="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
             {% if user.is_authenticated %}
-            <!-- User Profile Section -->
-            <div class="px-6 pb-6">
+            <!-- Enhanced User Profile Section -->
+            <div class="px-6 pb-4">
                 <a href="{% url 'account_settings' %}" class="block">
-                    <div class="feature-card p-4">
-                        <div class="flex items-center gap-4">
-                            <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-soft">
-                                {{ user.username|first|upper }}
-                            </div>
-                            <div class="flex-1">
-                                <div class="font-semibold text-secondary-800 text-lg">{{ user.username }}</div>
-                                <div class="text-sm text-secondary-500">{{ total_entries|default:'0' }} journal entries</div>
-                            </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="flex items-center p-4 glass-card rounded-2xl border border-primary-100/50">
+                        <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                            {{ user.username|first|upper }}
+                        </div>
+                        <div class="ml-4">
+                            <div class="font-semibold text-gray-800">{{ user.username }}</div>
+                            <div class="text-xs text-gray-500">{{ total_entries|default:'0' }} journal entries</div>
+                        </div>
+                        <div class="ml-auto">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </div>
@@ -814,109 +875,235 @@
                 </a>
             </div>
 
-            <!-- Quick Actions -->
+            <!-- Enhanced Quick Actions -->
             <div class="px-6 pb-6">
-                <h3 class="text-xs uppercase text-secondary-500 font-semibold mb-4 px-2">Quick Actions</h3>
                 <div class="grid grid-cols-4 gap-3">
-                    <a href="{% url 'new_entry' %}" class="feature-card p-4 text-center hover:scale-105">
-                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mx-auto mb-2">
+                    <a href="{% url 'new_entry' %}" class="menu-item-animate delay-100 flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
+                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                             </svg>
                         </div>
-                        <span class="text-xs font-medium">Write</span>
+                        <span class="text-xs font-medium">New Entry</span>
                     </a>
-                    <a href="{% url 'library' %}" class="feature-card p-4 text-center hover:scale-105">
-                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mx-auto mb-2">
+                    <a href="{% url 'library' %}" class="menu-item-animate delay-150 flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
+                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mb-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <span class="text-xs font-medium">Library</span>
+                        <span class="text-xs font-medium">Calendar</span>
                     </a>
-                    <a href="{% url 'insights' %}" class="feature-card p-4 text-center hover:scale-105">
-                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center mx-auto mb-2">
+                    <a href="{% url 'marketplace' %}" class="menu-item-animate delay-200 flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
+                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center mb-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                             </svg>
                         </div>
-                        <span class="text-xs font-medium">Insights</span>
+                        <span class="text-xs font-medium">Templates</span>
                     </a>
-                    <a href="{% url 'marketplace' %}" class="feature-card p-4 text-center hover:scale-105">
-                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center mx-auto mb-2">
+                    <a href="{% url 'preferences' %}" class="menu-item-animate delay-250 flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
+                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center mb-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <span class="text-xs font-medium">Market</span>
+                        <span class="text-xs font-medium">Images</span>
                     </a>
                 </div>
             </div>
 
-            <!-- Main Navigation -->
+            <!-- Enhanced Main Menu -->
             <div class="px-6 pb-6">
-                <h3 class="text-xs uppercase text-secondary-500 font-semibold mb-4 px-2">Navigation</h3>
-                <div class="space-y-2">
-                    <a href="{% url 'dashboard' %}" class="flex items-center gap-4 p-4 feature-card {% if request.resolver_match.url_name == 'dashboard' %}bg-primary-50 border-primary-200{% endif %}">
-                        <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
-                            </svg>
-                        </div>
-                        <span class="font-semibold">Dashboard</span>
-                    </a>
-                    <!-- Add other navigation items similarly -->
-                </div>
-            </div>
+                <h3 class="text-xs uppercase text-gray-500 font-semibold mb-3 px-2">Navigation</h3>
 
-            <!-- Logout -->
-            <div class="px-6 pb-8">
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="w-full p-4 feature-card border-error-200 text-error-600 hover:bg-error-50 flex items-center justify-center gap-3 font-semibold">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                <div class="space-y-2">
+                    <a href="{% url 'dashboard' %}" class="menu-item-animate delay-100 menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'dashboard' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                        {% if request.resolver_match.url_name == 'dashboard' %}<div class="active-pill"></div>{% endif %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
                         </svg>
-                        Logout
-                    </button>
-                </form>
+                        <span class="font-medium">Dashboard</span>
+                    </a>
+
+                    <a href="{% url 'library' %}" class="menu-item-animate delay-150 menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'library' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                        {% if request.resolver_match.url_name == 'library' %}<div class="active-pill"></div>{% endif %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                        </svg>
+                        <span class="font-medium">Library</span>
+                    </a>
+
+                    <a href="{% url 'biography' %}" class="menu-item-animate delay-200 menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'biography' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                        {% if request.resolver_match.url_name == 'biography' %}<div class="active-pill"></div>{% endif %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="font-medium">Biography</span>
+                    </a>
+
+                    <a href="{% url 'insights' %}" class="menu-item-animate delay-250 menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'insights' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                        {% if request.resolver_match.url_name == 'insights' %}<div class="active-pill"></div>{% endif %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <span class="font-medium">Insights</span>
+                    </a>
+
+                    <a href="{% url 'marketplace' %}" class="menu-item-animate delay-300 menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'marketplace' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                        {% if request.resolver_match.url_name == 'marketplace' %}<div class="active-pill"></div>{% endif %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="font-medium">Marketplace</span>
+                    </a>
+                </div>
+
+                <h3 class="text-xs uppercase text-gray-500 font-semibold mt-6 mb-3 px-2">Settings</h3>
+
+                <div class="space-y-2">
+                    <a href="{% url 'account_settings' %}" class="menu-item-animate delay-350 menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'account_settings' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                        {% if request.resolver_match.url_name == 'account_settings' %}<div class="active-pill"></div>{% endif %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span class="font-medium">Account Settings</span>
+                    </a>
+
+                    <a href="{% url 'preferences' %}" class="menu-item-animate delay-350 menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'preferences' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                        {% if request.resolver_match.url_name == 'preferences' %}<div class="active-pill"></div>{% endif %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                        <span class="font-medium">Journal Preferences</span>
+                    </a>
+                </div>
+
+                <!-- Enhanced Logout Button -->
+                <div class="mt-8">
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full py-4 px-4 glass-card hover:bg-red-50 text-red-600 rounded-2xl flex items-center justify-center transition-all duration-300 font-medium border border-red-100 hover:border-red-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span>Logout</span>
+                        </button>
+                    </form>
+                </div>
             </div>
             {% else %}
-            <!-- Guest Menu -->
+            <!-- Enhanced Menu for non-logged in users -->
             <div class="px-6 pb-6">
-                <h3 class="text-xs uppercase text-secondary-500 font-semibold mb-4 px-2">Get Started</h3>
-                <div class="space-y-3">
-                    <a href="{% url 'signup' %}?feature=journal" class="feature-card p-4 flex items-center gap-4 hover:scale-[1.02]">
+                <h3 class="text-xs uppercase text-gray-500 font-semibold mb-4 px-2">Discover DiaryVault</h3>
+
+                <div class="space-y-3 mb-8">
+                    <a href="{% url 'signup' %}?feature=journal" class="menu-item-animate delay-100 flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
                         <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <div class="font-semibold text-secondary-800">Start Journaling</div>
-                            <div class="text-sm text-secondary-500">Create your first entry</div>
+                            <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Journal</span>
+                            <span class="text-xs text-primary-600 block">Create daily entries</span>
                         </div>
-                        <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Free</span>
+                        <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Try it</span>
+                    </a>
+
+                    <a href="{% url 'signup' %}?feature=library" class="menu-item-animate delay-150 flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
+                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Library</span>
+                            <span class="text-xs text-primary-600 block">Organize your memories</span>
+                        </div>
+                        <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Explore</span>
+                    </a>
+
+                    <a href="{% url 'signup' %}?feature=biography" class="menu-item-animate delay-200 flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
+                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Biography</span>
+                            <span class="text-xs text-primary-600 block">Your life story</span>
+                        </div>
+                        <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Create</span>
+                    </a>
+
+                    <a href="{% url 'signup' %}?feature=insights" class="menu-item-animate delay-250 flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
+                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Insights</span>
+                            <span class="text-xs text-primary-600 block">Discover patterns</span>
+                        </div>
+                        <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Analyze</span>
                     </a>
                 </div>
-            </div>
 
-            <!-- Auth Buttons -->
-            <div class="px-6 pb-8 space-y-3">
-                <a href="{% url 'login' %}" class="w-full btn-secondary p-4 rounded-2xl text-center font-semibold flex items-center justify-center gap-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                    </svg>
-                    Log in
-                </a>
-                <a href="{% url 'signup' %}" class="w-full btn-primary p-4 rounded-2xl text-center font-semibold flex items-center justify-center gap-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                    </svg>
-                    Sign up for free
-                </a>
+                <!-- Available features section -->
+                <h3 class="text-xs uppercase text-gray-500 font-semibold mb-3 px-2">Explore</h3>
+
+                <div class="space-y-2 mb-8">
+                    <a href="{% url 'marketplace' %}" class="menu-item-animate delay-300 flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'marketplace' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span class="font-medium">Marketplace</span>
+                    </a>
+
+                    <a href="{% url 'home' %}" class="menu-item-animate delay-350 flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'home' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="font-medium">About DiaryVault</span>
+                    </a>
+                </div>
+
+                <!-- Enhanced Auth section -->
+                <div class="space-y-4">
+                    <a href="{% url 'login' %}" class="menu-item-animate delay-400 flex items-center justify-center gap-3 py-4 px-4 glass-card hover:bg-white/80 rounded-2xl transition-all duration-300 font-semibold border border-gray-200/50 hover:shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                        <span>Log in</span>
+                    </a>
+
+                    <a href="{% url 'signup' %}" class="menu-item-animate delay-450 flex items-center justify-center gap-3 py-4 px-4 btn-primary rounded-2xl transition-all duration-300 shadow-lg font-semibold hover:shadow-xl hover:-translate-y-1 active:translate-y-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        <span>Sign up for free</span>
+                    </a>
+                </div>
+
+                <div class="mt-8 p-6 glass-card rounded-2xl border border-primary-100/50 shadow-lg">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                        </div>
+                        <h4 class="font-bold text-gray-800 mb-2">Start Your Journey</h4>
+                        <p class="text-sm text-secondary-600 leading-relaxed">Create unlimited journal entries and discover insights about yourself with DiaryVault.</p>
+                    </div>
+                </div>
             </div>
             {% endif %}
+
+            <!-- Extra space at bottom for safe area -->
+            <div class="h-8"></div>
         </div>
     </div>
 
