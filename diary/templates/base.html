@@ -678,7 +678,7 @@
   @media (max-width: 768px) {
     body {
       padding-top: 80px;
-      padding-bottom: 80px;
+      padding-bottom: 0; /* Remove bottom padding to fix mobile nav */
     }
   }
 
@@ -811,12 +811,12 @@
   </div>
 </header>
 
-<!-- Enhanced Mobile Menu with Marketplace Style -->
+<!-- Enhanced Mobile Menu with Marketplace Style - RESTORED FUNCTIONALITY -->
 <div id="menuOverlay" class="menu-overlay fixed inset-0 bg-black/40 z-50 hidden">
   <div id="menuSheet" class="menu-sheet fixed bottom-0 left-0 right-0 rounded-t-3xl shadow-2xl z-50">
     <div class="pull-indicator"></div>
 
-    <div class="px-6 pt-4 pb-4 flex justify-between items-center border-b border-gray-100">
+    <div class="px-6 pt-2 pb-3 flex justify-between items-center">
       <h2 class="font-bold text-xl text-gradient diary-font">DiaryVault</h2>
       <button id="closeMenuBtn" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1162,146 +1162,85 @@
 
 <!-- Enhanced JavaScript -->
 <script>
-// Enhanced menu toggle with proper event handling and debugging
+// RESTORED: Universal menu toggle function - WORKING VERSION
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('DOM loaded, initializing menu...');
-
   const menuToggleBtn = document.getElementById('menuToggleBtn');
   const closeMenuBtn = document.getElementById('closeMenuBtn');
   const menuOverlay = document.getElementById('menuOverlay');
   const menuSheet = document.getElementById('menuSheet');
 
-  console.log('Menu elements:', {
-    menuToggleBtn: !!menuToggleBtn,
-    closeMenuBtn: !!closeMenuBtn,
-    menuOverlay: !!menuOverlay,
-    menuSheet: !!menuSheet
-  });
+  if (menuToggleBtn && closeMenuBtn && menuOverlay) {
+    function toggleMenu() {
+      if (menuOverlay.classList.contains('hidden')) {
+        // Show the menu
+        menuOverlay.classList.remove('hidden');
 
-  // Check if elements exist before adding event listeners
-  if (!menuToggleBtn || !closeMenuBtn || !menuOverlay || !menuSheet) {
-    console.error('Menu elements not found:', {
-      menuToggleBtn,
-      closeMenuBtn,
-      menuOverlay,
-      menuSheet
-    });
-    return;
-  }
+        // Small delay to allow the display:block to take effect before animation
+        setTimeout(() => {
+          menuOverlay.classList.add('active');
+          menuSheet.classList.add('open', 'menu-open');
+        }, 10);
+      } else {
+        // Hide the menu
+        menuSheet.classList.remove('open', 'menu-open');
+        menuOverlay.classList.remove('active');
 
-  function toggleMenu() {
-    console.log('Toggle menu called');
-    const isHidden = menuOverlay.classList.contains('hidden');
-    console.log('Menu is currently hidden:', isHidden);
-
-    if (isHidden) {
-      console.log('Showing menu...');
-      // Show the menu
-      menuOverlay.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-
-      // Force reflow
-      menuOverlay.offsetHeight;
-
-      // Add animation classes
-      requestAnimationFrame(() => {
-        menuOverlay.classList.add('active');
-        menuSheet.classList.add('open', 'menu-open');
-        console.log('Menu animation classes added');
-      });
-    } else {
-      console.log('Hiding menu...');
-      // Hide the menu
-      menuSheet.classList.remove('open', 'menu-open');
-      menuOverlay.classList.remove('active');
-      document.body.style.overflow = '';
-
-      // Wait for animation to complete before hiding the menu
-      setTimeout(() => {
-        menuOverlay.classList.add('hidden');
-        console.log('Menu hidden');
-      }, 400);
-    }
-  }
-
-  // Add event listeners with debugging
-  menuToggleBtn.addEventListener('click', function(e) {
-    console.log('Menu toggle button clicked');
-    e.preventDefault();
-    e.stopPropagation();
-    toggleMenu();
-  });
-
-  closeMenuBtn.addEventListener('click', function(e) {
-    console.log('Close menu button clicked');
-    e.preventDefault();
-    e.stopPropagation();
-    toggleMenu();
-  });
-
-  // Close menu when clicking outside
-  menuOverlay.addEventListener('click', function(event) {
-    console.log('Overlay clicked:', event.target === menuOverlay);
-    if (event.target === menuOverlay) {
-      toggleMenu();
-    }
-  });
-
-  // Prevent menu sheet clicks from closing the menu
-  menuSheet.addEventListener('click', function(e) {
-    e.stopPropagation();
-  });
-
-  // Handle escape key to close menu
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && !menuOverlay.classList.contains('hidden')) {
-      console.log('Escape key pressed, closing menu');
-      toggleMenu();
-    }
-  });
-
-  // Enhanced touch support for mobile menu
-  let startY = 0;
-  let currentY = 0;
-  let isDragging = false;
-
-  menuSheet.addEventListener('touchstart', function(e) {
-    startY = e.touches[0].clientY;
-    isDragging = true;
-  }, { passive: true });
-
-  menuSheet.addEventListener('touchmove', function(e) {
-    if (!isDragging) return;
-
-    currentY = e.touches[0].clientY;
-    const diff = currentY - startY;
-
-    if (diff > 0) {
-      const transform = Math.min(diff, 200);
-      menuSheet.style.transform = `translateY(${transform}px)`;
-
-      // Add resistance
-      if (diff > 50) {
-        e.preventDefault();
+        // Wait for animation to complete before hiding the menu
+        setTimeout(() => {
+          menuOverlay.classList.add('hidden');
+        }, 300);
       }
     }
-  }, { passive: false });
 
-  menuSheet.addEventListener('touchend', function() {
-    if (!isDragging) return;
+    // Add event listeners to buttons
+    menuToggleBtn.addEventListener('click', toggleMenu);
+    closeMenuBtn.addEventListener('click', toggleMenu);
 
-    const diff = currentY - startY;
-    isDragging = false;
+    // Close menu when clicking outside
+    menuOverlay.addEventListener('click', function(event) {
+      if (!menuOverlay.classList.contains('hidden') &&
+          !menuSheet.contains(event.target) &&
+          !menuToggleBtn.contains(event.target) &&
+          event.target === menuOverlay) {
+        toggleMenu();
+      }
+    });
 
-    if (diff > 80) {
-      toggleMenu();
-    } else {
-      // Reset transform
-      menuSheet.style.transform = '';
-    }
-  }, { passive: true });
+    // Handle escape key to close menu
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !menuOverlay.classList.contains('hidden')) {
+        toggleMenu();
+      }
+    });
 
-  console.log('Menu initialization complete');
+    // Support for swipe down to close the bottom sheet menu
+    let startY = 0;
+    let currentY = 0;
+
+    menuSheet.addEventListener('touchstart', function(e) {
+        startY = e.touches[0].clientY;
+    });
+
+    menuSheet.addEventListener('touchmove', function(e) {
+        currentY = e.touches[0].clientY;
+        const diff = currentY - startY;
+
+        if (diff > 0) {
+            menuSheet.style.transform = `translateY(${diff}px)`;
+            e.preventDefault();
+        }
+    });
+
+    menuSheet.addEventListener('touchend', function() {
+        const diff = currentY - startY;
+
+        if (diff > 80) {
+            toggleMenu();
+        } else {
+            menuSheet.style.transform = '';
+        }
+    });
+  }
 
   // Initialize other functionality
   initializeAnimations();
@@ -1335,7 +1274,7 @@ function initializeAnimations() {
   }
 }
 
-// Enhanced page transitions
+// Enhanced page transitions - RESTORED
 function initializePageTransitions() {
   // Apply transition to all internal navigation links
   document.querySelectorAll('a[href^="/"]').forEach(link => {
@@ -1359,17 +1298,13 @@ function initializePageTransitions() {
       e.preventDefault();
       const target = this.getAttribute('href');
 
-      // Add loading state to clicked element
-      this.style.opacity = '0.7';
-      this.style.transform = 'scale(0.98)';
+      // Fade out
+      document.body.classList.add('page-transitioning');
 
-      // Fade out with subtle animation
-      document.body.style.transition = 'opacity 0.2s ease';
-      document.body.style.opacity = '0.95';
-
+      // Navigate after transition
       setTimeout(() => {
         window.location.href = target;
-      }, 150);
+      }, 300);
     });
   });
 
@@ -1382,14 +1317,8 @@ function initializePageTransitions() {
         return;
       }
 
-      const submitBtn = form.querySelector('button[type="submit"]');
-      if (submitBtn) {
-        submitBtn.style.opacity = '0.8';
-        submitBtn.style.transform = 'scale(0.98)';
-      }
-
-      document.body.style.transition = 'opacity 0.2s ease';
-      document.body.style.opacity = '0.95';
+      // For regular form submissions, add transition
+      document.body.classList.add('page-transitioning');
     });
   });
 }
