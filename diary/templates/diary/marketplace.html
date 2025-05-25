@@ -714,12 +714,22 @@
           <div class="compact-filters">
             <select name="sort" class="filter-select">
               <option value="trending" {% if current_sort == 'trending' %}selected{% endif %}>🔥 Trending</option>
+              <option value="random" {% if current_sort == 'random' %}selected{% endif %}>🎲 Random</option>
               <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>🆕 Newest</option>
               <option value="topRated" {% if current_sort == 'topRated' %}selected{% endif %}>⭐ Top Rated</option>
+              <option value="most_liked" {% if current_sort == 'most_liked' %}selected{% endif %}>❤️ Most Liked</option>
               <option value="bestSelling" {% if current_sort == 'bestSelling' %}selected{% endif %}>💰 Best Selling</option>
               <option value="priceLow" {% if current_sort == 'priceLow' %}selected{% endif %}>💲 Price: Low to High</option>
               <option value="priceHigh" {% if current_sort == 'priceHigh' %}selected{% endif %}>💲 Price: High to Low</option>
             </select>
+
+            <!-- Optional: Add a "Shuffle Results" button for instant randomization -->
+            <button type="button" onclick="shuffleResults()" class="filter-toggle-btn" title="Shuffle the current results">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              Shuffle
+            </button>
 
             <select name="priceRange" class="filter-select">
               <option value="all">All Prices</option>
@@ -1824,6 +1834,139 @@ if ('serviceWorker' in navigator) {
       .catch(error => console.log('SW registration failed'));
   });
 }
+</script>
+
+<script>
+function shuffleResults() {
+  const productsGrid = document.getElementById('productsGrid');
+  if (!productsGrid) return;
+
+  // Get all product cards
+  const cards = Array.from(productsGrid.children);
+
+  // Shuffle the array
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+
+  // Add loading animation
+  productsGrid.style.opacity = '0.5';
+  productsGrid.style.transform = 'scale(0.98)';
+
+  // Re-append cards in new order after a brief delay
+  setTimeout(() => {
+    cards.forEach((card, index) => {
+      // Add staggered animation delay
+      card.style.animationDelay = `${index * 50}ms`;
+      card.classList.add('animate-fade-in-up');
+    });
+
+    // Clear and re-add cards
+    productsGrid.innerHTML = '';
+    cards.forEach(card => productsGrid.appendChild(card));
+
+    // Reset grid styling
+    productsGrid.style.opacity = '1';
+    productsGrid.style.transform = 'scale(1)';
+
+    showToast('Results shuffled! 🎲', 'success', 2000);
+  }, 300);
+}
+
+// Auto-shuffle on page load for trending/random sorts
+document.addEventListener('DOMContentLoaded', function() {
+  const currentSort = '{{ current_sort|default:"trending" }}';
+
+  // Add some randomization to the page load for trending
+  if (currentSort === 'trending' || currentSort === 'random') {
+    // Wait a bit after page load, then add subtle randomization
+    setTimeout(() => {
+      const cards = document.querySelectorAll('.product-card');
+      cards.forEach((card, index) => {
+        // Add slight random delays to animations
+        const randomDelay = Math.random() * 200;
+        card.style.animationDelay = `${randomDelay}ms`;
+      });
+    }, 100);
+  }
+});
+
+// Enhanced sort change handler
+document.addEventListener('change', function(e) {
+  if (e.target.name === 'sort') {
+    const form = e.target.closest('form');
+
+    // If switching to random, add immediate visual feedback
+    if (e.target.value === 'random') {
+      showToast('Randomizing results... 🎲', 'info', 1000);
+
+      // Add loading state to submit button
+      const submitBtn = form.querySelector('.search-btn');
+      if (submitBtn) {
+        submitBtn.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Shuffling...
+        `;
+      }
+    }
+
+    // Submit form with slight delay for better UX
+    setTimeout(() => form.submit(), 200);
+  }
+});
+
+// Periodic auto-shuffle for random sort (optional)
+document.addEventListener('DOMContentLoaded', function() {
+  const currentSort = '{{ current_sort|default:"trending" }}';
+
+  if (currentSort === 'random') {
+    // Auto-shuffle every 30 seconds when on random sort
+    const autoShuffleInterval = setInterval(() => {
+      // Only shuffle if user hasn't interacted recently
+      const lastInteraction = localStorage.getItem('lastInteraction');
+      const now = Date.now();
+
+      if (!lastInteraction || (now - parseInt(lastInteraction)) > 30000) {
+        shuffleResults();
+      }
+    }, 30000);
+
+    // Track user interactions
+    ['click', 'scroll', 'keypress'].forEach(event => {
+      document.addEventListener(event, () => {
+        localStorage.setItem('lastInteraction', Date.now().toString());
+      });
+    });
+
+    // Clear interval when leaving page
+    window.addEventListener('beforeunload', () => {
+      clearInterval(autoShuffleInterval);
+    });
+  }
+});
+
+// Add shuffle button to floating actions (optional)
+document.addEventListener('DOMContentLoaded', function() {
+  const floatingActions = document.querySelector('.floating-actions');
+  if (floatingActions) {
+    const shuffleBtn = document.createElement('button');
+    shuffleBtn.onclick = shuffleResults;
+    shuffleBtn.className = 'floating-btn glass-effect';
+    shuffleBtn.title = 'Shuffle Results';
+    shuffleBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+      </svg>
+    `;
+
+    floatingActions.appendChild(shuffleBtn);
+  }
+});
+
 </script>
 
 {% endblock %}

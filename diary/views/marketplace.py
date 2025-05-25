@@ -9,6 +9,8 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 from datetime import timedelta
 import json
+import random
+
 
 from ..models import (
     Journal, JournalTag, JournalLike, JournalPurchase,
@@ -16,7 +18,7 @@ from ..models import (
 )
 
 def marketplace_view(request):
-    """Main marketplace view showing real published journals"""
+    """Main marketplace view showing real published journals - now with randomization"""
 
     # Get filter parameters
     category = request.GET.get('category')
@@ -119,28 +121,41 @@ def marketplace_view(request):
         if filter_q:
             journals = journals.filter(filter_q)
 
-    # Apply sorting
-    if sort_by == 'trending':
-        try:
-            journals = journals.order_by('-popularity_score', '-date_published')
-        except:
-            # Fallback sorting
-            journals = journals.order_by('-view_count', '-created_at')
+    # ======================================================================
+    # NEW: Apply sorting with randomization options
+    # ======================================================================
+
+    # Convert to list for randomization (only when needed)
+    should_randomize = sort_by in ['random', 'trending'] or not search_query
+
+    if sort_by == 'random':
+        # Pure random sort
+        journal_list = list(journals)
+        random.shuffle(journal_list)
+        journals = journal_list
+
+    elif sort_by == 'trending':
+        # Smart trending with randomization
+        journals = get_trending_journals_randomized(journals)
+
     elif sort_by == 'newest':
         try:
             journals = journals.order_by('-date_published')
         except:
             journals = journals.order_by('-created_at')
+
     elif sort_by == 'price_low':
         try:
             journals = journals.order_by('price', '-date_published')
         except:
             journals = journals.order_by('-created_at')
+
     elif sort_by == 'price_high':
         try:
             journals = journals.order_by('-price', '-date_published')
         except:
             journals = journals.order_by('-created_at')
+
     elif sort_by == 'most_liked':
         try:
             journals = journals.annotate(
@@ -150,43 +165,35 @@ def marketplace_view(request):
             journals = journals.annotate(
                 like_count=Count('likes')
             ).order_by('-like_count', '-created_at')
+
     elif sort_by == 'top_earning':
         try:
             journals = journals.order_by('-total_tips', '-date_published')
         except:
             journals = journals.order_by('-created_at')
     else:
-        try:
-            journals = journals.order_by('-date_published')
-        except:
-            journals = journals.order_by('-created_at')
+        # Default: add some randomization to normal sorting
+        if not search_query and not category:
+            # Only randomize when browsing (no specific search/filter)
+            journals = get_mixed_sort_randomized(journals)
+        else:
+            try:
+                journals = journals.order_by('-date_published')
+            except:
+                journals = journals.order_by('-created_at')
 
-    # Get featured journal
-    featured_journal = None
-    try:
-        featured_journal = journals.filter(featured=True).first()
-        if not featured_journal:
-            featured_journal = journals.order_by('-total_tips').first()
-    except:
-        # Fallback
-        featured_journal = journals.first()
+    # ======================================================================
+    # Get featured content with randomization
+    # ======================================================================
 
-    # Get top earning journals
-    try:
-        top_earning = journals.order_by('-total_tips')[:3]
-    except:
-        top_earning = journals[:3]
+    # Get featured journal (randomized selection)
+    featured_journal = get_randomized_featured_journal(journals)
 
-    # Get popular free journals
-    try:
-        popular_free = journals.filter(price=0).annotate(
-            like_count=Count('likes')
-        ).order_by('-like_count', '-view_count')[:5]
-    except:
-        # Fallback if price field doesn't exist
-        popular_free = journals.annotate(
-            like_count=Count('likes')
-        ).order_by('-like_count', '-view_count')[:5]
+    # Get top earning journals (with some randomization)
+    top_earning = get_randomized_top_earning(journals)
+
+    # Get popular free journals (with randomization)
+    popular_free = get_randomized_popular_free(journals)
 
     # Get categories with journal counts (optional - skip if model doesn't exist)
     categories = []
@@ -237,6 +244,304 @@ def marketplace_view(request):
     }
 
     return render(request, 'diary/marketplace.html', context)
+
+
+def get_trending_journals_randomized(journals_queryset):
+    """Get trending journals with smart randomization"""
+    try:
+        # Get the queryset as a list for manipulation
+        all_journals = list(journals_queryset)
+
+        if len(all_journals) <= 16:
+            # If we have few journals, just shuffle them
+            random.shuffle(all_journals)
+            return all_journals
+
+        # Smart trending algorithm with randomization
+        weighted_journals = []
+
+        for journal in all_journals:
+            weight = 1  # Base weight
+
+            # Increase weight for staff picks
+            if hasattr(journal, 'is_staff_pick') and journal.is_staff_pick:
+                weight += 4
+
+            # Increase weight based on likes
+            try:
+                like_count = journal.likes.count() if hasattr(journal, 'likes') else 0
+                if like_count > 20:
+                    weight += 3
+                elif like_count > 10:
+                    weight += 2
+                elif like_count > 5:
+                    weight += 1
+            except:
+                pass
+
+            # Increase weight based on views
+            try:
+                view_count = getattr(journal, 'view_count', 0)
+                if view_count > 500:
+                    weight += 3
+                elif view_count > 100:
+                    weight += 2
+                elif view_count > 50:
+                    weight += 1
+            except:
+                pass
+
+            # Increase weight for recent journals
+            try:
+                days_old = (timezone.now() - journal.created_at).days
+                if days_old <= 7:
+                    weight += 2
+                elif days_old <= 30:
+                    weight += 1
+            except:
+                pass
+
+            # Add to weighted list (repeat based on weight)
+            weighted_journals.extend([journal] * weight)
+
+        # Shuffle the weighted list
+        random.shuffle(weighted_journals)
+
+        # Remove duplicates while preserving some randomness
+        seen = set()
+        result = []
+        for journal in weighted_journals:
+            if journal.id not in seen:
+                result.append(journal)
+                seen.add(journal.id)
+
+        return result
+
+    except Exception as e:
+        # Fallback: just shuffle the original list
+        journal_list = list(journals_queryset)
+        random.shuffle(journal_list)
+        return journal_list
+
+
+def get_mixed_sort_randomized(journals_queryset):
+    """Mix of popular and random journals for default browsing"""
+    try:
+        all_journals = list(journals_queryset)
+
+        if len(all_journals) <= 20:
+            random.shuffle(all_journals)
+            return all_journals
+
+        # Take top 30% by popularity, 70% random
+        sorted_journals = sorted(all_journals, key=lambda j: (
+            getattr(j, 'view_count', 0) +
+            (j.likes.count() if hasattr(j, 'likes') else 0) * 10
+        ), reverse=True)
+
+        popular_count = max(1, len(all_journals) // 3)
+        popular_journals = sorted_journals[:popular_count]
+        remaining_journals = sorted_journals[popular_count:]
+
+        # Shuffle both groups
+        random.shuffle(popular_journals)
+        random.shuffle(remaining_journals)
+
+        # Interleave them
+        result = []
+        for i in range(max(len(popular_journals), len(remaining_journals))):
+            if i < len(popular_journals):
+                result.append(popular_journals[i])
+            if i < len(remaining_journals):
+                result.append(remaining_journals[i])
+
+        return result
+
+    except Exception as e:
+        # Fallback
+        journal_list = list(journals_queryset)
+        random.shuffle(journal_list)
+        return journal_list
+
+
+def get_randomized_featured_journal(journals_queryset):
+    """Get a featured journal with weighted randomization"""
+    try:
+        if isinstance(journals_queryset, list):
+            journals = journals_queryset
+        else:
+            journals = list(journals_queryset)
+
+        if not journals:
+            return None
+
+        # Filter potential featured journals
+        featured_candidates = []
+
+        for journal in journals:
+            score = 0
+
+            # Higher score for staff picks
+            if hasattr(journal, 'is_staff_pick') and journal.is_staff_pick:
+                score += 10
+
+            # Score based on engagement
+            try:
+                like_count = journal.likes.count() if hasattr(journal, 'likes') else 0
+                view_count = getattr(journal, 'view_count', 0)
+                score += (like_count * 2) + (view_count * 0.01)
+            except:
+                pass
+
+            # Score based on entries count (quality indicator)
+            try:
+                entry_count = journal.entries.count()
+                if entry_count > 10:
+                    score += 5
+                elif entry_count > 5:
+                    score += 2
+            except:
+                pass
+
+            # Only consider journals with some engagement
+            if score > 1:
+                featured_candidates.append((journal, score))
+
+        if not featured_candidates:
+            # Fallback to random selection
+            return random.choice(journals)
+
+        # Sort by score and pick from top candidates with some randomization
+        featured_candidates.sort(key=lambda x: x[1], reverse=True)
+        top_candidates = featured_candidates[:min(5, len(featured_candidates))]
+
+        # Weighted random selection from top candidates
+        weights = [candidate[1] for candidate in top_candidates]
+        selected = random.choices(top_candidates, weights=weights, k=1)[0]
+
+        return selected[0]
+
+    except Exception as e:
+        # Fallback
+        try:
+            if isinstance(journals_queryset, list):
+                return random.choice(journals_queryset) if journals_queryset else None
+            else:
+                return journals_queryset.order_by('?').first()
+        except:
+            return None
+
+
+def get_randomized_top_earning(journals_queryset):
+    """Get top earning journals with some randomization"""
+    try:
+        if isinstance(journals_queryset, list):
+            journals = journals_queryset
+        else:
+            journals = list(journals_queryset)
+
+        # Filter journals with earnings
+        earning_journals = []
+        for journal in journals:
+            try:
+                tips = getattr(journal, 'total_tips', 0)
+                if tips and tips > 0:
+                    earning_journals.append(journal)
+            except:
+                pass
+
+        if len(earning_journals) < 3:
+            # If not enough earning journals, include popular ones
+            popular_journals = sorted(journals, key=lambda j: (
+                getattr(j, 'view_count', 0) +
+                (j.likes.count() if hasattr(j, 'likes') else 0) * 5
+            ), reverse=True)
+
+            earning_journals.extend(popular_journals[:5])
+            earning_journals = list(set(earning_journals))  # Remove duplicates
+
+        # Randomize the selection
+        random.shuffle(earning_journals)
+        return earning_journals[:3]
+
+    except Exception as e:
+        # Fallback
+        try:
+            if isinstance(journals_queryset, list):
+                random.shuffle(journals_queryset)
+                return journals_queryset[:3]
+            else:
+                return list(journals_queryset.order_by('?')[:3])
+        except:
+            return []
+
+
+def get_randomized_popular_free(journals_queryset):
+    """Get popular free journals with randomization"""
+    try:
+        if isinstance(journals_queryset, list):
+            journals = journals_queryset
+        else:
+            journals = list(journals_queryset)
+
+        # Filter free journals
+        free_journals = []
+        for journal in journals:
+            try:
+                # Check if journal is free
+                price = getattr(journal, 'price', None)
+                if price is None or price == 0:
+                    free_journals.append(journal)
+            except:
+                # If no price field, assume free
+                free_journals.append(journal)
+
+        if not free_journals:
+            return []
+
+        # Sort by popularity with randomization
+        def popularity_score(journal):
+            score = 0
+            try:
+                score += getattr(journal, 'view_count', 0) * 0.1
+                score += (journal.likes.count() if hasattr(journal, 'likes') else 0) * 2
+                score += random.randint(0, 100)  # Add randomness
+            except:
+                score = random.randint(0, 100)
+            return score
+
+        free_journals.sort(key=popularity_score, reverse=True)
+        return free_journals[:5]
+
+    except Exception as e:
+        # Fallback
+        try:
+            if isinstance(journals_queryset, list):
+                random.shuffle(journals_queryset)
+                return journals_queryset[:5]
+            else:
+                return list(journals_queryset.order_by('?')[:5])
+        except:
+            return []
+
+
+# ======================================================================
+# Additional sort option to add to your frontend
+# ======================================================================
+
+def get_sort_options():
+    """Return available sort options for the frontend"""
+    return [
+        ('trending', '🔥 Trending'),
+        ('random', '🎲 Random'),  # NEW: Pure random option
+        ('newest', '🆕 Newest'),
+        ('topRated', '⭐ Top Rated'),
+        ('bestSelling', '💰 Best Selling'),
+        ('priceLow', '💲 Price: Low to High'),
+        ('priceHigh', '💲 Price: High to Low'),
+        ('most_liked', '❤️ Most Liked'),  # NEW: Sort by likes
+    ]
+
 
 @login_required
 def publish_journal(request):
