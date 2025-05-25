@@ -384,24 +384,15 @@
     font-weight: 600;
   }
 
-  /* Enhanced Mobile Menu - FIXED */
-  .menu-sheet {
-    transform: translateY(100%);
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    max-height: 85vh;
-    overflow-y: auto;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(30px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    will-change: transform;
-  }
-
-  .menu-sheet.open {
-    transform: translateY(0);
-  }
-
-  /* Menu overlay - FIXED */
+  /* Enhanced Mobile Menu - COMPLETELY FIXED */
   .menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 9999;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
@@ -416,20 +407,38 @@
     backdrop-filter: blur(8px);
   }
 
+  .menu-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.1);
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 85vh;
+    overflow-y: auto;
+    z-index: 10000;
+    will-change: transform;
+  }
+
+  .menu-sheet.open {
+    transform: translateY(0);
+  }
+
+  /* Show/hide states */
+  .menu-overlay.hidden {
+    display: none;
+  }
+
   /* Ensure menu button is clickable */
   #menuToggleBtn {
     cursor: pointer;
     z-index: 60;
     position: relative;
-  }
-
-  /* Ensure menu overlay is above everything */
-  #menuOverlay {
-    z-index: 9999;
-  }
-
-  #menuSheet {
-    z-index: 10000;
   }
 
   /* Menu items styling */
@@ -1207,7 +1216,7 @@
 
 <!-- Enhanced JavaScript -->
 <script>
-// FIXED: Universal menu toggle function - Ensuring proper functionality
+// COMPLETELY FIXED: Simple and working menu toggle
 function initializeMenu() {
   const menuToggleBtn = document.getElementById('menuToggleBtn');
   const closeMenuBtn = document.getElementById('closeMenuBtn');
@@ -1226,33 +1235,50 @@ function initializeMenu() {
     return;
   }
 
+  function openMenu() {
+    console.log('Opening menu...');
+    console.log('Before - Overlay classes:', menuOverlay.className);
+    console.log('Before - Sheet classes:', menuSheet.className);
+
+    menuOverlay.classList.remove('hidden');
+    menuOverlay.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+
+    // Force reflow
+    menuOverlay.offsetHeight;
+
+    setTimeout(() => {
+      menuOverlay.classList.add('active');
+      menuSheet.classList.add('open');
+      console.log('After - Overlay classes:', menuOverlay.className);
+      console.log('After - Sheet classes:', menuSheet.className);
+    }, 10);
+  }
+
+  function closeMenu() {
+    console.log('Closing menu...');
+    menuOverlay.classList.remove('active');
+    menuSheet.classList.remove('open');
+    document.body.style.overflow = '';
+
+    setTimeout(() => {
+      menuOverlay.classList.add('hidden');
+      menuOverlay.style.display = 'none';
+      console.log('Menu closed and hidden');
+    }, 400);
+  }
+
   function toggleMenu() {
     console.log('Toggle menu called, current state:', menuOverlay.classList.contains('hidden') ? 'hidden' : 'visible');
 
-    if (menuOverlay.classList.contains('hidden')) {
-      // Show the menu
-      menuOverlay.classList.remove('hidden');
-      document.body.style.overflow = 'hidden'; // Prevent background scrolling
-
-      // Small delay to allow the display:block to take effect before animation
-      requestAnimationFrame(() => {
-        menuOverlay.classList.add('active');
-        menuSheet.classList.add('open', 'menu-open');
-      });
+    if (menuOverlay.classList.contains('hidden') || menuOverlay.style.display === 'none') {
+      openMenu();
     } else {
-      // Hide the menu
-      menuSheet.classList.remove('open', 'menu-open');
-      menuOverlay.classList.remove('active');
-      document.body.style.overflow = ''; // Restore scrolling
-
-      // Wait for animation to complete before hiding the menu
-      setTimeout(() => {
-        menuOverlay.classList.add('hidden');
-      }, 400);
+      closeMenu();
     }
   }
 
-  // Add event listeners with proper error handling
+  // Add event listeners
   menuToggleBtn.addEventListener('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -1264,53 +1290,38 @@ function initializeMenu() {
     e.preventDefault();
     e.stopPropagation();
     console.log('Close menu button clicked');
-    toggleMenu();
+    closeMenu();
   });
 
-  // Handle escape key to close menu
+  // Close menu when clicking on overlay background
+  menuOverlay.addEventListener('click', function(e) {
+    if (e.target === menuOverlay) {
+      console.log('Clicked on overlay background');
+      closeMenu();
+    }
+  });
+
+  // Prevent menu sheet clicks from closing menu
+  menuSheet.addEventListener('click', function(e) {
+    e.stopPropagation();
+  });
+
+  // Handle escape key
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && !menuOverlay.classList.contains('hidden')) {
       console.log('Escape key pressed, closing menu');
-      toggleMenu();
+      closeMenu();
     }
   });
 
-  // Support for swipe down to close the bottom sheet menu
-  let startY = 0;
-  let currentY = 0;
-  let isDragging = false;
+  // Initialize menu as hidden
+  menuOverlay.classList.add('hidden');
+  menuOverlay.style.display = 'none';
 
-  menuSheet.addEventListener('touchstart', function(e) {
-    startY = e.touches[0].clientY;
-    isDragging = true;
-  }, { passive: true });
-
-  menuSheet.addEventListener('touchmove', function(e) {
-    if (!isDragging) return;
-
-    currentY = e.touches[0].clientY;
-    const diff = currentY - startY;
-
-    if (diff > 0) {
-      menuSheet.style.transform = `translateY(${Math.min(diff, 100)}px)`;
-    }
-  }, { passive: true });
-
-  menuSheet.addEventListener('touchend', function() {
-    if (!isDragging) return;
-
-    const diff = currentY - startY;
-    isDragging = false;
-
-    if (diff > 80) {
-      toggleMenu();
-    } else {
-      menuSheet.style.transform = '';
-    }
-  }, { passive: true });
-
-  // Make toggle function globally available for debugging
+  // Make functions globally available for debugging
   window.toggleMenu = toggleMenu;
+  window.openMenu = openMenu;
+  window.closeMenu = closeMenu;
 }
 
 // Initialize menu when DOM is ready
