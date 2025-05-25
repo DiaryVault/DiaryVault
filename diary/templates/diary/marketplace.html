@@ -1418,30 +1418,51 @@
 
 {% block extra_js %}
 <script>
-// Enhanced JavaScript with better UX
+// Enhanced JavaScript with null checks for marketplace.html
 let cart = JSON.parse(localStorage.getItem('diaryvault_cart') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('diaryvault_wishlist') || '[]');
 let comparison = JSON.parse(localStorage.getItem('diaryvault_comparison') || '[]');
 
-// Initialize
+// Safe initialization
 document.addEventListener('DOMContentLoaded', function() {
-  updateCartCount();
-  updateWishlistCount();
-  updateCompareCount();
+  safeUpdateCartCount();
+  safeUpdateWishlistCount();
+  safeUpdateCompareCount();
   initializeAnimations();
   initializeSearch();
 });
 
+// Safe update functions with null checks
+function safeUpdateCartCount() {
+  const countElement = document.getElementById('cartCount');
+  if (countElement) {
+    countElement.textContent = cart.length;
+  }
+}
+
+function safeUpdateWishlistCount() {
+  const countElement = document.getElementById('wishlistCount');
+  if (countElement) {
+    countElement.textContent = wishlist.length;
+  }
+}
+
+function safeUpdateCompareCount() {
+  const countElement = document.getElementById('compareCount');
+  if (countElement) {
+    countElement.textContent = comparison.length;
+  }
+}
+
 // Initialize search functionality
 function initializeSearch() {
   const searchInput = document.querySelector('.search-input');
+  if (!searchInput) return;
 
-  // Add search suggestions (you can enhance this with real data)
+  // Add search suggestions
   searchInput.addEventListener('input', function(e) {
     const query = e.target.value.toLowerCase();
     if (query.length > 2) {
-      // Here you could implement real-time search suggestions
-      // For now, we'll just add some visual feedback
       this.classList.add('searching');
       setTimeout(() => {
         this.classList.remove('searching');
@@ -1453,16 +1474,9 @@ function initializeSearch() {
   document.querySelectorAll('.category-pill').forEach(pill => {
     pill.addEventListener('click', function(e) {
       e.preventDefault();
-
-      // Remove active class from all pills
       document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
-
-      // Add active class to clicked pill
       this.classList.add('active');
-
-      // Update search or redirect
-      const href = this.href;
-      window.location.href = href;
+      window.location.href = this.href;
     });
   });
 
@@ -1472,8 +1486,6 @@ function initializeSearch() {
       e.preventDefault();
       searchInput.value = this.textContent;
       searchInput.focus();
-
-      // Optionally submit the form automatically
       setTimeout(() => {
         document.querySelector('form').submit();
       }, 500);
@@ -1484,19 +1496,23 @@ function initializeSearch() {
 // Advanced filters toggle
 function toggleAdvancedFilters() {
   const dropdown = document.getElementById('advancedFiltersDropdown');
-  dropdown.classList.toggle('active');
+  if (dropdown) {
+    dropdown.classList.toggle('active');
+  }
 }
 
 // Clear all filters
 function clearAllFilters() {
   const form = document.querySelector('form');
+  if (!form) return;
 
-  // Reset all form elements except search
-  const searchValue = form.querySelector('[name="search"]').value;
+  const searchValue = form.querySelector('[name="search"]')?.value || '';
   form.reset();
-  form.querySelector('[name="search"]').value = searchValue;
+  const searchField = form.querySelector('[name="search"]');
+  if (searchField) {
+    searchField.value = searchValue;
+  }
 
-  // Remove active category
   document.querySelectorAll('.category-pill').forEach(pill => {
     pill.classList.remove('active');
   });
@@ -1507,14 +1523,16 @@ function clearAllFilters() {
 
 // Update active filters count
 function updateActiveFiltersCount() {
+  const countElement = document.getElementById('activeFiltersCount');
+  if (!countElement) return;
+
   let count = 0;
   const form = document.querySelector('form');
+  if (!form) return;
 
-  // Count checkboxes and radios
   const checkedInputs = form.querySelectorAll('input[type="checkbox"]:checked, input[type="radio"]:checked');
   count += checkedInputs.length;
 
-  // Count non-default selects
   const selects = form.querySelectorAll('select');
   selects.forEach(select => {
     if (select.value && select.value !== 'all' && select.value !== 'trending') {
@@ -1522,16 +1540,25 @@ function updateActiveFiltersCount() {
     }
   });
 
-  // Count active category
   if (document.querySelector('.category-pill.active')) {
     count++;
   }
 
-  document.getElementById('activeFiltersCount').textContent = count;
+  countElement.textContent = count;
 }
 
 // Enhanced toast notifications
 function showToast(message, type = 'info', duration = 3000) {
+  let container = document.getElementById('toastContainer');
+
+  // Create container if it doesn't exist
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'fixed top-4 right-4 z-50 space-y-2';
+    document.body.appendChild(container);
+  }
+
   const toast = document.createElement('div');
   toast.className = `toast ${type} transform translate-x-full`;
 
@@ -1544,7 +1571,7 @@ function showToast(message, type = 'info', duration = 3000) {
     </div>
   `;
 
-  document.getElementById('toastContainer').appendChild(toast);
+  container.appendChild(toast);
 
   // Animate in
   setTimeout(() => toast.classList.remove('translate-x-full'), 100);
@@ -1567,7 +1594,7 @@ function addToCart(journalId) {
     });
 
     localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
-    updateCartCount();
+    safeUpdateCartCount();
     showCartAnimation();
     showToast('Added to cart! 🛒', 'success');
   } else {
@@ -1578,19 +1605,19 @@ function addToCart(journalId) {
 function removeFromCart(journalId) {
   cart = cart.filter(item => item.id !== journalId);
   localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
-  updateCartCount();
+  safeUpdateCartCount();
   renderCartItems();
   showToast('Removed from cart', 'info');
-}
-
-function updateCartCount() {
-  const count = cart.length;
-  document.getElementById('cartCount').textContent = count;
 }
 
 function toggleCart() {
   const sidebar = document.getElementById('cartSidebar');
   const overlay = document.getElementById('cartOverlay');
+
+  if (!sidebar || !overlay) {
+    showToast('Cart feature not available on this page', 'info');
+    return;
+  }
 
   if (sidebar.classList.contains('translate-x-full')) {
     sidebar.classList.remove('translate-x-full');
@@ -1606,6 +1633,8 @@ function renderCartItems() {
   const container = document.getElementById('cartItems');
   const footer = document.getElementById('cartFooter');
 
+  if (!container) return;
+
   if (cart.length === 0) {
     container.innerHTML = `
       <div class="text-center text-gray-500 py-16">
@@ -1617,7 +1646,7 @@ function renderCartItems() {
         <h4 class="font-semibold text-gray-700 mb-2">Your cart is empty</h4>
         <p class="text-sm">Add some journals to get started!</p>
       </div>`;
-    footer.classList.add('hidden');
+    if (footer) footer.classList.add('hidden');
   } else {
     container.innerHTML = cart.map(item => `
       <div style="background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(255, 255, 255, 0.3);">
@@ -1629,7 +1658,7 @@ function renderCartItems() {
           </div>
           <div class="flex-1">
             <h4 class="font-semibold text-gray-800">${item.title}</h4>
-            <p class="text-sm text-gray-600">${item.price}</p>
+            <p class="text-sm text-gray-600">$${item.price}</p>
           </div>
           <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1641,8 +1670,11 @@ function renderCartItems() {
     `).join('');
 
     const total = cart.reduce((sum, item) => sum + item.price, 0);
-    document.getElementById('cartTotal').textContent = `${total.toFixed(2)}`;
-    footer.classList.remove('hidden');
+    const totalElement = document.getElementById('cartTotal');
+    if (totalElement) {
+      totalElement.textContent = `$${total.toFixed(2)}`;
+    }
+    if (footer) footer.classList.remove('hidden');
   }
 }
 
@@ -1658,12 +1690,7 @@ function toggleWishlist(journalId) {
   }
 
   localStorage.setItem('diaryvault_wishlist', JSON.stringify(wishlist));
-  updateWishlistCount();
-}
-
-function updateWishlistCount() {
-  const count = wishlist.length;
-  document.getElementById('wishlistCount').textContent = count;
+  safeUpdateWishlistCount();
 }
 
 // Comparison functions
@@ -1676,14 +1703,9 @@ function addToCompare(journalId) {
   if (!comparison.includes(journalId)) {
     comparison.push(journalId);
     localStorage.setItem('diaryvault_comparison', JSON.stringify(comparison));
-    updateCompareCount();
+    safeUpdateCompareCount();
     showToast('Added to comparison!', 'success');
   }
-}
-
-function updateCompareCount() {
-  const count = comparison.length;
-  document.getElementById('compareCount').textContent = count;
 }
 
 function toggleCompare() {
@@ -1691,7 +1713,6 @@ function toggleCompare() {
     showToast('No items to compare!', 'info');
     return;
   }
-  // Implementation for comparison modal would go here
   showToast('Comparison feature coming soon!', 'info');
 }
 
@@ -1705,6 +1726,8 @@ function setGridView(view) {
   const grid = document.getElementById('productsGrid');
   const gridBtn = document.getElementById('gridViewBtn');
   const listBtn = document.getElementById('listViewBtn');
+
+  if (!grid || !gridBtn || !listBtn) return;
 
   if (view === 'list') {
     grid.className = 'space-y-6';
@@ -1723,29 +1746,29 @@ function setGridView(view) {
 
 // Animation initialization
 function initializeAnimations() {
-  // Stagger animations for product cards
   const cards = document.querySelectorAll('.product-card');
   cards.forEach((card, index) => {
     card.style.animationDelay = `${index * 100}ms`;
   });
 
-  // Intersection Observer for scroll animations
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('animate-fade-in-up');
-      }
-    });
-  }, { threshold: 0.1 });
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-fade-in-up');
+        }
+      });
+    }, { threshold: 0.1 });
 
-  document.querySelectorAll('.animate-fade-in-up').forEach(el => {
-    observer.observe(el);
-  });
+    document.querySelectorAll('.animate-fade-in-up').forEach(el => {
+      observer.observe(el);
+    });
+  }
 }
 
 // Cart animation
 function showCartAnimation() {
-  const cartBtn = document.querySelector('[onclick="toggleCart()"]');
+  const cartBtn = document.querySelector('[onclick*="toggleCart"]');
   if (cartBtn) {
     cartBtn.style.animation = 'pulse 0.6s ease-in-out';
     setTimeout(() => {
@@ -1763,32 +1786,65 @@ function checkout() {
 
   showToast('Redirecting to checkout...', 'info');
 
-  // Simulate checkout process
   setTimeout(() => {
     cart = [];
     localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
-    updateCartCount();
+    safeUpdateCartCount();
     toggleCart();
     showToast('Order placed successfully! 🎉', 'success', 5000);
   }, 2000);
 }
 
+// Shuffle results function
+function shuffleResults() {
+  const productsGrid = document.getElementById('productsGrid');
+  if (!productsGrid) return;
+
+  const cards = Array.from(productsGrid.children);
+
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+
+  productsGrid.style.opacity = '0.5';
+  productsGrid.style.transform = 'scale(0.98)';
+
+  setTimeout(() => {
+    cards.forEach((card, index) => {
+      card.style.animationDelay = `${index * 50}ms`;
+      card.classList.add('animate-fade-in-up');
+    });
+
+    productsGrid.innerHTML = '';
+    cards.forEach(card => productsGrid.appendChild(card));
+
+    productsGrid.style.opacity = '1';
+    productsGrid.style.transform = 'scale(1)';
+
+    showToast('Results shuffled! 🎲', 'success', 2000);
+  }, 300);
+}
+
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
-  // Escape key closes modals
   if (e.key === 'Escape') {
-    if (!document.getElementById('cartSidebar').classList.contains('translate-x-full')) {
+    const cartSidebar = document.getElementById('cartSidebar');
+    if (cartSidebar && !cartSidebar.classList.contains('translate-x-full')) {
       toggleCart();
     }
-    if (document.getElementById('advancedFiltersDropdown').classList.contains('active')) {
+    const dropdown = document.getElementById('advancedFiltersDropdown');
+    if (dropdown && dropdown.classList.contains('active')) {
       toggleAdvancedFilters();
     }
   }
 
-  // Ctrl/Cmd + K for search focus
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
     e.preventDefault();
-    document.querySelector('.search-input').focus();
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+      searchInput.focus();
+    }
   }
 });
 
@@ -1813,18 +1869,62 @@ document.addEventListener('submit', function(e) {
 // Close dropdowns when clicking outside
 document.addEventListener('click', function(e) {
   const dropdown = document.getElementById('advancedFiltersDropdown');
-  const filterBtn = document.querySelector('[onclick="toggleAdvancedFilters()"]');
+  const filterBtn = document.querySelector('[onclick*="toggleAdvancedFilters"]');
 
   if (dropdown && dropdown.classList.contains('active')) {
-    if (!dropdown.contains(e.target) && !filterBtn.contains(e.target)) {
+    if (!dropdown.contains(e.target) && (!filterBtn || !filterBtn.contains(e.target))) {
       dropdown.classList.remove('active');
     }
   }
 });
 
-// Update filter count on page load
+// Auto-shuffle for random/trending sorts
 document.addEventListener('DOMContentLoaded', function() {
-  updateActiveFiltersCount();
+  // Get current sort from template context or URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentSort = urlParams.get('sort') || 'trending';
+
+  if (currentSort === 'trending' || currentSort === 'random') {
+    setTimeout(() => {
+      const cards = document.querySelectorAll('.product-card');
+      cards.forEach((card, index) => {
+        const randomDelay = Math.random() * 200;
+        card.style.animationDelay = `${randomDelay}ms`;
+      });
+    }, 100);
+  }
+});
+
+// Enhanced sort change handler
+document.addEventListener('change', function(e) {
+  if (e.target.name === 'sort') {
+    const form = e.target.closest('form');
+    if (!form) return;
+
+    if (e.target.value === 'random') {
+      showToast('Randomizing results... 🎲', 'info', 1000);
+
+      const submitBtn = form.querySelector('.search-btn');
+      if (submitBtn) {
+        submitBtn.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Shuffling...
+        `;
+      }
+    }
+
+    setTimeout(() => form.submit(), 200);
+  }
+});
+
+// Track user interactions for auto-shuffle
+['click', 'scroll', 'keypress'].forEach(event => {
+  document.addEventListener(event, () => {
+    localStorage.setItem('lastInteraction', Date.now().toString());
+  });
 });
 
 // Performance optimization - lazy loading for images
@@ -1847,145 +1947,9 @@ if ('IntersectionObserver' in window) {
   });
 }
 
-// Service Worker registration for offline support (optional)
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => console.log('SW registered'))
-      .catch(error => console.log('SW registration failed'));
-  });
-}
-</script>
-
-<script>
-function shuffleResults() {
-  const productsGrid = document.getElementById('productsGrid');
-  if (!productsGrid) return;
-
-  // Get all product cards
-  const cards = Array.from(productsGrid.children);
-
-  // Shuffle the array
-  for (let i = cards.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [cards[i], cards[j]] = [cards[j], cards[i]];
-  }
-
-  // Add loading animation
-  productsGrid.style.opacity = '0.5';
-  productsGrid.style.transform = 'scale(0.98)';
-
-  // Re-append cards in new order after a brief delay
-  setTimeout(() => {
-    cards.forEach((card, index) => {
-      // Add staggered animation delay
-      card.style.animationDelay = `${index * 50}ms`;
-      card.classList.add('animate-fade-in-up');
-    });
-
-    // Clear and re-add cards
-    productsGrid.innerHTML = '';
-    cards.forEach(card => productsGrid.appendChild(card));
-
-    // Reset grid styling
-    productsGrid.style.opacity = '1';
-    productsGrid.style.transform = 'scale(1)';
-
-    showToast('Results shuffled! 🎲', 'success', 2000);
-  }, 300);
-}
-
-// Auto-shuffle on page load for trending/random sorts
+// Initialize filters count on page load
 document.addEventListener('DOMContentLoaded', function() {
-  const currentSort = '{{ current_sort|default:"trending" }}';
-
-  // Add some randomization to the page load for trending
-  if (currentSort === 'trending' || currentSort === 'random') {
-    // Wait a bit after page load, then add subtle randomization
-    setTimeout(() => {
-      const cards = document.querySelectorAll('.product-card');
-      cards.forEach((card, index) => {
-        // Add slight random delays to animations
-        const randomDelay = Math.random() * 200;
-        card.style.animationDelay = `${randomDelay}ms`;
-      });
-    }, 100);
-  }
-});
-
-// Enhanced sort change handler
-document.addEventListener('change', function(e) {
-  if (e.target.name === 'sort') {
-    const form = e.target.closest('form');
-
-    // If switching to random, add immediate visual feedback
-    if (e.target.value === 'random') {
-      showToast('Randomizing results... 🎲', 'info', 1000);
-
-      // Add loading state to submit button
-      const submitBtn = form.querySelector('.search-btn');
-      if (submitBtn) {
-        submitBtn.innerHTML = `
-          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Shuffling...
-        `;
-      }
-    }
-
-    // Submit form with slight delay for better UX
-    setTimeout(() => form.submit(), 200);
-  }
-});
-
-// Periodic auto-shuffle for random sort (optional)
-document.addEventListener('DOMContentLoaded', function() {
-  const currentSort = '{{ current_sort|default:"trending" }}';
-
-  if (currentSort === 'random') {
-    // Auto-shuffle every 30 seconds when on random sort
-    const autoShuffleInterval = setInterval(() => {
-      // Only shuffle if user hasn't interacted recently
-      const lastInteraction = localStorage.getItem('lastInteraction');
-      const now = Date.now();
-
-      if (!lastInteraction || (now - parseInt(lastInteraction)) > 30000) {
-        shuffleResults();
-      }
-    }, 30000);
-
-    // Track user interactions
-    ['click', 'scroll', 'keypress'].forEach(event => {
-      document.addEventListener(event, () => {
-        localStorage.setItem('lastInteraction', Date.now().toString());
-      });
-    });
-
-    // Clear interval when leaving page
-    window.addEventListener('beforeunload', () => {
-      clearInterval(autoShuffleInterval);
-    });
-  }
-});
-
-// Add shuffle button to floating actions (optional)
-document.addEventListener('DOMContentLoaded', function() {
-  const floatingActions = document.querySelector('.floating-actions');
-  if (floatingActions) {
-    const shuffleBtn = document.createElement('button');
-    shuffleBtn.onclick = shuffleResults;
-    shuffleBtn.className = 'floating-btn glass-effect';
-    shuffleBtn.title = 'Shuffle Results';
-    shuffleBtn.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-      </svg>
-    `;
-
-    floatingActions.appendChild(shuffleBtn);
-  }
+  updateActiveFiltersCount();
 });
 
 </script>
