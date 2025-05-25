@@ -1486,16 +1486,17 @@
 
             // Service Worker registration for PWA
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/service-worker.js').then(
-                    registration => console.log('SW registered successfully'),
-                    error => console.log('SW registration failed')
-                );
+                navigator.serviceWorker.register('/service-worker.js').catch(() => {
+                    // Service worker registration failed - silent fail for production
+                });
             }
 
             // Enhanced error handling
             window.addEventListener('error', function(e) {
-                console.error('JavaScript error:', e.error);
-                showToast('Something went wrong. Please refresh the page.', 'error');
+                // Log errors for debugging but don't show user notifications in production
+                if (window.showToast && window.location.hostname === 'localhost') {
+                    showToast('Something went wrong. Please refresh the page.', 'error');
+                }
             });
 
             // Preload critical resources during idle time
