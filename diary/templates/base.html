@@ -451,14 +451,28 @@
 
       /* Staggered animation for menu items */
       .menu-item-animate {
-        opacity: 0;
-        transform: translateY(20px);
+        opacity: 1;
+        transform: translateY(0);
         transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
       }
 
-      .menu-open .menu-item-animate {
+      .menu-item-animate.fade-in {
+        animation: fadeInUp 0.4s ease-out forwards;
+      }
+
+      /* Fix menu visibility issues */
+      .mobile-menu * {
         opacity: 1;
-        transform: translateY(0);
+        visibility: visible;
+      }
+
+      .mobile-menu .menu-item,
+      .mobile-menu .menu-category,
+      .mobile-menu a,
+      .mobile-menu button {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
       }
 
       /* Active menu indicator */
@@ -820,8 +834,13 @@
                     </div>
                     {% endif %}
 
-                    <!-- Enhanced Menu Button -->
-                    <button id="menuToggleBtn" class="relative glass-card hover:scale-105 p-3 rounded-2xl transition-all duration-300 lg:hidden">
+                    <!-- Enhanced Menu Button (Always Visible) -->
+                    <button id="menuToggleBtn" class="relative glass-card hover:scale-105 p-3 rounded-2xl transition-all duration-300">
+                        {% if user.is_authenticated and unread_notifications > 0 %}
+                        <span class="absolute -top-1 -right-1 h-5 w-5 bg-error-500 rounded-full flex items-center justify-center">
+                            <span class="text-white text-xs font-bold">{{ unread_notifications }}</span>
+                        </span>
+                        {% endif %}
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
@@ -1217,6 +1236,14 @@
                         requestAnimationFrame(() => {
                             menuOverlay.classList.add('active');
                             menuSheet.classList.add('open');
+
+                            // Ensure all menu items are visible
+                            const menuItems = menuSheet.querySelectorAll('.menu-item-animate');
+                            menuItems.forEach((item, index) => {
+                                item.style.opacity = '1';
+                                item.style.transform = 'translateY(0)';
+                                item.style.visibility = 'visible';
+                            });
                         });
                     } else {
                         // Hide menu
