@@ -1345,13 +1345,6 @@
                     <span>Library</span>
                 </a>
 
-                <!-- FAB for New Entry -->
-                <a href="{% url 'new_entry' %}" class="fab" data-page="new-entry">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
-                </a>
-
                 <!-- Biography -->
                 <a href="{% url 'biography' %}"
                    class="mobile-nav-item {% if request.resolver_match.url_name == 'biography' %}active{% endif %}"
@@ -1723,66 +1716,6 @@
             document.body.style.opacity = '1';
             document.body.style.transition = 'opacity 0.3s ease';
         });
-
-        // Enhanced navigation interaction
-        function initEnhancedMobileNav() {
-            const navItems = document.querySelectorAll('.mobile-nav-item, .fab');
-
-            navItems.forEach(item => {
-                // Ripple effect on touch/click
-                item.addEventListener('touchstart', function(e) {
-                    createRipple(e, this);
-                });
-
-                item.addEventListener('click', function(e) {
-                    // Don't prevent default for actual navigation links
-                    createRipple(e, this);
-
-                    // Haptic feedback (if supported)
-                    if (navigator.vibrate) {
-                        navigator.vibrate(50);
-                    }
-
-                    // Add active state animation
-                    if (!this.classList.contains('fab')) {
-                        this.style.transform = 'scale(0.95)';
-                        setTimeout(() => {
-                            this.style.transform = '';
-                        }, 150);
-                    }
-                });
-
-                // Enhanced touch feedback
-                item.addEventListener('touchstart', function(e) {
-                    // Prevent default to avoid 300ms delay
-                    if (this.classList.contains('fab')) {
-                        e.preventDefault();
-                    }
-                    this.style.transform = this.classList.contains('fab') ?
-                        'translateY(-10px) scale(0.95)' : 'scale(0.95)';
-                }, { passive: false });
-
-                item.addEventListener('touchend', function() {
-                    setTimeout(() => {
-                        this.style.transform = this.classList.contains('fab') ?
-                            'translateY(-8px)' : '';
-                    }, 150);
-                });
-
-                // Mouse events for desktop testing
-                item.addEventListener('mousedown', function() {
-                    this.style.transform = this.classList.contains('fab') ?
-                        'translateY(-10px) scale(0.95)' : 'scale(0.95)';
-                });
-
-                item.addEventListener('mouseup', function() {
-                    setTimeout(() => {
-                        this.style.transform = this.classList.contains('fab') ?
-                            'translateY(-8px)' : '';
-                    }, 150);
-                });
-            });
-        }
 
         // Create ripple effect
         function createRipple(event, element) {
