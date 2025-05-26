@@ -186,23 +186,34 @@
       }
     </script>
     <style>
-      /* CRITICAL STABILITY FIXES */
+      /* REFINED STABILITY FIXES */
 
-      /* 1. Prevent any horizontal overflow */
-      html, body {
-        overflow-x: hidden !important;
-        max-width: 100vw !important;
-        position: relative;
-        box-sizing: border-box;
+      /* 1. Prevent horizontal overflow without affecting vertical scroll */
+      html {
+        overflow-x: hidden;
+        scroll-behavior: smooth;
       }
 
-      /* 2. Constrain all containers */
+      body {
+        overflow-x: hidden;
+        width: 100%;
+        position: relative;
+      }
+
+      /* 2. Constrain containers without affecting scroll */
       * {
         box-sizing: border-box;
       }
 
-      *:not(html):not(body) {
-        max-width: 100%;
+      /* 3. Prevent specific elements from causing horizontal overflow */
+      .container,
+      .max-w-7xl,
+      header,
+      main,
+      footer,
+      nav {
+        max-width: 100vw;
+        overflow-x: hidden;
       }
 
       /* Enhanced Typography */
@@ -217,37 +228,62 @@
         font-feature-settings: 'liga' 1;
       }
 
-      /* Enhanced Base Styles - STABILIZED */
+      /* Enhanced Base Styles - SCROLL OPTIMIZED */
       body {
         font-family: 'Inter', system-ui, sans-serif;
         font-feature-settings: 'liga' 1, 'kern' 1;
-        overflow-x: hidden !important;
-        /* FIXED: Static background - no animation */
+        overflow-x: hidden;
+        /* FIXED: Static background with proper scroll behavior */
         background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #f1f5f9 50%, #e0e7ff 75%, #f8fafc 100%);
-        background-size: 100% 100%; /* FIXED: Static size instead of 400% 400% */
+        background-size: 100% 100%;
         background-attachment: fixed;
         position: relative;
         width: 100%;
         min-height: 100vh;
-        max-width: 100vw !important;
+        /* REMOVED: max-width constraint that could affect scroll */
       }
 
       html {
-        overflow-x: hidden !important;
+        overflow-x: hidden;
         scroll-behavior: smooth;
-        max-width: 100vw !important;
+        /* REMOVED: max-width constraint that could affect scroll */
       }
 
-      /* FIXED: Constrain all major containers */
+      /* OPTIMIZED: Constrain containers without affecting scroll performance */
       .container,
       .max-w-7xl,
       header,
       main,
-      footer {
-        max-width: 100vw !important;
+      footer,
+      nav {
+        max-width: 100vw;
         overflow-x: hidden;
         width: 100%;
         box-sizing: border-box;
+      }
+
+      /* Ensure grid and flexbox don't cause overflow */
+      .grid {
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .grid > * {
+        min-width: 0;
+      }
+
+      /* Toast and overlay positioning */
+      #toastContainer {
+        position: fixed;
+        top: 6rem;
+        right: 1rem;
+        z-index: 50;
+        max-width: calc(100vw - 2rem);
+        pointer-events: none;
+      }
+
+      .fixed, .absolute, .sticky {
+        max-width: 100vw;
       }
 
       /* Enhanced Glass Morphism - STABILIZED */
@@ -976,33 +1012,22 @@
         }
       }
 
-      /* FINAL SAFETY MEASURES */
-      .grid {
-        width: 100%;
-        box-sizing: border-box;
-      }
-
-      .grid > * {
-        min-width: 0;
-      }
-
-      #toastContainer {
-        position: fixed;
-        top: 6rem;
-        right: 1rem;
-        z-index: 50;
-        max-width: calc(100vw - 2rem);
-        pointer-events: none;
-      }
-
-      .fixed, .absolute, .sticky {
-        max-width: 100vw;
-      }
-
       /* Shimmer container safety */
       .shimmer-container {
         overflow: hidden;
         position: relative;
+      }
+
+      /* Ensure smooth scrolling on mobile */
+      @media (max-width: 768px) {
+        body {
+          -webkit-overflow-scrolling: touch;
+        }
+      }
+
+      /* Optimize scroll performance */
+      .custom-scrollbar {
+        scroll-behavior: smooth;
       }
     </style>
 
@@ -1515,51 +1540,48 @@
 
     <!-- Enhanced JavaScript with STABILITY MONITORING -->
     <script>
-        // CRITICAL: Stability monitoring and prevention
+        // REFINED: Stability monitoring without affecting scroll
         document.addEventListener('DOMContentLoaded', function() {
-            // Disable horizontal scroll
-            document.body.style.overflowX = 'hidden';
-            document.documentElement.style.overflowX = 'hidden';
-
-            // Monitor for horizontal overflow
+            // Monitor for horizontal overflow (non-blocking)
             function checkForOverflow() {
                 const body = document.body;
-                const html = document.documentElement;
-
-                if (body.scrollWidth > window.innerWidth || html.scrollWidth > window.innerWidth) {
-                    console.warn('Horizontal overflow detected - fixing...');
-                    // Force correction
-                    document.body.style.width = '100%';
-                    document.body.style.maxWidth = '100vw';
-
-                    // Find and fix overflowing elements
-                    const allElements = document.querySelectorAll('*');
-                    allElements.forEach(el => {
-                        if (el.scrollWidth > window.innerWidth) {
-                            el.style.maxWidth = '100%';
-                            el.style.width = '100%';
-                            el.style.overflowX = 'hidden';
+                if (body.scrollWidth > window.innerWidth + 10) { // 10px tolerance
+                    console.warn('Horizontal overflow detected - applying gentle fix');
+                    // Gentle correction without affecting scroll
+                    const elements = document.querySelectorAll('*');
+                    elements.forEach(el => {
+                        if (el.getBoundingClientRect().width > window.innerWidth) {
+                            el.style.maxWidth = '100vw';
                         }
                     });
                 }
             }
 
-            // Check on load and resize
+            // Check periodically but don't interfere with scroll
             checkForOverflow();
-            window.addEventListener('resize', checkForOverflow);
+            let resizeTimeout;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(checkForOverflow, 250);
+            });
 
-            // Prevent horizontal touch gestures
-            let startX = 0;
+            // REFINED: Only prevent problematic horizontal gestures
+            let touchStartX = 0;
+            let touchStartY = 0;
+
             document.addEventListener('touchstart', function(e) {
-                startX = e.touches[0].clientX;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
             }, { passive: true });
 
             document.addEventListener('touchmove', function(e) {
-                const currentX = e.touches[0].clientX;
-                const diff = Math.abs(currentX - startX);
+                // Only prevent if it's clearly a horizontal gesture AND on body/html
+                const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+                const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
 
-                // If horizontal swipe on body, limit it
-                if (e.target === document.body && diff > 10) {
+                // Only prevent horizontal swipes that are clearly not vertical scrolls
+                if (deltaX > deltaY && deltaX > 30 &&
+                    (e.target === document.body || e.target === document.documentElement)) {
                     e.preventDefault();
                 }
             }, { passive: false });
@@ -1615,7 +1637,7 @@
                     }
                 });
 
-                // Enhanced touch support for swipe down to close
+                // Enhanced touch support for swipe down to close (scroll-friendly)
                 let startY = 0;
                 let currentY = 0;
                 let isDragging = false;
@@ -1623,7 +1645,7 @@
                 menuSheet.addEventListener('touchstart', function(e) {
                     startY = e.touches[0].clientY;
                     isDragging = true;
-                });
+                }, { passive: true });
 
                 menuSheet.addEventListener('touchmove', function(e) {
                     if (!isDragging) return;
@@ -1631,12 +1653,16 @@
                     currentY = e.touches[0].clientY;
                     const diff = currentY - startY;
 
+                    // Only handle swipe-to-close when at top of scroll AND moving down
                     if (diff > 0 && menuSheet.scrollTop === 0) {
                         menuSheet.style.transform = `translateY(${Math.min(diff, 200)}px)`;
                         menuSheet.style.transition = 'none';
-                        e.preventDefault();
+                        // Only prevent default for the close gesture, not normal scrolling
+                        if (diff > 20) {
+                            e.preventDefault();
+                        }
                     }
-                });
+                }, { passive: false });
 
                 menuSheet.addEventListener('touchend', function() {
                     if (!isDragging) return;
@@ -1649,7 +1675,7 @@
                     if (diff > 100) {
                         toggleMenu();
                     }
-                });
+                }, { passive: true });
             }
 
             // Enhanced Mobile Navigation with stability
@@ -1738,12 +1764,16 @@
                 }
             });
 
-            // Initialize page
+            // Smooth page initialization without scroll interference
             document.body.style.opacity = '1';
-            document.body.style.transition = 'opacity 0.3s ease';
+
+            // Performance: Use passive listeners where possible
+            window.addEventListener('scroll', function() {
+                // Any scroll-related functionality here
+            }, { passive: true });
         });
 
-        // STABILIZED Mobile Navigation
+        // SCROLL-OPTIMIZED Mobile Navigation
         function initEnhancedMobileNav() {
             const navItems = document.querySelectorAll('.mobile-nav-item, .fab');
 
@@ -1761,8 +1791,9 @@
                             this.style.transform = '';
                         }, 150);
                     }
-                });
+                }, { passive: false }); // Need to be non-passive for ripple effect
 
+                // Use passive listeners for touch events to improve scroll performance
                 item.addEventListener('touchstart', function(e) {
                     this.style.transform = this.classList.contains('fab') ?
                         'translateY(-10px) scale(0.95)' : 'scale(0.95)';
@@ -1773,40 +1804,44 @@
                         this.style.transform = this.classList.contains('fab') ?
                             'translateY(-8px)' : '';
                     }, 150);
-                });
+                }, { passive: true });
             });
         }
 
-        // STABILIZED Ripple effect
+        // OPTIMIZED Ripple effect for better performance
         function createRipple(event, element) {
-            const ripple = document.createElement('span');
-            const rect = element.getBoundingClientRect();
-            const size = Math.min(rect.width, rect.height, 100); // FIXED: Limited max size
+            // Use requestAnimationFrame for better performance
+            requestAnimationFrame(() => {
+                const ripple = document.createElement('span');
+                const rect = element.getBoundingClientRect();
+                const size = Math.min(rect.width, rect.height, 100);
 
-            let x, y;
-            if (event.touches && event.touches.length > 0) {
-                x = event.touches[0].clientX - rect.left;
-                y = event.touches[0].clientY - rect.top;
-            } else {
-                x = event.clientX - rect.left;
-                y = event.clientY - rect.top;
-            }
-
-            ripple.classList.add('ripple');
-            ripple.style.width = ripple.style.height = size + 'px';
-            // FIXED: Constrain to element bounds
-            ripple.style.left = Math.max(0, Math.min(x - size / 2, rect.width - size)) + 'px';
-            ripple.style.top = Math.max(0, Math.min(y - size / 2, rect.height - size)) + 'px';
-
-            element.style.position = 'relative';
-            element.style.overflow = 'hidden';
-            element.appendChild(ripple);
-
-            setTimeout(() => {
-                if (ripple.parentNode) {
-                    ripple.remove();
+                let x, y;
+                if (event.touches && event.touches.length > 0) {
+                    x = event.touches[0].clientX - rect.left;
+                    y = event.touches[0].clientY - rect.top;
+                } else {
+                    x = event.clientX - rect.left;
+                    y = event.clientY - rect.top;
                 }
-            }, 600);
+
+                ripple.classList.add('ripple');
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = Math.max(0, Math.min(x - size / 2, rect.width - size)) + 'px';
+                ripple.style.top = Math.max(0, Math.min(y - size / 2, rect.height - size)) + 'px';
+
+                if (!element.style.position || element.style.position === 'static') {
+                    element.style.position = 'relative';
+                }
+                element.style.overflow = 'hidden';
+                element.appendChild(ripple);
+
+                setTimeout(() => {
+                    if (ripple.parentNode) {
+                        ripple.remove();
+                    }
+                }, 600);
+            });
         }
 
         // Apply to interactive elements
