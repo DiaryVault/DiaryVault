@@ -865,9 +865,15 @@
 
           <div class="flex items-center gap-6 mb-6">
             <div class="flex items-center gap-2">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform">
-                {{ featured_journal.author.first_name|first|upper }}{{ featured_journal.author.last_name|first|upper }}
-              </div>
+                {% if featured_journal.author.userprofile.profile_picture %}
+                  <img src="{{ featured_journal.author.userprofile.profile_picture.url }}"
+                      alt="{{ featured_journal.author.username }}"
+                      class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-lg group-hover:scale-110 transition-transform">
+                {% else %}
+                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform">
+                    {{ featured_journal.author.first_name|first|upper }}{{ featured_journal.author.last_name|first|upper }}
+                  </div>
+                {% endif %}
               <div>
                 <p class="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">{{ featured_journal.author.get_full_name|default:featured_journal.author.username }}</p>
                 <p class="text-sm text-gray-600 group-hover:text-gray-700 transition-colors">{{ featured_journal.entries.count }} entries</p>
@@ -1208,9 +1214,15 @@
               <div class="p-6">
                 <!-- Author Info -->
                 <div class="flex items-center gap-3 mb-3">
-                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
-                    {{ journal.author.username|first|upper }}
-                  </div>
+                    {% if journal.author.userprofile.profile_picture %}
+                      <img src="{{ journal.author.userprofile.profile_picture.url }}"
+                          alt="{{ journal.author.username }}"
+                          class="w-8 h-8 rounded-full object-cover border-2 border-gray-200 hover:border-blue-400 transition-colors">
+                    {% else %}
+                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                        {{ journal.author.username|first|upper }}
+                      </div>
+                    {% endif %}
                   <div>
                     <p class="text-sm font-medium text-gray-800">{{ journal.author.get_full_name|default:journal.author.username }}</p>
                     <p class="text-xs text-gray-500">@{{ journal.author.username }}</p>

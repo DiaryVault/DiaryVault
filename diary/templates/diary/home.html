@@ -233,6 +233,36 @@
     color: white;
     font-size: 12px;
     font-weight: 600;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+  }
+
+  /* New styles for profile pictures */
+  .real-author img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+  }
+
+  .real-author img:hover {
+    border-color: #6366f1;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .real-marketplace-card:hover .real-author img {
+    transform: scale(1.1);
+    border-color: #8b5cf6;
+  }
+
+  .real-marketplace-card:hover .real-avatar {
+    transform: scale(1.1);
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
   }
 
   .real-author-name {
@@ -1165,13 +1195,19 @@
           <!-- Content -->
           <div class="real-content">
             <!-- Author -->
-            <div class="real-author">
-              <div class="real-avatar">
-                {{ journal.author.username|first|upper }}
-              </div>
-              <div class="real-author-name">
-                {{ journal.author.get_full_name|default:journal.author.username|truncatewords:2 }}
-              </div>
+              <div class="real-author">
+                {% if journal.author.userprofile.profile_picture %}
+                  <img src="{{ journal.author.userprofile.profile_picture.url }}"
+                      alt="{{ journal.author.username }}"
+                      class="w-7 h-7 rounded-full object-cover border-2 border-gray-200 hover:border-blue-400 transition-colors">
+                {% else %}
+                  <div class="real-avatar">
+                    {{ journal.author.username|first|upper }}
+                  </div>
+                {% endif %}
+                <div class="real-author-name">
+                  {{ journal.author.get_full_name|default:journal.author.username|truncatewords:2 }}
+                </div>
               <div class="ml-auto real-stats">
                 <div class="real-stat-item">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1278,8 +1314,16 @@
 
             <div class="real-content">
               <div class="real-author">
+              {% if forloop.counter <= 10 %}
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=sample{{ forloop.counter }}&backgroundColor=b6e3f4,c0aede,d1d4f9"
+                     alt="Sample Author {{ forloop.counter }}"
+                     class="w-7 h-7 rounded-full object-cover border-2 border-gray-200"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="real-avatar" style="display: none;">{{ forloop.counter|first }}</div>
+              {% else %}
                 <div class="real-avatar">{{ forloop.counter|first }}</div>
-                <div class="real-author-name">Sample Author {{ forloop.counter }}</div>
+              {% endif %}
+              <div class="real-author-name">Sample Author {{ forloop.counter }}</div>
                 <div class="ml-auto real-stats">
                   <div class="real-stat-item">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2625,9 +2669,14 @@ function showQuickViewModal(journal) {
 
       <div class="p-6">
         <div class="flex items-center gap-3 mb-4">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">
-            ${journal.author_name ? journal.author_name.charAt(0).toUpperCase() : 'A'}
-          </div>
+              ${journal.author_profile_picture ?
+                `<img src="${journal.author_profile_picture}"
+                      alt="${journal.author_name || 'Author'}"
+                      class="w-10 h-10 rounded-full object-cover border-2 border-gray-200 hover:border-blue-400 transition-colors">` :
+                `<div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">
+                   ${journal.author_name ? journal.author_name.charAt(0).toUpperCase() : 'A'}
+                 </div>`
+              }
           <div>
             <h3 class="font-bold text-xl text-gray-800 diary-font">${journal.title}</h3>
             <p class="text-gray-600">by ${journal.author_name || 'Anonymous'}</p>
