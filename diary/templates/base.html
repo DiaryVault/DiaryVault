@@ -110,7 +110,6 @@
               'slide-in': 'slideIn 0.5s ease-out forwards',
               'scale-in': 'scaleIn 0.4s ease-out forwards',
               'bounce-gentle': 'bounceGentle 2s ease-in-out infinite',
-              'float': 'float 3s ease-in-out infinite',
               'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
               'shimmer': 'shimmer 2s linear infinite',
               'pulse-ring': 'pulseRing 1.5s ease-out infinite',
@@ -127,8 +126,8 @@
                 '100%': { opacity: '1', transform: 'translateY(0)' },
               },
               slideIn: {
-                '0%': { transform: 'translateX(-100%)' },
-                '100%': { transform: 'translateX(0)' },
+                '0%': { transform: 'translateY(-100%)' },
+                '100%': { transform: 'translateY(0)' },
               },
               scaleIn: {
                 '0%': { opacity: '0', transform: 'scale(0.9)' },
@@ -136,11 +135,7 @@
               },
               bounceGentle: {
                 '0%, 100%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-5px)' },
-              },
-              float: {
-                '0%, 100%': { transform: 'translateY(0px)' },
-                '50%': { transform: 'translateY(-6px)' },
+                '50%': { transform: 'translateY(-3px)' },
               },
               pulseSoft: {
                 '0%, 100%': { opacity: '1' },
@@ -161,7 +156,7 @@
               },
               pulseBadge: {
                 '0%, 100%': { transform: 'scale(1)' },
-                '50%': { transform: 'scale(1.1)' },
+                '50%': { transform: 'scale(1.05)' },
               },
             },
             spacing: {
@@ -191,6 +186,25 @@
       }
     </script>
     <style>
+      /* CRITICAL STABILITY FIXES */
+
+      /* 1. Prevent any horizontal overflow */
+      html, body {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+        position: relative;
+        box-sizing: border-box;
+      }
+
+      /* 2. Constrain all containers */
+      * {
+        box-sizing: border-box;
+      }
+
+      *:not(html):not(body) {
+        max-width: 100%;
+      }
+
       /* Enhanced Typography */
       .diary-font {
         font-family: 'Playfair Display', serif;
@@ -203,38 +217,54 @@
         font-feature-settings: 'liga' 1;
       }
 
-      /* Enhanced Base Styles */
+      /* Enhanced Base Styles - STABILIZED */
       body {
         font-family: 'Inter', system-ui, sans-serif;
         font-feature-settings: 'liga' 1, 'kern' 1;
-        overflow-x: hidden;
+        overflow-x: hidden !important;
+        /* FIXED: Static background - no animation */
         background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #f1f5f9 50%, #e0e7ff 75%, #f8fafc 100%);
-        background-size: 400% 400%;
-        animation: gradientShift 20s ease infinite;
+        background-size: 100% 100%; /* FIXED: Static size instead of 400% 400% */
+        background-attachment: fixed;
         position: relative;
-      }
-
-      @keyframes gradientShift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
+        width: 100%;
+        min-height: 100vh;
+        max-width: 100vw !important;
       }
 
       html {
-        overflow-x: hidden;
+        overflow-x: hidden !important;
         scroll-behavior: smooth;
+        max-width: 100vw !important;
       }
 
-      /* Enhanced Glass Morphism */
+      /* FIXED: Constrain all major containers */
+      .container,
+      .max-w-7xl,
+      header,
+      main,
+      footer {
+        max-width: 100vw !important;
+        overflow-x: hidden;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* Enhanced Glass Morphism - STABILIZED */
       .glass-card {
         background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.3);
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+        width: 100%;
+        box-sizing: border-box;
+        position: relative;
       }
 
       .glass-card:hover {
         background: rgba(255, 255, 255, 0.95);
+        /* FIXED: Only vertical transform */
         transform: translateY(-4px);
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         border-color: rgba(99, 102, 241, 0.2);
@@ -245,9 +275,14 @@
         backdrop-filter: blur(24px) saturate(180%);
         -webkit-backdrop-filter: blur(24px) saturate(180%);
         border-top: 1px solid rgba(255, 255, 255, 0.3);
+        /* FIXED: Prevent movement */
+        width: 100%;
+        left: 0;
+        right: 0;
+        transform: none !important;
       }
 
-      /* Modern Button System */
+      /* Modern Button System - STABILIZED */
       .btn-primary {
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
         color: white;
@@ -257,6 +292,8 @@
         overflow: hidden;
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+        min-width: max-content;
+        box-sizing: border-box;
       }
 
       .btn-primary::before {
@@ -271,6 +308,7 @@
       }
 
       .btn-primary:hover {
+        /* FIXED: Only vertical transform */
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
       }
@@ -290,12 +328,15 @@
         font-weight: 500;
         backdrop-filter: blur(10px);
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+        min-width: max-content;
+        box-sizing: border-box;
       }
 
       .btn-secondary:hover {
         background: rgba(255, 255, 255, 1);
         border-color: #6366f1;
         color: #4338ca;
+        /* FIXED: Only vertical transform */
         transform: translateY(-1px);
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15);
       }
@@ -314,7 +355,7 @@
         border-color: rgba(99, 102, 241, 0.1);
       }
 
-      /* Enhanced Navigation */
+      /* Enhanced Navigation - STABILIZED */
       .nav-link {
         position: relative;
         color: #64748b;
@@ -356,7 +397,7 @@
         background: rgba(99, 102, 241, 0.12);
       }
 
-      /* Enhanced Brand Badge */
+      /* Enhanced Brand Badge - STABILIZED */
       .brand-badge {
         background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
         color: white;
@@ -368,10 +409,12 @@
         text-transform: uppercase;
         transform: rotate(-2deg);
         box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
-        animation: bounceGentle 2s ease-in-out infinite;
+        /* FIXED: Removed bouncing animation that could cause drift */
+        position: relative;
+        display: inline-block;
       }
 
-      /* Modern Card System */
+      /* Modern Card System - STABILIZED */
       .feature-card {
         background: rgba(255, 255, 255, 0.8);
         backdrop-filter: blur(20px);
@@ -381,6 +424,8 @@
         transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
         position: relative;
         overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
       }
 
       .feature-card::before {
@@ -396,7 +441,8 @@
       }
 
       .feature-card:hover {
-        transform: translateY(-8px) scale(1.02);
+        /* FIXED: Only vertical transform */
+        transform: translateY(-8px);
         background: rgba(255, 255, 255, 0.95);
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         border-color: rgba(99, 102, 241, 0.2);
@@ -406,7 +452,7 @@
         opacity: 1;
       }
 
-      /* Enhanced Mobile Menu */
+      /* Enhanced Mobile Menu - STABILIZED */
       .mobile-menu {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(30px);
@@ -414,6 +460,10 @@
         box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.1);
         transform: translateY(100%);
         transition: transform 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+        /* FIXED: Prevent horizontal movement */
+        left: 0;
+        right: 0;
+        width: 100%;
       }
 
       .mobile-menu.open {
@@ -426,6 +476,13 @@
         opacity: 0;
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
         pointer-events: none;
+        /* FIXED: Ensure full coverage without overflow */
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        left: 0;
+        top: 0;
       }
 
       .menu-overlay.active {
@@ -460,7 +517,8 @@
       }
 
       .menu-item:hover {
-        transform: scale(1.02);
+        /* FIXED: Controlled scale only */
+        transform: scale(1.01);
         background: rgba(99, 102, 241, 0.08);
       }
 
@@ -524,6 +582,7 @@
         border-color: #6366f1;
         background: rgba(255, 255, 255, 1);
         box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), 0 4px 15px rgba(99, 102, 241, 0.1);
+        /* FIXED: Only vertical transform */
         transform: translateY(-1px);
       }
 
@@ -560,7 +619,7 @@
         background-size: 24px 24px;
       }
 
-      /* Enhanced Mobile Navigation */
+      /* Enhanced Mobile Navigation - STABILIZED */
       .mobile-nav-item {
         position: relative;
         display: flex;
@@ -576,6 +635,9 @@
         user-select: none;
         -webkit-tap-highlight-color: transparent;
         text-decoration: none;
+        /* FIXED: Prevent horizontal movement */
+        width: auto;
+        min-width: 60px;
       }
 
       .mobile-nav-item::before {
@@ -601,6 +663,7 @@
       /* Active State */
       .mobile-nav-item.active {
         color: #4f46e5;
+        /* FIXED: Only vertical transform */
         transform: translateY(-1px);
       }
 
@@ -649,10 +712,11 @@
 
       .mobile-nav-item.active span {
         font-weight: 600;
+        /* FIXED: Controlled scale only */
         transform: scale(1.02);
       }
 
-      /* Enhanced Floating Action Button */
+      /* Enhanced Floating Action Button - STABILIZED */
       .fab {
         position: relative;
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
@@ -661,11 +725,12 @@
         padding: 12px;
         box-shadow: 0 6px 24px rgba(99, 102, 241, 0.3), 0 3px 12px rgba(99, 102, 241, 0.2);
         transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+        /* FIXED: Only vertical transform */
         transform: translateY(-6px);
         cursor: pointer;
         user-select: none;
         -webkit-tap-highlight-color: transparent;
-        animation: float 3s ease-in-out infinite;
+        /* REMOVED: float animation that could cause drift */
         overflow: hidden;
         text-decoration: none;
         display: flex;
@@ -683,6 +748,7 @@
       }
 
       .fab:hover {
+        /* FIXED: Only vertical and controlled scale transforms */
         transform: translateY(-8px) scale(1.02);
         box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4), 0 4px 15px rgba(99, 102, 241, 0.3);
       }
@@ -723,7 +789,7 @@
         z-index: 10;
       }
 
-      /* Ripple Effect */
+      /* Ripple Effect - STABILIZED */
       .ripple {
         position: absolute;
         border-radius: 50%;
@@ -731,11 +797,14 @@
         transform: scale(0);
         animation: ripple-animation 0.6s linear;
         pointer-events: none;
+        /* FIXED: Prevent overflow */
+        contain: layout style paint;
       }
 
       @keyframes ripple-animation {
         to {
-          transform: scale(4);
+          /* FIXED: Reduced scale from 4 to 2 to prevent overflow */
+          transform: scale(2);
           opacity: 0;
         }
       }
@@ -747,7 +816,7 @@
 
       /* Safe Area Support */
       .pb-safe {
-        padding-bottom: env(safe-area-inset-bottom, 16px);
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
       }
 
       /* Enhanced Scrollbar */
@@ -882,15 +951,12 @@
         background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
         background-size: 200% 100%;
         animation: shimmer 2s infinite;
+        overflow: hidden;
       }
 
-      /* Micro-interactions */
+      /* Micro-interactions - STABILIZED */
       .micro-bounce:hover {
         animation: bounceGentle 0.6s ease-in-out;
-      }
-
-      .micro-float {
-        animation: float 3s ease-in-out infinite;
       }
 
       /* Enhanced Backdrop Effects */
@@ -908,6 +974,35 @@
         .fab {
           padding: 20px; /* Larger FAB on touch devices */
         }
+      }
+
+      /* FINAL SAFETY MEASURES */
+      .grid {
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .grid > * {
+        min-width: 0;
+      }
+
+      #toastContainer {
+        position: fixed;
+        top: 6rem;
+        right: 1rem;
+        z-index: 50;
+        max-width: calc(100vw - 2rem);
+        pointer-events: none;
+      }
+
+      .fixed, .absolute, .sticky {
+        max-width: 100vw;
+      }
+
+      /* Shimmer container safety */
+      .shimmer-container {
+        overflow: hidden;
+        position: relative;
       }
     </style>
 
@@ -1418,10 +1513,58 @@
         <!-- Notifications will be inserted here -->
     </div>
 
-    <!-- Enhanced JavaScript -->
+    <!-- Enhanced JavaScript with STABILITY MONITORING -->
     <script>
-        // Enhanced menu functionality with improved animations
+        // CRITICAL: Stability monitoring and prevention
         document.addEventListener('DOMContentLoaded', function() {
+            // Disable horizontal scroll
+            document.body.style.overflowX = 'hidden';
+            document.documentElement.style.overflowX = 'hidden';
+
+            // Monitor for horizontal overflow
+            function checkForOverflow() {
+                const body = document.body;
+                const html = document.documentElement;
+
+                if (body.scrollWidth > window.innerWidth || html.scrollWidth > window.innerWidth) {
+                    console.warn('Horizontal overflow detected - fixing...');
+                    // Force correction
+                    document.body.style.width = '100%';
+                    document.body.style.maxWidth = '100vw';
+
+                    // Find and fix overflowing elements
+                    const allElements = document.querySelectorAll('*');
+                    allElements.forEach(el => {
+                        if (el.scrollWidth > window.innerWidth) {
+                            el.style.maxWidth = '100%';
+                            el.style.width = '100%';
+                            el.style.overflowX = 'hidden';
+                        }
+                    });
+                }
+            }
+
+            // Check on load and resize
+            checkForOverflow();
+            window.addEventListener('resize', checkForOverflow);
+
+            // Prevent horizontal touch gestures
+            let startX = 0;
+            document.addEventListener('touchstart', function(e) {
+                startX = e.touches[0].clientX;
+            }, { passive: true });
+
+            document.addEventListener('touchmove', function(e) {
+                const currentX = e.touches[0].clientX;
+                const diff = Math.abs(currentX - startX);
+
+                // If horizontal swipe on body, limit it
+                if (e.target === document.body && diff > 10) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            // Enhanced menu functionality
             const menuToggleBtn = document.getElementById('menuToggleBtn');
             const closeMenuBtn = document.getElementById('closeMenuBtn');
             const menuOverlay = document.getElementById('menuOverlay');
@@ -1434,12 +1577,10 @@
                         menuOverlay.classList.remove('hidden');
                         document.body.style.overflow = 'hidden';
 
-                        // Small delay for smooth animation
                         requestAnimationFrame(() => {
                             menuOverlay.classList.add('active');
                             menuSheet.classList.add('open');
 
-                            // Ensure all menu items are visible
                             const menuItems = menuSheet.querySelectorAll('.menu-item-animate');
                             menuItems.forEach((item, index) => {
                                 item.style.opacity = '1';
@@ -1453,25 +1594,21 @@
                         menuOverlay.classList.remove('active');
                         document.body.style.overflow = '';
 
-                        // Wait for animation to complete
                         setTimeout(() => {
                             menuOverlay.classList.add('hidden');
                         }, 400);
                     }
                 }
 
-                // Event listeners
                 menuToggleBtn.addEventListener('click', toggleMenu);
                 closeMenuBtn.addEventListener('click', toggleMenu);
 
-                // Close menu when clicking outside
                 menuOverlay.addEventListener('click', function(event) {
                     if (event.target === menuOverlay) {
                         toggleMenu();
                     }
                 });
 
-                // Enhanced keyboard support
                 document.addEventListener('keydown', function(e) {
                     if (e.key === 'Escape' && !menuOverlay.classList.contains('hidden')) {
                         toggleMenu();
@@ -1515,55 +1652,8 @@
                 });
             }
 
-            // Enhanced Mobile Navigation
+            // Enhanced Mobile Navigation with stability
             initEnhancedMobileNav();
-            initNavKeyboardShortcuts();
-            initSmoothTransitions();
-
-            // Enhanced page transitions
-            const links = document.querySelectorAll('a[href^="/"], a[href^="{% url "home" %}"]');
-            links.forEach(link => {
-                if (!link.getAttribute('href').includes('://') &&
-                    !link.getAttribute('href').startsWith('#') &&
-                    !link.classList.contains('no-transition') &&
-                    link.getAttribute('target') !== '_blank') {
-
-                    link.addEventListener('click', function(e) {
-                        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
-
-                        e.preventDefault();
-                        const target = this.getAttribute('href');
-
-                        // Add loading state
-                        document.body.style.opacity = '0.8';
-                        document.body.style.transition = 'opacity 0.3s ease';
-
-                        setTimeout(() => {
-                            window.location.href = target;
-                        }, 300);
-                    });
-                }
-            });
-
-            // Enhanced intersection observer for animations
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('animate-fade-in-up');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, observerOptions);
-
-            // Observe elements for animations
-            document.querySelectorAll('.feature-card, .glass-card').forEach(el => {
-                observer.observe(el);
-            });
 
             // Enhanced toast notification system
             window.showToast = function(message, type = 'info', duration = 4000) {
@@ -1596,10 +1686,8 @@
                 const container = document.getElementById('toastContainer');
                 container.appendChild(toast);
 
-                // Animate in
                 setTimeout(() => toast.classList.add('animate-slide-in'), 100);
 
-                // Auto remove
                 setTimeout(() => {
                     toast.style.opacity = '0';
                     toast.style.transform = 'translateX(100%)';
@@ -1607,40 +1695,23 @@
                 }, duration);
             };
 
-            // Enhanced keyboard shortcuts
+            // Keyboard shortcuts
             document.addEventListener('keydown', function(e) {
-                // Skip if user is typing
                 if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
-                // Ctrl/Cmd + N for new entry
                 if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
                     e.preventDefault();
                     const newEntryLink = document.querySelector('a[href*="new_entry"]');
                     if (newEntryLink) newEntryLink.click();
                 }
 
-                // Ctrl/Cmd + M for menu
                 if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
                     e.preventDefault();
                     if (menuToggleBtn) menuToggleBtn.click();
                 }
-
-                // Ctrl/Cmd + D for dashboard
-                if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
-                    e.preventDefault();
-                    const dashboardLink = document.querySelector('a[href*="dashboard"]');
-                    if (dashboardLink) dashboardLink.click();
-                }
-
-                // Ctrl/Cmd + L for library
-                if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
-                    e.preventDefault();
-                    const libraryLink = document.querySelector('a[href*="library"]');
-                    if (libraryLink) libraryLink.click();
-                }
             });
 
-            // Enhanced form handling with better loading states
+            // Enhanced form handling
             document.addEventListener('submit', function(e) {
                 const form = e.target;
                 if (form.tagName === 'FORM' && !form.classList.contains('no-loading')) {
@@ -1659,7 +1730,6 @@
                             </div>
                         `;
 
-                        // Reset button after 10 seconds as fallback
                         setTimeout(() => {
                             submitBtn.disabled = false;
                             submitBtn.innerHTML = originalText;
@@ -1668,82 +1738,23 @@
                 }
             });
 
-            // Performance optimizations
-            if ('IntersectionObserver' in window) {
-                // Lazy load images
-                const imageObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const img = entry.target;
-                            if (img.dataset.src) {
-                                img.src = img.dataset.src;
-                                img.removeAttribute('data-src');
-                                img.classList.remove('loading-shimmer');
-                                imageObserver.unobserve(img);
-                            }
-                        }
-                    });
-                });
-
-                document.querySelectorAll('img[data-src]').forEach(img => {
-                    img.classList.add('loading-shimmer');
-                    imageObserver.observe(img);
-                });
-            }
-
-            // Service Worker registration for PWA
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/service-worker.js').catch(() => {
-                    // Service worker registration failed - silent fail for production
-                });
-            }
-
-            // Enhanced error handling
-            window.addEventListener('error', function(e) {
-                // Log errors for debugging but don't show user notifications in production
-                if (window.showToast && window.location.hostname === 'localhost') {
-                    showToast('Something went wrong. Please refresh the page.', 'error');
-                }
-            });
-
-            // Preload critical resources during idle time
-            if ('requestIdleCallback' in window) {
-                requestIdleCallback(() => {
-                    const criticalRoutes = ['/dashboard', '/library', '/new_entry', '/biography'];
-                    criticalRoutes.forEach(route => {
-                        const link = document.createElement('link');
-                        link.rel = 'prefetch';
-                        link.href = route;
-                        document.head.appendChild(link);
-                    });
-                });
-            }
-
             // Initialize page
             document.body.style.opacity = '1';
             document.body.style.transition = 'opacity 0.3s ease';
         });
 
-        // Enhanced navigation interaction
+        // STABILIZED Mobile Navigation
         function initEnhancedMobileNav() {
             const navItems = document.querySelectorAll('.mobile-nav-item, .fab');
 
             navItems.forEach(item => {
-                // Ripple effect on touch/click
-                item.addEventListener('touchstart', function(e) {
-                    createRipple(e, this);
-                });
-
                 item.addEventListener('click', function(e) {
-                    // Don't prevent default for actual navigation links
                     createRipple(e, this);
 
-                    // Haptic feedback (if supported)
                     if (navigator.vibrate) {
                         navigator.vibrate(50);
                     }
 
-                    // Add active state animation
                     if (!this.classList.contains('fab')) {
                         this.style.transform = 'scale(0.95)';
                         setTimeout(() => {
@@ -1752,30 +1763,12 @@
                     }
                 });
 
-                // Enhanced touch feedback
                 item.addEventListener('touchstart', function(e) {
-                    // Prevent default to avoid 300ms delay
-                    if (this.classList.contains('fab')) {
-                        e.preventDefault();
-                    }
                     this.style.transform = this.classList.contains('fab') ?
                         'translateY(-10px) scale(0.95)' : 'scale(0.95)';
-                }, { passive: false });
+                }, { passive: true });
 
                 item.addEventListener('touchend', function() {
-                    setTimeout(() => {
-                        this.style.transform = this.classList.contains('fab') ?
-                            'translateY(-8px)' : '';
-                    }, 150);
-                });
-
-                // Mouse events for desktop testing
-                item.addEventListener('mousedown', function() {
-                    this.style.transform = this.classList.contains('fab') ?
-                        'translateY(-10px) scale(0.95)' : 'scale(0.95)';
-                });
-
-                item.addEventListener('mouseup', function() {
                     setTimeout(() => {
                         this.style.transform = this.classList.contains('fab') ?
                             'translateY(-8px)' : '';
@@ -1784,13 +1777,12 @@
             });
         }
 
-        // Create ripple effect
+        // STABILIZED Ripple effect
         function createRipple(event, element) {
             const ripple = document.createElement('span');
             const rect = element.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
+            const size = Math.min(rect.width, rect.height, 100); // FIXED: Limited max size
 
-            // Get touch/click coordinates
             let x, y;
             if (event.touches && event.touches.length > 0) {
                 x = event.touches[0].clientX - rect.left;
@@ -1802,10 +1794,12 @@
 
             ripple.classList.add('ripple');
             ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = (x - size / 2) + 'px';
-            ripple.style.top = (y - size / 2) + 'px';
+            // FIXED: Constrain to element bounds
+            ripple.style.left = Math.max(0, Math.min(x - size / 2, rect.width - size)) + 'px';
+            ripple.style.top = Math.max(0, Math.min(y - size / 2, rect.height - size)) + 'px';
 
             element.style.position = 'relative';
+            element.style.overflow = 'hidden';
             element.appendChild(ripple);
 
             setTimeout(() => {
@@ -1815,92 +1809,19 @@
             }, 600);
         }
 
-        // Enhanced keyboard shortcuts for navigation
-        function initNavKeyboardShortcuts() {
-            document.addEventListener('keydown', function(e) {
-                // Skip if user is typing in an input
-                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
-
-                const shortcuts = {
-                    '1': 'dashboard',
-                    '2': 'library',
-                    '3': 'new_entry', // Using underscore for Django URL name
-                    '4': 'biography',
-                    '5': 'insights'
-                };
-
-                if (shortcuts[e.key]) {
-                    e.preventDefault();
-                    const link = document.querySelector(`a[href*="${shortcuts[e.key]}"]`);
-                    if (link) {
-                        // Add visual feedback
-                        link.style.transform = 'scale(0.95)';
-                        setTimeout(() => {
-                            link.style.transform = '';
-                            link.click();
-                        }, 100);
-                    }
-                }
-
-                // Alt + N for new entry (alternative shortcut)
-                if (e.altKey && e.key === 'n') {
-                    e.preventDefault();
-                    const newEntryLink = document.querySelector('.fab');
-                    if (newEntryLink) newEntryLink.click();
-                }
-            });
-        }
-
-        // Smooth page transitions
-        function initSmoothTransitions() {
-            const navLinks = document.querySelectorAll('.mobile-nav-item, .fab');
-
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // Only apply transition effect for same-origin links
-                    const href = this.getAttribute('href');
-                    if (href && href.startsWith('/') && !href.includes('#')) {
-                        // Add loading state to current page
-                        document.body.style.opacity = '0.8';
-                        document.body.style.transition = 'opacity 0.2s ease';
-
-                        // Allow normal navigation to proceed
-                        setTimeout(() => {
-                            // Reset if navigation was cancelled
-                            document.body.style.opacity = '1';
-                        }, 1000);
-                    }
+        // Apply to interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.mobile-nav-item, .fab, button, .glass-card').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    createRipple(e, this);
                 });
             });
-        }
-
-        // Handle browser back button
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                document.body.style.opacity = '1';
-            }
         });
 
-        // Handle page visibility changes for better performance
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                // Pause non-critical animations when page is hidden
-                document.querySelectorAll('.fab').forEach(fab => {
-                    fab.style.animationPlayState = 'paused';
-                });
-            } else {
-                // Resume animations when page is visible
-                document.querySelectorAll('.fab').forEach(fab => {
-                    fab.style.animationPlayState = 'running';
-                });
-            }
-        });
-
-        // Utility functions for external use
         window.DiaryVault = {
             showToast: window.showToast,
             createRipple: createRipple,
-            version: '2.0-beta'
+            version: '2.0-stable'
         };
     </script>
 
