@@ -910,55 +910,81 @@
         }
       }
 
+/* REFINED Mobile Stability Fixes - Preserves Vertical Scrolling */
 
-/* Mobile Stability Fixes */
+/* 1. More careful overflow control */
+html {
+    overflow-x: hidden; /* Remove !important */
+    scroll-behavior: smooth;
+}
+
+body {
+    overflow-x: hidden; /* Remove !important */
+    overflow-y: auto; /* Explicitly enable vertical scrolling */
+    width: 100%;
+    max-width: 100vw;
+    position: relative;
+}
+
+/* 2. Mobile-specific adjustments */
 @media (max-width: 768px) {
-    /* Disable background animation on mobile to prevent movement */
+    /* Disable background animation on mobile only */
     body {
         background: #f8fafc !important;
         animation: none !important;
+        /* Ensure scrolling works */
+        overflow-y: auto !important;
+        height: auto;
+        min-height: 100vh;
     }
 
-    /* Ensure all containers stay within viewport */
+    /* Fix container widths without breaking scroll */
     .max-w-7xl,
     .container,
     main {
-        max-width: 100vw !important;
+        width: 100%;
+        max-width: calc(100vw - 0px);
+        margin-left: auto;
+        margin-right: auto;
         overflow-x: hidden;
+        /* Don't touch overflow-y - let it scroll naturally */
     }
 
-    /* Fix mobile navigation positioning */
+    /* Ensure main content area scrolls properly */
+    main {
+        overflow-y: visible; /* Explicitly allow vertical scroll */
+        overflow-x: hidden;
+        padding-bottom: 100px; /* Add space for mobile nav */
+    }
+
+    /* Fix mobile menu without affecting main scroll */
     .mobile-menu {
         width: 100vw;
         max-width: 100vw;
         left: 0;
         right: 0;
+        position: fixed;
+        bottom: 0;
+        overflow-y: auto; /* Allow menu to scroll if needed */
+        max-height: 85vh;
     }
 
-    /* Prevent text overflow */
+    /* Prevent text overflow without affecting scroll */
     p, div, span, h1, h2, h3, h4, h5, h6 {
         word-wrap: break-word;
         overflow-wrap: break-word;
+        max-width: 100%;
     }
 
     /* Fix glass cards */
     .glass-card,
     .feature-card {
         max-width: calc(100vw - 2rem);
+        width: 100%;
     }
 }
 
-/* Global overflow prevention */
-* {
-    box-sizing: border-box;
-}
-
-html, body {
-    overflow-x: hidden !important;
-    max-width: 100vw !important;
-}
-
-/* Touch optimization */
+/* 3. Touch optimization */
 @media (hover: none) and (pointer: coarse) {
     .mobile-nav-item,
     .fab,
@@ -968,20 +994,49 @@ html, body {
         -webkit-touch-callout: none;
     }
 
-    /* Disable problematic hover transforms on touch devices */
+    /* Disable hover transforms that might cause issues */
     .glass-card:hover,
     .feature-card:hover {
         transform: none !important;
     }
 
-    /* Prevent iOS zoom on input focus */
+    /* Prevent iOS zoom without affecting scroll */
     input[type="text"],
     input[type="email"],
     input[type="password"],
     textarea {
         font-size: 16px;
+        max-width: 100%;
+    }
+
+    /* Better touch scrolling */
+    body {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: none; /* Prevent horizontal bounce */
+        overscroll-behavior-y: auto; /* Allow vertical bounce */
     }
 }
+
+/* 4. Element-specific fixes */
+@media (max-width: 768px) {
+    /* Ensure images don't cause horizontal overflow */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Fix form elements */
+    input, textarea, select {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    /* Ensure buttons don't overflow */
+    button {
+        max-width: 100%;
+    }
+}
+
 
 
 
