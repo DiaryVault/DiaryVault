@@ -909,11 +909,6 @@
           padding: 20px; /* Larger FAB on touch devices */
         }
       }
-
-
-
-      
-
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -1908,36 +1903,37 @@
             version: '2.0-beta'
         };
 
-// Prevent horizontal scrolling
-function preventHorizontalMovement() {
-    if (window.scrollX !== 0) {
-        window.scrollTo(0, window.scrollY);
-    }
-}
-
-// Monitor and prevent horizontal scrolling
-window.addEventListener('scroll', preventHorizontalMovement, { passive: true });
-
-// Handle orientation changes
-window.addEventListener('orientationchange', function() {
-    setTimeout(() => {
-        window.scrollTo(0, window.scrollY);
-        document.body.style.height = 'auto';
-    }, 100);
-});
-
-// Ensure mobile menu doesn't cause horizontal movement
-if (menuSheet) {
-    menuSheet.addEventListener('touchmove', function(e) {
-        const diff = currentY - startY;
-        if (diff > 0 && menuSheet.scrollTop === 0) {
-            // Prevent horizontal movement during vertical swipe
-            e.preventDefault();
+        // Prevent horizontal scrolling
+        function preventHorizontalScrolling() {
+            // Only reset horizontal scroll, leave vertical alone
+            if (window.scrollX !== 0) {
+                window.scrollTo(0, window.scrollY);
+            }
         }
-    }, { passive: false });
-}
 
+        // Monitor only horizontal scrolling
+        window.addEventListener('scroll', preventHorizontalScrolling, { passive: true });
 
+        // Handle orientation changes without breaking scroll
+        window.addEventListener('orientationchange', function() {
+            setTimeout(() => {
+                // Only reset horizontal position
+                if (window.scrollX !== 0) {
+                    window.scrollTo(0, window.scrollY);
+                }
+            }, 100);
+        });
+
+        // Ensure mobile menu doesn't cause horizontal movement
+        if (menuSheet) {
+            menuSheet.addEventListener('touchmove', function(e) {
+                const diff = currentY - startY;
+                if (diff > 0 && menuSheet.scrollTop === 0) {
+                    // Prevent horizontal movement during vertical swipe
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        }
     </script>
 
     {% block extra_js %}{% endblock %}
