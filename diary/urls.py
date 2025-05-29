@@ -117,7 +117,7 @@ urlpatterns = [
     path('api/marketplace-stats/', core.marketplace_stats, name='marketplace_stats'),
 
     # Enhanced marketplace URLs
-    path('marketplace/publish-biography/', views.publish_biography, name='publish_biography'),
+    path('marketplace/publish-biography/', publish_biography, name='publish_biography'),
     path('api/purchase/<int:journal_id>/', views.purchase_journal_api, name='purchase_journal_api'),
     path('api/tip/<int:journal_id>/', views.tip_author_api, name='tip_author_api'),
     path('dashboard/earnings/', views.earnings_dashboard, name='earnings_dashboard'),
