@@ -1466,48 +1466,57 @@
 
                       // Tab switching with animation
                       function switchTab(tabName) {
-                        // Hide all tabs
-                        document.querySelectorAll('.tab-content').forEach(tab => {
-                          tab.classList.add('hidden');
-                        });
+                          // Hide all tabs using their IDs
+                          const allTabs = ['memories', 'journals', 'timeline', 'calendar'];
+                          allTabs.forEach(tab => {
+                              const tabElement = document.getElementById(tab + '-tab');
+                              if (tabElement) {
+                                  tabElement.classList.add('hidden');
+                              }
+                          });
 
-                        // Show selected tab
-                        document.getElementById(tabName + '-tab').classList.remove('hidden');
-
-                        // Update active state on buttons
-                        const buttons = document.querySelectorAll('.modern-tab');
-                        buttons.forEach(btn => {
-                          btn.classList.remove('active');
-                          if (btn.getAttribute('onclick').includes(tabName)) {
-                            btn.classList.add('active');
+                          // Show selected tab
+                          const selectedTab = document.getElementById(tabName + '-tab');
+                          if (selectedTab) {
+                              selectedTab.classList.remove('hidden');
                           }
-                        });
 
-                        // Update bottom navigation active state on mobile
-                        const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
-                        mobileNavItems.forEach(item => {
-                          item.classList.remove('active');
-                          if (item.getAttribute('onclick').includes(tabName)) {
-                            item.classList.add('active');
+                          // Update active state on buttons
+                          const buttons = document.querySelectorAll('.modern-tab');
+                          buttons.forEach(btn => {
+                              btn.classList.remove('active');
+                              if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabName)) {
+                                  btn.classList.add('active');
+                              }
+                          });
+
+                          // Update bottom navigation active state on mobile
+                          const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
+                          mobileNavItems.forEach(item => {
+                              item.classList.remove('active');
+                              if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(tabName)) {
+                                  item.classList.add('active');
+                              }
+                          });
+
+                          // Animate tab selector
+                          const activeTab = document.querySelector(`.modern-tab[onclick*="${tabName}"]`);
+                          const tabSelector = document.getElementById('tabSelector');
+
+                          if (activeTab && tabSelector) {
+                              const width = activeTab.getAttribute('data-tab-width');
+                              const offset = activeTab.getAttribute('data-tab-offset');
+
+                              if (width && offset) {
+                                  tabSelector.style.width = width;
+                                  tabSelector.style.transform = `translateX(${offset})`;
+                              }
                           }
-                        });
 
-                        // Animate tab selector
-                        const activeTab = document.querySelector(`.modern-tab[onclick="switchTab('${tabName}')"]`);
-                        const tabSelector = document.getElementById('tabSelector');
-
-                        if (activeTab && tabSelector) {
-                          const width = activeTab.getAttribute('data-tab-width');
-                          const offset = activeTab.getAttribute('data-tab-offset');
-
-                          tabSelector.style.width = width;
-                          tabSelector.style.transform = `translateX(${offset})`;
-                        }
-
-                        // Update URL without page reload to reflect current tab
-                        const url = new URL(window.location);
-                        url.searchParams.set('tab', tabName);
-                        window.history.pushState({}, '', url);
+                          // Update URL without page reload
+                          const url = new URL(window.location);
+                          url.searchParams.set('tab', tabName);
+                          window.history.pushState({}, '', url);
                       }
 
                       // Initialize tabs based on URL or default to memories
