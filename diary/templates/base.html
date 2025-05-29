@@ -747,12 +747,11 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
-                        Shop
+                        Marketplace
                     </a>
                 </nav>
                 {% else %}
                 <nav class="hidden lg:flex items-center gap-2">
-                    <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">About</a>
                     <a href="{% url 'signup' %}?feature=journal" class="nav-link">Journal</a>
                     <a href="{% url 'signup' %}?feature=library" class="nav-link">Library</a>
                     <a href="{% url 'signup' %}?feature=biography" class="nav-link">Biography</a>
@@ -914,18 +913,6 @@
             <!-- Non-authenticated Menu -->
             <div class="px-6 pb-6">
                 <div class="space-y-3 mb-6">
-                    <a href="{% url 'home' %}" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all hover:scale-[1.02]">
-                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <span class="font-semibold text-gray-800">About DiaryVault</span>
-                            <span class="text-sm text-primary-600 block">Learn more about our platform</span>
-                        </div>
-                    </a>
-
                     <a href="{% url 'marketplace' %}" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all hover:scale-[1.02]">
                         <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1056,6 +1043,16 @@
     <div id="toastContainer" class="fixed top-6 right-6 z-50 space-y-3 pointer-events-none">
         <!-- Notifications will be inserted here -->
     </div>
+
+    <!-- Debug Info (Remove in production) -->
+    {% if debug %}
+    <div id="debugInfo" style="position: fixed; top: 80px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 12px; z-index: 9999;">
+        <div>User: {{ user }}</div>
+        <div>Authenticated: {{ user.is_authenticated }}</div>
+        <div>Current URL: {{ request.resolver_match.url_name }}</div>
+        <button onclick="document.getElementById('debugInfo').style.display='none'" style="float: right; background: none; border: none; color: white;">×</button>
+    </div>
+    {% endif %}
 
     <!-- Enhanced JavaScript -->
     <script>
