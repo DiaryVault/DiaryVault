@@ -4,76 +4,182 @@
 
 {% block extra_css %}
 <style>
-  /* Enhanced card styling that works with base.html */
+  /* ZERO JavaScript conflicts - Pure CSS only */
+
+  /* Enhanced card styling */
   .insight-card {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(12px);
     border-radius: 20px;
-    overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    will-change: transform;
-    transform: translateZ(0);
   }
 
   .insight-card:hover {
-    transform: translateY(-4px) translateZ(0);
+    transform: translateY(-4px);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
   }
 
-  /* Enhanced chart containers */
-  .chart-container {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(8px);
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+  /* REDESIGNED: Better mood analysis layout */
+  .mood-analysis-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  @media (min-width: 1024px) {
+    .mood-analysis-grid {
+      grid-template-columns: 1.5fr 1fr;
+    }
+  }
+
+  .mood-content-card {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    border-radius: 20px;
+    padding: 2rem;
     position: relative;
     overflow: hidden;
   }
 
-  /* FIXED: Better mood distribution grid that handles overflow */
-  .mood-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.75rem;
-    max-height: 300px;
-    overflow-y: auto;
-    padding: 0.25rem;
+  .mood-content-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
   }
 
-  .mood-card {
+  .mood-stats-grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  /* REDESIGNED: Better mood distribution */
+  .mood-distribution-container {
     background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(8px);
-    border-radius: 12px;
-    padding: 1rem;
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .mood-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: #fbbf24 #fef3c7;
+  }
+
+  .mood-items-grid::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .mood-items-grid::-webkit-scrollbar-track {
+    background: #fef3c7;
+    border-radius: 3px;
+  }
+
+  .mood-items-grid::-webkit-scrollbar-thumb {
+    background: #fbbf24;
+    border-radius: 3px;
+  }
+
+  .mood-item {
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid rgba(251, 191, 36, 0.2);
+    border-radius: 16px;
+    padding: 1.25rem;
     text-align: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.3);
     transition: all 0.3s ease;
     cursor: pointer;
-    min-height: 100px;
+    min-height: 120px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    position: relative;
   }
 
-  .mood-card:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  .mood-item:hover {
+    transform: translateY(-2px) scale(1.03);
+    border-color: #fbbf24;
+    box-shadow: 0 8px 20px rgba(251, 191, 36, 0.2);
   }
 
-  /* FIXED: Better topic distribution that handles many items */
+  .mood-emoji {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+
+  .mood-name {
+    font-weight: 600;
+    color: #92400e;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .mood-percentage {
+    font-size: 1.75rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* REDESIGNED: Better topic analysis */
+  .topic-analysis-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  @media (min-width: 1024px) {
+    .topic-analysis-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .topic-chart-container {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(79, 70, 229, 0.05) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 20px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .topic-chart-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #6366f1, #4f46e5);
+  }
+
+  .topic-list-container {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
   .topic-list {
-    max-height: 400px;
+    max-height: 360px;
     overflow-y: auto;
     padding: 0.5rem;
     scrollbar-width: thin;
-    scrollbar-color: #6366f1 #f1f5f9;
+    scrollbar-color: #6366f1 #e0e7ff;
   }
 
   .topic-list::-webkit-scrollbar {
@@ -81,7 +187,7 @@
   }
 
   .topic-list::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: #e0e7ff;
     border-radius: 3px;
   }
 
@@ -91,54 +197,113 @@
   }
 
   .topic-item {
-    padding: 0.75rem 0;
-    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
-    transition: all 0.2s ease;
-  }
-
-  .topic-item:last-child {
-    border-bottom: none;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    background: rgba(255, 255, 255, 0.7);
   }
 
   .topic-item:hover {
     background: rgba(99, 102, 241, 0.05);
-    border-radius: 8px;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    border-color: rgba(99, 102, 241, 0.3);
+    transform: scale(1.02);
+  }
+
+  .topic-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .topic-name {
+    font-weight: 600;
+    color: #4338ca;
+    font-size: 0.95rem;
+  }
+
+  .topic-percentage {
+    font-weight: 700;
+    color: #6366f1;
+    font-size: 1rem;
   }
 
   .topic-bar {
-    background: rgba(229, 231, 235, 0.6);
+    background: rgba(226, 232, 240, 0.6);
     border-radius: 8px;
+    height: 10px;
     overflow: hidden;
-    height: 8px;
-    position: relative;
   }
 
   .topic-bar-fill {
     height: 100%;
-    border-radius: 8px;
     background: linear-gradient(90deg, #6366f1, #8b5cf6);
-    transition: width 1s ease-out;
+    border-radius: 8px;
+    transition: width 1.5s ease-out;
     position: relative;
   }
 
-  /* Enhanced patterns and suggestions with better overflow handling */
+  .topic-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  /* Enhanced mood trends chart */
+  .mood-trends-container {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  /* Better patterns and suggestions */
+  .patterns-suggestions-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  @media (min-width: 1024px) {
+    .patterns-suggestions-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .content-section {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
   .content-list {
-    max-height: 500px;
+    max-height: 450px;
     overflow-y: auto;
     padding: 0.5rem;
+    scrollbar-width: thin;
   }
 
   .pattern-card {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.03) 100%);
     border: 1px solid rgba(16, 185, 129, 0.2);
     border-radius: 16px;
     padding: 1.5rem;
     margin-bottom: 1rem;
     transition: all 0.3s ease;
     position: relative;
-    overflow: hidden;
   }
 
   .pattern-card::before {
@@ -147,24 +312,25 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
+    height: 3px;
     background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: 16px 16px 0 0;
   }
 
   .pattern-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 25px rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.4);
   }
 
   .suggestion-card {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(139, 92, 246, 0.03) 100%);
     border: 1px solid rgba(168, 85, 247, 0.2);
     border-radius: 16px;
     padding: 1.5rem;
     margin-bottom: 1rem;
     transition: all 0.3s ease;
     position: relative;
-    overflow: hidden;
   }
 
   .suggestion-card::before {
@@ -173,192 +339,140 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
+    height: 3px;
     background: linear-gradient(90deg, #a855f7, #8b5cf6);
+    border-radius: 16px 16px 0 0;
   }
 
   .suggestion-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 25px rgba(168, 85, 247, 0.15);
+    border-color: rgba(168, 85, 247, 0.4);
   }
 
-  /* Better empty state styling */
+  /* Enhanced empty states */
   .empty-state {
     text-align: center;
-    padding: 3rem 1.5rem;
+    padding: 3rem 2rem;
     background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(8px);
     border-radius: 20px;
     border: 2px dashed rgba(156, 163, 175, 0.3);
-    position: relative;
-    overflow: hidden;
   }
 
-  .empty-state::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
-    animation: shine 3s infinite;
+  .empty-icon {
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1rem;
+    color: #d1d5db;
   }
 
-  @keyframes shine {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%) };
-  }
-
-  /* Chart loading placeholder */
+  /* Loading states */
   .chart-loading {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 200px;
-    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background: linear-gradient(90deg, #f9fafb 25%, #f3f4f6 50%, #f9fafb 75%);
     background-size: 200% 100%;
-    animation: loading 1.5s infinite;
+    animation: loading-shimmer 1.5s infinite;
     border-radius: 12px;
   }
 
-  @keyframes loading {
+  @keyframes loading-shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
 
-  /* Mobile optimizations */
+  .loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid #e5e7eb;
+    border-top: 3px solid #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Section headers */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  /* Responsive improvements */
   @media (max-width: 640px) {
-    .mood-grid {
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      max-height: 250px;
+    .mood-items-grid {
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      max-height: 200px;
+    }
+
+    .mood-item {
+      padding: 1rem;
+      min-height: 100px;
+    }
+
+    .mood-emoji {
+      font-size: 2rem;
+    }
+
+    .mood-percentage {
+      font-size: 1.5rem;
     }
 
     .topic-list {
-      max-height: 300px;
+      max-height: 280px;
     }
 
     .content-list {
-      max-height: 400px;
-    }
-
-    .mood-card {
-      padding: 0.75rem;
-      min-height: 80px;
-    }
-
-    .pattern-card,
-    .suggestion-card {
-      padding: 1.25rem;
+      max-height: 350px;
     }
   }
 
-  /* Enhanced metrics display */
-  .metric-value {
-    font-size: 2rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* Notification badge styling */
-  .notification-badge {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.8; }
-  }
-
-  /* Enhanced page header */
-  .page-header {
-    text-align: center;
-    margin-bottom: 3rem;
-    position: relative;
-  }
-
-  .page-header::after {
-    content: '';
-    position: absolute;
-    bottom: -1rem;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 3px;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6);
-    border-radius: 2px;
-  }
-
-  /* Grid improvements for responsive layout */
-  .insights-grid {
-    display: grid;
-    gap: 2rem;
-  }
-
-  @media (min-width: 768px) {
-    .insights-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .insights-grid {
-      grid-template-columns: 2fr 1fr;
-    }
-  }
-
-  /* Fade in animations (using base.html system) */
-  .fade-in-up {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.6s ease;
-  }
-
-  .fade-in-up.animate {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* Better focus states */
-  .insight-card:focus-within {
+  /* Accessibility improvements */
+  .mood-item:focus,
+  .topic-item:focus,
+  .pattern-card:focus,
+  .suggestion-card:focus {
     outline: 2px solid #6366f1;
     outline-offset: 2px;
   }
 
-  /* Improved scrollbar for content areas */
-  .custom-scroll {
-    scrollbar-width: thin;
-    scrollbar-color: #6366f1 #f1f5f9;
-  }
+  /* Print styles */
+  @media print {
+    .insight-card {
+      box-shadow: none;
+      border: 1px solid #e5e7eb;
+    }
 
-  .custom-scroll::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  .custom-scroll::-webkit-scrollbar-track {
-    background: rgba(241, 245, 249, 0.5);
-    border-radius: 4px;
-  }
-
-  .custom-scroll::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
-    border-radius: 4px;
-    transition: background 0.3s ease;
-  }
-
-  .custom-scroll::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #4f46e5, #4338ca);
+    .mood-items-grid,
+    .topic-list,
+    .content-list {
+      max-height: none;
+      overflow: visible;
+    }
   }
 </style>
 
@@ -368,15 +482,15 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto relative">
-  <!-- Enhanced decorative elements (simplified) -->
-  <div class="absolute -top-10 -left-16 h-48 w-48 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
-  <div class="absolute -bottom-32 -right-16 h-48 w-48 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style="animation-delay: 2s;"></div>
+  <!-- Simplified decorative elements -->
+  <div class="absolute -top-10 -left-16 h-48 w-48 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
+  <div class="absolute -bottom-32 -right-16 h-48 w-48 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
 
-  <!-- Enhanced notifications -->
+  <!-- Messages -->
   {% if messages %}
     <div class="mb-8">
       {% for message in messages %}
-        <div class="{% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-800{% elif message.tags == 'success' %}bg-green-50 border-green-200 text-green-800{% else %}bg-blue-50 border-blue-200 text-blue-800{% endif %} px-6 py-4 rounded-2xl border mb-4 glass-effect animate-fade-in" role="alert">
+        <div class="{% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-800{% elif message.tags == 'success' %}bg-green-50 border-green-200 text-green-800{% else %}bg-blue-50 border-blue-200 text-blue-800{% endif %} px-6 py-4 rounded-2xl border mb-4" role="alert">
           <div class="flex items-center">
             <div class="flex-shrink-0">
               {% if message.tags == 'error' %}
@@ -393,115 +507,118 @@
                 </svg>
               {% endif %}
             </div>
-            <div class="ml-3">
-              {{ message }}
-            </div>
+            <div class="ml-3">{{ message }}</div>
           </div>
         </div>
       {% endfor %}
     </div>
   {% endif %}
 
-  <!-- Enhanced Header Section -->
-  <div class="page-header fade-in-up">
+  <!-- Header Section -->
+  <div class="text-center mb-12">
     <div class="inline-block mb-4">
-      <span class="px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full text-sm font-medium text-gray-600 shadow-lg border border-white/50 animate-float">
+      <span class="px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full text-sm font-medium text-gray-600 shadow-lg border border-white/50">
         🧠 Your Journal Insights
       </span>
     </div>
     <h1 class="text-4xl sm:text-5xl font-bold text-gray-800 diary-font mb-4">
       AI-Powered Insights
     </h1>
-    <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+    <p class="text-gray-600 text-lg max-w-2xl mx-auto mb-8">
       Discover patterns, trends, and meaningful insights from your journaling journey
     </p>
 
-    <!-- Enhanced regenerate button -->
-    <div class="mt-8">
-      <form method="post" class="inline-block">
-        {% csrf_token %}
-        <input type="hidden" name="regenerate_insights" value="true">
-        <button type="submit" class="btn-primary px-6 py-3 rounded-full hover:shadow-xl transition-all text-sm font-medium flex items-center gap-2 mx-auto">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          <span>Regenerate Insights</span>
-        </button>
-      </form>
-    </div>
+    <!-- Regenerate button -->
+    <form method="post" class="inline-block">
+      {% csrf_token %}
+      <input type="hidden" name="regenerate_insights" value="true">
+      <button type="submit" class="btn-primary px-6 py-3 rounded-full hover:shadow-xl transition-all text-sm font-medium flex items-center gap-2 mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span>Regenerate Insights</span>
+      </button>
+    </form>
   </div>
 
-  <!-- Enhanced Mood Analysis Section -->
+  <!-- REDESIGNED: Mood Analysis Section -->
   {% if mood_analysis %}
-  <div class="insight-card mb-8 fade-in-up">
+  <div class="insight-card mb-8">
     <div class="p-6 sm:p-8">
-      <h2 class="text-2xl font-semibold text-gradient mb-6 flex items-center gap-3 diary-font">
-        <div class="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+      <div class="section-header">
+        <div class="section-icon bg-gradient-to-br from-yellow-400 to-orange-500">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <span>Mood Analysis</span>
-        <span class="notification-badge">New Insights</span>
-      </h2>
+        <h2 class="section-title diary-font">Mood Analysis</h2>
+        <span class="px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold rounded-full">New Insights</span>
+      </div>
 
-      <div class="insights-grid">
+      <div class="mood-analysis-grid">
         <!-- AI Analysis Content -->
-        <div>
-          <div class="glass-card rounded-2xl p-6 border border-white/30">
-            <div class="text-gray-800 handwritten text-xl leading-relaxed">
-              {{ mood_analysis.content|linebreaks }}
-            </div>
+        <div class="mood-content-card">
+          <h3 class="text-lg font-semibold text-amber-800 mb-4 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            AI Analysis
+          </h3>
+          <div class="text-gray-800 handwritten text-xl leading-relaxed">
+            {{ mood_analysis.content|linebreaks }}
           </div>
         </div>
 
         <!-- Mood Statistics -->
-        <div class="space-y-6">
+        <div class="mood-stats-grid">
           <!-- Mood Trends Chart -->
-          <div class="chart-container">
-            <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              <span>Recent Mood Trends</span>
-            </h3>
+          <div class="mood-trends-container">
+            <div class="section-header">
+              <div class="section-icon bg-gradient-to-br from-yellow-500 to-orange-600" style="width: 2rem; height: 2rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <h3 class="text-base font-semibold text-gray-800">Recent Trends</h3>
+            </div>
             <div class="h-48 relative">
               {% if mood_trends %}
                 <canvas id="moodTrendChart"></canvas>
               {% else %}
                 <div class="chart-loading">
                   <div class="text-center">
-                    <div class="w-8 h-8 border-4 border-gray-200 border-t-primary-600 rounded-full animate-spin mb-3"></div>
-                    <p class="text-gray-500 text-sm">Building your mood timeline...</p>
+                    <div class="loading-spinner"></div>
+                    <p class="text-gray-500 text-sm">Building timeline...</p>
                   </div>
                 </div>
               {% endif %}
             </div>
           </div>
 
-          <!-- FIXED: Mood Distribution with better overflow handling -->
-          <div class="chart-container">
-            <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-              </svg>
-              <span>Mood Distribution</span>
-            </h3>
-            <div class="mood-grid custom-scroll">
+          <!-- REDESIGNED: Mood Distribution -->
+          <div class="mood-distribution-container">
+            <div class="section-header">
+              <div class="section-icon bg-gradient-to-br from-amber-500 to-yellow-600" style="width: 2rem; height: 2rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                </svg>
+              </div>
+              <h3 class="text-base font-semibold text-gray-800">Mood Breakdown</h3>
+            </div>
+            <div class="mood-items-grid">
               {% for mood in mood_distribution %}
-                <div class="mood-card">
-                  <div class="text-2xl mb-2">{{ mood.emoji }}</div>
-                  <div class="font-semibold text-gray-800 text-sm">{{ mood.name }}</div>
-                  <div class="metric-value text-lg">{{ mood.percentage }}%</div>
+                <div class="mood-item" tabindex="0">
+                  <div class="mood-emoji">{{ mood.emoji }}</div>
+                  <div class="mood-name">{{ mood.name }}</div>
+                  <div class="mood-percentage">{{ mood.percentage }}%</div>
                 </div>
               {% empty %}
                 <div class="col-span-full empty-state">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <p class="text-gray-500 text-sm">No mood data available yet</p>
-                  <p class="text-gray-400 text-xs mt-1">Continue journaling to see your mood patterns</p>
+                  <p class="text-gray-500 text-sm font-medium">No mood data yet</p>
+                  <p class="text-gray-400 text-xs mt-1">Continue journaling to see patterns</p>
                 </div>
               {% endfor %}
             </div>
@@ -512,49 +629,57 @@
   </div>
   {% endif %}
 
-  <!-- Enhanced Topic Distribution Section -->
-  <div class="insight-card mb-8 fade-in-up">
+  <!-- REDESIGNED: Topic Distribution Section -->
+  <div class="insight-card mb-8">
     <div class="p-6 sm:p-8">
-      <h2 class="text-2xl font-semibold text-gradient mb-6 flex items-center gap-3 diary-font">
-        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+      <div class="section-header">
+        <div class="section-icon bg-gradient-to-br from-indigo-500 to-purple-600">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
           </svg>
         </div>
-        <span>Topic Distribution</span>
-      </h2>
+        <h2 class="section-title diary-font">Topic Analysis</h2>
+      </div>
 
-      <div class="insights-grid">
+      <div class="topic-analysis-grid">
         <!-- Topic Chart -->
-        <div class="chart-container">
+        <div class="topic-chart-container">
+          <h3 class="text-lg font-semibold text-indigo-800 mb-4 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+            </svg>
+            Topic Distribution
+          </h3>
           <div class="h-80 relative">
             {% if tag_distribution %}
               <canvas id="topicChart"></canvas>
             {% else %}
               <div class="chart-loading">
                 <div class="text-center">
-                  <div class="w-8 h-8 border-4 border-gray-200 border-t-primary-600 rounded-full animate-spin mb-3"></div>
-                  <p class="text-gray-500 text-sm">Analyzing your topics...</p>
+                  <div class="loading-spinner"></div>
+                  <p class="text-gray-500 text-sm">Analyzing topics...</p>
                 </div>
               </div>
             {% endif %}
           </div>
         </div>
 
-        <!-- FIXED: Topic Breakdown with better overflow handling -->
-        <div class="chart-container">
-          <h3 class="font-semibold text-gray-800 mb-6 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-            </svg>
-            <span>Top Topics</span>
-          </h3>
-          <div class="topic-list custom-scroll">
+        <!-- REDESIGNED: Topic Breakdown -->
+        <div class="topic-list-container">
+          <div class="section-header">
+            <div class="section-icon bg-gradient-to-br from-indigo-600 to-purple-700" style="width: 2rem; height: 2rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+            </div>
+            <h3 class="text-base font-semibold text-gray-800">Top Topics</h3>
+          </div>
+          <div class="topic-list">
             {% for tag in tag_distribution %}
-              <div class="topic-item">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="font-medium text-gray-800 text-sm">{{ tag.name }}</span>
-                  <span class="text-sm text-gray-500 font-semibold">{{ tag.percentage }}%</span>
+              <div class="topic-item" tabindex="0">
+                <div class="topic-header">
+                  <span class="topic-name">{{ tag.name }}</span>
+                  <span class="topic-percentage">{{ tag.percentage }}%</span>
                 </div>
                 <div class="topic-bar">
                   <div class="topic-bar-fill" style="width: {{ tag.percentage }}%"></div>
@@ -562,11 +687,11 @@
               </div>
             {% empty %}
               <div class="empty-state">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
-                <p class="text-gray-500 text-sm">No topic data available yet</p>
-                <p class="text-gray-400 text-xs mt-1">Add tags to your entries to see topic analysis</p>
+                <p class="text-gray-500 text-sm font-medium">No topics yet</p>
+                <p class="text-gray-400 text-xs mt-1">Add tags to see analysis</p>
               </div>
             {% endfor %}
           </div>
@@ -575,90 +700,84 @@
     </div>
   </div>
 
-  <!-- Enhanced Patterns & Suggestions Grid -->
-  <div class="insights-grid mb-8">
-    <!-- Enhanced Patterns Section -->
-    <div class="insight-card fade-in-up">
-      <div class="p-6 sm:p-8">
-        <h2 class="text-2xl font-semibold text-gradient mb-6 flex items-center gap-3 diary-font">
-          <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <span>Patterns Detected</span>
-        </h2>
-
-        <div class="content-list custom-scroll">
-          {% for pattern in patterns %}
-            <div class="pattern-card">
-              <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
-                {{ pattern.title }}
-              </h3>
-              <p class="text-gray-700 handwritten text-lg leading-relaxed">{{ pattern.content }}</p>
-            </div>
-          {% empty %}
-            <div class="empty-state">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <h3 class="font-semibold text-gray-700 mb-2">No patterns detected yet</h3>
-              <p class="text-gray-500 text-sm">Continue journaling to discover trends in your entries</p>
-            </div>
-          {% endfor %}
+  <!-- Patterns & Suggestions -->
+  <div class="patterns-suggestions-grid mb-8">
+    <!-- Patterns Section -->
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon bg-gradient-to-br from-emerald-500 to-teal-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
         </div>
+        <h2 class="section-title diary-font">Patterns Detected</h2>
+      </div>
+
+      <div class="content-list">
+        {% for pattern in patterns %}
+          <div class="pattern-card" tabindex="0">
+            <h3 class="font-semibold text-emerald-800 mb-3 flex items-center gap-2">
+              <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+              {{ pattern.title }}
+            </h3>
+            <p class="text-gray-700 handwritten text-lg leading-relaxed">{{ pattern.content }}</p>
+          </div>
+        {% empty %}
+          <div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <h3 class="font-semibold text-gray-700 mb-2">No patterns detected yet</h3>
+            <p class="text-gray-500 text-sm">Continue journaling to discover trends</p>
+          </div>
+        {% endfor %}
       </div>
     </div>
 
-    <!-- Enhanced Suggestions Section -->
-    <div class="insight-card fade-in-up">
-      <div class="p-6 sm:p-8">
-        <h2 class="text-2xl font-semibold text-gradient mb-6 flex items-center gap-3 diary-font">
-          <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <!-- Suggestions Section -->
+    <div class="content-section">
+      <div class="section-header">
+        <div class="section-icon bg-gradient-to-br from-purple-500 to-pink-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+        </div>
+        <h2 class="section-title diary-font">Journal Suggestions</h2>
+      </div>
+
+      <div class="content-list">
+        {% for suggestion in suggestions %}
+          <div class="suggestion-card" tabindex="0">
+            <h3 class="font-semibold text-purple-800 mb-3 flex items-center gap-2">
+              <span class="w-2 h-2 bg-purple-500 rounded-full"></span>
+              {{ suggestion.title }}
+            </h3>
+            <p class="text-gray-700 handwritten text-lg leading-relaxed">{{ suggestion.content }}</p>
+          </div>
+        {% empty %}
+          <div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
+            <h3 class="font-semibold text-gray-700 mb-2">No suggestions yet</h3>
+            <p class="text-gray-500 text-sm">Continue journaling for recommendations</p>
           </div>
-          <span>Journal Suggestions</span>
-        </h2>
-
-        <div class="content-list custom-scroll">
-          {% for suggestion in suggestions %}
-            <div class="suggestion-card">
-              <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <span class="w-2 h-2 bg-purple-500 rounded-full"></span>
-                {{ suggestion.title }}
-              </h3>
-              <p class="text-gray-700 handwritten text-lg leading-relaxed">{{ suggestion.content }}</p>
-            </div>
-          {% empty %}
-            <div class="empty-state">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              <h3 class="font-semibold text-gray-700 mb-2">No suggestions generated yet</h3>
-              <p class="text-gray-500 text-sm">Continue journaling to receive personalized recommendations</p>
-            </div>
-          {% endfor %}
-        </div>
+        {% endfor %}
       </div>
     </div>
   </div>
 
-  <!-- Enhanced Call to Action -->
-  <div class="insight-card text-center fade-in-up">
+  <!-- Call to Action -->
+  <div class="insight-card text-center">
     <div class="p-8 sm:p-12">
       <div class="max-w-2xl mx-auto">
-        <div class="mb-6">
-          <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl animate-float">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
-          </div>
-          <h2 class="text-3xl font-bold text-gray-800 diary-font mb-4">Ready to add a new entry?</h2>
-          <p class="text-gray-600 text-lg leading-relaxed">The more you journal, the richer your insights become. Each entry adds depth to your personal story.</p>
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
         </div>
+        <h2 class="text-3xl font-bold text-gray-800 diary-font mb-4">Ready to add a new entry?</h2>
+        <p class="text-gray-600 text-lg leading-relaxed mb-8">The more you journal, the richer your insights become. Each entry adds depth to your personal story.</p>
 
         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <a href="{% url 'new_entry' %}" class="btn-primary text-white px-8 py-4 rounded-full inline-flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all text-lg font-medium">
@@ -683,120 +802,68 @@
 
 {% block extra_js %}
 <script>
-// SIMPLIFIED JavaScript that works with base.html (no conflicts)
+// MINIMAL JavaScript - NO scroll interference
 document.addEventListener('DOMContentLoaded', function() {
-  // Use base.html animation system
-  animateOnScroll();
-  initializeCharts();
+  // Only initialize charts - nothing else
+  if (typeof Chart !== 'undefined') {
+    initializeCharts();
+  }
 });
 
-// Simple animation using base.html classes
-function animateOnScroll() {
-  const elements = document.querySelectorAll('.fade-in-up');
-
-  // Use Intersection Observer if available, otherwise just show all
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 });
-
-    elements.forEach(el => observer.observe(el));
-  } else {
-    // Fallback: just show all elements
-    elements.forEach(el => el.classList.add('animate'));
-  }
-}
-
-// Chart initialization (simplified)
 function initializeCharts() {
-  // Configure Chart.js defaults
-  if (typeof Chart !== 'undefined') {
-    Chart.defaults.font.family = "'Inter', sans-serif";
-    Chart.defaults.color = '#374151';
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.color = '#374151';
 
-    initializeTopicChart();
-    initializeMoodChart();
-  }
-}
-
-function getColorCode(colorClass) {
-  const colorMap = {
-    'indigo-600': '#4f46e5', 'indigo-500': '#6366f1', 'blue-500': '#3b82f6',
-    'sky-500': '#0ea5e9', 'cyan-500': '#06b6d4', 'teal-500': '#14b8a6',
-    'emerald-500': '#10b981', 'green-500': '#22c55e', 'lime-500': '#84cc16',
-    'yellow-500': '#eab308', 'amber-500': '#f59e0b', 'orange-500': '#f97316',
-    'red-500': '#ef4444', 'rose-500': '#f43f5e', 'fuchsia-500': '#d946ef',
-    'purple-500': '#a855f7', 'violet-500': '#8b5cf6', 'secondary-500': '#6366f1',
-    'primary-500': '#8b5cf6'
-  };
-  return colorMap[colorClass] || '#9ca3af';
-}
-
-function initializeTopicChart() {
-  const element = document.getElementById('topicChart');
-  if (!element) return;
-
-  {% if tag_distribution %}
-  try {
-    const ctx = element.getContext('2d');
-
-    new Chart(ctx, {
+  // Topic Chart
+  const topicElement = document.getElementById('topicChart');
+  if (topicElement) {
+    {% if tag_distribution %}
+    const topicCtx = topicElement.getContext('2d');
+    new Chart(topicCtx, {
       type: 'doughnut',
       data: {
         labels: [{% for tag in tag_distribution %}'{{ tag.name }}',{% endfor %}],
         datasets: [{
           data: [{% for tag in tag_distribution %}{{ tag.percentage }},{% endfor %}],
-          backgroundColor: [{% for tag in tag_distribution %}getColorCode('{{ tag.color }}'),{% endfor %}],
+          backgroundColor: [
+            '#6366f1', '#8b5cf6', '#3b82f6', '#06b6d4', '#10b981',
+            '#84cc16', '#eab308', '#f59e0b', '#ef4444', '#f43f5e'
+          ],
           borderWidth: 3,
-          borderColor: '#ffffff',
-          hoverOffset: 8
+          borderColor: '#ffffff'
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: '65%',
+        cutout: '60%',
         plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { boxWidth: 15, padding: 20 }
-          }
+          legend: { position: 'bottom', labels: { padding: 20 } }
         }
       }
     });
-  } catch (error) {
-    console.error('Topic chart error:', error);
+    {% endif %}
   }
-  {% endif %}
-}
 
-function initializeMoodChart() {
-  const element = document.getElementById('moodTrendChart');
-  if (!element) return;
-
-  {% if mood_trends %}
-  try {
-    const ctx = element.getContext('2d');
-
-    new Chart(ctx, {
+  // Mood Chart
+  const moodElement = document.getElementById('moodTrendChart');
+  if (moodElement) {
+    {% if mood_trends %}
+    const moodCtx = moodElement.getContext('2d');
+    new Chart(moodCtx, {
       type: 'line',
       data: {
         labels: [{% for item in mood_trends %}'{{ item.date }}',{% endfor %}],
         datasets: [{
           label: 'Mood Level',
           data: [{% for item in mood_trends %}{{ item.mood }},{% endfor %}],
-          borderColor: '#6366f1',
-          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          borderColor: '#fbbf24',
+          backgroundColor: 'rgba(251, 191, 36, 0.1)',
           borderWidth: 3,
           tension: 0.4,
           fill: true,
           pointBackgroundColor: '#ffffff',
-          pointBorderColor: '#6366f1',
+          pointBorderColor: '#fbbf24',
           pointBorderWidth: 3,
           pointRadius: 6
         }]
@@ -805,16 +872,13 @@ function initializeMoodChart() {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          y: { min: 0, max: 10, ticks: { stepSize: 2 } },
-          x: { ticks: { maxRotation: 45 } }
+          y: { min: 0, max: 10, ticks: { stepSize: 2 } }
         },
         plugins: { legend: { display: false } }
       }
     });
-  } catch (error) {
-    console.error('Mood chart error:', error);
+    {% endif %}
   }
-  {% endif %}
 }
 </script>
 {% endblock %}
