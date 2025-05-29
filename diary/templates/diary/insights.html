@@ -6,14 +6,38 @@
 <style>
   /* SMOOTH SCROLLING - Conflict-free CSS */
 
-  /* COMPLETE SCROLLBAR REMOVAL */
+  /* MINIMAL SCROLLBAR STYLING */
+  :root {
+    --scrollbar-width: 6px;
+    --scrollbar-track: rgba(0, 0, 0, 0.05);
+    --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
+  }
+
+  /* Default minimal scrollbars for main content */
   * {
-    scrollbar-width: none !important; /* Firefox */
-    -ms-overflow-style: none !important; /* IE and Edge */
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   }
 
   *::-webkit-scrollbar {
-    display: none !important; /* Chrome, Safari, Opera */
+    width: var(--scrollbar-width);
+    height: var(--scrollbar-width);
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: 3px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
   }
 
   /* Enhanced card styling */
@@ -461,6 +485,14 @@
   /* Smooth scrolling for the entire page */
   html {
     scroll-behavior: smooth;
+    /* Ensure main page scrollbar is always visible */
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  body {
+    /* Prevent horizontal scroll */
+    overflow-x: hidden;
   }
 
   /* Ensure no horizontal scroll on the main content */
@@ -471,11 +503,6 @@
   /* Improve overall scrolling performance */
   * {
     -webkit-overflow-scrolling: touch;
-  }
-
-  /* Prevent any overflow from creating scrollbars */
-  body {
-    overflow-x: hidden !important;
   }
 </style>
 
