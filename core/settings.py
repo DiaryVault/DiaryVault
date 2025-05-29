@@ -14,28 +14,27 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-load_dotenv()  # load environment variables from .env file
-
-GROK_API_KEY = os.environ.get('GROK_API_KEY')
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-39q6gly-+d3b!h9h0%#m0zldysqtpv#vkap0byuq6&=w@s*73*'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'diaryvault.com', 'www.diaryvault.com', '52.64.254.25']
 
+# API Keys
+GROK_API_KEY = os.getenv('GROK_API_KEY')
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -54,7 +53,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.apple',
     'allauth.socialaccount.providers.microsoft',
-
 ]
 
 MIDDLEWARE = [
@@ -100,7 +98,6 @@ AUTHENTICATION_BACKENDS = [
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -108,10 +105,8 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -127,34 +122,23 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
-
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = '/login/'
@@ -164,7 +148,6 @@ LOGOUT_REDIRECT_URL = '/login/'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
-
 
 CACHES = {
     'default': {
@@ -176,9 +159,6 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Stripe Configuration
-
-load_dotenv()  # Load variables from .env
-
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 
@@ -190,9 +170,9 @@ MARKETPLACE_SETTINGS = {
     'PAYOUT_SCHEDULE': 'monthly', # monthly, weekly, daily
 }
 
-# Celery for background tasks (optional)
-CELERY_BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+# Celery for background tasks
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379')
 
 # Enhanced Marketplace Features (2025)
 MARKETPLACE_ENHANCED = {
@@ -233,4 +213,3 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=1, minute=0, day_of_week=1),  # Weekly Monday
     },
 }
-
