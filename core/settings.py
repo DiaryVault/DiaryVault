@@ -145,9 +145,27 @@ LOGIN_REDIRECT_URL = '/dashboard/'
 LOGIN_URL = '/login/'
 LOGOUT_REDIRECT_URL = '/login/'
 
+# Add these django-allauth specific settings
+ACCOUNT_LOGIN_REDIRECT_URL = '/dashboard/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/login/'
+ACCOUNT_SIGNUP_REDIRECT_URL = '/dashboard/'
+
+# Enhanced allauth configuration
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_VERIFICATION = 'optional'  # or 'mandatory' if you want email verification
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
+ACCOUNT_LOGOUT_ON_GET = False  # Require POST for logout (security)
+ACCOUNT_SESSION_REMEMBER = True  # Remember login sessions
+
+# Social account settings (if using social login)
+SOCIALACCOUNT_LOGIN_ON_GET = False
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+# Additional redirect behavior
+ACCOUNT_ADAPTER = 'allauth.account.adapter.DefaultAccountAdapter'
 
 CACHES = {
     'default': {

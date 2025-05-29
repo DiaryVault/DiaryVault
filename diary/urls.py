@@ -25,8 +25,8 @@ urlpatterns = [
     path('signup/', views.signup, name='signup'),
 
     # Authentication
-    path('login/', CustomLoginView.as_view(template_name='diary/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('login/', RedirectView.as_view(url='/accounts/login/', permanent=False), name='login'),
+    path('logout/', RedirectView.as_view(url='/accounts/logout/', permanent=False), name='logout'),
     path('password-reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
 
     # User Settings & Preferences
