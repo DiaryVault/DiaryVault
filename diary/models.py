@@ -9,8 +9,33 @@ class Tag(models.Model):
     name = models.CharField(max_length=50)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tags')
 
+    # IMPROVED: Add tag categories for better organization
+    TAG_CATEGORIES = [
+        ('emotion', 'Emotion'),
+        ('activity', 'Activity'),
+        ('person', 'Person'),
+        ('location', 'Location'),
+        ('goal', 'Goal'),
+        ('challenge', 'Challenge'),
+        ('achievement', 'Achievement'),
+        ('other', 'Other'),
+    ]
+    category = models.CharField(max_length=20, choices=TAG_CATEGORIES, default='other')
+
+    # IMPROVED: Track tag usage for insights
+    usage_count = models.PositiveIntegerField(default=0, editable=False)
+
     class Meta:
         unique_together = ['name', 'user']
+        indexes = [
+            models.Index(fields=['user', 'category']),
+            models.Index(fields=['user', 'usage_count']),
+        ]
+
+    def update_usage_count(self):
+        """Update the usage count based on related entries"""
+        self.usage_count = self.entries.count()
+        self.save(update_fields=['usage_count'])
 
     def __str__(self):
         return self.name
@@ -43,7 +68,41 @@ class Entry(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag, related_name='entries', blank=True)
-    mood = models.CharField(max_length=50, blank=True, null=True)
+
+    # IMPROVED: Add choices for consistent mood data
+    MOOD_CHOICES = [
+        ('excited', 'Excited'),
+        ('happy', 'Happy'),
+        ('content', 'Content'),
+        ('neutral', 'Neutral'),
+        ('anxious', 'Anxious'),
+        ('sad', 'Sad'),
+        ('angry', 'Angry'),
+        ('confused', 'Confused'),
+        ('grateful', 'Grateful'),
+        ('overwhelmed', 'Overwhelmed'),
+    ]
+    mood = models.CharField(max_length=50, choices=MOOD_CHOICES, blank=True, null=True)
+
+    # IMPROVED: Add numeric mood rating for better trend analysis
+    mood_rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+        null=True,
+        blank=True,
+        help_text="Rate your mood from 1 (terrible) to 10 (amazing)"
+    )
+
+    # IMPROVED: Add energy level for richer insights
+    energy_level = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+        null=True,
+        blank=True,
+        help_text="Rate your energy level from 1 (exhausted) to 10 (energized)"
+    )
+
+    # IMPROVED: Add word count for writing analysis
+    word_count = models.PositiveIntegerField(default=0, editable=False)
+
     summary = models.TextField(blank=True, null=True)
     chapter = models.ForeignKey(LifeChapter, on_delete=models.SET_NULL, null=True, blank=True, related_name='entries')
 
@@ -53,6 +112,23 @@ class Entry(models.Model):
     class Meta:
         ordering = ['-created_at']
         verbose_name_plural = 'entries'
+        # IMPROVED: Add database indexes for better query performance
+        indexes = [
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['user', 'mood']),
+            models.Index(fields=['created_at']),
+            models.Index(fields=['user', 'mood_rating']),
+        ]
+
+    def save(self, *args, **kwargs):
+        # Auto-calculate word count
+        if self.content:
+            self.word_count = len(self.content.split())
+        super().save(*args, **kwargs)
+
+        # Update tag usage counts
+        for tag in self.tags.all():
+            tag.update_usage_count()
 
     def __str__(self):
         return self.title
@@ -126,10 +202,32 @@ class UserInsight(models.Model):
         ('mood_analysis', 'Mood Analysis'),
         ('pattern', 'Pattern Detection'),
         ('suggestion', 'Suggestion'),
-        ('topic_analysis', 'Topic Analysis')
+        ('topic_analysis', 'Topic Analysis'),
+        ('writing_style', 'Writing Style Analysis'),
+        ('emotional_trends', 'Emotional Trends'),
+        ('productivity', 'Productivity Insights'),
     ])
     title = models.CharField(max_length=200)
     content = models.TextField()
+
+    # IMPROVED: Add confidence score for AI insights
+    confidence_score = models.FloatField(
+        default=0.0,
+        validators=[MinValueValidator(0.0), MaxValueValidator(1.0)],
+        help_text="AI confidence in this insight (0.0 to 1.0)"
+    )
+
+    # IMPROVED: Track which entries contributed to this insight
+    related_entries = models.ManyToManyField(Entry, blank=True, related_name='insights')
+
+    # IMPROVED: Add priority for displaying insights
+    priority = models.CharField(max_length=20, choices=[
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('urgent', 'Urgent'),
+    ], default='medium')
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -137,7 +235,32 @@ class UserInsight(models.Model):
         return f"{self.insight_type}: {self.title}"
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-priority', '-created_at']
+        indexes = [
+            models.Index(fields=['user', 'insight_type']),
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['user', 'priority']),
+        ]
+
+class AnalyticsEvent(models.Model):
+    """Track user interactions for better insights"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='analytics_events')
+    event_type = models.CharField(max_length=50, choices=[
+        ('entry_created', 'Entry Created'),
+        ('entry_updated', 'Entry Updated'),
+        ('mood_logged', 'Mood Logged'),
+        ('tags_added', 'Tags Added'),
+        ('insights_viewed', 'Insights Viewed'),
+        ('insights_regenerated', 'Insights Regenerated'),
+    ])
+    metadata = models.JSONField(default=dict, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['user', 'event_type', 'timestamp']),
+        ]
 
 class UserPreference(models.Model):
     """Store user personalization preferences for journal generation"""

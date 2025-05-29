@@ -18,15 +18,48 @@ def insights(request):
         # Delete existing insights for this user
         UserInsight.objects.filter(user=request.user).delete()
 
-        # Generate new insights using AIService
-        from ..services.ai_service import AIService
-        AIService.generate_insights(request.user)
+        try:
+            # Generate new insights using AIService
+            from ..services.ai_service import AIService
+            AIService.generate_insights(request.user)
+
+            # Check if mood analysis was created
+            mood_analysis_exists = UserInsight.objects.filter(
+                user=request.user,
+                insight_type='mood_analysis'
+            ).exists()
+
+            # If AIService didn't create mood analysis, use fallback
+            if not mood_analysis_exists:
+                logger.warning("AIService didn't create mood analysis, using fallback")
+                generate_fallback_insights(request.user)
+
+        except Exception as e:
+            logger.error(f"Error generating insights: {e}")
+            # Fallback to basic insights generation
+            generate_fallback_insights(request.user)
 
         messages.success(request, "Insights regenerated!")
         return redirect('insights')
 
     # Get this user's insights from the database
     user_insights = UserInsight.objects.filter(user=request.user)
+
+    # If no insights exist at all, generate them
+    if not user_insights.exists():
+        try:
+            from ..services.ai_service import AIService
+            AIService.generate_insights(request.user)
+            user_insights = UserInsight.objects.filter(user=request.user)
+
+            # If still no insights, use fallback
+            if not user_insights.exists():
+                generate_fallback_insights(request.user)
+                user_insights = UserInsight.objects.filter(user=request.user)
+        except Exception as e:
+            logger.error(f"Error generating initial insights: {e}")
+            generate_fallback_insights(request.user)
+            user_insights = UserInsight.objects.filter(user=request.user)
 
     # Prepare data structures
     mood_analysis = None
@@ -64,6 +97,80 @@ def insights(request):
     }
 
     return render(request, 'diary/insights.html', context)
+
+def generate_fallback_insights(user):
+    """
+    Generate basic insights when AIService fails.
+    This ensures users always have some insights to view.
+    """
+    entries = Entry.objects.filter(user=user)
+
+    if not entries.exists():
+        # Create basic "getting started" insights
+        UserInsight.objects.create(
+            user=user,
+            insight_type='mood_analysis',
+            title='Welcome to Your Insights',
+            content='Start journaling to see personalized insights about your mood patterns, emotional trends, and writing themes. Your insights will become more detailed as you add more entries.'
+        )
+
+        UserInsight.objects.create(
+            user=user,
+            insight_type='suggestion',
+            title='Getting Started',
+            content='Try writing about your day, your feelings, or what you\'re grateful for. The more you write, the better insights you\'ll receive!'
+        )
+        return
+
+    # Generate mood analysis based on actual entries
+    moods = [entry.mood for entry in entries if entry.mood]
+    if moods:
+        mood_counter = Counter(moods)
+        most_common_mood = mood_counter.most_common(1)[0][0]
+
+        mood_analysis_content = f"Based on your recent journal entries, you've been feeling mostly {most_common_mood}. "
+
+        if len(mood_counter) > 1:
+            mood_analysis_content += f"You've experienced {len(mood_counter)} different emotional states, showing a healthy range of emotions. "
+
+        mood_analysis_content += "Continue journaling to track how your emotional patterns evolve over time."
+    else:
+        mood_analysis_content = "You haven't added mood information to your entries yet. Consider tracking your emotions to get deeper insights into your emotional patterns."
+
+    UserInsight.objects.create(
+        user=user,
+        insight_type='mood_analysis',
+        title='Mood Analysis',
+        content=mood_analysis_content
+    )
+
+    # Generate basic patterns
+    if len(entries) >= 3:
+        UserInsight.objects.create(
+            user=user,
+            insight_type='pattern',
+            title='Journaling Consistency',
+            content=f'You have {len(entries)} journal entries, showing commitment to self-reflection and personal growth.'
+        )
+
+    # Generate basic suggestions
+    recent_entries = entries.order_by('-created_at')[:5]
+    if recent_entries:
+        avg_length = sum(len(entry.content.split()) for entry in recent_entries) / len(recent_entries)
+
+        if avg_length < 50:
+            suggestion_content = "Consider writing longer entries to capture more details about your thoughts and feelings. Deeper reflection often leads to greater insights."
+        elif avg_length > 200:
+            suggestion_content = "Your detailed entries show great self-awareness. Try experimenting with different writing styles or prompts to explore new aspects of your experiences."
+        else:
+            suggestion_content = "Your entries show a good balance of reflection and detail. Consider adding tags to help categorize your thoughts and track specific themes over time."
+
+        UserInsight.objects.create(
+            user=user,
+            insight_type='suggestion',
+            title='Writing Enhancement',
+            content=suggestion_content
+        )
 
 def generate_mood_distribution(entries):
     """
@@ -177,6 +284,7 @@ def generate_mood_trends(entries):
 
     return trends_data
 
+# Keep the original function for reference (you can remove this if not needed)
 def generate_user_insights(user):
     """
     Generate insights for a user - this is where you would call your AI service.
