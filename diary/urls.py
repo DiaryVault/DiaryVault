@@ -7,6 +7,8 @@ from django.conf.urls.static import static
 from .views import core
 from .views.core import CustomLoginView
 from .views import marketplace
+from .views.marketplace import publish_biography
+
 
 from . import views
 from .views import CustomLoginView
