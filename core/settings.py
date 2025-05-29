@@ -83,6 +83,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
             ],
         },
     },
@@ -173,3 +174,63 @@ CACHES = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Stripe Configuration
+
+load_dotenv()  # Load variables from .env
+
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+
+# Marketplace Settings
+MARKETPLACE_SETTINGS = {
+    'PLATFORM_FEE_PERCENT': 10,  # 10% platform fee
+    'TIP_FEE_PERCENT': 5,        # 5% fee on tips
+    'MINIMUM_PAYOUT': 50.00,     # Minimum earnings before payout
+    'PAYOUT_SCHEDULE': 'monthly', # monthly, weekly, daily
+}
+
+# Celery for background tasks (optional)
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+
+# Enhanced Marketplace Features (2025)
+MARKETPLACE_ENHANCED = {
+    'DYNAMIC_PRICING_ENABLED': True,
+    'ANALYTICS_PACKAGES_ENABLED': True,
+    'PREMIUM_PLACEMENTS_ENABLED': True,
+    'SUBSCRIPTION_TIERS_ENABLED': True,
+
+    # Analytics package pricing
+    'ANALYTICS_PRICING': {
+        'basic_insights': 9.99,
+        'advanced_analytics': 19.99,
+        'market_intelligence': 39.99
+    },
+
+    # Revenue sharing based on subscription tier
+    'REVENUE_SHARING': {
+        'standard': 0.85,        # 85% to author
+        'author_starter': 0.90,  # 90% to author
+        'author_professional': 0.95,  # 95% to author
+    }
+}
+
+# Celery periodic tasks for automation
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'update-dynamic-pricing': {
+        'task': 'diary.tasks.update_dynamic_pricing',
+        'schedule': crontab(hour=2, minute=0),  # Daily at 2 AM
+    },
+    'process-monthly-payouts': {
+        'task': 'diary.tasks.process_monthly_payouts',
+        'schedule': crontab(day_of_month=1, hour=3, minute=0),  # 1st of month
+    },
+    'generate-marketplace-insights': {
+        'task': 'diary.tasks.generate_marketplace_insights',
+        'schedule': crontab(hour=1, minute=0, day_of_week=1),  # Weekly Monday
+    },
+}
+

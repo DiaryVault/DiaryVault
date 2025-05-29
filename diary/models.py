@@ -622,3 +622,52 @@ def save_user_profile(sender, instance, **kwargs):
         instance.userprofile.save()
     except UserProfile.DoesNotExist:
         UserProfile.objects.create(user=instance)
+
+class MarketplacePlacement(models.Model):
+    """Track premium placements for journals"""
+    journal = models.ForeignKey('Journal', on_delete=models.CASCADE, related_name='placements')
+    placement_type = models.CharField(max_length=50, choices=[
+        ('featured_homepage', 'Featured Homepage'),
+        ('category_spotlight', 'Category Spotlight'),
+        ('newsletter_feature', 'Newsletter Feature'),
+        ('search_boost', 'Search Boost'),
+    ])
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    amount_paid = models.DecimalField(max_digits=8, decimal_places=2)
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class UserSubscription(models.Model):
+    """Handle various subscription tiers"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='marketplace_subscription')
+    subscription_type = models.CharField(max_length=30, choices=[
+        ('reader_basic', 'Reader Basic'),
+        ('reader_premium', 'Reader Premium'),
+        ('author_starter', 'Author Starter'),
+        ('author_professional', 'Author Professional'),
+    ])
+    is_active = models.BooleanField(default=True)
+    start_date = models.DateTimeField(auto_now_add=True)
+    next_billing_date = models.DateTimeField()
+    stripe_subscription_id = models.CharField(max_length=255, blank=True)
+
+    def get_benefits(self):
+        """Return subscription benefits"""
+        from .services.advanced_marketplace_service import MarketplaceEnhancementService
+        tiers = MarketplaceEnhancementService.implement_subscription_tiers()
+        return tiers.get(self.subscription_type, {}).get('benefits', [])
+
+class AnalyticsPackage(models.Model):
+    """Track purchases of premium analytics"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='analytics_purchases')
+    package_type = models.CharField(max_length=50, choices=[
+        ('basic_insights', 'Basic Insights'),
+        ('advanced_analytics', 'Advanced Analytics'),
+        ('market_intelligence', 'Market Intelligence'),
+    ])
+    data = models.JSONField()  # Store the analytics data
+    amount_paid = models.DecimalField(max_digits=8, decimal_places=2)
+    valid_until = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)

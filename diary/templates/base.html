@@ -14,6 +14,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0"/>
     <title>{% block title %}DiaryVault - Your Personal Digital Journal{% endblock %}</title>
+
+    <meta name="stripe-publishable-key" content="{{ STRIPE_PUBLISHABLE_KEY|default:'pk_test_your_key_here' }}">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
     <meta name="theme-color" content="#6366f1" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.3/cdn.min.js" defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -949,6 +953,26 @@
                         </svg>
                         Dashboard
                     </a>
+                    <!-- Add marketplace navigation -->
+                    <a href="{% url 'marketplace' %}" class="nav-link text-sm {% if request.resolver_match.url_name == 'marketplace' %}active{% endif %}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        Marketplace
+                    </a>
+                    <a href="{% url 'publish_journal' %}" class="nav-link text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Publish
+                    </a>
+                    <a href="{% url 'earnings_dashboard' %}" class="nav-link text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                        </svg>
+                        Earnings
+                    </a>
+                    <!-- Keep existing navigation items -->
                     <a href="{% url 'library' %}" class="nav-link text-sm {% if request.resolver_match.url_name == 'library' %}active{% endif %}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -1319,9 +1343,9 @@
 
     <!-- Enhanced Mobile Navigation -->
     {% if user.is_authenticated %}
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 glass-nav shadow-nav z-30">
-        <div class="px-3 py-2 pb-safe">
-            <div class="flex justify-around items-end relative">
+      <nav class="lg:hidden fixed bottom-0 left-0 right-0 glass-nav shadow-nav z-30">
+          <div class="px-3 py-2 pb-safe">
+              <div class="flex justify-around items-end relative">
                 <!-- Home/Dashboard -->
                 <a href="{% url 'dashboard' %}"
                    class="mobile-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
@@ -1371,6 +1395,17 @@
                     </svg>
                     <span>Insights</span>
                 </a>
+
+            <!-- Add Marketplace -->
+            <a href="{% url 'marketplace' %}"
+               class="mobile-nav-item {% if request.resolver_match.url_name == 'marketplace' %}active{% endif %}"
+               data-page="marketplace">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <span>Shop</span>
+            </a>
+
             </div>
         </div>
     </nav>

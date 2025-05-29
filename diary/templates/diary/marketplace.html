@@ -1285,15 +1285,27 @@
                     {% endif %}
                   </div>
 
-                  {% if user.is_authenticated %}
-                    <button onclick="addToCart({{ journal.id }})" class="btn-emerald px-6 py-3 rounded-xl font-semibold shadow-lg interactive-element">
-                      {% if journal.price > 0 %}Buy Now{% else %}Get Free{% endif %}
-                    </button>
-                  {% else %}
-                    <a href="{% url 'signup' %}" class="btn-emerald px-6 py-3 rounded-xl font-semibold shadow-lg inline-block">
-                      Sign Up
-                    </a>
-                  {% endif %}
+                    {% if user.is_authenticated %}
+                        <button onclick="addToCart({{ journal.id }})"
+                                class="btn-emerald px-6 py-3 rounded-xl font-semibold shadow-lg interactive-element"
+                                data-journal-id="{{ journal.id }}"
+                                data-price="{{ journal.price|default:0 }}">
+                            {% if journal.price > 0 %}Buy Now{% else %}Get Free{% endif %}
+                        </button>
+                    {% else %}
+                        <a href="{% url 'signup' %}" class="btn-emerald px-6 py-3 rounded-xl font-semibold shadow-lg inline-block">
+                            Sign Up
+                        </a>
+                    {% endif %}
+
+                    <!-- Add tip button for paid journals -->
+                    {% if journal.price > 0 and user.is_authenticated and journal.author != user %}
+                        <button onclick="window.marketplacePayments.handleTip(this)"
+                                class="btn-secondary px-4 py-2 rounded-lg text-sm mt-2"
+                                data-journal-id="{{ journal.id }}">
+                            💝 Tip Author
+                        </button>
+                    {% endif %}
                 </div>
 
                 <!-- Instant Access Badge -->
@@ -1430,540 +1442,522 @@
 
 {% block extra_js %}
 <script>
-// Enhanced JavaScript with null checks for marketplace.html
-let cart = JSON.parse(localStorage.getItem('diaryvault_cart') || '[]');
-let wishlist = JSON.parse(localStorage.getItem('diaryvault_wishlist') || '[]');
-let comparison = JSON.parse(localStorage.getItem('diaryvault_comparison') || '[]');
-
-// Safe initialization
-document.addEventListener('DOMContentLoaded', function() {
-  safeUpdateCartCount();
-  safeUpdateWishlistCount();
-  safeUpdateCompareCount();
-  initializeAnimations();
-  initializeSearch();
-});
-
-// Safe update functions with null checks
-function safeUpdateCartCount() {
-  const countElement = document.getElementById('cartCount');
-  if (countElement) {
-    countElement.textContent = cart.length;
-  }
-}
-
-function safeUpdateWishlistCount() {
-  const countElement = document.getElementById('wishlistCount');
-  if (countElement) {
-    countElement.textContent = wishlist.length;
-  }
-}
-
-function safeUpdateCompareCount() {
-  const countElement = document.getElementById('compareCount');
-  if (countElement) {
-    countElement.textContent = comparison.length;
-  }
-}
-
-// Initialize search functionality
-function initializeSearch() {
-  const searchInput = document.querySelector('.search-input');
-  if (!searchInput) return;
-
-  // Add search suggestions
-  searchInput.addEventListener('input', function(e) {
-    const query = e.target.value.toLowerCase();
-    if (query.length > 2) {
-      this.classList.add('searching');
-      setTimeout(() => {
-        this.classList.remove('searching');
-      }, 500);
-    }
-  });
-
-  // Handle category pill clicks
-  document.querySelectorAll('.category-pill').forEach(pill => {
-    pill.addEventListener('click', function(e) {
-      e.preventDefault();
-      document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
-      this.classList.add('active');
-      window.location.href = this.href;
-    });
-  });
-
-  // Handle quick category clicks
-  document.querySelectorAll('.quick-category').forEach(quickCat => {
-    quickCat.addEventListener('click', function(e) {
-      e.preventDefault();
-      searchInput.value = this.textContent;
-      searchInput.focus();
-      setTimeout(() => {
-        document.querySelector('form').submit();
-      }, 500);
-    });
-  });
-}
-
-// Advanced filters toggle
-function toggleAdvancedFilters() {
-  const dropdown = document.getElementById('advancedFiltersDropdown');
-  if (dropdown) {
-    dropdown.classList.toggle('active');
-  }
-}
-
-// Clear all filters
-function clearAllFilters() {
-  const form = document.querySelector('form');
-  if (!form) return;
-
-  const searchValue = form.querySelector('[name="search"]')?.value || '';
-  form.reset();
-  const searchField = form.querySelector('[name="search"]');
-  if (searchField) {
-    searchField.value = searchValue;
-  }
-
-  document.querySelectorAll('.category-pill').forEach(pill => {
-    pill.classList.remove('active');
-  });
-
-  updateActiveFiltersCount();
-  showToast('Filters cleared', 'info');
-}
-
-// Update active filters count
-function updateActiveFiltersCount() {
-  const countElement = document.getElementById('activeFiltersCount');
-  if (!countElement) return;
-
-  let count = 0;
-  const form = document.querySelector('form');
-  if (!form) return;
-
-  const checkedInputs = form.querySelectorAll('input[type="checkbox"]:checked, input[type="radio"]:checked');
-  count += checkedInputs.length;
-
-  const selects = form.querySelectorAll('select');
-  selects.forEach(select => {
-    if (select.value && select.value !== 'all' && select.value !== 'trending') {
-      count++;
-    }
-  });
-
-  if (document.querySelector('.category-pill.active')) {
-    count++;
-  }
-
-  countElement.textContent = count;
-}
-
-// Enhanced toast notifications
-function showToast(message, type = 'info', duration = 3000) {
-  let container = document.getElementById('toastContainer');
-
-  // Create container if it doesn't exist
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'toastContainer';
-    container.className = 'fixed top-4 right-4 z-50 space-y-2';
-    document.body.appendChild(container);
-  }
-
-  const toast = document.createElement('div');
-  toast.className = `toast ${type} transform translate-x-full`;
-
-  const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
-
-  toast.innerHTML = `
-    <div class="flex items-center gap-3">
-      <span class="text-lg">${icon}</span>
-      <span class="font-medium">${message}</span>
-    </div>
-  `;
-
-  container.appendChild(toast);
-
-  // Animate in
-  setTimeout(() => toast.classList.remove('translate-x-full'), 100);
-
-  // Animate out and remove
-  setTimeout(() => {
-    toast.classList.add('translate-x-full');
-    setTimeout(() => toast.remove(), 300);
-  }, duration);
-}
-
-// Enhanced shopping cart functions
-function addToCart(journalId) {
-  if (!cart.find(item => item.id === journalId)) {
-    cart.push({
-      id: journalId,
-      title: `Journal ${journalId}`,
-      price: 9.99,
-      quantity: 1
-    });
-
-    localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
-    safeUpdateCartCount();
-    showCartAnimation();
-    showToast('Added to cart! 🛒', 'success');
-  } else {
-    showToast('Already in cart!', 'info');
-  }
-}
-
-function removeFromCart(journalId) {
-  cart = cart.filter(item => item.id !== journalId);
-  localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
-  safeUpdateCartCount();
-  renderCartItems();
-  showToast('Removed from cart', 'info');
-}
-
-function toggleCart() {
-  const sidebar = document.getElementById('cartSidebar');
-  const overlay = document.getElementById('cartOverlay');
-
-  if (!sidebar || !overlay) {
-    showToast('Cart feature not available on this page', 'info');
-    return;
-  }
-
-  if (sidebar.classList.contains('translate-x-full')) {
-    sidebar.classList.remove('translate-x-full');
-    overlay.classList.remove('hidden');
-    renderCartItems();
-  } else {
-    sidebar.classList.add('translate-x-full');
-    overlay.classList.add('hidden');
-  }
-}
-
-function renderCartItems() {
-  const container = document.getElementById('cartItems');
-  const footer = document.getElementById('cartFooter');
-
-  if (!container) return;
-
-  if (cart.length === 0) {
-    container.innerHTML = `
-      <div class="text-center text-gray-500 py-16">
-        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 4H2m5 9v6a1 1 0 001 1h9a1 1 0 001-1v-6M9 19a1 1 0 102 0M20 19a1 1 0 10-2 0" />
-          </svg>
-        </div>
-        <h4 class="font-semibold text-gray-700 mb-2">Your cart is empty</h4>
-        <p class="text-sm">Add some journals to get started!</p>
-      </div>`;
-    if (footer) footer.classList.add('hidden');
-  } else {
-    container.innerHTML = cart.map(item => `
-      <div style="background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(255, 255, 255, 0.3);">
-        <div class="flex items-center gap-4">
-          <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <div class="flex-1">
-            <h4 class="font-semibold text-gray-800">${item.title}</h4>
-            <p class="text-sm text-gray-600">$${item.price}</p>
-          </div>
-          <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    `).join('');
-
-    const total = cart.reduce((sum, item) => sum + item.price, 0);
-    const totalElement = document.getElementById('cartTotal');
-    if (totalElement) {
-      totalElement.textContent = `$${total.toFixed(2)}`;
-    }
-    if (footer) footer.classList.remove('hidden');
-  }
-}
-
-// Wishlist functions
-function toggleWishlist(journalId) {
-  const index = wishlist.indexOf(journalId);
-  if (index === -1) {
-    wishlist.push(journalId);
-    showToast('Added to wishlist! ❤️', 'success');
-  } else {
-    wishlist.splice(index, 1);
-    showToast('Removed from wishlist', 'info');
-  }
-
-  localStorage.setItem('diaryvault_wishlist', JSON.stringify(wishlist));
-  safeUpdateWishlistCount();
-}
-
-// Comparison functions
-function addToCompare(journalId) {
-  if (comparison.length >= 4) {
-    showToast('Maximum 4 items can be compared!', 'warning');
-    return;
-  }
-
-  if (!comparison.includes(journalId)) {
-    comparison.push(journalId);
-    localStorage.setItem('diaryvault_comparison', JSON.stringify(comparison));
-    safeUpdateCompareCount();
-    showToast('Added to comparison!', 'success');
-  }
-}
-
-function toggleCompare() {
-  if (comparison.length === 0) {
-    showToast('No items to compare!', 'info');
-    return;
-  }
-  showToast('Comparison feature coming soon!', 'info');
-}
-
-// Quick view function
-function quickView(journalId) {
-  showToast('Quick view feature coming soon!', 'info');
-}
-
-// Grid view toggle
-function setGridView(view) {
-  const grid = document.getElementById('productsGrid');
-  const gridBtn = document.getElementById('gridViewBtn');
-  const listBtn = document.getElementById('listViewBtn');
-
-  if (!grid || !gridBtn || !listBtn) return;
-
-  if (view === 'list') {
-    grid.className = 'space-y-6';
-    gridBtn.classList.remove('bg-blue-500', 'text-white');
-    gridBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
-    listBtn.classList.add('bg-blue-500', 'text-white');
-    listBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
-  } else {
-    grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8';
-    gridBtn.classList.add('bg-blue-500', 'text-white');
-    gridBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
-    listBtn.classList.remove('bg-blue-500', 'text-white');
-    listBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
-  }
-}
-
-// Animation initialization
-function initializeAnimations() {
-  const cards = document.querySelectorAll('.product-card');
-  cards.forEach((card, index) => {
-    card.style.animationDelay = `${index * 100}ms`;
-  });
-
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate-fade-in-up');
+// Enhanced Marketplace JavaScript with proper Django integration
+class EnhancedMarketplacePayments {
+    constructor(stripePublishableKey) {
+        if (stripePublishableKey && stripePublishableKey !== 'pk_test_your_key_here') {
+            this.stripe = Stripe(stripePublishableKey);
+            this.elements = this.stripe.elements();
+        } else {
+            console.warn('Stripe not configured properly');
+            this.stripe = null;
         }
-      });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.animate-fade-in-up').forEach(el => {
-      observer.observe(el);
-    });
-  }
-}
-
-// Cart animation
-function showCartAnimation() {
-  const cartBtn = document.querySelector('[onclick*="toggleCart"]');
-  if (cartBtn) {
-    cartBtn.style.animation = 'pulse 0.6s ease-in-out';
-    setTimeout(() => {
-      cartBtn.style.animation = '';
-    }, 600);
-  }
-}
-
-// Checkout function
-function checkout() {
-  if (cart.length === 0) {
-    showToast('Your cart is empty!', 'warning');
-    return;
-  }
-
-  showToast('Redirecting to checkout...', 'info');
-
-  setTimeout(() => {
-    cart = [];
-    localStorage.setItem('diaryvault_cart', JSON.stringify(cart));
-    safeUpdateCartCount();
-    toggleCart();
-    showToast('Order placed successfully! 🎉', 'success', 5000);
-  }, 2000);
-}
-
-// Shuffle results function
-function shuffleResults() {
-  const productsGrid = document.getElementById('productsGrid');
-  if (!productsGrid) return;
-
-  const cards = Array.from(productsGrid.children);
-
-  for (let i = cards.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [cards[i], cards[j]] = [cards[j], cards[i]];
-  }
-
-  productsGrid.style.opacity = '0.5';
-  productsGrid.style.transform = 'scale(0.98)';
-
-  setTimeout(() => {
-    cards.forEach((card, index) => {
-      card.style.animationDelay = `${index * 50}ms`;
-      card.classList.add('animate-fade-in-up');
-    });
-
-    productsGrid.innerHTML = '';
-    cards.forEach(card => productsGrid.appendChild(card));
-
-    productsGrid.style.opacity = '1';
-    productsGrid.style.transform = 'scale(1)';
-
-    showToast('Results shuffled! 🎲', 'success', 2000);
-  }, 300);
-}
-
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    const cartSidebar = document.getElementById('cartSidebar');
-    if (cartSidebar && !cartSidebar.classList.contains('translate-x-full')) {
-      toggleCart();
+        this.cardElement = null;
+        this.init();
     }
-    const dropdown = document.getElementById('advancedFiltersDropdown');
-    if (dropdown && dropdown.classList.contains('active')) {
-      toggleAdvancedFilters();
+
+    init() {
+        this.setupEventListeners();
+        this.initializeCounts();
     }
-  }
 
-  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-    e.preventDefault();
-    const searchInput = document.querySelector('.search-input');
-    if (searchInput) {
-      searchInput.focus();
+    setupEventListeners() {
+        // Purchase buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('[data-action="purchase-journal"]') ||
+                e.target.closest('[data-action="purchase-journal"]')) {
+                e.preventDefault();
+                const button = e.target.matches('[data-action="purchase-journal"]') ?
+                             e.target : e.target.closest('[data-action="purchase-journal"]');
+                this.handlePurchase(button);
+            }
+        });
+
+        // Buy Now buttons in product cards
+        document.addEventListener('click', (e) => {
+            if (e.target.textContent.includes('Buy Now') || e.target.textContent.includes('Get Free')) {
+                const card = e.target.closest('.product-card');
+                if (card) {
+                    const journalId = card.dataset.journalId;
+                    const priceElement = card.querySelector('.text-2xl');
+                    const price = priceElement ? this.extractPrice(priceElement.textContent) : 0;
+
+                    e.preventDefault();
+                    this.handleDirectPurchase(journalId, price);
+                }
+            }
+        });
+
+        // Tip buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('[data-action="tip-author"]') ||
+                e.target.closest('[data-action="tip-author"]')) {
+                e.preventDefault();
+                const button = e.target.matches('[data-action="tip-author"]') ?
+                             e.target : e.target.closest('[data-action="tip-author"]');
+                this.handleTip(button);
+            }
+        });
+
+        // Quick tip buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('[data-action="quick-tip"]')) {
+                e.preventDefault();
+                this.handleQuickTip(e.target);
+            }
+        });
     }
-  }
-});
 
-// Form submission with loading states
-document.addEventListener('submit', function(e) {
-  const form = e.target;
-  if (form.tagName === 'FORM') {
-    const submitBtn = form.querySelector('button[type="submit"]');
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `
-        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        Searching...
-      `;
+    initializeCounts() {
+        // Update UI counts on page load
+        this.updateCartCount();
+        this.updateWishlistCount();
+        this.updateCompareCount();
     }
-  }
-});
 
-// Close dropdowns when clicking outside
-document.addEventListener('click', function(e) {
-  const dropdown = document.getElementById('advancedFiltersDropdown');
-  const filterBtn = document.querySelector('[onclick*="toggleAdvancedFilters"]');
-
-  if (dropdown && dropdown.classList.contains('active')) {
-    if (!dropdown.contains(e.target) && (!filterBtn || !filterBtn.contains(e.target))) {
-      dropdown.classList.remove('active');
+    extractPrice(priceText) {
+        if (priceText.includes('FREE')) return 0;
+        const match = priceText.match(/\$(\d+(?:\.\d{2})?)/);
+        return match ? parseFloat(match[1]) : 0;
     }
-  }
-});
 
-// Auto-shuffle for random/trending sorts
-document.addEventListener('DOMContentLoaded', function() {
-  // Get current sort from template context or URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const currentSort = urlParams.get('sort') || 'trending';
+    async handleDirectPurchase(journalId, price) {
+        if (!journalId) {
+            this.showError('Journal ID not found');
+            return;
+        }
 
-  if (currentSort === 'trending' || currentSort === 'random') {
-    setTimeout(() => {
-      const cards = document.querySelectorAll('.product-card');
-      cards.forEach((card, index) => {
-        const randomDelay = Math.random() * 200;
-        card.style.animationDelay = `${randomDelay}ms`;
-      });
-    }, 100);
-  }
-});
+        if (price === 0) {
+            // Free journal
+            try {
+                const response = await fetch(`/api/purchase/${journalId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCSRFToken()
+                    },
+                    body: JSON.stringify({})
+                });
 
-// Enhanced sort change handler
-document.addEventListener('change', function(e) {
-  if (e.target.name === 'sort') {
-    const form = e.target.closest('form');
-    if (!form) return;
+                const result = await response.json();
+                if (result.success) {
+                    this.showSuccess(result.message || 'Successfully added to your library!');
+                    // Update UI to reflect purchase
+                    this.updatePurchaseUI(journalId);
+                } else {
+                    this.showError(result.error || 'Purchase failed');
+                }
+            } catch (error) {
+                this.showError('Failed to process request');
+                console.error('Purchase error:', error);
+            }
+        } else {
+            // Paid journal - show payment modal
+            this.showPaymentModal(journalId, price, 'purchase');
+        }
+    }
 
-    if (e.target.value === 'random') {
-      showToast('Randomizing results... 🎲', 'info', 1000);
+    async handlePurchase(button) {
+        const journalId = button.dataset.journalId;
+        const price = parseFloat(button.dataset.price || 0);
 
-      const submitBtn = form.querySelector('.search-btn');
-      if (submitBtn) {
-        submitBtn.innerHTML = `
-          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Shuffling...
+        await this.handleDirectPurchase(journalId, price);
+    }
+
+    async handleTip(button) {
+        const journalId = button.dataset.journalId;
+        if (!journalId) {
+            this.showError('Journal ID not found');
+            return;
+        }
+        this.showTipModal(journalId);
+    }
+
+    async handleQuickTip(button) {
+        const journalId = button.dataset.journalId;
+        const amount = parseFloat(button.dataset.amount);
+
+        if (!journalId || !amount) {
+            this.showError('Missing tip information');
+            return;
+        }
+
+        await this.processTip(journalId, amount);
+    }
+
+    showPaymentModal(journalId, amount, type = 'purchase') {
+        if (!this.stripe) {
+            this.showError('Payment processing not available');
+            return;
+        }
+
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
+                <h3 class="text-xl font-bold mb-4">
+                    ${type === 'purchase' ? 'Complete Purchase' : 'Send Tip'}
+                </h3>
+                <div class="mb-6">
+                    <p class="text-gray-600">Amount: <span class="font-semibold text-2xl text-green-600">$${amount.toFixed(2)}</span></p>
+                </div>
+                <form id="payment-form">
+                    <div id="card-element" class="p-4 border border-gray-300 rounded-lg mb-4 bg-gray-50">
+                        <!-- Stripe Elements will create form elements here -->
+                    </div>
+                    <div id="card-errors" class="text-red-600 text-sm mb-4"></div>
+                    <div class="flex space-x-4">
+                        <button type="submit" id="submit-payment"
+                                class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors flex-1 font-semibold">
+                            ${type === 'purchase' ? 'Purchase Now' : 'Send Tip'}
+                        </button>
+                        <button type="button" onclick="this.closest('.fixed').remove()"
+                                class="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-400 transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-4 text-xs text-gray-500 text-center">
+                    <p>🔒 Secure payment powered by Stripe</p>
+                </div>
+            </div>
         `;
-      }
+
+        document.body.appendChild(modal);
+
+        // Setup Stripe Elements
+        this.cardElement = this.elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#424770',
+                    '::placeholder': {
+                        color: '#aab7c4',
+                    },
+                },
+                invalid: {
+                    color: '#9e2146',
+                },
+            },
+        });
+
+        this.cardElement.mount('#card-element');
+
+        // Handle real-time validation errors from the card Element
+        this.cardElement.on('change', ({error}) => {
+            const displayError = document.getElementById('card-errors');
+            if (error) {
+                displayError.textContent = error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        });
+
+        // Handle form submission
+        const form = document.getElementById('payment-form');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (type === 'purchase') {
+                this.processPurchase(journalId, amount);
+            } else {
+                this.processTip(journalId, amount);
+            }
+        });
     }
 
-    setTimeout(() => form.submit(), 200);
-  }
-});
+    showTipModal(journalId) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
+                <h3 class="text-xl font-bold mb-4">Send a Tip</h3>
+                <div class="mb-6">
+                    <p class="text-gray-600 mb-4">Choose an amount to support this author:</p>
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <button class="tip-amount-btn border-2 border-gray-300 rounded-lg p-4 hover:border-indigo-500 transition-colors text-lg font-semibold" data-amount="1">$1</button>
+                        <button class="tip-amount-btn border-2 border-gray-300 rounded-lg p-4 hover:border-indigo-500 transition-colors text-lg font-semibold" data-amount="3">$3</button>
+                        <button class="tip-amount-btn border-2 border-gray-300 rounded-lg p-4 hover:border-indigo-500 transition-colors text-lg font-semibold" data-amount="5">$5</button>
+                        <button class="tip-amount-btn border-2 border-gray-300 rounded-lg p-4 hover:border-indigo-500 transition-colors text-lg font-semibold" data-amount="10">$10</button>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Custom amount:</label>
+                        <input type="number" id="custom-amount" min="0.50" step="0.01" placeholder="0.00"
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <button type="button" id="send-tip"
+                            class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors flex-1 font-semibold">
+                        Continue to Payment
+                    </button>
+                    <button type="button" onclick="this.closest('.fixed').remove()"
+                            class="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-400 transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        `;
 
-// Track user interactions for auto-shuffle
-['click', 'scroll', 'keypress'].forEach(event => {
-  document.addEventListener(event, () => {
-    localStorage.setItem('lastInteraction', Date.now().toString());
-  });
-});
+        document.body.appendChild(modal);
 
-// Performance optimization - lazy loading for images
-if ('IntersectionObserver' in window) {
-  const imageObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const img = entry.target;
-        if (img.dataset.src) {
-          img.src = img.dataset.src;
-          img.removeAttribute('data-src');
-          imageObserver.unobserve(img);
+        let selectedAmount = 0;
+
+        // Handle tip amount selection
+        modal.querySelectorAll('.tip-amount-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                modal.querySelectorAll('.tip-amount-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-50'));
+                btn.classList.add('border-indigo-500', 'bg-indigo-50');
+                selectedAmount = parseFloat(btn.dataset.amount);
+                modal.querySelector('#custom-amount').value = '';
+            });
+        });
+
+        // Handle custom amount
+        modal.querySelector('#custom-amount').addEventListener('input', (e) => {
+            selectedAmount = parseFloat(e.target.value) || 0;
+            modal.querySelectorAll('.tip-amount-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-50'));
+        });
+
+        // Handle send tip
+        modal.querySelector('#send-tip').addEventListener('click', () => {
+            if (selectedAmount >= 0.50) {
+                modal.remove();
+                this.showPaymentModal(journalId, selectedAmount, 'tip');
+            } else {
+                this.showError('Minimum tip amount is $0.50');
+            }
+        });
+    }
+
+    async processPurchase(journalId, amount) {
+        if (!this.stripe || !this.cardElement) {
+            this.showError('Payment system not initialized');
+            return;
         }
-      }
-    });
-  });
 
-  document.querySelectorAll('img[data-src]').forEach(img => {
-    imageObserver.observe(img);
-  });
+        const submitButton = document.getElementById('submit-payment');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Processing...';
+
+        try {
+            const { paymentMethod, error } = await this.stripe.createPaymentMethod({
+                type: 'card',
+                card: this.cardElement,
+            });
+
+            if (error) {
+                this.showError(error.message);
+                return;
+            }
+
+            const response = await fetch(`/api/purchase/${journalId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: JSON.stringify({
+                    payment_method_id: paymentMethod.id
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                this.showSuccess(result.message || 'Purchase successful!');
+                document.querySelector('.fixed').remove();
+                this.updatePurchaseUI(journalId);
+                // Optionally redirect to the journal
+                setTimeout(() => {
+                    window.location.href = `/marketplace/journal/${journalId}/`;
+                }, 2000);
+            } else {
+                this.showError(result.error || 'Purchase failed');
+            }
+        } catch (error) {
+            this.showError('Payment processing failed');
+            console.error('Payment error:', error);
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Purchase Now';
+            }
+        }
+    }
+
+    async processTip(journalId, amount) {
+        try {
+            const response = await fetch(`/api/tip/${journalId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: JSON.stringify({
+                    amount: amount,
+                    message: 'Great journal!' // You can add a message input field
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                this.showSuccess(result.message || `Tip of $${amount.toFixed(2)} sent successfully!`);
+                if (document.querySelector('.fixed')) {
+                    document.querySelector('.fixed').remove();
+                }
+            } else {
+                this.showError(result.error || 'Tip processing failed');
+            }
+        } catch (error) {
+            this.showError('Tip processing failed');
+            console.error('Tip error:', error);
+        }
+    }
+
+    updatePurchaseUI(journalId) {
+        // Update the button text for purchased journals
+        const cards = document.querySelectorAll(`[data-journal-id="${journalId}"]`);
+        cards.forEach(card => {
+            const buyButton = card.querySelector('button[onclick*="addToCart"]');
+            if (buyButton) {
+                buyButton.textContent = 'Purchased ✓';
+                buyButton.disabled = true;
+                buyButton.classList.add('bg-green-500', 'cursor-not-allowed');
+                buyButton.classList.remove('btn-emerald');
+            }
+        });
+    }
+
+    // Wishlist and comparison functions (keep existing localStorage approach)
+    toggleWishlist(journalId) {
+        let wishlist = JSON.parse(localStorage.getItem('diaryvault_wishlist') || '[]');
+        const index = wishlist.indexOf(journalId);
+
+        if (index === -1) {
+            wishlist.push(journalId);
+            this.showSuccess('Added to wishlist! ❤️');
+        } else {
+            wishlist.splice(index, 1);
+            this.showSuccess('Removed from wishlist');
+        }
+
+        localStorage.setItem('diaryvault_wishlist', JSON.stringify(wishlist));
+        this.updateWishlistCount();
+    }
+
+    addToCompare(journalId) {
+        let comparison = JSON.parse(localStorage.getItem('diaryvault_comparison') || '[]');
+
+        if (comparison.length >= 4) {
+            this.showError('Maximum 4 items can be compared!');
+            return;
+        }
+
+        if (!comparison.includes(journalId)) {
+            comparison.push(journalId);
+            localStorage.setItem('diaryvault_comparison', JSON.stringify(comparison));
+            this.updateCompareCount();
+            this.showSuccess('Added to comparison!');
+        }
+    }
+
+    // Update UI counts
+    updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('diaryvault_cart') || '[]');
+        const countElement = document.getElementById('cartCount');
+        if (countElement) {
+            countElement.textContent = cart.length;
+        }
+    }
+
+    updateWishlistCount() {
+        const wishlist = JSON.parse(localStorage.getItem('diaryvault_wishlist') || '[]');
+        const countElement = document.getElementById('wishlistCount');
+        if (countElement) {
+            countElement.textContent = wishlist.length;
+        }
+    }
+
+    updateCompareCount() {
+        const comparison = JSON.parse(localStorage.getItem('diaryvault_comparison') || '[]');
+        const countElement = document.getElementById('compareCount');
+        if (countElement) {
+            countElement.textContent = comparison.length;
+        }
+    }
+
+    // Notification methods
+    showSuccess(message) {
+        this.showNotification(message, 'success');
+    }
+
+    showError(message) {
+        this.showNotification(message, 'error');
+    }
+
+    showNotification(message, type = 'info') {
+        // Use the existing showToast function from base.html if available
+        if (window.showToast) {
+            window.showToast(message, type);
+            return;
+        }
+
+        // Fallback notification system
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+            type === 'success' ? 'bg-green-500 text-white' :
+            type === 'error' ? 'bg-red-500 text-white' :
+            'bg-blue-500 text-white'
+        }`;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+
+    getCSRFToken() {
+        // Multiple ways to get CSRF token
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+               document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+               document.querySelector('input[name="csrfmiddlewaretoken"]')?.value ||
+               '';
+    }
 }
 
-// Initialize filters count on page load
-document.addEventListener('DOMContentLoaded', function() {
-  updateActiveFiltersCount();
-});
+// Initialize the enhanced marketplace
+document.addEventListener('DOMContentLoaded', () => {
+    const stripeKey = document.querySelector('meta[name="stripe-publishable-key"]')?.getAttribute('content');
+    if (stripeKey) {
+        window.marketplacePayments = new EnhancedMarketplacePayments(stripeKey);
 
+        // Make functions globally available for onclick handlers
+        window.toggleWishlist = (journalId) => window.marketplacePayments.toggleWishlist(journalId);
+        window.addToCompare = (journalId) => window.marketplacePayments.addToCompare(journalId);
+        window.quickView = (journalId) => {
+            window.marketplacePayments.showSuccess('Quick view feature coming soon!');
+        };
+
+        // Legacy support for existing cart functions
+        window.addToCart = (journalId) => {
+            // Get price from the product card
+            const card = document.querySelector(`[data-journal-id="${journalId}"]`);
+            const price = card ? window.marketplacePayments.extractPrice(
+                card.querySelector('.text-2xl')?.textContent || 'FREE'
+            ) : 0;
+
+            window.marketplacePayments.handleDirectPurchase(journalId, price);
+        };
+    } else {
+        console.warn('Stripe publishable key not found. Payment features will be disabled.');
+
+        // Provide fallback functions
+        window.addToCart = window.toggleWishlist = window.addToCompare = window.quickView = () => {
+            alert('Payment system not configured. Please contact support.');
+        };
+    }
+});
 </script>
 
 {% endblock %}

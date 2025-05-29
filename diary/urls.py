@@ -6,6 +6,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from .views import core
 from .views.core import CustomLoginView
+from .views import marketplace
 
 from . import views
 from .views import CustomLoginView
@@ -113,6 +114,14 @@ urlpatterns = [
     path('api/journal-preview/<int:journal_id>/', core.journal_preview, name='journal_preview'),
     path('api/marketplace-stats/', core.marketplace_stats, name='marketplace_stats'),
 
+    # Enhanced marketplace URLs
+    path('marketplace/publish-biography/', views.publish_biography, name='publish_biography'),
+    path('api/purchase/<int:journal_id>/', views.purchase_journal_api, name='purchase_journal_api'),
+    path('api/tip/<int:journal_id>/', views.tip_author_api, name='tip_author_api'),
+    path('dashboard/earnings/', views.earnings_dashboard, name='earnings_dashboard'),
+    path('dashboard/my-journals/', views.my_published_journals, name='my_published_journals'),
+
+
     # ============================================================================
     # Static File Handling
     # ============================================================================
@@ -122,6 +131,20 @@ urlpatterns = [
         permanent=True
     ), name='favicon'),
 ]
+
+marketplace_patterns = [
+    # Biography Publishing
+    path('marketplace/publish-biography/', marketplace.publish_biography, name='publish_biography'),
+
+    # Enhanced Purchase & Tip APIs
+    path('api/purchase/<int:journal_id>/', marketplace.purchase_journal_api, name='purchase_journal_api'),
+    path('api/tip/<int:journal_id>/', marketplace.tip_author_api, name='tip_author_api'),
+
+    # Author Dashboard
+    path('dashboard/earnings/', marketplace.earnings_dashboard, name='earnings_dashboard'),
+    path('dashboard/my-journals/', marketplace.my_published_journals, name='my_published_journals'),
+]
+
 
 # Serve media files in development
 if settings.DEBUG:

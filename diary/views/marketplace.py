@@ -10,10 +10,15 @@ from django.utils import timezone
 from datetime import timedelta
 import json
 import random
+from decimal import Decimal
+from django.conf import settings
+from django.db import transaction, models
 
+
+from ..views.marketplace_service import MarketplaceService
 
 from ..models import (
-    Journal, JournalTag, JournalLike, JournalPurchase,
+    Journal, JournalTag, JournalLike, JournalPurchase, Biography,
     JournalReview, Entry, JournalEntry, Tip
 )
 
@@ -1151,3 +1156,172 @@ def marketplace_search_suggestions(request):
         pass
 
     return JsonResponse({'suggestions': suggestions[:8]})
+
+
+@login_required
+def publish_biography(request):
+    """Publish user's biography to marketplace"""
+    biography = Biography.objects.filter(user=request.user).first()
+
+    if not biography:
+        messages.error(request, "You need to generate a biography first.")
+        return redirect('biography')
+
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        price = request.POST.get('price', '0.00')
+
+        try:
+            journal = MarketplaceService.publish_biography_as_journal(
+                user=request.user,
+                biography=biography,
+                price=float(price),
+                title=title,
+                description=description
+            )
+
+            messages.success(request, f'Biography "{title}" published successfully!')
+            return redirect('marketplace_journal_detail', journal_id=journal.id)
+
+        except Exception as e:
+            messages.error(request, f'Error publishing biography: {str(e)}')
+
+    context = {
+        'biography': biography,
+        'stripe_publishable_key': getattr(settings, 'STRIPE_PUBLISHABLE_KEY', '')
+    }
+
+    return render(request, 'diary/publish_biography.html', context)
+
+@login_required
+@require_POST
+def purchase_journal_api(request, journal_id):
+    """API endpoint for purchasing journals"""
+    journal = get_object_or_404(Journal, id=journal_id, is_published=True)
+
+    if journal.author == request.user:
+        return JsonResponse({'success': False, 'error': 'Cannot purchase your own journal'})
+
+    # Check if already purchased
+    if JournalPurchase.objects.filter(user=request.user, journal=journal).exists():
+        return JsonResponse({'success': False, 'error': 'Journal already purchased'})
+
+    try:
+        data = json.loads(request.body)
+        payment_method_id = data.get('payment_method_id')
+
+        if journal.price > 0 and not payment_method_id:
+            return JsonResponse({'success': False, 'error': 'Payment method required'})
+
+        purchase, intent = MarketplaceService.process_purchase(
+            user=request.user,
+            journal=journal,
+            payment_method_id=payment_method_id
+        )
+
+        if purchase:
+            return JsonResponse({
+                'success': True,
+                'message': f'Successfully purchased "{journal.title}"!',
+                'purchase_id': purchase.id
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Payment failed'
+            })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@login_required
+@require_POST
+def tip_author_api(request, journal_id):
+    """API endpoint for tipping authors"""
+    journal = get_object_or_404(Journal, id=journal_id, is_published=True)
+
+    if journal.author == request.user:
+        return JsonResponse({'success': False, 'error': 'Cannot tip yourself'})
+
+    try:
+        data = json.loads(request.body)
+        amount = float(data.get('amount', 0))
+        message = data.get('message', '')
+
+        if amount < 0.50:
+            return JsonResponse({'success': False, 'error': 'Minimum tip is $0.50'})
+
+        tip, intent = MarketplaceService.process_tip(
+            tipper=request.user,
+            journal=journal,
+            amount=amount,
+            message=message
+        )
+
+        return JsonResponse({
+            'success': True,
+            'message': f'Tip of ${amount:.2f} sent successfully!',
+            'tip_id': tip.id
+        })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@login_required
+def earnings_dashboard(request):
+    """Dashboard showing author earnings and analytics"""
+    earnings = MarketplaceService.get_author_earnings(request.user)
+
+    # Get published journals
+    journals = Journal.objects.filter(
+        author=request.user,
+        is_published=True
+    ).order_by('-date_published')
+
+    # Get recent purchases and tips
+    recent_purchases = JournalPurchase.objects.filter(
+        journal__author=request.user
+    ).select_related('user', 'journal').order_by('-created_at')[:10]
+
+    recent_tips = Tip.objects.filter(
+        recipient=request.user
+    ).select_related('tipper', 'journal').order_by('-created_at')[:10]
+
+    context = {
+        'earnings': earnings,
+        'journals': journals,
+        'recent_purchases': recent_purchases,
+        'recent_tips': recent_tips,
+        'total_journals': journals.count(),
+        'total_customers': JournalPurchase.objects.filter(
+            journal__author=request.user
+        ).values('user').distinct().count()
+    }
+
+    return render(request, 'diary/earnings_dashboard.html', context)
+
+@login_required
+def my_published_journals(request):
+    """View user's published journals with analytics"""
+    journals = Journal.objects.filter(
+        author=request.user,
+        is_published=True
+    ).order_by('-date_published')
+
+    # Add analytics to each journal
+    for journal in journals:
+        journal.total_purchases = journal.purchases.count()
+        journal.total_revenue = journal.purchases.aggregate(
+            total=Sum('amount')  # ← Fixed: Use Sum instead of models.Sum
+        )['total'] or Decimal('0.00')
+        journal.total_tips_received = journal.tips.aggregate(
+            total=Sum('amount')  # ← Fixed: Use Sum instead of models.Sum
+        )['total'] or Decimal('0.00')
+
+    context = {
+        'journals': journals,
+        'total_revenue': sum(j.total_revenue + j.total_tips_received for j in journals)
+    }
+
+    return render(request, 'diary/my_published_journals.html', context)
