@@ -1,26 +1,41 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, TemplateView
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import core
-from .views.core import CustomLoginView
-from .views import marketplace
+from .views.core import CustomLoginView, CustomSignupView
+from .views.marketplace import (
+    marketplace_view, publish_journal, marketplace_journal_detail,
+    like_journal, tip_author, marketplace_author_profile,
+    marketplace_monetization, marketplace_contest, marketplace_faq,
+    purchase_journal_api, tip_author_api, earnings_dashboard,
+    publish_biography, my_published_journals
+)
 
 from . import views
-from .views import CustomLoginView
 
 urlpatterns = [
+    # ============================================================================
+    # Authentication - These MUST come FIRST to override allauth
+    # ============================================================================
+    # FIXED: Only use CustomSignupView, remove function-based signup
+    path('signup/', CustomSignupView.as_view(), name='account_signup'),
+    path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
+
+    # Login views
+    path('login/', CustomLoginView.as_view(), name='account_login'),
+    path('login/', CustomLoginView.as_view(), name='login'),  # For mobile menu compatibility
+    path('accounts/login/', CustomLoginView.as_view(), name='account_login'),
+
     # ============================================================================
     # Main Pages
     # ============================================================================
     path('', views.home, name='home'),
-    path('signup/', views.signup, name='signup'),
 
-    # Authentication
-    path('login/', CustomLoginView.as_view(template_name='diary/account/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    # Authentication - other auth URLs
+    path('logout/', RedirectView.as_view(url='/accounts/logout/', permanent=False), name='logout'),
     path('password-reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
 
     # User Settings & Preferences
@@ -76,23 +91,26 @@ urlpatterns = [
     # Marketplace Feature
     # ============================================================================
     # Main marketplace
-    path('marketplace/', views.marketplace_view, name='marketplace'),
+    path('marketplace/', marketplace_view, name='marketplace'),
 
     # Publishing functionality
-    path('marketplace/publish/', views.publish_journal, name='publish_journal'),
+    path('marketplace/publish/', publish_journal, name='publish_journal'),
+    path('marketplace/publish-biography/', publish_biography, name='publish_biography'),
 
     # Journal detail and interactions
-    path('marketplace/journal/<int:journal_id>/', views.marketplace_journal_detail, name='marketplace_journal_detail'),
-    path('marketplace/like/<int:journal_id>/', views.like_journal, name='like_journal'),
-    path('marketplace/tip/<int:journal_id>/', views.tip_author, name='tip_author'),
+    path('marketplace/journal/<int:journal_id>/', marketplace_journal_detail, name='marketplace_journal_detail'),
+    path('marketplace/like/<int:journal_id>/', like_journal, name='like_journal'),
+    path('marketplace/tip/<int:journal_id>/', tip_author, name='tip_author'),
 
-    # Author profiles
-    path('marketplace/author/<str:username>/', views.marketplace_author_profile, name='marketplace_author_profile'),
+    # Author profiles and dashboards
+    path('marketplace/author/<str:username>/', marketplace_author_profile, name='marketplace_author_profile'),
+    path('dashboard/earnings/', earnings_dashboard, name='earnings_dashboard'),
+    path('dashboard/my-journals/', my_published_journals, name='my_published_journals'),
 
     # Additional marketplace pages
-    path('marketplace/monetization/', views.marketplace_monetization, name='marketplace_monetization'),
-    path('marketplace/contest/', views.marketplace_contest, name='marketplace_contest'),
-    path('marketplace/faq/', views.marketplace_faq, name='marketplace_faq'),
+    path('marketplace/monetization/', marketplace_monetization, name='marketplace_monetization'),
+    path('marketplace/contest/', marketplace_contest, name='marketplace_contest'),
+    path('marketplace/faq/', marketplace_faq, name='marketplace_faq'),
 
     # ============================================================================
     # API Endpoints
@@ -107,12 +125,16 @@ urlpatterns = [
     # Entry Management API
     path('api/entry/<int:entry_id>/regenerate-summary/', views.regenerate_summary_ajax, name='regenerate_summary_ajax'),
 
-    # Marketplace API (New - from your core.py)
+    # Marketplace API
     path('api/track-view/<int:journal_id>/', core.track_journal_view, name='track_journal_view'),
     path('api/wishlist/add/', core.add_to_wishlist, name='add_to_wishlist'),
     path('api/wishlist/remove/', core.remove_from_wishlist, name='remove_from_wishlist'),
     path('api/journal-preview/<int:journal_id>/', core.journal_preview, name='journal_preview'),
     path('api/marketplace-stats/', core.marketplace_stats, name='marketplace_stats'),
+
+    # Enhanced marketplace APIs
+    path('api/purchase/<int:journal_id>/', purchase_journal_api, name='purchase_journal_api'),
+    path('api/tip/<int:journal_id>/', tip_author_api, name='tip_author_api'),
 
     # ============================================================================
     # Static File Handling
@@ -123,20 +145,6 @@ urlpatterns = [
         permanent=True
     ), name='favicon'),
 ]
-
-marketplace_patterns = [
-    # Biography Publishing
-    path('marketplace/publish-biography/', marketplace.publish_biography, name='publish_biography'),
-
-    # Enhanced Purchase & Tip APIs
-    path('api/purchase/<int:journal_id>/', marketplace.purchase_journal_api, name='purchase_journal_api'),
-    path('api/tip/<int:journal_id>/', marketplace.tip_author_api, name='tip_author_api'),
-
-    # Author Dashboard
-    path('dashboard/earnings/', marketplace.earnings_dashboard, name='earnings_dashboard'),
-    path('dashboard/my-journals/', marketplace.my_published_journals, name='my_published_journals'),
-]
-
 
 # Serve media files in development
 if settings.DEBUG:

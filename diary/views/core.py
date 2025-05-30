@@ -775,6 +775,7 @@ class CustomSignupView(AllauthSignupView):
     """
     Custom signup view that uses our custom template
     """
+    # Use the template you just created
     template_name = 'diary/account/signup.html'
 
     def get_context_data(self, **kwargs):
