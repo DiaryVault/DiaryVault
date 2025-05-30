@@ -35,7 +35,7 @@ urlpatterns = [
     path('', views.home, name='home'),
 
     # Authentication - other auth URLs
-    path('logout/', RedirectView.as_view(url='/accounts/logout/', permanent=False), name='logout'),
+    path('logout/', RedirectView.as_view(url='/login/', permanent=False), name='logout'),
     path('password-reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
 
     # User Settings & Preferences
