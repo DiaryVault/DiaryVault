@@ -708,12 +708,8 @@ class CustomLoginView(AllauthLoginView):
     """
     Custom login view that uses our custom template
     """
-    # FIXED: Updated template path to match your template location
-    template_name = 'diary/login.html'  # Change this to match where your login.html is located
-
-    # Alternative paths you might have:
-    # template_name = 'account/login.html'  # If using allauth structure
-    # template_name = 'registration/login.html'  # If using Django's default structure
+    # UPDATED: Use the full path from the templates directory
+    template_name = 'diary/account/login.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
