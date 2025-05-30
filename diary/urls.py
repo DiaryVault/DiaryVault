@@ -22,7 +22,10 @@ urlpatterns = [
     # ============================================================================
     path('signup/', CustomSignupView.as_view(), name='account_signup'),
     path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
+
+    # FIXED: Added both 'account_login' and 'login' names
     path('login/', CustomLoginView.as_view(), name='account_login'),
+    path('login/', CustomLoginView.as_view(), name='login'),  # Added this for mobile menu
     path('accounts/login/', CustomLoginView.as_view(), name='account_login'),
 
     # ============================================================================

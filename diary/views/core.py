@@ -708,7 +708,12 @@ class CustomLoginView(AllauthLoginView):
     """
     Custom login view that uses our custom template
     """
-    template_name = 'account/login.html'
+    # FIXED: Updated template path to match your template location
+    template_name = 'diary/login.html'  # Change this to match where your login.html is located
+
+    # Alternative paths you might have:
+    # template_name = 'account/login.html'  # If using allauth structure
+    # template_name = 'registration/login.html'  # If using Django's default structure
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -730,6 +735,8 @@ class CustomLoginView(AllauthLoginView):
         pending_entry = self.request.session.get('pending_entry')
         if pending_entry:
             try:
+                from ..models import Entry, Tag
+
                 # Create entry
                 entry = Entry.objects.create(
                     user=self.request.user,
