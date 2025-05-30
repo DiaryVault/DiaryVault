@@ -459,6 +459,63 @@
         animation: bounceGentle 2s ease-in-out infinite;
       }
 
+      /* Enhanced Mobile Header - FIXED SIZE */
+      .mobile-header-compact {
+        padding-top: 0.25rem !important;
+        padding-bottom: 0.25rem !important;
+      }
+
+      /* Smaller logo on mobile */
+      @media screen and (max-width: 768px) {
+        .mobile-logo {
+          padding: 0.375rem !important;
+        }
+
+        .mobile-logo svg {
+          height: 1rem !important;
+          width: 1rem !important;
+        }
+
+        .mobile-logo-text {
+          font-size: 1rem !important;
+          line-height: 1.25rem !important;
+        }
+
+        .mobile-brand-badge {
+          transform: scale(0.65) rotate(-2deg) !important;
+          margin-left: -0.25rem !important;
+        }
+
+        .mobile-user-avatar {
+          height: 1.75rem !important;
+          width: 1.75rem !important;
+          font-size: 0.625rem !important;
+        }
+      }
+
+      /* Enhanced Hamburger Menu - FIXED VISIBILITY */
+      .menu-toggle-btn {
+        background: rgba(255, 255, 255, 0.9) !important;
+        border: 1px solid rgba(99, 102, 241, 0.15) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        padding: 0.5rem !important;
+      }
+
+      .menu-toggle-btn:hover {
+        background: rgba(255, 255, 255, 1) !important;
+        border-color: rgba(99, 102, 241, 0.25) !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15) !important;
+      }
+
+      .menu-toggle-btn svg {
+        color: #334155 !important; /* Much darker for better visibility */
+        stroke-width: 2.5 !important; /* Thicker lines */
+      }
+
+      .menu-toggle-btn:hover svg {
+        color: #1e293b !important; /* Even darker on hover */
+      }
+
       /* Modern Card System */
       .feature-card {
         background: rgba(255, 255, 255, 0.8);
@@ -1009,32 +1066,32 @@
 </head>
 
 <body class="min-h-screen flex flex-col bg-gradient-to-br text-secondary-800 custom-scrollbar pattern-dots">
-    <!-- Enhanced Header (Reduced Size) -->
-    <header class="sticky top-0 z-50 w-full glass-nav transition-all duration-300"
+    <!-- Enhanced Header (Smaller Mobile Size) -->
+    <header class="sticky top-0 z-50 w-full glass-nav transition-all duration-300 mobile-header-compact"
              x-data="{ scrolled: false }"
              x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 20 })"
              :class="{ 'shadow-soft-lg': scrolled }">
-        <div class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+        <div class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
             <div class="flex items-center justify-between">
-                <!-- Enhanced Logo (Smaller) -->
+                <!-- Enhanced Logo (Much Smaller on Mobile) -->
                 <div class="flex items-center">
                     <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center gap-2 group">
                         <div class="relative">
                             <div class="absolute inset-0 bg-primary-500 rounded-xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                            <div class="relative p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-soft group-hover:shadow-glow transition-all duration-300 group-hover:scale-105">
+                            <div class="relative mobile-logo p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-soft group-hover:shadow-glow transition-all duration-300 group-hover:scale-105">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                 </svg>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            <h1 class="text-lg font-bold text-gradient diary-font">DiaryVault</h1>
-                            <span class="brand-badge scale-75">Beta</span>
+                            <h1 class="mobile-logo-text text-lg font-bold text-gradient diary-font">DiaryVault</h1>
+                            <span class="mobile-brand-badge brand-badge scale-75">Beta</span>
                         </div>
                     </a>
                 </div>
 
-<!-- Enhanced Desktop Navigation (Smaller) -->
+                <!-- Enhanced Desktop Navigation (Smaller) -->
                 {% if user.is_authenticated %}
                 <nav class="hidden lg:flex items-center gap-1">
                     <a href="{% url 'dashboard' %}" class="nav-link text-sm {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
@@ -1096,17 +1153,17 @@
                 </nav>
                 {% endif %}
 
-                <!-- Enhanced Right Navigation (Smaller) -->
+                <!-- Enhanced Right Navigation (Smaller & Fixed User Avatar) -->
                 <div class="flex items-center gap-2">
                     {% if user.is_authenticated %}
-                    <!-- User Profile (Compact) -->
-                    <a href="{% url 'account_settings' %}" class="hidden sm:flex items-center gap-2 hover:opacity-90 transition-all duration-300 group p-1.5 rounded-xl hover:bg-white/50">
+                    <!-- User Profile (More Compact) -->
+                    <a href="{% url 'account_settings' %}" class="hidden sm:flex items-center gap-2 hover:opacity-90 transition-all duration-300 group p-1 rounded-lg hover:bg-white/50">
                         <div class="relative">
-                            <div class="h-8 w-8 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-xs shadow-soft group-hover:shadow-glow group-hover:scale-105 transition-all duration-300">
+                            <div class="mobile-user-avatar h-8 w-8 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-xs shadow-soft group-hover:shadow-glow group-hover:scale-105 transition-all duration-300">
                                 {{ user.username|first|upper }}
                             </div>
                             {% if unread_notifications > 0 %}
-                            <div class="absolute -top-1 -right-1 h-4 w-4 bg-error-500 rounded-full flex items-center justify-center">
+                            <div class="absolute -top-1 -right-1 h-3 w-3 bg-error-500 rounded-full flex items-center justify-center">
                                 <span class="text-white text-xs font-bold">{{ unread_notifications }}</span>
                             </div>
                             {% endif %}
@@ -1117,21 +1174,21 @@
                         </div>
                     </a>
                     {% else %}
-                    <!-- Auth Buttons (Smaller) - FIXED to use your custom views -->
+                    <!-- Auth Buttons (Smaller) -->
                     <div class="hidden md:flex gap-2 items-center">
                         <a href="{% url 'login' %}" class="btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium">Log in</a>
                         <a href="{% url 'signup' %}" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium">Sign up</a>
                     </div>
                     {% endif %}
 
-                    <!-- Enhanced Menu Button (Smaller) -->
-                    <button id="menuToggleBtn" class="relative glass-card hover:scale-105 p-2 rounded-xl transition-all duration-300 flex items-center justify-center">
+                    <!-- Enhanced Menu Button (FIXED VISIBILITY) -->
+                    <button id="menuToggleBtn" class="menu-toggle-btn relative hover:scale-105 rounded-xl transition-all duration-300 flex items-center justify-center">
                         {% if user.is_authenticated and unread_notifications > 0 %}
-                        <span class="absolute -top-1 -right-1 h-4 w-4 bg-error-500 rounded-full flex items-center justify-center">
+                        <span class="absolute -top-1 -right-1 h-3 w-3 bg-error-500 rounded-full flex items-center justify-center">
                             <span class="text-white text-xs font-bold">{{ unread_notifications }}</span>
                         </span>
                         {% endif %}
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
@@ -1371,7 +1428,7 @@
                     </a>
                 </div>
 
-                <!-- Enhanced Auth section - FIXED to use your custom views -->
+                <!-- Enhanced Auth section -->
                 <div class="space-y-4">
                     <a href="{% url 'login' %}" class="menu-item-animate delay-400 flex items-center justify-center gap-3 py-4 px-4 glass-card hover:bg-white/80 rounded-2xl transition-all duration-300 font-semibold border border-gray-200/50 hover:shadow-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1469,15 +1526,15 @@
                     <span>Insights</span>
                 </a>
 
-            <!-- FIXED: Marketplace instead of Shop -->
-            <a href="{% url 'marketplace' %}"
-               class="mobile-nav-item {% if request.resolver_match.url_name == 'marketplace' %}active{% endif %}"
-               data-page="marketplace">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-                <span>Marketplace</span>
-            </a>
+                <!-- FIXED: Marketplace instead of Shop -->
+                <a href="{% url 'marketplace' %}"
+                   class="mobile-nav-item {% if request.resolver_match.url_name == 'marketplace' %}active{% endif %}"
+                   data-page="marketplace">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    <span>Marketplace</span>
+                </a>
 
             </div>
         </div>
@@ -1526,7 +1583,7 @@
         <!-- Notifications will be inserted here -->
     </div>
 
-    <!-- Enhanced JavaScript with Mobile Stability -->
+    <!-- Enhanced JavaScript with Mobile Stability (Same as before) -->
     <script>
         // Enhanced menu functionality with improved animations
         document.addEventListener('DOMContentLoaded', function() {
@@ -1854,7 +1911,7 @@
                 const shortcuts = {
                     '1': 'dashboard',
                     '2': 'library',
-                    '3': 'new_entry', // Using underscore for Django URL name
+                    '3': 'new_entry',
                     '4': 'biography',
                     '5': 'insights'
                 };
@@ -1962,7 +2019,7 @@
         window.DiaryVault = {
             showToast: window.showToast,
             createRipple: createRipple,
-            version: '2.0-fixed'
+            version: '2.1-fixed'
         };
     </script>
 
