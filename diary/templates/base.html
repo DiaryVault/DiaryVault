@@ -1336,7 +1336,7 @@
     <!-- FIXED: Enhanced JavaScript - Completely Rewritten -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DiaryVault Enhanced Navigation - v4.2 FIXED - No Horizontal Scroll');
+            console.log('DiaryVault Enhanced Navigation - v4.0 FIXED');
             console.log('User authenticated:', {{ user.is_authenticated|yesno:"true,false" }});
             console.log('Current page:', '{{ request.resolver_match.url_name }}');
 
@@ -1549,32 +1549,12 @@
                 }
             });
 
-            // FIXED: Prevent horizontal scrolling
-            function preventHorizontalScroll() {
+            // Prevent horizontal scrolling
+            window.addEventListener('scroll', function() {
                 if (window.scrollX !== 0) {
                     window.scrollTo(0, window.scrollY);
-                    console.log('Prevented horizontal scroll, scrollX:', window.scrollX);
                 }
-            }
-
-            window.addEventListener('scroll', preventHorizontalScroll, { passive: true });
-
-            // Debug potential overflow elements
-            function checkOverflow() {
-                const elements = document.querySelectorAll('div, section, main, header, footer, nav');
-                elements.forEach(el => {
-                    if (el.scrollWidth > el.clientWidth) {
-                        console.warn('Overflow detected:', {
-                            element: el.tagName,
-                            class: el.className,
-                            scrollWidth: el.scrollWidth,
-                            clientWidth: el.clientWidth
-                        });
-                    }
-                });
-            }
-
-            setTimeout(checkOverflow, 1000); // Run after page load
+            }, { passive: true });
 
             // Handle page visibility for better performance
             document.addEventListener('visibilitychange', function() {
@@ -1604,7 +1584,7 @@
 
             // Initialize page
             document.body.style.opacity = '1';
-            console.log('DiaryVault navigation initialized successfully - Horizontal scroll prevention enhanced');
+            console.log('DiaryVault navigation initialized successfully - Mobile bottom nav removed');
         });
 
         // FIXED: Utility functions for external use
@@ -1620,7 +1600,7 @@
                 window.location.href = "{% url 'account_login' %}";
                 return false;
             },
-            version: '4.2-no-horizontal-scroll'
+            version: '4.1-no-mobile-bottom-nav'
         };
 
         // FIXED: Global error handler for debugging
@@ -1644,6 +1624,7 @@
             }
         });
     </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>
