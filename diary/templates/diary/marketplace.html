@@ -711,38 +711,9 @@
     white-space: nowrap;
   }
 
-  /* Ensure all text in product cards is visible */
-  .product-card p,
-  .product-card span {
-    display: block;
-    visibility: visible;
-  }
-
-  /* Make sure author text has proper display properties */
-  .product-card .text-sm.font-medium {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    color: #374151 !important;
-    line-height: 1.25;
-  }
-
-  .product-card .text-xs {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    color: #6b7280 !important;
-    line-height: 1.25;
-  }
-
   /* Improved author info layout */
   .author-info-container {
     min-width: 0; /* Allow flex item to shrink below content size */
-  }
-
-  /* Leading tight for better line height in author info */
-  .leading-tight {
-    line-height: 1.25;
   }
 
   /* Better responsive text in cards */
@@ -759,10 +730,6 @@
   /* Tag max width for long tag names */
   .max-w-24 {
     max-width: 6rem;
-  }
-
-  .max-w-20 {
-    max-width: 5rem;
   }
 </style>
 {% endblock %}
@@ -1331,38 +1298,39 @@
 
               <!-- Product Details -->
               <div class="p-6">
-                <!-- Author Info - Simplified Layout -->
-                <div class="mb-3">
-                  <div class="flex items-center gap-2 mb-2">
-                    <!-- Profile Picture -->
+                <!-- Author Info -->
+                <div class="flex items-center gap-3 mb-3">
+                  <!-- Profile Picture -->
+                  <div class="flex-shrink-0">
                     {% if journal.author.userprofile.profile_picture %}
                       <img src="{{ journal.author.userprofile.profile_picture.url }}"
                           alt="{{ journal.author.username }}"
-                          class="w-8 h-8 rounded-full object-cover border-2 border-gray-200 hover:border-blue-400 transition-colors flex-shrink-0">
+                          class="w-8 h-8 rounded-full object-cover border-2 border-gray-200 hover:border-blue-400 transition-colors">
                     {% else %}
-                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
                         {{ journal.author.username|first|upper }}
                       </div>
                     {% endif %}
-
-                    <!-- Author Name -->
-                    <div class="flex-1">
-                      <p class="text-sm font-medium text-gray-800 truncate max-w-full" title="{{ journal.author.get_full_name|default:journal.author.username }}">
-                        {{ journal.author.get_full_name|default:journal.author.username }}
-                      </p>
-                    </div>
                   </div>
 
-                  <!-- Username and View Count Row -->
-                  <div class="flex items-center justify-between text-xs text-gray-500">
-                    <span class="truncate" title="@{{ journal.author.username }}">@{{ journal.author.username }}</span>
-                    <span class="flex items-center gap-1 flex-shrink-0">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      {{ journal.view_count|default:0 }}
-                    </span>
+                  <!-- Author Name and Username - Allow to expand -->
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-800 truncate" title="{{ journal.author.get_full_name|default:journal.author.username }}">
+                      {{ journal.author.get_full_name|default:journal.author.username }}
+                    </p>
+                    <p class="text-xs text-gray-500 truncate" title="@{{ journal.author.username }}">
+                      @{{ journal.author.username }}
+                    </p>
+                  </div>
+
+                  <!-- View Count - Compact -->
+                  <div class="flex-shrink-0 flex items-center text-xs text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span class="hidden sm:inline">{{ journal.view_count|default:0 }}</span>
+                    <span class="sm:hidden">{{ journal.view_count|default:0|floatformat:0 }}</span>
                   </div>
                 </div>
 
@@ -1403,48 +1371,43 @@
                   {% endfor %}
                 </div>
 
-                <!-- Purchase Section - Desktop Enhanced -->
-                <div class="mt-6">
-                  <!-- Price and Purchase Button Row -->
-                  <div class="flex items-end justify-between mb-3">
-                    <!-- Price Section -->
-                    <div>
-                      {% if journal.price > 0 %}
-                        <div class="text-2xl font-bold text-green-600">${{ journal.price }}</div>
-                        {% if journal.total_tips > 0 %}
-                          <div class="text-xs text-gray-500">${{ journal.total_tips|floatformat:0 }} earned</div>
-                        {% endif %}
-                      {% else %}
-                        <div class="text-2xl font-bold text-blue-600">FREE</div>
-                        <div class="text-xs text-gray-500">Full access</div>
+                <!-- Purchase Section -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div class="flex-shrink-0">
+                    {% if journal.price > 0 %}
+                      <div class="text-2xl font-bold text-green-600">${{ journal.price }}</div>
+                      {% if journal.total_tips > 0 %}
+                        <div class="text-xs text-gray-500">${{ journal.total_tips|floatformat:0 }} earned</div>
                       {% endif %}
-                    </div>
+                    {% else %}
+                      <div class="text-2xl font-bold text-blue-600">FREE</div>
+                      <div class="text-xs text-gray-500">{{ journal.entries.count|default:0 }} entries</div>
+                    {% endif %}
+                  </div>
 
-                    <!-- Main Action Button -->
+                  <div class="flex flex-col gap-2">
                     {% if user.is_authenticated %}
                         <button onclick="addToCart({{ journal.id }})"
-                                class="btn-emerald px-6 py-2.5 rounded-xl font-semibold shadow-lg interactive-element flex-shrink-0"
+                                class="btn-emerald px-6 py-3 rounded-xl font-semibold shadow-lg interactive-element w-full sm:w-auto"
                                 data-journal-id="{{ journal.id }}"
                                 data-price="{{ journal.price|default:0 }}">
                             {% if journal.price > 0 %}Buy Now{% else %}Get Free{% endif %}
                         </button>
                     {% else %}
-                        <a href="{% url 'account_signup' %}" class="btn-emerald px-6 py-2.5 rounded-xl font-semibold shadow-lg inline-block text-center flex-shrink-0">
+                        <a href="{% url 'account_signup' %}" class="btn-emerald px-6 py-3 rounded-xl font-semibold shadow-lg inline-block text-center w-full sm:w-auto">
                             Sign Up
                         </a>
                     {% endif %}
-                  </div>
 
-                  <!-- Secondary Action (Tip) -->
-                  {% if journal.price > 0 and user.is_authenticated and journal.author != user %}
-                    <div class="border-t border-gray-100 pt-3">
-                      <button onclick="window.marketplacePayments.handleTip(this)"
-                              class="btn-secondary px-4 py-2 rounded-lg text-sm w-full"
-                              data-journal-id="{{ journal.id }}">
-                          💝 Tip Author
-                      </button>
-                    </div>
-                  {% endif %}
+                    <!-- Add tip button for paid journals -->
+                    {% if journal.price > 0 and user.is_authenticated and journal.author != user %}
+                        <button onclick="window.marketplacePayments.handleTip(this)"
+                                class="btn-secondary px-4 py-2 rounded-lg text-sm w-full sm:w-auto"
+                                data-journal-id="{{ journal.id }}">
+                            💝 Tip Author
+                        </button>
+                    {% endif %}
+                  </div>
                 </div>
 
                 <!-- Instant Access Badge -->
