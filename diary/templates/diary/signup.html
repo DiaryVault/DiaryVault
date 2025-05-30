@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load i18n %}
+{% load allauth account socialaccount %}
 
 {% block title %}Sign Up - DiaryVault{% endblock %}
 
@@ -482,55 +484,62 @@
         </div>
       </div>
 
-      <!-- Enhanced Social Authentication Buttons -->
+      <!-- Enhanced Social Authentication Buttons - FIXED URLS -->
+      {% get_providers as socialaccount_providers %}
+      {% if socialaccount_providers %}
       <div class="space-y-3 mb-6 animate-fade-in animation-delay-300">
-        <a href="/accounts/google/login/" class="social-btn google-btn w-full flex items-center justify-center px-4 py-3 rounded-xl font-medium text-sm group" aria-label="Continue with Google">
-          <svg class="w-5 h-5 mr-3 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-          </svg>
-          <span>Continue with Google</span>
-          <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </div>
-        </a>
-
-        <a href="/accounts/apple/login/" class="social-btn apple-btn w-full flex items-center justify-center px-4 py-3 rounded-xl font-medium text-sm group" aria-label="Continue with Apple">
-          <svg class="w-5 h-5 mr-3 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-          </svg>
-          <span>Continue with Apple</span>
-          <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </div>
-        </a>
-
-        <a href="/accounts/microsoft/login/" class="social-btn microsoft-btn w-full flex items-center justify-center px-4 py-3 rounded-xl font-medium text-sm group" aria-label="Continue with Microsoft">
-          <svg class="w-5 h-5 mr-3 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/>
-          </svg>
-          <span>Continue with Microsoft</span>
-          <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </div>
-        </a>
+        {% for provider in socialaccount_providers %}
+          {% if provider.id == "google" %}
+            <a href="{% provider_login_url provider.id %}" class="social-btn google-btn w-full flex items-center justify-center px-4 py-3 rounded-xl font-medium text-sm group" aria-label="Continue with Google">
+              <svg class="w-5 h-5 mr-3 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              <span>Continue with Google</span>
+              <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </div>
+            </a>
+          {% elif provider.id == "apple" %}
+            <a href="{% provider_login_url provider.id %}" class="social-btn apple-btn w-full flex items-center justify-center px-4 py-3 rounded-xl font-medium text-sm group" aria-label="Continue with Apple">
+              <svg class="w-5 h-5 mr-3 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              </svg>
+              <span>Continue with Apple</span>
+              <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </div>
+            </a>
+          {% elif provider.id == "microsoft" %}
+            <a href="{% provider_login_url provider.id %}" class="social-btn microsoft-btn w-full flex items-center justify-center px-4 py-3 rounded-xl font-medium text-sm group" aria-label="Continue with Microsoft">
+              <svg class="w-5 h-5 mr-3 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/>
+              </svg>
+              <span>Continue with Microsoft</span>
+              <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </div>
+            </a>
+          {% endif %}
+        {% endfor %}
       </div>
+      {% endif %}
 
       <!-- Enhanced divider -->
       <div class="divider animate-fade-in animation-delay-500">
         <span>or create account with email</span>
       </div>
 
-      <!-- Enhanced error display -->
-      {% if form.errors %}
+      <!-- Enhanced error display - USING ALLAUTH FORM ERRORS -->
+      {% if form.errors or form.non_field_errors %}
       <div class="error-container border rounded-xl px-4 py-4 mb-6 text-sm animate-fade-in">
         <div class="flex items-start gap-3">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
@@ -544,174 +553,135 @@
                   <li class="text-red-700">{{ field.label }}: {{ error }}</li>
                 {% endfor %}
               {% endfor %}
-              {% for error in form.non_field_errors %}
-                <li class="text-red-700">{{ error }}</li>
-              {% endfor %}
+              {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                  <li class="text-red-700">{{ error }}</li>
+                {% endfor %}
+              {% endif %}
             </ul>
           </div>
         </div>
       </div>
       {% endif %}
 
-      <!-- Enhanced form -->
-      <form method="post" id="signupForm" class="space-y-6 animate-fade-in animation-delay-500" novalidate>
+      <!-- Enhanced form - FIXED TO USE ALLAUTH -->
+      {% url 'account_signup' as signup_url %}
+      <form method="post" action="{{ signup_url }}" id="signupForm" class="space-y-6 animate-fade-in animation-delay-500" novalidate>
         {% csrf_token %}
 
-        <!-- Username field -->
-        <div class="form-group">
-          <label for="{{ form.username.id_for_label }}" class="block text-gray-700 text-sm font-medium mb-2">
-            Username
-            <span class="text-red-500">*</span>
-          </label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-            <input type="text" name="username" id="{{ form.username.id_for_label }}"
-                   class="form-input"
-                   placeholder="Enter your username"
-                   autocomplete="username"
-                   value="{{ form.username.value|default:'' }}"
-                   required>
-            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-              <svg id="username-check" class="h-5 w-5 text-green-500 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path class="checkmark" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
-          <div id="username-help" class="field-help">
-            <div class="flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Choose a unique username (3-150 characters, letters, digits and @/./+/-/_ only)
-            </div>
-          </div>
-        </div>
+        <!-- ALLAUTH FORM FIELDS -->
+        {% for field in form %}
+          <div class="form-group">
+            <label for="{{ field.id_for_label }}" class="block text-gray-700 text-sm font-medium mb-2">
+              {% if field.name == 'username' %}
+                Username
+              {% elif field.name == 'email' %}
+                Email Address
+              {% elif field.name == 'password1' %}
+                Password
+              {% elif field.name == 'password2' %}
+                Confirm Password
+              {% else %}
+                {{ field.label }}
+              {% endif %}
+              <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                {% if field.name == 'username' %}
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                {% elif field.name == 'email' %}
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                {% elif field.name == 'password1' or field.name == 'password2' %}
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                {% endif %}
+              </div>
 
-        <!-- Email field -->
-        <div class="form-group">
-          <label for="{{ form.email.id_for_label }}" class="block text-gray-700 text-sm font-medium mb-2">
-            Email Address
-            <span class="text-red-500">*</span>
-          </label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <input type="email" name="email" id="{{ form.email.id_for_label }}"
-                   class="form-input"
-                   placeholder="Enter your email address"
-                   autocomplete="email"
-                   value="{{ form.email.value|default:'' }}"
-                   required>
-            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-              <svg id="email-check" class="h-5 w-5 text-green-500 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path class="checkmark" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
-          <div id="email-help" class="field-help">
-            <div class="flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              We'll send you important updates and optional reminders here
-            </div>
-          </div>
-        </div>
+              <!-- Render the actual allauth field -->
+              {{ field|add_class:"form-input" }}
 
-        <!-- Password field -->
-        <div class="form-group">
-          <label for="{{ form.password1.id_for_label }}" class="block text-gray-700 text-sm font-medium mb-2">
-            Password
-            <span class="text-red-500">*</span>
-          </label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+              <!-- Password toggle and validation icons -->
+              {% if field.name == 'password1' or field.name == 'password2' %}
+                <button type="button" class="password-toggle absolute inset-y-0 right-0 pr-3 flex items-center" onclick="togglePassword('{{ field.id_for_label }}')" aria-label="Toggle password visibility">
+                  <svg id="eye-closed-{{ field.name }}" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464a12.067 12.067 0 01-2.35-1.878m13.832.08L17.45 9.12m2.5-2.5l-2.5 2.5" />
+                  </svg>
+                  <svg id="eye-open-{{ field.name }}" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+                {% if field.name == 'password2' %}
+                  <div class="absolute inset-y-0 right-12 pr-3 flex items-center">
+                    <svg id="password-match" class="h-5 w-5 text-green-500 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path class="checkmark" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                {% endif %}
+              {% else %}
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <svg id="{{ field.name }}-check" class="h-5 w-5 text-green-500 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path class="checkmark" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              {% endif %}
             </div>
-            <input type="password" name="password1" id="{{ form.password1.id_for_label }}"
-                   class="form-input"
-                   placeholder="Enter your password"
-                   autocomplete="new-password"
-                   required>
-            <button type="button" class="password-toggle absolute inset-y-0 right-0 pr-3 flex items-center" onclick="togglePassword('{{ form.password1.id_for_label }}')" aria-label="Toggle password visibility">
-              <svg id="eye-closed-1" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464a12.067 12.067 0 01-2.35-1.878m13.832.08L17.45 9.12m2.5-2.5l-2.5 2.5" />
-              </svg>
-              <svg id="eye-open-1" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-            </button>
-          </div>
 
-          <!-- Password strength indicator -->
-          <div id="password-strength" class="password-strength hidden">
-            <div class="strength-bar">
-              <div id="strength-fill" class="strength-fill"></div>
-            </div>
-            <div class="flex justify-between items-center">
-              <span id="strength-text" class="text-xs font-medium">Password strength</span>
-              <div class="flex gap-1 text-xs">
-                <span id="req-length" class="text-gray-400">8+ chars</span>
-                <span id="req-number" class="text-gray-400">number</span>
-                <span id="req-special" class="text-gray-400">special</span>
+            <!-- Field errors -->
+            {% if field.errors %}
+              <div class="mt-1 text-sm text-red-600">
+                {% for error in field.errors %}
+                  <p>{{ error }}</p>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <!-- Help text -->
+            <div id="{{ field.name }}-help" class="field-help">
+              <div class="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {% if field.name == 'username' %}
+                  Choose a unique username (3-150 characters, letters, digits and @/./+/-/_ only)
+                {% elif field.name == 'email' %}
+                  We'll send you important updates and optional reminders here
+                {% elif field.name == 'password1' %}
+                  Choose a strong password with at least 8 characters
+                {% elif field.name == 'password2' %}
+                  Please enter the same password as above for verification
+                {% else %}
+                  {{ field.help_text|default:"" }}
+                {% endif %}
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Confirm Password field -->
-        <div class="form-group">
-          <label for="{{ form.password2.id_for_label }}" class="block text-gray-700 text-sm font-medium mb-2">
-            Confirm Password
-            <span class="text-red-500">*</span>
-          </label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            <input type="password" name="password2" id="{{ form.password2.id_for_label }}"
-                   class="form-input"
-                   placeholder="Confirm your password"
-                   autocomplete="new-password"
-                   required>
-            <button type="button" class="password-toggle absolute inset-y-0 right-0 pr-3 flex items-center" onclick="togglePassword('{{ form.password2.id_for_label }}')" aria-label="Toggle password visibility">
-              <svg id="eye-closed-2" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464a12.067 12.067 0 01-2.35-1.878m13.832.08L17.45 9.12m2.5-2.5l-2.5 2.5" />
-              </svg>
-              <svg id="eye-open-2" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-            </button>
-            <div class="absolute inset-y-0 right-12 pr-3 flex items-center">
-              <svg id="password-match" class="h-5 w-5 text-green-500 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path class="checkmark" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
+            <!-- Password strength indicator for password1 -->
+            {% if field.name == 'password1' %}
+              <div id="password-strength" class="password-strength hidden">
+                <div class="strength-bar">
+                  <div id="strength-fill" class="strength-fill"></div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span id="strength-text" class="text-xs font-medium">Password strength</span>
+                  <div class="flex gap-1 text-xs">
+                    <span id="req-length" class="text-gray-400">8+ chars</span>
+                    <span id="req-number" class="text-gray-400">number</span>
+                    <span id="req-special" class="text-gray-400">special</span>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
           </div>
-          <div id="password2-help" class="field-help">
-            <div class="flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
-              </svg>
-              Please enter the same password as above for verification
-            </div>
-          </div>
-        </div>
+        {% endfor %}
 
-        <!-- Enhanced Terms checkbox -->
+        <!-- Enhanced Terms checkbox (if not included in form) -->
         <div class="flex items-start gap-3">
           <input id="terms" name="terms" type="checkbox" required
                  class="h-4 w-4 text-secondary-600 focus:ring-secondary-400 border-gray-300 rounded mt-1 transition-colors">
@@ -723,6 +693,11 @@
             <span class="text-red-500">*</span>
           </label>
         </div>
+
+        <!-- Hidden redirect field - IMPORTANT FOR ALLAUTH -->
+        {% if redirect_field_value %}
+          <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
 
         <!-- Enhanced submit button -->
         <button type="submit" id="signupButton"
@@ -743,7 +718,7 @@
       <!-- Enhanced login section -->
       <div class="mt-8 text-center animate-fade-in animation-delay-500">
         <p class="text-gray-600 text-sm mb-3">Already have an account?</p>
-        <a href="{% url 'login' %}" class="text-secondary-600 font-medium hover:text-secondary-800 text-sm inline-flex items-center gap-2 group transition-colors">
+        <a href="{% url 'account_login' %}" class="text-secondary-600 font-medium hover:text-secondary-800 text-sm inline-flex items-center gap-2 group transition-colors">
           <span>Sign in to your account</span>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -913,7 +888,7 @@ function setupFormValidation() {
   if (password1Input) {
     password1Input.addEventListener('input', function() {
       validatePassword1(this.value);
-      if (password2Input.value) {
+      if (password2Input && password2Input.value) {
         validatePassword2(password2Input.value, this.value);
       }
       updateSubmitButton();
@@ -989,12 +964,12 @@ function validatePassword1(value) {
   const strengthDiv = document.getElementById('password-strength');
 
   if (value.length === 0) {
-    strengthDiv.classList.add('hidden');
+    if (strengthDiv) strengthDiv.classList.add('hidden');
     input.classList.remove('valid', 'invalid');
     return false;
   }
 
-  strengthDiv.classList.remove('hidden');
+  if (strengthDiv) strengthDiv.classList.remove('hidden');
 
   // Check password requirements
   const requirements = {
@@ -1004,9 +979,13 @@ function validatePassword1(value) {
   };
 
   // Update requirement indicators
-  document.getElementById('req-length').className = requirements.length ? 'text-green-500' : 'text-gray-400';
-  document.getElementById('req-number').className = requirements.number ? 'text-green-500' : 'text-gray-400';
-  document.getElementById('req-special').className = requirements.special ? 'text-green-500' : 'text-gray-400';
+  const reqLength = document.getElementById('req-length');
+  const reqNumber = document.getElementById('req-number');
+  const reqSpecial = document.getElementById('req-special');
+
+  if (reqLength) reqLength.className = requirements.length ? 'text-green-500' : 'text-gray-400';
+  if (reqNumber) reqNumber.className = requirements.number ? 'text-green-500' : 'text-gray-400';
+  if (reqSpecial) reqSpecial.className = requirements.special ? 'text-green-500' : 'text-gray-400';
 
   // Calculate strength
   let strength = 0;
@@ -1018,29 +997,31 @@ function validatePassword1(value) {
   const strengthFill = document.getElementById('strength-fill');
   const strengthText = document.getElementById('strength-text');
 
-  if (strength === 1) {
-    strengthFill.className = 'strength-fill strength-weak';
-    strengthText.textContent = 'Weak password';
-    input.classList.add('invalid');
-    input.classList.remove('valid');
-    return false;
-  } else if (strength === 2) {
-    strengthFill.className = 'strength-fill strength-fair';
-    strengthText.textContent = 'Fair password';
-    input.classList.remove('invalid', 'valid');
-    return requirements.length; // Only valid if meets length requirement
-  } else if (strength === 3) {
-    strengthFill.className = 'strength-fill strength-good';
-    strengthText.textContent = 'Good password';
-    input.classList.add('valid');
-    input.classList.remove('invalid');
-    return true;
-  } else if (strength >= 4) {
-    strengthFill.className = 'strength-fill strength-strong';
-    strengthText.textContent = 'Strong password';
-    input.classList.add('valid');
-    input.classList.remove('invalid');
-    return true;
+  if (strengthFill && strengthText) {
+    if (strength === 1) {
+      strengthFill.className = 'strength-fill strength-weak';
+      strengthText.textContent = 'Weak password';
+      input.classList.add('invalid');
+      input.classList.remove('valid');
+      return false;
+    } else if (strength === 2) {
+      strengthFill.className = 'strength-fill strength-fair';
+      strengthText.textContent = 'Fair password';
+      input.classList.remove('invalid', 'valid');
+      return requirements.length;
+    } else if (strength === 3) {
+      strengthFill.className = 'strength-fill strength-good';
+      strengthText.textContent = 'Good password';
+      input.classList.add('valid');
+      input.classList.remove('invalid');
+      return true;
+    } else if (strength >= 4) {
+      strengthFill.className = 'strength-fill strength-strong';
+      strengthText.textContent = 'Strong password';
+      input.classList.add('valid');
+      input.classList.remove('invalid');
+      return true;
+    }
   }
 
   return false;
@@ -1170,25 +1151,26 @@ function setupPasswordStrength() {
   const password1Input = document.querySelector('input[name="password1"]');
   if (password1Input) {
     password1Input.addEventListener('focus', function() {
-      document.getElementById('password-strength').classList.remove('hidden');
+      const strengthDiv = document.getElementById('password-strength');
+      if (strengthDiv) strengthDiv.classList.remove('hidden');
     });
   }
 }
 
 function togglePassword(fieldId) {
   const passwordInput = document.getElementById(fieldId);
-  const fieldNum = fieldId.includes('password1') ? '1' : '2';
-  const eyeClosed = document.getElementById(`eye-closed-${fieldNum}`);
-  const eyeOpen = document.getElementById(`eye-open-${fieldNum}`);
+  const fieldName = passwordInput.name;
+  const eyeClosed = document.getElementById(`eye-closed-${fieldName}`);
+  const eyeOpen = document.getElementById(`eye-open-${fieldName}`);
 
   if (passwordInput.type === 'password') {
     passwordInput.type = 'text';
-    eyeClosed.classList.add('hidden');
-    eyeOpen.classList.remove('hidden');
+    if (eyeClosed) eyeClosed.classList.add('hidden');
+    if (eyeOpen) eyeOpen.classList.remove('hidden');
   } else {
     passwordInput.type = 'password';
-    eyeClosed.classList.remove('hidden');
-    eyeOpen.classList.add('hidden');
+    if (eyeClosed) eyeClosed.classList.remove('hidden');
+    if (eyeOpen) eyeOpen.classList.add('hidden');
   }
 }
 
@@ -1202,14 +1184,14 @@ function setLoadingState(loading) {
     button.disabled = true;
     button.classList.add('opacity-75');
     buttonText.textContent = 'Creating Account';
-    buttonIcon.classList.add('hidden');
-    loadingIcon.classList.remove('hidden');
+    if (buttonIcon) buttonIcon.classList.add('hidden');
+    if (loadingIcon) loadingIcon.classList.remove('hidden');
   } else {
     button.disabled = false;
     button.classList.remove('opacity-75');
     buttonText.textContent = 'Create Account';
-    buttonIcon.classList.remove('hidden');
-    loadingIcon.classList.add('hidden');
+    if (buttonIcon) buttonIcon.classList.remove('hidden');
+    if (loadingIcon) loadingIcon.classList.add('hidden');
   }
 }
 
