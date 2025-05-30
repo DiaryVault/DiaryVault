@@ -28,7 +28,7 @@ from ..forms import EntryForm, SignUpForm, LifeChapterForm
 from ..services.ai_service import AIService
 
 from allauth.account.utils import get_next_redirect_url
-from allauth.account.views import LoginView, SignupView
+from allauth.account.views import LoginView as AllauthLoginView, SignupView as AllauthSignupView
 
 
 logger = logging.getLogger(__name__)
