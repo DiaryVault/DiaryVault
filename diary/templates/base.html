@@ -12,8 +12,7 @@
     <link rel="manifest" href="/static/manifest.json">
     <meta name="msapplication-config" content="/static/browserconfig.xml">
     <meta charset="UTF-8" />
-    <!-- FIXED: Enhanced viewport meta tag for better mobile handling -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover, shrink-to-fit=no"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover"/>
     <title>{% block title %}DiaryVault - Your Personal Digital Journal{% endblock %}</title>
 
     <meta name="stripe-publishable-key" content="{{ STRIPE_PUBLISHABLE_KEY|default:'pk_test_your_key_here' }}">
@@ -198,97 +197,6 @@
     </script>
 
     <style>
-      /* FIXED: Critical mobile overflow prevention */
-      * {
-        box-sizing: border-box;
-      }
-
-      *:before,
-      *:after {
-        box-sizing: border-box;
-      }
-
-      /* FIXED: Enhanced root-level overflow control */
-      html {
-        overflow-x: hidden !important;
-        scroll-behavior: smooth;
-        width: 100vw;
-        max-width: 100vw;
-        -webkit-text-size-adjust: 100%;
-        -webkit-overflow-scrolling: touch;
-        position: relative;
-      }
-
-      /* FIXED: Body with strict mobile constraints */
-      body {
-        font-family: 'Inter', system-ui, sans-serif;
-        font-feature-settings: 'liga' 1, 'kern' 1;
-        overflow-x: hidden !important;
-        width: 100vw;
-        max-width: 100vw;
-        min-width: 320px;
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #f1f5f9 50%, #e0e7ff 75%, #f8fafc 100%);
-        /* FIXED: Reduced background size to prevent overflow */
-        background-size: 200% 200%;
-        animation: gradientShift 20s ease infinite;
-        position: relative;
-        overscroll-behavior-x: none !important;
-        -webkit-overflow-scrolling: touch;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        /* FIXED: Prevent any transform-related overflow */
-        transform: translateZ(0);
-        -webkit-transform: translateZ(0);
-      }
-
-      @keyframes gradientShift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-      }
-
-      /* FIXED: Container constraints for mobile */
-      .container {
-        width: 100%;
-        max-width: 100%;
-        margin: 0 auto;
-        padding-left: 1rem;
-        padding-right: 1rem;
-      }
-
-      @media (min-width: 640px) {
-        .container {
-          max-width: 640px;
-          padding-left: 1.5rem;
-          padding-right: 1.5rem;
-        }
-      }
-
-      @media (min-width: 768px) {
-        .container {
-          max-width: 768px;
-        }
-      }
-
-      @media (min-width: 1024px) {
-        .container {
-          max-width: 1024px;
-          padding-left: 2rem;
-          padding-right: 2rem;
-        }
-      }
-
-      @media (min-width: 1280px) {
-        .container {
-          max-width: 1280px;
-        }
-      }
-
-      @media (min-width: 1536px) {
-        .container {
-          max-width: 1536px;
-        }
-      }
-
       /* Enhanced Typography */
       .diary-font {
         font-family: 'Playfair Display', serif;
@@ -301,6 +209,41 @@
         font-feature-settings: 'liga' 1;
       }
 
+      /* Enhanced Base Styles */
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+        width: 100%;
+        max-width: 100%;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        font-feature-settings: 'liga' 1, 'kern' 1;
+        overflow-x: hidden;
+        width: 100%;
+        max-width: 100%;
+        min-width: 320px;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #f1f5f9 50%, #e0e7ff 75%, #f8fafc 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 20s ease infinite;
+        position: relative;
+        overscroll-behavior-x: none;
+        -webkit-overflow-scrolling: touch;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+      }
+
       /* Enhanced Glass Morphism */
       .glass-card {
         background: rgba(255, 255, 255, 0.85);
@@ -308,9 +251,8 @@
         border: 1px solid rgba(255, 255, 255, 0.3);
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
-        /* FIXED: Prevent overflow from glass cards */
         max-width: 100%;
-        overflow: hidden;
+        overflow-x: hidden;
       }
 
       .glass-card:hover {
@@ -325,11 +267,9 @@
         backdrop-filter: blur(24px) saturate(180%);
         -webkit-backdrop-filter: blur(24px) saturate(180%);
         border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-        /* FIXED: Strict width constraints for navigation */
-        width: 100vw;
+        width: 100%;
         max-width: 100vw;
-        overflow: hidden;
-        position: relative;
+        overflow-x: hidden;
       }
 
       /* Modern Button System */
@@ -476,13 +416,9 @@
         animation: bounceGentle 2s ease-in-out infinite;
       }
 
-      /* FIXED: Mobile Header - Enhanced constraints */
+      /* FIXED: Mobile Header - Compact Size */
       .mobile-header {
         padding: 0.25rem 0;
-        /* FIXED: Prevent any overflow from header */
-        width: 100%;
-        max-width: 100vw;
-        overflow: hidden;
       }
 
       @media screen and (max-width: 768px) {
@@ -498,8 +434,6 @@
         .mobile-logo-text {
           font-size: 1rem;
           line-height: 1.25rem;
-          /* FIXED: Prevent text overflow */
-          white-space: nowrap;
         }
 
         .mobile-brand-badge {
@@ -511,11 +445,9 @@
           height: 1.75rem;
           width: 1.75rem;
           font-size: 0.625rem;
-          /* FIXED: Prevent avatar overflow */
-          flex-shrink: 0;
         }
 
-        /* FIXED: Menu Toggle Button - Enhanced constraints */
+        /* FIXED: Menu Toggle Button - Compact Size */
         .menu-toggle-btn {
           background: rgba(255, 255, 255, 0.95);
           border: 1px solid rgba(99, 102, 241, 0.2);
@@ -525,8 +457,6 @@
           z-index: 20;
           position: relative;
           pointer-events: auto;
-          /* FIXED: Prevent button from causing overflow */
-          flex-shrink: 0;
         }
 
         .menu-toggle-btn:hover {
@@ -546,29 +476,20 @@
           color: #111827;
         }
 
-        /* FIXED: Header container with strict mobile constraints */
+        /* Make header container more compact */
         .mobile-header .container {
           padding-left: 0.75rem;
           padding-right: 0.75rem;
-          width: 100%;
-          max-width: 100vw;
         }
 
-        /* FIXED: Smaller gaps and flex constraints */
+        /* Smaller gap between logo elements */
         .mobile-header .flex.items-center.gap-2 {
           gap: 0.375rem;
-          min-width: 0; /* Allow flex items to shrink */
         }
 
+        /* Smaller gap in right navigation */
         .mobile-header .flex.items-center.gap-2:last-child {
           gap: 0.5rem;
-          flex-shrink: 0;
-        }
-
-        /* FIXED: Ensure logo section can shrink if needed */
-        .mobile-header .flex.items-center:first-child {
-          min-width: 0;
-          flex: 1;
         }
       }
 
@@ -582,8 +503,6 @@
         transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
         position: relative;
         overflow: hidden;
-        /* FIXED: Prevent card overflow */
-        max-width: 100%;
       }
 
       .feature-card::before {
@@ -609,7 +528,7 @@
         opacity: 1;
       }
 
-      /* FIXED: Enhanced Mobile Menu - Strict positioning */
+      /* FIXED: Enhanced Mobile Menu - Cleaner Implementation */
       .mobile-menu {
         background: rgba(255, 255, 255, 0.98);
         backdrop-filter: blur(30px);
@@ -617,11 +536,9 @@
         box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.1);
         transform: translateY(100%);
         transition: transform 0.4s cubic-bezier(0.23, 1, 0.320, 1);
-        /* FIXED: Strict mobile menu positioning */
-        width: 100vw;
+        width: 100%;
         max-width: 100vw;
         overflow-x: hidden;
-        overflow-y: auto;
         position: fixed;
         bottom: 0;
         left: 0;
@@ -630,6 +547,7 @@
         border-top-left-radius: 1.5rem;
         border-top-right-radius: 1.5rem;
         max-height: 85vh;
+        overflow-y: auto;
         padding-bottom: env(safe-area-inset-bottom, 1rem);
       }
 
@@ -643,8 +561,7 @@
         opacity: 0;
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
         pointer-events: none;
-        /* FIXED: Strict overlay positioning */
-        width: 100vw;
+        width: 100%;
         max-width: 100vw;
         overflow: hidden;
         position: fixed;
@@ -722,9 +639,6 @@
         font-weight: 500;
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
         backdrop-filter: blur(10px);
-        /* FIXED: Prevent form input overflow */
-        width: 100%;
-        max-width: 100%;
       }
 
       .form-input:focus {
@@ -748,8 +662,6 @@
         border: 1px solid rgba(255, 255, 255, 0.3);
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
         animation: slideIn 0.4s cubic-bezier(0.23, 1, 0.320, 1);
-        /* FIXED: Prevent notification overflow */
-        max-width: calc(100vw - 3rem);
       }
 
       .notification.success { border-left: 4px solid #22c55e; }
@@ -770,6 +682,8 @@
         background-size: 24px 24px;
       }
 
+
+
       /* Enhanced Loading States */
       .loading-shimmer {
         background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
@@ -784,6 +698,10 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
       }
+
+
+
+
 
       /* Enhanced Scrollbar */
       .custom-scrollbar::-webkit-scrollbar {
@@ -819,44 +737,6 @@
       .reliable-nav-link:active,
       .reliable-nav-link:focus {
         text-decoration: none;
-      }
-
-      /* FIXED: Enhanced mobile-specific overflow prevention */
-      @media screen and (max-width: 768px) {
-        /* Prevent any element from causing horizontal scroll */
-        * {
-          max-width: 100vw !important;
-        }
-
-        /* Ensure all containers respect viewport width */
-        .container,
-        .max-w-7xl,
-        .mx-auto {
-          width: 100% !important;
-          max-width: 100vw !important;
-          margin-left: auto !important;
-          margin-right: auto !important;
-        }
-
-        /* Fix any potential transform issues */
-        .glass-card:hover,
-        .feature-card:hover,
-        .menu-item:hover {
-          transform: none !important;
-        }
-
-        /* Disable problematic animations on mobile */
-        .bounce-gentle,
-        .float {
-          animation: none !important;
-        }
-
-        /* Ensure text doesn't overflow */
-        h1, h2, h3, h4, h5, h6, p, span, div {
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-          hyphens: auto;
-        }
       }
 
       /* Accessibility */
@@ -960,7 +840,7 @@
                     </a>
                 </div>
 
-                <!-- Enhanced Desktop Navigation -->
+                <!-- FIXED: Enhanced Desktop Navigation -->
                 {% if user.is_authenticated %}
                 <nav class="hidden lg:flex items-center gap-1">
                     <a href="{% url 'dashboard' %}" class="nav-link reliable-nav-link text-sm {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
@@ -1022,7 +902,7 @@
                 </nav>
                 {% endif %}
 
-                <!-- Enhanced Right Navigation -->
+                <!-- FIXED: Enhanced Right Navigation -->
                 <div class="flex items-center gap-2">
                     {% if user.is_authenticated %}
                     <!-- User Profile -->
@@ -1043,7 +923,7 @@
                         </div>
                     </a>
                     {% else %}
-                    <!-- Auth Buttons -->
+                    <!-- FIXED: Auth Buttons -->
                     <div class="hidden md:flex gap-2 items-center">
                         <a href="{% url 'account_login' %}" class="btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium reliable-nav-link">Log in</a>
                         <a href="{% url 'account_signup' %}" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium reliable-nav-link">Sign up</a>
@@ -1229,7 +1109,7 @@
             </div>
         </div>
         {% else %}
-        <!-- Enhanced Menu for non-logged in users -->
+        <!-- FIXED: Enhanced Menu for non-logged in users -->
         <div class="px-6 pb-6">
             <h3 class="text-xs uppercase text-gray-500 font-semibold mb-4 px-2">Discover DiaryVault</h3>
 
@@ -1297,7 +1177,7 @@
                 </a>
             </div>
 
-            <!-- Enhanced Auth section -->
+            <!-- FIXED: Enhanced Auth section -->
             <div class="space-y-4">
                 <a href="{% url 'account_login' %}" class="flex items-center justify-center gap-3 py-4 px-4 glass-card hover:bg-white/80 rounded-2xl transition-all duration-300 font-semibold border border-gray-200/50 hover:shadow-lg reliable-nav-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1338,6 +1218,8 @@
         <!-- Page content will go here -->
         {% endblock %}
     </main>
+
+
 
     <!-- Enhanced Footer -->
     <footer class="mt-8 glass-nav border-t border-primary-100">
@@ -1381,47 +1263,14 @@
         <!-- Notifications will be inserted here -->
     </div>
 
-    <!-- FIXED: Enhanced JavaScript with strict mobile overflow prevention -->
+    <!-- FIXED: Enhanced JavaScript - Completely Rewritten -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DiaryVault Fixed Mobile Scroll - v5.0');
+            console.log('DiaryVault Enhanced Navigation - v4.0 FIXED');
             console.log('User authenticated:', {{ user.is_authenticated|yesno:"true,false" }});
             console.log('Current page:', '{{ request.resolver_match.url_name }}');
 
-            // FIXED: Enhanced horizontal scroll prevention
-            function preventHorizontalScroll() {
-                // Force scroll position to top-left if somehow moved
-                if (window.scrollX !== 0) {
-                    window.scrollTo(0, window.scrollY);
-                }
-
-                // Ensure body width doesn't exceed viewport
-                document.body.style.maxWidth = '100vw';
-                document.body.style.overflowX = 'hidden';
-
-                // Check for problematic elements
-                const checkElements = () => {
-                    const elements = document.querySelectorAll('*');
-                    elements.forEach(el => {
-                        const rect = el.getBoundingClientRect();
-                        if (rect.width > window.innerWidth) {
-                            console.warn('Element exceeds viewport width:', el, rect.width);
-                            el.style.maxWidth = '100%';
-                            el.style.overflowX = 'hidden';
-                        }
-                    });
-                };
-
-                // Run check on load and scroll
-                checkElements();
-                window.addEventListener('scroll', checkElements, { passive: true });
-                window.addEventListener('resize', checkElements, { passive: true });
-            }
-
-            // Initialize horizontal scroll prevention
-            preventHorizontalScroll();
-
-            // Mobile menu functionality
+            // FIXED: Mobile menu functionality with proper event handling
             const menuToggleBtn = document.getElementById('menuToggleBtn');
             const closeMenuBtn = document.getElementById('closeMenuBtn');
             const menuOverlay = document.getElementById('menuOverlay');
@@ -1447,6 +1296,7 @@
                     }
                 }
 
+                // Clean event listeners
                 menuToggleBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1476,7 +1326,7 @@
                     }
                 });
 
-                // FIXED: Enhanced touch support with overflow prevention
+                // FIXED: Touch support for swipe down to close
                 let startY = 0;
                 let currentY = 0;
                 let isDragging = false;
@@ -1492,14 +1342,11 @@
                     currentY = e.touches[0].clientY;
                     const diff = currentY - startY;
 
-                    // FIXED: Prevent any horizontal movement during touch
-                    e.preventDefault();
-
                     if (diff > 0 && menuSheet.scrollTop === 0) {
                         const translateY = Math.min(diff * 0.5, 100);
                         menuSheet.style.transform = `translateY(${translateY}px)`;
                     }
-                }, { passive: false });
+                }, { passive: true });
 
                 menuSheet.addEventListener('touchend', function() {
                     if (!isDragging) return;
@@ -1515,14 +1362,16 @@
                 }, { passive: true });
             }
 
-            // Navigation link handling
+            // FIXED: Enhanced navigation link handling - prevent interference
             const allNavLinks = document.querySelectorAll('.reliable-nav-link');
             console.log('Found reliable nav links:', allNavLinks.length);
 
             allNavLinks.forEach((link, index) => {
                 console.log(`Setting up nav link ${index}:`, link.href);
 
+                // Remove any existing problematic event listeners
                 link.addEventListener('click', function(e) {
+                    // Don't prevent default - let normal navigation happen
                     console.log('Navigation link clicked:', this.href);
 
                     // Add visual feedback
@@ -1531,7 +1380,7 @@
                         this.style.opacity = '';
                     }, 150);
 
-                    // Close mobile menu if open
+                    // Close mobile menu if open and this is a navigation link
                     if (menuSheet && menuSheet.classList.contains('open')) {
                         setTimeout(() => {
                             menuSheet.classList.remove('open');
@@ -1542,7 +1391,7 @@
                     }
                 }, { capture: false, passive: false });
 
-                // Touch support
+                // Touch support for mobile
                 link.addEventListener('touchstart', function() {
                     this.style.transform = 'scale(0.97)';
                 }, { passive: true });
@@ -1552,7 +1401,7 @@
                 }, { passive: true });
             });
 
-            // Enhanced toast notification system
+            // FIXED: Enhanced toast notification system
             window.showToast = function(message, type = 'info', duration = 4000) {
                 console.log('Showing toast:', message, type);
 
@@ -1597,7 +1446,7 @@
                 }
             };
 
-            // Keyboard shortcuts
+            // FIXED: Enhanced keyboard shortcuts
             document.addEventListener('keydown', function(e) {
                 // Skip if user is typing
                 if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
@@ -1630,89 +1479,45 @@
                 }
             });
 
-            // FIXED: Enhanced horizontal scroll prevention
-            let scrollCheckInterval;
-
-            function startScrollMonitoring() {
-                scrollCheckInterval = setInterval(() => {
-                    if (window.scrollX !== 0) {
-                        console.warn('Horizontal scroll detected, correcting...');
-                        window.scrollTo(0, window.scrollY);
-                    }
-                }, 100);
-            }
-
-            function stopScrollMonitoring() {
-                if (scrollCheckInterval) {
-                    clearInterval(scrollCheckInterval);
-                }
-            }
-
-            // Monitor scroll on mobile devices
-            if (window.innerWidth <= 768) {
-                startScrollMonitoring();
-            }
-
-            // Handle orientation changes
-            window.addEventListener('orientationchange', function() {
-                setTimeout(() => {
-                    preventHorizontalScroll();
-                    if (window.innerWidth <= 768) {
-                        startScrollMonitoring();
-                    } else {
-                        stopScrollMonitoring();
-                    }
-                }, 100);
-            });
-
-            // Handle resize
-            window.addEventListener('resize', function() {
-                preventHorizontalScroll();
-                if (window.innerWidth <= 768) {
-                    startScrollMonitoring();
-                } else {
-                    stopScrollMonitoring();
+            // Prevent horizontal scrolling
+            window.addEventListener('scroll', function() {
+                if (window.scrollX !== 0) {
+                    window.scrollTo(0, window.scrollY);
                 }
             }, { passive: true });
 
-            // Handle page visibility for performance
+            // Handle page visibility for better performance
             document.addEventListener('visibilitychange', function() {
                 const isHidden = document.hidden;
                 console.log('Page visibility changed:', isHidden ? 'hidden' : 'visible');
-
-                if (!isHidden && window.innerWidth <= 768) {
-                    // Recheck scroll position when page becomes visible
-                    preventHorizontalScroll();
-                }
             });
 
-            // FIXED: Touch event handling to prevent horizontal scroll
-            let touchStartX = 0;
-            let touchStartY = 0;
+            // FIXED: Debug navigation links on page load
+            console.log('=== Navigation Links Debug ===');
+            document.querySelectorAll('a[href*="marketplace"]').forEach((link, i) => {
+                console.log(`Marketplace link ${i}:`, {
+                    href: link.href,
+                    text: link.textContent.trim(),
+                    classes: link.className,
+                    visible: link.offsetParent !== null
+                });
+            });
 
-            document.addEventListener('touchstart', function(e) {
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
-            }, { passive: true });
+            document.querySelectorAll('a[href*="login"]').forEach((link, i) => {
+                console.log(`Login link ${i}:`, {
+                    href: link.href,
+                    text: link.textContent.trim(),
+                    classes: link.className,
+                    visible: link.offsetParent !== null
+                });
+            });
 
-            document.addEventListener('touchmove', function(e) {
-                const touchEndX = e.touches[0].clientX;
-                const touchEndY = e.touches[0].clientY;
-                const deltaX = touchEndX - touchStartX;
-                const deltaY = touchEndY - touchStartY;
-
-                // If horizontal movement is greater than vertical, prevent it
-                if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
-
-            // Initialize page with opacity
+            // Initialize page
             document.body.style.opacity = '1';
-            console.log('DiaryVault fixed mobile scroll initialized successfully');
+            console.log('DiaryVault navigation initialized successfully - Mobile bottom nav removed');
         });
 
-        // Utility functions
+        // FIXED: Utility functions for external use
         window.DiaryVault = {
             showToast: window.showToast,
             navigateToMarketplace: function() {
@@ -1725,10 +1530,10 @@
                 window.location.href = "{% url 'account_login' %}";
                 return false;
             },
-            version: '5.0-fixed-mobile-scroll'
+            version: '4.1-no-mobile-bottom-nav'
         };
 
-        // Global error handler
+        // FIXED: Global error handler for debugging
         window.addEventListener('error', function(e) {
             console.error('JavaScript Error:', e.error);
             if (e.error && e.error.stack) {
@@ -1736,7 +1541,7 @@
             }
         });
 
-        // Debug click events
+        // FIXED: Additional debugging for click events
         document.addEventListener('click', function(e) {
             if (e.target.closest('a')) {
                 const link = e.target.closest('a');
