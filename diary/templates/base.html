@@ -17,8 +17,8 @@
 
     <meta name="stripe-publishable-key" content="{{ STRIPE_PUBLISHABLE_KEY|default:'pk_test_your_key_here' }}">
     <meta name="csrf-token" content="{{ csrf_token }}">
-
     <meta name="theme-color" content="#6366f1" />
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.3/cdn.min.js" defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -219,6 +219,7 @@
         scroll-behavior: smooth;
         width: 100%;
         max-width: 100%;
+        -webkit-text-size-adjust: 100%;
       }
 
       body {
@@ -234,77 +235,13 @@
         position: relative;
         overscroll-behavior-x: none;
         -webkit-overflow-scrolling: touch;
-      }
-
-      /* Prevent horizontal scrolling globally */
-      body, html {
-        max-width: 100vw;
-        overflow-x: hidden;
-      }
-
-      /* Prevent content from causing horizontal scroll */
-      * {
-        max-width: 100%;
-      }
-
-      img, video, iframe, object, embed {
-        max-width: 100%;
-        height: auto;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
 
       @keyframes gradientShift {
         0%, 100% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
-      }
-
-      /* Mobile-specific fixes */
-      @media screen and (max-width: 768px) {
-        body {
-          overflow-x: hidden !important;
-          width: 100vw !important;
-          max-width: 100vw !important;
-          position: relative;
-          -webkit-text-size-adjust: 100%;
-          -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Prevent zoom on input focus */
-        input, textarea, select {
-          font-size: 16px !important;
-        }
-
-        /* Prevent horizontal bounce */
-        * {
-          -webkit-transform: translateZ(0);
-          transform: translateZ(0);
-        }
-
-        /* Fix for iOS bounce */
-        html, body {
-          overscroll-behavior: none;
-          -webkit-overflow-scrolling: touch;
-        }
-      }
-
-      /* Enhanced touch handling for mobile stability */
-      @media (hover: none) and (pointer: coarse) {
-        body {
-          -webkit-touch-callout: none;
-          -webkit-user-select: none;
-          -khtml-user-select: none;
-          -moz-user-select: none;
-          -ms-user-select: none;
-          user-select: none;
-        }
-
-        /* Allow text selection in specific areas */
-        input, textarea, [contenteditable] {
-          -webkit-user-select: text;
-          -khtml-user-select: text;
-          -moz-user-select: text;
-          -ms-user-select: text;
-          user-select: text;
-        }
       }
 
       /* Enhanced Glass Morphism */
@@ -329,7 +266,7 @@
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(24px) saturate(180%);
         -webkit-backdrop-filter: blur(24px) saturate(180%);
-        border-top: 1px solid rgba(255, 255, 255, 0.3);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
         width: 100%;
         max-width: 100vw;
         overflow-x: hidden;
@@ -459,61 +396,60 @@
         animation: bounceGentle 2s ease-in-out infinite;
       }
 
-      /* Enhanced Mobile Header - FIXED SIZE */
-      .mobile-header-compact {
-        padding-top: 0.25rem !important;
-        padding-bottom: 0.25rem !important;
+      /* FIXED: Mobile Header - Improved Size and Layout */
+      .mobile-header {
+        padding: 0.5rem 0;
       }
 
-      /* Smaller logo on mobile */
       @media screen and (max-width: 768px) {
         .mobile-logo {
-          padding: 0.375rem !important;
+          padding: 0.5rem;
         }
 
         .mobile-logo svg {
-          height: 1rem !important;
-          width: 1rem !important;
+          height: 1.25rem;
+          width: 1.25rem;
         }
 
         .mobile-logo-text {
-          font-size: 1rem !important;
-          line-height: 1.25rem !important;
+          font-size: 1.125rem;
+          line-height: 1.375rem;
         }
 
         .mobile-brand-badge {
-          transform: scale(0.65) rotate(-2deg) !important;
-          margin-left: -0.25rem !important;
+          transform: scale(0.8) rotate(-2deg);
+          margin-left: -0.125rem;
         }
 
         .mobile-user-avatar {
-          height: 1.75rem !important;
-          width: 1.75rem !important;
-          font-size: 0.625rem !important;
+          height: 2rem;
+          width: 2rem;
+          font-size: 0.75rem;
         }
-      }
 
-      /* Enhanced Hamburger Menu - FIXED VISIBILITY */
-      .menu-toggle-btn {
-        background: rgba(255, 255, 255, 0.9) !important;
-        border: 1px solid rgba(99, 102, 241, 0.15) !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-        padding: 0.5rem !important;
-      }
+        /* FIXED: Menu Toggle Button - Better Visibility */
+        .menu-toggle-btn {
+          background: rgba(255, 255, 255, 0.95);
+          border: 1px solid rgba(99, 102, 241, 0.2);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          padding: 0.625rem;
+          border-radius: 0.75rem;
+        }
 
-      .menu-toggle-btn:hover {
-        background: rgba(255, 255, 255, 1) !important;
-        border-color: rgba(99, 102, 241, 0.25) !important;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15) !important;
-      }
+        .menu-toggle-btn:hover {
+          background: rgba(255, 255, 255, 1);
+          border-color: rgba(99, 102, 241, 0.3);
+          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
 
-      .menu-toggle-btn svg {
-        color: #334155 !important; /* Much darker for better visibility */
-        stroke-width: 2.5 !important; /* Thicker lines */
-      }
+        .menu-toggle-btn svg {
+          color: #1f2937;
+          stroke-width: 2.5;
+        }
 
-      .menu-toggle-btn:hover svg {
-        color: #1e293b !important; /* Even darker on hover */
+        .menu-toggle-btn:hover svg {
+          color: #111827;
+        }
       }
 
       /* Modern Card System */
@@ -551,9 +487,9 @@
         opacity: 1;
       }
 
-      /* Enhanced Mobile Menu */
+      /* FIXED: Enhanced Mobile Menu - Cleaner Implementation */
       .mobile-menu {
-        background: rgba(255, 255, 255, 0.95);
+        background: rgba(255, 255, 255, 0.98);
         backdrop-filter: blur(30px);
         border-top: 1px solid rgba(99, 102, 241, 0.1);
         box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.1);
@@ -562,6 +498,16 @@
         width: 100%;
         max-width: 100vw;
         overflow-x: hidden;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 60;
+        border-top-left-radius: 1.5rem;
+        border-top-right-radius: 1.5rem;
+        max-height: 85vh;
+        overflow-y: auto;
+        padding-bottom: env(safe-area-inset-bottom, 1rem);
       }
 
       .mobile-menu.open {
@@ -569,7 +515,7 @@
       }
 
       .menu-overlay {
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(8px);
         opacity: 0;
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
@@ -577,6 +523,9 @@
         width: 100%;
         max-width: 100vw;
         overflow: hidden;
+        position: fixed;
+        inset: 0;
+        z-index: 55;
       }
 
       .menu-overlay.active {
@@ -617,32 +566,6 @@
 
       .menu-item:active {
         transform: scale(0.98);
-      }
-
-      /* Staggered animation for menu items */
-      .menu-item-animate {
-        opacity: 1;
-        transform: translateY(0);
-        transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
-      }
-
-      .menu-item-animate.fade-in {
-        animation: fadeInUp 0.4s ease-out forwards;
-      }
-
-      /* Fix menu visibility issues */
-      .mobile-menu * {
-        opacity: 1;
-        visibility: visible;
-      }
-
-      .mobile-menu .menu-item,
-      .mobile-menu .menu-category,
-      .mobile-menu a,
-      .mobile-menu button {
-        opacity: 1 !important;
-        visibility: visible !important;
-        pointer-events: auto !important;
       }
 
       /* Active menu indicator */
@@ -711,7 +634,7 @@
         background-size: 24px 24px;
       }
 
-      /* Enhanced Mobile Navigation */
+      /* FIXED: Enhanced Mobile Navigation - Better Touch Targets */
       .mobile-nav-item {
         position: relative;
         display: flex;
@@ -722,7 +645,7 @@
         border-radius: 12px;
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
         color: #64748b;
-        min-height: 48px;
+        min-height: 56px; /* Better touch target */
         cursor: pointer;
         user-select: none;
         -webkit-tap-highlight-color: transparent;
@@ -803,7 +726,7 @@
         transform: scale(1.02);
       }
 
-      /* Enhanced Floating Action Button */
+      /* FIXED: Enhanced Floating Action Button */
       .fab {
         position: relative;
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
@@ -874,21 +797,19 @@
         z-index: 10;
       }
 
-      /* Ripple Effect */
-      .ripple {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(99, 102, 241, 0.3);
-        transform: scale(0);
-        animation: ripple-animation 0.6s linear;
-        pointer-events: none;
+      /* Enhanced Loading States */
+      .loading-shimmer {
+        background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+        background-size: 200% 100%;
+        animation: shimmer 2s infinite;
       }
 
-      @keyframes ripple-animation {
-        to {
-          transform: scale(4);
-          opacity: 0;
-        }
+      /* Text Gradient */
+      .text-gradient {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
       /* Enhanced Navigation Shadow */
@@ -921,75 +842,26 @@
         background: linear-gradient(135deg, #4f46e5, #4338ca);
       }
 
-      /* Text Gradient */
-      .text-gradient {
-        background: linear-gradient(135deg, #6366f1, #4f46e5);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      /* Enhanced Accessibility */
+      /* Accessibility */
       :focus-visible {
         outline: 2px solid #6366f1;
         outline-offset: 2px;
         border-radius: 8px;
       }
 
-      /* Print Optimizations */
-      @media print {
-        * {
-          box-shadow: none !important;
-          background: white !important;
-          color: black !important;
-        }
-
-        .mobile-menu, .fab, .mobile-nav, .glass-nav {
-          display: none !important;
-        }
-      }
-
-      /* Reduced Motion */
-      @media (prefers-reduced-motion: reduce) {
-        * {
-          animation-duration: 0.01ms !important;
-          animation-iteration-count: 1 !important;
-          transition-duration: 0.01ms !important;
-          scroll-behavior: auto !important;
-        }
-      }
-
-      /* High Contrast Mode */
-      @media (prefers-contrast: high) {
-        .glass-card, .glass-nav {
-          background: white;
-          border: 2px solid #000;
-        }
-
-        .btn-primary {
-          background: #000;
-          color: #fff;
-          border: 2px solid #000;
-        }
-
-        .btn-secondary {
-          background: #fff;
-          color: #000;
-          border: 2px solid #000;
-        }
-
+      /* Touch improvements */
+      @media (hover: none) and (pointer: coarse) {
         .mobile-nav-item {
-          color: #000;
-        }
-
-        .mobile-nav-item.active {
-          background: #000;
-          color: #fff;
+          min-height: 64px;
         }
 
         .fab {
-          background: #000;
-          border: 2px solid #000;
+          padding: 20px;
+        }
+
+        .menu-toggle-btn {
+          min-height: 44px;
+          min-width: 44px;
         }
       }
 
@@ -1006,7 +878,11 @@
 
         .glass-nav {
           background: rgba(15, 23, 42, 0.95);
-          border-top-color: rgba(148, 163, 184, 0.2);
+          border-bottom-color: rgba(148, 163, 184, 0.2);
+        }
+
+        .mobile-menu {
+          background: rgba(30, 41, 59, 0.95);
         }
 
         .mobile-nav-item {
@@ -1028,36 +904,26 @@
         }
       }
 
-      /* Enhanced Loading States */
-      .loading-shimmer {
-        background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-        background-size: 200% 100%;
-        animation: shimmer 2s infinite;
+      /* Reduced Motion */
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
       }
 
-      /* Micro-interactions */
-      .micro-bounce:hover {
-        animation: bounceGentle 0.6s ease-in-out;
-      }
-
-      .micro-float {
-        animation: float 3s ease-in-out infinite;
-      }
-
-      /* Enhanced Backdrop Effects */
-      .backdrop-blur-glass {
-        backdrop-filter: blur(20px) saturate(180%);
-        -webkit-backdrop-filter: blur(20px) saturate(180%);
-      }
-
-      /* Touch Improvements */
-      @media (hover: none) and (pointer: coarse) {
-        .mobile-nav-item {
-          min-height: 64px; /* Larger touch targets on mobile */
+      /* Print Optimizations */
+      @media print {
+        * {
+          box-shadow: none !important;
+          background: white !important;
+          color: black !important;
         }
 
-        .fab {
-          padding: 20px; /* Larger FAB on touch devices */
+        .mobile-menu, .fab, .mobile-nav, .glass-nav {
+          display: none !important;
         }
       }
     </style>
@@ -1066,14 +932,14 @@
 </head>
 
 <body class="min-h-screen flex flex-col bg-gradient-to-br text-secondary-800 custom-scrollbar pattern-dots">
-    <!-- Enhanced Header (Smaller Mobile Size) -->
-    <header class="sticky top-0 z-50 w-full glass-nav transition-all duration-300 mobile-header-compact"
+    <!-- Enhanced Header -->
+    <header class="sticky top-0 z-50 w-full glass-nav transition-all duration-300 mobile-header"
              x-data="{ scrolled: false }"
              x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 20 })"
              :class="{ 'shadow-soft-lg': scrolled }">
-        <div class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
+        <div class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
             <div class="flex items-center justify-between">
-                <!-- Enhanced Logo (Much Smaller on Mobile) -->
+                <!-- Enhanced Logo -->
                 <div class="flex items-center">
                     <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center gap-2 group">
                         <div class="relative">
@@ -1086,12 +952,12 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <h1 class="mobile-logo-text text-lg font-bold text-gradient diary-font">DiaryVault</h1>
-                            <span class="mobile-brand-badge brand-badge scale-75">Beta</span>
+                            <span class="mobile-brand-badge brand-badge">Beta</span>
                         </div>
                     </a>
                 </div>
 
-                <!-- Enhanced Desktop Navigation (Smaller) -->
+                <!-- Enhanced Desktop Navigation -->
                 {% if user.is_authenticated %}
                 <nav class="hidden lg:flex items-center gap-1">
                     <a href="{% url 'dashboard' %}" class="nav-link text-sm {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
@@ -1153,10 +1019,10 @@
                 </nav>
                 {% endif %}
 
-                <!-- Enhanced Right Navigation (Smaller & Fixed User Avatar) -->
+                <!-- Enhanced Right Navigation -->
                 <div class="flex items-center gap-2">
                     {% if user.is_authenticated %}
-                    <!-- User Profile (More Compact) -->
+                    <!-- User Profile -->
                     <a href="{% url 'account_settings' %}" class="hidden sm:flex items-center gap-2 hover:opacity-90 transition-all duration-300 group p-1 rounded-lg hover:bg-white/50">
                         <div class="relative">
                             <div class="mobile-user-avatar h-8 w-8 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-xs shadow-soft group-hover:shadow-glow group-hover:scale-105 transition-all duration-300">
@@ -1174,15 +1040,15 @@
                         </div>
                     </a>
                     {% else %}
-                    <!-- Auth Buttons (Smaller) -->
+                    <!-- Auth Buttons -->
                     <div class="hidden md:flex gap-2 items-center">
                         <a href="{% url 'account_login' %}" class="btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium">Log in</a>
                         <a href="{% url 'account_signup' %}" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium">Sign up</a>
                     </div>
                     {% endif %}
 
-                    <!-- Enhanced Menu Button (FIXED VISIBILITY) -->
-                    <button id="menuToggleBtn" class="menu-toggle-btn relative hover:scale-105 rounded-xl transition-all duration-300 flex items-center justify-center">
+                    <!-- Enhanced Menu Button -->
+                    <button id="menuToggleBtn" class="menu-toggle-btn relative hover:scale-105 transition-all duration-300 flex items-center justify-center">
                         {% if user.is_authenticated and unread_notifications > 0 %}
                         <span class="absolute -top-1 -right-1 h-3 w-3 bg-error-500 rounded-full flex items-center justify-center">
                             <span class="text-white text-xs font-bold">{{ unread_notifications }}</span>
@@ -1197,274 +1063,273 @@
         </div>
     </header>
 
-    <!-- Enhanced Mobile Menu (Restored Original Structure) -->
-    <div id="menuOverlay" class="menu-overlay fixed inset-0 bg-black/40 z-50 hidden">
-        <div id="menuSheet" class="mobile-menu fixed bottom-0 left-0 right-0 rounded-t-3xl shadow-2xl z-50 max-h-[85vh] overflow-y-auto">
-            <!-- Pull Indicator -->
-            <div class="w-10 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-2"></div>
+    <!-- Enhanced Mobile Menu -->
+    <div id="menuOverlay" class="menu-overlay"></div>
+    <div id="menuSheet" class="mobile-menu">
+        <!-- Pull Indicator -->
+        <div class="w-10 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-2"></div>
 
-            <!-- Enhanced Menu Header -->
-            <div class="px-6 pt-2 pb-4 flex justify-between items-center border-b border-gray-100">
-                <div class="flex items-center gap-3">
-                    <div class="p-1.5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        <!-- Enhanced Menu Header -->
+        <div class="px-6 pt-2 pb-4 flex justify-between items-center border-b border-gray-100">
+            <div class="flex items-center gap-3">
+                <div class="p-1.5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <h2 class="font-bold text-lg text-gradient diary-font">DiaryVault</h2>
+            </div>
+            <button id="closeMenuBtn" class="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        {% if user.is_authenticated %}
+        <!-- Enhanced User Profile Section -->
+        <div class="px-6 pb-4">
+            <a href="{% url 'account_settings' %}" class="block">
+                <div class="flex items-center p-4 glass-card rounded-2xl border border-primary-100/50">
+                    <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <div class="ml-4">
+                        <div class="font-semibold text-gray-800">{{ user.username }}</div>
+                        <div class="text-xs text-gray-500">{{ total_entries|default:'0' }} journal entries</div>
+                    </div>
+                    <div class="ml-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
                     </div>
-                    <h2 class="font-bold text-lg text-gradient diary-font">DiaryVault</h2>
                 </div>
-                <button id="closeMenuBtn" class="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
+            </a>
+        </div>
 
-            {% if user.is_authenticated %}
-            <!-- Enhanced User Profile Section -->
-            <div class="px-6 pb-4">
-                <a href="{% url 'account_settings' %}" class="block">
-                    <div class="flex items-center p-4 glass-card rounded-2xl border border-primary-100/50">
-                        <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                            {{ user.username|first|upper }}
-                        </div>
-                        <div class="ml-4">
-                            <div class="font-semibold text-gray-800">{{ user.username }}</div>
-                            <div class="text-xs text-gray-500">{{ total_entries|default:'0' }} journal entries</div>
-                        </div>
-                        <div class="ml-auto">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
+        <!-- Enhanced Quick Actions -->
+        <div class="px-6 pb-6">
+            <div class="grid grid-cols-4 gap-3">
+                <a href="{% url 'new_entry' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
+                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
                     </div>
+                    <span class="text-xs font-medium">New Entry</span>
+                </a>
+                <a href="{% url 'library' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
+                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <span class="text-xs font-medium">Calendar</span>
+                </a>
+                <a href="{% url 'marketplace' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
+                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                    </div>
+                    <span class="text-xs font-medium">Templates</span>
+                </a>
+                <a href="{% url 'preferences' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
+                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <span class="text-xs font-medium">Images</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Enhanced Main Menu -->
+        <div class="px-6 pb-6">
+            <h3 class="text-xs uppercase text-gray-500 font-semibold mb-3 px-2">Navigation</h3>
+
+            <div class="space-y-2">
+                <a href="{% url 'dashboard' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'dashboard' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                    {% if request.resolver_match.url_name == 'dashboard' %}<div class="active-pill"></div>{% endif %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+                    </svg>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+
+                <a href="{% url 'library' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'library' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                    {% if request.resolver_match.url_name == 'library' %}<div class="active-pill"></div>{% endif %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                    </svg>
+                    <span class="font-medium">Library</span>
+                </a>
+
+                <a href="{% url 'biography' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'biography' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                    {% if request.resolver_match.url_name == 'biography' %}<div class="active-pill"></div>{% endif %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span class="font-medium">Biography</span>
+                </a>
+
+                <a href="{% url 'insights' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'insights' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                    {% if request.resolver_match.url_name == 'insights' %}<div class="active-pill"></div>{% endif %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span class="font-medium">Insights</span>
+                </a>
+
+                <a href="{% url 'marketplace' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'marketplace' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                    {% if request.resolver_match.url_name == 'marketplace' %}<div class="active-pill"></div>{% endif %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span class="font-medium">Marketplace</span>
                 </a>
             </div>
 
-            <!-- Enhanced Quick Actions -->
-            <div class="px-6 pb-6">
-                <div class="grid grid-cols-4 gap-3">
-                    <a href="{% url 'new_entry' %}" class="menu-item-animate delay-100 flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
-                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                            </svg>
-                        </div>
-                        <span class="text-xs font-medium">New Entry</span>
-                    </a>
-                    <a href="{% url 'library' %}" class="menu-item-animate delay-150 flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
-                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <span class="text-xs font-medium">Calendar</span>
-                    </a>
-                    <a href="{% url 'marketplace' %}" class="menu-item-animate delay-200 flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
-                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                            </svg>
-                        </div>
-                        <span class="text-xs font-medium">Templates</span>
-                    </a>
-                    <a href="{% url 'preferences' %}" class="menu-item-animate delay-250 flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
-                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <span class="text-xs font-medium">Images</span>
-                    </a>
-                </div>
+            <h3 class="text-xs uppercase text-gray-500 font-semibold mt-6 mb-3 px-2">Settings</h3>
+
+            <div class="space-y-2">
+                <a href="{% url 'account_settings' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'account_settings' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                    {% if request.resolver_match.url_name == 'account_settings' %}<div class="active-pill"></div>{% endif %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="font-medium">Account Settings</span>
+                </a>
+
+                <a href="{% url 'preferences' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'preferences' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                    {% if request.resolver_match.url_name == 'preferences' %}<div class="active-pill"></div>{% endif %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                    <span class="font-medium">Journal Preferences</span>
+                </a>
             </div>
 
-            <!-- Enhanced Main Menu -->
-            <div class="px-6 pb-6">
-                <h3 class="text-xs uppercase text-gray-500 font-semibold mb-3 px-2">Navigation</h3>
-
-                <div class="space-y-2">
-                    <a href="{% url 'dashboard' %}" class="menu-item-animate delay-100 menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'dashboard' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                        {% if request.resolver_match.url_name == 'dashboard' %}<div class="active-pill"></div>{% endif %}
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+            <!-- Enhanced Logout Button -->
+            <div class="mt-8">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full py-4 px-4 glass-card hover:bg-red-50 text-red-600 rounded-2xl flex items-center justify-center transition-all duration-300 font-medium border border-red-100 hover:border-red-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
-                        <span class="font-medium">Dashboard</span>
-                    </a>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <!-- Enhanced Menu for non-logged in users -->
+        <div class="px-6 pb-6">
+            <h3 class="text-xs uppercase text-gray-500 font-semibold mb-4 px-2">Discover DiaryVault</h3>
 
-                    <a href="{% url 'library' %}" class="menu-item-animate delay-150 menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'library' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                        {% if request.resolver_match.url_name == 'library' %}<div class="active-pill"></div>{% endif %}
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="space-y-3 mb-8">
+                <a href="{% url 'account_signup' %}?feature=journal" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
+                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Journal</span>
+                        <span class="text-xs text-primary-600 block">Create daily entries</span>
+                    </div>
+                    <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Try it</span>
+                </a>
+
+                <a href="{% url 'account_signup' %}?feature=library" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
+                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
                         </svg>
-                        <span class="font-medium">Library</span>
-                    </a>
+                    </div>
+                    <div class="flex-1">
+                        <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Library</span>
+                        <span class="text-xs text-primary-600 block">Organize your memories</span>
+                    </div>
+                    <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Explore</span>
+                </a>
 
-                    <a href="{% url 'biography' %}" class="menu-item-animate delay-200 menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'biography' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                        {% if request.resolver_match.url_name == 'biography' %}<div class="active-pill"></div>{% endif %}
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="{% url 'account_signup' %}?feature=biography" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
+                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <span class="font-medium">Biography</span>
-                    </a>
+                    </div>
+                    <div class="flex-1">
+                        <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Biography</span>
+                        <span class="text-xs text-primary-600 block">Your life story</span>
+                    </div>
+                    <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Create</span>
+                </a>
 
-                    <a href="{% url 'insights' %}" class="menu-item-animate delay-250 menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'insights' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                        {% if request.resolver_match.url_name == 'insights' %}<div class="active-pill"></div>{% endif %}
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="{% url 'account_signup' %}?feature=insights" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
+                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        <span class="font-medium">Insights</span>
-                    </a>
-
-                    <a href="{% url 'marketplace' %}" class="menu-item-animate delay-300 menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'marketplace' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                        {% if request.resolver_match.url_name == 'marketplace' %}<div class="active-pill"></div>{% endif %}
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span class="font-medium">Marketplace</span>
-                    </a>
-                </div>
-
-                <h3 class="text-xs uppercase text-gray-500 font-semibold mt-6 mb-3 px-2">Settings</h3>
-
-                <div class="space-y-2">
-                    <a href="{% url 'account_settings' %}" class="menu-item-animate delay-350 menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'account_settings' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                        {% if request.resolver_match.url_name == 'account_settings' %}<div class="active-pill"></div>{% endif %}
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span class="font-medium">Account Settings</span>
-                    </a>
-
-                    <a href="{% url 'preferences' %}" class="menu-item-animate delay-350 menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'preferences' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                        {% if request.resolver_match.url_name == 'preferences' %}<div class="active-pill"></div>{% endif %}
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                        </svg>
-                        <span class="font-medium">Journal Preferences</span>
-                    </a>
-                </div>
-
-                <!-- Enhanced Logout Button -->
-                <div class="mt-8">
-                    <form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="w-full py-4 px-4 glass-card hover:bg-red-50 text-red-600 rounded-2xl flex items-center justify-center transition-all duration-300 font-medium border border-red-100 hover:border-red-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
-                            <span>Logout</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-            {% else %}
-            <!-- Enhanced Menu for non-logged in users -->
-            <div class="px-6 pb-6">
-                <h3 class="text-xs uppercase text-gray-500 font-semibold mb-4 px-2">Discover DiaryVault</h3>
-
-                <div class="space-y-3 mb-8">
-                    <a href="{% url 'account_signup' %}?feature=journal" class="menu-item-animate delay-100 flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
-                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Journal</span>
-                            <span class="text-xs text-primary-600 block">Create daily entries</span>
-                        </div>
-                        <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Try it</span>
-                    </a>
-
-                    <a href="{% url 'account_signup' %}?feature=library" class="menu-item-animate delay-150 flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
-                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Library</span>
-                            <span class="text-xs text-primary-600 block">Organize your memories</span>
-                        </div>
-                        <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Explore</span>
-                    </a>
-
-                    <a href="{% url 'account_signup' %}?feature=biography" class="menu-item-animate delay-200 flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
-                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Biography</span>
-                            <span class="text-xs text-primary-600 block">Your life story</span>
-                        </div>
-                        <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Create</span>
-                    </a>
-
-                    <a href="{% url 'account_signup' %}?feature=insights" class="menu-item-animate delay-250 flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
-                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Insights</span>
-                            <span class="text-xs text-primary-600 block">Discover patterns</span>
-                        </div>
-                        <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Analyze</span>
-                    </a>
-                </div>
-
-                <!-- Available features section -->
-                <div class="space-y-2 mb-8">
-                    <a href="{% url 'marketplace' %}" class="menu-item-animate delay-300 flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'marketplace' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span class="font-medium">Marketplace</span>
-                    </a>
-                </div>
-
-                <!-- Enhanced Auth section -->
-                <div class="space-y-4">
-                    <a href="{% url 'account_login' %}" class="menu-item-animate delay-400 flex items-center justify-center gap-3 py-4 px-4 glass-card hover:bg-white/80 rounded-2xl transition-all duration-300 font-semibold border border-gray-200/50 hover:shadow-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                        </svg>
-                        <span>Log in</span>
-                    </a>
-
-                    <a href="{% url 'account_signup' %}" class="menu-item-animate delay-450 flex items-center justify-center gap-3 py-4 px-4 btn-primary rounded-2xl transition-all duration-300 shadow-lg font-semibold hover:shadow-xl hover:-translate-y-1 active:translate-y-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                        </svg>
-                        <span>Sign up for free</span>
-                    </a>
-                </div>
-
-                <div class="mt-8 p-6 glass-card rounded-2xl border border-primary-100/50 shadow-lg">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                        </div>
-                        <h4 class="font-bold text-gray-800 mb-2">Start Your Journey</h4>
-                        <p class="text-sm text-secondary-600 leading-relaxed">Create unlimited journal entries and discover insights about yourself with DiaryVault.</p>
                     </div>
+                    <div class="flex-1">
+                        <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Insights</span>
+                        <span class="text-xs text-primary-600 block">Discover patterns</span>
+                    </div>
+                    <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Analyze</span>
+                </a>
+            </div>
+
+            <!-- Available features section -->
+            <div class="space-y-2 mb-8">
+                <a href="{% url 'marketplace' %}" class="flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'marketplace' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span class="font-medium">Marketplace</span>
+                </a>
+            </div>
+
+            <!-- Enhanced Auth section -->
+            <div class="space-y-4">
+                <a href="{% url 'account_login' %}" class="flex items-center justify-center gap-3 py-4 px-4 glass-card hover:bg-white/80 rounded-2xl transition-all duration-300 font-semibold border border-gray-200/50 hover:shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Log in</span>
+                </a>
+
+                <a href="{% url 'account_signup' %}" class="flex items-center justify-center gap-3 py-4 px-4 btn-primary rounded-2xl transition-all duration-300 shadow-lg font-semibold hover:shadow-xl hover:-translate-y-1 active:translate-y-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                    <span>Sign up for free</span>
+                </a>
+            </div>
+
+            <div class="mt-8 p-6 glass-card rounded-2xl border border-primary-100/50 shadow-lg">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                    </div>
+                    <h4 class="font-bold text-gray-800 mb-2">Start Your Journey</h4>
+                    <p class="text-sm text-secondary-600 leading-relaxed">Create unlimited journal entries and discover insights about yourself with DiaryVault.</p>
                 </div>
             </div>
-            {% endif %}
-
-            <!-- Extra space at bottom for safe area -->
-            <div class="h-8"></div>
         </div>
+        {% endif %}
+
+        <!-- Extra space at bottom for safe area -->
+        <div class="h-8"></div>
     </div>
 
-    <!-- Main Content (Keep Original Structure) -->
+    <!-- Main Content -->
     <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col">
         {% block content %}
         <!-- Page content will go here -->
@@ -1526,22 +1391,12 @@
                     <span>Insights</span>
                 </a>
 
-                <!-- FIXED: Marketplace instead of Shop -->
-                <a href="{% url 'marketplace' %}"
-                   class="mobile-nav-item {% if request.resolver_match.url_name == 'marketplace' %}active{% endif %}"
-                   data-page="marketplace">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    <span>Marketplace</span>
-                </a>
-
             </div>
         </div>
     </nav>
     {% endif %}
 
-    <!-- Enhanced Footer (Reduced Size) -->
+    <!-- Enhanced Footer -->
     <footer class="mt-8 glass-nav border-t border-primary-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -1561,13 +1416,13 @@
                 </div>
 
                 <div class="flex flex-wrap items-center justify-center gap-4 text-xs">
-                    <a href="https://crene.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-all duration-300 px-3 py-1.5 rounded-lg hover:bg-primary-50/50 micro-bounce">
+                    <a href="https://crene.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-all duration-300 px-3 py-1.5 rounded-lg hover:bg-primary-50/50">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
                         <span class="font-medium">Crene.com</span>
                     </a>
-                    <a href="https://euphorie.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-all duration-300 px-3 py-1.5 rounded-lg hover:bg-primary-50/50 micro-bounce">
+                    <a href="https://euphorie.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-all duration-300 px-3 py-1.5 rounded-lg hover:bg-primary-50/50">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
@@ -1583,10 +1438,10 @@
         <!-- Notifications will be inserted here -->
     </div>
 
-    <!-- Enhanced JavaScript with Mobile Stability (Same as before) -->
+    <!-- Enhanced JavaScript - Simplified and Fixed -->
     <script>
-        // Enhanced menu functionality with improved animations
         document.addEventListener('DOMContentLoaded', function() {
+            // Fixed mobile menu functionality
             const menuToggleBtn = document.getElementById('menuToggleBtn');
             const closeMenuBtn = document.getElementById('closeMenuBtn');
             const menuOverlay = document.getElementById('menuOverlay');
@@ -1594,56 +1449,34 @@
 
             if (menuToggleBtn && closeMenuBtn && menuOverlay && menuSheet) {
                 function toggleMenu() {
-                    if (menuOverlay.classList.contains('hidden')) {
+                    const isOpen = menuSheet.classList.contains('open');
+
+                    if (!isOpen) {
                         // Show menu
-                        menuOverlay.classList.remove('hidden');
+                        menuOverlay.classList.add('active');
+                        menuSheet.classList.add('open');
                         document.body.style.overflow = 'hidden';
-
-                        // Small delay for smooth animation
-                        requestAnimationFrame(() => {
-                            menuOverlay.classList.add('active');
-                            menuSheet.classList.add('open');
-
-                            // Ensure all menu items are visible
-                            const menuItems = menuSheet.querySelectorAll('.menu-item-animate');
-                            menuItems.forEach((item, index) => {
-                                item.style.opacity = '1';
-                                item.style.transform = 'translateY(0)';
-                                item.style.visibility = 'visible';
-                            });
-                        });
                     } else {
                         // Hide menu
                         menuSheet.classList.remove('open');
                         menuOverlay.classList.remove('active');
                         document.body.style.overflow = '';
-
-                        // Wait for animation to complete
-                        setTimeout(() => {
-                            menuOverlay.classList.add('hidden');
-                        }, 400);
                     }
                 }
 
                 // Event listeners
                 menuToggleBtn.addEventListener('click', toggleMenu);
                 closeMenuBtn.addEventListener('click', toggleMenu);
+                menuOverlay.addEventListener('click', toggleMenu);
 
-                // Close menu when clicking outside
-                menuOverlay.addEventListener('click', function(event) {
-                    if (event.target === menuOverlay) {
-                        toggleMenu();
-                    }
-                });
-
-                // Enhanced keyboard support
+                // Keyboard support
                 document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape' && !menuOverlay.classList.contains('hidden')) {
+                    if (e.key === 'Escape' && menuSheet.classList.contains('open')) {
                         toggleMenu();
                     }
                 });
 
-                // Enhanced touch support for swipe down to close
+                // Fixed touch support for swipe down to close
                 let startY = 0;
                 let currentY = 0;
                 let isDragging = false;
@@ -1651,7 +1484,7 @@
                 menuSheet.addEventListener('touchstart', function(e) {
                     startY = e.touches[0].clientY;
                     isDragging = true;
-                });
+                }, { passive: true });
 
                 menuSheet.addEventListener('touchmove', function(e) {
                     if (!isDragging) return;
@@ -1660,81 +1493,57 @@
                     const diff = currentY - startY;
 
                     if (diff > 0 && menuSheet.scrollTop === 0) {
-                        menuSheet.style.transform = `translateY(${Math.min(diff, 200)}px)`;
-                        menuSheet.style.transition = 'none';
-                        e.preventDefault();
+                        const translateY = Math.min(diff * 0.5, 100);
+                        menuSheet.style.transform = `translateY(${translateY}px)`;
                     }
-                });
+                }, { passive: true });
 
                 menuSheet.addEventListener('touchend', function() {
                     if (!isDragging) return;
                     isDragging = false;
 
                     const diff = currentY - startY;
-                    menuSheet.style.transition = '';
                     menuSheet.style.transform = '';
 
                     if (diff > 100) {
                         toggleMenu();
                     }
-                });
+                }, { passive: true });
             }
 
-            // Enhanced Mobile Navigation
-            initEnhancedMobileNav();
-            initNavKeyboardShortcuts();
-            initSmoothTransitions();
-            initMobileStability();
+            // Enhanced mobile navigation feedback
+            const navItems = document.querySelectorAll('.mobile-nav-item, .fab');
+            navItems.forEach(item => {
+                item.addEventListener('touchstart', function() {
+                    if (this.classList.contains('fab')) {
+                        this.style.transform = 'translateY(-4px) scale(0.95)';
+                    } else {
+                        this.style.transform = 'scale(0.95)';
+                    }
+                }, { passive: true });
 
-            // Enhanced page transitions
-            const links = document.querySelectorAll('a[href^="/"], a[href^="{% url "home" %}"]');
-            links.forEach(link => {
-                if (!link.getAttribute('href').includes('://') &&
-                    !link.getAttribute('href').startsWith('#') &&
-                    !link.classList.contains('no-transition') &&
-                    link.getAttribute('target') !== '_blank') {
+                item.addEventListener('touchend', function() {
+                    setTimeout(() => {
+                        if (this.classList.contains('fab')) {
+                            this.style.transform = 'translateY(-6px)';
+                        } else {
+                            this.style.transform = '';
+                        }
+                    }, 150);
+                }, { passive: true });
 
-                    link.addEventListener('click', function(e) {
-                        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
-
-                        e.preventDefault();
-                        const target = this.getAttribute('href');
-
-                        // Add loading state
-                        document.body.style.opacity = '0.8';
-                        document.body.style.transition = 'opacity 0.3s ease';
-
-                        setTimeout(() => {
-                            window.location.href = target;
-                        }, 300);
-                    });
-                }
-            });
-
-            // Enhanced intersection observer for animations
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('animate-fade-in-up');
-                        observer.unobserve(entry.target);
+                // Haptic feedback if supported
+                item.addEventListener('click', function() {
+                    if (navigator.vibrate) {
+                        navigator.vibrate(50);
                     }
                 });
-            }, observerOptions);
-
-            // Observe elements for animations
-            document.querySelectorAll('.feature-card, .glass-card').forEach(el => {
-                observer.observe(el);
             });
 
             // Enhanced toast notification system
             window.showToast = function(message, type = 'info', duration = 4000) {
                 const toast = document.createElement('div');
-                toast.className = `notification ${type} p-4 max-w-md pointer-events-auto`;
+                toast.className = `notification ${type} p-4 max-w-md pointer-events-auto animate-slide-up`;
 
                 const icons = {
                     success: '<svg class="h-5 w-5 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
@@ -1762,13 +1571,10 @@
                 const container = document.getElementById('toastContainer');
                 container.appendChild(toast);
 
-                // Animate in
-                setTimeout(() => toast.classList.add('animate-slide-in'), 100);
-
                 // Auto remove
                 setTimeout(() => {
                     toast.style.opacity = '0';
-                    toast.style.transform = 'translateX(100%)';
+                    toast.style.transform = 'translateY(-20px)';
                     setTimeout(() => toast.remove(), 300);
                 }, duration);
             };
@@ -1778,248 +1584,50 @@
                 // Skip if user is typing
                 if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
-                // Ctrl/Cmd + N for new entry
-                if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                // Navigation shortcuts
+                const shortcuts = {
+                    'n': "{% url 'new_entry' %}",
+                    'd': "{% url 'dashboard' %}",
+                    'l': "{% url 'library' %}",
+                    'b': "{% url 'biography' %}",
+                    'i': "{% url 'insights' %}"
+                };
+
+                if ((e.ctrlKey || e.metaKey) && shortcuts[e.key]) {
                     e.preventDefault();
-                    const newEntryLink = document.querySelector('a[href*="new_entry"]');
-                    if (newEntryLink) newEntryLink.click();
+                    window.location.href = shortcuts[e.key];
                 }
 
-                // Ctrl/Cmd + M for menu
+                // Menu toggle
                 if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
                     e.preventDefault();
                     if (menuToggleBtn) menuToggleBtn.click();
                 }
+            });
 
-                // Ctrl/Cmd + D for dashboard
-                if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
-                    e.preventDefault();
-                    const dashboardLink = document.querySelector('a[href*="dashboard"]');
-                    if (dashboardLink) dashboardLink.click();
+            // Prevent horizontal scrolling
+            window.addEventListener('scroll', function() {
+                if (window.scrollX !== 0) {
+                    window.scrollTo(0, window.scrollY);
                 }
+            }, { passive: true });
 
-                // Ctrl/Cmd + L for library
-                if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
-                    e.preventDefault();
-                    const libraryLink = document.querySelector('a[href*="library"]');
-                    if (libraryLink) libraryLink.click();
-                }
+            // Handle page visibility for better performance
+            document.addEventListener('visibilitychange', function() {
+                const isHidden = document.hidden;
+                document.querySelectorAll('.fab').forEach(fab => {
+                    fab.style.animationPlayState = isHidden ? 'paused' : 'running';
+                });
             });
 
             // Initialize page
             document.body.style.opacity = '1';
-            document.body.style.transition = 'opacity 0.3s ease';
-        });
-
-        // Enhanced navigation interaction
-        function initEnhancedMobileNav() {
-            const navItems = document.querySelectorAll('.mobile-nav-item, .fab');
-
-            navItems.forEach(item => {
-                // Ripple effect on touch/click
-                item.addEventListener('touchstart', function(e) {
-                    createRipple(e, this);
-                });
-
-                item.addEventListener('click', function(e) {
-                    // Don't prevent default for actual navigation links
-                    createRipple(e, this);
-
-                    // Haptic feedback (if supported)
-                    if (navigator.vibrate) {
-                        navigator.vibrate(50);
-                    }
-
-                    // Add active state animation
-                    if (!this.classList.contains('fab')) {
-                        this.style.transform = 'scale(0.95)';
-                        setTimeout(() => {
-                            this.style.transform = '';
-                        }, 150);
-                    }
-                });
-
-                // Enhanced touch feedback
-                item.addEventListener('touchstart', function(e) {
-                    // Prevent default to avoid 300ms delay
-                    if (this.classList.contains('fab')) {
-                        e.preventDefault();
-                    }
-                    this.style.transform = this.classList.contains('fab') ?
-                        'translateY(-10px) scale(0.95)' : 'scale(0.95)';
-                }, { passive: false });
-
-                item.addEventListener('touchend', function() {
-                    setTimeout(() => {
-                        this.style.transform = this.classList.contains('fab') ?
-                            'translateY(-8px)' : '';
-                    }, 150);
-                });
-
-                // Mouse events for desktop testing
-                item.addEventListener('mousedown', function() {
-                    this.style.transform = this.classList.contains('fab') ?
-                        'translateY(-10px) scale(0.95)' : 'scale(0.95)';
-                });
-
-                item.addEventListener('mouseup', function() {
-                    setTimeout(() => {
-                        this.style.transform = this.classList.contains('fab') ?
-                            'translateY(-8px)' : '';
-                    }, 150);
-                });
-            });
-        }
-
-        // Create ripple effect
-        function createRipple(event, element) {
-            const ripple = document.createElement('span');
-            const rect = element.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-
-            // Get touch/click coordinates
-            let x, y;
-            if (event.touches && event.touches.length > 0) {
-                x = event.touches[0].clientX - rect.left;
-                y = event.touches[0].clientY - rect.top;
-            } else {
-                x = event.clientX - rect.left;
-                y = event.clientY - rect.top;
-            }
-
-            ripple.classList.add('ripple');
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = (x - size / 2) + 'px';
-            ripple.style.top = (y - size / 2) + 'px';
-
-            element.style.position = 'relative';
-            element.appendChild(ripple);
-
-            setTimeout(() => {
-                if (ripple.parentNode) {
-                    ripple.remove();
-                }
-            }, 600);
-        }
-
-        // Enhanced keyboard shortcuts for navigation
-        function initNavKeyboardShortcuts() {
-            document.addEventListener('keydown', function(e) {
-                // Skip if user is typing in an input
-                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
-
-                const shortcuts = {
-                    '1': 'dashboard',
-                    '2': 'library',
-                    '3': 'new_entry',
-                    '4': 'biography',
-                    '5': 'insights'
-                };
-
-                if (shortcuts[e.key]) {
-                    e.preventDefault();
-                    const link = document.querySelector(`a[href*="${shortcuts[e.key]}"]`);
-                    if (link) {
-                        // Add visual feedback
-                        link.style.transform = 'scale(0.95)';
-                        setTimeout(() => {
-                            link.style.transform = '';
-                            link.click();
-                        }, 100);
-                    }
-                }
-
-                // Alt + N for new entry (alternative shortcut)
-                if (e.altKey && e.key === 'n') {
-                    e.preventDefault();
-                    const newEntryLink = document.querySelector('.fab');
-                    if (newEntryLink) newEntryLink.click();
-                }
-            });
-        }
-
-        // Smooth page transitions
-        function initSmoothTransitions() {
-            const navLinks = document.querySelectorAll('.mobile-nav-item, .fab');
-
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // Only apply transition effect for same-origin links
-                    const href = this.getAttribute('href');
-                    if (href && href.startsWith('/') && !href.includes('#')) {
-                        // Add loading state to current page
-                        document.body.style.opacity = '0.8';
-                        document.body.style.transition = 'opacity 0.2s ease';
-
-                        // Allow normal navigation to proceed
-                        setTimeout(() => {
-                            // Reset if navigation was cancelled
-                            document.body.style.opacity = '1';
-                        }, 1000);
-                    }
-                });
-            });
-        }
-
-        // Mobile stability fixes
-        function initMobileStability() {
-            // Prevent horizontal scrolling
-            function preventHorizontalScrolling() {
-                if (window.scrollX !== 0) {
-                    window.scrollTo(0, window.scrollY);
-                }
-            }
-
-            window.addEventListener('scroll', preventHorizontalScrolling, { passive: true });
-
-            // Prevent horizontal touch movement
-            window.addEventListener('touchmove', function(e) {
-                const touch = e.touches[0];
-                if (touch) {
-                    const deltaX = Math.abs(touch.clientX - (touch.startX || touch.clientX));
-                    const deltaY = Math.abs(touch.clientY - (touch.startY || touch.clientY));
-
-                    if (deltaX > deltaY && deltaX > 10) {
-                        e.preventDefault();
-                    }
-                }
-            }, { passive: false });
-
-            // Handle orientation changes
-            window.addEventListener('orientationchange', function() {
-                setTimeout(() => {
-                    window.scrollTo(0, window.scrollY);
-                }, 100);
-            });
-        }
-
-        // Handle browser back button
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                document.body.style.opacity = '1';
-            }
-        });
-
-        // Handle page visibility changes for better performance
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                // Pause non-critical animations when page is hidden
-                document.querySelectorAll('.fab').forEach(fab => {
-                    fab.style.animationPlayState = 'paused';
-                });
-            } else {
-                // Resume animations when page is visible
-                document.querySelectorAll('.fab').forEach(fab => {
-                    fab.style.animationPlayState = 'running';
-                });
-            }
         });
 
         // Utility functions for external use
         window.DiaryVault = {
             showToast: window.showToast,
-            createRipple: createRipple,
-            version: '2.1-fixed'
+            version: '3.0-fixed'
         };
     </script>
 
