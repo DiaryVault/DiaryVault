@@ -716,6 +716,20 @@
     min-width: 0; /* Allow flex item to shrink below content size */
   }
 
+  /* Leading tight for better line height in author info */
+  .leading-tight {
+    line-height: 1.25;
+  }
+
+  /* Ensure author text is visible */
+  .product-card .text-sm.font-medium {
+    min-height: 1.25rem;
+  }
+
+  .product-card .text-xs {
+    min-height: 1rem;
+  }
+
   /* Better responsive text in cards */
   @media (max-width: 640px) {
     .product-card .text-sm {
@@ -1299,7 +1313,7 @@
               <!-- Product Details -->
               <div class="p-6">
                 <!-- Author Info -->
-                <div class="flex items-center gap-3 mb-3">
+                <div class="flex items-center gap-2 mb-3">
                   <!-- Profile Picture -->
                   <div class="flex-shrink-0">
                     {% if journal.author.userprofile.profile_picture %}
@@ -1313,25 +1327,24 @@
                     {% endif %}
                   </div>
 
-                  <!-- Author Name and Username - Allow to expand -->
-                  <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-800 truncate" title="{{ journal.author.get_full_name|default:journal.author.username }}">
+                  <!-- Author Name and Username - Give more space -->
+                  <div class="flex-1 overflow-hidden">
+                    <p class="text-sm font-medium text-gray-800 truncate leading-tight" title="{{ journal.author.get_full_name|default:journal.author.username }}">
                       {{ journal.author.get_full_name|default:journal.author.username }}
                     </p>
-                    <p class="text-xs text-gray-500 truncate" title="@{{ journal.author.username }}">
+                    <p class="text-xs text-gray-500 truncate leading-tight" title="@{{ journal.author.username }}">
                       @{{ journal.author.username }}
                     </p>
                   </div>
+                </div>
 
-                  <!-- View Count - Compact -->
-                  <div class="flex-shrink-0 flex items-center text-xs text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    <span class="hidden sm:inline">{{ journal.view_count|default:0 }}</span>
-                    <span class="sm:hidden">{{ journal.view_count|default:0|floatformat:0 }}</span>
-                  </div>
+                <!-- View Count - Separate row to give more space to author -->
+                <div class="flex items-center justify-end text-xs text-gray-500 mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span>{{ journal.view_count|default:0 }} views</span>
                 </div>
 
                 <!-- Title -->
