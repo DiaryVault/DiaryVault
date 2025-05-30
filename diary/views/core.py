@@ -704,7 +704,7 @@ def marketplace_stats(request):
             'error': str(e)
         })
 
-class CustomLoginView(LoginView):
+class CustomLoginView(AllauthLoginView):
     """
     Custom login view that uses our custom template
     """
@@ -741,8 +741,11 @@ class CustomLoginView(LoginView):
                 # Add tags
                 tags = pending_entry.get('tags', [])
                 if not tags and pending_entry.get('content'):
-                    from ..utils.analytics import auto_generate_tags
-                    tags = auto_generate_tags(pending_entry.get('content'), pending_entry.get('mood'))
+                    try:
+                        from ..utils.analytics import auto_generate_tags
+                        tags = auto_generate_tags(pending_entry.get('content'), pending_entry.get('mood'))
+                    except:
+                        pass
 
                 if tags:
                     for tag_name in tags:
@@ -765,8 +768,7 @@ class CustomLoginView(LoginView):
 
         return response
 
-
-class CustomSignupView(SignupView):
+class CustomSignupView(AllauthSignupView):
     """
     Custom signup view that uses our custom template
     """
@@ -827,7 +829,6 @@ class CustomSignupView(SignupView):
 
         # Create initial user preferences
         try:
-            from ..models import UserPreference
             UserPreference.objects.create(user=self.user)
         except Exception as e:
             logger.error(f"Error creating preferences: {e}")
