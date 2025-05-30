@@ -18,7 +18,7 @@ from . import views
 
 urlpatterns = [
     # ============================================================================
-    # Authentication - Override allauth URLs (these must come FIRST)
+    # Authentication - These MUST come FIRST to override allauth
     # ============================================================================
     path('signup/', CustomSignupView.as_view(), name='account_signup'),
     path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
