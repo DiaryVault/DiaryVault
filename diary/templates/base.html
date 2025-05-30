@@ -282,6 +282,10 @@
         overflow: hidden;
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .btn-primary::before {
@@ -298,6 +302,8 @@
       .btn-primary:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        color: white;
+        text-decoration: none;
       }
 
       .btn-primary:hover::before {
@@ -315,6 +321,10 @@
         font-weight: 500;
         backdrop-filter: blur(10px);
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .btn-secondary:hover {
@@ -323,6 +333,7 @@
         color: #4338ca;
         transform: translateY(-1px);
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15);
+        text-decoration: none;
       }
 
       .btn-ghost {
@@ -331,12 +342,17 @@
         border: 1px solid transparent;
         font-weight: 500;
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .btn-ghost:hover {
         background: rgba(99, 102, 241, 0.05);
         color: #4f46e5;
         border-color: rgba(99, 102, 241, 0.1);
+        text-decoration: none;
       }
 
       /* Enhanced Navigation */
@@ -350,6 +366,9 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        text-decoration: none;
+        z-index: 10;
+        pointer-events: auto;
       }
 
       .nav-link::after {
@@ -369,6 +388,7 @@
       .nav-link.active {
         color: #4f46e5;
         background: rgba(99, 102, 241, 0.08);
+        text-decoration: none;
       }
 
       .nav-link:hover::after,
@@ -434,6 +454,9 @@
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
           padding: 0.5rem;
           border-radius: 0.625rem;
+          z-index: 20;
+          position: relative;
+          pointer-events: auto;
         }
 
         .menu-toggle-btn:hover {
@@ -556,6 +579,10 @@
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
         border-radius: 16px;
         overflow: hidden;
+        text-decoration: none;
+        display: block;
+        z-index: 10;
+        pointer-events: auto;
       }
 
       .menu-category::before {
@@ -575,11 +602,14 @@
 
       .menu-item {
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+        text-decoration: none;
+        display: block;
       }
 
       .menu-item:hover {
         transform: scale(1.02);
         background: rgba(99, 102, 241, 0.08);
+        text-decoration: none;
       }
 
       .menu-item:active {
@@ -668,6 +698,8 @@
         user-select: none;
         -webkit-tap-highlight-color: transparent;
         text-decoration: none;
+        z-index: 10;
+        pointer-events: auto;
       }
 
       .mobile-nav-item::before {
@@ -763,6 +795,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        z-index: 10;
+        pointer-events: auto;
       }
 
       .fab::before {
@@ -777,6 +811,8 @@
       .fab:hover {
         transform: translateY(-8px) scale(1.02);
         box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4), 0 4px 15px rgba(99, 102, 241, 0.3);
+        color: white;
+        text-decoration: none;
       }
 
       .fab:hover::before {
@@ -860,6 +896,22 @@
         background: linear-gradient(135deg, #4f46e5, #4338ca);
       }
 
+      /* FIXED: Ensure all navigation links are properly clickable */
+      .reliable-nav-link {
+        position: relative;
+        z-index: 15;
+        pointer-events: auto;
+        text-decoration: none;
+        display: block;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .reliable-nav-link:hover,
+      .reliable-nav-link:active,
+      .reliable-nav-link:focus {
+        text-decoration: none;
+      }
+
       /* Accessibility */
       :focus-visible {
         outline: 2px solid #6366f1;
@@ -880,6 +932,12 @@
         .menu-toggle-btn {
           min-height: 44px;
           min-width: 44px;
+        }
+
+        .reliable-nav-link {
+          min-height: 44px;
+          display: flex;
+          align-items: center;
         }
       }
 
@@ -959,7 +1017,7 @@
             <div class="flex items-center justify-between">
                 <!-- Enhanced Logo -->
                 <div class="flex items-center">
-                    <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center gap-2 group">
+                    <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center gap-2 group reliable-nav-link">
                         <div class="relative">
                             <div class="absolute inset-0 bg-primary-500 rounded-xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
                             <div class="relative mobile-logo p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-soft group-hover:shadow-glow transition-all duration-300 group-hover:scale-105">
@@ -975,52 +1033,52 @@
                     </a>
                 </div>
 
-                <!-- Enhanced Desktop Navigation -->
+                <!-- FIXED: Enhanced Desktop Navigation -->
                 {% if user.is_authenticated %}
                 <nav class="hidden lg:flex items-center gap-1">
-                    <a href="{% url 'dashboard' %}" class="nav-link text-sm {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <a href="{% url 'dashboard' %}" class="nav-link reliable-nav-link text-sm {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
                         </svg>
                         Dashboard
                     </a>
-                    <a href="{% url 'library' %}" class="nav-link text-sm {% if request.resolver_match.url_name == 'library' %}active{% endif %}">
+                    <a href="{% url 'library' %}" class="nav-link reliable-nav-link text-sm {% if request.resolver_match.url_name == 'library' %}active{% endif %}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                         Library
                     </a>
-                    <a href="{% url 'new_entry' %}" class="nav-link text-sm {% if request.resolver_match.url_name == 'new_entry' %}active{% endif %}">
+                    <a href="{% url 'new_entry' %}" class="nav-link reliable-nav-link text-sm {% if request.resolver_match.url_name == 'new_entry' %}active{% endif %}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
                         Write
                     </a>
-                    <a href="{% url 'biography' %}" class="nav-link text-sm {% if request.resolver_match.url_name == 'biography' %}active{% endif %}">
+                    <a href="{% url 'biography' %}" class="nav-link reliable-nav-link text-sm {% if request.resolver_match.url_name == 'biography' %}active{% endif %}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                         Biography
                     </a>
-                    <a href="{% url 'insights' %}" class="nav-link text-sm {% if request.resolver_match.url_name == 'insights' %}active{% endif %}">
+                    <a href="{% url 'insights' %}" class="nav-link reliable-nav-link text-sm {% if request.resolver_match.url_name == 'insights' %}active{% endif %}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                         Insights
                     </a>
-                    <a href="{% url 'marketplace' %}" class="nav-link text-sm {% if request.resolver_match.url_name == 'marketplace' %}active{% endif %}">
+                    <a href="{% url 'marketplace' %}" class="nav-link reliable-nav-link text-sm {% if request.resolver_match.url_name == 'marketplace' %}active{% endif %}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
                         Marketplace
                     </a>
-                    <a href="{% url 'publish_journal' %}" class="nav-link text-sm">
+                    <a href="{% url 'publish_journal' %}" class="nav-link reliable-nav-link text-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
                         Publish
                     </a>
-                    <a href="{% url 'earnings_dashboard' %}" class="nav-link text-sm">
+                    <a href="{% url 'earnings_dashboard' %}" class="nav-link reliable-nav-link text-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                         </svg>
@@ -1029,19 +1087,19 @@
                 </nav>
                 {% else %}
                 <nav class="hidden lg:flex items-center gap-1">
-                    <a href="{% url 'account_signup' %}?feature=journal" class="nav-link text-sm">Journal</a>
-                    <a href="{% url 'account_signup' %}?feature=library" class="nav-link text-sm">Library</a>
-                    <a href="{% url 'account_signup' %}?feature=biography" class="nav-link text-sm">Biography</a>
-                    <a href="{% url 'account_signup' %}?feature=insights" class="nav-link text-sm">Insights</a>
-                    <a href="{% url 'account_signup' %}" class="nav-link text-sm {% if request.resolver_match.url_name == 'marketplace' %}active{% endif %}">Marketplace</a>
+                    <a href="{% url 'account_signup' %}?feature=journal" class="nav-link reliable-nav-link text-sm">Journal</a>
+                    <a href="{% url 'account_signup' %}?feature=library" class="nav-link reliable-nav-link text-sm">Library</a>
+                    <a href="{% url 'account_signup' %}?feature=biography" class="nav-link reliable-nav-link text-sm">Biography</a>
+                    <a href="{% url 'account_signup' %}?feature=insights" class="nav-link reliable-nav-link text-sm">Insights</a>
+                    <a href="{% url 'marketplace' %}" class="nav-link reliable-nav-link text-sm {% if request.resolver_match.url_name == 'marketplace' %}active{% endif %}">Marketplace</a>
                 </nav>
                 {% endif %}
 
-                <!-- Enhanced Right Navigation -->
+                <!-- FIXED: Enhanced Right Navigation -->
                 <div class="flex items-center gap-2">
                     {% if user.is_authenticated %}
                     <!-- User Profile -->
-                    <a href="{% url 'account_settings' %}" class="hidden sm:flex items-center gap-2 hover:opacity-90 transition-all duration-300 group p-1 rounded-lg hover:bg-white/50">
+                    <a href="{% url 'account_settings' %}" class="hidden sm:flex items-center gap-2 hover:opacity-90 transition-all duration-300 group p-1 rounded-lg hover:bg-white/50 reliable-nav-link">
                         <div class="relative">
                             <div class="mobile-user-avatar h-8 w-8 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-xs shadow-soft group-hover:shadow-glow group-hover:scale-105 transition-all duration-300">
                                 {{ user.username|first|upper }}
@@ -1058,10 +1116,10 @@
                         </div>
                     </a>
                     {% else %}
-                    <!-- Auth Buttons -->
+                    <!-- FIXED: Auth Buttons -->
                     <div class="hidden md:flex gap-2 items-center">
-                        <a href="{% url 'account_login' %}" class="btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium">Log in</a>
-                        <a href="{% url 'account_signup' %}" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium">Sign up</a>
+                        <a href="{% url 'account_login' %}" class="btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium reliable-nav-link">Log in</a>
+                        <a href="{% url 'account_signup' %}" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium reliable-nav-link">Sign up</a>
                     </div>
                     {% endif %}
 
@@ -1107,7 +1165,7 @@
         {% if user.is_authenticated %}
         <!-- Enhanced User Profile Section -->
         <div class="px-6 pb-4">
-            <a href="{% url 'account_settings' %}" class="block">
+            <a href="{% url 'account_settings' %}" class="block reliable-nav-link">
                 <div class="flex items-center p-4 glass-card rounded-2xl border border-primary-100/50">
                     <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                         {{ user.username|first|upper }}
@@ -1128,7 +1186,7 @@
         <!-- Enhanced Quick Actions -->
         <div class="px-6 pb-6">
             <div class="grid grid-cols-4 gap-3">
-                <a href="{% url 'new_entry' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
+                <a href="{% url 'new_entry' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item reliable-nav-link">
                     <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -1136,7 +1194,7 @@
                     </div>
                     <span class="text-xs font-medium">New Entry</span>
                 </a>
-                <a href="{% url 'publish_journal' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
+                <a href="{% url 'publish_journal' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item reliable-nav-link">
                     <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mb-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -1144,7 +1202,7 @@
                     </div>
                     <span class="text-xs font-medium">Publish</span>
                 </a>
-                <a href="{% url 'earnings_dashboard' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
+                <a href="{% url 'earnings_dashboard' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item reliable-nav-link">
                     <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center mb-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
@@ -1152,7 +1210,7 @@
                     </div>
                     <span class="text-xs font-medium">Earnings</span>
                 </a>
-                <a href="{% url 'insights' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
+                <a href="{% url 'insights' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item reliable-nav-link">
                     <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center mb-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -1168,7 +1226,7 @@
             <h3 class="text-xs uppercase text-gray-500 font-semibold mb-3 px-2">Navigation</h3>
 
             <div class="space-y-2">
-                <a href="{% url 'dashboard' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'dashboard' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                <a href="{% url 'dashboard' %}" class="menu-category reliable-nav-link relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'dashboard' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
                     {% if request.resolver_match.url_name == 'dashboard' %}<div class="active-pill"></div>{% endif %}
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
@@ -1176,7 +1234,7 @@
                     <span class="font-medium">Dashboard</span>
                 </a>
 
-                <a href="{% url 'library' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'library' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                <a href="{% url 'library' %}" class="menu-category reliable-nav-link relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'library' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
                     {% if request.resolver_match.url_name == 'library' %}<div class="active-pill"></div>{% endif %}
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
@@ -1184,7 +1242,7 @@
                     <span class="font-medium">Library</span>
                 </a>
 
-                <a href="{% url 'biography' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'biography' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                <a href="{% url 'biography' %}" class="menu-category reliable-nav-link relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'biography' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
                     {% if request.resolver_match.url_name == 'biography' %}<div class="active-pill"></div>{% endif %}
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1192,7 +1250,7 @@
                     <span class="font-medium">Biography</span>
                 </a>
 
-                <a href="{% url 'insights' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'insights' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                <a href="{% url 'insights' %}" class="menu-category reliable-nav-link relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'insights' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
                     {% if request.resolver_match.url_name == 'insights' %}<div class="active-pill"></div>{% endif %}
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -1200,7 +1258,7 @@
                     <span class="font-medium">Insights</span>
                 </a>
 
-                <a href="{% url 'marketplace' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'marketplace' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                <a href="{% url 'marketplace' %}" class="menu-category reliable-nav-link relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'marketplace' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
                     {% if request.resolver_match.url_name == 'marketplace' %}<div class="active-pill"></div>{% endif %}
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -1212,7 +1270,7 @@
             <h3 class="text-xs uppercase text-gray-500 font-semibold mt-6 mb-3 px-2">Settings</h3>
 
             <div class="space-y-2">
-                <a href="{% url 'account_settings' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'account_settings' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                <a href="{% url 'account_settings' %}" class="menu-category reliable-nav-link relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'account_settings' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
                     {% if request.resolver_match.url_name == 'account_settings' %}<div class="active-pill"></div>{% endif %}
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065z" />
@@ -1221,7 +1279,7 @@
                     <span class="font-medium">Account Settings</span>
                 </a>
 
-                <a href="{% url 'preferences' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'preferences' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                <a href="{% url 'preferences' %}" class="menu-category reliable-nav-link relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'preferences' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
                     {% if request.resolver_match.url_name == 'preferences' %}<div class="active-pill"></div>{% endif %}
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -1244,12 +1302,12 @@
             </div>
         </div>
         {% else %}
-        <!-- Enhanced Menu for non-logged in users -->
+        <!-- FIXED: Enhanced Menu for non-logged in users -->
         <div class="px-6 pb-6">
             <h3 class="text-xs uppercase text-gray-500 font-semibold mb-4 px-2">Discover DiaryVault</h3>
 
             <div class="space-y-3 mb-8">
-                <a href="{% url 'account_signup' %}?feature=journal" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
+                <a href="{% url 'account_signup' %}?feature=journal" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group reliable-nav-link">
                     <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -1262,7 +1320,7 @@
                     <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Try it</span>
                 </a>
 
-                <a href="{% url 'account_signup' %}?feature=library" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
+                <a href="{% url 'account_signup' %}?feature=library" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group reliable-nav-link">
                     <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
@@ -1275,7 +1333,7 @@
                     <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Explore</span>
                 </a>
 
-                <a href="{% url 'account_signup' %}?feature=biography" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
+                <a href="{% url 'account_signup' %}?feature=biography" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group reliable-nav-link">
                     <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1288,7 +1346,7 @@
                     <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Create</span>
                 </a>
 
-                <a href="{% url 'account_signup' %}?feature=insights" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group">
+                <a href="{% url 'account_signup' %}?feature=insights" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group reliable-nav-link">
                     <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -1304,7 +1362,7 @@
 
             <!-- Available features section -->
             <div class="space-y-2 mb-8">
-                <a href="{% url 'marketplace' %}" class="flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'marketplace' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                <a href="{% url 'marketplace' %}" class="flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'marketplace' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent reliable-nav-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -1312,16 +1370,16 @@
                 </a>
             </div>
 
-            <!-- Enhanced Auth section -->
+            <!-- FIXED: Enhanced Auth section -->
             <div class="space-y-4">
-                <a href="{% url 'account_login' %}" class="flex items-center justify-center gap-3 py-4 px-4 glass-card hover:bg-white/80 rounded-2xl transition-all duration-300 font-semibold border border-gray-200/50 hover:shadow-lg">
+                <a href="{% url 'account_login' %}" class="flex items-center justify-center gap-3 py-4 px-4 glass-card hover:bg-white/80 rounded-2xl transition-all duration-300 font-semibold border border-gray-200/50 hover:shadow-lg reliable-nav-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
                     <span>Log in</span>
                 </a>
 
-                <a href="{% url 'account_signup' %}" class="flex items-center justify-center gap-3 py-4 px-4 btn-primary rounded-2xl transition-all duration-300 shadow-lg font-semibold hover:shadow-xl hover:-translate-y-1 active:translate-y-0">
+                <a href="{% url 'account_signup' %}" class="flex items-center justify-center gap-3 py-4 px-4 btn-primary rounded-2xl transition-all duration-300 shadow-lg font-semibold hover:shadow-xl hover:-translate-y-1 active:translate-y-0 reliable-nav-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
@@ -1434,13 +1492,13 @@
                 </div>
 
                 <div class="flex flex-wrap items-center justify-center gap-4 text-xs">
-                    <a href="https://crene.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-all duration-300 px-3 py-1.5 rounded-lg hover:bg-primary-50/50">
+                    <a href="https://crene.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-all duration-300 px-3 py-1.5 rounded-lg hover:bg-primary-50/50 reliable-nav-link">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
                         <span class="font-medium">Crene.com</span>
                     </a>
-                    <a href="https://euphorie.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-all duration-300 px-3 py-1.5 rounded-lg hover:bg-primary-50/50">
+                    <a href="https://euphorie.com" target="_blank" rel="noopener" class="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-all duration-300 px-3 py-1.5 rounded-lg hover:bg-primary-50/50 reliable-nav-link">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
@@ -1456,10 +1514,14 @@
         <!-- Notifications will be inserted here -->
     </div>
 
-    <!-- Enhanced JavaScript - Simplified and Fixed -->
+    <!-- FIXED: Enhanced JavaScript - Completely Rewritten -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Fixed mobile menu functionality
+            console.log('DiaryVault Enhanced Navigation - v4.0 FIXED');
+            console.log('User authenticated:', {{ user.is_authenticated|yesno:"true,false" }});
+            console.log('Current page:', '{{ request.resolver_match.url_name }}');
+
+            // FIXED: Mobile menu functionality with proper event handling
             const menuToggleBtn = document.getElementById('menuToggleBtn');
             const closeMenuBtn = document.getElementById('closeMenuBtn');
             const menuOverlay = document.getElementById('menuOverlay');
@@ -1468,33 +1530,54 @@
             if (menuToggleBtn && closeMenuBtn && menuOverlay && menuSheet) {
                 function toggleMenu() {
                     const isOpen = menuSheet.classList.contains('open');
+                    console.log('Toggling menu, currently open:', isOpen);
 
                     if (!isOpen) {
                         // Show menu
                         menuOverlay.classList.add('active');
                         menuSheet.classList.add('open');
                         document.body.style.overflow = 'hidden';
+                        console.log('Menu opened');
                     } else {
                         // Hide menu
                         menuSheet.classList.remove('open');
                         menuOverlay.classList.remove('active');
                         document.body.style.overflow = '';
+                        console.log('Menu closed');
                     }
                 }
 
-                // Event listeners
-                menuToggleBtn.addEventListener('click', toggleMenu);
-                closeMenuBtn.addEventListener('click', toggleMenu);
-                menuOverlay.addEventListener('click', toggleMenu);
+                // Clean event listeners
+                menuToggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Menu toggle button clicked');
+                    toggleMenu();
+                });
+
+                closeMenuBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Close menu button clicked');
+                    toggleMenu();
+                });
+
+                menuOverlay.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Menu overlay clicked');
+                    toggleMenu();
+                });
 
                 // Keyboard support
                 document.addEventListener('keydown', function(e) {
                     if (e.key === 'Escape' && menuSheet.classList.contains('open')) {
+                        console.log('Escape key pressed, closing menu');
                         toggleMenu();
                     }
                 });
 
-                // Fixed touch support for swipe down to close
+                // FIXED: Touch support for swipe down to close
                 let startY = 0;
                 let currentY = 0;
                 let isDragging = false;
@@ -1524,14 +1607,58 @@
                     menuSheet.style.transform = '';
 
                     if (diff > 100) {
+                        console.log('Swipe down detected, closing menu');
                         toggleMenu();
                     }
                 }, { passive: true });
             }
 
-            // Enhanced mobile navigation feedback
+            // FIXED: Enhanced navigation link handling - prevent interference
+            const allNavLinks = document.querySelectorAll('.reliable-nav-link');
+            console.log('Found reliable nav links:', allNavLinks.length);
+
+            allNavLinks.forEach((link, index) => {
+                console.log(`Setting up nav link ${index}:`, link.href);
+
+                // Remove any existing problematic event listeners
+                link.addEventListener('click', function(e) {
+                    // Don't prevent default - let normal navigation happen
+                    console.log('Navigation link clicked:', this.href);
+
+                    // Add visual feedback
+                    this.style.opacity = '0.7';
+                    setTimeout(() => {
+                        this.style.opacity = '';
+                    }, 150);
+
+                    // Close mobile menu if open and this is a navigation link
+                    if (menuSheet && menuSheet.classList.contains('open')) {
+                        setTimeout(() => {
+                            menuSheet.classList.remove('open');
+                            menuOverlay.classList.remove('active');
+                            document.body.style.overflow = '';
+                            console.log('Menu closed after navigation');
+                        }, 100);
+                    }
+                }, { capture: false, passive: false });
+
+                // Touch support for mobile
+                link.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.97)';
+                }, { passive: true });
+
+                link.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                }, { passive: true });
+            });
+
+            // FIXED: Enhanced mobile navigation feedback
             const navItems = document.querySelectorAll('.mobile-nav-item, .fab');
-            navItems.forEach(item => {
+            console.log('Found mobile nav items:', navItems.length);
+
+            navItems.forEach((item, index) => {
+                console.log(`Setting up mobile nav item ${index}:`, item.href);
+
                 item.addEventListener('touchstart', function() {
                     if (this.classList.contains('fab')) {
                         this.style.transform = 'translateY(-4px) scale(0.95)';
@@ -1552,14 +1679,17 @@
 
                 // Haptic feedback if supported
                 item.addEventListener('click', function() {
+                    console.log('Mobile nav item clicked:', this.href || 'no href');
                     if (navigator.vibrate) {
                         navigator.vibrate(50);
                     }
                 });
             });
 
-            // Enhanced toast notification system
+            // FIXED: Enhanced toast notification system
             window.showToast = function(message, type = 'info', duration = 4000) {
+                console.log('Showing toast:', message, type);
+
                 const toast = document.createElement('div');
                 toast.className = `notification ${type} p-4 max-w-md pointer-events-auto animate-slide-up`;
 
@@ -1587,39 +1717,50 @@
                 `;
 
                 const container = document.getElementById('toastContainer');
-                container.appendChild(toast);
+                if (container) {
+                    container.appendChild(toast);
 
-                // Auto remove
-                setTimeout(() => {
-                    toast.style.opacity = '0';
-                    toast.style.transform = 'translateY(-20px)';
-                    setTimeout(() => toast.remove(), 300);
-                }, duration);
+                    // Auto remove
+                    setTimeout(() => {
+                        toast.style.opacity = '0';
+                        toast.style.transform = 'translateY(-20px)';
+                        setTimeout(() => toast.remove(), 300);
+                    }, duration);
+                } else {
+                    console.error('Toast container not found');
+                }
             };
 
-            // Enhanced keyboard shortcuts
+            // FIXED: Enhanced keyboard shortcuts
             document.addEventListener('keydown', function(e) {
                 // Skip if user is typing
                 if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
-                // Navigation shortcuts
-                const shortcuts = {
-                    'n': "{% url 'new_entry' %}",
-                    'd': "{% url 'dashboard' %}",
-                    'l': "{% url 'library' %}",
-                    'b': "{% url 'biography' %}",
-                    'i': "{% url 'insights' %}"
-                };
+                // Navigation shortcuts for authenticated users
+                if ({{ user.is_authenticated|yesno:"true,false" }}) {
+                    const shortcuts = {
+                        'n': "{% url 'new_entry' %}",
+                        'd': "{% url 'dashboard' %}",
+                        'l': "{% url 'library' %}",
+                        'b': "{% url 'biography' %}",
+                        'i': "{% url 'insights' %}",
+                        'm': "{% url 'marketplace' %}"
+                    };
 
-                if ((e.ctrlKey || e.metaKey) && shortcuts[e.key]) {
-                    e.preventDefault();
-                    window.location.href = shortcuts[e.key];
+                    if ((e.ctrlKey || e.metaKey) && shortcuts[e.key]) {
+                        e.preventDefault();
+                        console.log('Keyboard shortcut:', e.key, '→', shortcuts[e.key]);
+                        window.location.href = shortcuts[e.key];
+                    }
                 }
 
                 // Menu toggle
-                if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                     e.preventDefault();
-                    if (menuToggleBtn) menuToggleBtn.click();
+                    if (menuToggleBtn) {
+                        console.log('Keyboard menu toggle');
+                        menuToggleBtn.click();
+                    }
                 }
             });
 
@@ -1638,15 +1779,67 @@
                 });
             });
 
+            // FIXED: Debug navigation links on page load
+            console.log('=== Navigation Links Debug ===');
+            document.querySelectorAll('a[href*="marketplace"]').forEach((link, i) => {
+                console.log(`Marketplace link ${i}:`, {
+                    href: link.href,
+                    text: link.textContent.trim(),
+                    classes: link.className,
+                    visible: link.offsetParent !== null
+                });
+            });
+
+            document.querySelectorAll('a[href*="login"]').forEach((link, i) => {
+                console.log(`Login link ${i}:`, {
+                    href: link.href,
+                    text: link.textContent.trim(),
+                    classes: link.className,
+                    visible: link.offsetParent !== null
+                });
+            });
+
             // Initialize page
             document.body.style.opacity = '1';
+            console.log('DiaryVault navigation initialized successfully');
         });
 
-        // Utility functions for external use
+        // FIXED: Utility functions for external use
         window.DiaryVault = {
             showToast: window.showToast,
-            version: '3.0-fixed'
+            navigateToMarketplace: function() {
+                console.log('Forcing navigation to marketplace');
+                window.location.href = "{% url 'marketplace' %}";
+                return false;
+            },
+            navigateToLogin: function() {
+                console.log('Forcing navigation to login');
+                window.location.href = "{% url 'account_login' %}";
+                return false;
+            },
+            version: '4.0-complete-fix'
         };
+
+        // FIXED: Global error handler for debugging
+        window.addEventListener('error', function(e) {
+            console.error('JavaScript Error:', e.error);
+            if (e.error && e.error.stack) {
+                console.error('Stack trace:', e.error.stack);
+            }
+        });
+
+        // FIXED: Additional debugging for click events
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('a')) {
+                const link = e.target.closest('a');
+                console.log('Link clicked:', {
+                    href: link.href,
+                    text: link.textContent.trim(),
+                    target: e.target,
+                    prevented: e.defaultPrevented
+                });
+            }
+        });
     </script>
 
     {% block extra_js %}{% endblock %}
