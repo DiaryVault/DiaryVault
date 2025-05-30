@@ -1,11 +1,11 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, TemplateView
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import core
-from .views.core import CustomLoginView
+from .views.core import CustomLoginView, CustomSignupView
 from .views.marketplace import (
     marketplace_view, publish_journal, marketplace_journal_detail,
     like_journal, tip_author, marketplace_author_profile,
@@ -15,15 +15,22 @@ from .views.marketplace import (
 )
 
 from . import views
-from .views import CustomLoginView
 
 urlpatterns = [
+    # ============================================================================
+    # Authentication - Override allauth URLs (these must come FIRST)
+    # ============================================================================
+    path('accounts/login/', CustomLoginView.as_view(), name='account_login'),
+    path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
+    path('login/', CustomLoginView.as_view(), name='login'),
+    path('signup/', CustomSignupView.as_view(), name='signup'),
+
     # ============================================================================
     # Main Pages
     # ============================================================================
     path('', views.home, name='home'),
 
-    # Authentication
+    # Authentication - other auth URLs
     path('logout/', RedirectView.as_view(url='/accounts/logout/', permanent=False), name='logout'),
     path('password-reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
 

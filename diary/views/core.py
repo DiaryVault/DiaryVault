@@ -17,6 +17,8 @@ from django.views.decorators.http import require_http_methods
 from django.db.models import Count, Sum, F, Q
 from django.core.cache import cache
 from django.conf import settings
+from django.urls import reverse_lazy, reverse
+
 
 from ..models import (
     Entry, Tag, SummaryVersion, LifeChapter, Biography,
@@ -24,6 +26,10 @@ from ..models import (
 )
 from ..forms import EntryForm, SignUpForm, LifeChapterForm
 from ..services.ai_service import AIService
+
+from allauth.account.utils import get_next_redirect_url
+from allauth.account.views import LoginView, SignupView
+
 
 logger = logging.getLogger(__name__)
 
@@ -697,3 +703,146 @@ def marketplace_stats(request):
             'success': False,
             'error': str(e)
         })
+
+class CustomLoginView(LoginView):
+    """
+    Custom login view that uses our custom template
+    """
+    template_name = 'account/login.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add any additional context here
+        context['page_title'] = 'Login - DiaryVault'
+        return context
+
+    def get_success_url(self):
+        # Redirect to dashboard after successful login
+        url = get_next_redirect_url(self.request) or reverse('dashboard')
+        return url
+
+    def form_valid(self, form):
+        """Process the valid form and check for pending entries"""
+        # First do the standard login process
+        response = super().form_valid(form)
+
+        # Check for pending entry in session
+        pending_entry = self.request.session.get('pending_entry')
+        if pending_entry:
+            try:
+                # Create entry
+                entry = Entry.objects.create(
+                    user=self.request.user,
+                    title=pending_entry.get('title', 'Untitled Entry'),
+                    content=pending_entry.get('content', ''),
+                    mood=pending_entry.get('mood')
+                )
+
+                # Add tags
+                tags = pending_entry.get('tags', [])
+                if not tags and pending_entry.get('content'):
+                    from ..utils.analytics import auto_generate_tags
+                    tags = auto_generate_tags(pending_entry.get('content'), pending_entry.get('mood'))
+
+                if tags:
+                    for tag_name in tags:
+                        tag, created = Tag.objects.get_or_create(
+                            name=tag_name.lower().strip(),
+                            user=self.request.user
+                        )
+                        entry.tags.add(tag)
+
+                # Clear pending entry
+                del self.request.session['pending_entry']
+
+                # Indicate success
+                self.request.session['entry_saved'] = True
+                self.request.session['saved_entry_id'] = entry.id
+
+                logger.info(f"Successfully created entry after login with ID: {entry.id}")
+            except Exception as e:
+                logger.error(f"Error processing pending entry after login: {str(e)}", exc_info=True)
+
+        return response
+
+
+class CustomSignupView(SignupView):
+    """
+    Custom signup view that uses our custom template
+    """
+    template_name = 'account/signup.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add any additional context here
+        context['page_title'] = 'Sign Up - DiaryVault'
+
+        # Track which feature led the user to signup
+        feature = self.request.GET.get('feature', None)
+        feature_data = {
+            'journal': {
+                'title': 'Journal Your Thoughts',
+                'description': 'Create beautiful journal entries powered by AI. Track your daily experiences, emotions, and reflections.',
+                'icon': 'pencil'
+            },
+            'library': {
+                'title': 'Browse Your Memory Library',
+                'description': 'Organize and explore your journal entries by time period, mood, and themes.',
+                'icon': 'book'
+            },
+            'insights': {
+                'title': 'Discover Personal Insights',
+                'description': 'Get AI-powered analytics about your writing patterns, mood trends, and personal growth.',
+                'icon': 'chart'
+            },
+            'biography': {
+                'title': 'Create Your Life Story',
+                'description': 'DiaryVault transforms your journal entries into beautiful chapter-based biographies.',
+                'icon': 'document'
+            }
+        }
+
+        context['feature'] = feature
+        context['feature_info'] = feature_data.get(feature, None)
+        return context
+
+    def get_success_url(self):
+        # Get the feature parameter to redirect appropriately
+        feature = self.request.GET.get('feature', None)
+
+        if feature == 'journal':
+            return reverse('new_entry')
+        elif feature == 'library':
+            return reverse('library')
+        elif feature == 'insights':
+            return reverse('insights')
+        elif feature == 'biography':
+            return reverse('biography')
+        else:
+            return reverse('dashboard')
+
+    def form_valid(self, form):
+        """Process the valid form and create user preferences"""
+        response = super().form_valid(form)
+
+        # Create initial user preferences
+        try:
+            from ..models import UserPreference
+            UserPreference.objects.create(user=self.user)
+        except Exception as e:
+            logger.error(f"Error creating preferences: {e}")
+
+        # Add success message based on feature
+        feature = self.request.GET.get('feature', None)
+        if feature == 'journal':
+            messages.success(self.request, "Your account has been created! Start your first journal entry.")
+        elif feature == 'library':
+            messages.success(self.request, "Your account has been created! Explore your journal library.")
+        elif feature == 'insights':
+            messages.success(self.request, "Your account has been created! Discover insights about your journaling.")
+        elif feature == 'biography':
+            messages.success(self.request, "Your account has been created! Start building your biography.")
+        else:
+            messages.success(self.request, "Welcome to DiaryVault! Your account has been created successfully.")
+
+        return response
