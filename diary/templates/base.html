@@ -1233,7 +1233,7 @@
     </div>
 
     <!-- FIXED: Enhanced JavaScript - Completely Rewritten -->
-    <script>
+    <scrip>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DiaryVault Enhanced Navigation - v4.0 FIXED');
             console.log('User authenticated:', {{ user.is_authenticated|yesno:"true,false" }});
@@ -1522,96 +1522,6 @@
                 });
             }
         });
-    </script>
-    <script>
-
-// OPTIMIZED TOUCH SCROLL FIX
-document.addEventListener('DOMContentLoaded', function() {
-  // 1. Immediate horizontal scroll prevention
-  function enforceNoHorizontalScroll() {
-    if (window.scrollX !== 0) {
-      window.scrollTo(0, window.scrollY);
-    }
-  }
-
-  // Monitor scroll constantly
-  window.addEventListener('scroll', enforceNoHorizontalScroll, { passive: true });
-
-  // 2. Advanced touch handling for mobile
-  if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-    let startX = 0;
-    let startY = 0;
-    let isScrolling = false;
-
-    document.addEventListener('touchstart', function(e) {
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-      isScrolling = false;
-    }, { passive: true });
-
-    document.addEventListener('touchmove', function(e) {
-      if (isScrolling) return;
-
-      const currentX = e.touches[0].clientX;
-      const currentY = e.touches[0].clientY;
-      const deltaX = Math.abs(currentX - startX);
-      const deltaY = Math.abs(currentY - startY);
-
-      // Determine scroll direction
-      if (deltaX > 5 || deltaY > 5) {
-        isScrolling = true;
-
-        // If more horizontal than vertical movement, prevent it
-        if (deltaX > deltaY) {
-          // Allow horizontal scroll only in specific containers
-          const allowedContainers = e.target.closest('.mobile-menu, textarea, input, [data-horizontal-scroll]');
-          if (!allowedContainers) {
-            e.preventDefault();
-            return false;
-          }
-        }
-      }
-    }, { passive: false });
-
-    // 3. Enhanced overscroll prevention
-    document.addEventListener('touchstart', function(e) {
-      // Prevent overscroll on body but allow on scrollable elements
-      if (e.target === document.body || e.target === document.documentElement) {
-        if (e.touches.length > 1) {
-          e.preventDefault(); // Prevent pinch zoom on body
-        }
-      }
-    }, { passive: false });
-  }
-
-  // 4. Window resize handler
-  window.addEventListener('resize', function() {
-    // Ensure no horizontal scroll after resize
-    setTimeout(enforceNoHorizontalScroll, 100);
-  });
-
-  // 5. Fix any existing wide elements
-  function fixWideElements() {
-    const wideElements = Array.from(document.querySelectorAll('*')).filter(el => {
-      return el.getBoundingClientRect().width > window.innerWidth;
-    });
-
-    wideElements.forEach(el => {
-      el.style.maxWidth = '100%';
-      el.style.overflowX = 'hidden';
-      console.warn('Fixed wide element:', el.tagName, el.className);
-    });
-  }
-
-  // Run checks
-  setTimeout(fixWideElements, 500);
-  setTimeout(enforceNoHorizontalScroll, 100);
-});
-
-
-
-
-
     </script>
     {% block extra_js %}{% endblock %}
 </body>
