@@ -15,6 +15,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover"/>
     <title>{% block title %}DiaryVault - Your Personal Digital Journal{% endblock %}</title>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover, shrink-to-fit=no">
+
     <meta name="stripe-publishable-key" content="{{ STRIPE_PUBLISHABLE_KEY|default:'pk_test_your_key_here' }}">
     <meta name="csrf-token" content="{{ csrf_token }}">
     <meta name="theme-color" content="#6366f1" />
@@ -1554,6 +1556,56 @@
             }
         });
     </script>
+
+
+    <!-- JavaScript to prevent programmatic horizontal scrolling -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Prevent any horizontal scrolling
+      function preventHorizontalScroll() {
+        if (window.scrollX !== 0) {
+          window.scrollTo(0, window.scrollY);
+        }
+      }
+
+      // Monitor for horizontal scroll attempts
+      window.addEventListener('scroll', preventHorizontalScroll, { passive: true });
+
+      // Prevent touch-based horizontal scrolling
+      let startX = 0;
+      let startY = 0;
+
+      document.addEventListener('touchstart', function(e) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }, { passive: true });
+
+      document.addEventListener('touchmove', function(e) {
+        const currentX = e.touches[0].clientX;
+        const currentY = e.touches[0].clientY;
+        const diffX = Math.abs(currentX - startX);
+        const diffY = Math.abs(currentY - startY);
+
+        // If horizontal movement is greater than vertical, prevent it
+        if (diffX > diffY && diffX > 10) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      // Force scroll position to 0,Y on resize
+      window.addEventListener('resize', function() {
+        setTimeout(() => {
+          window.scrollTo(0, window.scrollY);
+        }, 100);
+      });
+
+      // Initial scroll reset
+      window.scrollTo(0, window.scrollY);
+
+      console.log('Horizontal scroll prevention activated');
+    });
+    </script>
+
 
     {% block extra_js %}{% endblock %}
 </body>
