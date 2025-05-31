@@ -232,18 +232,13 @@
         max-width: 100%;
         min-width: 320px;
         background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #f1f5f9 50%, #e0e7ff 75%, #f8fafc 100%);
-        background-size: 400% 400%;
+        background-size: 100% 100%;
         animation: gradientShift 20s ease infinite;
         position: relative;
         overscroll-behavior-x: none;
         -webkit-overflow-scrolling: touch;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-      }
-
-      @keyframes gradientShift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
       }
 
       /* Enhanced Glass Morphism */
@@ -811,104 +806,7 @@
           display: none !important;
         }
       }
-    </style>
 
-    <style>
-    /* CRITICAL: Add these rules to your existing CSS */
-
-    /* 1. Prevent any horizontal overflow at the document level */
-    html, body {
-      overflow-x: hidden !important;
-      max-width: 100vw !important;
-    }
-
-    /* 2. Fix the background gradient that might be causing issues */
-    body {
-      background-size: 200% 200% !important; /* Reduced from 400% 400% */
-    }
-
-    /* 3. Ensure all containers stay within bounds */
-    .container {
-      max-width: 100% !important;
-      width: 100% !important;
-      margin-left: auto !important;
-      margin-right: auto !important;
-      padding-left: 1rem !important;
-      padding-right: 1rem !important;
-    }
-
-    /* 4. Fix header specifically */
-    header {
-      width: 100% !important;
-      max-width: 100vw !important;
-    }
-
-    /* 5. Fix the navigation container */
-    .mobile-header .container {
-      padding-left: 0.75rem !important;
-      padding-right: 0.75rem !important;
-    }
-
-    /* 6. Constrain flex containers that might overflow */
-    .flex {
-      min-width: 0 !important;
-    }
-
-    /* 7. Fix main content area */
-    main {
-      max-width: 100% !important;
-      width: 100% !important;
-    }
-
-    /* 8. Mobile-specific fixes */
-    @media screen and (max-width: 768px) {
-      /* Force narrow containers on mobile */
-      .max-w-7xl {
-        max-width: 100% !important;
-      }
-
-      /* Fix any wide elements in header */
-      .mobile-header .flex {
-        width: 100% !important;
-        flex-wrap: nowrap !important;
-      }
-
-      /* Ensure logo text doesn't overflow */
-      .mobile-logo-text {
-        max-width: 8rem !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-      }
-
-      /* Fix menu toggle button area */
-      .mobile-header .flex.items-center.gap-2:last-child {
-        flex-shrink: 0 !important;
-      }
-
-      /* Fix mobile menu */
-      .mobile-menu {
-        width: 100vw !important;
-        max-width: 100vw !important;
-        left: 0 !important;
-        right: 0 !important;
-      }
-
-      /* Fix menu overlay */
-      .menu-overlay {
-        width: 100vw !important;
-        max-width: 100vw !important;
-        left: 0 !important;
-        right: 0 !important;
-      }
-    }
-
-    /* 9. Fix any transforms that might cause overflow */
-    .group:hover .group-hover\:scale-105 {
-      transform: scale(1.02) !important; /* Reduced scale to prevent overflow */
-    }
-
-    /* 10. Safety net for any remaining issues */
     * {
       box-sizing: border-box !important;
     }
@@ -916,6 +814,7 @@
     *:not(html):not(body) {
       max-width: 100% !important;
     }
+
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -1661,56 +1560,6 @@
             }
         });
     </script>
-
-
-    <!-- JavaScript to prevent programmatic horizontal scrolling -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Prevent any horizontal scrolling
-      function preventHorizontalScroll() {
-        if (window.scrollX !== 0) {
-          window.scrollTo(0, window.scrollY);
-        }
-      }
-
-      // Monitor for horizontal scroll attempts
-      window.addEventListener('scroll', preventHorizontalScroll, { passive: true });
-
-      // Prevent touch-based horizontal scrolling
-      let startX = 0;
-      let startY = 0;
-
-      document.addEventListener('touchstart', function(e) {
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-      }, { passive: true });
-
-      document.addEventListener('touchmove', function(e) {
-        const currentX = e.touches[0].clientX;
-        const currentY = e.touches[0].clientY;
-        const diffX = Math.abs(currentX - startX);
-        const diffY = Math.abs(currentY - startY);
-
-        // If horizontal movement is greater than vertical, prevent it
-        if (diffX > diffY && diffX > 10) {
-          e.preventDefault();
-        }
-      }, { passive: false });
-
-      // Force scroll position to 0,Y on resize
-      window.addEventListener('resize', function() {
-        setTimeout(() => {
-          window.scrollTo(0, window.scrollY);
-        }, 100);
-      });
-
-      // Initial scroll reset
-      window.scrollTo(0, window.scrollY);
-
-      console.log('Horizontal scroll prevention activated');
-    });
-    </script>
-
 
     {% block extra_js %}{% endblock %}
 </body>
