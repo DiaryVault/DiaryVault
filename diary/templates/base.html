@@ -12,9 +12,8 @@
     <link rel="manifest" href="/static/manifest.json">
     <meta name="msapplication-config" content="/static/browserconfig.xml">
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover"/>
     <title>{% block title %}DiaryVault - Your Personal Digital Journal{% endblock %}</title>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 
     <meta name="stripe-publishable-key" content="{{ STRIPE_PUBLISHABLE_KEY|default:'pk_test_your_key_here' }}">
     <meta name="csrf-token" content="{{ csrf_token }}">
@@ -226,17 +225,23 @@
       body {
         font-family: 'Inter', system-ui, sans-serif;
         font-feature-settings: 'liga' 1, 'kern' 1;
+        overflow-x: hidden;
         width: 100%;
         max-width: 100%;
         min-width: 320px;
         background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #f1f5f9 50%, #e0e7ff 75%, #f8fafc 100%);
-        background-size: 100% 100%;
+        background-size: 400% 400%;
         animation: gradientShift 20s ease infinite;
         position: relative;
         overscroll-behavior-x: none;
         -webkit-overflow-scrolling: touch;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+      }
+
+      @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
       }
 
       /* Enhanced Glass Morphism */
@@ -755,6 +760,33 @@
         }
       }
 
+      /* Dark Mode Support */
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #1e293b 75%, #0f172a 100%);
+        }
+
+        .glass-card {
+          background: rgba(30, 41, 59, 0.8);
+          border-color: rgba(148, 163, 184, 0.2);
+        }
+
+        .glass-nav {
+          background: rgba(15, 23, 42, 0.95);
+          border-bottom-color: rgba(148, 163, 184, 0.2);
+        }
+
+        .mobile-menu {
+          background: rgba(30, 41, 59, 0.95);
+        }
+
+        .text-gradient {
+          background: linear-gradient(135deg, #818cf8, #a5b4fc);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+      }
+
       /* Reduced Motion */
       @media (prefers-reduced-motion: reduce) {
         * {
@@ -777,7 +809,6 @@
           display: none !important;
         }
       }
-
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -1233,7 +1264,7 @@
     </div>
 
     <!-- FIXED: Enhanced JavaScript - Completely Rewritten -->
-    <scrip>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DiaryVault Enhanced Navigation - v4.0 FIXED');
             console.log('User authenticated:', {{ user.is_authenticated|yesno:"true,false" }});
@@ -1523,6 +1554,7 @@
             }
         });
     </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>
