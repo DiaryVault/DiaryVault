@@ -14,7 +14,6 @@
     <meta charset="UTF-8" />
     <title>{% block title %}DiaryVault - Your Personal Digital Journal{% endblock %}</title>
 
-    <!-- TARGETED: Only enhanced viewport for mobile overflow fix -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
     <meta name="stripe-publishable-key" content="{{ STRIPE_PUBLISHABLE_KEY|default:'pk_test_your_key_here' }}">
@@ -216,7 +215,6 @@
         box-sizing: border-box;
       }
 
-      /* TARGETED: Only add overflow prevention to html/body */
       html {
         overflow-x: hidden;
         scroll-behavior: smooth;
@@ -228,24 +226,17 @@
       body {
         font-family: 'Inter', system-ui, sans-serif;
         font-feature-settings: 'liga' 1, 'kern' 1;
-        overflow-x: hidden;
         width: 100%;
         max-width: 100%;
         min-width: 320px;
-        /* KEEP: Original beautiful background gradient */
         background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #f1f5f9 50%, #e0e7ff 75%, #f8fafc 100%);
-        background-size: 400% 400%;
+        background-size: 100% 100%;
         animation: gradientShift 20s ease infinite;
         position: relative;
         overscroll-behavior-x: none;
         -webkit-overflow-scrolling: touch;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-      }
-
-      @keyframes gradientShift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
       }
 
       /* Enhanced Glass Morphism */
@@ -438,11 +429,6 @@
         .mobile-logo-text {
           font-size: 1rem;
           line-height: 1.25rem;
-          /* TARGETED: Only constrain logo text specifically */
-          max-width: 8rem;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
         }
 
         .mobile-brand-badge {
@@ -499,11 +485,6 @@
         /* Smaller gap in right navigation */
         .mobile-header .flex.items-center.gap-2:last-child {
           gap: 0.5rem;
-        }
-
-        /* TARGETED: Only constrain flex containers that are causing overflow */
-        .mobile-header .flex {
-          min-width: 0;
         }
       }
 
@@ -696,6 +677,8 @@
         background-size: 24px 24px;
       }
 
+
+
       /* Enhanced Loading States */
       .loading-shimmer {
         background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
@@ -710,6 +693,10 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
       }
+
+
+
+
 
       /* Enhanced Scrollbar */
       .custom-scrollbar::-webkit-scrollbar {
@@ -765,33 +752,6 @@
           min-height: 44px;
           display: flex;
           align-items: center;
-        }
-      }
-
-      /* Dark Mode Support */
-      @media (prefers-color-scheme: dark) {
-        body {
-          background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #1e293b 75%, #0f172a 100%);
-        }
-
-        .glass-card {
-          background: rgba(30, 41, 59, 0.8);
-          border-color: rgba(148, 163, 184, 0.2);
-        }
-
-        .glass-nav {
-          background: rgba(15, 23, 42, 0.95);
-          border-bottom-color: rgba(148, 163, 184, 0.2);
-        }
-
-        .mobile-menu {
-          background: rgba(30, 41, 59, 0.95);
-        }
-
-        .text-gradient {
-          background: linear-gradient(135deg, #818cf8, #a5b4fc);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
         }
       }
 
@@ -1272,41 +1232,14 @@
         <!-- Notifications will be inserted here -->
     </div>
 
-    <!-- TARGETED: JavaScript with minimal overflow protection -->
+    <!-- FIXED: Enhanced JavaScript - Completely Rewritten -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DiaryVault Enhanced Navigation - TARGETED MOBILE FIX');
+            console.log('DiaryVault Enhanced Navigation - v4.0 FIXED');
+            console.log('User authenticated:', {{ user.is_authenticated|yesno:"true,false" }});
+            console.log('Current page:', '{{ request.resolver_match.url_name }}');
 
-            // TARGETED: Only prevent horizontal scroll, keep all design intact
-            function preventHorizontalScroll() {
-                if (window.scrollX !== 0) {
-                    window.scrollTo(0, window.scrollY);
-                }
-            }
-
-            window.addEventListener('scroll', preventHorizontalScroll, { passive: true });
-
-            // Force initial position
-            window.scrollTo(0, window.scrollY);
-
-            // Prevent horizontal touch scrolling
-            let startX = 0;
-
-            document.addEventListener('touchstart', function(e) {
-                startX = e.touches[0].clientX;
-            }, { passive: true });
-
-            document.addEventListener('touchmove', function(e) {
-                const currentX = e.touches[0].clientX;
-                const diffX = Math.abs(currentX - startX);
-
-                // Only prevent if it's clearly horizontal scrolling
-                if (diffX > 30) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
-
-            // Mobile menu functionality (unchanged)
+            // FIXED: Mobile menu functionality with proper event handling
             const menuToggleBtn = document.getElementById('menuToggleBtn');
             const closeMenuBtn = document.getElementById('closeMenuBtn');
             const menuOverlay = document.getElementById('menuOverlay');
@@ -1315,44 +1248,54 @@
             if (menuToggleBtn && closeMenuBtn && menuOverlay && menuSheet) {
                 function toggleMenu() {
                     const isOpen = menuSheet.classList.contains('open');
+                    console.log('Toggling menu, currently open:', isOpen);
 
                     if (!isOpen) {
+                        // Show menu
                         menuOverlay.classList.add('active');
                         menuSheet.classList.add('open');
                         document.body.style.overflow = 'hidden';
+                        console.log('Menu opened');
                     } else {
+                        // Hide menu
                         menuSheet.classList.remove('open');
                         menuOverlay.classList.remove('active');
                         document.body.style.overflow = '';
+                        console.log('Menu closed');
                     }
                 }
 
+                // Clean event listeners
                 menuToggleBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    console.log('Menu toggle button clicked');
                     toggleMenu();
                 });
 
                 closeMenuBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    console.log('Close menu button clicked');
                     toggleMenu();
                 });
 
                 menuOverlay.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    console.log('Menu overlay clicked');
                     toggleMenu();
                 });
 
                 // Keyboard support
                 document.addEventListener('keydown', function(e) {
                     if (e.key === 'Escape' && menuSheet.classList.contains('open')) {
+                        console.log('Escape key pressed, closing menu');
                         toggleMenu();
                     }
                 });
 
-                // Touch support for swipe down to close
+                // FIXED: Touch support for swipe down to close
                 let startY = 0;
                 let currentY = 0;
                 let isDragging = false;
@@ -1382,30 +1325,42 @@
                     menuSheet.style.transform = '';
 
                     if (diff > 100) {
+                        console.log('Swipe down detected, closing menu');
                         toggleMenu();
                     }
                 }, { passive: true });
             }
 
-            // Navigation link handling (unchanged)
+            // FIXED: Enhanced navigation link handling - prevent interference
             const allNavLinks = document.querySelectorAll('.reliable-nav-link');
+            console.log('Found reliable nav links:', allNavLinks.length);
 
-            allNavLinks.forEach((link) => {
+            allNavLinks.forEach((link, index) => {
+                console.log(`Setting up nav link ${index}:`, link.href);
+
+                // Remove any existing problematic event listeners
                 link.addEventListener('click', function(e) {
+                    // Don't prevent default - let normal navigation happen
+                    console.log('Navigation link clicked:', this.href);
+
+                    // Add visual feedback
                     this.style.opacity = '0.7';
                     setTimeout(() => {
                         this.style.opacity = '';
                     }, 150);
 
+                    // Close mobile menu if open and this is a navigation link
                     if (menuSheet && menuSheet.classList.contains('open')) {
                         setTimeout(() => {
                             menuSheet.classList.remove('open');
                             menuOverlay.classList.remove('active');
                             document.body.style.overflow = '';
+                            console.log('Menu closed after navigation');
                         }, 100);
                     }
                 }, { capture: false, passive: false });
 
+                // Touch support for mobile
                 link.addEventListener('touchstart', function() {
                     this.style.transform = 'scale(0.97)';
                 }, { passive: true });
@@ -1415,8 +1370,10 @@
                 }, { passive: true });
             });
 
-            // Toast notifications (unchanged)
+            // FIXED: Enhanced toast notification system
             window.showToast = function(message, type = 'info', duration = 4000) {
+                console.log('Showing toast:', message, type);
+
                 const toast = document.createElement('div');
                 toast.className = `notification ${type} p-4 max-w-md pointer-events-auto animate-slide-up`;
 
@@ -1447,18 +1404,23 @@
                 if (container) {
                     container.appendChild(toast);
 
+                    // Auto remove
                     setTimeout(() => {
                         toast.style.opacity = '0';
                         toast.style.transform = 'translateY(-20px)';
                         setTimeout(() => toast.remove(), 300);
                     }, duration);
+                } else {
+                    console.error('Toast container not found');
                 }
             };
 
-            // Keyboard shortcuts (unchanged)
+            // FIXED: Enhanced keyboard shortcuts
             document.addEventListener('keydown', function(e) {
+                // Skip if user is typing
                 if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
+                // Navigation shortcuts for authenticated users
                 if ({{ user.is_authenticated|yesno:"true,false" }}) {
                     const shortcuts = {
                         'n': "{% url 'new_entry' %}",
@@ -1471,25 +1433,95 @@
 
                     if ((e.ctrlKey || e.metaKey) && shortcuts[e.key]) {
                         e.preventDefault();
+                        console.log('Keyboard shortcut:', e.key, '→', shortcuts[e.key]);
                         window.location.href = shortcuts[e.key];
                     }
                 }
 
+                // Menu toggle
                 if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                     e.preventDefault();
                     if (menuToggleBtn) {
+                        console.log('Keyboard menu toggle');
                         menuToggleBtn.click();
                     }
                 }
             });
 
-            console.log('DiaryVault navigation initialized - Design preserved, overflow fixed');
+            // Prevent horizontal scrolling
+            window.addEventListener('scroll', function() {
+                if (window.scrollX !== 0) {
+                    window.scrollTo(0, window.scrollY);
+                }
+            }, { passive: true });
+
+            // Handle page visibility for better performance
+            document.addEventListener('visibilitychange', function() {
+                const isHidden = document.hidden;
+                console.log('Page visibility changed:', isHidden ? 'hidden' : 'visible');
+            });
+
+            // FIXED: Debug navigation links on page load
+            console.log('=== Navigation Links Debug ===');
+            document.querySelectorAll('a[href*="marketplace"]').forEach((link, i) => {
+                console.log(`Marketplace link ${i}:`, {
+                    href: link.href,
+                    text: link.textContent.trim(),
+                    classes: link.className,
+                    visible: link.offsetParent !== null
+                });
+            });
+
+            document.querySelectorAll('a[href*="login"]').forEach((link, i) => {
+                console.log(`Login link ${i}:`, {
+                    href: link.href,
+                    text: link.textContent.trim(),
+                    classes: link.className,
+                    visible: link.offsetParent !== null
+                });
+            });
+
+            // Initialize page
+            document.body.style.opacity = '1';
+            console.log('DiaryVault navigation initialized successfully - Mobile bottom nav removed');
         });
 
+        // FIXED: Utility functions for external use
         window.DiaryVault = {
             showToast: window.showToast,
-            version: 'targeted-overflow-fix'
+            navigateToMarketplace: function() {
+                console.log('Forcing navigation to marketplace');
+                window.location.href = "{% url 'marketplace' %}";
+                return false;
+            },
+            navigateToLogin: function() {
+                console.log('Forcing navigation to login');
+                window.location.href = "{% url 'account_login' %}";
+                return false;
+            },
+            version: '4.1-no-mobile-bottom-nav'
         };
+
+        // FIXED: Global error handler for debugging
+        window.addEventListener('error', function(e) {
+            console.error('JavaScript Error:', e.error);
+            if (e.error && e.error.stack) {
+                console.error('Stack trace:', e.error.stack);
+            }
+        });
+
+        // FIXED: Additional debugging for click events
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('a')) {
+                const link = e.target.closest('a');
+                console.log('Link clicked:', {
+                    href: link.href,
+                    text: link.textContent.trim(),
+                    target: e.target,
+                    prevented: e.defaultPrevented
+                });
+            }
+        });
     </script>
 
     {% block extra_js %}{% endblock %}
