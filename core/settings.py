@@ -160,6 +160,33 @@ ACCOUNT_SESSION_REMEMBER = True  # Remember login sessions
 SOCIALACCOUNT_LOGIN_ON_GET = False
 SOCIALACCOUNT_AUTO_SIGNUP = True
 
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    },
+    'microsoft': {
+        'tenant': 'f3f2b81d-748f-4408-9eb7-6b7afbaa488e',  # Your Microsoft Tenant ID
+        'SCOPE': [
+            'User.Read',
+            'email',
+            'profile',
+        ],
+    },
+    'apple': {
+        # Apple configuration (when you get credentials)
+        'certificate_key': '''-----BEGIN PRIVATE KEY-----
+        # Your Apple certificate key will go here
+        -----END PRIVATE KEY-----''',
+    }
+}
+
 # Additional redirect behavior
 ACCOUNT_ADAPTER = 'allauth.account.adapter.DefaultAccountAdapter'
 
