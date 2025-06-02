@@ -5,37 +5,18 @@
 {% block extra_css %}
 <style>
 
-  /* ===============================================
-     MOBILE BOUNCE FIX - CORE STYLES
-     =============================================== */
-
-  /* Prevent overscroll bounce and viewport issues */
+  /* SCROLL FIX: Remove conflicting scroll behaviors */
   html, body {
-    /* ENHANCED: Prevent mobile bounce */
-    overscroll-behavior: none;
-    overflow-x: hidden !important;
+    /* Remove any overflow settings that conflict with base.html */
+    overflow-x: visible !important;
     scroll-behavior: smooth !important;
-    /* iOS height fix */
-    height: 100%;
-    -webkit-text-size-adjust: 100%;
   }
 
-  body {
-    /* ENHANCED: Mobile bounce prevention */
-    -webkit-overflow-scrolling: touch;
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    overscroll-behavior-y: contain;
-  }
-
-  /* Ensure main container doesn't create extra scroll context */
+  /* SCROLL FIX: Ensure main container doesn't create extra scroll context */
   #main-content {
-    /* ENHANCED: Better mobile handling */
+    /* Remove any height constraints that might cause scroll issues */
     min-height: auto;
     overflow: visible;
-    position: relative;
-    width: 100%;
-    max-width: 100vw;
   }
 
   /* Core branding elements */
@@ -71,25 +52,16 @@
   .animate-fade-in {
     animation: fadeIn 0.6s ease forwards;
     will-change: transform, opacity;
-    /* ENHANCED: Hardware acceleration */
-    backface-visibility: hidden;
-    transform: translateZ(0);
   }
 
   .animate-scale-in {
     animation: scaleIn 0.4s ease forwards;
     will-change: transform, opacity;
-    /* ENHANCED: Hardware acceleration */
-    backface-visibility: hidden;
-    transform: translateZ(0);
   }
 
   .animate-float {
     animation: float 4s ease-in-out infinite;
     will-change: transform;
-    /* ENHANCED: Hardware acceleration */
-    backface-visibility: hidden;
-    transform: translateZ(0);
   }
 
   .animation-delay-300 {
@@ -120,8 +92,6 @@
   .card-hover {
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     transform: translateZ(0); /* Hardware acceleration */
-    /* ENHANCED: Better mobile performance */
-    backface-visibility: hidden;
   }
 
   .card-hover:hover {
@@ -140,9 +110,6 @@
   .animate-blob {
     animation: blob 8s infinite;
     will-change: transform;
-    /* ENHANCED: Hardware acceleration */
-    backface-visibility: hidden;
-    transform: translateZ(0);
   }
 
   .animation-delay-2000 {
@@ -177,7 +144,7 @@
     height: 420px;
     display: flex;
     flex-direction: column;
-    /* ENHANCED: Hardware acceleration and mobile performance */
+    /* SCROLL FIX: Hardware acceleration */
     will-change: transform;
     transform: translateZ(0);
     backface-visibility: hidden;
@@ -404,7 +371,7 @@
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   }
 
-  /* ENHANCED: Improved focus states */
+  /* SCROLL FIX: Improved focus states */
   :focus {
     outline: 2px solid #6366f1 !important;
     outline-offset: 2px;
@@ -419,7 +386,7 @@
     outline-offset: 2px;
   }
 
-  /* ENHANCED: Custom scrollbar - ensure single scrollbar */
+  /* SCROLL FIX: Custom scrollbar - ensure single scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -440,17 +407,13 @@
     background: linear-gradient(135deg, #4f46e5, #4338ca);
   }
 
-  /* ENHANCED: Improved form input styling */
+  /* SCROLL FIX: Improved form input styling */
   #journalContainer {
     transition: all 0.2s ease;
     border-color: rgba(99, 102, 241, 0.3);
-    /* ENHANCED: Remove height constraints and improve mobile handling */
+    /* Remove any height constraints that might cause scroll issues */
     max-height: none;
     overflow: visible;
-    position: relative;
-    box-sizing: border-box;
-    /* ENHANCED: Mobile bounce prevention */
-    overscroll-behavior: contain;
   }
 
   #journalContainer:focus-within {
@@ -459,23 +422,12 @@
     background-color: white;
   }
 
-  /* ENHANCED: Better textarea handling */
+  /* SCROLL FIX: Better textarea handling */
   #journalInput {
-    /* ENHANCED: Prevent textarea from creating its own scroll context */
+    /* Prevent textarea from creating its own scroll context */
     resize: none;
     overflow: hidden;
     max-height: 400px; /* Reasonable max height */
-    /* ENHANCED: Mobile improvements */
-    font-size: 16px !important; /* Prevents zoom on iOS */
-    position: relative;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-    -webkit-user-select: text;
-    box-sizing: border-box;
-    outline: none !important;
-    border: none !important;
-    width: 100%;
-    overflow-y: auto; /* Allow internal scrolling when needed */
   }
 
   /* Better chat bubbles - OPTIMIZED */
@@ -489,8 +441,6 @@
     max-width: 85%;
     margin-bottom: 1rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    /* ENHANCED: Hardware acceleration */
-    backface-visibility: hidden;
   }
 
   .chat-bubble:hover {
@@ -541,41 +491,13 @@
     animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
   }
 
-  /* ===============================================
-     ENHANCED MOBILE OPTIMIZATIONS
-     =============================================== */
-
+  /* SCROLL FIX: Mobile optimizations */
   @media (max-width: 640px) {
-    /* ENHANCED: Comprehensive mobile bounce prevention */
-    html {
-      overscroll-behavior: none;
-      overflow-x: hidden;
-      height: 100%;
-      height: -webkit-fill-available;
-    }
-
-    body {
-      /* ENHANCED: Advanced mobile bounce prevention */
-      overscroll-behavior: none;
-      overflow-x: hidden;
-      touch-action: pan-y;
-      min-height: 100vh;
-      min-height: -webkit-fill-available;
-      overscroll-behavior-y: contain;
-      /* ENHANCED: Prevent pull-to-refresh */
-      position: relative;
-    }
-
-    /* ENHANCED: Prevent input zoom on iOS and improve touch handling */
+    /* Ensure proper input sizing without scroll issues */
     input, textarea, select {
       font-size: 16px !important; /* Prevent zoom on iOS */
       padding-top: 0.75rem;
       padding-bottom: 0.75rem;
-      /* ENHANCED: Mobile improvements */
-      -webkit-user-select: text;
-      transform: translateZ(0);
-      -webkit-appearance: none;
-      border-radius: 0;
     }
 
     .card-hover {
@@ -592,27 +514,20 @@
       margin-bottom: 1.5rem;
     }
 
-    /* ENHANCED: Better mobile textarea handling */
+    /* SCROLL FIX: Better mobile textarea handling */
     #journalContainer {
       min-height: 120px;
       max-height: 300px; /* Prevent taking up entire screen */
-      /* ENHANCED: Mobile bounce prevention */
-      overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch;
     }
 
     #journalInput {
       max-height: 280px; /* Slightly less than container */
-      /* ENHANCED: Better mobile handling */
-      overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch;
     }
 
     .marketplace-card {
       margin-bottom: 1.5rem;
     }
 
-    /* ENHANCED: Better touch targets */
     button,
     .suggestions-pill,
     input[type="checkbox"] + label,
@@ -620,8 +535,6 @@
     .btn-gradient {
       min-height: 44px;
       min-width: 44px;
-      /* ENHANCED: Touch optimization */
-      touch-action: manipulation;
     }
 
     .mobile-friendly-padding {
@@ -646,64 +559,11 @@
       transform: translateX(0);
     }
 
-    /* ENHANCED: Reduce animations on mobile for better performance */
-    .animate-blob,
-    .animate-float {
-      /* Pause resource-intensive animations on mobile */
-      animation-play-state: paused;
-    }
-
-    /* Keep only essential animations with shorter duration */
-    .animate-fade-in,
-    .animate-scale-in {
-      animation-duration: 0.3s;
-    }
-  }
-
-  /* ===============================================
-     ADDITIONAL MOBILE TOUCH AND GESTURE FIXES
-     =============================================== */
-
-  /* ENHANCED: Touch device specific improvements */
-  @media (hover: none) and (pointer: coarse) {
-    /* Touch device specific fixes */
-    * {
+    /* SCROLL FIX: Ensure mobile doesn't have scroll conflicts */
+    body {
+      /* Remove any mobile-specific scroll constraints */
+      overflow-x: visible !important;
       -webkit-overflow-scrolling: touch;
-    }
-
-    /* Prevent bounce on touch devices */
-    body {
-      touch-action: pan-y;
-      overscroll-behavior: none;
-    }
-
-    /* Better touch handling for interactive elements */
-    button, .btn, .suggestions-pill, .card-hover {
-      touch-action: manipulation;
-    }
-  }
-
-  /* ENHANCED: iOS Safari specific fixes */
-  @supports (-webkit-appearance: none) {
-    /* iOS specific improvements */
-    body {
-      /* Additional iOS bounce prevention */
-      position: relative;
-      overflow-x: hidden;
-    }
-  }
-
-  /* ENHANCED: Prevent zoom on double tap */
-  @media (max-width: 768px) {
-    * {
-      touch-action: manipulation;
-    }
-
-    /* Specific elements that should allow text selection */
-    input, textarea, [contenteditable] {
-      touch-action: manipulation;
-      -webkit-user-select: text;
-      user-select: text;
     }
   }
 
@@ -720,12 +580,20 @@
     80%, 100% { content: ''; }
   }
 
-  /* ENHANCED: Input container improvements */
+  /* SCROLL FIX: Input container improvements */
   #journalContainer {
     box-sizing: border-box;
     overflow: visible; /* Changed from hidden */
     position: relative;
     transition: all 0.2s ease-in-out;
+  }
+
+  #journalInput {
+    box-sizing: border-box;
+    outline: none !important;
+    border: none !important;
+    width: 100%;
+    overflow-y: auto; /* Allow internal scrolling when needed */
   }
 
   /* Custom class for focused state */
@@ -767,8 +635,6 @@
     gap: 0.5rem;
     max-width: 18rem;
     will-change: transform, opacity;
-    /* ENHANCED: Hardware acceleration */
-    backface-visibility: hidden;
   }
 
   .feedback-toast.show {
@@ -796,7 +662,7 @@
     color: white;
   }
 
-  /* ENHANCED: Enhanced responsive grid for 18 journals */
+  /* SCROLL FIX: Enhanced responsive grid for 18 journals */
   @media (min-width: 1536px) {
     .journal-grid-18 {
       grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -827,7 +693,7 @@
     }
   }
 
-  /* ENHANCED: Hover effects for clickable cards - OPTIMIZED */
+  /* SCROLL FIX: Hover effects for clickable cards - OPTIMIZED */
   .real-marketplace-card {
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -845,7 +711,7 @@
     flex-direction: column;
   }
 
-  /* ENHANCED: Better animation staggering for 18 cards */
+  /* PERFORMANCE: Better animation staggering for 18 cards */
   .real-marketplace-card:nth-child(1) { animation-delay: 0ms; }
   .real-marketplace-card:nth-child(2) { animation-delay: 50ms; }
   .real-marketplace-card:nth-child(3) { animation-delay: 100ms; }
@@ -865,7 +731,7 @@
   .real-marketplace-card:nth-child(17) { animation-delay: 800ms; }
   .real-marketplace-card:nth-child(18) { animation-delay: 850ms; }
 
-  /* ENHANCED: Performance optimizations for scrolling */
+  /* SCROLL FIX: Performance optimizations for scrolling */
   .animate-fade-in,
   .animate-scale-in,
   .animate-float,
@@ -875,78 +741,11 @@
     perspective: 1000px;
   }
 
-  /* ENHANCED: Reduce motion blur during scroll */
+  /* SCROLL FIX: Reduce motion blur during scroll */
   .is-scrolling .real-marketplace-card,
   .is-scrolling .animate-blob,
   .is-scrolling .animate-float {
     animation-play-state: paused;
-  }
-
-  /* ===============================================
-     MODAL AND OVERLAY MOBILE FIXES
-     =============================================== */
-
-  /* ENHANCED: Better modal handling on mobile */
-  .fixed.inset-0 {
-    /* Prevent modal bounce */
-    overscroll-behavior: none;
-    touch-action: none;
-    /* ENHANCED: Improve mobile modal positioning */
-    position: fixed !important;
-  }
-
-  /* ENHANCED: Better backdrop handling */
-  .backdrop-blur-sm {
-    /* Optimize backdrop blur for mobile performance */
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-  }
-
-  /* ===============================================
-     ACCESSIBILITY AND REDUCED MOTION
-     =============================================== */
-
-  @media (prefers-reduced-motion: reduce) {
-    /* Disable problematic animations for accessibility */
-    .animate-blob,
-    .animate-float,
-    * {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
-
-    /* Keep scroll behavior smooth but not animated */
-    html {
-      scroll-behavior: auto;
-    }
-  }
-
-  /* ===============================================
-     ADDITIONAL BROWSER COMPATIBILITY
-     =============================================== */
-
-  /* ENHANCED: Support for older mobile browsers */
-  @supports not (overscroll-behavior: none) {
-    /* Fallback for browsers without overscroll-behavior support */
-    body {
-      overflow-x: hidden;
-      position: relative;
-    }
-  }
-
-  /* ENHANCED: WebKit specific fixes */
-  @supports (-webkit-touch-callout: none) {
-    /* iOS Safari specific */
-    body {
-      min-height: -webkit-fill-available;
-      -webkit-text-size-adjust: 100%;
-    }
-
-    #journalInput {
-      -webkit-appearance: none;
-      -webkit-user-select: text;
-    }
   }
 
 </style>
