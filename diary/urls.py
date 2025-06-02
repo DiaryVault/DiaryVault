@@ -20,10 +20,14 @@ urlpatterns = [
     # ============================================================================
     # Authentication - These MUST come FIRST to override allauth
     # ============================================================================
-    # FIXED: Only use CustomSignupView, remove function-based signup
-    path('signup/', CustomSignupView.as_view(), name='account_signup'),
-    path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
+
+    # Login URLs - both paths point to CustomLoginView
     path('login/', CustomLoginView.as_view(), name='login'),
+    path('accounts/login/', CustomLoginView.as_view(), name='account_login'),
+
+    # Signup URLs - both paths point to CustomSignupView
+    path('signup/', CustomSignupView.as_view(), name='signup'),
+    path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
 
     # ============================================================================
     # Main Pages
@@ -33,10 +37,6 @@ urlpatterns = [
     # Authentication - other auth URLs
     path('logout/', auth_views.LogoutView.as_view(next_page='/login/'), name='logout'),
     path('password-reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
-
-    # User Settings & Preferences
-    path('preferences/', views.preferences, name='preferences'),
-    path('account/settings/', views.account_settings, name='account_settings'),
 
     # ============================================================================
     # Dashboard & Main App
