@@ -522,8 +522,24 @@
         </div>
         {% endif %}
 
-        <!-- Social Authentication -->
+        <!-- DEBUG: Social Authentication -->
         {% get_providers as socialaccount_providers %}
+
+        <!-- DEBUG INFO (remove in production) -->
+        {% if debug %}
+        <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+          <strong>Debug Info:</strong><br>
+          Available providers: {{ socialaccount_providers|length }}<br>
+          {% for provider in socialaccount_providers %}
+            - {{ provider.name }} ({{ provider.id }})<br>
+          {% empty %}
+            No providers found!<br>
+          {% endfor %}
+          Context available: {{ socialaccount|yesno:"Yes,No" }}<br>
+          Sites framework: {{ site.domain|default:"Not configured" }}
+        </div>
+        {% endif %}
+
         {% if socialaccount_providers %}
         <div class="space-y-3 mb-6 animate-fade-in-up delay-100">
           {% for provider in socialaccount_providers %}
