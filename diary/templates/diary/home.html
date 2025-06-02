@@ -1592,6 +1592,388 @@
 
 <!-- SCROLL FIX: Enhanced JavaScript with scroll optimizations -->
 <script>
+
+/* =================================================================
+   MOBILE BOUNCE FIX - JAVASCRIPT ADDITIONS
+   ================================================================= */
+
+// 1. ENHANCED MOBILE DETECTION AND SETUP
+function setupMobileBouncePreventions() {
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    // Add mobile class for CSS targeting
+    document.body.classList.add('is-mobile');
+
+    if (isIOS) {
+      document.body.classList.add('is-ios');
+      setupIOSSpecificFixes();
+    }
+
+    if (isSafari) {
+      document.body.classList.add('is-safari');
+    }
+
+    // Apply mobile-specific preventions
+    preventTouchBounce();
+    fixViewportHeight();
+    optimizeScrollPerformance();
+    preventZoomOnInputFocus();
+  }
+}
+
+// 2. PREVENT TOUCH BOUNCE
+function preventTouchBounce() {
+  let startY = 0;
+  let allowUp = true;
+  let allowDown = true;
+  let lastY = 0;
+
+  // Prevent overscroll bounce
+  document.addEventListener('touchstart', function(e) {
+    startY = e.touches[0].clientY;
+    lastY = startY;
+  }, { passive: false });
+
+  document.addEventListener('touchmove', function(e) {
+    const currentY = e.touches[0].clientY;
+    const direction = currentY > lastY ? 'down' : 'up';
+    lastY = currentY;
+
+    // Get the scrollable element
+    const target = e.target.closest('#journalInput, .scroll-container, #main-content') || document.documentElement;
+    const scrollTop = target.scrollTop || document.documentElement.scrollTop || document.body.scrollTop;
+    const scrollHeight = target.scrollHeight || document.documentElement.scrollHeight || document.body.scrollHeight;
+    const clientHeight = target.clientHeight || document.documentElement.clientHeight || window.innerHeight;
+
+    // Check if we're at the boundaries
+    const atTop = scrollTop <= 0;
+    const atBottom = scrollTop + clientHeight >= scrollHeight;
+
+    // Prevent bounce at boundaries
+    if ((atTop && direction === 'down') || (atBottom && direction === 'up')) {
+      // Only prevent if we're not inside a scrollable container
+      if (!e.target.closest('#journalInput, .scroll-container')) {
+        e.preventDefault();
+      }
+    }
+  }, { passive: false });
+
+  // Additional prevention for pull-to-refresh
+  document.addEventListener('touchmove', function(e) {
+    if (e.touches.length > 1) return; // Allow pinch zoom
+
+    const touch = e.touches[0];
+    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+
+    // Prevent pull-to-refresh when at top of page
+    if (scrollTop === 0 && touch.clientY > startY) {
+      // Allow scrolling within specific containers
+      const allowedContainers = e.target.closest('#journalInput, .scroll-container, .modal');
+      if (!allowedContainers) {
+        e.preventDefault();
+      }
+    }
+  }, { passive: false });
+}
+
+// 3. iOS SPECIFIC FIXES
+function setupIOSSpecificFixes() {
+  // Fix viewport height on iOS
+  function setViewportHeight() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  }
+
+  // Set initial viewport height
+  setViewportHeight();
+
+  // Update on resize and orientation change
+  window.addEventListener('resize', debounce(setViewportHeight, 100));
+  window.addEventListener('orientationchange', function() {
+    setTimeout(setViewportHeight, 500); // Delay for iOS
+  });
+
+  // Prevent zoom on double tap
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', function(e) {
+    const now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 300) {
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
+
+  // Fix iOS scroll momentum
+  document.addEventListener('touchmove', function(e) {
+    if (e.scale !== 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+}
+
+// 4. PREVENT ZOOM ON INPUT FOCUS
+function preventZoomOnInputFocus() {
+  const inputs = document.querySelectorAll('input, textarea, select');
+
+  inputs.forEach(input => {
+    // Ensure font-size is at least 16px to prevent zoom
+    if (window.getComputedStyle(input).fontSize.replace('px', '') < 16) {
+      input.style.fontSize = '16px';
+    }
+
+    // Handle focus events
+    input.addEventListener('focus', function() {
+      // Temporarily disable zoom
+      const viewport = document.querySelector('meta[name="viewport"]');
+      if (viewport) {
+        const originalContent = viewport.getAttribute('content');
+        viewport.setAttribute('content', originalContent + ', user-scalable=no');
+
+        // Re-enable zoom after focus
+        setTimeout(() => {
+          viewport.setAttribute('content', originalContent);
+        }, 500);
+      }
+    });
+  });
+}
+
+// 5. FIX VIEWPORT HEIGHT ISSUES
+function fixViewportHeight() {
+  // Fix for mobile browsers that change viewport height when URL bar shows/hides
+  function updateViewportHeight() {
+    // Get actual viewport height
+    const actualHeight = window.innerHeight;
+    const documentHeight = document.documentElement.clientHeight;
+
+    // Set CSS custom property for consistent height
+    document.documentElement.style.setProperty('--actual-vh', `${actualHeight * 0.01}px`);
+    document.documentElement.style.setProperty('--doc-height', `${documentHeight}px`);
+
+    // Update body height
+    document.body.style.minHeight = `${actualHeight}px`;
+  }
+
+  // Initial set
+  updateViewportHeight();
+
+  // Update on resize with debouncing
+  const debouncedUpdate = debounce(updateViewportHeight, 100);
+  window.addEventListener('resize', debouncedUpdate);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(updateViewportHeight, 500);
+  });
+
+  // Update on scroll (for URL bar hide/show)
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        updateViewportHeight();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+}
+
+// 6. OPTIMIZE SCROLL PERFORMANCE
+function optimizeScrollPerformance() {
+  let isScrolling = false;
+  let scrollTimeout;
+
+  // Throttled scroll handler
+  const handleScroll = throttle(() => {
+    if (!isScrolling) {
+      isScrolling = true;
+      document.body.classList.add('is-scrolling');
+
+      // Pause expensive animations during scroll
+      document.querySelectorAll('.animate-blob, .animate-float').forEach(el => {
+        el.style.animationPlayState = 'paused';
+      });
+    }
+
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      isScrolling = false;
+      document.body.classList.remove('is-scrolling');
+
+      // Resume animations
+      document.querySelectorAll('.animate-blob, .animate-float').forEach(el => {
+        el.style.animationPlayState = 'running';
+      });
+    }, 150);
+  }, 16); // ~60fps
+
+  window.addEventListener('scroll', handleScroll, { passive: true });
+}
+
+// 7. IMPROVED TEXTAREA HANDLING
+function setupEnhancedTextareaHandling() {
+  const journalInput = document.getElementById('journalInput');
+  if (!journalInput) return;
+
+  // Prevent bounce within textarea
+  journalInput.addEventListener('touchmove', function(e) {
+    const target = e.currentTarget;
+    const startTop = target.scrollTop;
+    const startLeft = target.scrollLeft;
+
+    // Allow scrolling within textarea
+    e.stopPropagation();
+  }, { passive: true });
+
+  // Auto-resize with performance optimization
+  const autoResize = throttle(function() {
+    const maxHeight = window.innerHeight * 0.4;
+    this.style.height = 'auto';
+    const newHeight = Math.min(this.scrollHeight, maxHeight);
+    this.style.height = newHeight + 'px';
+  }, 100);
+
+  journalInput.addEventListener('input', autoResize);
+
+  // Initial resize
+  setTimeout(() => autoResize.call(journalInput), 100);
+}
+
+// 8. MODAL AND OVERLAY FIXES
+function setupModalBouncePreventions() {
+  // Prevent body scroll when modal is open
+  let scrollPosition = 0;
+
+  window.openModal = function() {
+    scrollPosition = window.pageYOffset;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollPosition}px`;
+    document.body.style.width = '100%';
+  };
+
+  window.closeModal = function() {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, scrollPosition);
+  };
+
+  // Auto-apply to modals
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+      mutation.addedNodes.forEach(node => {
+        if (node.nodeType === 1 && node.classList && node.classList.contains('fixed')) {
+          if (node.classList.contains('inset-0')) {
+            openModal();
+
+            // Set up close handler
+            const closeHandler = () => {
+              closeModal();
+              node.removeEventListener('remove', closeHandler);
+            };
+
+            node.addEventListener('remove', closeHandler);
+
+            // Also handle manual removal
+            setTimeout(() => {
+              if (!document.contains(node)) {
+                closeModal();
+              }
+            }, 100);
+          }
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true });
+}
+
+// 9. UTILITY FUNCTIONS
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+function throttle(func, limit) {
+  let inThrottle;
+  return function() {
+    const args = arguments;
+    const context = this;
+    if (!inThrottle) {
+      func.apply(context, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  };
+}
+
+// 10. INITIALIZE EVERYTHING
+document.addEventListener('DOMContentLoaded', function() {
+  setupMobileBouncePreventions();
+  setupEnhancedTextareaHandling();
+  setupModalBouncePreventions();
+
+  // Additional safety check after page load
+  window.addEventListener('load', function() {
+    setTimeout(() => {
+      setupMobileBouncePreventions();
+    }, 100);
+  });
+});
+
+// 11. ENHANCED CSS UPDATES FOR MOBILE
+function addMobileBounceCSS() {
+  const style = document.createElement('style');
+  style.textContent = `
+    /* Additional mobile-specific styles */
+    .is-mobile {
+      overscroll-behavior: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .is-ios {
+      /* iOS specific height fix */
+      min-height: calc(var(--actual-vh, 1vh) * 100);
+    }
+
+    .is-scrolling * {
+      /* Disable pointer events during scroll for better performance */
+      pointer-events: none;
+    }
+
+    .is-scrolling .animate-blob,
+    .is-scrolling .animate-float {
+      animation-play-state: paused !important;
+    }
+
+    /* Prevent zoom on inputs */
+    @media (max-width: 768px) {
+      input, textarea, select {
+        font-size: 16px !important;
+        transform: translateZ(0);
+        -webkit-appearance: none;
+        border-radius: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// Initialize CSS
+addMobileBounceCSS();
+
+
+
 // Enhanced JavaScript with scroll performance fixes
 let cart = JSON.parse(localStorage.getItem('diaryvault_cart') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('diaryvault_wishlist') || '[]');
