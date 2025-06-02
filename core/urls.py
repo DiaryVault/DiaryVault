@@ -9,14 +9,14 @@ from diary.views import CustomLoginView
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # IMPORTANT: Override allauth login BEFORE including allauth.urls
+    # CRITICAL: Override allauth URLs BEFORE including allauth.urls
     path('accounts/login/', CustomLoginView.as_view(), name='account_login'),
+
+    # Include allauth URLs (but login is already overridden above)
+    path('accounts/', include('allauth.urls')),
 
     # Include your app URLs
     path('', include('diary.urls')),
-
-    # Include allauth URLs (login will be overridden by the above)
-    path('accounts/', include('allauth.urls')),
 ]
 
 # Serve media files in development

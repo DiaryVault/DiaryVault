@@ -24,11 +24,6 @@ urlpatterns = [
     path('signup/', CustomSignupView.as_view(), name='account_signup'),
     path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
 
-    # Login views
-    path('login/', CustomLoginView.as_view(), name='account_login'),
-    path('login/', CustomLoginView.as_view(), name='login'),  # For mobile menu compatibility
-    path('accounts/login/', CustomLoginView.as_view(), name='account_login'),
-
     # ============================================================================
     # Main Pages
     # ============================================================================
