@@ -21,14 +21,11 @@ urlpatterns = [
     # Authentication - These MUST come FIRST to override allauth
     # ============================================================================
 
-    # Login URLs - both paths point to CustomLoginView
-    path('login/', CustomLoginView.as_view(), name='login'),
-    path('accounts/login/', CustomLoginView.as_view(), name='account_login'),
-
     # Signup URLs - both paths point to CustomSignupView
     path('signup/', CustomSignupView.as_view(), name='signup'),
     path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
 
+    # Login URLs - both paths point to CustomLoginView
     path('login/', CustomLoginView.as_view(), name='account_login'),
     path('login/', CustomLoginView.as_view(), name='login'),  # For mobile menu compatibility
     path('accounts/login/', CustomLoginView.as_view(), name='account_login'),
