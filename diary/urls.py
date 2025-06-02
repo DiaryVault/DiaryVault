@@ -23,6 +23,7 @@ urlpatterns = [
     # FIXED: Only use CustomSignupView, remove function-based signup
     path('signup/', CustomSignupView.as_view(), name='account_signup'),
     path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
+    path('login/', CustomLoginView.as_view(), name='login'),
 
     # ============================================================================
     # Main Pages
