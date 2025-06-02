@@ -666,6 +666,7 @@ class CustomLoginView(LoginView):
     template_name = 'diary/account/login.html'
 
     def get_context_data(self, **kwargs):
+        print("=== CUSTOM LOGIN VIEW CALLED ===")
         # Get the default context from allauth's LoginView
         context = super().get_context_data(**kwargs)
 
