@@ -448,51 +448,6 @@ def custom_login(request):
     # Use Django's built-in login view
     return auth_views.LoginView.as_view(template_name='diary/login.html')(request)
 
-class CustomLoginView(LoginView):
-    def form_valid(self, form):
-        """Process the valid form and check for pending entries"""
-        # First do the standard login process
-        response = super().form_valid(form)
-
-        # Check for pending entry in session
-        pending_entry = self.request.session.get('pending_entry')
-        if pending_entry:
-            try:
-                # Create entry
-                entry = Entry.objects.create(
-                    user=self.request.user,
-                    title=pending_entry.get('title', 'Untitled Entry'),
-                    content=pending_entry.get('content', ''),
-                    mood=pending_entry.get('mood')
-                )
-
-                # Add tags
-                tags = pending_entry.get('tags', [])
-                if not tags and pending_entry.get('content'):
-                    from ..utils.analytics import auto_generate_tags
-                    tags = auto_generate_tags(pending_entry.get('content'), pending_entry.get('mood'))
-
-                if tags:
-                    for tag_name in tags:
-                        tag, created = Tag.objects.get_or_create(
-                            name=tag_name.lower().strip(),
-                            user=self.request.user
-                        )
-                        entry.tags.add(tag)
-
-                # Clear pending entry
-                del self.request.session['pending_entry']
-
-                # Indicate success
-                self.request.session['entry_saved'] = True
-                self.request.session['saved_entry_id'] = entry.id
-
-                logger.info(f"Successfully created entry after login with ID: {entry.id}")
-            except Exception as e:
-                logger.error(f"Error processing pending entry after login: {str(e)}", exc_info=True)
-
-        return response
-
 # ============================================================================
 # API Views for JavaScript integration
 # ============================================================================
@@ -704,17 +659,32 @@ def marketplace_stats(request):
             'error': str(e)
         })
 
-class CustomLoginView(AllauthLoginView):
+class CustomLoginView(LoginView):
     """
-    Custom login view that uses our custom template
+    Custom login view that handles pending entries and social authentication
     """
-    # UPDATED: Use the full path from the templates directory
     template_name = 'diary/account/login.html'
 
     def get_context_data(self, **kwargs):
+        # Get the default context from allauth's LoginView
         context = super().get_context_data(**kwargs)
-        # Add any additional context here
+
+        # CRUCIAL: Ensure request is available for socialaccount template tags
+        context['request'] = self.request
+
+        # Add any additional context
         context['page_title'] = 'Login - DiaryVault'
+
+        # Debug: Check if providers are working (remove this after testing)
+        from allauth.socialaccount.templatetags.socialaccount import get_providers
+        from django.template import Context
+        try:
+            template_context = Context({'request': self.request})
+            providers = get_providers(template_context)
+            print(f"DEBUG: Found {len(providers)} providers in view: {[p.id for p in providers]}")
+        except Exception as e:
+            print(f"DEBUG: Error getting providers in view: {e}")
+
         return context
 
     def get_success_url(self):
@@ -731,8 +701,6 @@ class CustomLoginView(AllauthLoginView):
         pending_entry = self.request.session.get('pending_entry')
         if pending_entry:
             try:
-                from ..models import Entry, Tag
-
                 # Create entry
                 entry = Entry.objects.create(
                     user=self.request.user,
@@ -744,11 +712,8 @@ class CustomLoginView(AllauthLoginView):
                 # Add tags
                 tags = pending_entry.get('tags', [])
                 if not tags and pending_entry.get('content'):
-                    try:
-                        from ..utils.analytics import auto_generate_tags
-                        tags = auto_generate_tags(pending_entry.get('content'), pending_entry.get('mood'))
-                    except:
-                        pass
+                    from ..utils.analytics import auto_generate_tags
+                    tags = auto_generate_tags(pending_entry.get('content'), pending_entry.get('mood'))
 
                 if tags:
                     for tag_name in tags:
