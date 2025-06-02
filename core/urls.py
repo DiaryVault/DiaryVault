@@ -3,11 +3,19 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+# Import your custom view
+from diary.views import CustomLoginView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # Include your app URLs first - this will override allauth URLs
+
+    # IMPORTANT: Override allauth login BEFORE including allauth.urls
+    path('accounts/login/', CustomLoginView.as_view(), name='account_login'),
+
+    # Include your app URLs
     path('', include('diary.urls')),
-    # Include allauth URLs - this should come AFTER your app URLs
+
+    # Include allauth URLs (login will be overridden by the above)
     path('accounts/', include('allauth.urls')),
 ]
 
