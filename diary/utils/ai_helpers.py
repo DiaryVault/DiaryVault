@@ -62,7 +62,7 @@ def call_grok_api(journal_content, timeout=10):
         """
 
         payload = {
-            'model': 'llama3-70b-8192',
+            'model': 'llama-3.3-70b-versatile',
             'messages': [
                 {'role': 'system', 'content': 'You are a helpful journal assistant that transforms brief notes into thoughtful diary entries.'},
                 {'role': 'user', 'content': prompt}
@@ -133,7 +133,7 @@ def generate_title(journal_entry, timeout=5):
         """
 
         payload = {
-            'model': 'llama3-70b-8192',  # Use the same model as the main function
+            'model': 'llama-3.3-70b-versatile',
             'messages': [
                 {'role': 'system', 'content': 'You are a helpful writing assistant.'},
                 {'role': 'user', 'content': prompt}
@@ -352,7 +352,7 @@ def call_grok_api_personalized(journal_content, user_preferences):
         """
 
         payload = {
-            'model': 'llama3-70b-8192',
+            'model': 'llama-3.3-70b-versatile',
             'messages': [
                 {'role': 'system', 'content': 'You are a helpful journal assistant that transforms brief notes into thoughtful diary entries.'},
                 {'role': 'user', 'content': prompt}
