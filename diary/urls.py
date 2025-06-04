@@ -133,7 +133,7 @@ urlpatterns = [
     path('api/purchase/<int:journal_id>/', purchase_journal_api, name='purchase_journal_api'),
     path('api/tip/<int:journal_id>/', tip_author_api, name='tip_author_api'),
 
-    path('accounts/settings/', views.account_settings_redirect, name='account_settings'),
+    path('accounts/settings/', views.account_settings, name='account_settings'),
 
     # ============================================================================
     # Static File Handling

@@ -818,7 +818,3 @@ class CustomSignupView(AllauthSignupView):
 
         return response
 
-
-def account_settings_redirect(request):
-    """Redirect to dashboard since we don't have account settings yet"""
-    return redirect('dashboard')
