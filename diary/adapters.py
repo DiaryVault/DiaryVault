@@ -35,16 +35,12 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         social provider, but before the login is actually processed.
         """
         # If user exists with this email, connect the accounts
-        if sociallogin.account.provider == 'google':
+        email = sociallogin.account.extra_data.get('email')
+        if email:
             try:
-                email = sociallogin.account.extra_data.get('email')
-                if email:
-                    try:
-                        user = User.objects.get(email=email)
-                        sociallogin.connect(request, user)
-                    except User.DoesNotExist:
-                        pass
-            except:
+                user = User.objects.get(email=email)
+                sociallogin.connect(request, user)
+            except User.DoesNotExist:
                 pass
 
     def save_user(self, request, sociallogin, form=None):
@@ -67,9 +63,20 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             user.email = sociallogin.account.extra_data.get('email')
 
         # Set first/last name from social account
+        if sociallogin.account.provider == 'microsoft':
+            # Microsoft specific data extraction
+            if not user.first_name and sociallogin.account.extra_data.get('given_name'):
+                user.first_name = sociallogin.account.extra_data.get('given_name')
+            if not user.last_name and sociallogin.account.extra_data.get('family_name'):
+                user.last_name = sociallogin.account.extra_data.get('family_name')
+            if not user.first_name and sociallogin.account.extra_data.get('givenName'):
+                user.first_name = sociallogin.account.extra_data.get('givenName')
+            if not user.last_name and sociallogin.account.extra_data.get('surname'):
+                user.last_name = sociallogin.account.extra_data.get('surname')
+
+        # Google and other providers
         if not user.first_name and sociallogin.account.extra_data.get('given_name'):
             user.first_name = sociallogin.account.extra_data.get('given_name')
-
         if not user.last_name and sociallogin.account.extra_data.get('family_name'):
             user.last_name = sociallogin.account.extra_data.get('family_name')
 
@@ -108,5 +115,21 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         Checks whether or not the site allows for signup via the
         passed SocialLogin instance.
         """
-        # Always allow auto signup for social logins
+        # ALWAYS allow auto signup for social logins
         return True
+
+    def new_user(self, request, sociallogin):
+        """
+        Instantiates a new User instance.
+        """
+        user = super().new_user(request, sociallogin)
+
+        # Ensure we have a username
+        if not user.username:
+            email = sociallogin.account.extra_data.get('email', '')
+            if email:
+                user.username = self.generate_unique_username([email])
+            else:
+                user.username = f"user_{uuid.uuid4().hex[:8]}"
+
+        return user
