@@ -134,6 +134,8 @@ urlpatterns = [
     path('api/tip/<int:journal_id>/', tip_author_api, name='tip_author_api'),
 
     path('accounts/settings/', views.account_settings, name='account_settings'),
+    path('preferences/', views.preferences, name='preferences'),
+
 
     # ============================================================================
     # Static File Handling
