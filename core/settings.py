@@ -203,14 +203,12 @@ SOCIALACCOUNT_PROVIDERS = {
         'VERIFIED_EMAIL': True,
     },
     'microsoft': {
-        'tenant': 'common',  # Use specific tenant if available
+        'tenant': 'common',  # MUST be 'common' for personal Microsoft accounts
         'SCOPE': [
             'openid',
-            'email',        # Moved email before profile
-            'profile',      # Profile last
+            'profile',
+            'email',
         ],
-        # ADDED: These help with seamless signup
-        'VERIFIED_EMAIL': True,
         # Specify exact app configuration to avoid conflicts - USING ENV VARS
         'APP': {
             'client_id': os.getenv('MICROSOFT_CLIENT_ID'),
