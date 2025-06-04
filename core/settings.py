@@ -143,27 +143,26 @@ SOCIALACCOUNT_ADAPTER = 'diary.adapters.CustomSocialAccountAdapter'
 
 SOCIALACCOUNT_FORMS = {}
 
-# Enhanced social account settings
+# FIXED: Enhanced social account settings for seamless login
 SOCIALACCOUNT_AUTO_SIGNUP = True  # Skip signup form entirely
 SOCIALACCOUNT_SIGNUP_FORM_CLASS = None  # No signup form
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Don't require email verification
 SOCIALACCOUNT_EMAIL_REQUIRED = False  # Don't require email in signup form
 SOCIALACCOUNT_QUERY_EMAIL = True  # Always fetch email from provider
-
-# Social account settings (if using social login)
-SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_LOGIN_ON_GET = True  # Social account settings (if using social login)
+SOCIALACCOUNT_STORE_TOKENS = False
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Add these django-allauth specific settings
+# FIXED: Django-allauth specific settings for seamless login
 ACCOUNT_LOGIN_REDIRECT_URL = '/dashboard/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/login/'
 ACCOUNT_SIGNUP_REDIRECT_URL = '/dashboard/'
 
-# Enhanced allauth configuration
-ACCOUNT_EMAIL_REQUIRED = True
+# FIXED: Enhanced allauth configuration - KEY CHANGES HERE
+ACCOUNT_EMAIL_REQUIRED = False  # CHANGED: This was True, now False to prevent signup form
 ACCOUNT_USERNAME_REQUIRED = False  # Don't require username in forms (we auto-generate)
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_EMAIL_VERIFICATION = 'none'  # No email verification required
@@ -172,8 +171,7 @@ ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 ACCOUNT_LOGOUT_ON_GET = False  # Require POST for logout (security)
 ACCOUNT_SESSION_REMEMBER = True  # Remember login sessions
 
-SOCIALACCOUNT_STORE_TOKENS = False
-
+# FIXED: Enhanced SOCIALACCOUNT_PROVIDERS with better configuration
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
@@ -184,6 +182,8 @@ SOCIALACCOUNT_PROVIDERS = {
             'access_type': 'online',
         },
         'OAUTH_PKCE_ENABLED': True,
+        # ADDED: These help with seamless signup
+        'VERIFIED_EMAIL': True,
     },
     'microsoft': {
         'tenant': 'f3f2b81d-748f-4408-9eb7-6b7afbaa488e',  # Your Microsoft Tenant ID
@@ -192,12 +192,16 @@ SOCIALACCOUNT_PROVIDERS = {
             'email',
             'profile',
         ],
+        # ADDED: These help with seamless signup
+        'VERIFIED_EMAIL': True,
     },
     'apple': {
         # Apple configuration (when you get credentials)
         'certificate_key': '''-----BEGIN PRIVATE KEY-----
         # Your Apple certificate key will go here
         -----END PRIVATE KEY-----''',
+        # ADDED: These help with seamless signup
+        'VERIFIED_EMAIL': True,
     }
 }
 
