@@ -143,6 +143,7 @@ SOCIALACCOUNT_ADAPTER = 'diary.adapters.CustomSocialAccountAdapter'
 
 # Enhanced social account settings
 SOCIALACCOUNT_AUTO_SIGNUP = True  # Skip signup form entirely
+SOCIALACCOUNT_SIGNUP_FORM_CLASS = None  # No signup form
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Don't require email verification
 SOCIALACCOUNT_EMAIL_REQUIRED = False  # Don't require email in signup form
 SOCIALACCOUNT_QUERY_EMAIL = True  # Always fetch email from provider
