@@ -202,21 +202,16 @@ SOCIALACCOUNT_PROVIDERS = {
         # ADDED: These help with seamless signup
         'VERIFIED_EMAIL': True,
     },
-    'microsoft': {
-        'tenant': 'common',  # Changed to common for broader compatibility
-        'SCOPE': [
-            'openid',      # REQUIRED: Must be first
-            'profile',
-            'email',
-        ],
-        # ADDED: These help with seamless signup
-        'VERIFIED_EMAIL': True,
-        # Add app configuration if needed
-        'APP': {
-            'client_id': os.getenv('MICROSOFT_CLIENT_ID'),
-            'secret': os.getenv('MICROSOFT_CLIENT_SECRET'),
-        }
-    },
+'microsoft': {
+    'tenant': 'common',
+    'SCOPE': ['openid', 'profile', 'email'],
+    'VERIFIED_EMAIL': True,
+    'APP': {
+        'client_id': '34199ebb-42ba-40df-a256-752f9e227c48',
+        'secret': 'ebf078a4-2493-4c7d-972d-0f722d14037a',  # Add your real secret here
+        'key': ''
+    }
+},
     'apple': {
         # Apple configuration (when you get credentials)
         'certificate_key': '''-----BEGIN PRIVATE KEY-----
