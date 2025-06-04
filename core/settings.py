@@ -141,6 +141,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 ACCOUNT_ADAPTER = 'diary.adapters.CustomAccountAdapter'
 SOCIALACCOUNT_ADAPTER = 'diary.adapters.CustomSocialAccountAdapter'
 
+SOCIALACCOUNT_FORMS = {}
+
 # Enhanced social account settings
 SOCIALACCOUNT_AUTO_SIGNUP = True  # Skip signup form entirely
 SOCIALACCOUNT_SIGNUP_FORM_CLASS = None  # No signup form
