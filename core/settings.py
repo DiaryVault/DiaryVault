@@ -161,6 +161,14 @@ ACCOUNT_LOGIN_REDIRECT_URL = '/dashboard/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/login/'
 ACCOUNT_SIGNUP_REDIRECT_URL = '/dashboard/'
 
+# ADDED: Force redirect to dashboard for social logins
+LOGIN_REDIRECT_URL = '/dashboard/'
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# ADDED: Additional redirect settings to prevent /accounts/profile/ redirect
+LOGIN_URL = '/login/'
+LOGOUT_URL = '/logout/'
+
 # FIXED: Enhanced allauth configuration - KEY CHANGES HERE
 ACCOUNT_EMAIL_REQUIRED = False  # CHANGED: This was True, now False to prevent signup form
 ACCOUNT_USERNAME_REQUIRED = False  # Don't require username in forms (we auto-generate)
