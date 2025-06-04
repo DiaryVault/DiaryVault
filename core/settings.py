@@ -172,6 +172,8 @@ ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 ACCOUNT_LOGOUT_ON_GET = False  # Require POST for logout (security)
 ACCOUNT_SESSION_REMEMBER = True  # Remember login sessions
 
+SOCIALACCOUNT_STORE_TOKENS = False
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
