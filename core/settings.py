@@ -137,6 +137,19 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Custom adapters for auto-username generation
+ACCOUNT_ADAPTER = 'diary.adapters.CustomAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'diary.adapters.CustomSocialAccountAdapter'
+
+# Enhanced social account settings
+SOCIALACCOUNT_AUTO_SIGNUP = True  # Skip signup form entirely
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Don't require email verification
+SOCIALACCOUNT_EMAIL_REQUIRED = False  # Don't require email in signup form
+SOCIALACCOUNT_QUERY_EMAIL = True  # Always fetch email from provider
+
+# Social account settings (if using social login)
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -148,17 +161,13 @@ ACCOUNT_SIGNUP_REDIRECT_URL = '/dashboard/'
 
 # Enhanced allauth configuration
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False  # Don't require username in forms (we auto-generate)
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
-ACCOUNT_EMAIL_VERIFICATION = 'optional'  # or 'mandatory' if you want email verification
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # No email verification required
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 ACCOUNT_LOGOUT_ON_GET = False  # Require POST for logout (security)
 ACCOUNT_SESSION_REMEMBER = True  # Remember login sessions
-
-# Social account settings (if using social login)
-SOCIALACCOUNT_LOGIN_ON_GET = True
-SOCIALACCOUNT_AUTO_SIGNUP = True
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
@@ -186,9 +195,6 @@ SOCIALACCOUNT_PROVIDERS = {
         -----END PRIVATE KEY-----''',
     }
 }
-
-# Additional redirect behavior
-ACCOUNT_ADAPTER = 'allauth.account.adapter.DefaultAccountAdapter'
 
 CACHES = {
     'default': {
