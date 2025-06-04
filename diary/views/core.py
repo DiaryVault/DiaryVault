@@ -817,3 +817,8 @@ class CustomSignupView(AllauthSignupView):
             messages.success(self.request, "Welcome to DiaryVault! Your account has been created successfully.")
 
         return response
+
+
+def account_settings_redirect(request):
+    """Redirect to dashboard since we don't have account settings yet"""
+    return redirect('dashboard')
