@@ -292,3 +292,31 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=1, minute=0, day_of_week=1),  # Weekly Monday
     },
 }
+
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/home/ubuntu/DiaryVault/django_debug.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'allauth': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
