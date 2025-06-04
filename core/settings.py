@@ -138,8 +138,8 @@ STATICFILES_DIRS = [
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Custom adapters for auto-username generation
-ACCOUNT_ADAPTER = 'diary.adapters.CustomAccountAdapter'
-SOCIALACCOUNT_ADAPTER = 'diary.adapters.CustomSocialAccountAdapter'
+# ACCOUNT_ADAPTER = 'diary.adapters.CustomAccountAdapter'
+# SOCIALACCOUNT_ADAPTER = 'diary.adapters.CustomSocialAccountAdapter'
 
 SOCIALACCOUNT_FORMS = {}
 
