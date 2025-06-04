@@ -203,11 +203,11 @@ SOCIALACCOUNT_PROVIDERS = {
         'VERIFIED_EMAIL': True,
     },
     'microsoft': {
-        'tenant': 'common',  # Changed to common for broader compatibility
+        'tenant': os.getenv('MICROSOFT_TENANT_ID', 'common'),  # Use specific tenant if available
         'SCOPE': [
-            'openid',      # REQUIRED: Must be first
-            'profile',
-            'email',
+            'openid',
+            'email',        # Moved email before profile
+            'profile',      # Profile last
         ],
         # ADDED: These help with seamless signup
         'VERIFIED_EMAIL': True,
