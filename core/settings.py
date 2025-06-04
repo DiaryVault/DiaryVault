@@ -194,13 +194,13 @@ SOCIALACCOUNT_PROVIDERS = {
         'VERIFIED_EMAIL': True,
     },
     'microsoft': {
-        'tenant': 'f3f2b81d-748f-4408-9eb7-6b7afbaa488e',  # Your Microsoft Tenant ID
+        'tenant': 'common',  # Allows any Microsoft account
         'SCOPE': [
-            'User.Read',
-            'email',
+            'openid',
             'profile',
+            'email',
+            'User.Read',
         ],
-        # ADDED: These help with seamless signup
         'VERIFIED_EMAIL': True,
     },
     'apple': {
