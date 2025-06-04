@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'diaryvault.com', 'www.diaryvault.com', '52.64.254.25']
 
@@ -152,6 +152,10 @@ SOCIALACCOUNT_QUERY_EMAIL = True  # Always fetch email from provider
 SOCIALACCOUNT_LOGIN_ON_GET = True  # Social account settings (if using social login)
 SOCIALACCOUNT_STORE_TOKENS = False
 
+# ADDED: Force auto-signup even more aggressively
+ACCOUNT_ADAPTER = 'diary.adapters.CustomAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'diary.adapters.CustomSocialAccountAdapter'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -179,6 +183,11 @@ ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 ACCOUNT_LOGOUT_ON_GET = False  # Require POST for logout (security)
 ACCOUNT_SESSION_REMEMBER = True  # Remember login sessions
 
+# ADDED: More aggressive settings to prevent signup forms
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
+ACCOUNT_UNIQUE_EMAIL = False  # Allow duplicate emails if needed
+ACCOUNT_PREVENT_ENUMERATION = False  # Don't block based on existing emails
+
 # FIXED: Enhanced SOCIALACCOUNT_PROVIDERS with better configuration
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
@@ -194,14 +203,19 @@ SOCIALACCOUNT_PROVIDERS = {
         'VERIFIED_EMAIL': True,
     },
     'microsoft': {
-        'tenant': 'common',  # Allows any Microsoft account
+        'tenant': 'common',  # Changed to common for broader compatibility
         'SCOPE': [
-            'openid',
+            'openid',      # REQUIRED: Must be first
             'profile',
             'email',
-            'User.Read',
         ],
+        # ADDED: These help with seamless signup
         'VERIFIED_EMAIL': True,
+        # Add app configuration if needed
+        'APP': {
+            'client_id': os.getenv('MICROSOFT_CLIENT_ID'),
+            'secret': os.getenv('MICROSOFT_CLIENT_SECRET'),
+        }
     },
     'apple': {
         # Apple configuration (when you get credentials)
