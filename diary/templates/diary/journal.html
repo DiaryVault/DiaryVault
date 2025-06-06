@@ -2101,11 +2101,10 @@ function generateTrulyDiverseEntry() {
   // Prepare form data with much better prompting
   const formData = new FormData();
 
-  // Send the enhanced prompt instead of raw content
-  formData.append('journal_content', enhancedPromptData.enhancedPrompt);
-
-  // Send conversation context
-  formData.append('conversation_context', JSON.stringify(chatHistory));
+  // NEW: Send as chat message instead of journal_content
+  formData.append('message', enhancedPromptData.enhancedPrompt);
+  formData.append('conversation_history', JSON.stringify(chatHistory));
+  formData.append('chat_mode', currentJournalTemplate || 'free-form');
 
   // Send detailed style instructions for your LLM
   formData.append('writing_style_analysis', JSON.stringify(userVoiceAnalysis));
@@ -2128,11 +2127,11 @@ function generateTrulyDiverseEntry() {
   formData.append('personalize', 'true');
 
   if (quickPhotoFile) {
-    formData.append('journal_photo', quickPhotoFile);
+    formData.append('photo', quickPhotoFile);
   }
 
-  // Make enhanced API call to your existing endpoint
-  fetch('/api/demo-journal/', {
+  // NEW: Use the chat endpoint instead of demo-journal
+  fetch('/api/chat/', {
     method: 'POST',
     headers: {
       'X-CSRFToken': csrfToken
@@ -2159,15 +2158,31 @@ function generateTrulyDiverseEntry() {
       return;
     }
 
+    // Handle both chat response and journal entry response
+    let finalContent, journalData;
+
+    if (data.type === 'journal_entry' && data.journal_entry) {
+      // Response from chat endpoint with journal entry
+      journalData = data.journal_entry;
+      finalContent = journalData.entry;
+    } else if (data.entry) {
+      // Direct journal entry response
+      journalData = data;
+      finalContent = data.entry;
+    } else {
+      // Fallback
+      journalData = { entry: data.ai_message || 'Journal entry created', title: 'My Journal Entry' };
+      finalContent = journalData.entry;
+    }
+
     // Check if the content is still formulaic and enhance it as fallback
-    let finalContent = data.entry;
     if (isContentFormulaic(finalContent)) {
       finalContent = enhanceJournalContent(finalContent, userVoiceAnalysis);
       showFeedback('⚡ Enhanced the content to sound more like you!', 'info', 3000);
     }
 
     // Update the data with enhanced content
-    data.entry = finalContent;
+    journalData.entry = finalContent;
 
     // Add final AI response
     const finalResponse = "I've crafted an entry that captures your authentic voice and the essence of our conversation. It should feel like something you'd actually write!";
@@ -2175,7 +2190,7 @@ function generateTrulyDiverseEntry() {
     chatHistory.push({ role: 'assistant', content: finalResponse });
 
     // Populate form and switch
-    populateFormWithAIContent(data);
+    populateFormWithAIContent(journalData);
     switchToManualForm();
 
     showFeedback('✨ Created an entry in your authentic voice!', 'success');
