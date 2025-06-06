@@ -53,8 +53,7 @@ urlpatterns = [
     path('entry/<int:entry_id>/', views.entry_detail, name='entry_detail'),
     path('entry/<int:entry_id>/edit/', views.edit_entry, name='edit_entry'),
     path('entry/<int:entry_id>/delete/', views.delete_entry, name='delete_entry'),
-
-    path('api/chat/', views.chat_with_ai, name='chat_with_ai'),
+    
 
     # ============================================================================
     # Library & Time Periods
