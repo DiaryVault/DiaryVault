@@ -1705,6 +1705,57 @@ function generateGatheringResponse(userMessage) {
   }
 }
 
+// Get deep dive question based on user input
+function getDeepDiveQuestion(userMessage) {
+  const template = journalTemplates[currentJournalTemplate];
+
+  // Use template-specific follow-ups if available
+  if (template && template.followUps) {
+    const randomFollowUp = template.followUps[Math.floor(Math.random() * template.followUps.length)];
+    return randomFollowUp;
+  }
+
+  // Fallback deep dive questions
+  const deepQuestions = [
+    "Can you tell me more about how that made you feel?",
+    "What do you think that experience taught you?",
+    "How does this connect to what's important to you?",
+    "What would you want to remember most about this?",
+    "How has this shaped your perspective?",
+    "What emotions came up for you during this?",
+    "How did this experience change you?",
+    "What meaning do you find in this experience?",
+    "What are you taking away from this?",
+    "How do you feel about this now, looking back?"
+  ];
+
+  // Try to pick a contextually relevant question based on the user's message
+  const lowerMessage = userMessage.toLowerCase();
+
+  if (lowerMessage.includes('feel') || lowerMessage.includes('emotion')) {
+    return "That sounds like it brought up some strong emotions. What was going through your mind when you felt that way?";
+  }
+
+  if (lowerMessage.includes('learn') || lowerMessage.includes('discover')) {
+    return "That's a valuable insight! How do you think this learning will influence you going forward?";
+  }
+
+  if (lowerMessage.includes('difficult') || lowerMessage.includes('hard') || lowerMessage.includes('challenge')) {
+    return "It sounds like that was challenging. What helped you get through it, and what did you discover about yourself?";
+  }
+
+  if (lowerMessage.includes('happy') || lowerMessage.includes('joy') || lowerMessage.includes('excited')) {
+    return "I can sense the positive energy in that experience! What made it so special for you?";
+  }
+
+  if (lowerMessage.includes('people') || lowerMessage.includes('friend') || lowerMessage.includes('family')) {
+    return "Relationships can be so meaningful. How did that interaction impact you, and what did you appreciate about it?";
+  }
+
+  // Default to a random deep question
+  return deepQuestions[Math.floor(Math.random() * deepQuestions.length)];
+}
+
 // Generate deep dive response
 function generateDeepDiveResponse(userMessage) {
   const followUpQuestions = [
