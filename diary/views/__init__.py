@@ -22,7 +22,7 @@ from .biography import (
 
 # API views
 from .api import (
-    demo_journal, regenerate_summary_ajax, save_generated_entry
+    demo_journal, regenerate_summary_ajax, save_generated_entry, chat_with_ai
 )
 
 # User views
