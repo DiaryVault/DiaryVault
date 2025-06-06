@@ -1602,6 +1602,7 @@ function handleKeyboardShortcuts(event) {
 // Quick start templates
 function useQuickStart(template) {
   currentJournalTemplate = template;
+  conversationState = 'gathering';
 
   // Hide conversation starter
   const starter = document.getElementById('conversationStarter');
@@ -1611,17 +1612,24 @@ function useQuickStart(template) {
     setTimeout(() => starter.classList.add('hidden'), 300);
   }
 
-  // Send initial message to LLM to start the conversation
-  sendInitialChatMessage(template);
+  // Start template conversation
+  const templateData = journalTemplates[template];
+  const greeting = getTemplateGreeting(template);
+
+  addMessageToChat(greeting, 'ai');
+  chatHistory.push({ role: 'assistant', content: greeting, template: template });
+
+  // Update AI status
+  updateAIStatus(`Starting ${templateData.name} session...`);
 
   // Focus on input
   const quickNotes = document.getElementById('quickNotes');
   if (quickNotes) {
-    quickNotes.placeholder = "Tell me about your day...";
+    quickNotes.placeholder = getTemplatePlaceholder(template);
     quickNotes.focus();
   }
 
-  showFeedback(`🎯 Started ${getTemplateName(template)} session - I'll ask thoughtful questions!`, 'success', 4000);
+  showFeedback(`🎯 Started ${templateData.name} session - I'll guide you through some thoughtful questions!`, 'success', 4000);
 }
 
 // Get template-specific greeting
@@ -1656,6 +1664,7 @@ function handleSmartSend() {
   }
 
   const userMessage = quickNotes.value.trim();
+  userContext.lastInput = userMessage;
 
   // Add to chat history
   chatHistory.push({ role: 'user', content: userMessage });
@@ -1672,11 +1681,11 @@ function handleSmartSend() {
     sendBtn.disabled = true;
   }
 
-  // Show thinking indicator
+  // Show enhanced thinking indicator
   showAdvancedThinking();
 
-  // Send to LLM for response
-  sendMessageToLLM(userMessage);
+  // Process the message intelligently
+  processIntelligentResponse(userMessage);
 }
 
 // Show advanced thinking with random thoughtful messages
@@ -1723,62 +1732,36 @@ function hideAdvancedThinking() {
 
 // Process intelligent response based on conversation state
 function processIntelligentResponse(userMessage) {
-  // This is now handled by sendMessageToLLM - keep this for compatibility
-  sendMessageToLLM(userMessage);
-}
+  // Determine response based on conversation state and template
+  let aiResponse;
+  let shouldGenerateEntry = false;
 
-// Send message to LLM backend
-function sendMessageToLLM(userMessage, isInitial = false) {
-  updateAIStatus("Having a genuine conversation with you...");
-
-  // Get CSRF token
-  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-  // Prepare form data
-  const formData = new FormData();
-  formData.append('message', userMessage);
-  formData.append('conversation_history', JSON.stringify(chatHistory));
-  formData.append('chat_mode', currentJournalTemplate || 'free-form');
-
-  if (quickPhotoFile) {
-    formData.append('photo', quickPhotoFile);
+  switch (conversationState) {
+    case 'initial':
+    case 'gathering':
+      aiResponse = generateGatheringResponse(userMessage);
+      break;
+    case 'deep-dive':
+      aiResponse = generateDeepDiveResponse(userMessage);
+      shouldGenerateEntry = chatHistory.filter(m => m.role === 'user').length >= 3;
+      break;
+    case 'finalizing':
+      shouldGenerateEntry = true;
+      aiResponse = "Perfect! I have enough beautiful details to create your journal entry. Let me craft something meaningful for you.";
+      break;
   }
 
-  // Make API call to your new LLM chat endpoint
-  fetch('/api/chat/', {
-    method: 'POST',
-    headers: {
-      'X-CSRFToken': csrfToken
-    },
-    body: formData
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Server error: ' + response.status);
-    }
-    return response.json();
-  })
-  .then(data => {
+  // Simulate API delay
+  setTimeout(() => {
     hideAdvancedThinking();
 
-    if (data.error) {
-      showFeedback(data.error, 'error');
-      return;
-    }
-
-    // Add AI response to chat
-    addMessageToChat(data.ai_message, 'ai');
-    chatHistory.push({ role: 'assistant', content: data.ai_message });
-
-    // Check if we should generate journal entry
-    if (data.should_switch_to_form) {
-      // AI decided we have enough content - generate journal entry
-      populateFormWithAIContent(data.journal_entry);
-      switchToManualForm();
-      showFeedback('✨ Created your personalized journal entry!', 'success');
+    if (shouldGenerateEntry) {
+      // Generate the journal entry
+      generateAdvancedJournalEntry();
     } else {
       // Continue conversation
-      updateConversationSuggestions(data.conversation_suggestions);
+      addMessageToChat(aiResponse, 'ai');
+      chatHistory.push({ role: 'assistant', content: aiResponse });
 
       // Re-enable send button
       const sendBtn = document.getElementById('smartSendBtn');
@@ -1794,37 +1777,7 @@ function sendMessageToLLM(userMessage, isInitial = false) {
     }
 
     updateConversationProgress();
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    hideAdvancedThinking();
-    showFeedback(error.message || 'Sorry, something went wrong. Please try again.', 'error');
-
-    // Re-enable send button
-    const sendBtn = document.getElementById('smartSendBtn');
-    if (sendBtn) {
-      sendBtn.disabled = false;
-    }
-    updateAIStatus("Ready to help - let's try again!");
-  });
-}
-
-// Update conversation suggestions based on LLM response
-function updateConversationSuggestions(suggestions) {
-  if (!suggestions || suggestions.length === 0) return;
-
-  const container = document.getElementById('dynamicSuggestions');
-  if (!container) return;
-
-  container.innerHTML = '';
-  suggestions.forEach((suggestion, index) => {
-    const button = document.createElement('button');
-    button.className = 'suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-indigo-200/50 animate-fade-in';
-    button.style.animationDelay = `${index * 100}ms`;
-    button.textContent = suggestion;
-    button.onclick = () => addQuickSuggestion(suggestion);
-    container.appendChild(button);
-  });
+  }, 2000 + Math.random() * 2000); // 2-4 seconds for realistic timing
 }
 
 // Truly human-like conversation patterns and responses
