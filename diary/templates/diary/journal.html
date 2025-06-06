@@ -651,6 +651,40 @@
     animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
   }
 
+  /* Animation for loading dots */
+  .loading-dots:after {
+    content: '.';
+    animation: dots 1.5s steps(5, end) infinite;
+  }
+
+  @keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60% { content: '...'; }
+    80%, 100% { content: ''; }
+  }
+
+  /* Enhanced chat bubbles */
+  .chat-container {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+
+  .chat-container::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .chat-container::-webkit-scrollbar-track {
+    background: rgba(241, 245, 249, 0.5);
+    border-radius: 4px;
+  }
+
+  .chat-container::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.3);
+    border-radius: 4px;
+  }
+
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
@@ -1149,6 +1183,7 @@ document.addEventListener('DOMContentLoaded', function() {
   setupEnhancedUX();
   setupScrollOptimizations();
   initializeChatInterface();
+  enhanceFormSubmission();
 });
 
 function initializeChatInterface() {
@@ -1499,9 +1534,19 @@ function populateFormWithAIContent(data) {
   if (typeof initModernTagsInput === 'function') {
     initModernTagsInput();
   }
+
+  // Show editing tips
+  showEditingTips();
 }
 
-// Switch to manual form
+// Show editing tips after AI generation
+function showEditingTips() {
+  setTimeout(() => {
+    showFeedback('💡 Tip: You can now edit the title, content, mood, and tags before saving!', 'info', 5000);
+  }, 1000);
+}
+
+// Switch to manual form with editing enhancements
 function switchToManualForm() {
   const chatArea = document.getElementById('chatArea');
   const journalForm = document.getElementById('journalForm');
@@ -1519,37 +1564,183 @@ function switchToManualForm() {
     }, 100);
   }
 
-  // Add button to go back to chat
-  addBackToChatButton();
+  // Add editing controls
+  addEditingControls();
+
+  // Focus on content field for immediate editing
+  setTimeout(() => {
+    const contentField = document.getElementById('journalInput');
+    if (contentField) {
+      contentField.focus();
+      // Position cursor at the end
+      contentField.setSelectionRange(contentField.value.length, contentField.value.length);
+    }
+  }, 500);
 }
 
-// Add back to chat button
-function addBackToChatButton() {
+// Add enhanced editing controls
+function addEditingControls() {
   const journalForm = document.getElementById('journalForm');
   if (!journalForm) return;
 
-  // Check if button already exists
-  if (document.getElementById('backToChatBtn')) return;
+  // Check if controls already exist
+  if (document.getElementById('editingControls')) return;
 
-  const backButton = document.createElement('div');
-  backButton.className = 'mb-4 text-center';
-  backButton.innerHTML = `
-    <button type="button" id="backToChatBtn" onclick="switchBackToChat()" class="btn-modern btn-secondary flex items-center gap-2 mx-auto">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-      </svg>
-      <span>Back to AI Assistant</span>
-    </button>
+  const editingControls = document.createElement('div');
+  editingControls.id = 'editingControls';
+  editingControls.className = 'mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200 animate-fade-in';
+  editingControls.innerHTML = `
+    <div class="flex items-start gap-3">
+      <div class="flex-shrink-0">
+        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </div>
+      </div>
+      <div class="flex-1">
+        <h4 class="text-sm font-semibold text-blue-900 mb-1">✨ Your AI-generated journal is ready to edit!</h4>
+        <p class="text-sm text-blue-700 mb-3">Feel free to personalize the content, adjust the mood, add tags, or modify anything to make it truly yours.</p>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="highlightEditableAreas()" class="inline-flex items-center gap-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-full transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Show what you can edit
+          </button>
+          <button type="button" onclick="regenerateWithMoreDetails()" class="inline-flex items-center gap-1 text-xs bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded-full transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Add more details with AI
+          </button>
+          <button type="button" onclick="switchBackToChat()" class="inline-flex items-center gap-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            Back to AI chat
+          </button>
+        </div>
+      </div>
+      <button type="button" onclick="dismissEditingControls()" class="flex-shrink-0 text-blue-400 hover:text-blue-600 transition-colors" title="Dismiss">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
   `;
 
-  journalForm.parentNode.insertBefore(backButton, journalForm);
+  journalForm.parentNode.insertBefore(editingControls, journalForm);
 }
 
-// Switch back to chat
+// Highlight editable areas
+function highlightEditableAreas() {
+  const editableElements = [
+    document.getElementById('id_title'),
+    document.getElementById('journalInput'),
+    document.getElementById('moodSlider'),
+    document.getElementById('id_tags')
+  ];
+
+  editableElements.forEach(element => {
+    if (element) {
+      element.style.transition = 'all 0.3s ease';
+      element.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.3)';
+      element.style.borderColor = '#3B82F6';
+    }
+  });
+
+  // Show tooltip-style messages
+  showFieldTooltips();
+
+  // Remove highlights after 3 seconds
+  setTimeout(() => {
+    editableElements.forEach(element => {
+      if (element) {
+        element.style.boxShadow = '';
+        element.style.borderColor = '';
+      }
+    });
+    hideFieldTooltips();
+  }, 3000);
+
+  showFeedback('✨ Highlighted all editable areas - click on any to start editing!', 'info', 3000);
+}
+
+// Show field tooltips
+function showFieldTooltips() {
+  const tooltips = [
+    { element: document.getElementById('id_title'), message: 'Edit your journal title' },
+    { element: document.getElementById('journalInput'), message: 'Modify your journal content' },
+    { element: document.getElementById('moodSlider'), message: 'Adjust your mood' },
+    { element: document.getElementById('id_tags'), message: 'Add or remove tags' }
+  ];
+
+  tooltips.forEach(({ element, message }) => {
+    if (element) {
+      const tooltip = document.createElement('div');
+      tooltip.className = 'absolute z-50 bg-gray-800 text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap editing-tooltip';
+      tooltip.textContent = message;
+
+      const rect = element.getBoundingClientRect();
+      tooltip.style.top = (rect.top - 30) + 'px';
+      tooltip.style.left = rect.left + 'px';
+
+      document.body.appendChild(tooltip);
+    }
+  });
+}
+
+// Hide field tooltips
+function hideFieldTooltips() {
+  document.querySelectorAll('.editing-tooltip').forEach(tooltip => {
+    tooltip.remove();
+  });
+}
+
+// Regenerate with more details
+function regenerateWithMoreDetails() {
+  // Switch back to chat but keep the current content as context
+  const currentContent = document.getElementById('journalInput').value;
+
+  // Add current content to chat history as context
+  chatHistory.push({
+    role: 'assistant',
+    content: `I can help you add more details to your journal entry. Here's what we have so far: "${currentContent.substring(0, 100)}..." What would you like me to expand on or add?`
+  });
+
+  switchBackToChat();
+
+  // Add message to chat
+  addMessageToChat("I can help you add more details to your journal entry. What would you like me to expand on or add?", 'ai');
+
+  // Pre-populate the input with a helpful prompt
+  const quickNotes = document.getElementById('quickNotes');
+  if (quickNotes) {
+    quickNotes.placeholder = "Tell me what to add or expand on...";
+    quickNotes.focus();
+  }
+
+  showFeedback('💬 Tell the AI what details you\'d like to add to your journal!', 'info', 4000);
+}
+
+// Dismiss editing controls
+function dismissEditingControls() {
+  const editingControls = document.getElementById('editingControls');
+  if (editingControls) {
+    editingControls.style.opacity = '0';
+    editingControls.style.transform = 'translateY(-10px)';
+    setTimeout(() => {
+      editingControls.remove();
+    }, 300);
+  }
+}
+
+// Enhanced switch back to chat with content preservation
 function switchBackToChat() {
   const chatArea = document.getElementById('chatArea');
   const journalForm = document.getElementById('journalForm');
-  const backButton = document.getElementById('backToChatBtn');
+  const editingControls = document.getElementById('editingControls');
 
   if (chatArea) {
     chatArea.classList.remove('hidden');
@@ -1559,14 +1750,44 @@ function switchBackToChat() {
     journalForm.classList.add('hidden');
   }
 
-  if (backButton) {
-    backButton.parentElement.remove();
+  if (editingControls) {
+    editingControls.remove();
   }
 
   // Scroll to chat
   setTimeout(() => {
     chatArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 100);
+}
+
+// Enhanced form submission with validation
+function enhanceFormSubmission() {
+  const form = document.getElementById('journalForm');
+  if (!form) return;
+
+  form.addEventListener('submit', function(e) {
+    // Add a loading state to the submit button
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Saving...
+      `;
+
+      // Re-enable after 3 seconds in case of issues
+      setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }, 3000);
+    }
+
+    showFeedback('Saving your journal entry...', 'info', 2000);
+  });
 }
 
 // SCROLL FIX: New scroll optimization function
