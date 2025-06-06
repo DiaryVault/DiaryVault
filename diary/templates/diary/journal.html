@@ -770,130 +770,276 @@
     </p>
   </div>
 
-  <!-- Chat area for AI generation (visible if not in edit mode) -->
+  <!-- Advanced AI Chat area for journal generation (visible if not in edit mode) -->
   {% if not is_edit_mode %}
   <div id="chatArea" class="mb-8 space-y-4 animate-fade-in">
     <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden border border-white transition-all hover:shadow-2xl card-hover">
-      <!-- Chat Header -->
+      <!-- Enhanced Chat Header with AI Status -->
       <div class="bg-gradient-to-r from-secondary-50 to-primary-50 px-4 sm:px-6 py-4 border-b border-white flex items-center justify-between">
-        <div>
-          <h3 class="font-semibold text-gray-800 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd" />
-            </svg>
-            AI Journal Assistant
-          </h3>
-          <p class="text-xs text-gray-600 mt-1">Share your day and I'll help create a beautiful journal entry</p>
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <div class="w-10 h-10 bg-gradient-to-br from-secondary-500 to-primary-500 rounded-full flex items-center justify-center shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse" id="aiStatusIndicator"></div>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+              AI Journal Assistant
+              <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">Online</span>
+            </h3>
+            <p class="text-xs text-gray-600 mt-0.5" id="aiStatusText">Ready to help you create amazing journal entries</p>
+          </div>
         </div>
         <div class="text-xs font-medium bg-white/50 px-3 py-1 rounded-full text-gray-500 flex items-center gap-1 shadow-inner">
           <span id="quickCharCount">0</span>
           <span>characters</span>
+          <span class="text-gray-400 ml-1">(min. 10)</span>
         </div>
       </div>
 
-      <!-- Chat Container -->
+      <!-- Enhanced Chat Container with Smart Features -->
       <div class="p-4 sm:p-6">
-        <div class="chat-container" id="chatContainer">
-          <!-- Initial AI greeting -->
-          <div class="chat-bubble ai">
-            <p class="handwritten text-gray-800 text-lg leading-relaxed">Hello! I'm your journal assistant. Share some quick notes about your day, and I'll help transform them into a beautiful journal entry. You can also add a photo to capture the moment.</p>
-          </div>
-
-          <!-- Conversation history will be added here dynamically -->
-          <div id="chatHistory"></div>
-
-          <!-- Thinking indicator (initially hidden) -->
-          <div class="chat-bubble ai hidden" id="thinkingIndicator">
-            <div class="flex items-center gap-2">
-              <div class="flex gap-1">
-                <div class="w-2 h-2 bg-secondary-500 rounded-full animate-pulse"></div>
-                <div class="w-2 h-2 bg-secondary-500 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
-                <div class="w-2 h-2 bg-secondary-500 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+        <!-- Smart Conversation Starter -->
+        <div id="conversationStarter" class="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h4 class="text-sm font-semibold text-blue-900 mb-2">Let's create something amazing together!</h4>
+              <div class="space-y-2">
+                <button onclick="useQuickStart('daily-reflection')" class="w-full text-left p-3 bg-white rounded-lg border border-blue-200 hover:border-blue-300 hover:bg-blue-50 transition-all group">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="font-medium text-gray-800 text-sm">📝 Daily Reflection</div>
+                      <div class="text-xs text-gray-600">Reflect on your day's experiences and emotions</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+                <button onclick="useQuickStart('gratitude-practice')" class="w-full text-left p-3 bg-white rounded-lg border border-blue-200 hover:border-blue-300 hover:bg-blue-50 transition-all group">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="font-medium text-gray-800 text-sm">🙏 Gratitude Practice</div>
+                      <div class="text-xs text-gray-600">Focus on what you're thankful for today</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+                <button onclick="useQuickStart('goal-tracking')" class="w-full text-left p-3 bg-white rounded-lg border border-blue-200 hover:border-blue-300 hover:bg-blue-50 transition-all group">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="font-medium text-gray-800 text-sm">🎯 Goal & Progress</div>
+                      <div class="text-xs text-gray-600">Track your goals and celebrate achievements</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+                <button onclick="useQuickStart('free-form')" class="w-full text-left p-3 bg-white rounded-lg border border-blue-200 hover:border-blue-300 hover:bg-blue-50 transition-all group">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="font-medium text-gray-800 text-sm">✨ Free Form</div>
+                      <div class="text-xs text-gray-600">Just tell me about your day in your own words</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
               </div>
-              <span class="handwritten text-gray-600">Thinking...</span>
             </div>
           </div>
         </div>
 
-        <!-- Chat input container -->
-        <div class="mt-4 relative">
-          <div class="bg-white rounded-xl border border-gray-200 focus-within:border-secondary-400 transition shadow-inner overflow-hidden">
-            <textarea id="quickNotes" class="w-full p-4 pr-20 border-0 focus:ring-0 focus:outline-none handwritten bg-transparent text-lg resize-none"
-              placeholder="Tell me about your day..."
-              oninput="countQuickChars()" rows="3"></textarea>
-
-            <!-- Chat tools -->
-            <div class="absolute bottom-2 right-2 flex items-center gap-2">
-              <!-- Photo upload tool -->
-              <div class="relative">
-                <button type="button" class="p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center" onclick="document.getElementById('quickPhotoInput').click()" title="Add Photo">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 hover:text-secondary-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </button>
-                <!-- Hidden file input -->
-                <input type="file" id="quickPhotoInput" class="hidden" accept="image/*" onchange="handleQuickFileSelect(this)">
-              </div>
-
-              <!-- Generate button -->
-              <button type="button" class="btn-gradient text-white p-2 rounded-full transition-all hover:shadow-lg" id="generateEntryBtn" onclick="generateJournalEntry()" title="Generate Entry">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+        <!-- Advanced Chat Container -->
+        <div class="chat-container" id="chatContainer">
+          <!-- AI Introduction Message -->
+          <div class="chat-bubble ai" id="initialGreeting">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 bg-gradient-to-br from-secondary-400 to-primary-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
-              </button>
+              </div>
+              <div class="flex-1">
+                <p class="handwritten text-gray-800 text-lg leading-relaxed mb-2">
+                  Hello! I'm your personal journal assistant. I'm here to help you create beautiful, meaningful journal entries.
+                </p>
+                <p class="handwritten text-gray-700 text-base leading-relaxed">
+                  Choose a template above to get started, or simply tell me about your day. I'll ask thoughtful questions to help you explore your experiences and emotions deeply.
+                </p>
+              </div>
             </div>
           </div>
 
-          <!-- Photo preview for quick chat (initially hidden) -->
-          <div id="quickPhotoContainer" class="hidden mt-3 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-            <div class="relative">
-              <img id="quickPhotoPreview" class="w-full max-h-60 object-cover" src="" alt="Photo preview">
-              <div class="absolute top-2 right-2 flex gap-2">
-                <button type="button" class="bg-white/90 p-1 rounded-full shadow-sm border border-gray-200 hover:bg-white transition-colors" onclick="document.getElementById('quickPhotoInput').click()" title="Change photo">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          <!-- Dynamic conversation history -->
+          <div id="chatHistory"></div>
+
+          <!-- Enhanced thinking indicator -->
+          <div class="chat-bubble ai hidden" id="thinkingIndicator">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 bg-gradient-to-br from-secondary-400 to-primary-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <div class="w-4 h-4 relative">
+                  <div class="absolute inset-0 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                </div>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <div class="flex gap-1">
+                    <div class="w-2 h-2 bg-secondary-500 rounded-full animate-bounce"></div>
+                    <div class="w-2 h-2 bg-secondary-500 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
+                    <div class="w-2 h-2 bg-secondary-500 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+                  </div>
+                  <span class="handwritten text-gray-600" id="thinkingText">Thinking deeply about your experience...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Advanced Input Interface -->
+        <div class="mt-6 space-y-4">
+          <!-- Smart Input Container -->
+          <div class="relative">
+            <div class="bg-white rounded-xl border-2 border-gray-200 focus-within:border-secondary-400 transition-all shadow-inner overflow-hidden">
+              <!-- Input Header with Context -->
+              <div id="inputContext" class="hidden px-4 py-2 bg-gray-50 border-b border-gray-200 text-sm text-gray-600">
+                <span id="contextText"></span>
+              </div>
+
+              <!-- Main Textarea -->
+              <textarea id="quickNotes" class="w-full p-4 pr-24 border-0 focus:ring-0 focus:outline-none handwritten bg-transparent text-lg resize-none min-h-[100px]"
+                placeholder="Share what's on your mind..."
+                oninput="handleSmartInput(this)"
+                onkeydown="handleKeyboardShortcuts(event)"
+                rows="3"></textarea>
+
+              <!-- Advanced Input Tools -->
+              <div class="absolute bottom-3 right-3 flex items-center gap-2">
+                <!-- Voice Input Button -->
+                <button type="button" id="voiceInputBtn" class="p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center relative group" onclick="toggleVoiceInput()" title="Voice Input">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 group-hover:text-secondary-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                   </svg>
+                  <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                    Voice input
+                  </div>
                 </button>
-                <button type="button" class="bg-white/90 p-1 rounded-full shadow-sm border border-gray-200 hover:bg-red-50 transition-colors" onclick="removeQuickPhoto()" title="Remove photo">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+
+                <!-- Photo Upload Tool -->
+                <div class="relative group">
+                  <button type="button" class="p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center" onclick="document.getElementById('quickPhotoInput').click()" title="Add Photo">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 group-hover:text-secondary-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                  <input type="file" id="quickPhotoInput" class="hidden" accept="image/*" onchange="handleQuickFileSelect(this)">
+                  <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                    Add photo
+                  </div>
+                </div>
+
+                <!-- Smart Send Button -->
+                <button type="button" class="btn-gradient text-white p-2 rounded-full transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        id="smartSendBtn"
+                        onclick="handleSmartSend()"
+                        disabled
+                        title="Send Message">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
                 </button>
               </div>
-            </div>
-            <div class="p-2 bg-gray-50 text-xs text-gray-600 flex justify-between items-center">
-              <span id="quickPhotoName">image.jpg</span>
-              <span class="text-secondary-600">Added to journal</span>
+
+              <!-- Character Counter & Smart Suggestions -->
+              <div class="px-4 pb-3 flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                  <span class="text-gray-500">
+                    <span id="quickCharCount">0</span>/2000
+                  </span>
+                  <span id="smartSuggestion" class="text-secondary-600 italic hidden"></span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <span class="text-gray-400">Press</span>
+                  <kbd class="px-1 py-0.5 bg-gray-100 rounded text-xs">Ctrl+Enter</kbd>
+                  <span class="text-gray-400">to send</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Topic suggestions -->
-          <div class="mt-3">
+          <!-- Enhanced Photo Preview -->
+          <div id="quickPhotoContainer" class="hidden">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <div class="relative">
+                <img id="quickPhotoPreview" class="w-full max-h-60 object-cover" src="" alt="Photo preview">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                <div class="absolute top-3 right-3 flex gap-2">
+                  <button type="button" class="bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-sm border border-white/50 hover:bg-white transition-colors" onclick="document.getElementById('quickPhotoInput').click()" title="Change photo">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                  </button>
+                  <button type="button" class="bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-sm border border-white/50 hover:bg-red-50 transition-colors" onclick="removeQuickPhoto()" title="Remove photo">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="absolute bottom-3 left-3 right-16">
+                  <div class="bg-white/90 backdrop-blur-sm rounded-lg p-2">
+                    <div class="text-sm font-medium text-gray-800" id="quickPhotoName">photo.jpg</div>
+                    <div class="text-xs text-gray-600">This will be included with your journal entry</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Smart Topic Suggestions -->
+          <div id="smartTopics" class="space-y-3">
             <div class="text-xs font-medium text-gray-700 mb-2 flex items-center gap-1.5">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-              Try these topics:
+              <span>Smart suggestions based on your writing:</span>
             </div>
-            <div class="flex flex-wrap gap-2">
-              <button type="button" onclick="addQuickSuggestion('Today I accomplished')" class="suggestions-pill bg-secondary-50 hover:bg-secondary-100 text-secondary-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-secondary-200/50">Today I accomplished</button>
-              <button type="button" onclick="addQuickSuggestion('I felt happy when')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-emerald-200/50">I felt happy when</button>
-              <button type="button" onclick="addQuickSuggestion('I learned that')" class="suggestions-pill bg-primary-50 hover:bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-primary-200/50">I learned that</button>
-              <button type="button" onclick="addQuickSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50">I met with</button>
-              <button type="button" onclick="addQuickSuggestion('I\'m grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50">I'm grateful for</button>
+            <div class="flex flex-wrap gap-2" id="dynamicSuggestions">
+              <!-- Dynamic suggestions will be added here -->
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Switch to manual form option -->
+      <!-- Advanced Action Footer -->
       <div class="bg-gradient-to-r from-secondary-50 to-primary-50 p-4 border-t border-white">
-        <div class="text-center">
-          <button type="button" id="useManualFormBtn" onclick="switchToManualForm()" class="btn-modern btn-secondary flex items-center gap-2 mx-auto">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="text-xs text-gray-600 flex items-center gap-1">
+              <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span>AI is ready</span>
+            </div>
+            <div class="text-xs text-gray-500">|</div>
+            <div class="text-xs text-gray-600" id="conversationProgress">
+              Ready to start your journal
+            </div>
+          </div>
+          <button type="button" id="useManualFormBtn" onclick="switchToManualForm()" class="btn-modern btn-secondary flex items-center gap-2 text-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
-            <span>Write manually instead</span>
+            <span>Write manually</span>
           </button>
         </div>
       </div>
@@ -1154,14 +1300,667 @@
 
 <!-- SCROLL FIX: Enhanced JavaScript with scroll optimizations -->
 <script>
-// Global chat history storage
+// Advanced AI Journal Assistant - Much better than home.html
 let chatHistory = [];
 let quickPhotoFile = null;
 let quickPhotoDataUrl = null;
+let currentJournalTemplate = null;
+let conversationState = 'initial'; // initial, gathering, deep-dive, finalizing
+let userContext = {};
+let voiceRecognition = null;
+let isVoiceInputActive = false;
 
-// Enhanced JavaScript with scroll performance fixes
-let currentPhotoFile = null;
-let currentPhotoDataUrl = null;
+// Enhanced conversation templates
+const journalTemplates = {
+  'daily-reflection': {
+    name: 'Daily Reflection',
+    questions: [
+      "What was the highlight of your day?",
+      "How did you feel during different parts of your day?",
+      "What challenged you today, and how did you handle it?",
+      "What are you grateful for from today?",
+      "What did you learn about yourself today?"
+    ],
+    followUps: [
+      "Can you tell me more about that feeling?",
+      "What do you think caused that reaction?",
+      "How does this connect to your goals or values?",
+      "What would you do differently next time?"
+    ]
+  },
+  'gratitude-practice': {
+    name: 'Gratitude Practice',
+    questions: [
+      "What are three things you're grateful for today?",
+      "Who made a positive impact on your day?",
+      "What small moment brought you joy?",
+      "What about your health, relationships, or opportunities are you thankful for?",
+      "How has practicing gratitude changed your perspective?"
+    ],
+    followUps: [
+      "Why does that particular thing mean so much to you?",
+      "How did that person's actions affect you?",
+      "What made that moment special?",
+      "How can you show appreciation for this in your life?"
+    ]
+  },
+  'goal-tracking': {
+    name: 'Goal & Progress',
+    questions: [
+      "What progress did you make toward your goals today?",
+      "What obstacles did you encounter?",
+      "What motivated you to keep going?",
+      "What skills or insights did you develop?",
+      "How will you build on today's progress tomorrow?"
+    ],
+    followUps: [
+      "What specific steps led to that progress?",
+      "How did overcoming that obstacle feel?",
+      "Where do you find that motivation?",
+      "How will you apply this learning going forward?"
+    ]
+  },
+  'free-form': {
+    name: 'Free Form',
+    questions: [
+      "Tell me about your day in your own words.",
+      "What's been on your mind lately?",
+      "How have you been feeling?",
+      "What would you like to remember about today?",
+      "Is there anything you'd like to explore deeper?"
+    ],
+    followUps: [
+      "That sounds important - can you share more?",
+      "How does that make you feel?",
+      "What do you think that means for you?",
+      "How would you like to move forward with that?"
+    ]
+  }
+};
+
+// Smart input suggestions based on context
+const smartSuggestions = {
+  emotions: ["happy", "excited", "content", "peaceful", "frustrated", "anxious", "proud", "grateful", "confused", "hopeful"],
+  activities: ["work", "family time", "exercise", "reading", "cooking", "travel", "learning", "relaxing", "creating", "socializing"],
+  relationships: ["friends", "family", "colleagues", "partner", "children", "parents", "mentors", "community"],
+  achievements: ["completed", "accomplished", "learned", "improved", "helped", "created", "solved", "discovered"],
+  challenges: ["difficult", "challenging", "overwhelming", "stressful", "uncertain", "complex", "demanding"]
+};
+
+// Initialize advanced chat interface
+function initializeChatInterface() {
+  countQuickChars();
+  setupVoiceInput();
+  initializeSmartSuggestions();
+  setupAdvancedFeatures();
+
+  // Set up auto-resize for quick notes
+  const quickNotes = document.getElementById('quickNotes');
+  if (quickNotes) {
+    quickNotes.addEventListener('input', function() {
+      handleSmartInput(this);
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+    });
+  }
+}
+
+// Handle smart input with context awareness
+function handleSmartInput(textarea) {
+  const value = textarea.value;
+  countQuickChars();
+
+  // Enable/disable send button
+  const sendBtn = document.getElementById('smartSendBtn');
+  const contextDiv = document.getElementById('inputContext');
+
+  if (sendBtn) {
+    sendBtn.disabled = value.trim().length < 10;
+  }
+
+  // Provide contextual suggestions
+  if (value.length > 20) {
+    generateSmartSuggestions(value);
+  }
+
+  // Show context hints
+  if (currentJournalTemplate && conversationState === 'gathering') {
+    const template = journalTemplates[currentJournalTemplate];
+    if (template && contextDiv) {
+      contextDiv.classList.remove('hidden');
+      document.getElementById('contextText').textContent = `💡 ${template.name} mode: ${getContextualHint(value)}`;
+    }
+  }
+}
+
+// Generate smart suggestions based on input
+function generateSmartSuggestions(input) {
+  const suggestions = [];
+  const lowerInput = input.toLowerCase();
+
+  // Analyze input and suggest relevant prompts
+  Object.entries(smartSuggestions).forEach(([category, words]) => {
+    words.forEach(word => {
+      if (lowerInput.includes(word)) {
+        suggestions.push(...getRelevantSuggestions(category, word));
+      }
+    });
+  });
+
+  // Update suggestion pills
+  updateDynamicSuggestions(suggestions.slice(0, 4));
+}
+
+// Get relevant suggestions based on detected categories
+function getRelevantSuggestions(category, trigger) {
+  const suggestions = {
+    emotions: [
+      `What triggered that ${trigger} feeling?`,
+      `How long did you feel ${trigger}?`,
+      `What helped you process being ${trigger}?`
+    ],
+    activities: [
+      `What did you enjoy most about ${trigger}?`,
+      `How did ${trigger} impact your day?`,
+      `What did you learn from ${trigger}?`
+    ],
+    relationships: [
+      `How did time with ${trigger} affect you?`,
+      `What did you appreciate about ${trigger}?`,
+      `How has your relationship with ${trigger} grown?`
+    ],
+    achievements: [
+      `What steps led to what you ${trigger}?`,
+      `How do you feel about what you ${trigger}?`,
+      `What will you do next after ${trigger} this?`
+    ]
+  };
+
+  return suggestions[category] || [];
+}
+
+// Update dynamic suggestions
+function updateDynamicSuggestions(suggestions) {
+  const container = document.getElementById('dynamicSuggestions');
+  if (!container || suggestions.length === 0) return;
+
+  container.innerHTML = '';
+  suggestions.forEach((suggestion, index) => {
+    const button = document.createElement('button');
+    button.className = 'suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-indigo-200/50 animate-fade-in';
+    button.style.animationDelay = `${index * 100}ms`;
+    button.textContent = suggestion;
+    button.onclick = () => addQuickSuggestion(suggestion);
+    container.appendChild(button);
+  });
+}
+
+// Handle keyboard shortcuts
+function handleKeyboardShortcuts(event) {
+  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+    event.preventDefault();
+    handleSmartSend();
+  }
+
+  if (event.key === 'Escape') {
+    const contextDiv = document.getElementById('inputContext');
+    if (contextDiv) {
+      contextDiv.classList.add('hidden');
+    }
+  }
+}
+
+// Quick start templates
+function useQuickStart(template) {
+  currentJournalTemplate = template;
+  conversationState = 'gathering';
+
+  // Hide conversation starter
+  const starter = document.getElementById('conversationStarter');
+  if (starter) {
+    starter.style.opacity = '0';
+    starter.style.transform = 'translateY(-10px)';
+    setTimeout(() => starter.classList.add('hidden'), 300);
+  }
+
+  // Start template conversation
+  const templateData = journalTemplates[template];
+  const greeting = getTemplateGreeting(template);
+
+  addMessageToChat(greeting, 'ai');
+  chatHistory.push({ role: 'assistant', content: greeting, template: template });
+
+  // Update AI status
+  updateAIStatus(`Starting ${templateData.name} session...`);
+
+  // Focus on input
+  const quickNotes = document.getElementById('quickNotes');
+  if (quickNotes) {
+    quickNotes.placeholder = getTemplatePlaceholder(template);
+    quickNotes.focus();
+  }
+
+  showFeedback(`🎯 Started ${templateData.name} session - I'll guide you through some thoughtful questions!`, 'success', 4000);
+}
+
+// Get template-specific greeting
+function getTemplateGreeting(template) {
+  const greetings = {
+    'daily-reflection': "Perfect! Let's reflect on your day together. I'll ask you some thoughtful questions to help you explore your experiences deeply. What was the highlight of your day?",
+    'gratitude-practice': "Wonderful! Gratitude practice is so powerful for wellbeing. I'll help you explore what you're thankful for today. What are three things you're grateful for today, big or small?",
+    'goal-tracking': "Excellent choice! Let's look at your progress and achievements. I'll help you reflect on how you're moving toward your goals. What progress did you make toward your goals today?",
+    'free-form': "Great! I love free-form journaling. Just share whatever's on your mind, and I'll help you explore it deeper. Tell me about your day in your own words."
+  };
+  return greetings[template] || "Let's start your journal entry. What would you like to share?";
+}
+
+// Get template-specific placeholder
+function getTemplatePlaceholder(template) {
+  const placeholders = {
+    'daily-reflection': "Share what stood out to you today...",
+    'gratitude-practice': "What are you grateful for today?",
+    'goal-tracking': "What progress did you make today?",
+    'free-form': "Tell me about your day..."
+  };
+  return placeholders[template] || "Share what's on your mind...";
+}
+
+// Enhanced smart send with conversation flow
+function handleSmartSend() {
+  const quickNotes = document.getElementById('quickNotes');
+  if (!quickNotes || quickNotes.value.trim().length < 10) {
+    showFeedback('Please share at least 10 characters about your day', 'warning');
+    quickNotes.focus();
+    return;
+  }
+
+  const userMessage = quickNotes.value.trim();
+  userContext.lastInput = userMessage;
+
+  // Add to chat history
+  chatHistory.push({ role: 'user', content: userMessage });
+  addMessageToChat(userMessage, 'user');
+
+  // Clear input
+  quickNotes.value = '';
+  quickNotes.style.height = 'auto';
+  countQuickChars();
+
+  // Update send button state
+  const sendBtn = document.getElementById('smartSendBtn');
+  if (sendBtn) {
+    sendBtn.disabled = true;
+  }
+
+  // Show enhanced thinking indicator
+  showAdvancedThinking();
+
+  // Process the message intelligently
+  processIntelligentResponse(userMessage);
+}
+
+// Show advanced thinking with random thoughtful messages
+function showAdvancedThinking() {
+  const thinkingIndicator = document.getElementById('thinkingIndicator');
+  const thinkingText = document.getElementById('thinkingText');
+
+  if (thinkingIndicator) {
+    thinkingIndicator.classList.remove('hidden');
+  }
+
+  const thinkingMessages = [
+    "Thinking deeply about your experience...",
+    "Considering the best follow-up question...",
+    "Analyzing the emotions in your words...",
+    "Crafting a thoughtful response...",
+    "Understanding the context of your day...",
+    "Preparing insightful questions..."
+  ];
+
+  let messageIndex = 0;
+  const messageInterval = setInterval(() => {
+    if (thinkingText) {
+      thinkingText.textContent = thinkingMessages[messageIndex];
+      messageIndex = (messageIndex + 1) % thinkingMessages.length;
+    }
+  }, 2000);
+
+  // Store interval ID to clear it later
+  thinkingIndicator.dataset.intervalId = messageInterval;
+}
+
+// Hide thinking indicator
+function hideAdvancedThinking() {
+  const thinkingIndicator = document.getElementById('thinkingIndicator');
+  if (thinkingIndicator) {
+    const intervalId = thinkingIndicator.dataset.intervalId;
+    if (intervalId) {
+      clearInterval(parseInt(intervalId));
+    }
+    thinkingIndicator.classList.add('hidden');
+  }
+}
+
+// Process intelligent response based on conversation state
+function processIntelligentResponse(userMessage) {
+  // Determine response based on conversation state and template
+  let aiResponse;
+  let shouldGenerateEntry = false;
+
+  switch (conversationState) {
+    case 'initial':
+    case 'gathering':
+      aiResponse = generateGatheringResponse(userMessage);
+      break;
+    case 'deep-dive':
+      aiResponse = generateDeepDiveResponse(userMessage);
+      shouldGenerateEntry = chatHistory.filter(m => m.role === 'user').length >= 3;
+      break;
+    case 'finalizing':
+      shouldGenerateEntry = true;
+      aiResponse = "Perfect! I have enough beautiful details to create your journal entry. Let me craft something meaningful for you.";
+      break;
+  }
+
+  // Simulate API delay
+  setTimeout(() => {
+    hideAdvancedThinking();
+
+    if (shouldGenerateEntry) {
+      // Generate the journal entry
+      generateAdvancedJournalEntry();
+    } else {
+      // Continue conversation
+      addMessageToChat(aiResponse, 'ai');
+      chatHistory.push({ role: 'assistant', content: aiResponse });
+
+      // Re-enable send button
+      const sendBtn = document.getElementById('smartSendBtn');
+      if (sendBtn) {
+        sendBtn.disabled = false;
+      }
+
+      // Focus back on input
+      const quickNotes = document.getElementById('quickNotes');
+      if (quickNotes) {
+        quickNotes.focus();
+      }
+    }
+
+    updateConversationProgress();
+  }, 2000 + Math.random() * 2000); // 2-4 seconds for realistic timing
+}
+
+// Generate gathering response
+function generateGatheringResponse(userMessage) {
+  const template = journalTemplates[currentJournalTemplate];
+  const questionIndex = chatHistory.filter(m => m.role === 'assistant').length - 1;
+
+  if (template && questionIndex < template.questions.length - 1) {
+    conversationState = 'gathering';
+    return `That's really insightful. ${template.questions[questionIndex + 1]}`;
+  } else {
+    conversationState = 'deep-dive';
+    return getDeepDiveQuestion(userMessage);
+  }
+}
+
+// Generate deep dive response
+function generateDeepDiveResponse(userMessage) {
+  const followUpQuestions = [
+    "Can you tell me more about how that made you feel?",
+    "What do you think that experience taught you?",
+    "How does this connect to what's important to you?",
+    "What would you want to remember most about this?",
+    "How has this shaped your perspective?",
+    "What are you taking away from this experience?"
+  ];
+
+  if (chatHistory.filter(m => m.role === 'user').length >= 3) {
+    conversationState = 'finalizing';
+    return "You've shared such meaningful insights. I think I have everything needed to create a beautiful journal entry that captures your thoughts and feelings. Ready for me to write it?";
+  }
+
+  return followUpQuestions[Math.floor(Math.random() * followUpQuestions.length)];
+}
+
+// Get contextual hint
+function getContextualHint(input) {
+  const hints = [
+    "I'm listening for the emotions in your words",
+    "Tell me about the details that stood out",
+    "I'm curious about how this made you feel",
+    "Share what this experience means to you"
+  ];
+  return hints[Math.floor(Math.random() * hints.length)];
+}
+
+// Generate advanced journal entry
+function generateAdvancedJournalEntry() {
+  updateAIStatus("Crafting your personalized journal entry...");
+
+  // Show loading indicator
+  const loadingIndicator = document.getElementById('loadingIndicator');
+  if (loadingIndicator) {
+    loadingIndicator.classList.remove('hidden');
+  }
+
+  // Compile all user messages for context
+  const userMessages = chatHistory.filter(m => m.role === 'user').map(m => m.content).join('\n\n');
+
+  // Get CSRF token
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  // Prepare advanced form data
+  const formData = new FormData();
+  formData.append('journal_content', userMessages);
+  formData.append('conversation_context', JSON.stringify(chatHistory));
+  formData.append('template_type', currentJournalTemplate || 'free-form');
+
+  if (quickPhotoFile) {
+    formData.append('journal_photo', quickPhotoFile);
+  }
+
+  // Make enhanced API call
+  fetch('/api/demo-journal/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken
+    },
+    body: formData
+  })
+  .then(response => {
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error('Rate limit exceeded. Please wait a moment before trying again.');
+      }
+      throw new Error('Server error: ' + response.status);
+    }
+    return response.json();
+  })
+  .then(data => {
+    // Hide loading indicator
+    if (loadingIndicator) {
+      loadingIndicator.classList.add('hidden');
+    }
+
+    if (data.error) {
+      showFeedback(data.error, 'error');
+      return;
+    }
+
+    // Add final AI response
+    const finalResponse = "Beautiful! I've created a journal entry that captures the essence of our conversation. You can review and edit it below before saving.";
+    addMessageToChat(finalResponse, 'ai');
+    chatHistory.push({ role: 'assistant', content: finalResponse });
+
+    // Populate form and switch
+    populateFormWithAIContent(data);
+    switchToManualForm();
+
+    showFeedback('🎉 Your personalized journal entry is ready! Feel free to edit before saving.', 'success');
+    updateAIStatus("Journal entry created successfully!");
+  })
+  .catch(error => {
+    console.error('Error:', error);
+
+    if (loadingIndicator) {
+      loadingIndicator.classList.add('hidden');
+    }
+
+    showFeedback(error.message || 'Sorry, we encountered an error. Please try again later.', 'error');
+    updateAIStatus("Ready to help - let's try again!");
+  });
+}
+
+// Update AI status
+function updateAIStatus(message) {
+  const statusText = document.getElementById('aiStatusText');
+  if (statusText) {
+    statusText.textContent = message;
+  }
+}
+
+// Update conversation progress
+function updateConversationProgress() {
+  const progressElement = document.getElementById('conversationProgress');
+  if (!progressElement) return;
+
+  const userMessageCount = chatHistory.filter(m => m.role === 'user').length;
+
+  const progressMessages = {
+    0: "Ready to start your journal",
+    1: "Great start! Tell me more",
+    2: "Getting deeper insights",
+    3: "Almost ready to create your entry",
+    4: "Perfect! Creating your journal"
+  };
+
+  const message = progressMessages[Math.min(userMessageCount, 4)] || "Creating amazing content";
+  progressElement.textContent = message;
+}
+
+// Enhanced quick character counter
+function countQuickChars() {
+  const textArea = document.getElementById('quickNotes');
+  const charCount = document.getElementById('quickCharCount');
+
+  if (!textArea || !charCount) {
+    return;
+  }
+
+  const count = textArea.value.length;
+  charCount.textContent = count;
+
+  // Color coding
+  if (count < 10) {
+    charCount.className = 'text-gray-400';
+  } else if (count < 100) {
+    charCount.className = 'text-yellow-600';
+  } else {
+    charCount.className = 'text-green-600';
+  }
+}
+
+// Voice input functionality
+function setupVoiceInput() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    const voiceBtn = document.getElementById('voiceInputBtn');
+    if (voiceBtn) {
+      voiceBtn.style.display = 'none';
+    }
+    return;
+  }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  voiceRecognition = new SpeechRecognition();
+
+  voiceRecognition.continuous = true;
+  voiceRecognition.interimResults = true;
+  voiceRecognition.lang = 'en-US';
+
+  voiceRecognition.onstart = function() {
+    isVoiceInputActive = true;
+    updateVoiceButton();
+  };
+
+  voiceRecognition.onend = function() {
+    isVoiceInputActive = false;
+    updateVoiceButton();
+  };
+
+  voiceRecognition.onresult = function(event) {
+    let finalTranscript = '';
+    let interimTranscript = '';
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalTranscript += transcript;
+      } else {
+        interimTranscript += transcript;
+      }
+    }
+
+    const quickNotes = document.getElementById('quickNotes');
+    if (quickNotes) {
+      if (finalTranscript) {
+        quickNotes.value += finalTranscript;
+        handleSmartInput(quickNotes);
+      }
+    }
+  };
+}
+
+function toggleVoiceInput() {
+  if (!voiceRecognition) return;
+
+  if (isVoiceInputActive) {
+    voiceRecognition.stop();
+  } else {
+    voiceRecognition.start();
+  }
+}
+
+function updateVoiceButton() {
+  const voiceBtn = document.getElementById('voiceInputBtn');
+  if (!voiceBtn) return;
+
+  if (isVoiceInputActive) {
+    voiceBtn.classList.add('bg-red-100', 'text-red-600');
+    voiceBtn.classList.remove('hover:bg-gray-100');
+  } else {
+    voiceBtn.classList.remove('bg-red-100', 'text-red-600');
+    voiceBtn.classList.add('hover:bg-gray-100');
+  }
+}
+
+// Initialize smart suggestions
+function initializeSmartSuggestions() {
+  // This will be enhanced based on user's writing patterns over time
+}
+
+// Setup advanced features
+function setupAdvancedFeatures() {
+  // Auto-save draft functionality
+  const quickNotes = document.getElementById('quickNotes');
+  if (quickNotes) {
+    const debouncedSave = debounce(() => {
+      if (quickNotes.value.length > 20) {
+        localStorage.setItem('journal_draft', quickNotes.value);
+      }
+    }, 1000);
+
+    quickNotes.addEventListener('input', debouncedSave);
+
+    // Restore draft
+    const draft = localStorage.getItem('journal_draft');
+    if (draft && quickNotes.value === '') {
+      quickNotes.value = draft;
+      handleSmartInput(quickNotes);
+    }
+  }
+}
 
 // SCROLL FIX: Optimized debounce function
 function debounce(func, wait) {
@@ -1184,6 +1983,7 @@ document.addEventListener('DOMContentLoaded', function() {
   setupScrollOptimizations();
   initializeChatInterface();
   enhanceFormSubmission();
+  updateAIStatus("Ready to create amazing journal entries!");
 });
 
 function initializeChatInterface() {
