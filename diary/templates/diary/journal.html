@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+// Detect the user's actual tone from{% extends "base.html" %}
 
 {% block title %}{% if is_edit_mode %}Edit Entry{% else %}New Entry{% endif %} - DiaryVault{% endblock %}
 
@@ -2012,6 +2012,44 @@ function detectActualTone(text) {
   if (casual > formal) return 'casual';
   if (formal > casual) return 'formal';
   return 'balanced';
+}
+
+// Detect how the user structures their thoughts
+function detectStructurePreference(messages) {
+  const avgSentencesPerMessage = messages.reduce((sum, msg) => {
+    const sentences = msg.content.split(/[.!?]+/).filter(s => s.trim().length > 5);
+    return sum + sentences.length;
+  }, 0) / messages.length;
+
+  const hasLists = messages.some(msg => msg.content.includes('\n') || msg.content.match(/\d\.|•|-/));
+
+  if (avgSentencesPerMessage > 4 || hasLists) return 'organized';
+  if (avgSentencesPerMessage < 2) return 'concise';
+  return 'flowing';
+}
+
+// Detect vocabulary style
+function detectVocabularyStyle(text) {
+  const simpleWords = (text.match(/\b(good|bad|nice|cool|fun|great|okay)\b/gi) || []).length;
+  const complexWords = (text.match(/\b(magnificent|extraordinary|contemplative|intricate|profound)\b/gi) || []).length;
+  const emotionalWords = (text.match(/\b(heart|soul|spirit|essence|energy|vibe)\b/gi) || []).length;
+
+  if (complexWords > simpleWords) return 'sophisticated';
+  if (emotionalWords > 2) return 'expressive';
+  if (simpleWords > complexWords) return 'simple';
+  return 'everyday';
+}
+
+// Detect emotional expression style
+function detectEmotionalStyle(text) {
+  const directEmotions = (text.match(/\b(I feel|I'm feeling|I felt|I am)\b/gi) || []).length;
+  const metaphorical = (text.match(/\b(like|as if|reminds me|feels like)\b/gi) || []).length;
+  const intensifiers = (text.match(/\b(very|really|so|extremely|absolutely|totally)\b/gi) || []).length;
+
+  if (intensifiers > 3) return 'intense';
+  if (metaphorical > directEmotions) return 'metaphorical';
+  if (directEmotions > 2) return 'direct';
+  return 'subtle';
 }
 
 // Create a completely custom journal entry that sounds like the user
