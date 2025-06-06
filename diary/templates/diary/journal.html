@@ -1943,7 +1943,7 @@ function getWrapUpResponse() {
   return wrapUps[Math.floor(Math.random() * wrapUps.length)];
 }
 
-// Generate truly diverse content that breaks the formula
+// Generate truly diverse content with enhanced backend prompting
 function generateTrulyDiverseEntry() {
   updateAIStatus("Crafting something that sounds authentically like you...");
 
@@ -1956,24 +1956,85 @@ function generateTrulyDiverseEntry() {
   // Analyze the user's actual voice and style
   const userVoiceAnalysis = analyzeUserVoice();
 
-  // Create a completely custom journal entry
-  const customEntry = createCustomJournalEntry(userVoiceAnalysis);
+  // Get CSRF token
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-  // Simulate API call but use our custom generation
-  setTimeout(() => {
+  // Create comprehensive prompt data for your LLM
+  const enhancedPromptData = createEnhancedPrompt(userVoiceAnalysis);
+
+  // Prepare form data with much better prompting
+  const formData = new FormData();
+
+  // Send the enhanced prompt instead of raw content
+  formData.append('journal_content', enhancedPromptData.enhancedPrompt);
+
+  // Send conversation context
+  formData.append('conversation_context', JSON.stringify(chatHistory));
+
+  // Send detailed style instructions for your LLM
+  formData.append('writing_style_analysis', JSON.stringify(userVoiceAnalysis));
+
+  // Send specific instructions to avoid formulaic content
+  formData.append('style_instructions', JSON.stringify({
+    avoid_phrases: [
+      "As I sit down to reflect",
+      "As I look back on my day",
+      "Reflecting on my day",
+      "In conclusion",
+      "As I close this journal entry"
+    ],
+    tone: userVoiceAnalysis.tone,
+    structure: userVoiceAnalysis.structure,
+    writing_guidelines: enhancedPromptData.guidelines
+  }));
+
+  formData.append('template_type', currentJournalTemplate || 'free-form');
+  formData.append('personalize', 'true');
+
+  if (quickPhotoFile) {
+    formData.append('journal_photo', quickPhotoFile);
+  }
+
+  // Make enhanced API call to your existing endpoint
+  fetch('/api/demo-journal/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken
+    },
+    body: formData
+  })
+  .then(response => {
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error('Rate limit exceeded. Please wait a moment before trying again.');
+      }
+      throw new Error('Server error: ' + response.status);
+    }
+    return response.json();
+  })
+  .then(data => {
     // Hide loading indicator
     if (loadingIndicator) {
       loadingIndicator.classList.add('hidden');
     }
 
-    // Create the data object with our custom content
-    const data = {
-      entry: customEntry.content,
-      title: customEntry.title
-    };
+    if (data.error) {
+      showFeedback(data.error, 'error');
+      return;
+    }
+
+    // Check if the content is still formulaic and enhance it as fallback
+    let finalContent = data.entry;
+    if (isContentFormulaic(finalContent)) {
+      finalContent = enhanceJournalContent(finalContent, userVoiceAnalysis);
+      showFeedback('⚡ Enhanced the content to sound more like you!', 'info', 3000);
+    }
+
+    // Update the data with enhanced content
+    data.entry = finalContent;
 
     // Add final AI response
-    const finalResponse = "There you go! I tried to capture your authentic voice and make it sound like something you'd actually write, not a template. How does it feel?";
+    const finalResponse = "I've crafted an entry that captures your authentic voice and the essence of our conversation. It should feel like something you'd actually write!";
     addMessageToChat(finalResponse, 'ai');
     chatHistory.push({ role: 'assistant', content: finalResponse });
 
@@ -1981,9 +2042,100 @@ function generateTrulyDiverseEntry() {
     populateFormWithAIContent(data);
     switchToManualForm();
 
-    showFeedback('✨ Created an entry that should sound uniquely like you!', 'success');
-    updateAIStatus("Made something authentic to your voice!");
-  }, 2000 + Math.random() * 2000);
+    showFeedback('✨ Created an entry in your authentic voice!', 'success');
+    updateAIStatus("Made something that truly sounds like you!");
+  })
+  .catch(error => {
+    console.error('Error:', error);
+
+    if (loadingIndicator) {
+      loadingIndicator.classList.add('hidden');
+    }
+
+    showFeedback(error.message || 'Sorry, we encountered an error. Please try again later.', 'error');
+    updateAIStatus("Ready to help - let's try again!");
+  });
+}
+
+// Create an enhanced prompt that guides your LLM to write better content
+function createEnhancedPrompt(voiceAnalysis) {
+  const userMessages = chatHistory.filter(m => m.role === 'user').map(m => m.content);
+  const conversationSummary = userMessages.join('\n\n');
+
+  const guidelines = [
+    `Write in a ${voiceAnalysis.tone} tone that matches how this person naturally communicates`,
+    `Use ${voiceAnalysis.vocabulary} vocabulary - match their word choice level`,
+    `Structure: ${voiceAnalysis.structure} - mirror their way of organizing thoughts`,
+    `Emotional style: ${voiceAnalysis.emotionalStyle} - match how they express feelings`,
+    "Start with something engaging, not 'As I sit down to reflect' or similar cliches",
+    "Write like a real person's authentic diary entry, not an AI template",
+    "Use their actual words and phrases where possible",
+    "Make it sound like THEY wrote it, not like an AI assistant wrote it",
+    "Avoid generic journal entry language - be specific and personal"
+  ];
+
+  const enhancedPrompt = `
+CONVERSATION CONTEXT:
+${conversationSummary}
+
+WRITING STYLE TO MATCH:
+- Tone: ${voiceAnalysis.tone}
+- Structure: ${voiceAnalysis.structure}
+- Vocabulary: ${voiceAnalysis.vocabulary}
+- Emotional expression: ${voiceAnalysis.emotionalStyle}
+- Average message length: ${Math.round(voiceAnalysis.avgLength)} characters
+
+SPECIFIC INSTRUCTIONS:
+- Write a journal entry that sounds like this person actually wrote it
+- Use their natural language patterns and vocabulary
+- Don't start with formulaic phrases like "As I reflect on my day"
+- Make it feel authentic and personal, not like a template
+- Include specific details from our conversation
+- Match their emotional expression style
+- Use a natural, conversational flow
+
+SAMPLE PHRASES FROM THEIR CONVERSATION:
+${extractKeyPhrases(voiceAnalysis.allText).join(', ')}
+
+Please write a journal entry that captures the essence of our conversation while sounding authentically like this person wrote it themselves.`;
+
+  return {
+    enhancedPrompt,
+    guidelines
+  };
+}
+
+// Extract key phrases that are uniquely theirs
+function extractKeyPhrases(text) {
+  // Get phrases that show their personality
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10 && s.trim().length < 80);
+  const uniquePhrases = [];
+
+  sentences.forEach(sentence => {
+    const clean = sentence.trim().replace(/^(and|but|so|then|also)\s+/i, '');
+    if (clean.length > 5 && clean.length < 60) {
+      uniquePhrases.push(clean);
+    }
+  });
+
+  return uniquePhrases.slice(0, 5); // Top 5 most characteristic phrases
+}
+
+// Check if content is still formulaic
+function isContentFormulaic(content) {
+  const formulaicPhrases = [
+    'as i sit down to reflect',
+    'as i look back on my day',
+    'reflecting on my day',
+    'in conclusion',
+    'as i close this journal entry',
+    'as i write this entry',
+    'taking time to reflect',
+    'looking back on today'
+  ];
+
+  const lowerContent = content.toLowerCase();
+  return formulaicPhrases.some(phrase => lowerContent.includes(phrase));
 }
 
 // Analyze user's authentic voice from their messages
