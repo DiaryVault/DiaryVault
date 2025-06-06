@@ -1,75 +1,180 @@
-{% extends 'base.html' %}
-{% load widget_tweaks %}
+{% extends "base.html" %}
 
 {% block title %}{% if is_edit_mode %}Edit Entry{% else %}New Entry{% endif %} - DiaryVault{% endblock %}
 
 {% block extra_css %}
 <style>
-  /* Base Styles */
-  :root {
-    --primary-color: #6366f1;
-    --primary-light: #e0e7ff;
-    --primary-dark: #4f46e5;
-    --secondary-color: #6366f1;
-    --secondary-light: #e0e7ff;
-    --text-primary: #1f2937;
-    --text-secondary: #4b5563;
-    --text-light: #9ca3af;
-    --bg-gradient: linear-gradient(135deg, #6366f1, #a855f7);
-    --surface-1: #ffffff;
-    --surface-2: #f9fafb;
-    --border-light: rgba(229, 231, 235, 0.6);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --radius-sm: 0.375rem;
-    --radius-md: 0.5rem;
-    --radius-lg: 0.75rem;
-    --radius-xl: 1rem;
-    --transition-normal: all 0.3s ease;
+  /* SCROLL FIX: Remove conflicting scroll behaviors */
+  html, body {
+    overflow-x: visible !important;
+    scroll-behavior: smooth !important;
+  }
+
+  #main-content {
+    min-height: auto;
+    overflow: visible;
+  }
+
+  /* Core branding elements */
+  .diary-font {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.01em;
+    line-height: 1.5;
   }
 
   .handwritten {
-    font-family: 'Caveat', cursive;
+    font-family: 'Satisfy', cursive;
+    letter-spacing: 0.01em;
+    line-height: 1.7;
   }
 
-  .diary-font {
-    font-family: 'Caveat', cursive;
+  /* Enhanced animations - REDUCED for better scroll performance */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Card and Container Styles */
-  .journal-card {
-    background: var(--surface-1);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-md);
-    border: 1px solid var(--border-light);
-    overflow: hidden;
-    transition: var(--transition-normal);
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
   }
 
-  .journal-card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
+  @keyframes float {
+    0% { transform: translateY(0px) translateZ(0); }
+    50% { transform: translateY(-8px) translateZ(0); }
+    100% { transform: translateY(0px) translateZ(0); }
   }
 
-  .header-section {
-    background: linear-gradient(to right, #f0f9ff, #e0e7ff);
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--border-light);
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease forwards;
+    will-change: transform, opacity;
   }
 
-  .glass-effect {
-    background-color: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+  .animate-scale-in {
+    animation: scaleIn 0.4s ease forwards;
+    will-change: transform, opacity;
   }
 
-  /* Form Fields */
-  .form-field {
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+
+  .animation-delay-700 {
+    animation-delay: 700ms;
+  }
+
+  /* Enhanced shadows and hover effects - OPTIMIZED */
+  .btn-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateZ(0);
+  }
+
+  .btn-gradient:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    transform: translateY(-2px) translateZ(0);
+    box-shadow: 0 8px 20px -5px rgba(99, 102, 241, 0.4);
+  }
+
+  .card-hover {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: translateZ(0);
+  }
+
+  .card-hover:hover {
+    transform: translateY(-4px) translateZ(0);
+    box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* SCROLL FIX: Input container improvements */
+  #journalContainer {
+    box-sizing: border-box;
+    overflow: visible;
     position: relative;
-    margin-bottom: 1.5rem;
+    transition: all 0.2s ease-in-out;
+    border-color: rgba(99, 102, 241, 0.3);
+    max-height: none;
   }
 
+  #journalContainer.input-focused {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+  }
+
+  #journalInput {
+    box-sizing: border-box;
+    outline: none !important;
+    border: none !important;
+    width: 100%;
+    overflow-y: auto;
+    resize: none;
+    max-height: 400px;
+  }
+
+  #journalInput:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+  }
+
+  /* Photo preview container */
+  #photoPreviewContainer {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+  }
+
+  /* Toast notification system - OPTIMIZED */
+  .feedback-toast {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateX(100%) translateZ(0);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 18rem;
+    will-change: transform, opacity;
+  }
+
+  .feedback-toast.show {
+    transform: translateX(0) translateZ(0);
+    opacity: 1;
+  }
+
+  .feedback-toast.success {
+    background-color: #10b981;
+    color: white;
+  }
+
+  .feedback-toast.error {
+    background-color: #ef4444;
+    color: white;
+  }
+
+  .feedback-toast.info {
+    background-color: #6366f1;
+    color: white;
+  }
+
+  .feedback-toast.warning {
+    background-color: #f59e0b;
+    color: white;
+  }
+
+  /* Enhanced form styling */
   .floating-label {
     position: relative;
     margin-bottom: 1.25rem;
@@ -78,12 +183,13 @@
   .floating-label input,
   .floating-label textarea {
     width: 100%;
-    padding: 1rem;
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-md);
-    background-color: var(--surface-2);
+    padding: 1rem 1rem 0.5rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background-color: #f9fafb;
     font-size: 1rem;
-    transition: var(--transition-normal);
+    transition: all 0.3s ease;
+    font-family: 'Playfair Display', serif;
   }
 
   .floating-label label {
@@ -91,9 +197,10 @@
     top: 1rem;
     left: 1rem;
     font-size: 1rem;
-    color: var(--text-secondary);
+    color: #6b7280;
     pointer-events: none;
-    transition: var(--transition-normal);
+    transition: all 0.3s ease;
+    background-color: transparent;
   }
 
   .floating-label input:focus,
@@ -102,7 +209,9 @@
   .floating-label textarea:not(:placeholder-shown) {
     padding-top: 1.5rem;
     padding-bottom: 0.5rem;
-    border-color: var(--primary-color);
+    border-color: #6366f1;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   }
 
   .floating-label input:focus ~ label,
@@ -112,7 +221,98 @@
     top: 0.5rem;
     left: 0.8rem;
     font-size: 0.75rem;
-    color: var(--primary-color);
+    color: #6366f1;
+    font-weight: 500;
+  }
+
+  /* Modern Photo Upload */
+  .photo-upload-modern {
+    position: relative;
+    margin: 1.5rem 0;
+    border-radius: 0.75rem;
+    background: #f9fafb;
+    border: 2px dashed #d1d5db;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .photo-upload-modern:hover {
+    border-color: #6366f1;
+    background-color: rgba(99, 102, 241, 0.05);
+  }
+
+  .photo-upload-input {
+    display: none;
+  }
+
+  .photo-upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    cursor: pointer;
+    height: 12rem;
+  }
+
+  .photo-upload-icon {
+    width: 3rem;
+    height: 3rem;
+    color: #9ca3af;
+    margin-bottom: 1rem;
+  }
+
+  .photo-upload-text {
+    color: #6b7280;
+    text-align: center;
+  }
+
+  .photo-upload-text strong {
+    color: #6366f1;
+  }
+
+  .photo-preview-modern {
+    width: 100%;
+    height: 12rem;
+    object-fit: cover;
+    display: none;
+  }
+
+  .photo-preview-modern.has-image {
+    display: block;
+  }
+
+  .photo-controls-modern {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+
+  .photo-upload-modern:hover .photo-controls-modern {
+    opacity: 1;
+  }
+
+  .photo-control-btn-modern {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: none;
+  }
+
+  .photo-control-btn-modern:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   }
 
   /* Modern Mood Selector */
@@ -125,11 +325,11 @@
     position: relative;
     height: 5rem;
     background: linear-gradient(to right,
-      #4ade80 0%, /* Happy/Excited */
-      #a78bfa 50%, /* Content/Neutral */
-      #f87171 100% /* Anxious/Sad */
+      #4ade80 0%,
+      #a78bfa 50%,
+      #f87171 100%
     );
-    border-radius: var(--radius-lg);
+    border-radius: 0.75rem;
     margin-top: 0.5rem;
   }
 
@@ -151,7 +351,7 @@
     height: 3rem;
     background: white;
     border-radius: 50%;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -173,97 +373,7 @@
 
   .mood-labels span {
     font-size: 0.8rem;
-    color: var(--text-secondary);
-  }
-
-  /* Modern Photo Upload */
-  .photo-upload-modern {
-    position: relative;
-    margin: 1.5rem 0;
-    border-radius: var(--radius-lg);
-    background: var(--surface-2);
-    border: 2px dashed var(--border-light);
-    transition: var(--transition-normal);
-    overflow: hidden;
-  }
-
-  .photo-upload-modern:hover {
-    border-color: var(--primary-color);
-    background-color: rgba(99, 102, 241, 0.05);
-  }
-
-  .photo-upload-input {
-    display: none;
-  }
-
-  .photo-upload-label {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    cursor: pointer;
-    height: 12rem;
-  }
-
-  .photo-upload-icon {
-    width: 3rem;
-    height: 3rem;
-    color: var(--text-light);
-    margin-bottom: 1rem;
-  }
-
-  .photo-upload-text {
-    color: var(--text-secondary);
-    text-align: center;
-  }
-
-  .photo-upload-text strong {
-    color: var(--primary-color);
-  }
-
-  .photo-preview-modern {
-    width: 100%;
-    height: 12rem;
-    object-fit: cover;
-    display: none;
-  }
-
-  .photo-preview-modern.has-image {
-    display: block;
-  }
-
-  .photo-controls-modern {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    display: flex;
-    gap: 0.5rem;
-    opacity: 0;
-    transition: var(--transition-normal);
-  }
-
-  .photo-upload-modern:hover .photo-controls-modern {
-    opacity: 1;
-  }
-
-  .photo-control-btn-modern {
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 50%;
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition-normal);
-    border: none;
-  }
-
-  .photo-control-btn-modern:hover {
-    transform: scale(1.1);
-    box-shadow: var(--shadow-md);
+    color: #6b7280;
   }
 
   /* Tags Input Modern */
@@ -275,13 +385,14 @@
   .tags-input {
     width: 100%;
     padding: 0.75rem;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-light);
-    transition: var(--transition-normal);
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    transition: all 0.3s ease;
+    font-family: 'Playfair Display', serif;
   }
 
   .tags-input:focus {
-    border-color: var(--primary-color);
+    border-color: #6366f1;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
     outline: none;
   }
@@ -297,16 +408,16 @@
     display: inline-flex;
     align-items: center;
     padding: 0.375rem 0.75rem;
-    background: var(--primary-light);
-    color: var(--primary-dark);
+    background: rgba(99, 102, 241, 0.1);
+    color: #4f46e5;
     border-radius: 9999px;
     font-size: 0.75rem;
     font-weight: 500;
-    transition: var(--transition-normal);
+    transition: all 0.3s ease;
   }
 
   .tag-pill:hover {
-    background: var(--primary-color);
+    background: #6366f1;
     color: white;
   }
 
@@ -324,18 +435,18 @@
     padding: 0.375rem 0.75rem;
     margin-right: 0.5rem;
     margin-bottom: 0.5rem;
-    background-color: var(--surface-2);
-    border: 1px solid var(--border-light);
+    background-color: #f9fafb;
+    border: 1px solid #d1d5db;
     border-radius: 9999px;
     font-size: 0.75rem;
     cursor: pointer;
-    transition: var(--transition-normal);
+    transition: all 0.3s ease;
   }
 
   .tag-suggestion:hover {
-    background-color: var(--primary-light);
-    border-color: var(--primary-color);
-    color: var(--primary-dark);
+    background-color: rgba(99, 102, 241, 0.1);
+    border-color: #6366f1;
+    color: #4f46e5;
   }
 
   /* Button Styles */
@@ -344,33 +455,34 @@
     align-items: center;
     justify-content: center;
     padding: 0.75rem 1.5rem;
-    border-radius: var(--radius-md);
+    border-radius: 0.5rem;
     font-weight: 500;
-    transition: var(--transition-normal);
+    transition: all 0.3s ease;
     cursor: pointer;
+    transform: translateZ(0);
   }
 
   .btn-primary {
-    background: var(--bg-gradient);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
     border: none;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 
   .btn-primary:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px) translateZ(0);
   }
 
   .btn-secondary {
     background: white;
-    color: var(--text-primary);
-    border: 1px solid var(--border-light);
+    color: #374151;
+    border: 1px solid #d1d5db;
   }
 
   .btn-secondary:hover {
-    background: var(--surface-2);
-    border-color: var(--text-light);
+    background: #f9fafb;
+    border-color: #9ca3af;
   }
 
   /* Animation for auto-populated content */
@@ -390,9 +502,15 @@
   }
 
   .content-editor-container {
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-md);
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
     overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .content-editor-container:focus-within {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   }
 
   .content-editor-textarea {
@@ -401,10 +519,10 @@
     padding: 1rem;
     border: none;
     resize: vertical;
-    font-family: 'Caveat', cursive;
+    font-family: 'Satisfy', cursive;
     font-size: 1.125rem;
-    color: var(--text-primary);
-    background-color: var(--surface-1);
+    color: #1f2937;
+    background-color: white;
   }
 
   .content-editor-textarea:focus {
@@ -416,240 +534,182 @@
     bottom: 0.5rem;
     right: 0.5rem;
     font-size: 0.75rem;
-    color: var(--text-light);
-    background: var(--surface-1);
+    color: #9ca3af;
+    background: white;
     padding: 0.25rem 0.5rem;
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-sm);
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 
-  /* Chat components for AI interface */
-  .chat-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding-bottom: 1rem;
-  }
-
+  /* Better chat bubbles - OPTIMIZED */
   .chat-bubble {
-    padding: 1rem;
-    border-radius: 1rem;
-    max-width: 85%;
+    will-change: transform;
+    transform: translateZ(0);
+    transition: all 0.2s ease;
     position: relative;
-    animation: fadeIn 0.3s ease forwards;
+    padding: 1rem 1.5rem;
+    border-radius: 1.25rem;
+    max-width: 85%;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .chat-bubble:hover {
+    transform: scale(1.01) translateZ(0);
   }
 
   .chat-bubble.ai {
     background-color: rgba(243, 244, 246, 0.8);
-    border: 1px solid rgba(229, 231, 235, 0.5);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     align-self: flex-start;
     border-bottom-left-radius: 0.25rem;
+    border-top-right-radius: 1.5rem;
+    box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.1);
   }
 
   .chat-bubble.user {
-    background-color: rgba(99, 102, 241, 0.1);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
     align-self: flex-end;
     border-bottom-right-radius: 0.25rem;
+    border-top-left-radius: 1.5rem;
+    margin-left: auto;
+    box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.15);
   }
 
-  .chat-bubble.thinking {
-    background-color: rgba(243, 244, 246, 0.8);
-    border: 1px solid rgba(229, 231, 235, 0.5);
-    align-self: flex-start;
-    border-bottom-left-radius: 0.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  /* SCROLL FIX: Mobile optimizations */
+  @media (max-width: 640px) {
+    input, textarea, select {
+      font-size: 16px !important;
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+
+    .card-hover {
+      margin-bottom: 1rem;
+    }
+
+    .suggestions-pill {
+      min-height: 36px;
+      padding: 0.4rem 0.8rem;
+    }
+
+    #journalContainer {
+      min-height: 120px;
+      max-height: 300px;
+    }
+
+    #journalInput {
+      max-height: 280px;
+    }
+
+    button,
+    .suggestions-pill,
+    input[type="checkbox"] + label,
+    .card-hover,
+    .btn-gradient {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    .mobile-friendly-padding {
+      padding: 0.75rem !important;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    body {
+      overflow-x: visible !important;
+      -webkit-overflow-scrolling: touch;
+    }
   }
 
-  .typing-indicator {
-    display: flex;
-    gap: 0.3rem;
+  /* Loading spinner improvements */
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1.3);
+      opacity: 0;
+    }
   }
 
-  .typing-indicator span {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background-color: #6366f1;
-    display: inline-block;
-    opacity: 0.6;
-  }
-
-  .typing-indicator span:nth-child(1) {
-    animation: pulse 1s infinite;
-  }
-
-  .typing-indicator span:nth-child(2) {
-    animation: pulse 1s infinite 0.3s;
-  }
-
-  .typing-indicator span:nth-child(3) {
-    animation: pulse 1s infinite 0.6s;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 0.4; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.1); }
-  }
-
-  /* Input container */
-  .journal-input-container {
-    position: relative;
-    background-color: white;
-    border-radius: 1rem;
-    border: 1px solid rgba(229, 231, 235, 0.8);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-  }
-
-  .journal-input-container textarea {
-    flex: 1;
-    padding-right: 3.5rem;
-  }
-
-  .journal-input-container:focus-within {
-    border-color: #6366f1;
-    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.1);
-  }
-
-  /* Chat tools */
-  .chat-tools {
+  .loading-pulse-ring::before {
+    content: '';
     position: absolute;
-    right: 0.5rem;
-    bottom: 50%;
-    transform: translateY(50%);
-    display: flex;
-    gap: 0.5rem;
-    height: calc(100% - 1rem);
-    align-items: center;
+    inset: -4px;
+    border-radius: 50%;
+    background: rgba(99, 102, 241, 0.3);
+    animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
   }
 
-  .tool-button {
-    margin-right: 0.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 9999px;
-    background-color: white;
-    border: 1px solid rgba(229, 231, 235, 0.8);
-    color: #6366f1;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
   }
 
-  .tool-button:hover {
-    background-color: rgba(99, 102, 241, 0.1);
-    transform: translateY(-2px);
+  ::-webkit-scrollbar-track {
+    background: rgba(241, 245, 249, 0.5);
+    border-radius: 4px;
   }
 
-  .tool-button.primary {
-    background-color: #6366f1;
-    color: white;
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    border-radius: 4px;
+    transition: background 0.3s ease;
   }
 
-  .tool-button.primary:hover {
-    background-color: #4f46e5;
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
   }
 
-  /* AI Modal */
-  .modal-content {
-    background: white;
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-    max-width: 500px;
-    width: 100%;
-    margin: 2rem;
-    transform: scale(0.95);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+  /* Focus states */
+  :focus {
+    outline: 2px solid #6366f1 !important;
+    outline-offset: 2px;
   }
 
-  .modal-visible .modal-content {
-    transform: scale(1);
-    opacity: 1;
+  :focus:not(:focus-visible) {
+    outline: none !important;
   }
 
-  .modal-header {
-    background: linear-gradient(to right, #f0f9ff, #e0e7ff);
-    padding: 1.25rem;
-    border-bottom: 1px solid rgba(229, 231, 235, 0.5);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .modal-body {
-    padding: 1.5rem;
-  }
-
-  .template-card {
-    background: white;
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    transition: var(--transition-normal);
-    cursor: pointer;
-    margin-bottom: 0.75rem;
-  }
-
-  .template-card:hover {
-    border-color: var(--primary-color);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-  }
-
-  .template-card-content {
-    padding: 1rem;
-    display: flex;
-    align-items: center;
-  }
-
-  .template-icon {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 1rem;
-  }
-
-  /* Other Animations */
-  @keyframes scaleIn {
-    0% { transform: scale(0.95); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
-  .scale-in {
-    animation: scaleIn 0.3s ease forwards;
-  }
-
-  @keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-  }
-
-  .fade-in {
-    animation: fadeIn 0.3s ease forwards;
+  :focus-visible {
+    outline: 2px solid #6366f1 !important;
+    outline-offset: 2px;
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
+<!-- Skip link for accessibility -->
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-secondary-600 focus:outline-offset-0">Skip to main content</a>
+
+<!-- SCROLL FIX: Simplified main container -->
+<div id="main-content" class="max-w-4xl w-full mx-auto relative">
+  <!-- Enhanced decorative elements - REDUCED for performance -->
+  <div class="hidden sm:block absolute -top-10 -left-16 h-48 w-48 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob"></div>
+  <div class="hidden sm:block absolute -bottom-32 -right-16 h-48 w-48 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob animation-delay-500"></div>
+  <div class="absolute top-1/3 left-1/3 h-16 w-16 sm:h-20 sm:w-20 bg-amber-300 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-700"></div>
+
+  <!-- Enhanced feedback container -->
+  <div id="feedback-container" class="fixed bottom-4 right-4 flex flex-col gap-2 z-50">
+    <!-- Feedback toasts will be added here dynamically -->
+  </div>
+
   {% if messages %}
     <div class="mb-6">
       {% for message in messages %}
         {% if message.tags != 'success' or "signed in" not in message.message %}
-          <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% elif message.tags == 'success' %}bg-green-100 border-green-400 text-green-700{% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} px-4 py-3 rounded-xl shadow-sm border mb-4 scale-in">
+          <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% elif message.tags == 'success' %}bg-green-100 border-green-400 text-green-700{% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} px-4 py-3 rounded-xl shadow-sm border mb-4 animate-scale-in">
             {{ message }}
           </div>
         {% endif %}
@@ -657,156 +717,46 @@
     </div>
   {% endif %}
 
-  <!-- Page Header with Date -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-    <div>
-      <h2 class="text-2xl sm:text-3xl font-bold diary-font text-gray-900 mb-1">
-        {% if is_edit_mode %}Edit Journal Entry{% else %}New Journal Entry{% endif %}
-      </h2>
-      <p class="text-gray-500 text-sm">{{ today|date:"l, F j, Y" }}</p>
+  <!-- Header with date -->
+  <div class="text-center mb-10 relative z-10">
+    <div class="inline-block mb-3 animate-pulse">
+      <span class="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-gray-500 shadow-sm border border-white/50">
+        {{ today|date:"l, F j, Y" }}
+      </span>
     </div>
-    <div class="glass-effect py-1 px-3 rounded-lg shadow-sm border border-white/30">
-      <time datetime="{{ today|date:'Y-m-d' }}" class="text-secondary-700 font-medium flex items-center gap-1.5">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        {{ today|date:"F j, Y" }}
-      </time>
-    </div>
+    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2 animate-fade-in">
+      {% if is_edit_mode %}Edit Your Journal Entry{% else %}Create Your Journal Entry{% endif %}
+    </h2>
+    <p class="text-gray-600 text-sm max-w-md mx-auto animate-fade-in animation-delay-300">
+      {% if is_edit_mode %}
+        Update your thoughts and feelings for this entry
+      {% else %}
+        Share your thoughts, feelings and experiences - our AI will help you create a beautiful journal entry
+      {% endif %}
+    </p>
   </div>
 
-  <!-- Main content area -->
-  <div class="journal-card" id="journalCard">
-    <!-- Header section - always visible -->
-    <div class="header-section">
-      <div class="flex items-center justify-between">
-        <h3 class="font-semibold diary-font text-gray-800 flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-          {% if is_edit_mode %}Edit Your Journal Entry{% else %}Create Journal Entry with AI{% endif %}
-        </h3>
-        <div class="text-xs font-medium glass-effect px-3 py-1.5 rounded-full text-gray-600 flex items-center gap-1.5 shadow-sm border border-white/30">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-          </svg>
-          <span id="charCount">0</span>
-          <span>characters</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Chat/conversation area -->
-    {% if not is_edit_mode %}
-    <div class="p-4 sm:p-6 glass-effect border-b border-white/20">
-      <div class="chat-container" id="chatContainer">
-        <!-- Initial AI greeting -->
-        <div class="chat-bubble ai">
-          <p class="handwritten text-gray-800 text-lg leading-relaxed">Hello! I'm your journal assistant. Share some quick notes about your day, and I'll help transform them into a beautiful journal entry. You can also add a photo to capture the moment.</p>
-        </div>
-
-        <!-- Conversation history will be added here dynamically -->
-        <div id="chatHistory"></div>
-
-        <!-- Thinking indicator (initially hidden) -->
-        <div class="chat-bubble thinking hidden" id="thinkingIndicator">
-          <div class="typing-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-          <span class="ml-2 text-gray-600">Thinking...</span>
-        </div>
-      </div>
-
-      <!-- Chat input container -->
-      <div class="mt-4 mb-2 journal-input-container">
-        <textarea id="quickNotes" class="input-area w-full p-4 pr-16 border-0 focus:ring-0 diary-font text-gray-800 bg-transparent rounded-xl"
-          placeholder="Tell me about your day..."
-          oninput="countChars()" rows="3"></textarea>
-
-        <!-- Chat tools -->
-        <div class="chat-tools">
-          <!-- Photo upload tool -->
-          <div class="relative">
-            <button type="button" class="tool-button" onclick="document.getElementById('entryPhotoInput').click()">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span class="tooltip">Add Photo</span>
-            </button>
-            <!-- Hidden file input -->
-            <input type="file" name="entry_photo" id="entryPhotoInput" class="hidden" accept="image/*" onchange="handleFileSelect(this)">
-          </div>
-
-          <!-- Generate button -->
-          <button type="button" class="tool-button primary" id="generateEntryBtn" onclick="sendMessage()">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+  <!-- Enhanced Main entry form with improved styling -->
+  <form method="post" enctype="multipart/form-data" id="journalForm" class="w-full relative z-10 animate-scale-in">
+    {% csrf_token %}
+    <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden border border-white transition-all hover:shadow-2xl card-hover">
+      <div class="p-3 sm:p-6">
+        <!-- Header section with responsive layout -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+          <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd" />
             </svg>
-            <span class="tooltip">Generate</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Photo preview (initially hidden) -->
-      <div id="photoContainer" class="hidden mt-3 rounded-lg overflow-hidden border border-white/30 shadow-sm">
-        <div class="relative">
-          <img id="photoPreview" class="w-full max-h-60 object-cover" src="" alt="Journal photo preview">
-          <div class="absolute top-2 right-2 flex gap-2">
-            <button type="button" class="photo-control-btn" onclick="document.getElementById('entryPhotoInput').click()" title="Change photo">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-              </svg>
-            </button>
-            <button type="button" class="photo-control-btn" onclick="removePhoto()" title="Remove photo">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
+            Journal Entry Details
+          </h3>
+          <div class="text-xs font-medium bg-gray-100 px-3 py-1 rounded-full text-gray-500 flex items-center gap-1 shadow-inner w-fit">
+            <span id="charCount">{{ form.content.value|length|default:0 }}</span>
+            <span>characters</span>
           </div>
         </div>
-        <div class="p-2 bg-white/80 text-xs text-gray-600 flex justify-between items-center">
-          <span id="photoName">image.jpg</span>
-          <span class="text-secondary-600">Added to journal</span>
-        </div>
-      </div>
-
-      <!-- Topic suggestions -->
-      <div class="mt-3">
-        <div class="text-xs font-medium text-gray-700 mb-2 flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
-          Try these topics:
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestions-pill bg-secondary-50 hover:bg-secondary-100 text-secondary-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-secondary-200/50">Today I accomplished</button>
-          <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-emerald-200/50">I felt happy when</button>
-          <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-primary-50 hover:bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-primary-200/50">I learned that</button>
-          <button type="button" onclick="addSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50">I met with</button>
-          <button type="button" onclick="addSuggestion('I'm grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50">I'm grateful for</button>
-        </div>
-      </div>
-
-      <div class="mt-4 text-center">
-        <button id="useEntryFormBtn" class="btn-modern btn-secondary flex items-center gap-2 mx-auto">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-          </svg>
-          <span>Edit entry in full form</span>
-        </button>
-      </div>
-    </div>
-    {% endif %}
-
-    <!-- Modern Full Entry Form -->
-    <div id="fullEntryForm" class="p-6 {% if not is_edit_mode %}hidden{% endif %}">
-      <form method="post" enctype="multipart/form-data" class="space-y-8">
-        {% csrf_token %}
 
         <!-- Title field with floating label -->
-        <div class="form-field">
+        <div class="form-field mb-6">
           <div class="floating-label">
             <input type="text" id="id_title" name="title" placeholder=" "
                   class="focus:ring-primary-color focus:border-primary-color"
@@ -818,58 +768,82 @@
           {% endif %}
         </div>
 
-        <!-- Modern Photo Upload -->
-        <div class="form-field">
-          <h3 class="text-sm font-medium mb-2 text-gray-700 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Add a Moment
-          </h3>
+        <!-- SCROLL FIX: Enhanced integrated input container -->
+        <div id="journalContainer" class="relative border border-gray-200 rounded-xl focus-within:border-secondary-400 transition bg-gray-50/50 min-h-[200px] sm:min-h-[300px] shadow-inner mb-6">
+          <!-- SCROLL FIX: Input textarea with improved styling -->
+          <textarea
+            id="journalInput"
+            name="content"
+            class="input-area w-full p-3 sm:p-4 border-0 focus:ring-0 focus:outline-none handwritten bg-transparent min-h-[200px] sm:min-h-[300px] resize-none text-lg"
+            placeholder="Tell me about your day... What did you do? How did you feel? What are you grateful for?"
+            oninput="countChars()"
+            data-dropzone="true"
+            aria-label="Journal content"
+            autocomplete="off"
+            spellcheck="true">{{ form.content.value|default:'' }}</textarea>
 
-          <div class="photo-upload-modern" id="photoUploadModern">
-            <!-- Hidden file input -->
-            <input type="file" name="entry_photo" id="formPhotoInputModern" class="photo-upload-input" accept="image/*">
-
-            <!-- Photo preview -->
-            <img src="{{ form.instance.photo.url|default:'' }}" id="photoPreviewModern" class="photo-preview-modern {% if form.instance.photo %}has-image{% endif %}" alt="Journal photo">
-
-            <!-- Placeholder content -->
-            <label for="formPhotoInputModern" class="photo-upload-label" id="photoPlaceholderModern" {% if form.instance.photo %}style="display: none;"{% endif %}>
-              <svg xmlns="http://www.w3.org/2000/svg" class="photo-upload-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <div class="photo-upload-text">
-                <p class="mb-1">Drag & drop a photo or</p>
-                <p><strong>click to browse</strong></p>
+          <!-- Photo preview container with improved styling (initially hidden) -->
+          <div id="photoPreviewContainer" class="{% if not form.instance.photo %}hidden{% endif %} p-3 border-t border-gray-200 bg-white/80">
+            <div class="flex items-center gap-3">
+              <div class="relative inline-block group">
+                <img id="photoPreview" class="h-20 w-20 sm:h-24 sm:w-24 object-cover rounded-lg border-2 border-secondary-200 shadow-sm"
+                     src="{% if form.instance.photo %}{{ form.instance.photo.url }}{% endif %}" alt="Your photo">
+                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-lg transition-colors flex items-center justify-center">
+                  <button type="button" id="removePhotoBtn" class="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md border border-gray-200 opacity-100 hover:bg-red-50 transition-colors"
+                    onclick="removePhoto()" title="Remove photo" aria-label="Remove photo">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
               </div>
-            </label>
-
-            <!-- Controls -->
-            <div class="photo-controls-modern" id="photoControlsModern" {% if not form.instance.photo %}style="display: none;"{% endif %}>
-              <button type="button" class="photo-control-btn-modern" id="changePhotoModern">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-              </button>
-              <button type="button" class="photo-control-btn-modern" id="removePhotoModern">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div class="text-sm text-gray-600">
+                <div class="font-medium">Photo added</div>
+                <div class="text-xs" id="photoName">{% if form.instance.photo %}{{ form.instance.photo.name }}{% else %}image.jpg{% endif %}</div>
+              </div>
             </div>
           </div>
 
-          <p class="text-xs text-gray-500 mt-2 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Add a photo to capture this moment visually (max 5MB)
-          </p>
+          <!-- Enhanced tools container with tooltip -->
+          <div class="absolute bottom-2 right-3 flex items-center gap-2">
+            <div class="relative group">
+              <input id="journalPhoto" name="entry_photo" type="file" accept="image/*" class="hidden" onchange="previewPhoto(event)" aria-label="Add a photo to your journal">
+              <label for="journalPhoto" class="cursor-pointer p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center" title="Add a photo">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 group-hover:text-secondary-500 transition-colors" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                </svg>
+              </label>
+              <div class="absolute bottom-full right-0 mb-2 w-max bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                Add a photo
+              </div>
+            </div>
+          </div>
+
+          <!-- Enhanced drop zone indicator with animation (hidden by default) -->
+          <div id="dropZoneIndicator" class="hidden absolute inset-0 bg-secondary-50 border-2 border-dashed border-secondary-400 rounded-xl flex items-center justify-center pointer-events-none z-10 opacity-95">
+            <div class="text-center p-4 animate-scale-in">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-secondary-400 mx-auto mb-2 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p class="text-secondary-600 font-medium">Drop your photo here</p>
+            </div>
+          </div>
+        </div>
+
+        {% if form.content.errors %}
+          <p class="text-red-600 text-xs mb-4">{{ form.content.errors.0 }}</p>
+        {% endif %}
+
+        <!-- Enhanced drag-and-drop hint message -->
+        <div class="mb-4 text-xs text-gray-500 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>You can drag & drop a photo directly into the input box</span>
         </div>
 
         <!-- Modern Mood Selector -->
-        <div class="form-field">
+        <div class="form-field mb-6">
           <h3 class="text-sm font-medium mb-2 text-gray-700 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -886,7 +860,7 @@
             <div class="mood-slider" id="moodSlider">
               <div class="mood-slider-track"></div>
               <div class="mood-slider-thumb" id="moodThumb" style="left: 50%;">
-                <span id="moodEmoji">😐</span>
+                <span id="moodThumbEmoji">😐</span>
               </div>
             </div>
 
@@ -899,35 +873,14 @@
 
           <!-- Hidden radio buttons (for form submission) -->
           <div class="hidden">
-            <input type="radio" name="mood" value="happy" id="mood_happy" {% if form.mood.value == 'happy' %}checked{% endif %}>
-            <input type="radio" name="mood" value="excited" id="mood_excited" {% if form.mood.value == 'excited' %}checked{% endif %}>
-            <input type="radio" name="mood" value="content" id="mood_content" {% if form.mood.value == 'content' %}checked{% endif %}>
-            <input type="radio" name="mood" value="neutral" id="mood_neutral" {% if form.mood.value == 'neutral' %}checked{% endif %}>
-            <input type="radio" name="mood" value="anxious" id="mood_anxious" {% if form.mood.value == 'anxious' %}checked{% endif %}>
-            <input type="radio" name="mood" value="sad" id="mood_sad" {% if form.mood.value == 'sad' %}checked{% endif %}>
+            {% for choice in form.mood %}
+              {{ choice.tag }}
+            {% endfor %}
           </div>
-        </div>
-
-        <!-- Content field with modern editor -->
-        <div class="form-field content-editor">
-          <h3 class="text-sm font-medium mb-2 text-gray-700 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-            Your Journal Entry
-          </h3>
-
-          <div class="content-editor-container">
-            <textarea id="id_content" name="content" class="content-editor-textarea" placeholder="Write your thoughts here...">{{ form.content.value|default:'' }}</textarea>
-          </div>
-
-          {% if form.content.errors %}
-            <p class="text-red-600 text-xs mt-1">{{ form.content.errors.0 }}</p>
-          {% endif %}
         </div>
 
         <!-- Tags field with modern input -->
-        <div class="form-field">
+        <div class="form-field mb-6">
           <h3 class="text-sm font-medium mb-2 text-gray-700 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -944,16 +897,16 @@
             <!-- Tag suggestions -->
             <div class="tag-suggestions mt-3">
               <p class="text-xs text-gray-500 mb-2">Suggested tags:</p>
-              <button type="button" class="tag-suggestion">work</button>
-              <button type="button" class="tag-suggestion">family</button>
-              <button type="button" class="tag-suggestion">health</button>
-              <button type="button" class="tag-suggestion">friends</button>
-              <button type="button" class="tag-suggestion">reflection</button>
-              <button type="button" class="tag-suggestion">gratitude</button>
-              <button type="button" class="tag-suggestion">travel</button>
-              <button type="button" class="tag-suggestion">food</button>
-              <button type="button" class="tag-suggestion">learning</button>
-              <button type="button" class="tag-suggestion">goals</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('work')">work</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('family')">family</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('health')">health</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('friends')">friends</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('reflection')">reflection</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('gratitude')">gratitude</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('travel')">travel</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('food')">food</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('learning')">learning</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('goals')">goals</button>
             </div>
           </div>
 
@@ -965,10 +918,37 @@
           </p>
         </div>
 
-        <!-- Modern Buttons -->
-        <div class="pt-4 border-t border-gray-100 flex justify-between items-center">
+        <!-- Enhanced suggestions section with better wrapping and animations -->
+        <div class="mb-6">
+          <div class="text-xs font-medium text-gray-600 mb-2 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            <span>Start with a prompt:</span>
+          </div>
+          <div class="flex flex-wrap gap-1 sm:gap-2">
+            <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestions-pill bg-secondary-50 hover:bg-secondary-100 text-secondary-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-medium transition shadow-sm border border-secondary-200/50 min-h-[32px] sm:min-h-[40px] mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 100ms;" aria-label="Add 'Today I accomplished' prompt">Today I accomplished</button>
+            <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-emerald-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 200ms;" aria-label="Add 'I felt happy when' prompt">I felt happy when</button>
+            <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-indigo-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 300ms;" aria-label="Add 'I learned that' prompt">I learned that</button>
+            <button type="button" onclick="addSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 400ms;" aria-label="Add 'I met with' prompt">I met with</button>
+            <button type="button" onclick="addSuggestion('I\'m grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 500ms;" aria-label="Add 'I'm grateful for' prompt">I'm grateful for</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced bottom action area with mobile optimizations -->
+      <div class="bg-gradient-to-r from-secondary-50 to-primary-50 px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-t border-white">
+        <div class="text-xs text-gray-600 flex items-center gap-2">
+          <span class="h-6 w-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-600" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+            </svg>
+          </span>
+          <span>{% if is_edit_mode %}Update your journal entry{% else %}Create your journal entry{% endif %}</span>
+        </div>
+        <div class="action-container flex gap-3">
           {% if is_edit_mode %}
-            <a href="{% url 'entry_detail' entry.id %}" class="btn-modern btn-secondary">
+            <a href="{% url 'entry_detail' form.instance.id %}" class="btn-modern btn-secondary">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
@@ -983,344 +963,260 @@
             </a>
           {% endif %}
 
-          <div class="flex gap-3">
-            <button type="button" id="aiHelpBtn" class="btn-modern btn-secondary relative">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              AI Writing Help
-              <span class="absolute -top-1 -right-1 flex h-3 w-3">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-secondary-500"></span>
-              </span>
-            </button>
-
-            <button type="submit" class="btn-modern btn-primary">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-              </svg>
-              {% if is_edit_mode %}Save Changes{% else %}Save Entry{% endif %}
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modern AI Help Modal -->
-  <div id="aiHelpModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden transition-opacity duration-300">
-    <div class="max-w-lg w-full bg-white rounded-xl shadow-2xl m-4 overflow-hidden transform transition-transform duration-300 scale-95 opacity-0" id="modalContent">
-      <!-- Modal Header -->
-      <div class="p-5 bg-gradient-to-r from-secondary-50 to-primary-50 flex justify-between items-center border-b border-gray-100">
-        <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          <span>AI Writing Assistance</span>
-        </h3>
-        <button id="closeModal" class="bg-white/80 p-1.5 rounded-full text-gray-500 hover:text-gray-700 transition-colors duration-200 hover:bg-white/100">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <!-- Modal Content -->
-      <div class="p-6">
-        <p class="text-gray-600 mb-6">Choose a writing template to enhance your journal entry:</p>
-
-        <div class="grid gap-4">
-          <!-- Template Cards -->
-          <div class="ai-prompt-btn overflow-hidden rounded-lg border border-gray-100 bg-white transition-all duration-200 hover:shadow-md hover:border-secondary-200 hover:bg-secondary-50/20 cursor-pointer" data-template="daily-reflection">
-            <div class="flex p-4">
-              <div class="bg-secondary-100 rounded-lg p-3 mr-4 self-start">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div class="flex-1">
-                <div class="font-medium text-gray-800 mb-1">Daily Reflection</div>
-                <p class="text-gray-500 text-sm">Create a structured entry about your experiences, achievements, and lessons of the day.</p>
-              </div>
-              <div class="ml-2 self-center text-secondary-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div class="ai-prompt-btn overflow-hidden rounded-lg border border-gray-100 bg-white transition-all duration-200 hover:shadow-md hover:border-primary-200 hover:bg-primary-50/20 cursor-pointer" data-template="thought-organizer">
-            <div class="flex p-4">
-              <div class="bg-primary-100 rounded-lg p-3 mr-4 self-start">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-              </div>
-              <div class="flex-1">
-                <div class="font-medium text-gray-800 mb-1">Thought Organizer</div>
-                <p class="text-gray-500 text-sm">Provides a framework for exploring complex thoughts and ideas methodically.</p>
-              </div>
-              <div class="ml-2 self-center text-primary-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div class="ai-prompt-btn overflow-hidden rounded-lg border border-gray-100 bg-white transition-all duration-200 hover:shadow-md hover:border-rose-200 hover:bg-rose-50/20 cursor-pointer" data-template="emotional-explorer">
-            <div class="flex p-4">
-              <div class="bg-rose-100 rounded-lg p-3 mr-4 self-start">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </div>
-              <div class="flex-1">
-                <div class="font-medium text-gray-800 mb-1">Emotional Explorer</div>
-                <p class="text-gray-500 text-sm">Create a template for exploring and understanding your emotions with depth.</p>
-              </div>
-              <div class="ml-2 self-center text-rose-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div class="ai-prompt-btn overflow-hidden rounded-lg border border-gray-100 bg-white transition-all duration-200 hover:shadow-md hover:border-emerald-200 hover:bg-emerald-50/20 cursor-pointer" data-template="gratitude-practice">
-            <div class="flex p-4">
-              <div class="bg-emerald-100 rounded-lg p-3 mr-4 self-start">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                </svg>
-              </div>
-              <div class="flex-1">
-                <div class="font-medium text-gray-800 mb-1">Gratitude Practice</div>
-                <p class="text-gray-500 text-sm">Creates a framework for identifying and appreciating positive aspects of your life.</p>
-              </div>
-              <div class="ml-2 self-center text-emerald-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div class="ai-prompt-btn overflow-hidden rounded-lg border border-gray-100 bg-white transition-all duration-200 hover:shadow-md hover:border-amber-200 hover:bg-amber-50/20 cursor-pointer" data-template="progress-tracker">
-            <div class="flex p-4">
-              <div class="bg-amber-100 rounded-lg p-3 mr-4 self-start">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-              <div class="flex-1">
-                <div class="font-medium text-gray-800 mb-1">Progress Tracker</div>
-                <p class="text-gray-500 text-sm">Helps you document progress toward personal or professional goals and next steps.</p>
-              </div>
-              <div class="ml-2 self-center text-amber-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Modal Footer -->
-        <div class="mt-6 flex justify-end">
-          <button id="cancelAiHelp" class="btn-modern btn-secondary">
-            Cancel
+          <button type="submit" class="btn-gradient text-white px-5 py-3 rounded-full text-sm font-medium flex items-center justify-center gap-2 shadow-md w-full sm:w-auto hover:shadow-lg transition-all" aria-label="{% if is_edit_mode %}Update journal entry{% else %}Save journal entry{% endif %}">
+            <span>{% if is_edit_mode %}Update Entry{% else %}Save Entry{% endif %}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
           </button>
         </div>
       </div>
     </div>
-  </div>
+  </form>
 </div>
-{% endblock %}
 
-{% block extra_js %}
+<!-- SCROLL FIX: Enhanced JavaScript with scroll optimizations -->
 <script>
-// Global chat history storage
-let chatHistory = [];
+// Enhanced JavaScript with scroll performance fixes
+let currentPhotoFile = null;
+let currentPhotoDataUrl = null;
 
-// Main initialization
+// SCROLL FIX: Optimized debounce function
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// SCROLL FIX: Initialize with better performance
 document.addEventListener('DOMContentLoaded', function() {
-  console.log("DOM fully loaded, initializing components...");
-
-  // Initialize character counter
-  countChars();
-  console.log("Character counter initialized");
-
-  // Initialize components based on view mode
-  if (document.getElementById('moodSlider')) {
-    initModernMoodSlider();
-    console.log("Modern mood slider initialized");
-  } else {
-    initMoodSelectors();
-    console.log("Classic mood selectors initialized");
-  }
-
-  initAIHelpModal();
-  console.log("AI Help Modal initialized");
-
-  initTagButtons();
-  console.log("Tag buttons initialized");
-
-  if (document.getElementById('photoUploadModern')) {
-    initModernPhotoUpload();
-    console.log("Modern photo upload initialized");
-  } else {
-    setupPhotoDragAndDrop();
-    console.log("Classic photo drag and drop initialized");
-  }
-
-  initExistingPhoto();
-  console.log("Existing photo initialized");
-
-  // Initialize modern tags system if available
-  if (document.getElementById('selectedTags')) {
-    initModernTagsInput();
-    console.log("Modern tags input initialized");
-  }
-
-  // Initialize the word counter for content
-  if (document.getElementById('id_content')) {
-    initContentEditor();
-    console.log("Content editor initialized");
-  }
-
-  initChatInterface();
-  console.log("Chat interface initialized");
+  initializeJournalForm();
+  initializeAnimations();
+  setupEnhancedUX();
+  setupScrollOptimizations();
 });
 
-// Function to ensure base.html elements are preserved
-function transferToFullForm() {
-  console.log("Transferring to full form...");
+// SCROLL FIX: New scroll optimization function
+function setupScrollOptimizations() {
+  let isScrolling = false;
+  let scrollTimeout;
+  let ticking = false;
 
-  // Find the main journal card container
-  const journalCard = document.getElementById('journalCard');
-
-  if (!journalCard) {
-    console.error('Could not find journal card container');
-    return;
+  function handleScrollPerformance() {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        if (isScrolling) {
+          document.body.classList.add('is-scrolling');
+        } else {
+          document.body.classList.remove('is-scrolling');
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
   }
 
-  // Find the chat interface and form sections
-  const chatInterface = journalCard.querySelector('.p-4.sm\\:p-6.glass-effect.border-b.border-white\\/20');
-  const fullEntryForm = document.getElementById('fullEntryForm');
+  window.addEventListener('scroll', function() {
+    if (!isScrolling) {
+      isScrolling = true;
+    }
 
-  if (!chatInterface || !fullEntryForm) {
-    console.error('Could not find chat interface or form');
-    return;
-  }
+    handleScrollPerformance();
 
-  // 1. First, transfer any AI-generated content to the form
-  transferAIContentToForm();
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      isScrolling = false;
+      handleScrollPerformance();
+    }, 150);
+  }, { passive: true });
 
-  // 2. Next, transfer any photo
-  transferPhotoToForm();
+  // SCROLL FIX: Prevent scroll jank on mobile
+  if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+    document.addEventListener('touchmove', function(e) {
+      const target = e.target.closest('#journalContainer, .mobile-menu');
+      if (!target) return;
 
-  // 3. Hide the chat interface section
-  chatInterface.classList.add('hidden');
-
-  // 4. Show the form section
-  fullEntryForm.classList.remove('hidden');
-
-  // 5. Scroll to the form
-  fullEntryForm.scrollIntoView({ behavior: 'smooth' });
-
-  // 6. Re-run initialization for form elements
-  if (document.getElementById('moodSlider')) {
-    initModernMoodSlider();
-  } else {
-    initMoodSelectors();
-  }
-
-  if (document.getElementById('photoUploadModern')) {
-    initModernPhotoUpload();
-  } else {
-    setupPhotoDragAndDrop();
-  }
-
-  if (document.getElementById('selectedTags')) {
-    initModernTagsInput();
-  }
-
-  console.log("Transfer to full form complete");
-}
-
-// Transfer AI generated content to form fields
-function transferAIContentToForm() {
-  console.log("Transferring AI content to form...");
-
-  const contentField = document.getElementById('id_content');
-  const titleField = document.getElementById('id_title');
-
-  if (!contentField || !titleField) {
-    console.error("Content or title field not found");
-    return;
-  }
-
-  // If we don't have AI content yet, create default content
-  if (contentField.value.trim() === '') {
-    // Get any user input from the chat
-    const userMessages = chatHistory.filter(msg => msg.role === 'user')
-                                   .map(msg => msg.content);
-
-    if (userMessages.length > 0) {
-      console.log("Found user messages to transfer:", userMessages.length);
-
-      const userInput = userMessages.join('\n\n');
-      const today = new Date();
-      const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-      contentField.value = `${dateStr}\n\n${userInput}\n\nReflecting on this has been insightful. I'll continue to journal my thoughts regularly to track my growth and insights.`;
-
-      // Set a default title if empty
-      if (titleField.value.trim() === '') {
-        titleField.value = `Journal Entry - ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
+      if (target.id === 'journalContainer') {
+        return;
       }
 
-      // Add highlight animation if modern UI
-      contentField.classList.add('auto-populated');
-      titleField.classList.add('auto-populated');
-      setTimeout(() => {
-        contentField.classList.remove('auto-populated');
-        titleField.classList.remove('auto-populated');
-      }, 2000);
+      const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+      const clientHeight = document.documentElement.clientHeight;
 
-      console.log("AI content transferred to form");
-    } else {
-      console.log("No user messages found to transfer");
-    }
-  } else {
-    console.log("Content field already contains text, skipping transfer");
+      if ((scrollTop === 0 && e.touches[0].clientY > e.touches[0].clientY) ||
+          (scrollTop + clientHeight >= scrollHeight && e.touches[0].clientY < e.touches[0].clientY)) {
+        e.preventDefault();
+      }
+    }, { passive: false });
   }
 }
 
-// Initialize chat interface
-function initChatInterface() {
-  console.log("Initializing chat interface...");
+function setupEnhancedUX() {
+  initFeedbackSystem();
+  setupKeyboardShortcuts();
+  setupAccessibilityFeatures();
+}
 
-  // Edit form button functionality with better naming
-  const useEntryFormBtn = document.getElementById('useEntryFormBtn');
-  if (useEntryFormBtn) {
-    // Use the improved transfer function
-    useEntryFormBtn.addEventListener('click', transferToFullForm);
-    console.log("Entry form button listener attached");
-  } else {
-    console.log("Entry form button not found");
+function initFeedbackSystem() {
+  if (!document.getElementById('feedback-container')) {
+    const container = document.createElement('div');
+    container.id = 'feedback-container';
+    container.className = 'fixed bottom-4 right-4 flex flex-col gap-2 z-50';
+    document.body.appendChild(container);
   }
+}
+
+// SCROLL FIX: Optimized feedback system
+function showFeedback(message, type = 'info', duration = 3000) {
+  const container = document.getElementById('feedback-container');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `feedback-toast ${type}`;
+
+  let icon = '';
+  switch (type) {
+    case 'success':
+      icon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>';
+      break;
+    case 'error':
+      icon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>';
+      break;
+    case 'warning':
+      icon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>';
+      break;
+    default:
+      icon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>';
+  }
+
+  toast.innerHTML = `
+    ${icon}
+    <span>${message}</span>
+    <button class="ml-auto text-white opacity-80 hover:opacity-100" onclick="this.parentElement.remove()" aria-label="Dismiss">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+      </svg>
+    </button>
+  `;
+
+  container.appendChild(toast);
+  toast.offsetHeight;
+  toast.classList.add('show');
+
+  if (duration > 0) {
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+
+  return toast;
+}
+
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.fixed.inset-0').forEach(modal => {
+        if (modal.classList.contains('z-50')) {
+          modal.remove();
+        }
+      });
+    }
+
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      const searchInput = document.getElementById('journalInput');
+      if (searchInput) {
+        searchInput.focus();
+      }
+    }
+
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      const submitBtn = document.querySelector('button[type="submit"]');
+      if (submitBtn && !submitBtn.disabled) {
+        submitBtn.click();
+      }
+    }
+  });
+}
+
+function setupAccessibilityFeatures() {
+  document.querySelectorAll('button:not([aria-label])').forEach(btn => {
+    if (btn.title) {
+      btn.setAttribute('aria-label', btn.title);
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+      document.body.classList.add('keyboard-navigation');
+    }
+  });
+
+  document.addEventListener('mousedown', function() {
+    document.body.classList.remove('keyboard-navigation');
+  });
+}
+
+// SCROLL FIX: Initialize journal form with better performance
+function initializeJournalForm() {
+  setupOptimizedDragAndDrop();
+  initModernMoodSlider();
+  initModernTagsInput();
+
+  // SCROLL FIX: Better textarea handling
+  const journalInput = document.getElementById('journalInput');
+  if (journalInput) {
+    const debouncedResize = debounce(function() {
+      // SCROLL FIX: Limit max height to prevent scroll issues
+      const maxHeight = window.innerHeight * 0.4; // 40% of viewport height
+      this.style.height = 'auto';
+      const newHeight = Math.min(this.scrollHeight, maxHeight);
+      this.style.height = newHeight + 'px';
+    }, 100);
+
+    journalInput.addEventListener('input', function() {
+      countChars();
+      debouncedResize.call(this);
+    });
+
+    // SCROLL FIX: Initial sizing with height limit
+    setTimeout(() => {
+      const maxHeight = window.innerHeight * 0.4;
+      journalInput.style.height = 'auto';
+      const newHeight = Math.min(journalInput.scrollHeight, maxHeight);
+      journalInput.style.height = newHeight + 'px';
+    }, 100);
+
+    const journalContainer = document.getElementById('journalContainer');
+    if (journalContainer) {
+      journalInput.addEventListener('focus', function() {
+        journalContainer.classList.add('input-focused');
+      });
+
+      journalInput.addEventListener('blur', function() {
+        journalContainer.classList.remove('input-focused');
+      });
+    }
+  }
+
+  countChars();
 }
 
 // Character counter function
 function countChars() {
-  const textArea = document.getElementById('quickNotes');
+  const textArea = document.getElementById('journalInput');
   const charCount = document.getElementById('charCount');
 
   if (!textArea || !charCount) {
-    console.log("Quick notes textarea or char counter not found");
     return;
   }
 
@@ -1330,74 +1226,155 @@ function countChars() {
 
   // Set initial count
   updateCount();
-
-  // Update on input
-  textArea.addEventListener('input', updateCount);
-
-  console.log("Character counter set up");
 }
 
-// Transfer photo from chat interface to form
-function transferPhotoToForm() {
-  console.log("Attempting to transfer photo...");
+// SCROLL FIX: Optimized drag and drop
+function setupOptimizedDragAndDrop() {
+  const dropArea = document.getElementById('journalContainer');
+  const dropIndicator = document.getElementById('dropZoneIndicator');
 
-  const chatPhotoInput = document.getElementById('entryPhotoInput');
-
-  // Try to find modern or classic form photo input
-  const formPhotoInput = document.getElementById('formPhotoInputModern') ||
-                         document.getElementById('formPhotoInput');
-
-  if (!chatPhotoInput || !formPhotoInput) {
-    console.log("Photo inputs not found");
+  if (!dropArea || !dropIndicator) {
     return;
   }
 
-  if (chatPhotoInput.files && chatPhotoInput.files[0]) {
-    console.log("Found photo to transfer:", chatPhotoInput.files[0].name);
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, preventDefaults, { passive: false });
+  });
 
-    try {
-      // Make sure the name attribute is set correctly for Django
-      formPhotoInput.name = 'entry_photo';
+  let isDraggingOver = false;
 
-      // Create a new DataTransfer
-      const dataTransfer = new DataTransfer();
-      dataTransfer.items.add(chatPhotoInput.files[0]);
-      formPhotoInput.files = dataTransfer.files;
-
-      // Update the preview based on which UI we're using
-      if (document.getElementById('formPhotoInputModern')) {
-        // For modern UI
-        const event = new Event('change');
-        formPhotoInput.dispatchEvent(event);
-        console.log("Modern photo preview updated");
-      } else {
-        // For classic UI
-        handleFormFileSelect(formPhotoInput);
-        console.log("Classic photo preview updated");
+  dropArea.addEventListener('dragenter', function() {
+    isDraggingOver = true;
+    requestAnimationFrame(() => {
+      if (isDraggingOver) {
+        dropIndicator.classList.remove('hidden');
       }
+    });
+  }, { passive: true });
 
-      console.log("Photo transferred successfully");
-    } catch (error) {
-      console.error("Error transferring photo:", error);
+  dropArea.addEventListener('dragleave', function(e) {
+    const rect = dropArea.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+
+    if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
+      isDraggingOver = false;
+      requestAnimationFrame(() => {
+        if (!isDraggingOver) {
+          dropIndicator.classList.add('hidden');
+        }
+      });
     }
-  } else {
-    console.log("No photo to transfer");
+  }, { passive: true });
+
+  dropArea.addEventListener('drop', function(e) {
+    isDraggingOver = false;
+    requestAnimationFrame(() => {
+      dropIndicator.classList.add('hidden');
+    });
+
+    const dt = e.dataTransfer;
+    if (!dt.files || dt.files.length === 0) return;
+
+    const file = dt.files[0];
+
+    if (file.type.match('image.*')) {
+      handleImageFile(file);
+    } else {
+      showFeedback('Only image files are allowed', 'error');
+    }
+  }, { passive: false });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
   }
 }
 
-// Add suggestion to textarea
-function addSuggestion(text) {
-  console.log("Adding suggestion:", text);
-
-  const textArea = document.getElementById('quickNotes');
-  if (!textArea) {
-    console.error("Quick notes textarea not found");
+function handleImageFile(file) {
+  if (file.size > 5 * 1024 * 1024) {
+    showFeedback('File is too large. Maximum size is 5MB.', 'error');
     return;
   }
+
+  currentPhotoFile = file;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    currentPhotoDataUrl = e.target.result;
+
+    const preview = document.getElementById('photoPreview');
+    if (preview) {
+      preview.src = currentPhotoDataUrl;
+    }
+
+    const previewContainer = document.getElementById('photoPreviewContainer');
+    if (previewContainer) {
+      previewContainer.classList.remove('hidden');
+    }
+
+    const photoName = document.getElementById('photoName');
+    if (photoName) {
+      photoName.textContent = file.name;
+    }
+
+    showFeedback('Photo added successfully', 'success', 2000);
+  };
+
+  reader.readAsDataURL(file);
+
+  const fileInput = document.getElementById('journalPhoto');
+  if (fileInput) {
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    fileInput.files = dataTransfer.files;
+  }
+}
+
+function previewPhoto(event) {
+  const fileInput = event.target;
+  const file = fileInput.files[0];
+
+  if (file) {
+    if (file.size > 5 * 1024 * 1024) {
+      showFeedback('File is too large. Maximum size is 5MB.', 'error');
+      fileInput.value = '';
+      return;
+    }
+
+    if (!file.type.match('image.*')) {
+      showFeedback('Only image files are allowed.', 'error');
+      fileInput.value = '';
+      return;
+    }
+
+    handleImageFile(file);
+  }
+}
+
+function removePhoto() {
+  const fileInput = document.getElementById('journalPhoto');
+  if (fileInput) {
+    fileInput.value = '';
+  }
+
+  const previewContainer = document.getElementById('photoPreviewContainer');
+  if (previewContainer) {
+    previewContainer.classList.add('hidden');
+  }
+
+  currentPhotoFile = null;
+  currentPhotoDataUrl = null;
+
+  showFeedback('Photo removed', 'info', 2000);
+}
+
+function addSuggestion(text) {
+  const textArea = document.getElementById('journalInput');
+  if (!textArea) return;
 
   let currentText = textArea.value;
 
-  // Add a space if there's already content and it doesn't end with space or newline
   if (currentText && !currentText.endsWith('\n') && !currentText.endsWith(' ')) {
     currentText += ' ';
   }
@@ -1405,102 +1382,27 @@ function addSuggestion(text) {
   textArea.value = currentText + text + ' ';
   textArea.focus();
 
-  // Update character count
-  const charCount = document.getElementById('charCount');
-  if (charCount) {
-    charCount.textContent = textArea.value.length;
-  }
+  countChars();
 
-  // Move cursor to end
+  const inputEvent = new Event('input');
+  textArea.dispatchEvent(inputEvent);
+
   textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
 
-  console.log("Suggestion added");
-}
-
-// Add tag to tag field
-function addTag(tag) {
-  console.log("Adding tag:", tag);
-
-  const tagField = document.getElementById('id_tags');
-  if (!tagField) {
-    console.error("Tags field not found");
-    return;
-  }
-
-  let currentTags = tagField.value;
-
-  // Don't add if tag already exists
-  if (currentTags.split(',').map(t => t.trim()).includes(tag)) {
-    console.log("Tag already exists, skipping");
-    return;
-  }
-
-  // Add comma if needed
-  if (currentTags && !currentTags.endsWith(',') && currentTags.trim() !== '') {
-    currentTags += ', ';
-  }
-
-  tagField.value = currentTags + tag;
-
-  // Update visual pills if using modern UI
-  if (document.getElementById('selectedTags')) {
-    updateTagPills();
-  }
-
-  tagField.focus();
-
-  // Move cursor to end
-  tagField.selectionStart = tagField.selectionEnd = tagField.value.length;
-
-  console.log("Tag added");
-}
-
-// Initialize mood selectors (classic UI)
-function initMoodSelectors() {
-  console.log("Initializing classic mood selectors");
-
-  const moodSelectors = document.querySelectorAll('.mood-selector');
-  if (moodSelectors.length === 0) {
-    console.log("No classic mood selectors found");
-    return;
-  }
-
-  moodSelectors.forEach(selector => {
-    selector.addEventListener('click', function() {
-      // Remove selected class from all selectors
-      moodSelectors.forEach(s => s.classList.remove('selected'));
-      // Add selected class to clicked selector
-      this.classList.add('selected');
-      // Check the radio button
-      const radio = this.querySelector('input[type="radio"]');
-      if (radio) radio.checked = true;
-    });
-
-    // Initialize selected state based on checked input
-    const radio = selector.querySelector('input[type="radio"]');
-    if (radio && radio.checked) {
-      selector.classList.add('selected');
-    }
-  });
-
-  console.log("Classic mood selectors initialized with", moodSelectors.length, "options");
+  showFeedback(`Added "${text}" to your entry`, 'success', 1500);
 }
 
 // Modern Mood Slider
 function initModernMoodSlider() {
-  console.log("Initializing modern mood slider");
-
   const moodSlider = document.getElementById('moodSlider');
   const moodThumb = document.getElementById('moodThumb');
   const moodValue = document.getElementById('moodValue');
-  const moodEmojis = document.querySelectorAll('#moodEmoji');
+  const moodEmoji = document.getElementById('moodEmoji');
+  const moodThumbEmoji = document.getElementById('moodThumbEmoji');
 
-  if (!moodSlider || !moodThumb || !moodValue || moodEmojis.length === 0) {
-    console.error("Missing required elements for mood slider");
+  if (!moodSlider || !moodThumb || !moodValue) {
     return;
   }
-
-  console.log("Found", moodEmojis.length, "mood emoji elements");
 
   // Mood options mapping
   const moods = [
@@ -1511,9 +1413,6 @@ function initModernMoodSlider() {
     { value: 'anxious', emoji: '😰', position: '83.3%', color: '#fb923c' },
     { value: 'sad', emoji: '😢', position: '100%', color: '#f87171' }
   ];
-
-  // Auto-detect mood from content if appropriate
-  autoDetectMood();
 
   // Set initial position based on selected mood radio
   setMoodFromRadio();
@@ -1560,7 +1459,6 @@ function initModernMoodSlider() {
       const clientX = e.clientX || (e.touches && e.touches[0].clientX);
 
       if (!clientX) {
-        console.warn("Could not get clientX coordinate");
         return;
       }
 
@@ -1577,9 +1475,12 @@ function initModernMoodSlider() {
       const selectedMood = moods[moodIndex];
       moodThumb.style.left = selectedMood.position;
 
-      moodEmojis.forEach(el => {
-        el.textContent = selectedMood.emoji;
-      });
+      if (moodThumbEmoji) {
+        moodThumbEmoji.textContent = selectedMood.emoji;
+      }
+      if (moodEmoji) {
+        moodEmoji.textContent = selectedMood.emoji;
+      }
 
       moodValue.textContent = selectedMood.value.charAt(0).toUpperCase() + selectedMood.value.slice(1);
 
@@ -1592,8 +1493,6 @@ function initModernMoodSlider() {
       // Update background color with a smooth transition
       moodThumb.style.backgroundColor = 'white';
       moodThumb.style.boxShadow = `0 0 0 2px ${selectedMood.color}, 0 4px 6px -1px rgba(0, 0, 0, 0.1)`;
-
-      console.log("Updated mood to:", selectedMood.value);
     } catch (error) {
       console.error("Error updating mood position:", error);
     }
@@ -1609,7 +1508,6 @@ function initModernMoodSlider() {
       const defaultMood = moods.find(mood => mood.value === "content");
       if (defaultMood) {
         setMoodUI(defaultMood);
-        console.log("Set default mood to content");
       }
       return;
     }
@@ -1619,258 +1517,57 @@ function initModernMoodSlider() {
     if (!selectedMood) return;
 
     setMoodUI(selectedMood);
-    console.log("Set mood from radio to:", selectedMood.value);
   }
 
   function setMoodUI(selectedMood) {
     // Update UI
     moodThumb.style.left = selectedMood.position;
 
-    moodEmojis.forEach(el => {
-      el.textContent = selectedMood.emoji;
-    });
+    if (moodThumbEmoji) {
+      moodThumbEmoji.textContent = selectedMood.emoji;
+    }
+    if (moodEmoji) {
+      moodEmoji.textContent = selectedMood.emoji;
+    }
 
     moodValue.textContent = selectedMood.value.charAt(0).toUpperCase() + selectedMood.value.slice(1);
     moodThumb.style.backgroundColor = 'white';
     moodThumb.style.boxShadow = `0 0 0 2px ${selectedMood.color}, 0 4px 6px -1px rgba(0, 0, 0, 0.1)`;
   }
-
-  function autoDetectMood() {
-    // Get content from the textarea
-    const content = document.getElementById('id_content');
-    if (!content || !content.value) return;
-
-    // Simple mood detection based on keywords
-    const contentText = content.value.toLowerCase();
-
-    // Define mood keywords
-    const moodKeywords = {
-      happy: ['happy', 'joy', 'wonderful', 'great', 'awesome', 'delighted', 'pleased'],
-      excited: ['excited', 'thrilled', 'amazing', 'fantastic', 'exhilarated', 'pumped'],
-      content: ['content', 'satisfied', 'peaceful', 'calm', 'relaxed', 'at ease'],
-      neutral: ['okay', 'fine', 'alright', 'neutral', 'average', 'so-so'],
-      anxious: ['anxious', 'worried', 'nervous', 'stressed', 'concerned', 'uneasy'],
-      sad: ['sad', 'disappointed', 'upset', 'unhappy', 'down', 'depressed', 'low']
-    };
-
-    // Count keyword occurrences
-    const moodCounts = {};
-    for (const [mood, keywords] of Object.entries(moodKeywords)) {
-      moodCounts[mood] = 0;
-      keywords.forEach(keyword => {
-        const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-        const matches = contentText.match(regex);
-        if (matches) {
-          moodCounts[mood] += matches.length;
-        }
-      });
-    }
-
-    // Find the dominant mood
-    let dominantMood = 'neutral'; // default
-    let maxCount = 0;
-
-    for (const [mood, count] of Object.entries(moodCounts)) {
-      if (count > maxCount) {
-        maxCount = count;
-        dominantMood = mood;
-      }
-    }
-
-    // Set the mood if detected
-    if (maxCount > 0) {
-      const radioToCheck = document.querySelector(`input[name="mood"][value="${dominantMood}"]`);
-      if (radioToCheck) {
-        radioToCheck.checked = true;
-
-        // Find corresponding mood and update UI
-        const selectedMood = moods.find(mood => mood.value === dominantMood);
-        if (selectedMood) {
-          setMoodUI(selectedMood);
-
-          // Add animation to show it was auto-populated
-          moodSlider.classList.add('auto-populated');
-          setTimeout(() => {
-            moodSlider.classList.remove('auto-populated');
-          }, 2000);
-
-          console.log("Auto-detected mood:", dominantMood);
-        }
-      }
-    }
-  }
-
-  console.log("Modern mood slider initialization complete");
-}
-
-// Initialize tag buttons
-function initTagButtons() {
-  console.log("Initializing tag buttons");
-
-  const tagButtons = document.querySelectorAll('button[onclick^="addTag"]');
-  if (tagButtons.length === 0) {
-    console.log("No tag buttons found");
-    return;
-  }
-
-  tagButtons.forEach(button => {
-    // Remove the inline onclick attribute if exists
-    if (button.hasAttribute('onclick')) {
-      const tag = button.getAttribute('onclick').match(/addTag\(['"](.+?)['"]\)/);
-      if (tag && tag[1]) {
-        const tagValue = tag[1];
-        button.removeAttribute('onclick');
-
-        // Add proper event listener
-        button.addEventListener('click', function() {
-          addTag(tagValue);
-
-          // Add visual feedback
-          this.classList.add('bg-secondary-100');
-          setTimeout(() => {
-            this.classList.remove('bg-secondary-100');
-          }, 300);
-        });
-      }
-    }
-  });
-
-  // Also initialize tag suggestions for modern UI
-  const tagSuggestions = document.querySelectorAll('.tag-suggestion');
-  if (tagSuggestions.length > 0) {
-    console.log("Found", tagSuggestions.length, "tag suggestions");
-
-    tagSuggestions.forEach(suggestion => {
-      suggestion.addEventListener('click', function() {
-        addTag(this.textContent.trim());
-      });
-    });
-  }
-
-  console.log("Tag buttons initialized with", tagButtons.length, "buttons");
 }
 
 // Modern Tags Input
 function initModernTagsInput() {
-  console.log("Initializing modern tags input");
-
   const tagsInput = document.getElementById('id_tags');
   const tagsList = document.getElementById('selectedTags');
 
   if (!tagsInput || !tagsList) {
-    console.log("Tags input or container not found");
     return;
   }
-
-  // Auto-generate tags from content if appropriate
-  autoGenerateTags();
 
   // Display existing tags as pills
   updateTagPills();
 
   // Handle input changes
   tagsInput.addEventListener('input', function() {
-    // Check if a comma was just typed
-    if (this.value.endsWith(',')) {
-      // Get the tag before the comma
-      const tag = this.value.slice(0, -1).trim();
-      if (tag) {
-        addTag(tag);
-        // Clean up the input
-        this.value = this.value.split(',').map(t => t.trim()).filter(t => t).join(', ');
-      }
-    }
+    updateTagPills();
   });
 
   tagsInput.addEventListener('keydown', function(e) {
-    // If Enter is pressed, add the current tag
-    if (e.key === 'Enter') {
+    // If Enter or comma is pressed, update pills
+    if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
-      const tag = this.value.trim();
-      if (tag) {
-        addTag(tag);
-        this.value = '';
-      }
+      setTimeout(() => updateTagPills(), 10);
     }
   });
-
-  function autoGenerateTags() {
-    // Get content from the textarea
-    const content = document.getElementById('id_content');
-    if (!content || !content.value) {
-      console.log("No content to generate tags from");
-      return;
-    }
-
-    // Skip if tags are already set
-    if (tagsInput.value.trim()) {
-      console.log("Tags already set, skipping auto-generation");
-      return;
-    }
-
-    const contentText = content.value.toLowerCase();
-
-    // Common categories for journal entries
-    const categories = {
-      work: ['work', 'job', 'career', 'office', 'project', 'meeting', 'colleague', 'boss', 'deadline'],
-      health: ['health', 'fitness', 'exercise', 'gym', 'workout', 'run', 'yoga', 'meditation', 'diet', 'sleep'],
-      family: ['family', 'mom', 'dad', 'sister', 'brother', 'wife', 'husband', 'kids', 'children', 'parents'],
-      friends: ['friend', 'buddy', 'hangout', 'gathering', 'party', 'social'],
-      travel: ['travel', 'trip', 'journey', 'vacation', 'visit', 'explore', 'adventure'],
-      food: ['food', 'meal', 'breakfast', 'lunch', 'dinner', 'cook', 'restaurant', 'recipe'],
-      learning: ['learn', 'study', 'class', 'course', 'book', 'read', 'knowledge'],
-      reflection: ['reflect', 'think', 'contemplation', 'introspection', 'realization'],
-      goals: ['goal', 'aim', 'objective', 'target', 'plan', 'aspiration', 'achievement'],
-      gratitude: ['grateful', 'thankful', 'appreciate', 'blessing', 'gratitude']
-    };
-
-    // Detect categories
-    const detectedTags = [];
-
-    for (const [category, keywords] of Object.entries(categories)) {
-      for (const keyword of keywords) {
-        if (contentText.includes(keyword)) {
-          detectedTags.push(category);
-          console.log("Detected tag:", category);
-          break; // Only add each category once
-        }
-      }
-    }
-
-    // Add mood as a tag
-    const selectedMood = document.querySelector('input[name="mood"]:checked');
-    if (selectedMood) {
-      detectedTags.push(selectedMood.value);
-      console.log("Added mood tag:", selectedMood.value);
-    }
-
-    // Update tags if any were detected
-    if (detectedTags.length > 0) {
-      tagsInput.value = detectedTags.join(', ');
-      updateTagPills();
-
-      // Add animation to show it was auto-populated
-      tagsInput.classList.add('auto-populated');
-      setTimeout(() => {
-        tagsInput.classList.remove('auto-populated');
-      }, 2000);
-
-      console.log("Auto-generated", detectedTags.length, "tags");
-    }
-  }
-
-  console.log("Modern tags input initialized");
 }
 
 // Update visual tags pills
 function updateTagPills() {
-  console.log("Updating tag pills");
-
   const tagsInput = document.getElementById('id_tags');
   const tagsList = document.getElementById('selectedTags');
 
   if (!tagsInput || !tagsList) {
-    console.log("Tags input or container not found");
     return;
   }
 
@@ -1897,14 +1594,42 @@ function updateTagPills() {
       removeTag(this.dataset.tag);
     });
   });
+}
 
-  console.log("Updated tag pills for", currentTags.length, "tags");
+// Add tag
+function addTag(tag) {
+  const tagField = document.getElementById('id_tags');
+  if (!tagField) {
+    return;
+  }
+
+  let currentTags = tagField.value;
+
+  // Don't add if tag already exists
+  if (currentTags.split(',').map(t => t.trim()).includes(tag)) {
+    return;
+  }
+
+  // Add comma if needed
+  if (currentTags && !currentTags.endsWith(',') && currentTags.trim() !== '') {
+    currentTags += ', ';
+  }
+
+  tagField.value = currentTags + tag;
+
+  // Update visual pills
+  updateTagPills();
+
+  tagField.focus();
+
+  // Move cursor to end
+  tagField.selectionStart = tagField.selectionEnd = tagField.value.length;
+
+  showFeedback(`Added tag: ${tag}`, 'success', 1000);
 }
 
 // Remove tag
 function removeTag(tagToRemove) {
-  console.log("Removing tag:", tagToRemove);
-
   const tagsInput = document.getElementById('id_tags');
   if (!tagsInput) return;
 
@@ -1917,734 +1642,57 @@ function removeTag(tagToRemove) {
   // Update the input value
   tagsInput.value = currentTags.join(', ');
 
-  // Update visual representation if using modern UI
-  if (document.getElementById('selectedTags')) {
-    updateTagPills();
-  }
+  // Update visual representation
+  updateTagPills();
 
-  console.log("Tag removed");
+  showFeedback(`Removed tag: ${tagToRemove}`, 'info', 1000);
 }
 
-// Initialize content editor
-function initContentEditor() {
-  console.log("Initializing content editor");
+function initializeAnimations() {
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
 
-  const contentEditor = document.getElementById('id_content');
-  if (!contentEditor) {
-    console.log("Content editor not found");
-    return;
-  }
-
-  // Add word counter if using modern UI
-  if (!document.querySelector('.word-counter')) {
-    const wordCounter = document.createElement('div');
-    wordCounter.className = 'word-counter';
-    wordCounter.textContent = '0 words';
-    contentEditor.parentNode.appendChild(wordCounter);
-
-    contentEditor.addEventListener('input', function() {
-      // Count words
-      const text = this.value.trim();
-      const wordCount = text ? text.split(/\s+/).length : 0;
-      wordCounter.textContent = `${wordCount} words`;
-    });
-
-    // Trigger initial count
-    contentEditor.dispatchEvent(new Event('input'));
-
-    console.log("Word counter added");
-  }
-
-  console.log("Content editor initialized");
-}
-
-// Initialize AI Help Modal
-function initAIHelpModal() {
-  console.log("Initializing AI Help Modal");
-
-  const aiHelpBtn = document.getElementById('aiHelpBtn');
-  const aiHelpModal = document.getElementById('aiHelpModal');
-
-  if (!aiHelpBtn || !aiHelpModal) {
-    console.log("AI help button or modal not found");
-    return;
-  }
-
-  aiHelpBtn.addEventListener('click', () => {
-    console.log("AI help button clicked");
-
-    aiHelpModal.classList.remove('hidden');
-
-    // Handle animation based on modern or classic UI
-    if (document.getElementById('modalContent')) {
-      // Modern UI
-      const modalContent = document.getElementById('modalContent');
-      setTimeout(() => {
-        modalContent.style.opacity = '1';
-        modalContent.style.transform = 'scale(1)';
-      }, 10);
-    } else {
-      // Classic UI
-      setTimeout(() => {
-        const modalContent = aiHelpModal.querySelector('.glass-effect');
-        if (modalContent) modalContent.classList.add('scale-in');
-      }, 10);
-    }
-  });
-
-  // Close button
-  const closeModal = document.getElementById('closeModal');
-  if (closeModal) {
-    closeModal.addEventListener('click', closeAIModal);
-  }
-
-  // Cancel button
-  const cancelAiHelp = document.getElementById('cancelAiHelp');
-  if (cancelAiHelp) {
-    cancelAiHelp.addEventListener('click', closeAIModal);
-  }
-
-  // Close modal when clicking outside
-  aiHelpModal.addEventListener('click', (e) => {
-    if (e.target === aiHelpModal) {
-      closeAIModal();
-    }
-  });
-
-  // Process AI prompt buttons - works with both modern and classic UI
-  const aiPromptBtns = document.querySelectorAll('.ai-prompt-btn');
-
-  aiPromptBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const contentField = document.getElementById('id_content');
-      if (!contentField) return;
-
-      let promptText = '';
-
-      // Try to identify the template - support both approaches
-      let templateType = null;
-
-      // Modern UI uses data attributes
-      if (btn.dataset.template) {
-        templateType = btn.dataset.template;
-      }
-      // Classic UI uses text content
-      else if (btn.querySelector('.font-medium')) {
-        const buttonText = btn.querySelector('.font-medium').textContent;
-
-        if (buttonText.includes('reflect')) templateType = 'daily-reflection';
-        else if (buttonText.includes('structure')) templateType = 'thought-organizer';
-        else if (buttonText.includes('emotion')) templateType = 'emotional-explorer';
-        else if (buttonText.includes('gratitude')) templateType = 'gratitude-practice';
-        else if (buttonText.includes('goal')) templateType = 'progress-tracker';
-      }
-
-      console.log("Selected template:", templateType);
-
-      // Templates for each button type
-      if (templateType === 'daily-reflection') {
-        promptText = "Today, I experienced...\n\nWhat went well:\n\nWhat I found challenging:\n\nWhat I learned:\n\nHow I'm feeling now:";
-      } else if (templateType === 'thought-organizer') {
-        promptText = "Context:\n\nMy initial thoughts:\n\nConsidering different perspectives:\n\nWhat this means for me:";
-      } else if (templateType === 'emotional-explorer') {
-        promptText = "I'm feeling...\n\nThis emotion arose when...\n\nPhysically, I notice...\n\nMy thoughts around this are...\n\nWhat I need right now is...";
-      } else if (templateType === 'gratitude-practice') {
-        promptText = "Today I'm grateful for:\n\n1. \n\n2. \n\n3. \n\nWhy these matter to me:\n\nHow this gratitude affects my perspective:";
-      } else if (templateType === 'progress-tracker') {
-        promptText = "Current goal: \n\nProgress made today: \n\nChallenges encountered: \n\nNext steps: \n\nThoughts on my progress:";
-      }
-
-      // Set the value to the content field
-      contentField.value = promptText;
-
-      // Add highlight animation if modern UI
-      contentField.classList.add('auto-populated');
-      setTimeout(() => {
-        contentField.classList.remove('auto-populated');
-      }, 2000);
-
-      console.log("Applied template to content field");
-
-      // Close the modal
-      closeAIModal();
-    });
-  });
-
-  console.log("AI Help Modal initialized with", aiPromptBtns.length, "prompt buttons");
-}
-
-// Close AI help modal
-function closeAIModal() {
-  console.log("Closing AI modal");
-
-  const aiHelpModal = document.getElementById('aiHelpModal');
-  if (!aiHelpModal) return;
-
-  // Handle animation based on modern or classic UI
-  if (document.getElementById('modalContent')) {
-    // Modern UI
-    const modalContent = document.getElementById('modalContent');
-    modalContent.style.opacity = '0';
-    modalContent.style.transform = 'scale(0.95)';
-  } else {
-    // Classic UI
-    const modalContent = aiHelpModal.querySelector('.glass-effect');
-    if (modalContent) modalContent.classList.remove('scale-in');
-  }
-
-  // Hide modal after animation completes
-  setTimeout(() => {
-    aiHelpModal.classList.add('hidden');
-  }, 200);
-}
-
-// Modern Photo Upload
-function initModernPhotoUpload() {
-  console.log("Initializing modern photo upload");
-
-  const photoUpload = document.getElementById('photoUploadModern');
-  const photoInput = document.getElementById('formPhotoInputModern');
-  const photoPreview = document.getElementById('photoPreviewModern');
-  const photoPlaceholder = document.getElementById('photoPlaceholderModern');
-  const photoControls = document.getElementById('photoControlsModern');
-
-  if (!photoUpload || !photoInput || !photoPreview || !photoPlaceholder || !photoControls) {
-    console.log("Required photo upload elements not found");
-    return;
-  }
-
-  // Handle file selection
-  photoInput.addEventListener('change', function() {
-    if (!this.files || !this.files[0]) return;
-
-    const file = this.files[0];
-    console.log("Photo selected:", file.name);
-
-    // Check file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image file is too large. Please select an image under 5MB.');
-      this.value = '';
-      return;
-    }
-
-    // Preview the image
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      photoPreview.src = e.target.result;
-      photoPreview.classList.add('has-image');
-      photoPlaceholder.style.display = 'none';
-      photoControls.style.display = 'flex';
-
-      // Add scaling animation
-      photoPreview.style.transform = 'scale(0.95)';
-      photoPreview.style.opacity = '0';
-
-      setTimeout(() => {
-        photoPreview.style.transition = 'all 0.3s ease';
-        photoPreview.style.transform = 'scale(1)';
-        photoPreview.style.opacity = '1';
-      }, 10);
-    };
-    reader.readAsDataURL(file);
-  });
-
-  // Remove photo button
-  const removePhotoBtn = document.getElementById('removePhotoModern');
-  if (removePhotoBtn) {
-    removePhotoBtn.addEventListener('click', function() {
-      photoInput.value = '';
-      photoPreview.src = '';
-      photoPreview.classList.remove('has-image');
-      photoPlaceholder.style.display = 'flex';
-      photoControls.style.display = 'none';
-      console.log("Photo removed");
+    document.querySelectorAll('.animate-fade-in, .animate-scale-in').forEach(el => {
+      observer.observe(el);
     });
   }
-
-  // Change photo button
-  const changePhotoBtn = document.getElementById('changePhotoModern');
-  if (changePhotoBtn) {
-    changePhotoBtn.addEventListener('click', function() {
-      photoInput.click();
-    });
-  }
-
-  // Drag and drop functionality
-  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-    photoUpload.addEventListener(eventName, preventDefaults, false);
-  });
-
-  function preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  ['dragenter', 'dragover'].forEach(eventName => {
-    photoUpload.addEventListener(eventName, highlight, false);
-  });
-
-  ['dragleave', 'drop'].forEach(eventName => {
-    photoUpload.addEventListener(eventName, unhighlight, false);
-  });
-
-  function highlight() {
-    photoUpload.classList.add('drop-active');
-    photoUpload.style.borderColor = 'var(--primary-color)';
-    photoUpload.style.backgroundColor = 'rgba(99, 102, 241, 0.05)';
-  }
-
-  function unhighlight() {
-    photoUpload.classList.remove('drop-active');
-    photoUpload.style.borderColor = '';
-    photoUpload.style.backgroundColor = '';
-  }
-
-  photoUpload.addEventListener('drop', handleDrop, false);
-
-  function handleDrop(e) {
-    const dt = e.dataTransfer;
-    const files = dt.files;
-
-    if (files.length) {
-      photoInput.files = files;
-
-      // Trigger the change event manually
-      const event = new Event('change');
-      photoInput.dispatchEvent(event);
-
-      console.log("File dropped and processed");
-    }
-  }
-
-  console.log("Modern photo upload initialized");
-}
-
-// Handle file selection for chat interface
-function handleFileSelect(input) {
-  console.log("Handling file selection for chat");
-
-  if (!input.files || !input.files[0]) return;
-
-  const file = input.files[0];
-  console.log("File selected:", file.name);
-
-  // Check file size (max 5MB)
-  if (file.size > 5 * 1024 * 1024) {
-    alert('Image file is too large. Please select an image under 5MB.');
-    input.value = '';
-    return;
-  }
-
-  // Preview the image
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const photoPreview = document.getElementById('photoPreview');
-    if (photoPreview) {
-      photoPreview.src = e.target.result;
-    }
-
-    // Show the photo container
-    const photoContainer = document.getElementById('photoContainer');
-    if (photoContainer) {
-      photoContainer.classList.remove('hidden');
-    }
-
-    // Update file name
-    const photoName = document.getElementById('photoName');
-    if (photoName) {
-      photoName.textContent = file.name;
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-// Remove photo from chat interface
-function removePhoto() {
-  console.log("Removing photo from chat");
-
-  const photoInput = document.getElementById('entryPhotoInput');
-  if (photoInput) {
-    photoInput.value = '';
-  }
-
-  const photoContainer = document.getElementById('photoContainer');
-  if (photoContainer) {
-    photoContainer.classList.add('hidden');
-  }
-}
-
-// Handle file selection for classic form
-function handleFormFileSelect(input) {
-  console.log("Handling file selection for form");
-
-  if (!input.files || !input.files[0]) return;
-
-  const file = input.files[0];
-  console.log("File selected:", file.name);
-
-  // Check file size (max 5MB)
-  if (file.size > 5 * 1024 * 1024) {
-    alert('Image file is too large. Please select an image under 5MB.');
-    input.value = '';
-    return;
-  }
-
-  // Preview the image
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const photoPreview = document.getElementById('formPhotoPreview');
-    if (photoPreview) {
-      photoPreview.src = e.target.result;
-      photoPreview.classList.add('has-image');
-    }
-
-    // Hide placeholder, show controls
-    const photoPlaceholder = document.getElementById('formPhotoPlaceholder');
-    const photoControls = document.getElementById('formPhotoControls');
-
-    if (photoPlaceholder) {
-      photoPlaceholder.classList.add('hidden');
-    }
-
-    if (photoControls) {
-      photoControls.style.display = 'flex';
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-// Remove photo from classic form
-function removeFormPhoto() {
-  console.log("Removing photo from form");
-
-  const photoInput = document.getElementById('formPhotoInput');
-  if (photoInput) {
-    photoInput.value = '';
-  }
-
-  const photoPreview = document.getElementById('formPhotoPreview');
-  if (photoPreview) {
-    photoPreview.src = '';
-    photoPreview.classList.remove('has-image');
-  }
-
-  // Show placeholder, hide controls
-  const photoPlaceholder = document.getElementById('formPhotoPlaceholder');
-  const photoControls = document.getElementById('formPhotoControls');
-
-  if (photoPlaceholder) {
-    photoPlaceholder.classList.remove('hidden');
-  }
-
-  if (photoControls) {
-    photoControls.style.display = 'none';
-  }
-}
-
-// Setup photo drag and drop for classic UI
-function setupPhotoDragAndDrop() {
-  console.log("Setting up photo drag and drop");
-
-  const dropZone = document.getElementById('photoDropZone');
-  const dropOverlay = document.getElementById('formDropOverlay');
-
-  if (!dropZone) {
-    console.log("Drop zone not found");
-    return;
-  }
-
-  // Prevent default behavior
-  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-    dropZone.addEventListener(eventName, preventDefaults, false);
-  });
-
-  function preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  // Highlight drop zone when dragging over it
-  ['dragenter', 'dragover'].forEach(eventName => {
-    dropZone.addEventListener(eventName, highlight, false);
-  });
-
-  ['dragleave', 'drop'].forEach(eventName => {
-    dropZone.addEventListener(eventName, unhighlight, false);
-  });
-
-  function highlight() {
-    dropZone.classList.add('drop-zone-active');
-  }
-
-  function unhighlight() {
-    dropZone.classList.remove('drop-zone-active');
-  }
-
-  // Handle dropped files
-  dropZone.addEventListener('drop', handleDrop, false);
-
-  function handleDrop(e) {
-    const dt = e.dataTransfer;
-    const files = dt.files;
-
-    if (files.length) {
-      const photoInput = document.getElementById('formPhotoInput');
-      if (photoInput) {
-        photoInput.files = files;
-        handleFormFileSelect(photoInput);
-        console.log("File dropped and processed");
-      }
-    }
-  }
-
-  console.log("Photo drag and drop set up");
 }
 
 // Initialize existing photo for edit mode
 function initExistingPhoto() {
-  console.log("Initializing existing photo");
+  const photoPreview = document.getElementById('photoPreview');
+  const photoPreviewContainer = document.getElementById('photoPreviewContainer');
 
-  // Check if we're using modern or classic UI
-  const modernPhotoPreview = document.getElementById('photoPreviewModern');
-  const classicPhotoPreview = document.getElementById('formPhotoPreview');
-
-  if (modernPhotoPreview && modernPhotoPreview.getAttribute('src')) {
-    if (modernPhotoPreview.getAttribute('src').trim() !== '') {
-      modernPhotoPreview.classList.add('has-image');
-
-      // Hide placeholder, show controls
-      const photoPlaceholder = document.getElementById('photoPlaceholderModern');
-      const photoControls = document.getElementById('photoControlsModern');
-
-      if (photoPlaceholder) {
-        photoPlaceholder.style.display = 'none';
-      }
-
-      if (photoControls) {
-        photoControls.style.display = 'flex';
-      }
-
-      console.log("Found existing photo (modern UI)");
-    }
-  }
-  else if (classicPhotoPreview && classicPhotoPreview.getAttribute('src')) {
-    // If there's a source already set (for edit mode)
-    if (classicPhotoPreview.getAttribute('src').trim() !== '') {
-      classicPhotoPreview.classList.add('has-image');
-
-      // Hide placeholder, show controls
-      const photoPlaceholder = document.getElementById('formPhotoPlaceholder');
-      const photoControls = document.getElementById('formPhotoControls');
-
-      if (photoPlaceholder) {
-        photoPlaceholder.classList.add('hidden');
-      }
-
-      if (photoControls) {
-        photoControls.style.display = 'flex';
-      }
-
-      console.log("Found existing photo (classic UI)");
-    }
-  }
-}
-
-// Send message function
-function sendMessage() {
-  console.log("Sending message");
-
-  const quickNotes = document.getElementById('quickNotes');
-  if (!quickNotes || quickNotes.value.trim() === '') {
-    console.log("No message to send");
-    return;
-  }
-
-  // Get user message
-  const userMessage = quickNotes.value.trim();
-
-  // Add to chat history
-  chatHistory.push({ role: 'user', content: userMessage });
-
-  // Display user message
-  addMessageToChat(userMessage, 'user');
-
-  // Clear input
-  quickNotes.value = '';
-
-  // Update character count
-  const charCount = document.getElementById('charCount');
-  if (charCount) {
-    charCount.textContent = '0';
-  }
-
-  // Show thinking indicator
-  const thinkingIndicator = document.getElementById('thinkingIndicator');
-  if (thinkingIndicator) {
-    thinkingIndicator.classList.remove('hidden');
-  }
-
-  // Get the photo if any
-  const photoInput = document.getElementById('entryPhotoInput');
-  let photoDescription = '';
-
-  if (photoInput && photoInput.files && photoInput.files[0]) {
-    photoDescription = `The user has also uploaded a photo: ${photoInput.files[0].name}`;
-    console.log("Found uploaded photo:", photoInput.files[0].name);
-  }
-
-  // Simulate AI response (in a real app, this would call your backend API)
-  setTimeout(() => {
-    // Hide thinking indicator
-    if (thinkingIndicator) {
-      thinkingIndicator.classList.add('hidden');
-    }
-
-    // Generate AI response based on the conversation history
-    let aiResponse;
-
-    if (chatHistory.length === 1) {
-      // First message
-      aiResponse = `Thanks for sharing! Let me transform this into a beautiful journal entry for you. ${photoDescription ? 'I noticed you uploaded a photo, which will be included with your entry.' : ''}`;
-
-      // Show the generated entry after the initial response
-      setTimeout(() => {
-        generateEntry(userMessage, photoDescription);
-      }, 1500);
-    } else {
-      // Follow-up messages
-      aiResponse = "I've updated your journal entry with this additional information.";
-
-      // Update the generated entry
-      setTimeout(() => {
-        updateGeneratedEntry(userMessage);
-      }, 1000);
-    }
-
-    // Add AI response to chat history
-    chatHistory.push({ role: 'assistant', content: aiResponse });
-
-    // Display AI message
-    addMessageToChat(aiResponse, 'ai');
-  }, 1500);
-}
-
-function addMessageToChat(message, role) {
-  console.log(`Adding ${role} message to chat`);
-
-  const chatHistoryContainer = document.getElementById('chatHistory');
-  if (!chatHistoryContainer) {
-    console.error("Chat history container not found");
-    return;
-  }
-
-  const messageElement = document.createElement('div');
-  messageElement.classList.add('chat-bubble', role);
-
-  // Use handwritten class for AI messages
-  if (role === 'ai') {
-    messageElement.classList.add('handwritten');
-  } else {
-    messageElement.classList.add('diary-font');
-  }
-
-  messageElement.innerHTML = `<p>${message}</p>`;
-  chatHistoryContainer.appendChild(messageElement);
-
-  // Scroll to the bottom of the chat
-  const chatContainer = document.getElementById('chatContainer');
-  if (chatContainer) {
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-  }
-}
-
-function generateEntry(userNotes, photoDescription) {
-  console.log("Generating journal entry");
-
-  // In a real app, this would be an API call to your backend
-  // For demo purposes, we'll simulate a simple response
-
-  const today = new Date();
-  const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-  const aiGeneratedContent = `${dateStr}\n\n${userNotes}\n\nI took some time to reflect on what this means for me going forward. It's amazing how each day brings new experiences and opportunities for growth.\n\n${photoDescription ? 'I captured a special moment in a photo today, which helps me remember the feelings associated with this memory.\n\n' : ''}As I wind down for the day, I'm grateful for these moments of reflection and the chance to document my journey.`;
-
-  // Add the generated entry to the form
-  const contentField = document.getElementById('id_content');
-  if (contentField) {
-    contentField.value = aiGeneratedContent;
-    console.log("Content field populated");
-
-    // Trigger auto-detection of mood and tags if using modern UI
-    if (document.getElementById('moodSlider')) {
-      initModernMoodSlider();
-    }
-
-    if (document.getElementById('selectedTags')) {
-      initModernTagsInput();
-    }
-  }
-
-  // Set a default title
-  const titleField = document.getElementById('id_title');
-  if (titleField && !titleField.value) {
-    titleField.value = `Journal Entry - ${today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
-    console.log("Title field populated");
-  }
-
-  // Add a final message suggesting to continue or use the form
-  setTimeout(() => {
-    const finalMessage = "I've created a journal entry based on what you shared. You can continue sharing more details with me, or click the button below to edit the entry directly in the form.";
-
-    // Add AI response to chat history
-    chatHistory.push({ role: 'assistant', content: finalMessage });
-
-    // Display AI message
-    addMessageToChat(finalMessage, 'ai');
-  }, 1000);
-}
-
-function updateGeneratedEntry(additionalNotes) {
-  console.log("Updating generated entry");
-
-  // In a real app, this would use the entire conversation history
-  // to generate a new entry via your backend API
-
-  // For demo purposes, we'll just append the new information
-  const contentField = document.getElementById('id_content');
-  if (contentField) {
-    contentField.value += `\n\nAdditional thoughts: ${additionalNotes}`;
-
-    // Add highlight animation if using modern UI
-    contentField.classList.add('auto-populated');
-    setTimeout(() => {
-      contentField.classList.remove('auto-populated');
-    }, 2000);
-
-    console.log("Content field updated");
-
-    // Re-run mood and tag detection if using modern UI
-    if (document.getElementById('moodSlider')) {
-      initModernMoodSlider();
-    }
-
-    if (document.getElementById('selectedTags')) {
-      initModernTagsInput();
+  if (photoPreview && photoPreview.src && photoPreview.src !== window.location.href) {
+    if (photoPreviewContainer) {
+      photoPreviewContainer.classList.remove('hidden');
     }
   }
 }
 
 // Make functions available globally for debugging
 window.diaryFunctions = {
-  sendMessage,
   addSuggestion,
   addTag,
   removeTag,
-  transferToFullForm,
   updateTagPills,
   initModernMoodSlider,
   initModernTagsInput,
-  initModernPhotoUpload
+  showFeedback,
+  countChars
 };
+
+// Initialize existing photo on load
+document.addEventListener('DOMContentLoaded', function() {
+  initExistingPhoto();
+});
 
 </script>
 {% endblock %}
