@@ -1691,88 +1691,506 @@ function processIntelligentResponse(userMessage) {
   }, 2000 + Math.random() * 2000); // 2-4 seconds for realistic timing
 }
 
-// Generate gathering response
-function generateGatheringResponse(userMessage) {
-  const template = journalTemplates[currentJournalTemplate];
-  const questionIndex = chatHistory.filter(m => m.role === 'assistant').length - 1;
+// Truly human-like conversation patterns and responses
+const humanConversationStyles = {
+  greetings: [
+    "Hey there! I'm so glad you're here. What's been going on with you today?",
+    "Hi! I've been excited to hear about your day. What's on your mind?",
+    "Hello! I love getting to know people through their daily experiences. How are you feeling right now?",
+    "Hey! Thanks for choosing to journal today. What's something that stood out to you?",
+    "Hi there! I'm genuinely curious - what's been the energy of your day like?"
+  ],
 
-  if (template && questionIndex < template.questions.length - 1) {
-    conversationState = 'gathering';
-    return `That's really insightful. ${template.questions[questionIndex + 1]}`;
+  followUps: {
+    excited: [
+      "Oh wow, I can feel your excitement! Tell me more about that feeling.",
+      "That sounds amazing! What made it so special for you?",
+      "I love hearing that energy in your voice! What was the best part?",
+      "Your enthusiasm is contagious! How did that make you feel in the moment?"
+    ],
+    challenging: [
+      "That sounds really tough. How are you processing that?",
+      "Oof, that's a lot to handle. What's been helping you get through it?",
+      "I can imagine that was difficult. What thoughts are you having about it now?",
+      "That's heavy stuff. How are you taking care of yourself with all that?"
+    ],
+    accomplished: [
+      "That's such a great feeling! What did it take to get there?",
+      "I love that sense of accomplishment. What are you most proud of?",
+      "Yes! Those breakthrough moments are the best. How does it feel to have pushed through?",
+      "That's awesome progress. What do you think made the difference today?"
+    ],
+    reflective: [
+      "That's really thoughtful. Where do you think that insight came from?",
+      "I can tell you're really processing this. What else is coming up for you?",
+      "That's such an interesting way to look at it. How does that sit with you?",
+      "You're really tuning into something important there. What feels true about that?"
+    ],
+    grateful: [
+      "That's beautiful. What is it about that experience that touches you?",
+      "I can feel the gratitude in what you're sharing. How does that appreciation feel in your body?",
+      "Those moments of thankfulness are so precious. What made you pause and notice it?",
+      "That's really moving. How do you want to carry that feeling forward?"
+    ]
+  },
+
+  encouragement: [
+    "I'm really enjoying hearing about your day.",
+    "You're sharing such thoughtful details.",
+    "I can tell this means a lot to you.",
+    "The way you describe things is really vivid.",
+    "I appreciate how honest you're being.",
+    "You have such interesting insights.",
+    "I love how you notice the small moments.",
+    "You're really good at capturing feelings."
+  ],
+
+  transitions: [
+    "What else is coming up for you?",
+    "I'm curious about something else...",
+    "Can I ask you about another part of your day?",
+    "Something else I'm wondering about...",
+    "I'd love to hear more about...",
+    "What about the emotional side of things?",
+    "How did that ripple out into the rest of your day?",
+    "I'm getting a sense that there's more to explore here..."
+  ]
+};
+
+// Detect emotional context from user messages
+function analyzeEmotionalContext(message) {
+  const lowerMessage = message.toLowerCase();
+
+  // Excitement indicators
+  if (lowerMessage.match(/amazing|incredible|awesome|fantastic|excited|thrilled|love|perfect|wonderful|brilliant/)) {
+    return 'excited';
+  }
+
+  // Challenge indicators
+  if (lowerMessage.match(/difficult|hard|tough|struggling|stressed|overwhelmed|frustrating|challenging|tired|exhausted/)) {
+    return 'challenging';
+  }
+
+  // Accomplishment indicators
+  if (lowerMessage.match(/accomplished|finished|completed|achieved|proud|successful|breakthrough|progress|better|improved/)) {
+    return 'accomplished';
+  }
+
+  // Gratitude indicators
+  if (lowerMessage.match(/grateful|thankful|blessed|appreciate|lucky|gift|beautiful|peaceful|content|happy/)) {
+    return 'grateful';
+  }
+
+  // Reflective indicators
+  if (lowerMessage.match(/thinking|realized|understand|learning|discovered|noticed|reflected|wondering|considering/)) {
+    return 'reflective';
+  }
+
+  return 'neutral';
+}
+
+// Generate human-like responses based on conversation flow
+function generateHumanResponse(userMessage, conversationLength) {
+  const emotionalContext = analyzeEmotionalContext(userMessage);
+  const followUps = humanConversationStyles.followUps[emotionalContext] || humanConversationStyles.followUps.reflective;
+
+  let response = '';
+
+  // Add natural acknowledgment
+  if (conversationLength === 1) {
+    const encouragements = humanConversationStyles.encouragement;
+    response += encouragements[Math.floor(Math.random() * encouragements.length)] + ' ';
+  }
+
+  // Add contextual follow-up
+  const followUp = followUps[Math.floor(Math.random() * followUps.length)];
+  response += followUp;
+
+  // Sometimes add a transition or additional question
+  if (Math.random() > 0.6 && conversationLength > 1) {
+    const transitions = humanConversationStyles.transitions;
+    const transition = transitions[Math.floor(Math.random() * transitions.length)];
+    response += ' ' + transition;
+  }
+
+  return response;
+}
+
+// Quick start templates with human conversation starters
+function useQuickStart(template) {
+  currentJournalTemplate = template;
+  conversationState = 'gathering';
+
+  // Hide conversation starter
+  const starter = document.getElementById('conversationStarter');
+  if (starter) {
+    starter.style.opacity = '0';
+    starter.style.transform = 'translateY(-10px)';
+    setTimeout(() => starter.classList.add('hidden'), 300);
+  }
+
+  // Start with human-like conversation based on template
+  let greeting = '';
+
+  switch(template) {
+    case 'daily-reflection':
+      greeting = "I love diving deep into how days unfold! What's something from today that's still sitting with you?";
+      break;
+    case 'gratitude-practice':
+      greeting = "Gratitude journaling is one of my favorite things! What's making your heart feel full today?";
+      break;
+    case 'goal-tracking':
+      greeting = "I get excited hearing about people's progress! What's one thing you moved forward on today, even if it was small?";
+      break;
+    case 'free-form':
+      greeting = "I'm all ears! Just start wherever feels right - what's the energy of your day been like?";
+      break;
+    default:
+      greeting = "I'm really curious to hear what's been on your mind today. What feels important to share?";
+  }
+
+  addMessageToChat(greeting, 'ai');
+  chatHistory.push({ role: 'assistant', content: greeting, template: template });
+
+  // Update AI status
+  updateAIStatus("Having a genuine conversation with you...");
+
+  // Focus on input with natural placeholder
+  const quickNotes = document.getElementById('quickNotes');
+  if (quickNotes) {
+    quickNotes.placeholder = "Just start typing naturally...";
+    quickNotes.focus();
+  }
+
+  showFeedback(`💬 Started a natural conversation about ${journalTemplates[template].name.toLowerCase()}`, 'success', 3000);
+}
+
+// Process intelligent response with more human conversation
+function processIntelligentResponse(userMessage) {
+  const userMessageCount = chatHistory.filter(m => m.role === 'user').length;
+  let aiResponse;
+  let shouldGenerateEntry = false;
+
+  // More natural conversation flow
+  if (userMessageCount === 1) {
+    // First response - show interest and ask for more
+    aiResponse = generateHumanResponse(userMessage, 1);
+  } else if (userMessageCount === 2) {
+    // Second response - go deeper
+    const emotionalContext = analyzeEmotionalContext(userMessage);
+    aiResponse = generateHumanResponse(userMessage, 2);
+  } else if (userMessageCount === 3) {
+    // Third response - maybe one more question or wrap up
+    if (Math.random() > 0.4) { // 60% chance to wrap up
+      shouldGenerateEntry = true;
+      aiResponse = getWrapUpResponse();
+    } else {
+      aiResponse = generateHumanResponse(userMessage, 3);
+    }
   } else {
-    conversationState = 'deep-dive';
-    return getDeepDiveQuestion(userMessage);
+    // After 3+ exchanges, definitely wrap up
+    shouldGenerateEntry = true;
+    aiResponse = getWrapUpResponse();
   }
+
+  // Simulate human thinking time (more realistic)
+  const thinkingTime = 1500 + Math.random() * 2500; // 1.5-4 seconds
+
+  setTimeout(() => {
+    hideAdvancedThinking();
+
+    if (shouldGenerateEntry) {
+      // Add final response then generate
+      addMessageToChat(aiResponse, 'ai');
+      chatHistory.push({ role: 'assistant', content: aiResponse });
+
+      // Small pause before generation
+      setTimeout(() => {
+        generateTrulyDiverseEntry();
+      }, 1000);
+    } else {
+      // Continue conversation
+      addMessageToChat(aiResponse, 'ai');
+      chatHistory.push({ role: 'assistant', content: aiResponse });
+
+      // Re-enable send button
+      const sendBtn = document.getElementById('smartSendBtn');
+      if (sendBtn) {
+        sendBtn.disabled = false;
+      }
+
+      // Focus back on input
+      const quickNotes = document.getElementById('quickNotes');
+      if (quickNotes) {
+        quickNotes.focus();
+      }
+    }
+
+    updateConversationProgress();
+  }, thinkingTime);
 }
 
-// Get deep dive question based on user input
-function getDeepDiveQuestion(userMessage) {
-  const template = journalTemplates[currentJournalTemplate];
-
-  // Use template-specific follow-ups if available
-  if (template && template.followUps) {
-    const randomFollowUp = template.followUps[Math.floor(Math.random() * template.followUps.length)];
-    return randomFollowUp;
-  }
-
-  // Fallback deep dive questions
-  const deepQuestions = [
-    "Can you tell me more about how that made you feel?",
-    "What do you think that experience taught you?",
-    "How does this connect to what's important to you?",
-    "What would you want to remember most about this?",
-    "How has this shaped your perspective?",
-    "What emotions came up for you during this?",
-    "How did this experience change you?",
-    "What meaning do you find in this experience?",
-    "What are you taking away from this?",
-    "How do you feel about this now, looking back?"
+// Natural wrap-up responses
+function getWrapUpResponse() {
+  const wrapUps = [
+    "This has been such a rich conversation! I feel like I really understand the essence of your day. Let me create something beautiful that captures all of this.",
+    "Wow, thank you for sharing so openly with me. I can feel the depth of your experience. I'm excited to weave this into a journal entry that honors your story.",
+    "I love how thoughtfully you've shared about your day. There's so much meaning in what you've told me. Let me craft an entry that reflects your unique voice and experience.",
+    "This conversation has given me such a clear picture of who you are and how you experience life. I want to create something that truly feels like you wrote it.",
+    "Your insights and the way you see the world are really special. I'm going to create a journal entry that captures not just what happened, but who you are as a person."
   ];
 
-  // Try to pick a contextually relevant question based on the user's message
-  const lowerMessage = userMessage.toLowerCase();
-
-  if (lowerMessage.includes('feel') || lowerMessage.includes('emotion')) {
-    return "That sounds like it brought up some strong emotions. What was going through your mind when you felt that way?";
-  }
-
-  if (lowerMessage.includes('learn') || lowerMessage.includes('discover')) {
-    return "That's a valuable insight! How do you think this learning will influence you going forward?";
-  }
-
-  if (lowerMessage.includes('difficult') || lowerMessage.includes('hard') || lowerMessage.includes('challenge')) {
-    return "It sounds like that was challenging. What helped you get through it, and what did you discover about yourself?";
-  }
-
-  if (lowerMessage.includes('happy') || lowerMessage.includes('joy') || lowerMessage.includes('excited')) {
-    return "I can sense the positive energy in that experience! What made it so special for you?";
-  }
-
-  if (lowerMessage.includes('people') || lowerMessage.includes('friend') || lowerMessage.includes('family')) {
-    return "Relationships can be so meaningful. How did that interaction impact you, and what did you appreciate about it?";
-  }
-
-  // Default to a random deep question
-  return deepQuestions[Math.floor(Math.random() * deepQuestions.length)];
+  return wrapUps[Math.floor(Math.random() * wrapUps.length)];
 }
 
-// Generate deep dive response
-function generateDeepDiveResponse(userMessage) {
-  const followUpQuestions = [
-    "Can you tell me more about how that made you feel?",
-    "What do you think that experience taught you?",
-    "How does this connect to what's important to you?",
-    "What would you want to remember most about this?",
-    "How has this shaped your perspective?",
-    "What are you taking away from this experience?"
-  ];
+// Generate truly diverse content that breaks the formula
+function generateTrulyDiverseEntry() {
+  updateAIStatus("Crafting something that sounds authentically like you...");
 
-  if (chatHistory.filter(m => m.role === 'user').length >= 3) {
-    conversationState = 'finalizing';
-    return "You've shared such meaningful insights. I think I have everything needed to create a beautiful journal entry that captures your thoughts and feelings. Ready for me to write it?";
+  // Show loading indicator
+  const loadingIndicator = document.getElementById('loadingIndicator');
+  if (loadingIndicator) {
+    loadingIndicator.classList.remove('hidden');
   }
 
-  return followUpQuestions[Math.floor(Math.random() * followUpQuestions.length)];
+  // Analyze the user's actual voice and style
+  const userVoiceAnalysis = analyzeUserVoice();
+
+  // Create a completely custom journal entry
+  const customEntry = createCustomJournalEntry(userVoiceAnalysis);
+
+  // Simulate API call but use our custom generation
+  setTimeout(() => {
+    // Hide loading indicator
+    if (loadingIndicator) {
+      loadingIndicator.classList.add('hidden');
+    }
+
+    // Create the data object with our custom content
+    const data = {
+      entry: customEntry.content,
+      title: customEntry.title
+    };
+
+    // Add final AI response
+    const finalResponse = "There you go! I tried to capture your authentic voice and make it sound like something you'd actually write, not a template. How does it feel?";
+    addMessageToChat(finalResponse, 'ai');
+    chatHistory.push({ role: 'assistant', content: finalResponse });
+
+    // Populate form and switch
+    populateFormWithAIContent(data);
+    switchToManualForm();
+
+    showFeedback('✨ Created an entry that should sound uniquely like you!', 'success');
+    updateAIStatus("Made something authentic to your voice!");
+  }, 2000 + Math.random() * 2000);
+}
+
+// Analyze user's authentic voice from their messages
+function analyzeUserVoice() {
+  const userMessages = chatHistory.filter(m => m.role === 'user');
+  const allText = userMessages.map(m => m.content).join(' ');
+
+  return {
+    messages: userMessages,
+    allText: allText,
+    avgLength: allText.length / userMessages.length,
+    tone: detectActualTone(allText),
+    structure: detectStructurePreference(userMessages),
+    vocabulary: detectVocabularyStyle(allText),
+    emotionalStyle: detectEmotionalStyle(allText)
+  };
+}
+
+// Detect the user's actual tone from their writing
+function detectActualTone(text) {
+  const casual = (text.match(/\b(like|yeah|really|pretty|kinda|gonna|wanna)\b/gi) || []).length;
+  const formal = (text.match(/\b(therefore|however|furthermore|nevertheless|consequently)\b/gi) || []).length;
+  const enthusiastic = (text.match(/[!]{1,3}|amazing|awesome|love|excited|incredible/gi) || []).length;
+
+  if (enthusiastic > 2) return 'enthusiastic';
+  if (casual > formal) return 'casual';
+  if (formal > casual) return 'formal';
+  return 'balanced';
+}
+
+// Create a completely custom journal entry that sounds like the user
+function createCustomJournalEntry(voice) {
+  const userMessages = voice.messages.map(m => m.content);
+  const mainContent = userMessages.join('\n\n');
+
+  // Get the user's actual words and phrases
+  const userPhrases = extractUserPhrases(voice.allText);
+  const userEmotions = extractUserEmotions(voice.allText);
+
+  // Create an opening that mirrors their style
+  let opening = createAuthenticOpening(userMessages[0], voice.tone);
+
+  // Build the main content using their actual language
+  let content = transformUserContentToJournal(mainContent, voice);
+
+  // Create a natural ending in their voice
+  let ending = createAuthenticEnding(voice);
+
+  // Combine everything
+  const fullEntry = `${opening}\n\n${content}\n\n${ending}`;
+
+  // Create a natural title
+  const title = createNaturalTitle(userMessages, voice);
+
+  return {
+    content: fullEntry,
+    title: title
+  };
+}
+
+// Extract phrases that are uniquely theirs
+function extractUserPhrases(text) {
+  // Look for unique expressions, not generic ones
+  const phrases = [];
+  const sentences = text.split(/[.!?]+/);
+
+  sentences.forEach(sentence => {
+    if (sentence.trim().length > 10 && sentence.trim().length < 100) {
+      phrases.push(sentence.trim());
+    }
+  });
+
+  return phrases;
+}
+
+// Extract their emotional expressions
+function extractUserEmotions(text) {
+  const emotionMap = {};
+  const emotionWords = text.match(/\b(feel|felt|feeling|emotion|happy|sad|excited|nervous|proud|grateful|frustrated|peaceful|energized|tired|motivated|inspired|overwhelmed|content|anxious|hopeful|confident)\w*\b/gi) || [];
+
+  emotionWords.forEach(word => {
+    emotionMap[word.toLowerCase()] = (emotionMap[word.toLowerCase()] || 0) + 1;
+  });
+
+  return emotionMap;
+}
+
+// Create an opening that sounds like them, not a template
+function createAuthenticOpening(firstMessage, tone) {
+  const openings = {
+    casual: [
+      "So today was interesting...",
+      "I've been thinking about today, and",
+      "Today felt different somehow.",
+      "There's something about today that",
+      "I keep coming back to how"
+    ],
+    enthusiastic: [
+      "Okay, I have to talk about today!",
+      "Today was absolutely",
+      "I'm still buzzing from",
+      "I can't get over how",
+      "Today reminded me why I love"
+    ],
+    formal: [
+      "Today presented an opportunity to",
+      "I find myself reflecting on",
+      "Today offered some insights about",
+      "I've been considering how",
+      "Today highlighted the importance of"
+    ],
+    balanced: [
+      "I've been thinking about today.",
+      "Today brought some clarity about",
+      "There was something meaningful about today.",
+      "I noticed something important today.",
+      "Today helped me realize"
+    ]
+  };
+
+  const options = openings[tone] || openings.balanced;
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+// Transform their content into journal format while keeping their voice
+function transformUserContentToJournal(content, voice) {
+  // Don't completely rewrite - keep their authentic language
+  // Just add some structure and flow
+
+  const sections = content.split('\n\n');
+  let transformed = '';
+
+  sections.forEach((section, index) => {
+    if (index > 0) {
+      // Add natural transitions that match their style
+      const transitions = voice.tone === 'casual' ?
+        ['What really stuck with me was', 'And then there was', 'I also keep thinking about'] :
+        voice.tone === 'enthusiastic' ?
+        ['But the best part was', 'And get this', 'What made it even better was'] :
+        ['Another aspect that stood out was', 'Additionally', 'What also resonated with me was'];
+
+      const transition = transitions[Math.floor(Math.random() * transitions.length)];
+      transformed += transition + ' ' + section.toLowerCase() + '\n\n';
+    } else {
+      transformed += section + '\n\n';
+    }
+  });
+
+  return transformed.trim();
+}
+
+// Create an ending that sounds like their natural voice
+function createAuthenticEnding(voice) {
+  const endings = {
+    casual: [
+      "Anyway, that's where my head's at right now.",
+      "Pretty good day overall, I'd say.",
+      "Looking forward to seeing what tomorrow brings.",
+      "Feeling pretty good about all of this.",
+      "It's nice to have days like this."
+    ],
+    enthusiastic: [
+      "I'm so energized thinking about all of this!",
+      "Can't wait to see what builds from here!",
+      "This feeling is exactly what I needed!",
+      "I'm going to hold onto this energy!",
+      "Today was absolutely perfect for where I'm at."
+    ],
+    formal: [
+      "I'm grateful for the insights this day has provided.",
+      "This experience has given me valuable perspective.",
+      "I look forward to applying these learnings going forward.",
+      "Today has reinforced some important principles for me.",
+      "I appreciate the growth that today has offered."
+    ],
+    balanced: [
+      "I'm thankful for today's experiences.",
+      "It feels good to reflect on all of this.",
+      "I'm curious to see how this influences tomorrow.",
+      "Today was exactly what I needed.",
+      "I feel centered after thinking through all of this."
+    ]
+  };
+
+  const options = endings[voice.tone] || endings.balanced;
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+// Create a natural title from their content
+function createNaturalTitle(userMessages, voice) {
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+
+  // Extract key themes from their messages
+  const allText = userMessages.join(' ').toLowerCase();
+
+  if (allText.includes('work') || allText.includes('project') || allText.includes('accomplish')) {
+    return `Getting Things Done - ${dateStr}`;
+  } else if (allText.includes('feel') || allText.includes('emotion') || allText.includes('heart')) {
+    return `Feeling It All - ${dateStr}`;
+  } else if (allText.includes('people') || allText.includes('friend') || allText.includes('family')) {
+    return `Connections - ${dateStr}`;
+  } else if (allText.includes('learn') || allText.includes('discover') || allText.includes('realize')) {
+    return `Learning Something New - ${dateStr}`;
+  } else {
+    return `Today's Thoughts - ${dateStr}`;
+  }
 }
 
 // Get contextual hint
