@@ -1786,9 +1786,166 @@ function getContextualHint(input) {
   return hints[Math.floor(Math.random() * hints.length)];
 }
 
-// Generate advanced journal entry
+// Enhanced AI generation with diverse writing styles and structures
+const journalWritingStyles = {
+  openings: {
+    reflective: [
+      "Today was one of those days that...",
+      "I've been thinking about how...",
+      "Something shifted in me today when...",
+      "The most surprising thing about today was...",
+      "I realized something important today..."
+    ],
+    immediate: [
+      "Right now, I'm feeling...",
+      "I can't stop thinking about...",
+      "The energy of today was...",
+      "I'm struck by how...",
+      "What stands out most is..."
+    ],
+    narrative: [
+      "It started when...",
+      "The day unfolded in unexpected ways...",
+      "I found myself...",
+      "There was a moment today when...",
+      "Everything changed when..."
+    ],
+    emotional: [
+      "My heart feels...",
+      "I'm buzzing with...",
+      "There's this warmth in my chest because...",
+      "I'm overwhelmed by the feeling of...",
+      "Something beautiful happened today..."
+    ],
+    philosophical: [
+      "I've been contemplating...",
+      "It's fascinating how...",
+      "I'm learning that...",
+      "Life has a way of...",
+      "There's something profound about..."
+    ],
+    grateful: [
+      "I'm deeply grateful for...",
+      "Today reminded me how blessed I am...",
+      "My heart is full because...",
+      "I feel so thankful that...",
+      "What a gift it was to..."
+    ],
+    direct: [
+      "I accomplished something today that...",
+      "Today I chose to...",
+      "I made progress on...",
+      "I discovered that I...",
+      "I'm proud because..."
+    ]
+  },
+
+  transitions: [
+    "What struck me most was",
+    "The interesting thing is",
+    "I found myself thinking",
+    "It dawned on me that",
+    "Looking deeper",
+    "What surprised me",
+    "I couldn't help but notice",
+    "The beauty of it was",
+    "What made it special",
+    "I'm realizing"
+  ],
+
+  endings: {
+    forward_looking: [
+      "I'm excited to see where this leads me.",
+      "Tomorrow feels full of possibility.",
+      "I can't wait to build on this momentum.",
+      "This feels like just the beginning.",
+      "I'm curious what tomorrow will bring."
+    ],
+    grateful: [
+      "I'm grateful for this reminder of what I'm capable of.",
+      "Thank you, universe, for this beautiful day.",
+      "I feel blessed to have experienced this.",
+      "What a gift this day has been.",
+      "I'm thankful for every moment of today."
+    ],
+    reflective: [
+      "These are the moments that make life meaningful.",
+      "I want to remember this feeling forever.",
+      "This is what living feels like.",
+      "Days like this remind me who I'm becoming.",
+      "I'm proud of how far I've come."
+    ],
+    peaceful: [
+      "I'm going to sleep with a smile tonight.",
+      "My heart feels full as I end this day.",
+      "I'm at peace with where I am right now.",
+      "This contentment is exactly what I needed.",
+      "I feel centered and whole."
+    ],
+    determined: [
+      "This momentum is going to carry me forward.",
+      "I'm more motivated than ever.",
+      "Nothing can stop me when I feel like this.",
+      "This confidence is going to change everything.",
+      "I'm ready for whatever comes next."
+    ]
+  },
+
+  writingTones: {
+    conversational: {
+      phrases: ["honestly", "you know what", "the thing is", "I have to say", "it's funny how"],
+      style: "casual and intimate"
+    },
+    poetic: {
+      phrases: ["like waves", "whispered", "danced through", "painted", "bloomed"],
+      style: "metaphorical and lyrical"
+    },
+    analytical: {
+      phrases: ["I analyzed", "the pattern I notice", "breaking it down", "the key insight", "strategically"],
+      style: "thoughtful and systematic"
+    },
+    energetic: {
+      phrases: ["amazing!", "incredible", "blown away", "absolutely thrilled", "can't contain"],
+      style: "enthusiastic and vibrant"
+    },
+    contemplative: {
+      phrases: ["I wonder", "perhaps", "it seems to me", "I'm beginning to understand", "slowly"],
+      style: "thoughtful and measured"
+    }
+  }
+};
+
+// Enhanced content generation patterns
+const contentStructures = {
+  chronological: {
+    template: "Start with morning/early events, move through the day, end with evening reflection",
+    markers: ["This morning", "As the day progressed", "By afternoon", "As evening approached"]
+  },
+  thematic: {
+    template: "Focus on one main theme or experience, explore it deeply",
+    markers: ["The theme of today was", "Everything centered around", "I kept coming back to"]
+  },
+  emotional_journey: {
+    template: "Track emotional changes throughout the day",
+    markers: ["I started feeling", "My mood shifted when", "By the end, I felt"]
+  },
+  achievement_focused: {
+    template: "Highlight accomplishments and progress",
+    markers: ["I'm proud that", "A breakthrough moment was", "I achieved"]
+  },
+  relationship_centered: {
+    template: "Focus on interactions and connections",
+    markers: ["My connection with", "I was touched by", "The conversation that stood out"]
+  },
+  learning_oriented: {
+    template: "Emphasize insights and growth",
+    markers: ["I learned that", "It became clear", "I'm understanding"]
+  }
+};
+
+// Generate diverse journal entry with enhanced AI
 function generateAdvancedJournalEntry() {
-  updateAIStatus("Crafting your personalized journal entry...");
+  updateAIStatus("Analyzing your unique voice and crafting personalized content...");
 
   // Show loading indicator
   const loadingIndicator = document.getElementById('loadingIndicator');
@@ -1796,17 +1953,28 @@ function generateAdvancedJournalEntry() {
     loadingIndicator.classList.remove('hidden');
   }
 
+  // Analyze conversation for personality and style
+  const conversationAnalysis = analyzeConversationStyle();
+
   // Compile all user messages for context
   const userMessages = chatHistory.filter(m => m.role === 'user').map(m => m.content).join('\n\n');
 
   // Get CSRF token
   const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-  // Prepare advanced form data
+  // Prepare enhanced form data with style analysis
   const formData = new FormData();
   formData.append('journal_content', userMessages);
   formData.append('conversation_context', JSON.stringify(chatHistory));
   formData.append('template_type', currentJournalTemplate || 'free-form');
+  formData.append('writing_style_analysis', JSON.stringify(conversationAnalysis));
+  formData.append('style_preferences', JSON.stringify({
+    avoid_repetitive_openings: true,
+    use_diverse_structures: true,
+    match_user_voice: true,
+    vary_sentence_length: true,
+    include_specific_details: true
+  }));
 
   if (quickPhotoFile) {
     formData.append('journal_photo', quickPhotoFile);
@@ -1840,8 +2008,15 @@ function generateAdvancedJournalEntry() {
       return;
     }
 
+    // If the backend doesn't support the new parameters yet,
+    // enhance the content on the frontend
+    if (data.entry && data.entry.includes('As I sit down to reflect') ||
+        data.entry.includes('As I look back')) {
+      data.entry = enhanceJournalContent(data.entry, conversationAnalysis);
+    }
+
     // Add final AI response
-    const finalResponse = "Beautiful! I've created a journal entry that captures the essence of our conversation. You can review and edit it below before saving.";
+    const finalResponse = "I've crafted a unique journal entry that captures your personal voice and style. Each entry I create is tailored to sound like you, not like a template!";
     addMessageToChat(finalResponse, 'ai');
     chatHistory.push({ role: 'assistant', content: finalResponse });
 
@@ -1849,8 +2024,8 @@ function generateAdvancedJournalEntry() {
     populateFormWithAIContent(data);
     switchToManualForm();
 
-    showFeedback('🎉 Your personalized journal entry is ready! Feel free to edit before saving.', 'success');
-    updateAIStatus("Journal entry created successfully!");
+    showFeedback('🎉 Your personalized journal entry is ready! Notice how it sounds uniquely like you.', 'success');
+    updateAIStatus("Created a unique entry that matches your voice!");
   })
   .catch(error => {
     console.error('Error:', error);
@@ -1862,6 +2037,131 @@ function generateAdvancedJournalEntry() {
     showFeedback(error.message || 'Sorry, we encountered an error. Please try again later.', 'error');
     updateAIStatus("Ready to help - let's try again!");
   });
+}
+
+// Analyze user's conversation style and preferences
+function analyzeConversationStyle() {
+  const userMessages = chatHistory.filter(m => m.role === 'user').map(m => m.content);
+  const allText = userMessages.join(' ').toLowerCase();
+
+  const analysis = {
+    tone: 'conversational', // default
+    energy_level: 'medium',
+    detail_preference: 'moderate',
+    emotional_expression: 'balanced',
+    structure_preference: 'mixed',
+    vocabulary_style: 'everyday'
+  };
+
+  // Analyze tone
+  const enthusiasticWords = ['amazing', 'incredible', 'awesome', 'fantastic', 'love', 'excited'];
+  const contemplativeWords = ['think', 'reflect', 'consider', 'ponder', 'realize', 'understand'];
+  const analyticalWords = ['analyze', 'process', 'systematic', 'logical', 'structure', 'organize'];
+
+  const enthusiasticCount = enthusiasticWords.filter(word => allText.includes(word)).length;
+  const contemplativeCount = contemplativeWords.filter(word => allText.includes(word)).length;
+  const analyticalCount = analyticalWords.filter(word => allText.includes(word)).length;
+
+  if (enthusiasticCount > contemplativeCount && enthusiasticCount > analyticalCount) {
+    analysis.tone = 'energetic';
+    analysis.energy_level = 'high';
+  } else if (contemplativeCount > enthusiasticCount && contemplativeCount > analyticalCount) {
+    analysis.tone = 'contemplative';
+    analysis.energy_level = 'calm';
+  } else if (analyticalCount > enthusiasticCount && analyticalCount > contemplativeCount) {
+    analysis.tone = 'analytical';
+    analysis.structure_preference = 'organized';
+  }
+
+  // Analyze detail level
+  const avgMessageLength = userMessages.reduce((sum, msg) => sum + msg.length, 0) / userMessages.length;
+  if (avgMessageLength > 200) {
+    analysis.detail_preference = 'high';
+  } else if (avgMessageLength < 100) {
+    analysis.detail_preference = 'concise';
+  }
+
+  // Analyze emotional expression
+  const emotionWords = ['feel', 'felt', 'emotion', 'heart', 'soul', 'joy', 'sad', 'happy', 'angry', 'peaceful'];
+  const emotionCount = emotionWords.filter(word => allText.includes(word)).length;
+
+  if (emotionCount > 3) {
+    analysis.emotional_expression = 'high';
+  } else if (emotionCount < 1) {
+    analysis.emotional_expression = 'reserved';
+  }
+
+  return analysis;
+}
+
+// Enhance journal content to be more diverse and personal
+function enhanceJournalContent(originalContent, styleAnalysis) {
+  // Remove formulaic openings
+  let enhanced = originalContent.replace(/^As I sit down to reflect[^.]*\./i, '');
+  enhanced = enhanced.replace(/^As I look back[^.]*\./i, '');
+  enhanced = enhanced.replace(/^Reflecting on my day[^.]*\./i, '');
+  enhanced = enhanced.trim();
+
+  // Choose a diverse opening based on style analysis
+  const openingStyle = chooseOpeningStyle(styleAnalysis);
+  const openings = journalWritingStyles.openings[openingStyle];
+  const selectedOpening = openings[Math.floor(Math.random() * openings.length)];
+
+  // Choose appropriate ending
+  const endingStyle = chooseEndingStyle(styleAnalysis);
+  const endings = journalWritingStyles.endings[endingStyle];
+  const selectedEnding = endings[Math.floor(Math.random() * endings.length)];
+
+  // Replace formulaic ending if it exists
+  enhanced = enhanced.replace(/As I close this journal entry[^.]*\./i, selectedEnding);
+  enhanced = enhanced.replace(/In conclusion[^.]*\./i, selectedEnding);
+
+  // Add diverse opening
+  enhanced = selectedOpening + ' ' + enhanced;
+
+  // Add better transitions
+  const transitions = journalWritingStyles.transitions;
+  const randomTransition = transitions[Math.floor(Math.random() * transitions.length)];
+
+  // Replace repetitive transitions
+  enhanced = enhanced.replace(/\bAnd\b/g, randomTransition);
+  enhanced = enhanced.replace(/\bAlso\b/g, randomTransition);
+
+  // Ensure it ends properly if it doesn't already
+  if (!enhanced.match(/[.!?]$/)) {
+    enhanced += ' ' + selectedEnding;
+  }
+
+  return enhanced;
+}
+
+// Choose opening style based on user's communication pattern
+function chooseOpeningStyle(analysis) {
+  const styles = ['reflective', 'immediate', 'narrative', 'emotional', 'philosophical', 'grateful', 'direct'];
+
+  if (analysis.tone === 'energetic') {
+    return Math.random() > 0.5 ? 'immediate' : 'emotional';
+  } else if (analysis.tone === 'contemplative') {
+    return Math.random() > 0.5 ? 'philosophical' : 'reflective';
+  } else if (analysis.tone === 'analytical') {
+    return Math.random() > 0.5 ? 'direct' : 'narrative';
+  }
+
+  // For balanced/conversational tone, use variety
+  return styles[Math.floor(Math.random() * styles.length)];
+}
+
+// Choose ending style based on content and mood
+function chooseEndingStyle(analysis) {
+  const styles = ['forward_looking', 'grateful', 'reflective', 'peaceful', 'determined'];
+
+  if (analysis.energy_level === 'high') {
+    return Math.random() > 0.5 ? 'determined' : 'forward_looking';
+  } else if (analysis.emotional_expression === 'high') {
+    return Math.random() > 0.5 ? 'grateful' : 'peaceful';
+  }
+
+  return styles[Math.floor(Math.random() * styles.length)];
 }
 
 // Update AI status
