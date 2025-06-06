@@ -6,8 +6,6 @@ from django.dispatch import receiver
 import json
 from django.contrib.auth.signals import user_logged_in
 
-
-
 class RateLimitMiddleware(MiddlewareMixin):
     # Store IP addresses and their last request times
     ip_requests = {}
