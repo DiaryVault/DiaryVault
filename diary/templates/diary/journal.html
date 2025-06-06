@@ -736,8 +736,151 @@
     </p>
   </div>
 
+  <!-- Chat area for AI generation (visible if not in edit mode) -->
+  {% if not is_edit_mode %}
+  <div id="chatArea" class="mb-8 space-y-4 animate-fade-in">
+    <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden border border-white transition-all hover:shadow-2xl card-hover">
+      <!-- Chat Header -->
+      <div class="bg-gradient-to-r from-secondary-50 to-primary-50 px-4 sm:px-6 py-4 border-b border-white flex items-center justify-between">
+        <div>
+          <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd" />
+            </svg>
+            AI Journal Assistant
+          </h3>
+          <p class="text-xs text-gray-600 mt-1">Share your day and I'll help create a beautiful journal entry</p>
+        </div>
+        <div class="text-xs font-medium bg-white/50 px-3 py-1 rounded-full text-gray-500 flex items-center gap-1 shadow-inner">
+          <span id="quickCharCount">0</span>
+          <span>characters</span>
+        </div>
+      </div>
+
+      <!-- Chat Container -->
+      <div class="p-4 sm:p-6">
+        <div class="chat-container" id="chatContainer">
+          <!-- Initial AI greeting -->
+          <div class="chat-bubble ai">
+            <p class="handwritten text-gray-800 text-lg leading-relaxed">Hello! I'm your journal assistant. Share some quick notes about your day, and I'll help transform them into a beautiful journal entry. You can also add a photo to capture the moment.</p>
+          </div>
+
+          <!-- Conversation history will be added here dynamically -->
+          <div id="chatHistory"></div>
+
+          <!-- Thinking indicator (initially hidden) -->
+          <div class="chat-bubble ai hidden" id="thinkingIndicator">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-1">
+                <div class="w-2 h-2 bg-secondary-500 rounded-full animate-pulse"></div>
+                <div class="w-2 h-2 bg-secondary-500 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                <div class="w-2 h-2 bg-secondary-500 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+              </div>
+              <span class="handwritten text-gray-600">Thinking...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat input container -->
+        <div class="mt-4 relative">
+          <div class="bg-white rounded-xl border border-gray-200 focus-within:border-secondary-400 transition shadow-inner overflow-hidden">
+            <textarea id="quickNotes" class="w-full p-4 pr-20 border-0 focus:ring-0 focus:outline-none handwritten bg-transparent text-lg resize-none"
+              placeholder="Tell me about your day..."
+              oninput="countQuickChars()" rows="3"></textarea>
+
+            <!-- Chat tools -->
+            <div class="absolute bottom-2 right-2 flex items-center gap-2">
+              <!-- Photo upload tool -->
+              <div class="relative">
+                <button type="button" class="p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center" onclick="document.getElementById('quickPhotoInput').click()" title="Add Photo">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 hover:text-secondary-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </button>
+                <!-- Hidden file input -->
+                <input type="file" id="quickPhotoInput" class="hidden" accept="image/*" onchange="handleQuickFileSelect(this)">
+              </div>
+
+              <!-- Generate button -->
+              <button type="button" class="btn-gradient text-white p-2 rounded-full transition-all hover:shadow-lg" id="generateEntryBtn" onclick="generateJournalEntry()" title="Generate Entry">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Photo preview for quick chat (initially hidden) -->
+          <div id="quickPhotoContainer" class="hidden mt-3 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+            <div class="relative">
+              <img id="quickPhotoPreview" class="w-full max-h-60 object-cover" src="" alt="Photo preview">
+              <div class="absolute top-2 right-2 flex gap-2">
+                <button type="button" class="bg-white/90 p-1 rounded-full shadow-sm border border-gray-200 hover:bg-white transition-colors" onclick="document.getElementById('quickPhotoInput').click()" title="Change photo">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                </button>
+                <button type="button" class="bg-white/90 p-1 rounded-full shadow-sm border border-gray-200 hover:bg-red-50 transition-colors" onclick="removeQuickPhoto()" title="Remove photo">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="p-2 bg-gray-50 text-xs text-gray-600 flex justify-between items-center">
+              <span id="quickPhotoName">image.jpg</span>
+              <span class="text-secondary-600">Added to journal</span>
+            </div>
+          </div>
+
+          <!-- Topic suggestions -->
+          <div class="mt-3">
+            <div class="text-xs font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              Try these topics:
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="addQuickSuggestion('Today I accomplished')" class="suggestions-pill bg-secondary-50 hover:bg-secondary-100 text-secondary-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-secondary-200/50">Today I accomplished</button>
+              <button type="button" onclick="addQuickSuggestion('I felt happy when')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-emerald-200/50">I felt happy when</button>
+              <button type="button" onclick="addQuickSuggestion('I learned that')" class="suggestions-pill bg-primary-50 hover:bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-primary-200/50">I learned that</button>
+              <button type="button" onclick="addQuickSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50">I met with</button>
+              <button type="button" onclick="addQuickSuggestion('I\'m grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50">I'm grateful for</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Switch to manual form option -->
+      <div class="bg-gradient-to-r from-secondary-50 to-primary-50 p-4 border-t border-white">
+        <div class="text-center">
+          <button type="button" id="useManualFormBtn" onclick="switchToManualForm()" class="btn-modern btn-secondary flex items-center gap-2 mx-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            <span>Write manually instead</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Enhanced loading indicator with better animations -->
+  <div id="loadingIndicator" class="mt-6 sm:mt-12 hidden animate-fade-in">
+    <div class="flex flex-col items-center justify-center p-4 sm:p-8 bg-white/70 backdrop-blur-sm rounded-xl shadow-lg border border-white">
+      <div class="relative">
+        <div class="w-12 sm:w-16 h-12 sm:h-16 border-4 border-secondary-200 border-t-secondary-600 rounded-full animate-spin mb-4"></div>
+        <div class="absolute inset-0 bg-secondary-100 rounded-full scale-125 animate-ping opacity-30"></div>
+      </div>
+      <p class="text-center text-gray-600 handwritten text-lg sm:text-xl">Crafting your journal entry<span class="loading-dots"></span></p>
+      <p class="text-center text-gray-500 text-sm mt-2">This takes just a moment</p>
+    </div>
+  </div>
+
   <!-- Enhanced Main entry form with improved styling -->
-  <form method="post" enctype="multipart/form-data" id="journalForm" class="w-full relative z-10 animate-scale-in">
+  <form method="post" enctype="multipart/form-data" id="journalForm" class="w-full relative z-10 animate-scale-in {% if not is_edit_mode %}hidden{% endif %}">
     {% csrf_token %}
     <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden border border-white transition-all hover:shadow-2xl card-hover">
       <div class="p-3 sm:p-6">
@@ -977,6 +1120,11 @@
 
 <!-- SCROLL FIX: Enhanced JavaScript with scroll optimizations -->
 <script>
+// Global chat history storage
+let chatHistory = [];
+let quickPhotoFile = null;
+let quickPhotoDataUrl = null;
+
 // Enhanced JavaScript with scroll performance fixes
 let currentPhotoFile = null;
 let currentPhotoDataUrl = null;
@@ -1000,7 +1148,426 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeAnimations();
   setupEnhancedUX();
   setupScrollOptimizations();
+  initializeChatInterface();
 });
+
+function initializeChatInterface() {
+  // Initialize quick notes character counter
+  countQuickChars();
+
+  // Set up auto-resize for quick notes
+  const quickNotes = document.getElementById('quickNotes');
+  if (quickNotes) {
+    quickNotes.addEventListener('input', function() {
+      countQuickChars();
+      // Auto-resize
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+  }
+}
+
+// Quick notes character counter
+function countQuickChars() {
+  const textArea = document.getElementById('quickNotes');
+  const charCount = document.getElementById('quickCharCount');
+
+  if (!textArea || !charCount) {
+    return;
+  }
+
+  charCount.textContent = textArea.value.length;
+}
+
+// Add suggestion to quick notes
+function addQuickSuggestion(text) {
+  const textArea = document.getElementById('quickNotes');
+  if (!textArea) return;
+
+  let currentText = textArea.value;
+
+  if (currentText && !currentText.endsWith('\n') && !currentText.endsWith(' ')) {
+    currentText += ' ';
+  }
+
+  textArea.value = currentText + text + ' ';
+  textArea.focus();
+
+  countQuickChars();
+
+  // Auto-resize
+  textArea.style.height = 'auto';
+  textArea.style.height = Math.min(textArea.scrollHeight, 120) + 'px';
+
+  // Move cursor to end
+  textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
+
+  showFeedback(`Added "${text}" to your notes`, 'success', 1500);
+}
+
+// Handle quick photo selection
+function handleQuickFileSelect(input) {
+  if (!input.files || !input.files[0]) return;
+
+  const file = input.files[0];
+
+  // Check file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    showFeedback('Image file is too large. Please select an image under 5MB.', 'error');
+    input.value = '';
+    return;
+  }
+
+  // Check file type
+  if (!file.type.match('image.*')) {
+    showFeedback('Only image files are allowed.', 'error');
+    input.value = '';
+    return;
+  }
+
+  quickPhotoFile = file;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    quickPhotoDataUrl = e.target.result;
+
+    const preview = document.getElementById('quickPhotoPreview');
+    if (preview) {
+      preview.src = quickPhotoDataUrl;
+    }
+
+    const container = document.getElementById('quickPhotoContainer');
+    if (container) {
+      container.classList.remove('hidden');
+    }
+
+    const photoName = document.getElementById('quickPhotoName');
+    if (photoName) {
+      photoName.textContent = file.name;
+    }
+
+    showFeedback('Photo added successfully', 'success', 2000);
+  };
+
+  reader.readAsDataURL(file);
+}
+
+// Remove quick photo
+function removeQuickPhoto() {
+  const photoInput = document.getElementById('quickPhotoInput');
+  if (photoInput) {
+    photoInput.value = '';
+  }
+
+  const container = document.getElementById('quickPhotoContainer');
+  if (container) {
+    container.classList.add('hidden');
+  }
+
+  quickPhotoFile = null;
+  quickPhotoDataUrl = null;
+
+  showFeedback('Photo removed', 'info', 2000);
+}
+
+// Generate journal entry with AI
+function generateJournalEntry() {
+  const quickNotes = document.getElementById('quickNotes');
+  if (!quickNotes || quickNotes.value.trim() === '') {
+    showFeedback('Please share some notes about your day first', 'warning');
+    quickNotes.focus();
+    return;
+  }
+
+  const userMessage = quickNotes.value.trim();
+
+  // Add to chat history
+  chatHistory.push({ role: 'user', content: userMessage });
+
+  // Display user message
+  addMessageToChat(userMessage, 'user');
+
+  // Clear input
+  quickNotes.value = '';
+  quickNotes.style.height = 'auto';
+  countQuickChars();
+
+  // Show thinking indicator
+  const thinkingIndicator = document.getElementById('thinkingIndicator');
+  if (thinkingIndicator) {
+    thinkingIndicator.classList.remove('hidden');
+  }
+
+  // Show loading indicator
+  const loadingIndicator = document.getElementById('loadingIndicator');
+  if (loadingIndicator) {
+    loadingIndicator.classList.remove('hidden');
+  }
+
+  // Disable generate button
+  const generateBtn = document.getElementById('generateEntryBtn');
+  if (generateBtn) {
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = `
+      <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    `;
+  }
+
+  // Get CSRF token
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  // Prepare form data
+  const formData = new FormData();
+  formData.append('journal_content', userMessage);
+
+  if (quickPhotoFile) {
+    formData.append('journal_photo', quickPhotoFile);
+  }
+
+  // Make API call to generate journal entry
+  fetch('/api/demo-journal/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken
+    },
+    body: formData
+  })
+  .then(response => {
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error('Rate limit exceeded. Please wait a moment before trying again.');
+      }
+      throw new Error('Server error: ' + response.status);
+    }
+    return response.json();
+  })
+  .then(data => {
+    // Hide loading indicator
+    if (loadingIndicator) {
+      loadingIndicator.classList.add('hidden');
+    }
+
+    // Hide thinking indicator
+    if (thinkingIndicator) {
+      thinkingIndicator.classList.add('hidden');
+    }
+
+    // Re-enable generate button
+    if (generateBtn) {
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+        </svg>
+      `;
+    }
+
+    if (data.error) {
+      showFeedback(data.error, 'error');
+      return;
+    }
+
+    // Add AI response to chat
+    const aiResponse = "Perfect! I've created a beautiful journal entry based on what you shared. You can now review and edit it in the form below.";
+    chatHistory.push({ role: 'assistant', content: aiResponse });
+    addMessageToChat(aiResponse, 'ai');
+
+    // Populate the form with generated content
+    populateFormWithAIContent(data);
+
+    // Switch to manual form
+    switchToManualForm();
+
+    showFeedback('Journal entry generated successfully!', 'success');
+  })
+  .catch(error => {
+    console.error('Error:', error);
+
+    // Hide loading indicator
+    if (loadingIndicator) {
+      loadingIndicator.classList.add('hidden');
+    }
+
+    // Hide thinking indicator
+    if (thinkingIndicator) {
+      thinkingIndicator.classList.add('hidden');
+    }
+
+    // Re-enable generate button
+    if (generateBtn) {
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+        </svg>
+      `;
+    }
+
+    showFeedback(error.message || 'Sorry, we encountered an error. Please try again later.', 'error');
+  });
+}
+
+// Add message to chat
+function addMessageToChat(message, role) {
+  const chatHistoryContainer = document.getElementById('chatHistory');
+  if (!chatHistoryContainer) {
+    return;
+  }
+
+  const messageElement = document.createElement('div');
+  messageElement.classList.add('chat-bubble', role);
+
+  // Use handwritten class for AI messages
+  if (role === 'ai') {
+    messageElement.classList.add('handwritten');
+  } else {
+    messageElement.classList.add('diary-font');
+  }
+
+  messageElement.innerHTML = `<p>${message}</p>`;
+  chatHistoryContainer.appendChild(messageElement);
+
+  // Scroll to the bottom of the chat
+  const chatContainer = document.getElementById('chatContainer');
+  if (chatContainer) {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+}
+
+// Populate form with AI-generated content
+function populateFormWithAIContent(data) {
+  // Set title
+  const titleField = document.getElementById('id_title');
+  if (titleField && data.title) {
+    titleField.value = data.title;
+    titleField.classList.add('auto-populated');
+    setTimeout(() => titleField.classList.remove('auto-populated'), 2000);
+  }
+
+  // Set content
+  const contentField = document.getElementById('journalInput');
+  if (contentField && data.entry) {
+    contentField.value = data.entry;
+    contentField.classList.add('auto-populated');
+    setTimeout(() => contentField.classList.remove('auto-populated'), 2000);
+
+    // Auto-resize content field
+    contentField.style.height = 'auto';
+    const newHeight = Math.min(contentField.scrollHeight, window.innerHeight * 0.4);
+    contentField.style.height = newHeight + 'px';
+  }
+
+  // Transfer photo if exists
+  if (quickPhotoFile) {
+    currentPhotoFile = quickPhotoFile;
+    currentPhotoDataUrl = quickPhotoDataUrl;
+
+    const preview = document.getElementById('photoPreview');
+    if (preview) {
+      preview.src = quickPhotoDataUrl;
+    }
+
+    const previewContainer = document.getElementById('photoPreviewContainer');
+    if (previewContainer) {
+      previewContainer.classList.remove('hidden');
+    }
+
+    const photoName = document.getElementById('photoName');
+    if (photoName) {
+      photoName.textContent = quickPhotoFile.name;
+    }
+
+    // Set the file input
+    const fileInput = document.getElementById('journalPhoto');
+    if (fileInput) {
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(quickPhotoFile);
+      fileInput.files = dataTransfer.files;
+    }
+  }
+
+  // Update character count
+  countChars();
+
+  // Re-initialize mood slider and tags
+  if (typeof initModernMoodSlider === 'function') {
+    initModernMoodSlider();
+  }
+  if (typeof initModernTagsInput === 'function') {
+    initModernTagsInput();
+  }
+}
+
+// Switch to manual form
+function switchToManualForm() {
+  const chatArea = document.getElementById('chatArea');
+  const journalForm = document.getElementById('journalForm');
+
+  if (chatArea) {
+    chatArea.classList.add('hidden');
+  }
+
+  if (journalForm) {
+    journalForm.classList.remove('hidden');
+
+    // Scroll to form
+    setTimeout(() => {
+      journalForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+
+  // Add button to go back to chat
+  addBackToChatButton();
+}
+
+// Add back to chat button
+function addBackToChatButton() {
+  const journalForm = document.getElementById('journalForm');
+  if (!journalForm) return;
+
+  // Check if button already exists
+  if (document.getElementById('backToChatBtn')) return;
+
+  const backButton = document.createElement('div');
+  backButton.className = 'mb-4 text-center';
+  backButton.innerHTML = `
+    <button type="button" id="backToChatBtn" onclick="switchBackToChat()" class="btn-modern btn-secondary flex items-center gap-2 mx-auto">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+      </svg>
+      <span>Back to AI Assistant</span>
+    </button>
+  `;
+
+  journalForm.parentNode.insertBefore(backButton, journalForm);
+}
+
+// Switch back to chat
+function switchBackToChat() {
+  const chatArea = document.getElementById('chatArea');
+  const journalForm = document.getElementById('journalForm');
+  const backButton = document.getElementById('backToChatBtn');
+
+  if (chatArea) {
+    chatArea.classList.remove('hidden');
+  }
+
+  if (journalForm) {
+    journalForm.classList.add('hidden');
+  }
+
+  if (backButton) {
+    backButton.parentElement.remove();
+  }
+
+  // Scroll to chat
+  setTimeout(() => {
+    chatArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
 
 // SCROLL FIX: New scroll optimization function
 function setupScrollOptimizations() {
