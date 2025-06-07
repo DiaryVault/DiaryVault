@@ -174,10 +174,7 @@ LOGIN_URL = '/login/'
 LOGOUT_URL = '/logout/'
 
 # FIXED: Enhanced allauth configuration - KEY CHANGES HERE
-ACCOUNT_EMAIL_REQUIRED = False  # CHANGED: This was True, now False to prevent signup form
-ACCOUNT_USERNAME_REQUIRED = False  # Don't require username in forms (we auto-generate)
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
-ACCOUNT_EMAIL_VERIFICATION = 'none'  # No email verification required
+ACCOUNT_EMAIL_VERIFICATION = 'optional'  # No email verification required
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 ACCOUNT_LOGOUT_ON_GET = False  # Require POST for logout (security)
