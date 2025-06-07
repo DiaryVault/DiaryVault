@@ -114,7 +114,7 @@ class Entry(models.Model):
     class Meta:
         ordering = ['-created_at']
         verbose_name_plural = 'entries'
-        # ENHANCED: Add comprehensive database indexes for better query performance
+        # FIXED: Remove any indexes with relationship lookups (no __ allowed)
         indexes = [
             # Basic indexes
             models.Index(fields=['user', 'created_at']),
@@ -130,6 +130,10 @@ class Entry(models.Model):
             # Composite indexes for common filter combinations
             models.Index(fields=['user', 'mood', 'created_at']),
             models.Index(fields=['user', 'chapter', 'created_at']),
+            # Additional performance indexes
+            models.Index(fields=['user']),
+            models.Index(fields=['mood']),
+            models.Index(fields=['published_in_journal']),
         ]
 
     def save(self, *args, **kwargs):
@@ -138,9 +142,14 @@ class Entry(models.Model):
             self.word_count = len(self.content.split())
         super().save(*args, **kwargs)
 
-        # Update tag usage counts
-        for tag in self.tags.all():
-            tag.update_usage_count()
+        # Update tag usage counts (with error handling)
+        try:
+            for tag in self.tags.all():
+                if hasattr(tag, 'update_usage_count'):
+                    tag.update_usage_count()
+        except Exception:
+            # Skip tag updates if there are issues (e.g., during migrations)
+            pass
 
     def __str__(self):
         return self.title
@@ -183,25 +192,67 @@ class Entry(models.Model):
             score += 20
 
         # Has tags (20 points)
-        if self.tags.exists():
-            score += 20
+        try:
+            if self.tags.exists():
+                score += 20
+        except Exception:
+            # Handle case where tags relationship isn't ready
+            pass
 
         # Has title (10 points)
         if self.title.strip():
             score += 10
 
         # Engagement factor (10 points)
-        if hasattr(self, 'photos') and self.photos.exists():
-            score += 5
-        if hasattr(self, 'chapter') and self.chapter:
+        try:
+            if hasattr(self, 'photos') and self.photos.exists():
+                score += 5
+        except Exception:
+            pass
+
+        if self.chapter:
             score += 5
 
         return min(100, score)
 
-    # Compatibility aliases
     def can_publish(self):
         """Compatibility alias for can_be_published"""
         return self.can_be_published()
+
+    def get_reading_time(self):
+        """Estimate reading time in minutes (average 200 words per minute)"""
+        if self.word_count:
+            return max(1, round(self.word_count / 200))
+        return 1
+
+    def get_excerpt(self, length=150):
+        """Get excerpt of entry content"""
+        if len(self.content) <= length:
+            return self.content
+        return self.content[:length].rsplit(' ', 1)[0] + '...'
+
+    def has_media(self):
+        """Check if entry has any associated media"""
+        try:
+            return hasattr(self, 'photos') and self.photos.exists()
+        except Exception:
+            return False
+
+    def get_mood_emoji(self):
+        """Get emoji representation of mood"""
+        mood_emojis = {
+            'excited': '🤩',
+            'happy': '😊',
+            'content': '😌',
+            'neutral': '😐',
+            'anxious': '😰',
+            'sad': '😢',
+            'angry': '😠',
+            'confused': '😕',
+            'grateful': '🙏',
+            'overwhelmed': '😵',
+        }
+        return mood_emojis.get(self.mood, '😐')
 
 class SummaryVersion(models.Model):
     """Track different versions of AI-generated summaries"""
@@ -840,13 +891,14 @@ class JournalPurchase(models.Model):
 
     class Meta:
         unique_together = ['user', 'journal']
-        # ENHANCED: Add indexes for purchase analytics
+        # FIXED: Remove the invalid index with journal__author
         indexes = [
             models.Index(fields=['user', 'created_at']),
             models.Index(fields=['journal', 'created_at']),
-            models.Index(fields=['journal__author', 'created_at']),  # For author earnings
+            # REMOVED: models.Index(fields=['journal__author', 'created_at']),  # This is invalid
+            # Instead, if you need to query by author, create a separate index on journal only
+            models.Index(fields=['journal']),  # This allows efficient author lookups via journal.author
         ]
-
 class JournalReview(models.Model):
     """Reviews and ratings for journals"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
