@@ -95,7 +95,7 @@ urlpatterns = [
     path('marketplace/', marketplace_view, name='marketplace'),
 
     # Publishing functionality
-    path('marketplace/publish/', publish_journal, name='publish_journal'),
+    path('marketplace/publish/', journal_compiler.smart_journal_compiler, name='publish_journal'),
     path('marketplace/publish-biography/', publish_biography, name='publish_biography'),
 
     # Journal detail and interactions
