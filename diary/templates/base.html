@@ -662,73 +662,136 @@
         animation: bounceGentle 2s ease-in-out infinite;
       }
 
-      /* FIXED: Mobile Header - More generous spacing and accessibility */
+      /* FIXED: Mobile Header - Better Layout Control */
       .mobile-header {
-        padding: 0.75rem 0; /* Increased from 0.25rem */
-        min-height: 64px; /* Ensure minimum height */
+        padding: 0.75rem 0;
+        min-height: 64px;
       }
 
+      /* FIXED: Mobile header layout - prevents overlapping */
       @media screen and (max-width: 768px) {
-        /* Ensure header has enough space */
         .mobile-header {
-          padding: 1rem 0; /* Even more space on mobile */
+          padding: 0.875rem 0;
           min-height: 72px;
         }
 
-        /* Make mobile header container more spacious */
         .mobile-header .container {
-          padding-left: 1rem;
-          padding-right: 1rem;
+          padding-left: 0.75rem;
+          padding-right: 0.75rem;
           max-width: 100%;
         }
 
-        /* Ensure header content has proper spacing */
-        .mobile-header .flex.items-center.justify-between {
+        /* FIXED: Ensure header content has proper distribution */
+        .mobile-header .header-content {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
           min-height: 52px;
+          width: 100%;
+          position: relative;
+        }
+
+        /* FIXED: Logo section - constrained width */
+        .mobile-logo-section {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex: 1;
+          min-width: 0;
+          max-width: calc(100% - 140px); /* Leave space for right section */
+          overflow: hidden;
         }
 
         .mobile-logo {
-          padding: 0.5rem;
+          padding: 0.375rem;
+          flex-shrink: 0;
         }
 
         .mobile-logo svg {
-          height: 1.25rem;
-          width: 1.25rem;
+          height: 1.125rem;
+          width: 1.125rem;
         }
 
         .mobile-logo-text {
-          font-size: 1.125rem;
-          line-height: 1.5rem;
+          font-size: 1rem;
+          line-height: 1.25rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .mobile-brand-badge {
-          transform: scale(0.8) rotate(-2deg);
-          margin-left: -0.25rem;
+          transform: scale(0.75) rotate(-2deg);
+          margin-left: -0.125rem;
+          flex-shrink: 0;
+        }
+
+        /* FIXED: Right section - fixed width to prevent overlapping */
+        .mobile-right-section {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex-shrink: 0;
+          width: auto;
+          min-width: 120px; /* Minimum space for user profile + menu button */
+        }
+
+        /* FIXED: User profile on mobile - more compact */
+        .mobile-user-profile {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.25rem 0.5rem;
+          border-radius: 1rem;
+          background: rgba(255, 255, 255, 0.8);
+          backdrop-filter: blur(15px);
+          border: 1px solid rgba(255, 255, 255, 0.6);
+          transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          text-decoration: none;
+          flex-shrink: 0;
+        }
+
+        .mobile-user-profile:hover {
+          background: rgba(255, 255, 255, 0.95);
+          border-color: rgba(99, 102, 241, 0.2);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+          text-decoration: none;
         }
 
         .mobile-user-avatar {
-          height: 2rem;
-          width: 2rem;
-          font-size: 0.75rem;
+          height: 1.75rem;
+          width: 1.75rem;
+          font-size: 0.7rem;
+          border-radius: 0.75rem;
+          background: linear-gradient(135deg, #6366f1, #4f46e5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: 700;
+          flex-shrink: 0;
         }
 
-        /* FIXED: Menu Toggle Button - Better accessibility and positioning */
+        /* FIXED: Menu Toggle Button - proper sizing and positioning */
         .menu-toggle-btn {
           background: rgba(255, 255, 255, 0.95);
           border: 1px solid rgba(99, 102, 241, 0.2);
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          padding: 0.75rem; /* Increased from 0.5rem */
+          padding: 0.625rem;
           border-radius: 0.75rem;
           z-index: 20;
           position: relative;
           pointer-events: auto;
-          min-width: 48px; /* Ensure minimum touch target */
-          min-height: 48px; /* Ensure minimum touch target */
+          min-width: 44px;
+          min-height: 44px;
+          width: 44px;
+          height: 44px;
           display: flex;
           align-items: center;
           justify-content: center;
-          flex-shrink: 0; /* Prevent shrinking */
-          margin-left: 0.5rem; /* Add some space from other elements */
+          flex-shrink: 0;
         }
 
         .menu-toggle-btn:hover {
@@ -740,8 +803,8 @@
         .menu-toggle-btn svg {
           color: #1f2937;
           stroke-width: 2.5;
-          height: 1.25rem;
-          width: 1.25rem;
+          height: 1.125rem;
+          width: 1.125rem;
           flex-shrink: 0;
         }
 
@@ -749,49 +812,51 @@
           color: #111827;
         }
 
-        /* Ensure proper spacing in right navigation */
-        .mobile-header .flex.items-center.gap-3:last-child {
-          gap: 0.75rem;
-          flex-shrink: 0;
-        }
-
-        /* Hide quick action buttons on mobile */
+        /* Hide desktop elements on mobile */
         .quick-action-btn {
           display: none;
         }
 
-        /* Ensure user profile doesn't interfere with menu button */
-        .enhanced-user-profile {
-          margin-right: 0.5rem;
+        /* Hide desktop navigation */
+        .desktop-nav {
+          display: none;
+        }
+
+        /* Hide desktop auth buttons */
+        .desktop-auth {
+          display: none;
+        }
+
+        /* Hide desktop user profile */
+        .desktop-user-profile {
+          display: none;
         }
       }
 
-      /* Additional mobile-specific fixes */
+      /* Additional tablet-specific adjustments */
       @media screen and (max-width: 640px) {
-        .mobile-header {
-          padding: 0.875rem 0;
-        }
-
         .mobile-header .container {
-          padding-left: 0.875rem;
-          padding-right: 0.875rem;
+          padding-left: 0.625rem;
+          padding-right: 0.625rem;
         }
 
-        /* Ensure enough space for all elements */
-        .mobile-header .flex.items-center.gap-2 {
-          gap: 0.5rem;
-          min-width: 0; /* Allow flex items to shrink if needed */
+        .mobile-logo-section {
+          max-width: calc(100% - 110px); /* Even less space on very small screens */
         }
 
-        /* Make sure logo section doesn't take too much space */
-        .mobile-header .flex.items-center:first-child {
-          flex: 1;
-          min-width: 0;
+        .mobile-right-section {
+          min-width: 100px;
         }
 
-        /* Ensure right section has enough space */
-        .mobile-header .flex.items-center:last-child {
-          flex-shrink: 0;
+        .mobile-logo-text {
+          font-size: 0.9rem;
+        }
+      }
+
+      /* Ensure no elements are hidden on desktop */
+      @media screen and (min-width: 769px) {
+        .mobile-user-profile {
+          display: none;
         }
       }
 
@@ -1140,15 +1205,15 @@
 </head>
 
 <body class="min-h-screen flex flex-col bg-gradient-to-br text-secondary-800 custom-scrollbar pattern-dots">
-    <!-- Enhanced Header -->
+    <!-- Enhanced Header with FIXED Mobile Layout -->
     <header class="sticky top-0 z-50 w-full glass-nav transition-all duration-300 mobile-header"
              x-data="{ scrolled: false }"
              x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 20 })"
              :class="{ 'shadow-soft-lg': scrolled }">
         <div class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-            <div class="flex items-center justify-between min-h-12">
-                <!-- Enhanced Logo -->
-                <div class="flex items-center flex-1 min-w-0">
+            <div class="header-content">
+                <!-- Enhanced Logo Section with FIXED mobile constraints -->
+                <div class="mobile-logo-section">
                     <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center gap-2 group reliable-nav-link">
                         <div class="relative">
                             <div class="absolute inset-0 bg-primary-500 rounded-xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
@@ -1159,15 +1224,15 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2 min-w-0">
-                            <h1 class="mobile-logo-text text-lg font-bold text-gradient diary-font truncate">DiaryVault</h1>
-                            <span class="mobile-brand-badge brand-badge flex-shrink-0">Beta</span>
+                            <h1 class="mobile-logo-text font-bold text-gradient diary-font">DiaryVault</h1>
+                            <span class="mobile-brand-badge brand-badge">Beta</span>
                         </div>
                     </a>
                 </div>
 
                 <!-- Enhanced Desktop Navigation for Logged-in Users -->
                 {% if user.is_authenticated %}
-                <nav class="hidden lg:flex items-center gap-2">
+                <nav class="desktop-nav hidden lg:flex items-center gap-2">
                     <a href="{% url 'dashboard' %}" class="nav-link reliable-nav-link text-sm {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
@@ -1200,7 +1265,7 @@
                     </a>
                 </nav>
                 {% else %}
-                <nav class="hidden lg:flex items-center gap-1">
+                <nav class="desktop-nav hidden lg:flex items-center gap-1">
                     <a href="{% url 'account_signup' %}?feature=journal" class="nav-link reliable-nav-link text-sm">Journal</a>
                     <a href="{% url 'account_signup' %}?feature=library" class="nav-link reliable-nav-link text-sm">Library</a>
                     <a href="{% url 'account_signup' %}?feature=biography" class="nav-link reliable-nav-link text-sm">Biography</a>
@@ -1209,8 +1274,8 @@
                 </nav>
                 {% endif %}
 
-                <!-- Enhanced Right Navigation -->
-                <div class="flex items-center gap-3 flex-shrink-0">
+                <!-- Enhanced Right Navigation with FIXED mobile layout -->
+                <div class="mobile-right-section">
                     {% if user.is_authenticated %}
                     <!-- Quick Action Buttons (Desktop Only) -->
                     <div class="quick-actions-container hidden xl:flex">
@@ -1228,8 +1293,8 @@
                         </a>
                     </div>
 
-                    <!-- Enhanced User Profile -->
-                    <a href="{% url 'account_settings' %}" class="enhanced-user-profile hidden sm:flex group reliable-nav-link">
+                    <!-- Enhanced Desktop User Profile -->
+                    <a href="{% url 'account_settings' %}" class="desktop-user-profile enhanced-user-profile hidden md:flex group reliable-nav-link">
                         <div class="relative">
                             <div class="enhanced-user-avatar h-10 w-10 flex items-center justify-center text-white font-bold text-sm">
                                 {{ user.username|first|upper }}
@@ -1249,15 +1314,27 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                         </svg>
                     </a>
+
+                    <!-- FIXED: Mobile User Profile - compact and non-overlapping -->
+                    <a href="{% url 'account_settings' %}" class="mobile-user-profile md:hidden reliable-nav-link">
+                        <div class="mobile-user-avatar">
+                            {{ user.username|first|upper }}
+                        </div>
+                        {% if unread_notifications > 0 %}
+                        <div class="enhanced-notification-badge" style="top: -4px; right: -4px; min-width: 0.75rem; height: 0.75rem; font-size: 0.5rem;">
+                            <span>{{ unread_notifications }}</span>
+                        </div>
+                        {% endif %}
+                    </a>
                     {% else %}
-                    <!-- Auth Buttons -->
-                    <div class="hidden md:flex gap-2 items-center">
+                    <!-- Desktop Auth Buttons -->
+                    <div class="desktop-auth hidden md:flex gap-2 items-center">
                         <a href="{% url 'account_login' %}" class="btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium reliable-nav-link">Log in</a>
                         <a href="{% url 'account_signup' %}" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium reliable-nav-link">Sign up</a>
                     </div>
                     {% endif %}
 
-                    <!-- Enhanced Menu Button - FIXED -->
+                    <!-- Enhanced Menu Button - FIXED positioning -->
                     <button id="menuToggleBtn" class="menu-toggle-btn relative hover:scale-105 transition-all duration-300 flex items-center justify-center">
                         {% if user.is_authenticated and unread_notifications > 0 %}
                         <div class="enhanced-notification-badge">
@@ -1547,13 +1624,13 @@
             <h1 class="text-4xl font-bold text-gradient diary-font mb-4">Welcome to DiaryVault</h1>
             <p class="text-xl text-secondary-600 mb-8">Your personal digital journal experience</p>
             <div class="space-y-4">
-                <p class="text-secondary-600">The mobile menu hamburger button has been fixed with:</p>
+                <p class="text-secondary-600">The mobile header layout has been completely fixed:</p>
                 <ul class="text-left max-w-md mx-auto space-y-2 text-secondary-600">
-                    <li>✅ Increased padding for better touch targets</li>
-                    <li>✅ Minimum 48px touch area for accessibility</li>
-                    <li>✅ Better spacing from other elements</li>
-                    <li>✅ Improved header layout with flex-shrink controls</li>
-                    <li>✅ More generous mobile header padding</li>
+                    <li>✅ Logo section constrained to prevent overlapping</li>
+                    <li>✅ Mobile user profile optimized and compact</li>
+                    <li>✅ Hamburger menu button properly positioned</li>
+                    <li>✅ Right section fixed width prevents overflow</li>
+                    <li>✅ Responsive layout works on all screen sizes</li>
                 </ul>
             </div>
         </div>
@@ -1611,7 +1688,7 @@
     <!-- Enhanced JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DiaryVault Enhanced Navigation - v6.0 with FIXED Mobile Menu Button');
+            console.log('DiaryVault Enhanced Navigation - v7.0 with FIXED Mobile Header Layout');
             console.log('User authenticated:', {{ user.is_authenticated|yesno:"true,false" }});
             console.log('Current page:', '{{ request.resolver_match.url_name }}');
 
@@ -1837,7 +1914,7 @@
 
             // Initialize page
             document.body.style.opacity = '1';
-            console.log('DiaryVault navigation initialized successfully with FIXED mobile menu button');
+            console.log('DiaryVault navigation initialized successfully with FIXED mobile header layout');
         });
 
         // Utility functions for external use
@@ -1853,7 +1930,7 @@
                 window.location.href = "{% url 'account_login' %}";
                 return false;
             },
-            version: '6.0-fixed-mobile-menu'
+            version: '7.0-fixed-mobile-header-layout'
         };
 
         // Global error handler for debugging
