@@ -45,17 +45,35 @@ def smart_journal_compiler(request):
     templates = JournalTemplateService.get_available_templates()
 
     # Get recent compiled journals
-    compiled_journals = Journal.objects.filter(
-        author=request.user,
-        is_published=True
-    ).order_by('-date_published')[:5]
+    try:
+        compiled_journals = Journal.objects.filter(
+            author=request.user
+        ).order_by('-created_at')[:6]
+
+        # Add entry count to each journal for template use
+        for journal in compiled_journals:
+            try:
+                journal.entry_count = journal.entries.count()
+                if journal.entry_count == 0 and hasattr(journal, 'entry_count_cached'):
+                    journal.entry_count = journal.entry_count_cached
+                if journal.entry_count == 0:
+                    journal.entry_count = "Draft"
+            except Exception as e:
+                journal.entry_count = "Unknown"
+                print(f"Error getting entry count for journal {journal.id}: {e}")
+
+        print(f"DEBUG: Successfully loaded {compiled_journals.count()} journals")
+
+    except Exception as e:
+        print(f"ERROR fetching compiled journals: {e}")
+        compiled_journals = Journal.objects.none()
 
     context = {
         'analysis': analysis,
         'recommendations': recommendations,
         'templates': templates,
-        'entries': entries,  # ← ADD THIS LINE
-        'compiled_journals': compiled_journals,  # ← ADD THIS LINE
+        'entries': entries,
+        'compiled_journals': compiled_journals,
         'total_entries': entries.count(),
         'has_enough_entries': entries.count() >= 5,
     }

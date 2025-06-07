@@ -263,9 +263,15 @@
                             </svg>
                             {{ journal.date_published|date:"M d, Y"|default:journal.created_at|date:"M d, Y" }}
                         </span>
-                        {% if journal.entry_count %}
-                        <span class="text-secondary-500">{{ journal.entry_count }} entries</span>
-                        {% endif %}
+                        <span class="text-secondary-500">
+                            {% if journal.entries.count > 0 %}
+                                {{ journal.entries.count }} entries
+                            {% elif journal.entry_count_cached > 0 %}
+                                {{ journal.entry_count_cached }} entries
+                            {% else %}
+                                Draft journal
+                            {% endif %}
+                        </span>
                     </div>
                     {% if journal.price %}
                     <span class="font-bold text-success-600">${{ journal.price }}</span>
