@@ -18,7 +18,7 @@ from django.db.models import Count, Sum, F, Q
 from django.core.cache import cache
 from django.conf import settings
 from django.urls import reverse_lazy, reverse
-
+from django.db.models import Count, Sum, Avg, Min, Max, F, Q
 
 from ..models import (
     Entry, Tag, SummaryVersion, LifeChapter, Biography,
