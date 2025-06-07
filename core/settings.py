@@ -76,7 +76,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
+        'APP_DIRS': False,  # Must be False when using custom loaders
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -85,7 +85,6 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
             ],
-            # Enhanced template caching for better performance
             'loaders': [
                 ('django.template.loaders.cached.Loader', [
                     'django.template.loaders.filesystem.Loader',
