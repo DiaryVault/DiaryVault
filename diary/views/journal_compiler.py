@@ -44,15 +44,23 @@ def smart_journal_compiler(request):
     # Get available templates
     templates = JournalTemplateService.get_available_templates()
 
+    # Get recent compiled journals
+    compiled_journals = Journal.objects.filter(
+        author=request.user,
+        is_published=True
+    ).order_by('-date_published')[:5]
+
     context = {
         'analysis': analysis,
         'recommendations': recommendations,
         'templates': templates,
+        'entries': entries,  # ← ADD THIS LINE
+        'compiled_journals': compiled_journals,  # ← ADD THIS LINE
         'total_entries': entries.count(),
         'has_enough_entries': entries.count() >= 5,
     }
 
-    return render(request, 'diary/publish_journal.html', context)
+    return render(request, 'diary/smart_journal_compiler.html', context)
 
 @login_required
 @require_POST

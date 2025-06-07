@@ -114,6 +114,17 @@
         background: rgba(16, 185, 129, 0.05);
     }
 
+    .journal-card {
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+
+    .journal-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+        border-color: #cbd5e1;
+    }
+
     .loading-overlay {
         position: fixed;
         top: 0;
@@ -206,6 +217,102 @@
                 <div class="text-sm text-secondary-600">Story Arcs</div>
             </div>
         </div>
+    </div>
+
+    <!-- Recent Compiled Journals -->
+    <div class="glass-card rounded-3xl p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-secondary-800">Your Compiled Journals</h2>
+            {% if compiled_journals %}
+            <span class="text-sm text-secondary-600">{{ compiled_journals|length }} journal{{ compiled_journals|length|pluralize }}</span>
+            {% endif %}
+        </div>
+
+        {% if compiled_journals %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for journal in compiled_journals %}
+            <div class="journal-card bg-white rounded-xl p-6">
+                <div class="flex items-start justify-between mb-3">
+                    <h3 class="font-bold text-secondary-800 text-lg leading-tight flex-1 mr-3">{{ journal.title }}</h3>
+                    <div class="flex items-center space-x-1">
+                        {% if journal.is_published %}
+                        <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            Published
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                            </svg>
+                            Draft
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <p class="text-sm text-secondary-600 mb-4 line-clamp-3">{{ journal.description|truncatechars:120 }}</p>
+
+                <div class="flex justify-between items-center text-sm mb-4">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-secondary-500">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            {{ journal.date_published|date:"M d, Y"|default:journal.created_at|date:"M d, Y" }}
+                        </span>
+                        {% if journal.entry_count %}
+                        <span class="text-secondary-500">{{ journal.entry_count }} entries</span>
+                        {% endif %}
+                    </div>
+                    {% if journal.price %}
+                    <span class="font-bold text-success-600">${{ journal.price }}</span>
+                    {% else %}
+                    <span class="text-secondary-500">Free</span>
+                    {% endif %}
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    {% if journal.is_published %}
+                    <a href="/marketplace/journal/{{ journal.id }}/" class="btn-primary px-4 py-2 text-sm rounded-lg flex-1 text-center">
+                        View in Marketplace
+                    </a>
+                    {% else %}
+                    <a href="/diary/journal/{{ journal.id }}/edit/" class="btn-secondary px-4 py-2 text-sm rounded-lg flex-1 text-center">
+                        Continue Editing
+                    </a>
+                    {% endif %}
+                    <button class="text-secondary-500 hover:text-secondary-700 p-2" title="More options">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if compiled_journals|length > 6 %}
+        <div class="text-center mt-6">
+            <a href="/diary/journals/" class="btn-secondary px-6 py-2 rounded-lg">
+                View All Journals
+            </a>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-12">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-secondary-800 mb-2">No journals yet</h3>
+            <p class="text-secondary-600 mb-6">Create your first compiled journal using the steps below!</p>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Step 1: Method Selection -->
