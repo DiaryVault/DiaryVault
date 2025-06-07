@@ -26,6 +26,7 @@
         padding: 0.75rem 1.5rem;
         font-size: 0.875rem;
         line-height: 1.25rem;
+        cursor: pointer;
     }
 
     .btn-primary:hover {
@@ -39,6 +40,7 @@
         opacity: 0.6;
         transform: none;
         cursor: not-allowed;
+        background: #9ca3af;
     }
 
     .btn-secondary {
@@ -55,6 +57,7 @@
         padding: 0.5rem 1rem;
         font-size: 0.875rem;
         line-height: 1.25rem;
+        cursor: pointer;
     }
 
     .btn-secondary:hover {
@@ -156,10 +159,21 @@
         }
     }
 
+    @media (min-width: 641px) {
+        .mobile-steps {
+            display: none;
+        }
+
+        .desktop-steps {
+            display: flex;
+        }
+    }
+
     .method-card {
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border: 2px solid transparent;
+        user-select: none;
     }
 
     .method-card:hover {
@@ -169,7 +183,9 @@
 
     .method-card.selected {
         border-color: #6366f1;
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(79, 70, 229, 0.02));
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05));
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(99, 102, 241, 0.2);
     }
 
     /* Mobile-optimized method cards */
@@ -415,6 +431,71 @@
             display: block;
         }
     }
+
+    .entry-checkbox {
+        accent-color: #10b981;
+    }
+
+    .toast {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        color: white;
+        font-weight: 500;
+        z-index: 1000;
+        transition: all 0.3s ease;
+        transform: translateX(100%);
+        max-width: 400px;
+    }
+
+    .toast.success {
+        background: #10b981;
+    }
+
+    .toast.error {
+        background: #ef4444;
+    }
+
+    .toast.show {
+        transform: translateX(0);
+    }
+
+    @media (max-width: 640px) {
+        .toast {
+            top: 1rem;
+            left: 1rem;
+            right: 1rem;
+            max-width: none;
+            transform: translateY(-100%);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    /* Method selection visual enhancements */
+    .method-selection-text {
+        transition: all 0.3s ease;
+    }
+
+    .method-selection-text.selected {
+        color: #6366f1;
+        font-weight: 600;
+    }
+
+    /* Continue button enhancement */
+    .continue-btn-enabled {
+        background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+        opacity: 1 !important;
+        cursor: pointer !important;
+    }
 </style>
 {% endblock %}
 
@@ -636,6 +717,13 @@
                 </div>
             </div>
         </div>
+
+        <div class="mt-6 text-center">
+            <div id="selectedMethodText" class="method-selection-text text-sm text-secondary-600 mb-4">Select a compilation method to continue</div>
+            <button id="continueToStep2" class="btn-primary px-6 py-3 rounded-xl" disabled>
+                Continue to Entry Selection
+            </button>
+        </div>
     </div>
 
     <!-- Mobile-Optimized Step 2: Entry Selection -->
@@ -687,9 +775,14 @@
             <div class="text-sm text-secondary-600">
                 Estimated: <span id="totalWords">0</span> words
             </div>
-            <button id="analyzeBtn" class="btn-primary px-6 py-3 rounded-xl mobile-full-width sm:w-auto" disabled>
-                Analyze Selected Entries
-            </button>
+            <div class="flex space-x-3">
+                <button id="backToStep1" class="btn-secondary px-6 py-3 rounded-xl">
+                    Back
+                </button>
+                <button id="analyzeBtn" class="btn-primary px-6 py-3 rounded-xl mobile-full-width sm:w-auto" disabled>
+                    Analyze Selected Entries
+                </button>
+            </div>
         </div>
     </div>
 
@@ -701,7 +794,10 @@
                 <div class="text-secondary-600">Analysis results will appear here...</div>
             </div>
         </div>
-        <div class="mt-4 sm:mt-6 text-center">
+        <div class="mt-4 sm:mt-6 flex flex-col sm:flex-row sm:justify-between space-y-3 sm:space-y-0">
+            <button id="backToStep2" class="btn-secondary px-6 py-3 rounded-xl">
+                Back
+            </button>
             <button id="generateStructureBtn" class="btn-primary px-6 py-3 rounded-xl mobile-full-width sm:w-auto" disabled>
                 Generate Journal Structure
             </button>
@@ -766,8 +862,11 @@
                         </div>
                     </div>
 
-                    <div class="pt-4">
-                        <button type="submit" id="publishBtn" class="w-full btn-primary py-3 rounded-xl text-base sm:text-lg font-semibold">
+                    <div class="pt-4 flex flex-col sm:flex-row sm:justify-between space-y-3 sm:space-y-0">
+                        <button type="button" id="backToStep3" class="btn-secondary px-6 py-3 rounded-xl">
+                            Back
+                        </button>
+                        <button type="submit" id="publishBtn" class="btn-primary py-3 px-6 rounded-xl text-base sm:text-lg font-semibold">
                             Publish Journal
                         </button>
                     </div>
@@ -852,21 +951,46 @@ class SmartJournalCompiler {
     }
 
     bindEvents() {
-        // Method selection
+        // Method selection with improved event handling
         document.querySelectorAll('.method-card').forEach(card => {
-            card.addEventListener('click', (e) => this.selectMethod(e));
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.selectMethod(card);
+            });
         });
 
         // Entry selection
         document.querySelectorAll('.entry-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => this.updateSelectedEntries());
+            checkbox.addEventListener('change', () => this.updateSelectedEntries());
+        });
+
+        // Entry card clicks
+        document.querySelectorAll('.entry-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.type !== 'checkbox' && !e.target.closest('.edit-entry-btn')) {
+                    const checkbox = card.querySelector('.entry-checkbox');
+                    checkbox.checked = !checkbox.checked;
+                    this.updateSelectedEntries();
+                }
+            });
         });
 
         // Entry editing
         document.querySelectorAll('.edit-entry-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => this.openEditModal(e));
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openEditModal(e);
+            });
         });
 
+        // Navigation buttons
+        document.getElementById('continueToStep2')?.addEventListener('click', () => this.goToStep(2));
+        document.getElementById('backToStep1')?.addEventListener('click', () => this.goToStep(1));
+        document.getElementById('backToStep2')?.addEventListener('click', () => this.goToStep(2));
+        document.getElementById('backToStep3')?.addEventListener('click', () => this.goToStep(3));
+
+        // Selection buttons
         document.getElementById('selectAllBtn')?.addEventListener('click', () => this.selectAllEntries());
         document.getElementById('selectNoneBtn')?.addEventListener('click', () => this.selectNoneEntries());
 
@@ -876,8 +1000,8 @@ class SmartJournalCompiler {
         document.getElementById('editEntryForm')?.addEventListener('submit', (e) => this.saveEntryEdit(e));
 
         // Action buttons
-        document.getElementById('analyzeBtn')?.addEventListener('click', (e) => this.analyzeEntries(e));
-        document.getElementById('generateStructureBtn')?.addEventListener('click', (e) => this.generateStructure(e));
+        document.getElementById('analyzeBtn')?.addEventListener('click', () => this.analyzeEntries());
+        document.getElementById('generateStructureBtn')?.addEventListener('click', () => this.generateStructure());
         document.getElementById('publishForm')?.addEventListener('submit', (e) => this.publishJournal(e));
 
         // Close modals on overlay click
@@ -886,29 +1010,41 @@ class SmartJournalCompiler {
                 this.closeEditModal();
             }
         });
-
-        document.getElementById('loadingOverlay')?.addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) {
-                // Prevent closing loading overlay by clicking
-            }
-        });
     }
 
-    selectMethod(event) {
+    selectMethod(card) {
         // Remove previous selections
-        document.querySelectorAll('.method-card').forEach(card => {
-            card.classList.remove('selected');
+        document.querySelectorAll('.method-card').forEach(c => {
+            c.classList.remove('selected');
         });
 
         // Select clicked method
-        const card = event.currentTarget;
         card.classList.add('selected');
         this.selectedMethod = card.dataset.method;
 
         console.log('Selected method:', this.selectedMethod);
 
-        // Move to next step
-        this.goToStep(2);
+        // Update UI
+        const methodNames = {
+            'ai': 'AI Smart Compilation',
+            'thematic': 'Thematic Collection',
+            'chronological': 'Timeline Journey'
+        };
+
+        const selectedText = document.getElementById('selectedMethodText');
+        const continueBtn = document.getElementById('continueToStep2');
+
+        if (selectedText) {
+            selectedText.textContent = `Selected: ${methodNames[this.selectedMethod]}`;
+            selectedText.classList.add('selected');
+        }
+
+        if (continueBtn) {
+            continueBtn.disabled = false;
+            continueBtn.classList.add('continue-btn-enabled');
+        }
+
+        this.showToast(`${methodNames[this.selectedMethod]} selected!`, 'success');
     }
 
     updateSelectedEntries() {
@@ -946,7 +1082,6 @@ class SmartJournalCompiler {
     }
 
     openEditModal(event) {
-        event.stopPropagation();
         const entryId = event.currentTarget.dataset.entryId;
         const entryCard = event.currentTarget.closest('.entry-card');
 
@@ -961,15 +1096,11 @@ class SmartJournalCompiler {
 
         // Show modal
         document.getElementById('editModal').style.display = 'flex';
-
-        // Prevent body scroll on mobile
         document.body.style.overflow = 'hidden';
     }
 
     closeEditModal() {
         document.getElementById('editModal').style.display = 'none';
-
-        // Restore body scroll
         document.body.style.overflow = '';
     }
 
@@ -981,7 +1112,7 @@ class SmartJournalCompiler {
         const content = document.getElementById('editEntryContent').value;
 
         if (!title.trim() || !content.trim()) {
-            this.showError('Title and content are required');
+            this.showToast('Title and content are required', 'error');
             return;
         }
 
@@ -1006,10 +1137,9 @@ class SmartJournalCompiler {
             });
 
             if (response.ok) {
-                // Update the entry card in the UI
                 this.updateEntryCardAfterEdit(entryId, title, content);
                 this.closeEditModal();
-                this.showSuccess('Entry updated successfully!');
+                this.showToast('Entry updated successfully!', 'success');
 
                 // If this entry was selected, update the word count
                 const checkbox = document.querySelector(`input[value="${entryId}"]`);
@@ -1022,7 +1152,7 @@ class SmartJournalCompiler {
 
         } catch (error) {
             console.error('Save error:', error);
-            this.showError('Failed to save entry: ' + error.message);
+            this.showToast('Failed to save entry: ' + error.message, 'error');
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
@@ -1052,28 +1182,23 @@ class SmartJournalCompiler {
     selectAllEntries() {
         document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = true);
         this.updateSelectedEntries();
+        this.showToast('All entries selected', 'success');
     }
 
     selectNoneEntries() {
         document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = false);
         this.updateSelectedEntries();
+        this.showToast('All entries deselected', 'success');
     }
 
-    async analyzeEntries(event) {
-        event.preventDefault();
-
+    async analyzeEntries() {
         if (!this.selectedMethod || this.selectedEntries.size === 0) {
-            this.showError('Please select a method and entries first');
+            this.showToast('Please select a method and entries first', 'error');
             return;
         }
 
-        const button = event.target;
-        const originalText = button.textContent;
-
         try {
             this.showLoading('Analyzing your entries...');
-            button.disabled = true;
-            button.textContent = 'Analyzing...';
 
             const response = await fetch('/diary/api/analyze-entries/', {
                 method: 'POST',
@@ -1093,36 +1218,27 @@ class SmartJournalCompiler {
                 this.analysisData = data.analysis;
                 this.displayAnalysisResults(data.analysis);
                 this.goToStep(3);
-                this.showSuccess('Analysis completed successfully!');
+                this.showToast('Analysis completed successfully!', 'success');
             } else {
                 throw new Error(data.error || 'Analysis failed');
             }
 
         } catch (error) {
             console.error('Analysis error:', error);
-            this.showError('Failed to analyze entries: ' + error.message);
+            this.showToast('Failed to analyze entries: ' + error.message, 'error');
         } finally {
             this.hideLoading();
-            button.disabled = false;
-            button.textContent = originalText;
         }
     }
 
-    async generateStructure(event) {
-        event.preventDefault();
-
+    async generateStructure() {
         if (!this.analysisData) {
-            this.showError('Please complete analysis first');
+            this.showToast('Please complete analysis first', 'error');
             return;
         }
 
-        const button = event.target;
-        const originalText = button.textContent;
-
         try {
             this.showLoading('Generating journal structure...');
-            button.disabled = true;
-            button.textContent = 'Generating...';
 
             const journalType = document.querySelector('input[name="journalType"]:checked')?.value || 'growth';
 
@@ -1147,18 +1263,16 @@ class SmartJournalCompiler {
                 this.displayStructure(data.structure);
                 this.populatePublishingForm(data.structure);
                 this.goToStep(4);
-                this.showSuccess('Structure generated successfully!');
+                this.showToast('Structure generated successfully!', 'success');
             } else {
                 throw new Error(data.error || 'Structure generation failed');
             }
 
         } catch (error) {
             console.error('Structure generation error:', error);
-            this.showError('Failed to generate structure: ' + error.message);
+            this.showToast('Failed to generate structure: ' + error.message, 'error');
         } finally {
             this.hideLoading();
-            button.disabled = false;
-            button.textContent = originalText;
         }
     }
 
@@ -1166,17 +1280,16 @@ class SmartJournalCompiler {
         event.preventDefault();
 
         if (!this.structureData) {
-            this.showError('Please generate structure first');
+            this.showToast('Please generate structure first', 'error');
             return;
         }
 
-        const formData = new FormData(event.target);
-        const title = formData.get('title') || document.getElementById('journalTitle').value;
-        const description = formData.get('description') || document.getElementById('journalDescription').value;
+        const title = document.getElementById('journalTitle').value;
+        const description = document.getElementById('journalDescription').value;
         const price = parseFloat(document.getElementById('journalPrice').value || 0);
 
         if (!title || !description) {
-            this.showError('Please fill in all required fields');
+            this.showToast('Please fill in all required fields', 'error');
             return;
         }
 
@@ -1216,7 +1329,7 @@ class SmartJournalCompiler {
 
         } catch (error) {
             console.error('Publishing error:', error);
-            this.showError('Failed to publish journal: ' + error.message);
+            this.showToast('Failed to publish journal: ' + error.message, 'error');
             this.hideLoading();
             button.disabled = false;
             button.textContent = originalText;
@@ -1277,7 +1390,7 @@ class SmartJournalCompiler {
                 <div class="bg-green-50 rounded-xl p-4">
                     <div class="text-xs sm:text-sm">
                         <strong>Estimated Length:</strong> ${(structure.estimated_length || 0).toLocaleString()} words<br>
-                        <strong>Suggested Price:</strong> $${structure.suggested_price || '9.99'}
+                        <strong>Suggested Price:</strong> ${structure.suggested_price || '9.99'}
                     </div>
                 </div>
             </div>
@@ -1368,23 +1481,17 @@ class SmartJournalCompiler {
     showLoading(message) {
         document.getElementById('loadingText').textContent = message;
         document.getElementById('loadingOverlay').style.display = 'flex';
-
-        // Prevent body scroll
         document.body.style.overflow = 'hidden';
     }
 
     hideLoading() {
         document.getElementById('loadingOverlay').style.display = 'none';
-
-        // Restore body scroll
         document.body.style.overflow = '';
     }
 
     showSuccessModal(journalId) {
         const modal = document.getElementById('successModal');
         modal.style.display = 'flex';
-
-        // Prevent body scroll
         document.body.style.overflow = 'hidden';
 
         document.getElementById('viewJournalBtn').onclick = () => {
@@ -1392,14 +1499,16 @@ class SmartJournalCompiler {
         };
     }
 
-    showSuccess(message) {
-        // Create a mobile-friendly toast notification
+    showToast(message, type = 'success') {
+        // Remove existing toasts
+        document.querySelectorAll('.toast').forEach(toast => toast.remove());
+
         const toast = document.createElement('div');
-        toast.className = 'fixed top-4 left-4 right-4 sm:top-4 sm:right-4 sm:left-auto sm:max-w-md bg-green-500 text-white px-4 sm:px-6 py-3 rounded-lg shadow-lg z-50 transform translate-y-full sm:translate-y-0 sm:translate-x-full transition-transform duration-300';
+        toast.className = `toast ${type}`;
         toast.innerHTML = `
             <div class="flex items-center justify-between">
-                <span class="text-sm sm:text-base">${message}</span>
-                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
+                <span>${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-3 text-white hover:text-gray-200">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -1410,52 +1519,17 @@ class SmartJournalCompiler {
         document.body.appendChild(toast);
 
         // Show toast
-        setTimeout(() => {
-            toast.classList.remove('translate-y-full', 'translate-x-full');
-        }, 100);
+        setTimeout(() => toast.classList.add('show'), 100);
 
         // Hide toast after 3 seconds
         setTimeout(() => {
-            toast.classList.add('translate-y-full', 'sm:translate-y-0', 'sm:translate-x-full');
+            toast.classList.remove('show');
             setTimeout(() => {
                 if (document.body.contains(toast)) {
                     document.body.removeChild(toast);
                 }
             }, 300);
         }, 3000);
-    }
-
-    showError(message) {
-        // Create a mobile-friendly toast notification for errors
-        const toast = document.createElement('div');
-        toast.className = 'fixed top-4 left-4 right-4 sm:top-4 sm:right-4 sm:left-auto sm:max-w-md bg-red-500 text-white px-4 sm:px-6 py-3 rounded-lg shadow-lg z-50 transform translate-y-full sm:translate-y-0 sm:translate-x-full transition-transform duration-300';
-        toast.innerHTML = `
-            <div class="flex items-center justify-between">
-                <span class="text-sm sm:text-base">${message}</span>
-                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-        `;
-
-        document.body.appendChild(toast);
-
-        // Show toast
-        setTimeout(() => {
-            toast.classList.remove('translate-y-full', 'translate-x-full');
-        }, 100);
-
-        // Hide toast after 4 seconds (errors stay a bit longer)
-        setTimeout(() => {
-            toast.classList.add('translate-y-full', 'sm:translate-y-0', 'sm:translate-x-full');
-            setTimeout(() => {
-                if (document.body.contains(toast)) {
-                    document.body.removeChild(toast);
-                }
-            }, 300);
-        }, 4000);
     }
 
     getCSRFToken() {
