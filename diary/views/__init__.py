@@ -1,3 +1,5 @@
+# diary/views/__init__.py
+
 # Core views
 from .core import home, signup, dashboard, custom_login, CustomLoginView
 
@@ -38,3 +40,19 @@ from .marketplace import (
     quick_view_journal, add_to_wishlist, add_to_comparison,
     marketplace_search_suggestions
 )
+
+# NEW: Smart Journal Compiler views
+from .journal_compiler import (
+    smart_journal_compiler, analyze_entries_ajax, generate_journal_structure,
+    publish_compiled_journal
+)
+
+# NEW: API views for journal compiler
+from .api_views import (
+    save_draft, load_draft, generate_marketing_copy
+)
+
+# Import modules for URL patterns (if needed)
+from . import journal_compiler
+from . import marketplace as marketplace_views
+from . import api_views
