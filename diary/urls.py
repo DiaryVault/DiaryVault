@@ -161,6 +161,9 @@ urlpatterns = [
     path('api/marketplace/price-suggestion/', api.get_price_suggestion, name='get_price_suggestion'),
     path('api/marketplace/marketing-copy/', api.generate_marketing_copy, name='generate_marketing_copy'),
 
+    path('api/analyze-entries/', views.analyze_entries_ajax, name='analyze_entries_ajax'),
+    path('api/generate-structure/', views.generate_journal_structure, name='generate_journal_structure'),
+    path('api/publish/', views.publish_compiled_journal, name='publish_compiled_journal'),
 
     # ============================================================================
     # Static File Handling
