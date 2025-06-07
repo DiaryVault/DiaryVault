@@ -4,6 +4,8 @@ import time
 import requests
 from datetime import datetime, timedelta
 from requests.exceptions import Timeout, ConnectionError, RequestException
+from typing import List, Dict, Any, Optional
+from django.contrib.auth.models import User
 
 from django.utils import timezone
 from django.conf import settings
@@ -460,7 +462,6 @@ class AIService:
                 biography.save()
 
                 # Auto-classify biography into chapters
-                from ..services.ai_service import AIService
                 auto_chapters = AIService._auto_classify_biography_into_chapters(biography_content, user)
 
                 # If we already have chapters_data, merge with new data
@@ -504,6 +505,7 @@ class AIService:
             else:
                 return "Unable to generate your biography at this time. Please try again later."
 
+    @staticmethod
     def _auto_classify_biography_into_chapters(biography_content, user):
         """
         Automatically classify a biography into standard chapters.
@@ -517,9 +519,6 @@ class AIService:
         import time
         import requests
         from django.conf import settings
-
-        # Get models
-        LifeChapter = apps.get_model('diary', 'LifeChapter')
 
         request_id = int(time.time() * 1000)
         logger.info(f"Auto-classification {request_id} started for user {user.username}")
@@ -658,6 +657,551 @@ class AIService:
             logger.error(f"Auto-classification {request_id} error: {str(e)}", exc_info=True)
             return {}
 
+    # ========================================================================
+    # NEW METHODS FOR SMART JOURNAL COMPILER
+    # ========================================================================
+
+    @staticmethod
+    def generate_journal_analysis(user: User, entries) -> str:
+        """Generate AI-powered analysis of journal entries for compilation"""
+
+        try:
+            # Prepare entry data for analysis
+            entry_data = []
+            for entry in entries[:50]:  # Limit to recent 50 entries
+                entry_data.append({
+                    'title': entry.title,
+                    'content': entry.content[:500],  # First 500 chars
+                    'mood': entry.mood,
+                    'date': entry.created_at.strftime('%Y-%m-%d'),
+                    'tags': [tag.name for tag in entry.tags.all()]
+                })
+
+            analysis_prompt = f"""
+Analyze this collection of journal entries and provide insights about:
+
+1. Dominant themes and patterns
+2. Emotional journey and growth
+3. Writing style and voice
+4. Key life events or transformations
+5. Potential story arcs or narratives
+6. Publication potential and market appeal
+
+Journal Entries Data:
+{json.dumps(entry_data[:10], indent=2)}
+
+Provide a comprehensive but concise analysis (300-400 words) that would help the author understand their journaling patterns and identify potential publication opportunities.
+
+Focus on:
+- What makes these entries unique and compelling
+- Natural story progressions or themes
+- Emotional depth and authenticity
+- Potential reader appeal
+"""
+
+            if user.is_authenticated:
+                response = generate_ai_content_personalized(analysis_prompt, user)
+            else:
+                response = generate_ai_content(analysis_prompt)
+
+            return response.get('entry', 'Analysis completed successfully')
+
+        except Exception as e:
+            logger.error(f"Error generating journal analysis: {e}")
+            return "Unable to generate detailed analysis at this time. Basic analysis completed successfully."
+
+    @staticmethod
+    def generate_journal_structure(user: User, entries, analysis: Dict, journal_type: str, compilation_method: str) -> Dict:
+        """Generate AI-powered journal structure"""
+
+        try:
+            # Prepare context for AI
+            context = {
+                'journal_type': journal_type,
+                'compilation_method': compilation_method,
+                'entry_count': len(entries),
+                'dominant_themes': [theme['name'] for theme in analysis.get('themes', [])[:5]],
+                'quality_score': analysis.get('quality_score', {}).get('score', 0),
+                'date_range': analysis.get('date_range', {}),
+                'story_arcs': len(analysis.get('story_arcs', []))
+            }
+
+            structure_prompt = f"""
+Create a compelling journal structure for publication based on this analysis:
+
+Context: {json.dumps(context, indent=2)}
+
+Generate a journal structure with:
+1. Compelling title (based on journal type: {journal_type})
+2. Engaging description for potential readers
+3. 3-6 well-organized chapters with:
+   - Meaningful chapter titles
+   - Brief chapter descriptions
+   - Logical flow and progression
+4. Consider the compilation method: {compilation_method}
+
+Format your response as JSON:
+{{
+    "title": "Suggested Journal Title",
+    "description": "Marketing description for readers",
+    "chapters": [
+        {{
+            "title": "Chapter Title",
+            "description": "What this chapter covers",
+            "theme": "primary theme",
+            "estimated_entries": 5
+        }}
+    ],
+    "target_audience": "Who would enjoy this journal",
+    "unique_selling_points": ["USP 1", "USP 2", "USP 3"]
+}}
+
+Make it compelling and marketable while staying authentic to the author's voice.
+The structure should feel natural and engaging for readers.
+"""
+
+            response = AIService._get_groq_response(structure_prompt)
+
+            # Parse AI response
+            try:
+                json_text = AIService.extract_json_from_text(response)
+                structure = json.loads(json_text)
+            except json.JSONDecodeError:
+                # Fallback structure if JSON parsing fails
+                structure = AIService._create_fallback_structure(journal_type, analysis)
+
+            # Validate and enhance structure
+            structure = AIService._validate_and_enhance_structure(structure, entries, analysis)
+
+            return structure
+
+        except Exception as e:
+            logger.error(f"Error generating journal structure: {e}")
+            return AIService._create_fallback_structure(journal_type, analysis)
+
+    @staticmethod
+    def _create_fallback_structure(journal_type: str, analysis: Dict) -> Dict:
+        """Create fallback structure when AI generation fails"""
+
+        # Template structures based on journal type
+        templates = {
+            'growth': {
+                'title': 'My Personal Growth Journey',
+                'description': 'A candid exploration of personal development, challenges overcome, and lessons learned along the way.',
+                'chapters': [
+                    {'title': 'Where I Started', 'description': 'Setting the foundation for change'},
+                    {'title': 'Facing Challenges', 'description': 'Obstacles and how I navigated them'},
+                    {'title': 'Breakthrough Moments', 'description': 'Key realizations and turning points'},
+                    {'title': 'Growth and Reflection', 'description': 'Lessons learned and future aspirations'}
+                ]
+            },
+            'travel': {
+                'title': 'Adventures and Discoveries',
+                'description': 'A journey through new places, cultures, and experiences that shaped my perspective.',
+                'chapters': [
+                    {'title': 'Departure', 'description': 'Leaving familiar territory behind'},
+                    {'title': 'New Horizons', 'description': 'First encounters with the unknown'},
+                    {'title': 'Deep Immersion', 'description': 'Living like a local and unexpected discoveries'},
+                    {'title': 'Coming Home', 'description': 'Reflections on how travel changed me'}
+                ]
+            },
+            'career': {
+                'title': 'Professional Evolution',
+                'description': 'Navigating career transitions, professional growth, and finding purpose in work.',
+                'chapters': [
+                    {'title': 'Career Crossroads', 'description': 'Recognizing the need for change'},
+                    {'title': 'Taking the Leap', 'description': 'Bold moves and calculated risks'},
+                    {'title': 'Learning and Adapting', 'description': 'Developing new skills and perspectives'},
+                    {'title': 'New Professional Identity', 'description': 'Embracing change and future goals'}
+                ]
+            }
+        }
+
+        template = templates.get(journal_type, templates['growth'])
+
+        # Customize based on analysis
+        themes = analysis.get('themes', [])
+        if themes:
+            dominant_theme = themes[0]['name']
+            template['title'] = f"My {dominant_theme.title()} Journey"
+
+        template['target_audience'] = f"Readers interested in {journal_type} and personal development"
+        template['unique_selling_points'] = [
+            "Authentic personal narrative",
+            "Real experiences and honest reflections",
+            "Practical insights and lessons learned"
+        ]
+
+        return template
+
+    @staticmethod
+    def _validate_and_enhance_structure(structure: Dict, entries, analysis: Dict) -> Dict:
+        """Validate and enhance the AI-generated structure"""
+
+        # Ensure required fields exist
+        if 'title' not in structure:
+            structure['title'] = 'My Personal Journal'
+
+        if 'description' not in structure:
+            structure['description'] = 'A collection of personal reflections and experiences.'
+
+        if 'chapters' not in structure or not structure['chapters']:
+            structure['chapters'] = [
+                {
+                    'title': 'My Journey',
+                    'description': 'Personal reflections and experiences',
+                    'theme': 'general',
+                    'estimated_entries': len(entries)
+                }
+            ]
+
+        # Assign entries to chapters
+        entries_list = list(entries.order_by('created_at'))
+        entries_per_chapter = len(entries_list) // len(structure['chapters'])
+
+        for i, chapter in enumerate(structure['chapters']):
+            start_idx = i * entries_per_chapter
+            if i == len(structure['chapters']) - 1:  # Last chapter gets remaining entries
+                chapter_entries = entries_list[start_idx:]
+            else:
+                end_idx = start_idx + entries_per_chapter
+                chapter_entries = entries_list[start_idx:end_idx]
+
+            chapter['entry_ids'] = [entry.id for entry in chapter_entries]
+            chapter['entry_count'] = len(chapter_entries)
+
+        # Add metadata
+        structure['compilation_method'] = 'ai'
+        structure['generated_at'] = timezone.now().isoformat()
+        structure['total_entries'] = len(entries)
+
+        return structure
+
+    @staticmethod
+    def generate_chapter_introduction(chapter_title: str, chapter_description: str, user: User) -> str:
+        """Generate AI introduction for a chapter"""
+
+        try:
+            intro_prompt = f"""
+Write a compelling introduction for a journal chapter titled "{chapter_title}".
+
+Chapter Description: {chapter_description}
+
+Create a warm, engaging introduction (150-200 words) that:
+1. Sets the context for this chapter
+2. Prepares readers for what they'll discover
+3. Creates emotional connection
+4. Maintains an authentic, personal tone
+
+The introduction should feel like the author is personally speaking to the reader,
+drawing them into this part of their journey.
+"""
+
+            response = AIService._get_groq_response(intro_prompt)
+            return response
+
+        except Exception as e:
+            logger.error(f"Error generating chapter introduction: {e}")
+            return f"Welcome to {chapter_title}. In this chapter, we explore {chapter_description.lower()}."
+
+    @staticmethod
+    def generate_reflection_questions(journal_type: str, user: User) -> str:
+        """Generate reflection questions for readers"""
+
+        try:
+            questions_prompt = f"""
+Create 8-10 thoughtful reflection questions for readers of a {journal_type} journal.
+
+These questions should:
+1. Help readers connect with the content personally
+2. Encourage deep self-reflection
+3. Be open-ended and thought-provoking
+4. Relate specifically to {journal_type} themes
+5. Be suitable for personal journaling or group discussion
+
+Format as a numbered list with brief explanations for each question.
+Make them meaningful and actionable.
+"""
+
+            response = AIService._get_groq_response(questions_prompt)
+            return response
+
+        except Exception as e:
+            logger.error(f"Error generating reflection questions: {e}")
+            return AIService._get_default_reflection_questions(journal_type)
+
+    @staticmethod
+    def _get_default_reflection_questions(journal_type: str) -> str:
+        """Get default reflection questions by type"""
+
+        questions_by_type = {
+            'growth': """
+1. What patterns do you notice in your own growth journey?
+2. Which challenges mentioned resonate most with your experience?
+3. How do you typically handle difficult transitions?
+4. What would you tell your past self about facing fears?
+5. Which insights could you apply to your current situation?
+6. How has your definition of success evolved over time?
+7. What role does self-reflection play in your personal growth?
+8. How do you maintain motivation during challenging periods?
+""",
+            'travel': """
+1. How do new experiences change your perspective on home?
+2. What travel experiences have shaped your worldview most?
+3. How do you handle uncertainty when exploring new places?
+4. What connections have you made with people from different cultures?
+5. How has travel influenced your personal growth?
+6. What fears have you overcome through your adventures?
+7. How do you balance planning with spontaneity when traveling?
+8. What travel memories do you find yourself returning to often?
+""",
+            'career': """
+1. How do you define professional fulfillment?
+2. What role does passion play in your career decisions?
+3. How do you handle professional setbacks and failures?
+4. What skills have been most valuable in your career journey?
+5. How do you balance personal values with professional demands?
+6. What career advice would you give to someone starting out?
+7. How has your relationship with work evolved over time?
+8. What legacy do you want to leave through your professional work?
+"""
+        }
+
+        return questions_by_type.get(journal_type, questions_by_type['growth'])
+
+    @staticmethod
+    def generate_thematic_connections(structure: Dict, user: User) -> str:
+        """Generate thematic connections between chapters"""
+
+        try:
+            chapters = structure.get('chapters', [])
+            chapter_themes = [chapter.get('theme', chapter.get('title', '')) for chapter in chapters]
+
+            connections_prompt = f"""
+Identify and explain the thematic connections between these journal chapters:
+
+Chapters: {', '.join(chapter_themes)}
+
+Write a brief guide (200-250 words) that:
+1. Shows how the chapters connect thematically
+2. Highlights the overall narrative arc
+3. Helps readers understand the progression
+4. Points out recurring themes and motifs
+
+Keep it insightful but accessible, helping readers see the deeper patterns
+in the author's journey.
+"""
+
+            response = AIService._get_groq_response(connections_prompt)
+            return response
+
+        except Exception as e:
+            logger.error(f"Error generating thematic connections: {e}")
+            return 'The chapters in this journal are connected by themes of growth, discovery, and personal transformation.'
+
+    @staticmethod
+    def generate_readers_guide(structure: Dict, user: User) -> str:
+        """Generate a reader's guide for the journal"""
+
+        try:
+            journal_title = structure.get('title', 'Journal')
+            journal_type = structure.get('journal_type', 'personal')
+            chapter_count = len(structure.get('chapters', []))
+
+            guide_prompt = f"""
+Create a reader's guide for "{journal_title}" - a {journal_type} journal with {chapter_count} chapters.
+
+The guide should include:
+1. How to get the most out of reading this journal
+2. Suggested reading approach (linear vs. selective)
+3. How to use this journal for personal reflection
+4. Discussion questions for book clubs or personal use
+5. Related topics for further exploration
+
+Keep it practical and encouraging (300-400 words).
+Make it feel like helpful advice from a friend.
+"""
+
+            response = AIService._get_groq_response(guide_prompt)
+            return response
+
+        except Exception as e:
+            logger.error(f"Error generating readers guide: {e}")
+            return AIService._get_default_readers_guide(journal_title)
+
+    @staticmethod
+    def _get_default_readers_guide(journal_title: str) -> str:
+        """Get default reader's guide"""
+
+        return f"""
+# Reader's Guide to "{journal_title}"
+
+## How to Read This Journal
+
+This journal is designed to be both a personal narrative and a source of inspiration for your own journey. You can read it from beginning to end to follow the complete story arc, or focus on specific chapters that resonate with your current situation.
+
+## Getting the Most from Your Reading
+
+- Take your time with each entry
+- Keep a notebook handy for your own reflections
+- Consider how the experiences relate to your own life
+- Don't hesitate to re-read sections that particularly speak to you
+
+## For Personal Reflection
+
+Use this journal as a mirror for your own experiences. After reading each chapter, spend a few minutes reflecting on how the themes and experiences connect to your own life journey.
+
+## For Discussion Groups
+
+This journal works well for book clubs and discussion groups. Each chapter can spark meaningful conversations about personal growth, life transitions, and shared human experiences.
+
+## Further Exploration
+
+Consider starting your own journaling practice inspired by what you've read. The act of writing about your experiences can be just as transformative as reading about others'.
+"""
+
+    @staticmethod
+    def analyze_marketability(entries, analysis: Dict) -> Dict:
+        """Analyze the marketability potential of entries"""
+
+        try:
+            marketability_prompt = f"""
+Analyze the marketability potential of a journal collection with these characteristics:
+
+- Total entries: {len(entries)}
+- Quality score: {analysis.get('quality_score', {}).get('score', 'N/A')}
+- Main themes: {[theme['name'] for theme in analysis.get('themes', [])[:5]]}
+- Writing consistency: {analysis.get('writing_patterns', {}).get('writing_frequency', 'unknown')}
+
+Provide analysis on:
+1. Market appeal (1-10 scale with explanation)
+2. Target audience description
+3. Competitive positioning
+4. Pricing recommendations
+5. Marketing angles
+
+Be realistic but encouraging. Focus on what makes this collection unique.
+"""
+
+            response = AIService._get_groq_response(marketability_prompt)
+
+            # Extract insights (simplified - you could use more sophisticated parsing)
+            return {
+                'analysis': response,
+                'market_appeal': 7,  # Default
+                'target_audience': 'Personal development readers',
+                'suggested_price_range': (4.99, 14.99)
+            }
+
+        except Exception as e:
+            logger.error(f"Error analyzing marketability: {e}")
+            return {
+                'analysis': 'Marketability analysis temporarily unavailable',
+                'market_appeal': 7,
+                'target_audience': 'General audience interested in personal stories',
+                'suggested_price_range': (4.99, 12.99)
+            }
+
+    @staticmethod
+    def generate_marketing_copy(journal) -> Dict:
+        """Generate marketing copy for a published journal"""
+
+        try:
+            marketing_prompt = f"""
+Create compelling marketing copy for this journal:
+
+Title: {journal.title}
+Description: {journal.description}
+Author: {journal.author.username}
+Entry Count: {getattr(journal, 'entries', {}).count() if hasattr(journal, 'entries') else 'Multiple'} entries
+
+Generate:
+1. Catchy tagline (10-15 words)
+2. Short description for listings (50-80 words)
+3. Social media post (Twitter-length)
+4. Email subject line for newsletters
+
+Make it engaging and authentic while highlighting the unique value.
+Focus on emotional connection and reader benefits.
+"""
+
+            response = AIService._get_groq_response(marketing_prompt)
+
+            return {
+                'marketing_copy': response,
+                'generated': True
+            }
+
+        except Exception as e:
+            logger.error(f"Error generating marketing copy: {e}")
+            return {
+                'marketing_copy': 'Discover authentic stories and personal insights in this compelling journal.',
+                'generated': False
+            }
+
+    # ========================================================================
+    # EXISTING METHODS FOR BACKWARDS COMPATIBILITY
+    # ========================================================================
+
+    @staticmethod
+    def generate_conversational_response(prompt):
+        """
+        Generate a conversational response using your existing AI helpers
+        """
+        try:
+            # Use your existing generate_ai_content function
+            response_data = generate_ai_content(prompt)
+
+            # Extract the text content
+            if isinstance(response_data, dict):
+                return response_data.get('entry', response_data.get('content', str(response_data)))
+            else:
+                return str(response_data)
+
+        except Exception as e:
+            logger.error(f"Error generating conversational response: {e}")
+            return "I'd love to hear more about that. What stood out to you most?"
+
+    @staticmethod
+    def generate_simple_response(prompt):
+        """
+        Generate a simple response for decision making
+        """
+        try:
+            # Use your existing generate_ai_content function for simple decisions
+            response_data = generate_ai_content(prompt)
+
+            # Extract the text content
+            if isinstance(response_data, dict):
+                return response_data.get('entry', response_data.get('content', str(response_data)))
+            else:
+                return str(response_data)
+
+        except Exception as e:
+            logger.error(f"Error generating simple response: {e}")
+            return "CONTINUE_CHAT - need more information"
+
+    @staticmethod
+    def generate_chat_decision(conversation_history, current_message):
+        """
+        Determine if we should create journal entry or continue chatting
+        """
+        user_messages = [msg for msg in conversation_history if msg.get('role') == 'user']
+
+        # Simple heuristics first
+        if len(user_messages) < 2:
+            return False, "Need more conversation"
+
+        if len(user_messages) >= 4:
+            return True, "Sufficient content for journal entry"
+
+        # For 2-3 messages, make a smarter decision based on content depth
+        total_content_length = sum(len(msg.get('content', '')) for msg in user_messages)
+
+        if total_content_length > 300:  # If they've shared substantial content
+            return True, "Rich content provided"
+        else:
+            return False, "Could use more detail"
 
     @staticmethod
     def _get_groq_response(prompt, model="llama3-70b-8192", temperature=0.7, max_tokens=1000):

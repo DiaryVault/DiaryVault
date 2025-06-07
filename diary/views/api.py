@@ -3,16 +3,21 @@ import logging
 import time
 from datetime import datetime
 
+from django.utils import timezone
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
-from django.core.cache import cache
+from django.views.decorators.http import require_POST, csrf_exempt
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
+from django.db.models import Count, Avg
+from django.core.cache import cache
 
-from ..models import Entry, Tag
+
+from .. import models
+from ..models import Entry, Journal, Tag, JournalEntry
 from ..utils.ai_helpers import generate_ai_content, generate_ai_content_personalized
 from ..utils.analytics import get_content_hash, auto_generate_tags
 from ..services.ai_service import AIService
+from .journal_compiler import JournalAnalysisService, JournalCompilerAI
 
 logger = logging.getLogger(__name__)
 
@@ -713,3 +718,462 @@ class AIService:
             return True, "Rich content provided"
         else:
             return False, "Could use more detail"
+
+@login_required
+@require_POST
+def quick_analyze_for_publishing(request):
+    """Quick analysis API for publishing decisions"""
+    try:
+        data = json.loads(request.body)
+        entry_ids = data.get('entry_ids', [])
+
+        if not entry_ids:
+            # Analyze all user entries
+            entries = Entry.objects.filter(user=request.user)
+        else:
+            entries = Entry.objects.filter(id__in=entry_ids, user=request.user)
+
+        if not entries.exists():
+            return JsonResponse({
+                'success': False,
+                'error': 'No entries found'
+            }, status=400)
+
+        # Quick analysis
+        analysis = {
+            'total_entries': entries.count(),
+            'total_words': sum(len(entry.content.split()) for entry in entries),
+            'avg_length': 0,
+            'themes': [],
+            'quality_indicators': {},
+            'publishability_score': 0
+        }
+
+        if entries.exists():
+            analysis['avg_length'] = analysis['total_words'] / analysis['total_entries']
+
+            # Extract themes
+            theme_counter = {}
+            for entry in entries:
+                for tag in entry.tags.all():
+                    theme_counter[tag.name] = theme_counter.get(tag.name, 0) + 1
+
+            analysis['themes'] = [
+                {'name': theme, 'count': count}
+                for theme, count in sorted(theme_counter.items(), key=lambda x: x[1], reverse=True)[:5]
+            ]
+
+            # Quality indicators
+            entries_with_tags = entries.filter(tags__isnull=False).distinct().count()
+            entries_with_mood = entries.exclude(mood__isnull=True).count()
+
+            analysis['quality_indicators'] = {
+                'has_tags': entries_with_tags / analysis['total_entries'] * 100,
+                'has_mood': entries_with_mood / analysis['total_entries'] * 100,
+                'good_length': sum(1 for entry in entries if len(entry.content.split()) >= 100) / analysis['total_entries'] * 100
+            }
+
+            # Simple publishability score
+            score = 0
+            if analysis['total_entries'] >= 10:
+                score += 25
+            elif analysis['total_entries'] >= 5:
+                score += 15
+
+            if analysis['avg_length'] >= 150:
+                score += 25
+            elif analysis['avg_length'] >= 75:
+                score += 15
+
+            if len(analysis['themes']) >= 3:
+                score += 25
+            elif len(analysis['themes']) >= 1:
+                score += 15
+
+            if analysis['quality_indicators']['has_tags'] >= 50:
+                score += 25
+            elif analysis['quality_indicators']['has_tags'] >= 25:
+                score += 15
+
+            analysis['publishability_score'] = min(100, score)
+
+        return JsonResponse({
+            'success': True,
+            'analysis': analysis,
+            'recommendations': _get_publishing_recommendations(analysis)
+        })
+
+    except Exception as e:
+        logger.error(f"Error in quick analysis: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': 'Analysis failed'
+        }, status=500)
+
+@login_required
+@require_POST
+def get_price_suggestion(request):
+    """API endpoint for AI-powered price suggestions"""
+    try:
+        data = json.loads(request.body)
+        entry_ids = data.get('entry_ids', [])
+        journal_type = data.get('journal_type', 'growth')
+        target_audience = data.get('target_audience', 'general')
+
+        entries = Entry.objects.filter(id__in=entry_ids, user=request.user) if entry_ids else Entry.objects.filter(user=request.user)
+
+        if not entries.exists():
+            return JsonResponse({
+                'success': False,
+                'error': 'No entries found'
+            }, status=400)
+
+        # Analyze entries for pricing
+        analysis = JournalAnalysisService.analyze_user_entries(request.user, entries)
+
+        # Calculate suggested price
+        base_price = 4.99
+
+        # Quality multiplier
+        quality_score = analysis.get('quality_score', {}).get('score', 50)
+        quality_multiplier = 1 + (quality_score - 50) / 200
+
+        # Length multiplier
+        total_words = sum(len(entry.content.split()) for entry in entries)
+        if total_words > 15000:
+            length_multiplier = 1.6
+        elif total_words > 10000:
+            length_multiplier = 1.4
+        elif total_words > 5000:
+            length_multiplier = 1.2
+        else:
+            length_multiplier = 1.0
+
+        # Theme/market multiplier
+        theme_multipliers = {
+            'travel': 1.3,
+            'growth': 1.2,
+            'career': 1.25,
+            'relationships': 1.15,
+            'creativity': 1.2,
+            'health': 1.1
+        }
+        market_multiplier = theme_multipliers.get(journal_type, 1.0)
+
+        suggested_price = base_price * quality_multiplier * length_multiplier * market_multiplier
+
+        # Round to reasonable price points
+        price_points = [2.99, 4.99, 6.99, 9.99, 12.99, 14.99, 19.99, 24.99]
+        final_price = min(price_points, key=lambda x: abs(x - suggested_price))
+
+        # Get market comparisons
+        similar_journals = Journal.objects.filter(
+            is_published=True
+        ).aggregate(
+            avg_price=Avg('price'),
+            min_price=models.Min('price'),
+            max_price=models.Max('price')
+        )
+
+        return JsonResponse({
+            'success': True,
+            'suggested_price': final_price,
+            'price_range': {
+                'min': max(0.99, final_price * 0.7),
+                'max': min(29.99, final_price * 1.5)
+            },
+            'market_data': {
+                'average_price': round(similar_journals['avg_price'] or 9.99, 2),
+                'price_range': f"${similar_journals['min_price'] or 0.99:.2f} - ${similar_journals['max_price'] or 24.99:.2f}"
+            },
+            'factors': {
+                'quality_score': quality_score,
+                'total_words': total_words,
+                'journal_type': journal_type,
+                'entry_count': entries.count()
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting price suggestion: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': 'Price suggestion failed'
+        }, status=500)
+
+@login_required
+@require_POST
+def generate_marketing_copy(request):
+    """Generate AI-powered marketing copy for a journal"""
+    try:
+        data = json.loads(request.body)
+        title = data.get('title', '')
+        description = data.get('description', '')
+        journal_type = data.get('journal_type', 'growth')
+        entry_ids = data.get('entry_ids', [])
+
+        if not title:
+            return JsonResponse({
+                'success': False,
+                'error': 'Title is required'
+            }, status=400)
+
+        # Create a temporary journal object for analysis
+        class TempJournal:
+            def __init__(self, title, description, author, journal_type):
+                self.title = title
+                self.description = description
+                self.author = author
+                self.journal_type = journal_type
+                self.entries = Entry.objects.filter(id__in=entry_ids, user=author) if entry_ids else Entry.objects.filter(user=author)
+
+        temp_journal = TempJournal(title, description, request.user, journal_type)
+
+        # Generate marketing copy using AI
+        marketing_data = AIService.generate_marketing_copy(temp_journal)
+
+        # Parse the marketing copy if it's a string
+        marketing_copy = marketing_data.get('marketing_copy', '')
+
+        # Extract different components (simplified parsing)
+        lines = marketing_copy.split('\n')
+        parsed_copy = {
+            'tagline': f'Discover the transformative power of {journal_type}',
+            'short_description': description[:80] + '...' if len(description) > 80 else description,
+            'social_media': f'New journal: "{title}" - A personal journey of {journal_type} and discovery. #journaling #personal{journal_type}',
+            'email_subject': f'📖 New Release: {title}'
+        }
+
+        # Try to extract better components from AI response
+        for line in lines:
+            line = line.strip()
+            if line.startswith('Tagline:') or line.startswith('1.'):
+                parsed_copy['tagline'] = line.split(':', 1)[-1].strip().strip('"')
+            elif line.startswith('Short description:') or line.startswith('2.'):
+                parsed_copy['short_description'] = line.split(':', 1)[-1].strip().strip('"')
+            elif line.startswith('Social media:') or line.startswith('3.'):
+                parsed_copy['social_media'] = line.split(':', 1)[-1].strip().strip('"')
+            elif line.startswith('Email subject:') or line.startswith('4.'):
+                parsed_copy['email_subject'] = line.split(':', 1)[-1].strip().strip('"')
+
+        return JsonResponse({
+            'success': True,
+            'marketing_copy': parsed_copy,
+            'full_ai_response': marketing_copy
+        })
+
+    except Exception as e:
+        logger.error(f"Error generating marketing copy: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': 'Marketing copy generation failed'
+        }, status=500)
+
+@login_required
+def get_journal_templates_api(request):
+    """API endpoint to get available journal templates"""
+    try:
+        from .journal_compiler import JournalTemplateService
+        templates = JournalTemplateService.get_available_templates()
+
+        return JsonResponse({
+            'success': True,
+            'templates': templates
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting templates: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': 'Failed to load templates'
+        }, status=500)
+
+@login_required
+@require_POST
+def save_journal_draft(request):
+    """Save journal compilation as draft"""
+    try:
+        data = json.loads(request.body)
+
+        # Store draft in session or database
+        draft_data = {
+            'title': data.get('title', ''),
+            'description': data.get('description', ''),
+            'journal_type': data.get('journal_type', 'growth'),
+            'compilation_method': data.get('compilation_method', 'ai'),
+            'selected_entries': data.get('entry_ids', []),
+            'ai_enhancements': data.get('ai_enhancements', []),
+            'structure': data.get('structure', {}),
+            'saved_at': timezone.now().isoformat()
+        }
+
+        # Save to session for now (you could create a JournalDraft model)
+        request.session['journal_draft'] = draft_data
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Draft saved successfully',
+            'draft_id': 'session_draft'  # You could generate actual IDs with a model
+        })
+
+    except Exception as e:
+        logger.error(f"Error saving draft: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': 'Failed to save draft'
+        }, status=500)
+
+@login_required
+def load_journal_draft(request):
+    """Load saved journal draft"""
+    try:
+        draft_data = request.session.get('journal_draft')
+
+        if not draft_data:
+            return JsonResponse({
+                'success': False,
+                'error': 'No draft found'
+            }, status=404)
+
+        return JsonResponse({
+            'success': True,
+            'draft': draft_data
+        })
+
+    except Exception as e:
+        logger.error(f"Error loading draft: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': 'Failed to load draft'
+        }, status=500)
+
+@login_required
+@require_POST
+def validate_journal_data(request):
+    """Validate journal data before publishing"""
+    try:
+        data = json.loads(request.body)
+
+        errors = []
+        warnings = []
+
+        # Validate title
+        title = data.get('title', '').strip()
+        if not title:
+            errors.append('Title is required')
+        elif len(title) < 5:
+            warnings.append('Title might be too short for good discoverability')
+        elif len(title) > 100:
+            errors.append('Title is too long (max 100 characters)')
+
+        # Validate description
+        description = data.get('description', '').strip()
+        if not description:
+            errors.append('Description is required')
+        elif len(description) < 50:
+            warnings.append('Description should be at least 50 characters for better engagement')
+        elif len(description) > 500:
+            warnings.append('Description might be too long for marketplace listings')
+
+        # Validate price
+        try:
+            price = float(data.get('price', 0))
+            if price < 0:
+                errors.append('Price cannot be negative')
+            elif price > 99.99:
+                warnings.append('Price seems unusually high - consider market research')
+        except ValueError:
+            errors.append('Invalid price format')
+
+        # Validate entries
+        entry_ids = data.get('entry_ids', [])
+        if not entry_ids:
+            errors.append('At least one entry must be selected')
+        else:
+            entries = Entry.objects.filter(id__in=entry_ids, user=request.user)
+            if entries.count() != len(entry_ids):
+                errors.append('Some selected entries not found')
+
+            # Check entry quality
+            short_entries = sum(1 for entry in entries if len(entry.content.split()) < 50)
+            if short_entries > len(entry_ids) * 0.3:
+                warnings.append('Many entries are quite short - consider expanding or removing them')
+
+        # Check for duplicate titles
+        if title:
+            existing = Journal.objects.filter(
+                title__iexact=title,
+                author=request.user,
+                is_published=True
+            ).exists()
+            if existing:
+                errors.append('You already have a published journal with this title')
+
+        return JsonResponse({
+            'success': True,
+            'valid': len(errors) == 0,
+            'errors': errors,
+            'warnings': warnings
+        })
+
+    except Exception as e:
+        logger.error(f"Error validating journal data: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': 'Validation failed'
+        }, status=500)
+
+def _get_publishing_recommendations(analysis):
+    """Get publishing recommendations based on analysis"""
+    recommendations = []
+    score = analysis['publishability_score']
+
+    if score >= 80:
+        recommendations.append({
+            'type': 'success',
+            'message': 'Your journal is ready for publishing! High quality content with good structure.',
+            'action': 'Proceed with publishing'
+        })
+    elif score >= 60:
+        recommendations.append({
+            'type': 'info',
+            'message': 'Good foundation for publishing. Consider a few improvements for better market appeal.',
+            'action': 'Review suggestions below'
+        })
+    else:
+        recommendations.append({
+            'type': 'warning',
+            'message': 'Your journal needs some improvements before publishing for best results.',
+            'action': 'Address the issues below'
+        })
+
+    # Specific recommendations
+    if analysis['total_entries'] < 10:
+        recommendations.append({
+            'type': 'suggestion',
+            'message': f'Add more entries. You have {analysis["total_entries"]}, but 10+ entries create better value for readers.',
+            'action': 'Write more entries'
+        })
+
+    if analysis['avg_length'] < 75:
+        recommendations.append({
+            'type': 'suggestion',
+            'message': f'Your average entry length is {int(analysis["avg_length"])} words. Longer entries (100+ words) provide more value.',
+            'action': 'Expand shorter entries'
+        })
+
+    if len(analysis['themes']) < 3:
+        recommendations.append({
+            'type': 'suggestion',
+            'message': 'Add more diverse themes and tags to your entries for broader appeal.',
+            'action': 'Add tags and themes'
+        })
+
+    if analysis['quality_indicators']['has_tags'] < 50:
+        recommendations.append({
+            'type': 'suggestion',
+            'message': 'Add tags to more entries to help with discoverability and organization.',
+            'action': 'Tag your entries'
+        })
+
+    return recommendations

@@ -1,4 +1,5 @@
 # diary/models.py
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -104,10 +105,11 @@ class Entry(models.Model):
     word_count = models.PositiveIntegerField(default=0, editable=False)
 
     summary = models.TextField(blank=True, null=True)
+    summary_generated_at = models.DateTimeField(null=True, blank=True)
     chapter = models.ForeignKey(LifeChapter, on_delete=models.SET_NULL, null=True, blank=True, related_name='entries')
 
     # Marketplace integration - link to published journal
-    published_in_journal = models.ForeignKey('Journal', on_delete=models.SET_NULL, null=True, blank=True, related_name='published_entries')
+    published_in_journal = models.ForeignKey('Journal', on_delete=models.SET_NULL, null=True, blank=True, related_name='source_entries')
 
     class Meta:
         ordering = ['-created_at']
@@ -143,13 +145,53 @@ class Entry(models.Model):
         """Return month and year format for display"""
         return self.created_at.strftime("%b %Y")
 
-    def can_publish(self):
+    def can_be_published(self):
         """Check if entry meets publishing criteria"""
         return (
             len(self.content.strip()) >= 100 and  # Minimum length
             self.title.strip() and  # Has title
             not self.published_in_journal  # Not already published
         )
+
+    def get_quality_score(self):
+        """Calculate quality score for this entry"""
+        score = 0
+
+        # Length factor (40 points max)
+        word_count = len(self.content.split())
+        if word_count >= 300:
+            score += 40
+        elif word_count >= 150:
+            score += 30
+        elif word_count >= 100:
+            score += 20
+        elif word_count >= 50:
+            score += 10
+
+        # Has mood (20 points)
+        if self.mood:
+            score += 20
+
+        # Has tags (20 points)
+        if self.tags.exists():
+            score += 20
+
+        # Has title (10 points)
+        if self.title.strip():
+            score += 10
+
+        # Engagement factor (10 points)
+        if hasattr(self, 'photos') and self.photos.exists():
+            score += 5
+        if hasattr(self, 'chapter') and self.chapter:
+            score += 5
+
+        return min(100, score)
+
+    # Compatibility aliases
+    def can_publish(self):
+        """Compatibility alias for can_be_published"""
+        return self.can_be_published()
 
 class SummaryVersion(models.Model):
     """Track different versions of AI-generated summaries"""
@@ -314,7 +356,243 @@ class UserPreference(models.Model):
         verbose_name = "User Preference"
         verbose_name_plural = "User Preferences"
 
-# Marketplace-specific models
+# ========================================================================
+# SMART JOURNAL COMPILER MODELS
+# ========================================================================
+
+class JournalCompilationSession(models.Model):
+    """Track journal compilation sessions for analytics and recovery"""
+
+    COMPILATION_METHODS = [
+        ('ai', 'AI Smart Compilation'),
+        ('thematic', 'Thematic Collection'),
+        ('chronological', 'Timeline Journey'),
+    ]
+
+    JOURNAL_TYPES = [
+        ('growth', 'Personal Growth'),
+        ('travel', 'Travel & Adventures'),
+        ('career', 'Career Development'),
+        ('relationships', 'Relationships & Love'),
+        ('creative', 'Creative Process'),
+        ('health', 'Health & Wellness'),
+        ('family', 'Family Life'),
+        ('learning', 'Learning & Education'),
+    ]
+
+    STATUS_CHOICES = [
+        ('started', 'Started'),
+        ('analyzing', 'Analyzing'),
+        ('structuring', 'Generating Structure'),
+        ('ready', 'Ready to Publish'),
+        ('published', 'Published'),
+        ('abandoned', 'Abandoned'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='compilation_sessions')
+    session_id = models.UUIDField(default=uuid.uuid4, unique=True)
+
+    # Compilation settings
+    compilation_method = models.CharField(max_length=20, choices=COMPILATION_METHODS)
+    journal_type = models.CharField(max_length=20, choices=JOURNAL_TYPES)
+
+    # Selected entries
+    selected_entries = models.ManyToManyField(Entry, blank=True)
+
+    # AI enhancements
+    ai_enhancements = models.JSONField(default=list, blank=True)
+
+    # Generated structure
+    generated_structure = models.JSONField(default=dict, blank=True)
+
+    # Analysis results
+    analysis_results = models.JSONField(default=dict, blank=True)
+
+    # Session metadata
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='started')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    # Final journal if published
+    published_journal = models.ForeignKey('Journal', on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Journal Compilation Session'
+        verbose_name_plural = 'Journal Compilation Sessions'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.get_journal_type_display()} ({self.status})"
+
+    def get_progress_percentage(self):
+        """Calculate completion percentage"""
+        status_progress = {
+            'started': 10,
+            'analyzing': 30,
+            'structuring': 60,
+            'ready': 90,
+            'published': 100,
+            'abandoned': 0
+        }
+        return status_progress.get(self.status, 0)
+
+    def mark_as_completed(self, journal=None):
+        """Mark session as completed"""
+        self.status = 'published' if journal else 'ready'
+        self.completed_at = timezone.now()
+        if journal:
+            self.published_journal = journal
+        self.save()
+
+class JournalTemplate(models.Model):
+    """Predefined journal templates for compilation"""
+
+    TEMPLATE_TYPES = [
+        ('transformation', 'Personal Transformation'),
+        ('adventure', 'Adventure & Travel'),
+        ('creative', 'Creative Journey'),
+        ('reflection', 'Mindful Reflection'),
+        ('relationship', 'Relationship Chronicles'),
+        ('career', 'Professional Development'),
+        ('custom', 'Custom Template'),
+    ]
+
+    name = models.CharField(max_length=100)
+    template_type = models.CharField(max_length=20, choices=TEMPLATE_TYPES)
+    description = models.TextField()
+
+    # Template structure
+    chapter_structure = models.JSONField(default=list)  # [{'title': 'Chapter 1', 'description': '...', 'theme': 'growth'}]
+
+    # Template metadata
+    success_rate = models.IntegerField(default=85, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    average_price = models.DecimalField(max_digits=6, decimal_places=2, default=9.99)
+    estimated_word_count = models.IntegerField(default=5000)
+
+    # Template usage
+    usage_count = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    is_featured = models.BooleanField(default=False)
+
+    # Template creation
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-success_rate', '-usage_count']
+        verbose_name = 'Journal Template'
+        verbose_name_plural = 'Journal Templates'
+
+    def __str__(self):
+        return f"{self.name} ({self.get_template_type_display()})"
+
+    def increment_usage(self):
+        """Increment usage count"""
+        self.usage_count += 1
+        self.save(update_fields=['usage_count'])
+
+class JournalAnalytics(models.Model):
+    """Analytics for published journals from compiler"""
+
+    journal = models.OneToOneField('Journal', on_delete=models.CASCADE, related_name='analytics')
+
+    # Compilation metadata
+    compilation_method = models.CharField(max_length=20, blank=True)
+    journal_type = models.CharField(max_length=20, blank=True)
+    template_used = models.ForeignKey(JournalTemplate, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # Content analytics
+    total_words = models.IntegerField(default=0)
+    total_entries = models.IntegerField(default=0)
+    average_entry_length = models.IntegerField(default=0)
+
+    # Quality metrics
+    quality_score = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    readability_score = models.FloatField(default=0)
+    theme_diversity = models.IntegerField(default=0)
+
+    # Performance metrics
+    view_count_weekly = models.IntegerField(default=0)
+    like_count_weekly = models.IntegerField(default=0)
+    purchase_count_weekly = models.IntegerField(default=0)
+    revenue_weekly = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+
+    # Reader engagement
+    average_read_time = models.IntegerField(default=0)  # in seconds
+    completion_rate = models.FloatField(default=0)  # percentage of readers who finish
+
+    # Market performance
+    conversion_rate = models.FloatField(default=0)  # views to purchases
+    reader_rating = models.FloatField(default=0)
+
+    # Analytics timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_calculated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Journal Analytics'
+        verbose_name_plural = 'Journal Analytics'
+
+    def __str__(self):
+        return f"Analytics for {self.journal.title}"
+
+    def calculate_metrics(self):
+        """Calculate and update analytics metrics"""
+        # Update view counts, engagement, etc.
+        # This would be called periodically or triggered by events
+        pass
+
+class AIGenerationLog(models.Model):
+    """Log AI generations for debugging and improvement"""
+
+    GENERATION_TYPES = [
+        ('analysis', 'Entry Analysis'),
+        ('structure', 'Journal Structure'),
+        ('introduction', 'Chapter Introduction'),
+        ('questions', 'Reflection Questions'),
+        ('connections', 'Thematic Connections'),
+        ('guide', 'Reader\'s Guide'),
+        ('marketing', 'Marketing Copy'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    generation_type = models.CharField(max_length=20, choices=GENERATION_TYPES)
+
+    # Input data
+    input_prompt = models.TextField()
+    input_metadata = models.JSONField(default=dict, blank=True)
+
+    # Output data
+    generated_content = models.TextField()
+    generation_metadata = models.JSONField(default=dict, blank=True)
+
+    # Quality metrics
+    success = models.BooleanField(default=True)
+    user_rating = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(5)])
+
+    # Performance metrics
+    generation_time = models.FloatField(default=0)  # in seconds
+    token_count = models.IntegerField(default=0)
+    cost = models.DecimalField(max_digits=6, decimal_places=4, default=0)
+
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'AI Generation Log'
+        verbose_name_plural = 'AI Generation Logs'
+
+    def __str__(self):
+        return f"{self.get_generation_type_display()} for {self.user.username}"
+
+# ========================================================================
+# MARKETPLACE-SPECIFIC MODELS (ENHANCED)
+# ========================================================================
+
 class JournalTag(models.Model):
     """Enhanced tags for marketplace journals"""
     name = models.CharField(max_length=50, unique=True)
@@ -372,6 +650,26 @@ class Journal(models.Model):
         ('restricted', 'Restricted'),
     ]
     privacy_setting = models.CharField(max_length=10, choices=PRIVACY_CHOICES, default='public')
+
+    # ENHANCED: Journal Compiler Integration
+    compilation_session = models.ForeignKey(
+        JournalCompilationSession,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='compiled_journals'
+    )
+
+    # Compilation metadata
+    compilation_method = models.CharField(max_length=20, blank=True)
+    journal_type = models.CharField(max_length=20, blank=True)
+    ai_enhancements_used = models.JSONField(default=list, blank=True)
+
+    # AI-generated content flags
+    has_ai_introductions = models.BooleanField(default=False)
+    has_ai_questions = models.BooleanField(default=False)
+    has_ai_connections = models.BooleanField(default=False)
+    has_readers_guide = models.BooleanField(default=False)
 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -436,6 +734,13 @@ class Journal(models.Model):
         self.save(update_fields=['popularity_score'])
         return score
 
+    def get_compilation_analytics(self):
+        """Get analytics for this compiled journal"""
+        try:
+            return self.analytics
+        except JournalAnalytics.DoesNotExist:
+            return JournalAnalytics.objects.create(journal=self)
+
 class JournalEntry(models.Model):
     """Model representing an individual entry in a journal"""
 
@@ -452,6 +757,33 @@ class JournalEntry(models.Model):
 
     # Include in published journal
     is_included = models.BooleanField(default=True)
+
+    # ENHANCED: Journal Compiler Integration
+    ENTRY_TYPES = [
+        ('original', 'Original Entry'),
+        ('introduction', 'Chapter Introduction'),
+        ('reflection', 'Reflection Questions'),
+        ('guide', 'Reader\'s Guide'),
+        ('connection', 'Thematic Connection'),
+    ]
+
+    entry_type = models.CharField(max_length=20, choices=ENTRY_TYPES, default='original')
+    original_entry = models.ForeignKey(
+        Entry,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='published_versions'
+    )
+
+    # AI generation metadata
+    is_ai_generated = models.BooleanField(default=False)
+    ai_generation_log = models.ForeignKey(
+        AIGenerationLog,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         return self.title
@@ -606,23 +938,6 @@ class UserProfile(models.Model):
         verbose_name = "User Profile"
         verbose_name_plural = "User Profiles"
 
-
-# Signal to automatically create UserProfile when User is created
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        UserProfile.objects.create(user=instance)
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    try:
-        instance.userprofile.save()
-    except UserProfile.DoesNotExist:
-        UserProfile.objects.create(user=instance)
-
 class MarketplacePlacement(models.Model):
     """Track premium placements for journals"""
     journal = models.ForeignKey('Journal', on_delete=models.CASCADE, related_name='placements')
@@ -655,9 +970,12 @@ class UserSubscription(models.Model):
 
     def get_benefits(self):
         """Return subscription benefits"""
-        from .services.advanced_marketplace_service import MarketplaceEnhancementService
-        tiers = MarketplaceEnhancementService.implement_subscription_tiers()
-        return tiers.get(self.subscription_type, {}).get('benefits', [])
+        try:
+            from .services.advanced_marketplace_service import MarketplaceEnhancementService
+            tiers = MarketplaceEnhancementService.implement_subscription_tiers()
+            return tiers.get(self.subscription_type, {}).get('benefits', [])
+        except:
+            return []
 
 class AnalyticsPackage(models.Model):
     """Track purchases of premium analytics"""
@@ -671,3 +989,5 @@ class AnalyticsPackage(models.Model):
     amount_paid = models.DecimalField(max_digits=8, decimal_places=2)
     valid_until = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+
