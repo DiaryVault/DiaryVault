@@ -22,61 +22,91 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def smart_journal_compiler(request):
-    """Main view for the Smart Journal Compiler"""
+    """Main view for the Smart Journal Compiler - DEBUG VERSION"""
 
-    # Get user's entries and analyze them
+    print("=" * 60)
+    print(f"🔍 SMART JOURNAL COMPILER VIEW CALLED")
+    print(f"🔍 User: {request.user.username}")
+    print(f"🔍 URL: {request.path}")
+    print("=" * 60)
+
+    # Get user's entries
     entries = Entry.objects.filter(user=request.user).order_by('-created_at')
+    print(f"🔍 Found {entries.count()} entries for user")
 
     if not entries.exists():
         messages.info(request, "You need at least 5 journal entries to use the Smart Journal Compiler.")
         return redirect('new_entry')
 
-    # Generate comprehensive analysis
-    analysis = JournalAnalysisService.analyze_user_entries(request.user, entries)
+    # Simple data for now to isolate the journal issue
+    analysis = {
+        'total_entries': entries.count(),
+        'themes': [],
+        'quality_score': {'score': 75},
+        'story_arcs': []
+    }
 
-    # Get AI recommendations for compilation methods
-    recommendations = JournalCompilerAI.get_compilation_recommendations(
-        user=request.user,
-        entries=entries,
-        analysis=analysis
-    )
+    recommendations = []
+    templates = []
 
-    # Get available templates
-    templates = JournalTemplateService.get_available_templates()
+    # DEBUG THE JOURNAL QUERY STEP BY STEP
+    print("🔍 Starting journal query debugging...")
 
-    # Get recent compiled journals
     try:
-        compiled_journals = Journal.objects.filter(
-            author=request.user
-        ).order_by('-created_at')[:6]
+        # Test 1: Basic query
+        print("🔍 Test 1: Journal.objects.all()")
+        all_journals = Journal.objects.all()
+        print(f"    Total journals in DB: {all_journals.count()}")
 
-        # Add entry count to each journal for template use
-        for journal in compiled_journals:
-            try:
-                journal.entry_count = journal.entries.count()
-                if journal.entry_count == 0 and hasattr(journal, 'entry_count_cached'):
-                    journal.entry_count = journal.entry_count_cached
-                if journal.entry_count == 0:
-                    journal.entry_count = "Draft"
-            except Exception as e:
-                journal.entry_count = "Unknown"
-                print(f"Error getting entry count for journal {journal.id}: {e}")
+        # Test 2: User filter
+        print(f"🔍 Test 2: Journal.objects.filter(author={request.user})")
+        user_journals = Journal.objects.filter(author=request.user)
+        print(f"    User journals: {user_journals.count()}")
 
-        print(f"DEBUG: Successfully loaded {compiled_journals.count()} journals")
+        # Show details of user journals
+        if user_journals.exists():
+            print("🔍 User journal details:")
+            for j in user_journals:
+                print(f"    📖 ID: {j.id}, Title: '{j.title}', Published: {j.is_published}")
+
+        # Test 3: Final query (what we'll send to template)
+        print("🔍 Test 3: Final query with ordering and limit")
+        compiled_journals = Journal.objects.filter(author=request.user).order_by('-created_at')[:6]
+        print(f"    Compiled journals queryset: {compiled_journals}")
+        print(f"    Compiled journals count: {compiled_journals.count()}")
+
+        # Convert to list to see if that helps
+        compiled_journals_list = list(compiled_journals)
+        print(f"    Converted to list: {len(compiled_journals_list)} items")
+
+        if compiled_journals_list:
+            print("🔍 Final list contents:")
+            for i, journal in enumerate(compiled_journals_list):
+                print(f"    {i+1}. {journal.title} (ID: {journal.id})")
+
+        # This is what goes to the template
+        final_journals = compiled_journals_list
 
     except Exception as e:
-        print(f"ERROR fetching compiled journals: {e}")
-        compiled_journals = Journal.objects.none()
+        print(f"❌ ERROR in journal query: {e}")
+        import traceback
+        traceback.print_exc()
+        final_journals = []
+
+    print(f"🔍 Sending to template: {len(final_journals)} journals")
 
     context = {
         'analysis': analysis,
         'recommendations': recommendations,
         'templates': templates,
         'entries': entries,
-        'compiled_journals': compiled_journals,
+        'compiled_journals': final_journals,
         'total_entries': entries.count(),
         'has_enough_entries': entries.count() >= 5,
     }
+
+    print(f"🔍 Context compiled_journals: {len(context['compiled_journals'])}")
+    print("🔍 Rendering template...")
 
     return render(request, 'diary/publish_journal.html', context)
 
