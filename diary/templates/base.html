@@ -521,7 +521,7 @@
         border: 2px solid white;
       }
 
-      /* Quick Action Buttons (Desktop Only) - Fixed specificity */
+      /* Quick Action Buttons (Desktop Only) - Enhanced Protection */
       .quick-action-btn {
         background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05)) !important;
         border: 1px solid rgba(99, 102, 241, 0.2) !important;
@@ -536,10 +536,18 @@
         text-decoration: none !important;
         display: inline-flex !important;
         align-items: center !important;
+        justify-content: center !important;
         gap: 0.375rem !important;
         font-size: 0.875rem !important;
         transform: none !important;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+        min-width: auto !important;
+        max-width: none !important;
+        width: auto !important;
+        height: auto !important;
+        flex-shrink: 0 !important;
+        flex-grow: 0 !important;
+        margin: 0 !important;
       }
 
       .quick-action-btn::before {
@@ -569,9 +577,34 @@
         transform: translateY(0) !important;
       }
 
-      /* Ensure quick action buttons are never affected by nav-link styles */
+      /* Ensure quick action buttons container maintains proper layout */
+      .quick-actions-container {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        flex-shrink: 0 !important;
+        flex-grow: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      /* Override any potential marketplace page conflicts */
+      body .quick-action-btn,
+      html .quick-action-btn {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05)) !important;
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        color: #4f46e5 !important;
+        font-weight: 500 !important;
+        transform: none !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+        flex: none !important;
+      }
+
+      /* Ensure quick action buttons are never affected by any nav-link styles */
       .quick-action-btn.nav-link,
-      .quick-action-btn.reliable-nav-link {
+      .quick-action-btn.reliable-nav-link,
+      .nav-link.quick-action-btn,
+      .reliable-nav-link.quick-action-btn {
         background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05)) !important;
         border: 1px solid rgba(99, 102, 241, 0.2) !important;
         color: #4f46e5 !important;
@@ -580,7 +613,9 @@
       }
 
       .quick-action-btn.nav-link:hover,
-      .quick-action-btn.reliable-nav-link:hover {
+      .quick-action-btn.reliable-nav-link:hover,
+      .nav-link.quick-action-btn:hover,
+      .reliable-nav-link.quick-action-btn:hover {
         background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
         color: white !important;
         transform: translateY(-2px) !important;
@@ -590,7 +625,10 @@
       /* Override any potential active state conflicts */
       .quick-action-btn.active,
       .quick-action-btn.nav-link.active,
-      .quick-action-btn.reliable-nav-link.active {
+      .quick-action-btn.reliable-nav-link.active,
+      .active.quick-action-btn,
+      .nav-link.active.quick-action-btn,
+      .reliable-nav-link.active.quick-action-btn {
         background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05)) !important;
         border: 1px solid rgba(99, 102, 241, 0.2) !important;
         color: #4f46e5 !important;
@@ -601,8 +639,12 @@
 
       .quick-action-btn.active::after,
       .quick-action-btn.nav-link.active::after,
-      .quick-action-btn.reliable-nav-link.active::after {
+      .quick-action-btn.reliable-nav-link.active::after,
+      .active.quick-action-btn::after,
+      .nav-link.active.quick-action-btn::after,
+      .reliable-nav-link.active.quick-action-btn::after {
         display: none !important;
+        content: none !important;
       }
 
       /* Enhanced Brand Badge */
@@ -1120,7 +1162,7 @@
                 <div class="flex items-center gap-3">
                     {% if user.is_authenticated %}
                     <!-- Quick Action Buttons (Desktop Only) -->
-                    <div class="hidden xl:flex items-center gap-2">
+                    <div class="quick-actions-container hidden xl:flex">
                         <a href="{% url 'publish_journal' %}" class="quick-action-btn">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
