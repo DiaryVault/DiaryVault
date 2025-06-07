@@ -12,7 +12,6 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Count, Avg
 from django.core.cache import cache
 
-
 from .. import models
 from ..models import Entry, Journal, Tag, JournalEntry
 from ..utils.ai_helpers import generate_ai_content, generate_ai_content_personalized

@@ -13,7 +13,8 @@ from .views.marketplace import (
     purchase_journal_api, tip_author_api, earnings_dashboard,
     publish_biography, my_published_journals
 )
-from .views import journal_compiler, marketplace_views, api_views
+from .views import journal_compiler, marketplace_views
+from .views import api
 
 from . import views
 
@@ -150,9 +151,9 @@ urlpatterns = [
     path('api/journal-compiler/publish/', journal_compiler.publish_compiled_journal, name='publish_compiled_journal'),
 
     # Enhanced marketplace APIs
-    path('api/marketplace/quick-analyze/', api_views.quick_analyze_for_publishing, name='quick_analyze_for_publishing'),
-    path('api/marketplace/price-suggestion/', api_views.get_price_suggestion, name='get_price_suggestion'),
-    path('api/marketplace/marketing-copy/', api_views.generate_marketing_copy, name='generate_marketing_copy'),
+    path('api/marketplace/quick-analyze/', api.quick_analyze_for_publishing, name='quick_analyze_for_publishing'),
+    path('api/marketplace/price-suggestion/', api.get_price_suggestion, name='get_price_suggestion'),
+    path('api/marketplace/marketing-copy/', api.generate_marketing_copy, name='generate_marketing_copy'),
 
 
     # ============================================================================
