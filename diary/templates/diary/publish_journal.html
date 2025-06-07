@@ -182,8 +182,8 @@
     }
 
     .method-card.selected {
-        border-color: #6366f1;
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05));
+        border-color: #6366f1 !important;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05)) !important;
         transform: translateY(-2px);
         box-shadow: 0 12px 25px rgba(99, 102, 241, 0.2);
     }
@@ -486,8 +486,8 @@
     }
 
     .method-selection-text.selected {
-        color: #6366f1;
-        font-weight: 600;
+        color: #6366f1 !important;
+        font-weight: 600 !important;
     }
 
     /* Continue button enhancement */
@@ -669,7 +669,10 @@
         <h2 class="text-xl sm:text-2xl lg:mobile-section-title font-bold text-secondary-800 mb-4 sm:mb-6">Choose Your Compilation Method</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6" data-method="ai">
+            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6"
+                 data-method="ai"
+                 onclick="selectMethod(this, 'AI Smart Compilation')"
+                 style="cursor: pointer;">
                 <div class="text-center">
                     <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
                         <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -685,7 +688,10 @@
                 </div>
             </div>
 
-            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6" data-method="thematic">
+            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6"
+                 data-method="thematic"
+                 onclick="selectMethod(this, 'Thematic Collection')"
+                 style="cursor: pointer;">
                 <div class="text-center">
                     <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
                         <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -701,7 +707,10 @@
                 </div>
             </div>
 
-            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6" data-method="chronological">
+            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6"
+                 data-method="chronological"
+                 onclick="selectMethod(this, 'Timeline Journey')"
+                 style="cursor: pointer;">
                 <div class="text-center">
                     <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
                         <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -720,7 +729,7 @@
 
         <div class="mt-6 text-center">
             <div id="selectedMethodText" class="method-selection-text text-sm text-secondary-600 mb-4">Select a compilation method to continue</div>
-            <button id="continueToStep2" class="btn-primary px-6 py-3 rounded-xl" disabled>
+            <button id="continueToStep2" class="btn-primary px-6 py-3 rounded-xl" disabled onclick="goToStep(2)">
                 Continue to Entry Selection
             </button>
         </div>
@@ -733,21 +742,21 @@
             <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                 <span class="text-sm text-secondary-600">Selected: <span id="selectedCount">0</span></span>
                 <div class="flex space-x-2">
-                    <button id="selectAllBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">All</button>
-                    <button id="selectNoneBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">None</button>
+                    <button id="selectAllBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg" onclick="selectAllEntries()">All</button>
+                    <button id="selectNoneBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg" onclick="selectNoneEntries()">None</button>
                 </div>
             </div>
         </div>
 
         <div id="entriesGrid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
             {% for entry in entries %}
-            <div class="entry-card glass-card rounded-lg sm:rounded-xl p-3 sm:p-4" data-entry-id="{{ entry.id }}">
+            <div class="entry-card glass-card rounded-lg sm:rounded-xl p-3 sm:p-4" data-entry-id="{{ entry.id }}" onclick="toggleEntry(this)">
                 <div class="flex items-start space-x-3">
-                    <input type="checkbox" class="entry-checkbox mt-1 w-4 h-4 sm:w-5 sm:h-5" value="{{ entry.id }}">
+                    <input type="checkbox" class="entry-checkbox mt-1 w-4 h-4 sm:w-5 sm:h-5" value="{{ entry.id }}" onclick="updateSelectedEntries()">
                     <div class="flex-1 min-w-0">
                         <div class="flex justify-between items-start mb-2">
                             <h4 class="font-medium text-secondary-800 flex-1 mr-2 entry-title text-sm sm:text-base" data-original="{{ entry.title }}">{{ entry.title|truncatechars:40 }}</h4>
-                            <button class="edit-entry-btn text-blue-600 hover:text-blue-800 text-sm flex-shrink-0" data-entry-id="{{ entry.id }}" title="Edit entry">
+                            <button class="edit-entry-btn text-blue-600 hover:text-blue-800 text-sm flex-shrink-0" data-entry-id="{{ entry.id }}" title="Edit entry" onclick="openEditModal(event, {{ entry.id }})">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                 </svg>
@@ -776,10 +785,10 @@
                 Estimated: <span id="totalWords">0</span> words
             </div>
             <div class="flex space-x-3">
-                <button id="backToStep1" class="btn-secondary px-6 py-3 rounded-xl">
+                <button id="backToStep1" class="btn-secondary px-6 py-3 rounded-xl" onclick="goToStep(1)">
                     Back
                 </button>
-                <button id="analyzeBtn" class="btn-primary px-6 py-3 rounded-xl mobile-full-width sm:w-auto" disabled>
+                <button id="analyzeBtn" class="btn-primary px-6 py-3 rounded-xl mobile-full-width sm:w-auto" disabled onclick="analyzeEntries()">
                     Analyze Selected Entries
                 </button>
             </div>
@@ -795,10 +804,10 @@
             </div>
         </div>
         <div class="mt-4 sm:mt-6 flex flex-col sm:flex-row sm:justify-between space-y-3 sm:space-y-0">
-            <button id="backToStep2" class="btn-secondary px-6 py-3 rounded-xl">
+            <button id="backToStep2" class="btn-secondary px-6 py-3 rounded-xl" onclick="goToStep(2)">
                 Back
             </button>
-            <button id="generateStructureBtn" class="btn-primary px-6 py-3 rounded-xl mobile-full-width sm:w-auto" disabled>
+            <button id="generateStructureBtn" class="btn-primary px-6 py-3 rounded-xl mobile-full-width sm:w-auto" disabled onclick="generateStructure()">
                 Generate Journal Structure
             </button>
         </div>
@@ -822,7 +831,7 @@
             <!-- Publishing Form -->
             <div>
                 <h3 class="font-bold text-secondary-800 mb-4">Publishing Details</h3>
-                <form id="publishForm" class="space-y-4">
+                <form id="publishForm" class="space-y-4" onsubmit="publishJournal(event)">
                     <div class="form-row">
                         <label class="form-label">Title</label>
                         <input type="text" id="journalTitle" required
@@ -863,7 +872,7 @@
                     </div>
 
                     <div class="pt-4 flex flex-col sm:flex-row sm:justify-between space-y-3 sm:space-y-0">
-                        <button type="button" id="backToStep3" class="btn-secondary px-6 py-3 rounded-xl">
+                        <button type="button" id="backToStep3" class="btn-secondary px-6 py-3 rounded-xl" onclick="goToStep(3)">
                             Back
                         </button>
                         <button type="submit" id="publishBtn" class="btn-primary py-3 px-6 rounded-xl text-base sm:text-lg font-semibold">
@@ -890,14 +899,14 @@
     <div class="modal-content bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 max-w-2xl w-full mx-4 max-h-96 overflow-hidden">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg sm:text-xl font-bold text-secondary-800">Edit Entry</h3>
-            <button id="closeEditModal" class="text-gray-400 hover:text-gray-600 p-1">
+            <button id="closeEditModal" class="text-gray-400 hover:text-gray-600 p-1" onclick="closeEditModal()">
                 <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
         </div>
 
-        <form id="editEntryForm" class="space-y-4">
+        <form id="editEntryForm" class="space-y-4" onsubmit="saveEntryEdit(event)">
             <input type="hidden" id="editEntryId">
             <div class="form-row">
                 <label class="form-label">Title</label>
@@ -912,7 +921,7 @@
             </div>
 
             <div class="flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
-                <button type="button" id="cancelEdit" class="btn-secondary px-4 py-2 rounded-lg order-2 sm:order-1">Cancel</button>
+                <button type="button" id="cancelEdit" class="btn-secondary px-4 py-2 rounded-lg order-2 sm:order-1" onclick="closeEditModal()">Cancel</button>
                 <button type="submit" class="btn-primary px-6 py-2 rounded-lg order-1 sm:order-2">Save Changes</button>
             </div>
         </form>
@@ -925,7 +934,7 @@
         <div class="text-4xl sm:text-6xl text-green-500 mb-4">✓</div>
         <div class="text-secondary-800 font-medium text-lg sm:text-xl mb-2">Journal Published!</div>
         <div class="text-sm text-secondary-600 mb-4">Your journal has been successfully published to the marketplace.</div>
-        <button id="viewJournalBtn" class="btn-primary px-6 py-2 rounded-lg">View Journal</button>
+        <button id="viewJournalBtn" class="btn-primary px-6 py-2 rounded-lg" onclick="viewJournal()">View Journal</button>
     </div>
 </div>
 
@@ -934,611 +943,559 @@
 
 {% block extra_js %}
 <script>
-class SmartJournalCompiler {
-    constructor() {
-        this.selectedMethod = null;
-        this.selectedEntries = new Set();
-        this.currentStep = 1;
-        this.analysisData = null;
-        this.structureData = null;
+// Global variables
+let selectedMethod = null;
+let selectedEntries = new Set();
+let currentStep = 1;
+let analysisData = null;
+let structureData = null;
+let publishedJournalId = null;
 
-        this.init();
+// Method selection function (inline onclick)
+function selectMethod(element, methodName) {
+    console.log('Method selected:', methodName);
+
+    // Remove selected class from all cards
+    document.querySelectorAll('.method-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+
+    // Add selected class to clicked card
+    element.classList.add('selected');
+
+    // Store selected method
+    selectedMethod = element.dataset.method;
+
+    // Update text
+    const selectedText = document.getElementById('selectedMethodText');
+    if (selectedText) {
+        selectedText.textContent = `Selected: ${methodName}`;
+        selectedText.classList.add('selected');
     }
 
-    init() {
-        this.bindEvents();
-        this.updateStepDisplay();
+    // Enable continue button
+    const continueBtn = document.getElementById('continueToStep2');
+    if (continueBtn) {
+        continueBtn.disabled = false;
+        continueBtn.classList.add('continue-btn-enabled');
     }
 
-    bindEvents() {
-        // Method selection with improved event handling
-        document.querySelectorAll('.method-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.selectMethod(card);
-            });
-        });
+    showToast(`${methodName} selected!`, 'success');
+}
 
-        // Entry selection
-        document.querySelectorAll('.entry-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', () => this.updateSelectedEntries());
-        });
+// Step navigation
+function goToStep(step) {
+    console.log('Going to step:', step);
+    currentStep = step;
+    updateStepDisplay();
+}
 
-        // Entry card clicks
-        document.querySelectorAll('.entry-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                if (e.target.type !== 'checkbox' && !e.target.closest('.edit-entry-btn')) {
-                    const checkbox = card.querySelector('.entry-checkbox');
-                    checkbox.checked = !checkbox.checked;
-                    this.updateSelectedEntries();
-                }
-            });
-        });
-
-        // Entry editing
-        document.querySelectorAll('.edit-entry-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.openEditModal(e);
-            });
-        });
-
-        // Navigation buttons
-        document.getElementById('continueToStep2')?.addEventListener('click', () => this.goToStep(2));
-        document.getElementById('backToStep1')?.addEventListener('click', () => this.goToStep(1));
-        document.getElementById('backToStep2')?.addEventListener('click', () => this.goToStep(2));
-        document.getElementById('backToStep3')?.addEventListener('click', () => this.goToStep(3));
-
-        // Selection buttons
-        document.getElementById('selectAllBtn')?.addEventListener('click', () => this.selectAllEntries());
-        document.getElementById('selectNoneBtn')?.addEventListener('click', () => this.selectNoneEntries());
-
-        // Edit modal events
-        document.getElementById('closeEditModal')?.addEventListener('click', () => this.closeEditModal());
-        document.getElementById('cancelEdit')?.addEventListener('click', () => this.closeEditModal());
-        document.getElementById('editEntryForm')?.addEventListener('submit', (e) => this.saveEntryEdit(e));
-
-        // Action buttons
-        document.getElementById('analyzeBtn')?.addEventListener('click', () => this.analyzeEntries());
-        document.getElementById('generateStructureBtn')?.addEventListener('click', () => this.generateStructure());
-        document.getElementById('publishForm')?.addEventListener('submit', (e) => this.publishJournal(e));
-
-        // Close modals on overlay click
-        document.getElementById('editModal')?.addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) {
-                this.closeEditModal();
-            }
-        });
-    }
-
-    selectMethod(card) {
-        // Remove previous selections
-        document.querySelectorAll('.method-card').forEach(c => {
-            c.classList.remove('selected');
-        });
-
-        // Select clicked method
-        card.classList.add('selected');
-        this.selectedMethod = card.dataset.method;
-
-        console.log('Selected method:', this.selectedMethod);
-
-        // Update UI
-        const methodNames = {
-            'ai': 'AI Smart Compilation',
-            'thematic': 'Thematic Collection',
-            'chronological': 'Timeline Journey'
-        };
-
-        const selectedText = document.getElementById('selectedMethodText');
-        const continueBtn = document.getElementById('continueToStep2');
-
-        if (selectedText) {
-            selectedText.textContent = `Selected: ${methodNames[this.selectedMethod]}`;
-            selectedText.classList.add('selected');
-        }
-
-        if (continueBtn) {
-            continueBtn.disabled = false;
-            continueBtn.classList.add('continue-btn-enabled');
-        }
-
-        this.showToast(`${methodNames[this.selectedMethod]} selected!`, 'success');
-    }
-
-    updateSelectedEntries() {
-        const checkboxes = document.querySelectorAll('.entry-checkbox:checked');
-        this.selectedEntries = new Set(Array.from(checkboxes).map(cb => parseInt(cb.value)));
-
-        // Update UI
-        document.getElementById('selectedCount').textContent = this.selectedEntries.size;
-
-        // Calculate total words
-        let totalWords = 0;
-        checkboxes.forEach(cb => {
-            const card = cb.closest('.entry-card');
-            const wordCountEl = card.querySelector('.word-count');
-            const wordCount = wordCountEl.textContent.match(/\d+/);
-            if (wordCount) totalWords += parseInt(wordCount[0]);
-        });
-        document.getElementById('totalWords').textContent = totalWords.toLocaleString();
-
-        // Enable/disable analyze button
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        if (analyzeBtn) {
-            analyzeBtn.disabled = this.selectedEntries.size === 0;
-        }
-
-        // Update entry card styling
-        document.querySelectorAll('.entry-card').forEach(card => {
-            const checkbox = card.querySelector('.entry-checkbox');
-            if (checkbox.checked) {
-                card.classList.add('selected');
+function updateStepDisplay() {
+    // Hide all step contents
+    for (let i = 1; i <= 4; i++) {
+        const content = document.getElementById(`step${i}Content`);
+        if (content) {
+            if (i === currentStep) {
+                content.classList.remove('hidden');
+                content.classList.add('fade-in');
             } else {
-                card.classList.remove('selected');
+                content.classList.add('hidden');
             }
-        });
-    }
-
-    openEditModal(event) {
-        const entryId = event.currentTarget.dataset.entryId;
-        const entryCard = event.currentTarget.closest('.entry-card');
-
-        // Get current entry data
-        const title = entryCard.querySelector('.entry-title').dataset.original;
-        const content = entryCard.querySelector('.entry-content').dataset.original;
-
-        // Populate modal
-        document.getElementById('editEntryId').value = entryId;
-        document.getElementById('editEntryTitle').value = title;
-        document.getElementById('editEntryContent').value = content;
-
-        // Show modal
-        document.getElementById('editModal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-
-    closeEditModal() {
-        document.getElementById('editModal').style.display = 'none';
-        document.body.style.overflow = '';
-    }
-
-    async saveEntryEdit(event) {
-        event.preventDefault();
-
-        const entryId = document.getElementById('editEntryId').value;
-        const title = document.getElementById('editEntryTitle').value;
-        const content = document.getElementById('editEntryContent').value;
-
-        if (!title.trim() || !content.trim()) {
-            this.showToast('Title and content are required', 'error');
-            return;
         }
+    }
 
-        const submitBtn = event.target.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
+    // Update desktop step indicators
+    for (let i = 1; i <= 4; i++) {
+        const indicator = document.getElementById(`step${i}`);
+        const line = document.getElementById(`line${i}`);
 
-        try {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Saving...';
-
-            const response = await fetch(`/entry/${entryId}/edit/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': this.getCSRFToken(),
-                },
-                body: new URLSearchParams({
-                    'title': title,
-                    'content': content,
-                    'csrfmiddlewaretoken': this.getCSRFToken()
-                })
-            });
-
-            if (response.ok) {
-                this.updateEntryCardAfterEdit(entryId, title, content);
-                this.closeEditModal();
-                this.showToast('Entry updated successfully!', 'success');
-
-                // If this entry was selected, update the word count
-                const checkbox = document.querySelector(`input[value="${entryId}"]`);
-                if (checkbox && checkbox.checked) {
-                    this.updateSelectedEntries();
-                }
+        if (indicator) {
+            indicator.classList.remove('active', 'completed', 'pending');
+            if (i < currentStep) {
+                indicator.classList.add('completed');
+            } else if (i === currentStep) {
+                indicator.classList.add('active');
             } else {
-                throw new Error('Failed to save entry');
-            }
-
-        } catch (error) {
-            console.error('Save error:', error);
-            this.showToast('Failed to save entry: ' + error.message, 'error');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-        }
-    }
-
-    updateEntryCardAfterEdit(entryId, newTitle, newContent) {
-        const entryCard = document.querySelector(`[data-entry-id="${entryId}"]`);
-        if (!entryCard) return;
-
-        // Update title
-        const titleEl = entryCard.querySelector('.entry-title');
-        titleEl.textContent = newTitle.length > 40 ? newTitle.substring(0, 40) + '...' : newTitle;
-        titleEl.dataset.original = newTitle;
-
-        // Update content
-        const contentEl = entryCard.querySelector('.entry-content');
-        contentEl.textContent = newContent.length > 80 ? newContent.substring(0, 80) + '...' : newContent;
-        contentEl.dataset.original = newContent;
-
-        // Update word count
-        const wordCount = newContent.split(/\s+/).filter(word => word.length > 0).length;
-        const wordCountEl = entryCard.querySelector('.word-count');
-        wordCountEl.textContent = `${wordCount} words`;
-    }
-
-    selectAllEntries() {
-        document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = true);
-        this.updateSelectedEntries();
-        this.showToast('All entries selected', 'success');
-    }
-
-    selectNoneEntries() {
-        document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = false);
-        this.updateSelectedEntries();
-        this.showToast('All entries deselected', 'success');
-    }
-
-    async analyzeEntries() {
-        if (!this.selectedMethod || this.selectedEntries.size === 0) {
-            this.showToast('Please select a method and entries first', 'error');
-            return;
-        }
-
-        try {
-            this.showLoading('Analyzing your entries...');
-
-            const response = await fetch('/diary/api/analyze-entries/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': this.getCSRFToken(),
-                },
-                body: JSON.stringify({
-                    method: this.selectedMethod,
-                    entry_ids: Array.from(this.selectedEntries)
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                this.analysisData = data.analysis;
-                this.displayAnalysisResults(data.analysis);
-                this.goToStep(3);
-                this.showToast('Analysis completed successfully!', 'success');
-            } else {
-                throw new Error(data.error || 'Analysis failed');
-            }
-
-        } catch (error) {
-            console.error('Analysis error:', error);
-            this.showToast('Failed to analyze entries: ' + error.message, 'error');
-        } finally {
-            this.hideLoading();
-        }
-    }
-
-    async generateStructure() {
-        if (!this.analysisData) {
-            this.showToast('Please complete analysis first', 'error');
-            return;
-        }
-
-        try {
-            this.showLoading('Generating journal structure...');
-
-            const journalType = document.querySelector('input[name="journalType"]:checked')?.value || 'growth';
-
-            const response = await fetch('/diary/api/generate-structure/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': this.getCSRFToken(),
-                },
-                body: JSON.stringify({
-                    method: this.selectedMethod,
-                    journal_type: journalType,
-                    entry_ids: Array.from(this.selectedEntries),
-                    ai_enhancements: []
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                this.structureData = data.structure;
-                this.displayStructure(data.structure);
-                this.populatePublishingForm(data.structure);
-                this.goToStep(4);
-                this.showToast('Structure generated successfully!', 'success');
-            } else {
-                throw new Error(data.error || 'Structure generation failed');
-            }
-
-        } catch (error) {
-            console.error('Structure generation error:', error);
-            this.showToast('Failed to generate structure: ' + error.message, 'error');
-        } finally {
-            this.hideLoading();
-        }
-    }
-
-    async publishJournal(event) {
-        event.preventDefault();
-
-        if (!this.structureData) {
-            this.showToast('Please generate structure first', 'error');
-            return;
-        }
-
-        const title = document.getElementById('journalTitle').value;
-        const description = document.getElementById('journalDescription').value;
-        const price = parseFloat(document.getElementById('journalPrice').value || 0);
-
-        if (!title || !description) {
-            this.showToast('Please fill in all required fields', 'error');
-            return;
-        }
-
-        if (!confirm('Are you sure you want to publish this journal?')) {
-            return;
-        }
-
-        const button = document.getElementById('publishBtn');
-        const originalText = button.textContent;
-
-        try {
-            this.showLoading('Publishing your journal...');
-            button.disabled = true;
-            button.textContent = 'Publishing...';
-
-            const response = await fetch('/diary/api/publish-journal/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': this.getCSRFToken(),
-                },
-                body: JSON.stringify({
-                    title: title,
-                    description: description,
-                    price: price
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                this.hideLoading();
-                this.showSuccessModal(data.journal_id);
-            } else {
-                throw new Error(data.error || 'Publishing failed');
-            }
-
-        } catch (error) {
-            console.error('Publishing error:', error);
-            this.showToast('Failed to publish journal: ' + error.message, 'error');
-            this.hideLoading();
-            button.disabled = false;
-            button.textContent = originalText;
-        }
-    }
-
-    displayAnalysisResults(analysis) {
-        const container = document.getElementById('analysisResults');
-        container.innerHTML = `
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                <div class="text-center p-3 sm:p-4 bg-white rounded-xl">
-                    <div class="text-xl sm:text-2xl font-bold text-blue-600">${analysis.total_entries || 0}</div>
-                    <div class="text-xs sm:text-sm text-gray-600">Entries</div>
-                </div>
-                <div class="text-center p-3 sm:p-4 bg-white rounded-xl">
-                    <div class="text-xl sm:text-2xl font-bold text-green-600">${analysis.themes?.length || 0}</div>
-                    <div class="text-xs sm:text-sm text-gray-600">Themes</div>
-                </div>
-                <div class="text-center p-3 sm:p-4 bg-white rounded-xl">
-                    <div class="text-xl sm:text-2xl font-bold text-yellow-600">${analysis.quality_score?.score || 0}%</div>
-                    <div class="text-xs sm:text-sm text-gray-600">Quality</div>
-                </div>
-                <div class="text-center p-3 sm:p-4 bg-white rounded-xl">
-                    <div class="text-xl sm:text-2xl font-bold text-purple-600">${analysis.story_arcs?.length || 0}</div>
-                    <div class="text-xs sm:text-sm text-gray-600">Story Arcs</div>
-                </div>
-            </div>
-            <div class="bg-blue-50 rounded-xl p-4">
-                <h4 class="font-semibold text-blue-800 mb-2">Analysis Summary</h4>
-                <p class="text-blue-700 text-sm">${analysis.ai_insights || 'Your entries have been analyzed and are ready for compilation.'}</p>
-            </div>
-        `;
-
-        document.getElementById('generateStructureBtn').disabled = false;
-    }
-
-    displayStructure(structure) {
-        const container = document.getElementById('structurePreview');
-
-        let chaptersHtml = '';
-        if (structure.chapters) {
-            chaptersHtml = structure.chapters.map((chapter, index) => `
-                <div class="border-l-4 border-blue-500 pl-4 py-2">
-                    <h4 class="font-medium text-gray-800 text-sm sm:text-base">${chapter.title}</h4>
-                    <p class="text-xs sm:text-sm text-gray-600">${chapter.entry_count || 0} entries</p>
-                    <p class="text-xs text-gray-500">${chapter.description || ''}</p>
-                </div>
-            `).join('');
-        }
-
-        container.innerHTML = `
-            <div class="space-y-4">
-                <div class="bg-white rounded-xl p-4">
-                    <h3 class="font-bold text-gray-800 mb-2 text-sm sm:text-base">${structure.title || 'Generated Journal'}</h3>
-                    <p class="text-gray-600 text-xs sm:text-sm">${structure.description || ''}</p>
-                </div>
-                <div class="space-y-3">${chaptersHtml}</div>
-                <div class="bg-green-50 rounded-xl p-4">
-                    <div class="text-xs sm:text-sm">
-                        <strong>Estimated Length:</strong> ${(structure.estimated_length || 0).toLocaleString()} words<br>
-                        <strong>Suggested Price:</strong> ${structure.suggested_price || '9.99'}
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    populatePublishingForm(structure) {
-        if (structure.title) {
-            document.getElementById('journalTitle').value = structure.title;
-        }
-        if (structure.description) {
-            document.getElementById('journalDescription').value = structure.description;
-        }
-        if (structure.suggested_price) {
-            const price = typeof structure.suggested_price === 'string'
-                ? structure.suggested_price.replace(', '')
-                : structure.suggested_price;
-            document.getElementById('journalPrice').value = price;
-        }
-    }
-
-    goToStep(step) {
-        this.currentStep = step;
-        this.updateStepDisplay();
-    }
-
-    updateStepDisplay() {
-        // Hide all step contents
-        for (let i = 1; i <= 4; i++) {
-            const content = document.getElementById(`step${i}Content`);
-            if (content) {
-                if (i === this.currentStep) {
-                    content.classList.remove('hidden');
-                    content.classList.add('fade-in');
-                } else {
-                    content.classList.add('hidden');
-                }
+                indicator.classList.add('pending');
             }
         }
 
-        // Update desktop step indicators
-        for (let i = 1; i <= 4; i++) {
-            const indicator = document.getElementById(`step${i}`);
-            const line = document.getElementById(`line${i}`);
+        if (line && i < 4) {
+            line.classList.toggle('completed', i < currentStep);
+        }
+    }
 
+    // Update mobile step indicators
+    for (let i = 1; i <= 4; i++) {
+        const mobileStep = document.getElementById(`mobile-step${i}`);
+        if (mobileStep) {
+            mobileStep.classList.remove('active', 'completed', 'pending');
+            const indicator = mobileStep.querySelector('.step-indicator');
             if (indicator) {
                 indicator.classList.remove('active', 'completed', 'pending');
-                if (i < this.currentStep) {
+                if (i < currentStep) {
+                    mobileStep.classList.add('completed');
                     indicator.classList.add('completed');
-                } else if (i === this.currentStep) {
+                } else if (i === currentStep) {
+                    mobileStep.classList.add('active');
                     indicator.classList.add('active');
                 } else {
+                    mobileStep.classList.add('pending');
                     indicator.classList.add('pending');
                 }
             }
-
-            if (line && i < 4) {
-                line.classList.toggle('completed', i < this.currentStep);
-            }
-        }
-
-        // Update mobile step indicators
-        for (let i = 1; i <= 4; i++) {
-            const mobileStep = document.getElementById(`mobile-step${i}`);
-
-            if (mobileStep) {
-                mobileStep.classList.remove('active', 'completed', 'pending');
-
-                const indicator = mobileStep.querySelector('.step-indicator');
-                if (indicator) {
-                    indicator.classList.remove('active', 'completed', 'pending');
-
-                    if (i < this.currentStep) {
-                        mobileStep.classList.add('completed');
-                        indicator.classList.add('completed');
-                    } else if (i === this.currentStep) {
-                        mobileStep.classList.add('active');
-                        indicator.classList.add('active');
-                    } else {
-                        mobileStep.classList.add('pending');
-                        indicator.classList.add('pending');
-                    }
-                }
-            }
         }
     }
+}
 
-    showLoading(message) {
-        document.getElementById('loadingText').textContent = message;
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+// Entry selection functions
+function toggleEntry(card) {
+    const checkbox = card.querySelector('.entry-checkbox');
+    if (checkbox && !event.target.closest('.edit-entry-btn')) {
+        checkbox.checked = !checkbox.checked;
+        updateSelectedEntries();
+    }
+}
+
+function updateSelectedEntries() {
+    const checkboxes = document.querySelectorAll('.entry-checkbox:checked');
+    selectedEntries = new Set(Array.from(checkboxes).map(cb => parseInt(cb.value)));
+
+    // Update UI
+    document.getElementById('selectedCount').textContent = selectedEntries.size;
+
+    // Calculate total words
+    let totalWords = 0;
+    checkboxes.forEach(cb => {
+        const card = cb.closest('.entry-card');
+        const wordCountEl = card.querySelector('.word-count');
+        const wordCount = wordCountEl.textContent.match(/\d+/);
+        if (wordCount) totalWords += parseInt(wordCount[0]);
+    });
+    document.getElementById('totalWords').textContent = totalWords.toLocaleString();
+
+    // Enable/disable analyze button
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    if (analyzeBtn) {
+        analyzeBtn.disabled = selectedEntries.size === 0;
     }
 
-    hideLoading() {
-        document.getElementById('loadingOverlay').style.display = 'none';
-        document.body.style.overflow = '';
+    // Update entry card styling
+    document.querySelectorAll('.entry-card').forEach(card => {
+        const checkbox = card.querySelector('.entry-checkbox');
+        if (checkbox.checked) {
+            card.classList.add('selected');
+        } else {
+            card.classList.remove('selected');
+        }
+    });
+}
+
+function selectAllEntries() {
+    document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = true);
+    updateSelectedEntries();
+    showToast('All entries selected', 'success');
+}
+
+function selectNoneEntries() {
+    document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = false);
+    updateSelectedEntries();
+    showToast('All entries deselected', 'success');
+}
+
+// Edit modal functions
+function openEditModal(event, entryId) {
+    event.stopPropagation();
+    const entryCard = event.target.closest('.entry-card');
+
+    // Get current entry data
+    const title = entryCard.querySelector('.entry-title').dataset.original;
+    const content = entryCard.querySelector('.entry-content').dataset.original;
+
+    // Populate modal
+    document.getElementById('editEntryId').value = entryId;
+    document.getElementById('editEntryTitle').value = title;
+    document.getElementById('editEntryContent').value = content;
+
+    // Show modal
+    document.getElementById('editModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+async function saveEntryEdit(event) {
+    event.preventDefault();
+
+    const entryId = document.getElementById('editEntryId').value;
+    const title = document.getElementById('editEntryTitle').value;
+    const content = document.getElementById('editEntryContent').value;
+
+    if (!title.trim() || !content.trim()) {
+        showToast('Title and content are required', 'error');
+        return;
     }
 
-    showSuccessModal(journalId) {
-        const modal = document.getElementById('successModal');
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
 
-        document.getElementById('viewJournalBtn').onclick = () => {
-            window.location.href = `/marketplace/journal/${journalId}/`;
-        };
+    try {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+
+        const response = await fetch(`/entry/${entryId}/edit/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: new URLSearchParams({
+                'title': title,
+                'content': content,
+                'csrfmiddlewaretoken': getCSRFToken()
+            })
+        });
+
+        if (response.ok) {
+            updateEntryCardAfterEdit(entryId, title, content);
+            closeEditModal();
+            showToast('Entry updated successfully!', 'success');
+
+            // If this entry was selected, update the word count
+            const checkbox = document.querySelector(`input[value="${entryId}"]`);
+            if (checkbox && checkbox.checked) {
+                updateSelectedEntries();
+            }
+        } else {
+            throw new Error('Failed to save entry');
+        }
+
+    } catch (error) {
+        console.error('Save error:', error);
+        showToast('Failed to save entry: ' + error.message, 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    }
+}
+
+function updateEntryCardAfterEdit(entryId, newTitle, newContent) {
+    const entryCard = document.querySelector(`[data-entry-id="${entryId}"]`);
+    if (!entryCard) return;
+
+    // Update title
+    const titleEl = entryCard.querySelector('.entry-title');
+    titleEl.textContent = newTitle.length > 40 ? newTitle.substring(0, 40) + '...' : newTitle;
+    titleEl.dataset.original = newTitle;
+
+    // Update content
+    const contentEl = entryCard.querySelector('.entry-content');
+    contentEl.textContent = newContent.length > 80 ? newContent.substring(0, 80) + '...' : newContent;
+    contentEl.dataset.original = newContent;
+
+    // Update word count
+    const wordCount = newContent.split(/\s+/).filter(word => word.length > 0).length;
+    const wordCountEl = entryCard.querySelector('.word-count');
+    wordCountEl.textContent = `${wordCount} words`;
+}
+
+// Analysis and structure functions
+async function analyzeEntries() {
+    if (!selectedMethod || selectedEntries.size === 0) {
+        showToast('Please select a method and entries first', 'error');
+        return;
     }
 
-    showToast(message, type = 'success') {
-        // Remove existing toasts
-        document.querySelectorAll('.toast').forEach(toast => toast.remove());
+    try {
+        showLoading('Analyzing your entries...');
 
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.innerHTML = `
-            <div class="flex items-center justify-between">
-                <span>${message}</span>
-                <button onclick="this.parentElement.parentElement.remove()" class="ml-3 text-white hover:text-gray-200">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+        const response = await fetch('/diary/api/analyze-entries/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify({
+                method: selectedMethod,
+                entry_ids: Array.from(selectedEntries)
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            analysisData = data.analysis;
+            displayAnalysisResults(data.analysis);
+            goToStep(3);
+            showToast('Analysis completed successfully!', 'success');
+        } else {
+            throw new Error(data.error || 'Analysis failed');
+        }
+
+    } catch (error) {
+        console.error('Analysis error:', error);
+        showToast('Failed to analyze entries: ' + error.message, 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function generateStructure() {
+    if (!analysisData) {
+        showToast('Please complete analysis first', 'error');
+        return;
+    }
+
+    try {
+        showLoading('Generating journal structure...');
+
+        const journalType = document.querySelector('input[name="journalType"]:checked')?.value || 'growth';
+
+        const response = await fetch('/diary/api/generate-structure/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify({
+                method: selectedMethod,
+                journal_type: journalType,
+                entry_ids: Array.from(selectedEntries),
+                ai_enhancements: []
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            structureData = data.structure;
+            displayStructure(data.structure);
+            populatePublishingForm(data.structure);
+            goToStep(4);
+            showToast('Structure generated successfully!', 'success');
+        } else {
+            throw new Error(data.error || 'Structure generation failed');
+        }
+
+    } catch (error) {
+        console.error('Structure generation error:', error);
+        showToast('Failed to generate structure: ' + error.message, 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function publishJournal(event) {
+    event.preventDefault();
+
+    if (!structureData) {
+        showToast('Please generate structure first', 'error');
+        return;
+    }
+
+    const title = document.getElementById('journalTitle').value;
+    const description = document.getElementById('journalDescription').value;
+    const price = parseFloat(document.getElementById('journalPrice').value || 0);
+
+    if (!title || !description) {
+        showToast('Please fill in all required fields', 'error');
+        return;
+    }
+
+    if (!confirm('Are you sure you want to publish this journal?')) {
+        return;
+    }
+
+    const button = document.getElementById('publishBtn');
+    const originalText = button.textContent;
+
+    try {
+        showLoading('Publishing your journal...');
+        button.disabled = true;
+        button.textContent = 'Publishing...';
+
+        const response = await fetch('/diary/api/publish-journal/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify({
+                title: title,
+                description: description,
+                price: price
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            publishedJournalId = data.journal_id;
+            hideLoading();
+            showSuccessModal();
+        } else {
+            throw new Error(data.error || 'Publishing failed');
+        }
+
+    } catch (error) {
+        console.error('Publishing error:', error);
+        showToast('Failed to publish journal: ' + error.message, 'error');
+        hideLoading();
+        button.disabled = false;
+        button.textContent = originalText;
+    }
+}
+
+// Display functions
+function displayAnalysisResults(analysis) {
+    const container = document.getElementById('analysisResults');
+    container.innerHTML = `
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div class="text-center p-3 sm:p-4 bg-white rounded-xl">
+                <div class="text-xl sm:text-2xl font-bold text-blue-600">${analysis.total_entries || 0}</div>
+                <div class="text-xs sm:text-sm text-gray-600">Entries</div>
             </div>
-        `;
+            <div class="text-center p-3 sm:p-4 bg-white rounded-xl">
+                <div class="text-xl sm:text-2xl font-bold text-green-600">${analysis.themes?.length || 0}</div>
+                <div class="text-xs sm:text-sm text-gray-600">Themes</div>
+            </div>
+            <div class="text-center p-3 sm:p-4 bg-white rounded-xl">
+                <div class="text-xl sm:text-2xl font-bold text-yellow-600">${analysis.quality_score?.score || 0}%</div>
+                <div class="text-xs sm:text-sm text-gray-600">Quality</div>
+            </div>
+            <div class="text-center p-3 sm:p-4 bg-white rounded-xl">
+                <div class="text-xl sm:text-2xl font-bold text-purple-600">${analysis.story_arcs?.length || 0}</div>
+                <div class="text-xs sm:text-sm text-gray-600">Story Arcs</div>
+            </div>
+        </div>
+        <div class="bg-blue-50 rounded-xl p-4">
+            <h4 class="font-semibold text-blue-800 mb-2">Analysis Summary</h4>
+            <p class="text-blue-700 text-sm">${analysis.ai_insights || 'Your entries have been analyzed and are ready for compilation.'}</p>
+        </div>
+    `;
 
-        document.body.appendChild(toast);
+    document.getElementById('generateStructureBtn').disabled = false;
+}
 
-        // Show toast
-        setTimeout(() => toast.classList.add('show'), 100);
+function displayStructure(structure) {
+    const container = document.getElementById('structurePreview');
 
-        // Hide toast after 3 seconds
+    let chaptersHtml = '';
+    if (structure.chapters) {
+        chaptersHtml = structure.chapters.map((chapter, index) => `
+            <div class="border-l-4 border-blue-500 pl-4 py-2">
+                <h4 class="font-medium text-gray-800 text-sm sm:text-base">${chapter.title}</h4>
+                <p class="text-xs sm:text-sm text-gray-600">${chapter.entry_count || 0} entries</p>
+                <p class="text-xs text-gray-500">${chapter.description || ''}</p>
+            </div>
+        `).join('');
+    }
+
+    container.innerHTML = `
+        <div class="space-y-4">
+            <div class="bg-white rounded-xl p-4">
+                <h3 class="font-bold text-gray-800 mb-2 text-sm sm:text-base">${structure.title || 'Generated Journal'}</h3>
+                <p class="text-gray-600 text-xs sm:text-sm">${structure.description || ''}</p>
+            </div>
+            <div class="space-y-3">${chaptersHtml}</div>
+            <div class="bg-green-50 rounded-xl p-4">
+                <div class="text-xs sm:text-sm">
+                    <strong>Estimated Length:</strong> ${(structure.estimated_length || 0).toLocaleString()} words<br>
+                    <strong>Suggested Price:</strong> ${structure.suggested_price || '9.99'}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function populatePublishingForm(structure) {
+    if (structure.title) {
+        document.getElementById('journalTitle').value = structure.title;
+    }
+    if (structure.description) {
+        document.getElementById('journalDescription').value = structure.description;
+    }
+    if (structure.suggested_price) {
+        const price = typeof structure.suggested_price === 'string'
+            ? structure.suggested_price.replace(', '')
+            : structure.suggested_price;
+        document.getElementById('journalPrice').value = price;
+    }
+}
+
+// Modal functions
+function showSuccessModal() {
+    const modal = document.getElementById('successModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function viewJournal() {
+    if (publishedJournalId) {
+        window.location.href = `/marketplace/journal/${publishedJournalId}/`;
+    }
+}
+
+// Utility functions
+function showLoading(message) {
+    document.getElementById('loadingText').textContent = message;
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function showToast(message, type = 'success') {
+    // Remove existing toasts
+    document.querySelectorAll('.toast').forEach(toast => toast.remove());
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <div class="flex items-center justify-between">
+            <span>${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-3 text-white hover:text-gray-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(toast);
+
+    // Show toast
+    setTimeout(() => toast.classList.add('show'), 100);
+
+    // Hide toast after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
         setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => {
-                if (document.body.contains(toast)) {
-                    document.body.removeChild(toast);
-                }
-            }, 300);
-        }, 3000);
-    }
+            if (document.body.contains(toast)) {
+                document.body.removeChild(toast);
+            }
+        }, 300);
+    }, 3000);
+}
 
-    getCSRFToken() {
-        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
-    }
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 }
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Smart Journal Compiler initialized');
+    updateStepDisplay();
+
+    // Initialize entry selection
+    updateSelectedEntries();
+
     // Add viewport meta tag if not present for better mobile experience
     if (!document.querySelector('meta[name="viewport"]')) {
         const viewport = document.createElement('meta');
@@ -1546,9 +1503,6 @@ document.addEventListener('DOMContentLoaded', function() {
         viewport.content = 'width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover';
         document.head.appendChild(viewport);
     }
-
-    // Initialize the compiler
-    new SmartJournalCompiler();
 
     // Add touch support for better mobile interaction
     document.addEventListener('touchstart', function() {}, { passive: true });
@@ -1604,5 +1558,8 @@ if (window.innerWidth <= 768) {
     const viewportHeight = window.innerHeight;
     document.documentElement.style.setProperty('--vh', `${viewportHeight * 0.01}px`);
 }
+
+// Debug logging
+console.log('Smart Journal Compiler script loaded');
 </script>
 {% endblock %}
