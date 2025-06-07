@@ -1727,39 +1727,24 @@ function processIntelligentResponse(userMessage) {
   sendMessageToLLM(userMessage);
 }
 
-let conversationMetrics = {
-  depth_score: 0,
-  emotion_coverage: new Set(),
-  topic_diversity: new Set(),
-  detail_richness: 0,
-  readiness_score: 0
-};
-
 // Send message to LLM backend
 function sendMessageToLLM(userMessage, isInitial = false) {
   updateAIStatus("Having a genuine conversation with you...");
 
-  // Analyze conversation readiness BEFORE sending to backend
-  const readinessAnalysis = analyzeConversationReadiness();
-
   // Get CSRF token
   const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-  // Prepare enhanced form data
+  // Prepare form data
   const formData = new FormData();
   formData.append('message', userMessage);
   formData.append('conversation_history', JSON.stringify(chatHistory));
   formData.append('chat_mode', currentJournalTemplate || 'free-form');
-  formData.append('conversation_metrics', JSON.stringify(readinessAnalysis));
-
-  // Tell backend our readiness assessment
-  formData.append('suggest_compilation', readinessAnalysis.shouldCompile.toString());
-  formData.append('compilation_confidence', readinessAnalysis.confidence.toString());
 
   if (quickPhotoFile) {
     formData.append('photo', quickPhotoFile);
   }
 
+  // Make API call to your new LLM chat endpoint
   fetch('/api/chat/', {
     method: 'POST',
     headers: {
@@ -1785,27 +1770,27 @@ function sendMessageToLLM(userMessage, isInitial = false) {
     addMessageToChat(data.ai_message, 'ai');
     chatHistory.push({ role: 'assistant', content: data.ai_message });
 
-    // ENHANCED: Check multiple conditions for compilation
-    const shouldCompile = data.should_switch_to_form ||
-                         data.ready_for_compilation ||
-                         readinessAnalysis.shouldCompile ||
-                         checkLocalCompilationCriteria();
-
-    if (shouldCompile) {
-      // Show compilation preview first
-      showCompilationPreview(data.journal_entry || generateLocalJournalEntry());
+    // Check if we should generate journal entry
+    if (data.should_switch_to_form) {
+      // AI decided we have enough content - generate journal entry
+      populateFormWithAIContent(data.journal_entry);
+      switchToManualForm();
+      showFeedback('✨ Created your personalized journal entry!', 'success');
     } else {
       // Continue conversation
       updateConversationSuggestions(data.conversation_suggestions);
-      updateConversationMetrics(userMessage, data.ai_message);
 
       // Re-enable send button
       const sendBtn = document.getElementById('smartSendBtn');
-      if (sendBtn) sendBtn.disabled = false;
+      if (sendBtn) {
+        sendBtn.disabled = false;
+      }
 
       // Focus back on input
       const quickNotes = document.getElementById('quickNotes');
-      if (quickNotes) quickNotes.focus();
+      if (quickNotes) {
+        quickNotes.focus();
+      }
     }
 
     updateConversationProgress();
@@ -1815,8 +1800,11 @@ function sendMessageToLLM(userMessage, isInitial = false) {
     hideAdvancedThinking();
     showFeedback(error.message || 'Sorry, something went wrong. Please try again.', 'error');
 
+    // Re-enable send button
     const sendBtn = document.getElementById('smartSendBtn');
-    if (sendBtn) sendBtn.disabled = false;
+    if (sendBtn) {
+      sendBtn.disabled = false;
+    }
     updateAIStatus("Ready to help - let's try again!");
   });
 }
@@ -4403,386 +4391,6 @@ window.diaryFunctions = {
 document.addEventListener('DOMContentLoaded', function() {
   initExistingPhoto();
 });
-
-// Analyze if conversation is ready for compilation
-function analyzeConversationReadiness() {
-  const userMessages = chatHistory.filter(m => m.role === 'user');
-  const allUserText = userMessages.map(m => m.content).join(' ').toLowerCase();
-
-  const analysis = {
-    messageCount: userMessages.length,
-    totalWords: allUserText.split(' ').length,
-    emotionalDepth: analyzeEmotionalDepth(allUserText),
-    topicCoverage: analyzeTopicCoverage(allUserText),
-    detailRichness: analyzeDetailRichness(userMessages),
-    shouldCompile: false,
-    confidence: 0,
-    reasoning: []
-  };
-
-  // Scoring criteria
-  let score = 0;
-  const reasons = [];
-
-  // Message count (20 points max)
-  if (analysis.messageCount >= 3) {
-    score += Math.min(20, analysis.messageCount * 5);
-    reasons.push(`${analysis.messageCount} meaningful exchanges`);
-  }
-
-  // Word count (25 points max)
-  if (analysis.totalWords >= 50) {
-    score += Math.min(25, analysis.totalWords / 4);
-    reasons.push(`${analysis.totalWords} words of detail`);
-  }
-
-  // Emotional depth (25 points max)
-  score += analysis.emotionalDepth;
-  if (analysis.emotionalDepth > 10) {
-    reasons.push('Rich emotional content');
-  }
-
-  // Topic diversity (20 points max)
-  score += analysis.topicCoverage;
-  if (analysis.topicCoverage > 10) {
-    reasons.push('Multiple topics covered');
-  }
-
-  // Detail richness (10 points max)
-  score += analysis.detailRichness;
-  if (analysis.detailRichness > 5) {
-    reasons.push('Specific details shared');
-  }
-
-  analysis.confidence = Math.min(100, score);
-  analysis.shouldCompile = score >= 60; // 60% threshold
-  analysis.reasoning = reasons;
-
-  return analysis;
-}
-
-// Check local criteria independent of backend
-function checkLocalCompilationCriteria() {
-  const userMessages = chatHistory.filter(m => m.role === 'user');
-
-  // Force compilation after 4+ user messages
-  if (userMessages.length >= 4) return true;
-
-  // Force compilation if user seems done (short responses)
-  const lastMessage = userMessages[userMessages.length - 1];
-  if (lastMessage && lastMessage.content.length < 30 && userMessages.length >= 2) {
-    return true;
-  }
-
-  return false;
-}
-
-// Show compilation preview before finalizing
-function showCompilationPreview(journalData) {
-  const previewModal = createCompilationPreviewModal(journalData);
-  document.body.appendChild(previewModal);
-
-  // Animate in
-  requestAnimationFrame(() => {
-    previewModal.classList.remove('opacity-0');
-    previewModal.querySelector('.modal-content').classList.remove('scale-95');
-  });
-}
-
-// Create compilation preview modal
-function createCompilationPreviewModal(journalData) {
-  const modal = document.createElement('div');
-  modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 opacity-0 transition-opacity duration-300 p-4';
-
-  modal.innerHTML = `
-    <div class="modal-content bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300">
-      <div class="p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Your Journal Entry Preview
-          </h3>
-          <button onclick="closeCompilationPreview()" class="text-gray-400 hover:text-gray-600 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        <div class="mb-6">
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <p class="text-blue-800 text-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              I've compiled our conversation into a beautiful journal entry. You can accept it as-is, make edits, or continue our conversation for more details.
-            </p>
-          </div>
-
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
-              <div class="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                <div class="font-medium text-gray-800">${journalData.title || 'My Journal Entry'}</div>
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Content Preview</label>
-              <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg max-h-60 overflow-y-auto">
-                <div class="text-gray-800 whitespace-pre-wrap handwritten leading-relaxed">${journalData.entry || journalData.content || 'Content will be generated...'}</div>
-              </div>
-            </div>
-
-            <div class="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-              <strong>Conversation Summary:</strong> ${chatHistory.filter(m => m.role === 'user').length} messages, ${analyzeConversationReadiness().totalWords} words, covering topics like ${generateTopicSummary()}
-            </div>
-          </div>
-        </div>
-
-        <div class="flex flex-col sm:flex-row gap-3">
-          <button onclick="acceptCompilation()" class="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Accept & Edit
-          </button>
-          <button onclick="continueConversation()" class="flex-1 bg-gray-100 text-gray-700 px-4 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            Add More Details
-          </button>
-          <button onclick="regenerateEntry()" class="flex-1 bg-green-100 text-green-700 px-4 py-3 rounded-lg font-medium hover:bg-green-200 transition-colors flex items-center justify-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Try Different Style
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-
-  // Store journal data on modal for access
-  modal.journalData = journalData;
-
-  return modal;
-}
-
-// Accept compilation and switch to form
-function acceptCompilation() {
-  const modal = document.querySelector('.fixed.inset-0');
-  const journalData = modal?.journalData;
-
-  if (journalData) {
-    populateFormWithAIContent(journalData);
-    switchToManualForm();
-    showFeedback('✨ Journal entry ready for editing!', 'success');
-  }
-
-  closeCompilationPreview();
-}
-
-// Continue conversation for more details
-function continueConversation() {
-  closeCompilationPreview();
-
-  // Add helpful prompt to guide user
-  const encouragementMessage = "What else would you like to add? I can help you explore more details, emotions, or any other aspects of your day.";
-  addMessageToChat(encouragementMessage, 'ai');
-  chatHistory.push({ role: 'assistant', content: encouragementMessage });
-
-  // Focus on input
-  const quickNotes = document.getElementById('quickNotes');
-  if (quickNotes) {
-    quickNotes.placeholder = "Tell me more about...";
-    quickNotes.focus();
-  }
-
-  // Re-enable send button
-  const sendBtn = document.getElementById('smartSendBtn');
-  if (sendBtn) sendBtn.disabled = false;
-
-  showFeedback('💬 Continue sharing - I\'m listening!', 'info', 3000);
-}
-
-// Regenerate with different style
-function regenerateEntry() {
-  closeCompilationPreview();
-
-  // Show style options
-  showStyleSelectionModal();
-}
-
-// Close compilation preview
-function closeCompilationPreview() {
-  const modal = document.querySelector('.fixed.inset-0');
-  if (modal) {
-    modal.classList.add('opacity-0');
-    modal.querySelector('.modal-content').classList.add('scale-95');
-    setTimeout(() => modal.remove(), 300);
-  }
-}
-
-// Generate local journal entry if backend doesn't provide one
-function generateLocalJournalEntry() {
-  const userMessages = chatHistory.filter(m => m.role === 'user').map(m => m.content);
-  const voiceAnalysis = analyzeUserVoice();
-
-  // Create a simple but authentic journal entry
-  const today = new Date();
-  const title = `${today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${generateContextualTitle(userMessages)}`;
-
-  const entry = createAuthenticEntry(userMessages, voiceAnalysis);
-
-  return {
-    title: title,
-    entry: entry,
-    mood: detectDominantMood(userMessages.join(' ')),
-    tags: generateRelevantTags(userMessages.join(' '))
-  };
-}
-
-// Create authentic entry from conversation
-function createAuthenticEntry(userMessages, voiceAnalysis) {
-  // Use their actual words as much as possible
-  const naturalOpening = createNaturalOpening(userMessages[0], voiceAnalysis.tone);
-  const mainContent = userMessages.join('\n\n');
-  const naturalClosing = createNaturalClosing(voiceAnalysis);
-
-  return `${naturalOpening}\n\n${mainContent}\n\n${naturalClosing}`;
-}
-
-// Generate contextual title based on content
-function generateContextualTitle(userMessages) {
-  const allText = userMessages.join(' ').toLowerCase();
-
-  if (allText.includes('work') || allText.includes('job')) return 'Work Reflections';
-  if (allText.includes('family') || allText.includes('friend')) return 'Connections';
-  if (allText.includes('accomplish') || allText.includes('achieve')) return 'Achievements';
-  if (allText.includes('feel') || allText.includes('emotion')) return 'Emotional Journey';
-  if (allText.includes('learn') || allText.includes('discover')) return 'Insights';
-
-  return 'Daily Reflections';
-}
-
-// Detect dominant mood from conversation
-function detectDominantMood(text) {
-  const lowerText = text.toLowerCase();
-
-  const moodIndicators = {
-    happy: ['happy', 'joy', 'excited', 'amazing', 'wonderful', 'great'],
-    sad: ['sad', 'disappointed', 'upset', 'down', 'blue'],
-    anxious: ['worried', 'nervous', 'anxious', 'stressed', 'overwhelmed'],
-    content: ['peaceful', 'calm', 'satisfied', 'content', 'okay'],
-    excited: ['thrilled', 'pumped', 'energized', 'fantastic', 'incredible']
-  };
-
-  let maxScore = 0;
-  let dominantMood = 'content';
-
-  Object.entries(moodIndicators).forEach(([mood, indicators]) => {
-    const score = indicators.filter(word => lowerText.includes(word)).length;
-    if (score > maxScore) {
-      maxScore = score;
-      dominantMood = mood;
-    }
-  });
-
-  return dominantMood;
-}
-
-// Generate relevant tags from conversation
-function generateRelevantTags(text) {
-  const commonTags = {
-    'work': ['work', 'job', 'office', 'career', 'project', 'meeting'],
-    'family': ['family', 'mom', 'dad', 'parent', 'child', 'kids'],
-    'friends': ['friend', 'buddy', 'companion', 'social'],
-    'health': ['health', 'exercise', 'gym', 'workout', 'medical'],
-    'food': ['food', 'eat', 'cook', 'restaurant', 'meal'],
-    'travel': ['travel', 'trip', 'vacation', 'journey', 'visit'],
-    'learning': ['learn', 'study', 'education', 'book', 'course'],
-    'creativity': ['create', 'art', 'music', 'write', 'design'],
-    'reflection': ['think', 'reflect', 'ponder', 'consider', 'realize'],
-    'gratitude': ['grateful', 'thankful', 'appreciate', 'blessed']
-  };
-
-  const lowerText = text.toLowerCase();
-  const foundTags = [];
-
-  Object.entries(commonTags).forEach(([tag, keywords]) => {
-    if (keywords.some(keyword => lowerText.includes(keyword))) {
-      foundTags.push(tag);
-    }
-  });
-
-  return foundTags.slice(0, 5).join(', '); // Limit to 5 tags
-}
-
-// Analyze various aspects for readiness scoring
-function analyzeEmotionalDepth(text) {
-  const emotionWords = ['feel', 'felt', 'emotion', 'heart', 'soul', 'joy', 'sad', 'happy', 'angry', 'peaceful', 'excited', 'nervous', 'proud', 'grateful', 'frustrated', 'content', 'anxious', 'hopeful'];
-  const matches = emotionWords.filter(word => text.includes(word)).length;
-  return Math.min(25, matches * 3); // Max 25 points
-}
-
-function analyzeTopicCoverage(text) {
-  const topics = ['work', 'family', 'friends', 'health', 'food', 'travel', 'learning', 'goals', 'relationships', 'activities', 'thoughts', 'plans'];
-  const matches = topics.filter(topic => text.includes(topic)).length;
-  return Math.min(20, matches * 2); // Max 20 points
-}
-
-function analyzeDetailRichness(messages) {
-  const avgLength = messages.reduce((sum, msg) => sum + msg.content.length, 0) / messages.length;
-  return Math.min(10, avgLength / 20); // Max 10 points
-}
-
-function updateConversationMetrics(userMessage, aiMessage) {
-  // Update metrics for next analysis
-  conversationMetrics.detail_richness += userMessage.length;
-
-  // Extract emotions and topics
-  const emotions = ['happy', 'sad', 'excited', 'nervous', 'proud', 'grateful', 'frustrated'];
-  const topics = ['work', 'family', 'friends', 'health', 'activities'];
-
-  emotions.forEach(emotion => {
-    if (userMessage.toLowerCase().includes(emotion)) {
-      conversationMetrics.emotion_coverage.add(emotion);
-    }
-  });
-
-  topics.forEach(topic => {
-    if (userMessage.toLowerCase().includes(topic)) {
-      conversationMetrics.topic_diversity.add(topic);
-    }
-  });
-}
-
-function generateTopicSummary() {
-  const userMessages = chatHistory.filter(m => m.role === 'user');
-  const allText = userMessages.join(' ').toLowerCase();
-  const topics = [];
-
-  if (allText.includes('work')) topics.push('work');
-  if (allText.includes('family') || allText.includes('friend')) topics.push('relationships');
-  if (allText.includes('feel') || allText.includes('emotion')) topics.push('emotions');
-  if (allText.includes('accomplish') || allText.includes('goal')) topics.push('achievements');
-
-  return topics.length > 0 ? topics.join(', ') : 'daily experiences';
-}
-
-// Make functions globally available
-window.compilationFunctions = {
-  acceptCompilation,
-  continueConversation,
-  regenerateEntry,
-  closeCompilationPreview,
-  analyzeConversationReadiness,
-  generateLocalJournalEntry
-};
 
 </script>
 {% endblock %}
