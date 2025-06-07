@@ -58,6 +58,7 @@ urlpatterns = [
 
     path('api/chat/', views.chat_with_ai, name='chat_with_ai'),
 
+
     # ============================================================================
     # Library & Time Periods
     # ============================================================================
@@ -114,13 +115,6 @@ urlpatterns = [
     path('marketplace/faq/', marketplace_faq, name='marketplace_faq'),
 
     # ============================================================================
-    # SMART JOURNAL COMPILER - Main Pages
-    # ============================================================================
-    path('publish_journal/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler'),
-    path('publish/smart-compiler/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler_alt'),
-    path('publish/preview-structure/', journal_compiler.preview_journal_structure, name='preview_journal_structure'),
-
-    # ============================================================================
     # API Endpoints
     # ============================================================================
     # Journal Generation & Management
@@ -144,35 +138,33 @@ urlpatterns = [
     path('api/purchase/<int:journal_id>/', purchase_journal_api, name='purchase_journal_api'),
     path('api/tip/<int:journal_id>/', tip_author_api, name='tip_author_api'),
 
-    # ============================================================================
-    # SMART JOURNAL COMPILER - API Endpoints
-    # ============================================================================
-    # Main compilation endpoints
-    path('diary/compiler/analyze-entries/', journal_compiler.analyze_entries_ajax, name='analyze_entries_ajax'),
-    path('diary/compiler/generate-structure/', journal_compiler.generate_journal_structure, name='generate_journal_structure'),
-    path('diary/compiler/publish/', journal_compiler.publish_compiled_journal, name='publish_compiled_journal'),
-
-    # Draft management
-    path('diary/api/save-draft/', api.save_journal_draft, name='save_journal_draft'),
-    path('diary/api/load-draft/', api.load_journal_draft, name='load_journal_draft'),
-
-    # Marketing and analytics
-    path('diary/api/marketing-copy/', api.generate_marketing_copy, name='generate_marketing_copy'),
-    path('api/marketplace/quick-analyze/', api.quick_analyze_for_publishing, name='quick_analyze_for_publishing'),
-    path('api/marketplace/price-suggestion/', api.get_price_suggestion, name='get_price_suggestion'),
-
-    # Legacy API endpoints (keeping for backward compatibility)
-    path('api/journal-compiler/save-draft/', api.save_journal_draft, name='api_save_journal_draft'),
-    path('api/journal-compiler/load-draft/', api.load_journal_draft, name='api_load_journal_draft'),
-    path('api/journal-compiler/analyze/', journal_compiler.analyze_entries_ajax, name='api_analyze_entries_ajax'),
-    path('api/journal-compiler/generate-structure/', journal_compiler.generate_journal_structure, name='api_generate_journal_structure'),
-    path('api/journal-compiler/publish/', journal_compiler.publish_compiled_journal, name='api_publish_compiled_journal'),
-
-    # ============================================================================
-    # Account Management
-    # ============================================================================
     path('accounts/settings/', views.account_settings, name='account_settings'),
     path('preferences/', views.preferences, name='preferences'),
+
+    # Journal Compiler URLs
+    path('publish/smart-compiler/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler'),
+    path('publish/preview-structure/', journal_compiler.preview_journal_structure, name='preview_journal_structure'),
+
+    # API endpoints for journal compiler
+    path('api/journal-compiler/save-draft/', api.save_journal_draft, name='save_journal_draft'),
+    path('api/journal-compiler/load-draft/', api.load_journal_draft, name='load_journal_draft'),
+
+
+    # AJAX API endpoints for Journal Compiler
+    path('api/journal-compiler/analyze/', journal_compiler.analyze_entries_ajax, name='analyze_entries_ajax'),
+    path('api/journal-compiler/generate-structure/', journal_compiler.generate_journal_structure, name='generate_journal_structure'),
+    path('api/journal-compiler/publish/', journal_compiler.publish_compiled_journal, name='publish_compiled_journal'),
+
+
+    # Enhanced marketplace APIs
+    path('api/marketplace/quick-analyze/', api.quick_analyze_for_publishing, name='quick_analyze_for_publishing'),
+    path('api/marketplace/price-suggestion/', api.get_price_suggestion, name='get_price_suggestion'),
+    path('api/marketplace/marketing-copy/', api.generate_marketing_copy, name='generate_marketing_copy'),
+
+    path('api/analyze-entries/', views.analyze_entries_ajax, name='analyze_entries_ajax'),
+    path('api/generate-structure/', views.generate_journal_structure, name='generate_journal_structure'),
+    path('api/publish/', views.publish_compiled_journal, name='publish_compiled_journal'),
+
 
     # ============================================================================
     # Static File Handling
