@@ -57,7 +57,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'diary.middleware.SecurityHeadersMiddleware',  # Enhanced security headers
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -65,7 +64,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'diary.middleware.RateLimitMiddleware',  # Your existing rate limiting
-    'diary.middleware.RequestLoggingMiddleware',  # Enhanced request logging
     'diary.middleware.PendingEntryMiddleware',  # Your existing middleware
     'allauth.account.middleware.AccountMiddleware',
 ]
@@ -200,8 +198,8 @@ ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
 ACCOUNT_UNIQUE_EMAIL = True  # Allow duplicate emails if needed - CRITICAL FOR YOUR CASE
 ACCOUNT_PREVENT_ENUMERATION = False  # Don't block based on existing emails
 
-ACCOUNT_LOGIN_METHODS = {'email', 'username'}  # Allow both email and username login
-ACCOUNT_SIGNUP_FIELDS = ['email', 'password1', 'password2']  # Required signup fields
+ACCOUNT_LOGIN_METHODS = ['email']
+ACCOUNT_SIGNUP_FIELDS = ['email']
 
 # FIXED: Enhanced SOCIALACCOUNT_PROVIDERS with better configuration
 SOCIALACCOUNT_PROVIDERS = {
