@@ -588,7 +588,11 @@
         <h2 class="text-xl sm:text-2xl lg:mobile-section-title font-bold text-secondary-800 mb-4 sm:mb-6">Choose Your Compilation Method</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6" data-method="ai">
+            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6 cursor-pointer"
+                 data-method="ai"
+                 role="button"
+                 tabindex="0"
+                 aria-label="Select AI Smart Compilation method">
                 <div class="text-center">
                     <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
                         <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -604,7 +608,11 @@
                 </div>
             </div>
 
-            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6" data-method="thematic">
+            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6 cursor-pointer"
+                 data-method="thematic"
+                 role="button"
+                 tabindex="0"
+                 aria-label="Select Thematic Collection method">
                 <div class="text-center">
                     <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
                         <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -620,7 +628,11 @@
                 </div>
             </div>
 
-            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6" data-method="chronological">
+            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6 cursor-pointer"
+                 data-method="chronological"
+                 role="button"
+                 tabindex="0"
+                 aria-label="Select Timeline Journey method">
                 <div class="text-center">
                     <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
                         <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -852,9 +864,35 @@ class SmartJournalCompiler {
     }
 
     bindEvents() {
-        // Method selection
+        // Method selection with enhanced mobile support
         document.querySelectorAll('.method-card').forEach(card => {
+            // Mouse events
             card.addEventListener('click', (e) => this.selectMethod(e));
+
+            // Touch events for mobile
+            card.addEventListener('touchend', (e) => {
+                e.preventDefault(); // Prevent double-firing on mobile
+                this.selectMethod(e);
+            });
+
+            // Keyboard accessibility
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.selectMethod(e);
+                }
+            });
+
+            // Visual feedback for touch devices
+            card.addEventListener('touchstart', (e) => {
+                card.style.transform = 'scale(0.98)';
+                card.style.opacity = '0.9';
+            }, { passive: true });
+
+            card.addEventListener('touchcancel', (e) => {
+                card.style.transform = '';
+                card.style.opacity = '';
+            });
         });
 
         // Entry selection
@@ -892,12 +930,31 @@ class SmartJournalCompiler {
                 // Prevent closing loading overlay by clicking
             }
         });
+
+        // Add method card hover effects for non-touch devices
+        if (!('ontouchstart' in window)) {
+            document.querySelectorAll('.method-card').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-4px)';
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    if (!card.classList.contains('selected')) {
+                        card.style.transform = '';
+                    }
+                });
+            });
+        }
     }
 
     selectMethod(event) {
+        console.log('Method selection triggered:', event.type);
+
         // Remove previous selections
         document.querySelectorAll('.method-card').forEach(card => {
             card.classList.remove('selected');
+            card.style.transform = '';
+            card.style.opacity = '';
         });
 
         // Select clicked method
@@ -905,10 +962,24 @@ class SmartJournalCompiler {
         card.classList.add('selected');
         this.selectedMethod = card.dataset.method;
 
+        // Visual feedback
+        card.style.transform = 'translateY(-2px)';
+
+        // Reset visual feedback after animation
+        setTimeout(() => {
+            card.style.transform = '';
+            card.style.opacity = '';
+        }, 300);
+
         console.log('Selected method:', this.selectedMethod);
 
-        // Move to next step
-        this.goToStep(2);
+        // Show success feedback
+        this.showSuccess(`Selected ${card.querySelector('h3').textContent} method!`);
+
+        // Move to next step after a brief delay for better UX
+        setTimeout(() => {
+            this.goToStep(2);
+        }, 500);
     }
 
     updateSelectedEntries() {
