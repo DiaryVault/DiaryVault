@@ -155,6 +155,16 @@ urlpatterns = [
     path('api/marketplace/price-suggestion/', api.get_price_suggestion, name='get_price_suggestion'),
     path('api/marketplace/marketing-copy/', api.generate_marketing_copy, name='generate_marketing_copy'),
 
+    # Smart Journal Compiler URLs
+    path('smart-journal-compiler/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler'),
+    path('api/journal-compiler/analyze/', journal_compiler.analyze_entries_ajax, name='analyze_entries_ajax'),
+    path('api/journal-compiler/generate-structure/', journal_compiler.generate_journal_structure, name='generate_journal_structure'),
+    path('api/journal-compiler/publish/', journal_compiler.publish_compiled_journal, name='publish_compiled_journal'),
+
+    # API endpoints for journal compiler
+    path('api/journal-compiler/save-draft/', api.save_journal_draft, name='save_journal_draft'),
+    path('api/journal-compiler/load-draft/', api.load_journal_draft, name='load_journal_draft'),
+
 
     # ============================================================================
     # Static File Handling
