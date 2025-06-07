@@ -295,429 +295,149 @@ def chat_with_ai(request):
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }, status=500)
 
-def generate_chat_response(user_message, conversation_history, chat_mode, user=None, photo=None):
-    """
-    Generate AI response for chat conversation
-    """
+# JOURNAL COMPILER API ENDPOINTS
 
-    # Build conversation context for the LLM
-    conversation_context = build_conversation_context(
-        user_message=user_message,
-        conversation_history=conversation_history,
-        chat_mode=chat_mode,
-        user=user,
-        photo=photo
-    )
-
-    # Determine if we should generate a journal entry or continue chatting
-    should_generate_entry = should_create_journal_entry(conversation_history, user_message)
-
-    if should_generate_entry:
-        # Generate final journal entry
-        journal_data = generate_final_journal_entry(conversation_history, user_message, user)
-        return {
-            'type': 'journal_entry',
-            'ai_message': "Perfect! I've created a beautiful journal entry based on our conversation. You can review and edit it below.",
-            'journal_entry': journal_data,
-            'should_switch_to_form': True
-        }
-    else:
-        # Continue conversation
-        ai_message = generate_conversational_response(conversation_context)
-        return {
-            'type': 'conversation',
-            'ai_message': ai_message,
-            'should_switch_to_form': False,
-            'conversation_suggestions': generate_conversation_suggestions(conversation_context)
-        }
-
-def build_conversation_context(user_message, conversation_history, chat_mode, user, photo):
-    """
-    Build comprehensive context for the LLM
-    """
-
-    # Create a rich system prompt based on chat mode and user history
-    system_prompt = create_dynamic_system_prompt(chat_mode, user)
-
-    # Build conversation summary
-    conversation_summary = summarize_conversation(conversation_history)
-
-    # Analyze user's writing style from conversation
-    writing_style = analyze_writing_style(conversation_history)
-
-    # Photo context
-    photo_context = "The user has shared a photo with this message." if photo else ""
-
-    context = {
-        'system_prompt': system_prompt,
-        'conversation_summary': conversation_summary,
-        'writing_style': writing_style,
-        'current_message': user_message,
-        'photo_context': photo_context,
-        'chat_mode': chat_mode,
-        'message_count': len([msg for msg in conversation_history if msg.get('role') == 'user'])
-    }
-
-    return context
-
-def create_dynamic_system_prompt(chat_mode, user):
-    """
-    Create a dynamic system prompt based on mode and user preferences
-    """
-
-    base_prompt = """You are an empathetic and insightful journal assistant. Your role is to help users explore their thoughts, feelings, and experiences through meaningful conversation. You ask thoughtful follow-up questions, show genuine interest in their responses, and help them dive deeper into their experiences.
-
-Key principles:
-- Be genuinely curious about their experiences
-- Ask one thoughtful follow-up question at a time
-- Validate their feelings and experiences
-- Help them explore emotions and insights
-- Use their natural language style
-- Be conversational and warm, not clinical or robotic"""
-
-    mode_specific_prompts = {
-        'daily-reflection': """
-Focus on helping them reflect on their day. Ask about:
-- Key moments and experiences
-- Emotional highs and lows
-- What they learned or realized
-- How they handled challenges
-- What they're grateful for
-- How they're feeling about tomorrow
-""",
-        'gratitude-practice': """
-Focus on gratitude and positive experiences. Ask about:
-- What brought them joy today
-- People who made a positive impact
-- Small moments they appreciated
-- Things they often take for granted
-- How gratitude affects their perspective
-- Ways to carry this appreciation forward
-""",
-        'goal-tracking': """
-Focus on progress, achievements, and aspirations. Ask about:
-- What they accomplished today
-- Steps toward their bigger goals
-- Obstacles they overcame
-- Skills they're developing
-- What motivated them to keep going
-- How they want to build on today's progress
-""",
-        'free-form': """
-Follow their lead completely. Ask about whatever seems most important to them:
-- What's really on their mind
-- What they most want to explore or understand
-- Feelings or experiences that stand out
-- Anything they want to process or remember
-"""
-    }
-
-    mode_prompt = mode_specific_prompts.get(chat_mode, mode_specific_prompts['free-form'])
-
-    # Add user-specific context if available
-    user_context = ""
-    if user and user.is_authenticated:
-        # Get user's previous entries for context
-        recent_entries = Entry.objects.filter(user=user).order_by('-created_at')[:3]
-        if recent_entries:
-            user_context = f"\nContext: This user has written {recent_entries.count()} recent entries. Their recent topics include themes around personal growth and daily experiences."
-
-    return base_prompt + mode_prompt + user_context
-
-def should_create_journal_entry(conversation_history, current_message):
-    """
-    Determine if we have enough content for a journal entry
-    """
-
-    # Use the simpler decision method from AIService
-    should_create, reason = AIService.generate_chat_decision(conversation_history, current_message)
-
-    logger.info(f"Journal entry decision: {should_create} - {reason}")
-    return should_create
-
-def generate_conversational_response(conversation_context):
-    """
-    Generate a natural, conversational AI response
-    """
-
-    # Create a focused prompt for conversation
-    conversation_prompt = f"""
-You are a warm, empathetic journal assistant having a natural conversation with someone about their day and experiences.
-
-Chat Mode: {conversation_context['chat_mode']}
-Message Count: {conversation_context['message_count']}
-
-Their latest message: "{conversation_context['current_message']}"
-
-Recent conversation: {conversation_context['conversation_summary']}
-
-Generate a warm, engaging response that:
-1. Acknowledges what they shared with genuine interest
-2. Asks ONE thoughtful follow-up question to explore deeper
-3. Feels natural and conversational (like talking to a caring friend)
-4. Avoids being clinical or overly formal
-
-Keep your response to 1-2 sentences plus one follow-up question.
-"""
-
-    # Use your existing AI service
+@login_required
+@require_POST
+def analyze_entries_ajax(request):
+    """AJAX endpoint to analyze entries for compilation - matches your journal_compiler"""
     try:
-        response = AIService.generate_conversational_response(conversation_prompt)
+        data = json.loads(request.body)
+        compilation_method = data.get('method', 'ai')
+        entry_ids = data.get('entry_ids', [])
 
-        # Ensure we have a reasonable response
-        if not response or len(response.strip()) < 10:
-            # Fallback responses based on chat mode
-            fallback_responses = {
-                'daily-reflection': "That sounds really meaningful. What made that moment stand out to you?",
-                'gratitude-practice': "I love hearing about what brings you joy. How did that make you feel?",
-                'goal-tracking': "That's great progress! What motivated you to keep going?",
-                'free-form': "Thank you for sharing that with me. What's been on your mind about it?"
-            }
+        # Get selected entries or all entries if none selected
+        if entry_ids:
+            entries = Entry.objects.filter(
+                id__in=entry_ids,
+                user=request.user
+            )
+        else:
+            entries = Entry.objects.filter(user=request.user)
 
-            mode = conversation_context.get('chat_mode', 'free-form')
-            response = fallback_responses.get(mode, "I'd love to hear more about that. What stood out to you most?")
+        # Perform analysis based on compilation method
+        if compilation_method == 'ai':
+            analysis = JournalCompilerAI.smart_analyze_entries(request.user, entries)
+        elif compilation_method == 'thematic':
+            analysis = JournalCompilerAI.thematic_analyze_entries(request.user, entries)
+        elif compilation_method == 'chronological':
+            analysis = JournalCompilerAI.chronological_analyze_entries(request.user, entries)
+        else:
+            analysis = JournalAnalysisService.analyze_user_entries(request.user, entries)
 
-        return response
+        return JsonResponse({
+            'success': True,
+            'analysis': analysis,
+            'entry_count': entries.count()
+        })
 
     except Exception as e:
-        logger.error(f"Error generating conversational response: {e}")
-        # Return a safe fallback
-        return "That's really interesting. Can you tell me more about how that made you feel?"
+        logger.error(f"Error analyzing entries: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': 'Failed to analyze entries'
+        }, status=500)
 
-def generate_final_journal_entry(conversation_history, final_message, user):
-    """
-    Generate the final journal entry from the entire conversation
-    """
+@login_required
+@require_POST
+def generate_journal_structure(request):
+    """Generate journal structure with AI-powered chapters and organization"""
+    try:
+        data = json.loads(request.body)
 
-    # Combine all user messages
-    user_content = extract_user_content_from_conversation(conversation_history, final_message)
+        compilation_method = data.get('method', 'ai')
+        journal_type = data.get('journal_type', 'growth')
+        entry_ids = data.get('entry_ids', [])
+        ai_enhancements = data.get('ai_enhancements', [])
 
-    # Analyze their writing style
-    writing_style = analyze_writing_style(conversation_history)
+        # Get entries
+        entries = Entry.objects.filter(
+            id__in=entry_ids,
+            user=request.user
+        ) if entry_ids else Entry.objects.filter(user=request.user)
 
-    # Create comprehensive prompt
-    journal_prompt = f"""
-Create a personal journal entry based on this conversation. The person has shared their thoughts and experiences naturally through our chat.
+        if not entries.exists():
+            return JsonResponse({
+                'success': False,
+                'error': 'No entries selected'
+            }, status=400)
 
-Their messages:
-{user_content}
+        # Generate journal structure using AI
+        structure = JournalCompilerAI.generate_journal_structure(
+            user=request.user,
+            entries=entries,
+            compilation_method=compilation_method,
+            journal_type=journal_type,
+            ai_enhancements=ai_enhancements
+        )
 
-Writing style to match:
-{writing_style}
+        # Store structure in session for later use
+        request.session['journal_structure'] = structure
+        request.session['selected_entry_ids'] = list(entries.values_list('id', flat=True))
 
-Create a journal entry that:
-- Sounds like THEY wrote it, not an AI
-- Captures the essence of what they shared
-- Uses their natural language and tone
-- Flows naturally from their thoughts
-- Includes the specific details and emotions they mentioned
-- Feels authentic and personal
+        return JsonResponse({
+            'success': True,
+            'structure': structure,
+            'estimated_length': structure.get('estimated_length', 0),
+            'suggested_price': structure.get('suggested_price', 9.99)
+        })
 
-Start the entry naturally - avoid cliché openings like "As I sit down to reflect..."
+    except Exception as e:
+        logger.error(f"Error generating journal structure: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': 'Failed to generate journal structure'
+        }, status=500)
 
-Make it feel like their authentic voice and experience.
-"""
+@login_required
+@require_POST
+def publish_compiled_journal(request):
+    """Publish the compiled journal to marketplace"""
+    try:
+        data = json.loads(request.body)
 
-    # Generate using your existing AI service
-    if user and user.is_authenticated:
-        journal_data = generate_ai_content_personalized(journal_prompt, user)
-    else:
-        journal_data = generate_ai_content(journal_prompt)
+        title = data.get('title')
+        description = data.get('description')
+        price = float(data.get('price', 0))
 
-    return journal_data
+        # Get structure from session
+        structure = request.session.get('journal_structure')
+        entry_ids = request.session.get('selected_entry_ids')
 
-def analyze_writing_style(conversation_history):
-    """
-    Analyze the user's writing style from their messages
-    """
+        if not structure or not entry_ids:
+            return JsonResponse({
+                'success': False,
+                'error': 'Journal structure not found. Please regenerate.'
+            }, status=400)
 
-    user_messages = [msg.get('content', '') for msg in conversation_history if msg.get('role') == 'user']
+        # Create the journal
+        journal = JournalCompilerAI.create_compiled_journal(
+            user=request.user,
+            title=title,
+            description=description,
+            price=price,
+            structure=structure,
+            entry_ids=entry_ids
+        )
 
-    if not user_messages:
-        return "casual and conversational"
+        # Clear session data
+        if 'journal_structure' in request.session:
+            del request.session['journal_structure']
+        if 'selected_entry_ids' in request.session:
+            del request.session['selected_entry_ids']
 
-    all_text = ' '.join(user_messages)
+        return JsonResponse({
+            'success': True,
+            'journal_id': journal.id,
+            'redirect_url': f'/marketplace/journal/{journal.id}/'
+        })
 
-    style_analysis = {
-        'length': 'concise' if len(all_text) < 200 else 'detailed',
-        'tone': analyze_tone(all_text),
-        'emotion_level': analyze_emotion_level(all_text),
-        'complexity': analyze_complexity(all_text)
-    }
-
-    return f"{style_analysis['tone']}, {style_analysis['emotion_level']}, tends to be {style_analysis['length']}"
-
-def analyze_tone(text):
-    """Analyze conversational tone"""
-    casual_indicators = ['like', 'yeah', 'really', 'kinda', 'gonna', 'wanna']
-    formal_indicators = ['however', 'therefore', 'consequently', 'furthermore']
-
-    casual_count = sum(1 for word in casual_indicators if word in text.lower())
-    formal_count = sum(1 for word in formal_indicators if word in text.lower())
-
-    if casual_count > formal_count:
-        return 'casual'
-    elif formal_count > casual_count:
-        return 'formal'
-    else:
-        return 'balanced'
-
-def analyze_emotion_level(text):
-    """Analyze emotional expression level"""
-    emotion_words = ['feel', 'felt', 'amazing', 'terrible', 'excited', 'sad', 'happy', 'frustrated']
-    emotion_count = sum(1 for word in emotion_words if word in text.lower())
-
-    if emotion_count > 3:
-        return 'emotionally expressive'
-    elif emotion_count > 1:
-        return 'moderately emotional'
-    else:
-        return 'reserved'
-
-def analyze_complexity(text):
-    """Analyze language complexity"""
-    words = text.split()
-    avg_word_length = sum(len(word) for word in words) / len(words) if words else 0
-
-    if avg_word_length > 5:
-        return 'complex vocabulary'
-    else:
-        return 'simple vocabulary'
-
-def extract_user_content_from_conversation(conversation_history, final_message):
-    """
-    Extract and format all user content from the conversation
-    """
-    user_messages = [msg.get('content', '') for msg in conversation_history if msg.get('role') == 'user']
-    user_messages.append(final_message)
-
-    return '\n\n'.join(user_messages)
-
-def format_conversation_for_analysis(conversation_history):
-    """
-    Format conversation for LLM analysis
-    """
-    formatted = []
-    for msg in conversation_history:
-        role = "User" if msg.get('role') == 'user' else "Assistant"
-        content = msg.get('content', '')
-        formatted.append(f"{role}: {content}")
-
-    return '\n'.join(formatted)
-
-def summarize_conversation(conversation_history):
-    """
-    Create a summary of the conversation so far
-    """
-    if not conversation_history:
-        return "This is the start of our conversation."
-
-    user_messages = [msg.get('content', '') for msg in conversation_history if msg.get('role') == 'user']
-    ai_messages = [msg.get('content', '') for msg in conversation_history if msg.get('role') == 'assistant']
-
-    return f"We've exchanged {len(conversation_history)} messages. The user has shared: {' | '.join(user_messages[-2:])}"
-
-def generate_conversation_suggestions(conversation_context):
-    """
-    Generate contextual suggestions for the user
-    """
-
-    # This could also use AI, but for now, simple contextual suggestions
-    suggestions = []
-
-    current_message = conversation_context['current_message'].lower()
-
-    if 'work' in current_message:
-        suggestions.extend([
-            "How did that make me feel?",
-            "What did I learn from this?",
-            "What would I do differently?"
-        ])
-    elif 'friend' in current_message or 'family' in current_message:
-        suggestions.extend([
-            "What made that moment special?",
-            "How has this relationship grown?",
-            "What am I grateful for about them?"
-        ])
-    else:
-        suggestions.extend([
-            "What surprised me about today?",
-            "How am I feeling right now?",
-            "What do I want to remember about this?"
-        ])
-
-    return suggestions[:3]  # Return top 3 suggestions
-
-
-# Add this to your existing AIService class in services/ai_service.py
-
-class AIService:
-    # ... your existing methods ...
-
-    @staticmethod
-    def generate_conversational_response(prompt):
-        """
-        Generate a conversational response using your existing AI helpers
-        """
-        try:
-            # Use your existing generate_ai_content function
-            from ..utils.ai_helpers import generate_ai_content
-
-            # Call your existing AI function - it should return a dict with 'entry' key
-            response_data = generate_ai_content(prompt)
-
-            # Extract the text content
-            if isinstance(response_data, dict):
-                return response_data.get('entry', response_data.get('content', str(response_data)))
-            else:
-                return str(response_data)
-
-        except Exception as e:
-            logger.error(f"Error generating conversational response: {e}")
-            return "I'd love to hear more about that. What stood out to you most?"
-
-    @staticmethod
-    def generate_simple_response(prompt):
-        """
-        Generate a simple response for decision making
-        """
-        try:
-            # Use your existing generate_ai_content function for simple decisions
-            from ..utils.ai_helpers import generate_ai_content
-
-            response_data = generate_ai_content(prompt)
-
-            # Extract the text content
-            if isinstance(response_data, dict):
-                return response_data.get('entry', response_data.get('content', str(response_data)))
-            else:
-                return str(response_data)
-
-        except Exception as e:
-            logger.error(f"Error generating simple response: {e}")
-            return "CONTINUE_CHAT - need more information"
-
-    @staticmethod
-    def generate_chat_decision(conversation_history, current_message):
-        """
-        Determine if we should create journal entry or continue chatting
-        """
-        user_messages = [msg for msg in conversation_history if msg.get('role') == 'user']
-
-        # Simple heuristics first
-        if len(user_messages) < 2:
-            return False, "Need more conversation"
-
-        if len(user_messages) >= 4:
-            return True, "Sufficient content for journal entry"
-
-        # For 2-3 messages, make a smarter decision based on content depth
-        total_content_length = sum(len(msg.get('content', '')) for msg in user_messages)
-
-        if total_content_length > 300:  # If they've shared substantial content
-            return True, "Rich content provided"
-        else:
-            return False, "Could use more detail"
+    except Exception as e:
+        logger.error(f"Error publishing compiled journal: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 @login_required
 @require_POST
@@ -1123,6 +843,361 @@ def validate_journal_data(request):
             'error': 'Validation failed'
         }, status=500)
 
+# HELPER FUNCTIONS FOR CHAT FUNCTIONALITY
+
+def generate_chat_response(user_message, conversation_history, chat_mode, user=None, photo=None):
+    """
+    Generate AI response for chat conversation
+    """
+
+    # Build conversation context for the LLM
+    conversation_context = build_conversation_context(
+        user_message=user_message,
+        conversation_history=conversation_history,
+        chat_mode=chat_mode,
+        user=user,
+        photo=photo
+    )
+
+    # Determine if we should generate a journal entry or continue chatting
+    should_generate_entry = should_create_journal_entry(conversation_history, user_message)
+
+    if should_generate_entry:
+        # Generate final journal entry
+        journal_data = generate_final_journal_entry(conversation_history, user_message, user)
+        return {
+            'type': 'journal_entry',
+            'ai_message': "Perfect! I've created a beautiful journal entry based on our conversation. You can review and edit it below.",
+            'journal_entry': journal_data,
+            'should_switch_to_form': True
+        }
+    else:
+        # Continue conversation
+        ai_message = generate_conversational_response(conversation_context)
+        return {
+            'type': 'conversation',
+            'ai_message': ai_message,
+            'should_switch_to_form': False,
+            'conversation_suggestions': generate_conversation_suggestions(conversation_context)
+        }
+
+def build_conversation_context(user_message, conversation_history, chat_mode, user, photo):
+    """
+    Build comprehensive context for the LLM
+    """
+
+    # Create a rich system prompt based on chat mode and user history
+    system_prompt = create_dynamic_system_prompt(chat_mode, user)
+
+    # Build conversation summary
+    conversation_summary = summarize_conversation(conversation_history)
+
+    # Analyze user's writing style from conversation
+    writing_style = analyze_writing_style(conversation_history)
+
+    # Photo context
+    photo_context = "The user has shared a photo with this message." if photo else ""
+
+    context = {
+        'system_prompt': system_prompt,
+        'conversation_summary': conversation_summary,
+        'writing_style': writing_style,
+        'current_message': user_message,
+        'photo_context': photo_context,
+        'chat_mode': chat_mode,
+        'message_count': len([msg for msg in conversation_history if msg.get('role') == 'user'])
+    }
+
+    return context
+
+def create_dynamic_system_prompt(chat_mode, user):
+    """
+    Create a dynamic system prompt based on mode and user preferences
+    """
+
+    base_prompt = """You are an empathetic and insightful journal assistant. Your role is to help users explore their thoughts, feelings, and experiences through meaningful conversation. You ask thoughtful follow-up questions, show genuine interest in their responses, and help them dive deeper into their experiences.
+
+Key principles:
+- Be genuinely curious about their experiences
+- Ask one thoughtful follow-up question at a time
+- Validate their feelings and experiences
+- Help them explore emotions and insights
+- Use their natural language style
+- Be conversational and warm, not clinical or robotic"""
+
+    mode_specific_prompts = {
+        'daily-reflection': """
+Focus on helping them reflect on their day. Ask about:
+- Key moments and experiences
+- Emotional highs and lows
+- What they learned or realized
+- How they handled challenges
+- What they're grateful for
+- How they're feeling about tomorrow
+""",
+        'gratitude-practice': """
+Focus on gratitude and positive experiences. Ask about:
+- What brought them joy today
+- People who made a positive impact
+- Small moments they appreciated
+- Things they often take for granted
+- How gratitude affects their perspective
+- Ways to carry this appreciation forward
+""",
+        'goal-tracking': """
+Focus on progress, achievements, and aspirations. Ask about:
+- What they accomplished today
+- Steps toward their bigger goals
+- Obstacles they overcame
+- Skills they're developing
+- What motivated them to keep going
+- How they want to build on today's progress
+""",
+        'free-form': """
+Follow their lead completely. Ask about whatever seems most important to them:
+- What's really on their mind
+- What they most want to explore or understand
+- Feelings or experiences that stand out
+- Anything they want to process or remember
+"""
+    }
+
+    mode_prompt = mode_specific_prompts.get(chat_mode, mode_specific_prompts['free-form'])
+
+    # Add user-specific context if available
+    user_context = ""
+    if user and user.is_authenticated:
+        # Get user's previous entries for context
+        recent_entries = Entry.objects.filter(user=user).order_by('-created_at')[:3]
+        if recent_entries:
+            user_context = f"\nContext: This user has written {recent_entries.count()} recent entries. Their recent topics include themes around personal growth and daily experiences."
+
+    return base_prompt + mode_prompt + user_context
+
+def should_create_journal_entry(conversation_history, current_message):
+    """
+    Determine if we have enough content for a journal entry
+    """
+
+    # Use the simpler decision method from AIService
+    should_create, reason = AIService.generate_chat_decision(conversation_history, current_message)
+
+    logger.info(f"Journal entry decision: {should_create} - {reason}")
+    return should_create
+
+def generate_conversational_response(conversation_context):
+    """
+    Generate a natural, conversational AI response
+    """
+
+    # Create a focused prompt for conversation
+    conversation_prompt = f"""
+You are a warm, empathetic journal assistant having a natural conversation with someone about their day and experiences.
+
+Chat Mode: {conversation_context['chat_mode']}
+Message Count: {conversation_context['message_count']}
+
+Their latest message: "{conversation_context['current_message']}"
+
+Recent conversation: {conversation_context['conversation_summary']}
+
+Generate a warm, engaging response that:
+1. Acknowledges what they shared with genuine interest
+2. Asks ONE thoughtful follow-up question to explore deeper
+3. Feels natural and conversational (like talking to a caring friend)
+4. Avoids being clinical or overly formal
+
+Keep your response to 1-2 sentences plus one follow-up question.
+"""
+
+    # Use your existing AI service
+    try:
+        response = AIService.generate_conversational_response(conversation_prompt)
+
+        # Ensure we have a reasonable response
+        if not response or len(response.strip()) < 10:
+            # Fallback responses based on chat mode
+            fallback_responses = {
+                'daily-reflection': "That sounds really meaningful. What made that moment stand out to you?",
+                'gratitude-practice': "I love hearing about what brings you joy. How did that make you feel?",
+                'goal-tracking': "That's great progress! What motivated you to keep going?",
+                'free-form': "Thank you for sharing that with me. What's been on your mind about it?"
+            }
+
+            mode = conversation_context.get('chat_mode', 'free-form')
+            response = fallback_responses.get(mode, "I'd love to hear more about that. What stood out to you most?")
+
+        return response
+
+    except Exception as e:
+        logger.error(f"Error generating conversational response: {e}")
+        # Return a safe fallback
+        return "That's really interesting. Can you tell me more about how that made you feel?"
+
+def generate_final_journal_entry(conversation_history, final_message, user):
+    """
+    Generate the final journal entry from the entire conversation
+    """
+
+    # Combine all user messages
+    user_content = extract_user_content_from_conversation(conversation_history, final_message)
+
+    # Analyze their writing style
+    writing_style = analyze_writing_style(conversation_history)
+
+    # Create comprehensive prompt
+    journal_prompt = f"""
+Create a personal journal entry based on this conversation. The person has shared their thoughts and experiences naturally through our chat.
+
+Their messages:
+{user_content}
+
+Writing style to match:
+{writing_style}
+
+Create a journal entry that:
+- Sounds like THEY wrote it, not an AI
+- Captures the essence of what they shared
+- Uses their natural language and tone
+- Flows naturally from their thoughts
+- Includes the specific details and emotions they mentioned
+- Feels authentic and personal
+
+Start the entry naturally - avoid cliché openings like "As I sit down to reflect..."
+
+Make it feel like their authentic voice and experience.
+"""
+
+    # Generate using your existing AI service
+    if user and user.is_authenticated:
+        journal_data = generate_ai_content_personalized(journal_prompt, user)
+    else:
+        journal_data = generate_ai_content(journal_prompt)
+
+    return journal_data
+
+def analyze_writing_style(conversation_history):
+    """
+    Analyze the user's writing style from their messages
+    """
+
+    user_messages = [msg.get('content', '') for msg in conversation_history if msg.get('role') == 'user']
+
+    if not user_messages:
+        return "casual and conversational"
+
+    all_text = ' '.join(user_messages)
+
+    style_analysis = {
+        'length': 'concise' if len(all_text) < 200 else 'detailed',
+        'tone': analyze_tone(all_text),
+        'emotion_level': analyze_emotion_level(all_text),
+        'complexity': analyze_complexity(all_text)
+    }
+
+    return f"{style_analysis['tone']}, {style_analysis['emotion_level']}, tends to be {style_analysis['length']}"
+
+def analyze_tone(text):
+    """Analyze conversational tone"""
+    casual_indicators = ['like', 'yeah', 'really', 'kinda', 'gonna', 'wanna']
+    formal_indicators = ['however', 'therefore', 'consequently', 'furthermore']
+
+    casual_count = sum(1 for word in casual_indicators if word in text.lower())
+    formal_count = sum(1 for word in formal_indicators if word in text.lower())
+
+    if casual_count > formal_count:
+        return 'casual'
+    elif formal_count > casual_count:
+        return 'formal'
+    else:
+        return 'balanced'
+
+def analyze_emotion_level(text):
+    """Analyze emotional expression level"""
+    emotion_words = ['feel', 'felt', 'amazing', 'terrible', 'excited', 'sad', 'happy', 'frustrated']
+    emotion_count = sum(1 for word in emotion_words if word in text.lower())
+
+    if emotion_count > 3:
+        return 'emotionally expressive'
+    elif emotion_count > 1:
+        return 'moderately emotional'
+    else:
+        return 'reserved'
+
+def analyze_complexity(text):
+    """Analyze language complexity"""
+    words = text.split()
+    avg_word_length = sum(len(word) for word in words) / len(words) if words else 0
+
+    if avg_word_length > 5:
+        return 'complex vocabulary'
+    else:
+        return 'simple vocabulary'
+
+def extract_user_content_from_conversation(conversation_history, final_message):
+    """
+    Extract and format all user content from the conversation
+    """
+    user_messages = [msg.get('content', '') for msg in conversation_history if msg.get('role') == 'user']
+    user_messages.append(final_message)
+
+    return '\n\n'.join(user_messages)
+
+def format_conversation_for_analysis(conversation_history):
+    """
+    Format conversation for LLM analysis
+    """
+    formatted = []
+    for msg in conversation_history:
+        role = "User" if msg.get('role') == 'user' else "Assistant"
+        content = msg.get('content', '')
+        formatted.append(f"{role}: {content}")
+
+    return '\n'.join(formatted)
+
+def summarize_conversation(conversation_history):
+    """
+    Create a summary of the conversation so far
+    """
+    if not conversation_history:
+        return "This is the start of our conversation."
+
+    user_messages = [msg.get('content', '') for msg in conversation_history if msg.get('role') == 'user']
+    ai_messages = [msg.get('content', '') for msg in conversation_history if msg.get('role') == 'assistant']
+
+    return f"We've exchanged {len(conversation_history)} messages. The user has shared: {' | '.join(user_messages[-2:])}"
+
+def generate_conversation_suggestions(conversation_context):
+    """
+    Generate contextual suggestions for the user
+    """
+
+    # This could also use AI, but for now, simple contextual suggestions
+    suggestions = []
+
+    current_message = conversation_context['current_message'].lower()
+
+    if 'work' in current_message:
+        suggestions.extend([
+            "How did that make me feel?",
+            "What did I learn from this?",
+            "What would I do differently?"
+        ])
+    elif 'friend' in current_message or 'family' in current_message:
+        suggestions.extend([
+            "What made that moment special?",
+            "How has this relationship grown?",
+            "What am I grateful for about them?"
+        ])
+    else:
+        suggestions.extend([
+            "What surprised me about today?",
+            "How am I feeling right now?",
+            "What do I want to remember about this?"
+        ])
+
+    return suggestions[:3]  # Return top 3 suggestions
+
 def _get_publishing_recommendations(analysis):
     """Get publishing recommendations based on analysis"""
     recommendations = []
@@ -1177,3 +1252,113 @@ def _get_publishing_recommendations(analysis):
         })
 
     return recommendations
+
+# Enhanced AIService class with additional methods
+class AIService:
+    # ... your existing methods ...
+
+    @staticmethod
+    def generate_conversational_response(prompt):
+        """
+        Generate a conversational response using your existing AI helpers
+        """
+        try:
+            # Use your existing generate_ai_content function
+            from ..utils.ai_helpers import generate_ai_content
+
+            # Call your existing AI function - it should return a dict with 'entry' key
+            response_data = generate_ai_content(prompt)
+
+            # Extract the text content
+            if isinstance(response_data, dict):
+                return response_data.get('entry', response_data.get('content', str(response_data)))
+            else:
+                return str(response_data)
+
+        except Exception as e:
+            logger.error(f"Error generating conversational response: {e}")
+            return "I'd love to hear more about that. What stood out to you most?"
+
+    @staticmethod
+    def generate_simple_response(prompt):
+        """
+        Generate a simple response for decision making
+        """
+        try:
+            # Use your existing generate_ai_content function for simple decisions
+            from ..utils.ai_helpers import generate_ai_content
+
+            response_data = generate_ai_content(prompt)
+
+            # Extract the text content
+            if isinstance(response_data, dict):
+                return response_data.get('entry', response_data.get('content', str(response_data)))
+            else:
+                return str(response_data)
+
+        except Exception as e:
+            logger.error(f"Error generating simple response: {e}")
+            return "CONTINUE_CHAT - need more information"
+
+    @staticmethod
+    def generate_chat_decision(conversation_history, current_message):
+        """
+        Determine if we should create journal entry or continue chatting
+        """
+        user_messages = [msg for msg in conversation_history if msg.get('role') == 'user']
+
+        # Simple heuristics first
+        if len(user_messages) < 2:
+            return False, "Need more conversation"
+
+        if len(user_messages) >= 4:
+            return True, "Sufficient content for journal entry"
+
+        # For 2-3 messages, make a smarter decision based on content depth
+        total_content_length = sum(len(msg.get('content', '')) for msg in user_messages)
+
+        if total_content_length > 300:  # If they've shared substantial content
+            return True, "Rich content provided"
+        else:
+            return False, "Could use more detail"
+
+    @staticmethod
+    def generate_marketing_copy(journal):
+        """Generate marketing copy for a journal"""
+        try:
+            prompt = f"""
+            Create marketing copy for this journal:
+            Title: {journal.title}
+            Description: {journal.description}
+            Type: {journal.journal_type}
+
+            Generate:
+            1. A compelling tagline (10-15 words)
+            2. A short description for marketplace (50-80 words)
+            3. A social media post (with hashtags)
+            4. An email subject line
+
+            Make it engaging and authentic.
+            """
+
+            # Use your existing AI content generation
+            from ..utils.ai_helpers import generate_ai_content
+            response = generate_ai_content(prompt)
+
+            return {
+                'marketing_copy': response.get('entry', str(response)),
+                'success': True
+            }
+
+        except Exception as e:
+            logger.error(f"Error generating marketing copy: {e}")
+            # Fallback marketing copy
+            return {
+                'marketing_copy': {
+                    'tagline': f'Discover the transformative power of {journal.journal_type}',
+                    'short_description': journal.description[:80] + '...' if len(journal.description) > 80 else journal.description,
+                    'social_media': f'📖 New journal: "{journal.title}" - A personal journey of {journal.journal_type} and discovery. #journaling #{journal.journal_type}',
+                    'email_subject': f'New Release: {journal.title}'
+                },
+                'success': True
+            }

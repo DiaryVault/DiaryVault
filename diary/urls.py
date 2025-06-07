@@ -121,7 +121,7 @@ urlpatterns = [
     path('publish/preview-structure/', journal_compiler.preview_journal_structure, name='preview_journal_structure'),
 
     # ============================================================================
-    # API Endpoints
+    # API Endpoints - Core Functionality
     # ============================================================================
     # Journal Generation & Management
     path('api/demo-journal/', views.demo_journal, name='demo_journal'),
@@ -145,12 +145,12 @@ urlpatterns = [
     path('api/tip/<int:journal_id>/', tip_author_api, name='tip_author_api'),
 
     # ============================================================================
-    # SMART JOURNAL COMPILER - API Endpoints
+    # SMART JOURNAL COMPILER - API Endpoints (FIXED)
     # ============================================================================
-    # Main compilation endpoints
-    path('diary/compiler/analyze-entries/', journal_compiler.analyze_entries_ajax, name='analyze_entries_ajax'),
-    path('diary/compiler/generate-structure/', journal_compiler.generate_journal_structure, name='generate_journal_structure'),
-    path('diary/compiler/publish/', journal_compiler.publish_compiled_journal, name='publish_compiled_journal'),
+    # Main compilation endpoints - these match what your JavaScript calls
+    path('diary/api/analyze-entries/', api.analyze_entries_ajax, name='analyze_entries_ajax'),
+    path('diary/api/generate-structure/', api.generate_journal_structure, name='generate_journal_structure'),
+    path('diary/api/publish-journal/', api.publish_compiled_journal, name='publish_compiled_journal'),
 
     # Draft management
     path('diary/api/save-draft/', api.save_journal_draft, name='save_journal_draft'),
@@ -158,15 +158,15 @@ urlpatterns = [
 
     # Marketing and analytics
     path('diary/api/marketing-copy/', api.generate_marketing_copy, name='generate_marketing_copy'),
-    path('api/marketplace/quick-analyze/', api.quick_analyze_for_publishing, name='quick_analyze_for_publishing'),
-    path('api/marketplace/price-suggestion/', api.get_price_suggestion, name='get_price_suggestion'),
+    path('diary/api/quick-analyze/', api.quick_analyze_for_publishing, name='quick_analyze_for_publishing'),
+    path('diary/api/price-suggestion/', api.get_price_suggestion, name='get_price_suggestion'),
+    path('diary/api/validate-journal/', api.validate_journal_data, name='validate_journal_data'),
+    path('diary/api/templates/', api.get_journal_templates_api, name='get_journal_templates_api'),
 
-    # Legacy API endpoints (keeping for backward compatibility)
-    path('api/journal-compiler/save-draft/', api.save_journal_draft, name='api_save_journal_draft'),
-    path('api/journal-compiler/load-draft/', api.load_journal_draft, name='api_load_journal_draft'),
-    path('api/journal-compiler/analyze/', journal_compiler.analyze_entries_ajax, name='api_analyze_entries_ajax'),
-    path('api/journal-compiler/generate-structure/', journal_compiler.generate_journal_structure, name='api_generate_journal_structure'),
-    path('api/journal-compiler/publish/', journal_compiler.publish_compiled_journal, name='api_publish_compiled_journal'),
+    # Alternative endpoints that point to journal_compiler views (for backend use)
+    path('diary/compiler/analyze-entries/', journal_compiler.analyze_entries_ajax, name='compiler_analyze_entries_ajax'),
+    path('diary/compiler/generate-structure/', journal_compiler.generate_journal_structure, name='compiler_generate_journal_structure'),
+    path('diary/compiler/publish/', journal_compiler.publish_compiled_journal, name='compiler_publish_compiled_journal'),
 
     # ============================================================================
     # Account Management
