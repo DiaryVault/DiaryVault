@@ -348,7 +348,8 @@ def signup(request):
 
 @login_required
 def dashboard(request):
-    """Main dashboard with books and recent entries"""
+    """Optimized main dashboard with books and recent entries"""
+
     # Check for save_after_login flag
     if request.session.pop('save_after_login', False):
         try:
@@ -368,76 +369,141 @@ def dashboard(request):
         except Exception as e:
             logger.error(f"Error creating entry after login: {str(e)}")
 
-    # Get time periods
-    entries = Entry.objects.filter(user=request.user)
-    time_periods = {}
+    # OPTIMIZED: Single aggregation query for user statistics
+    user_stats = Entry.objects.filter(user=request.user).aggregate(
+        total_entries=Count('id'),
+        avg_word_count=Avg('word_count'),
+        total_words=Sum('word_count'),
+        first_entry_date=Min('created_at'),
+        last_entry_date=Max('created_at')
+    )
 
-    # Group entries by quarter/year
-    for entry in entries:
-        period = entry.get_time_period()
-        if period not in time_periods:
-            time_periods[period] = {
-                'period': period,
-                'count': 0,
-                'entries': [],
-                'first_entry': None,
-                'color': 'sky-700'  # Default color
+    # OPTIMIZED: Get recent entries with related data in one query
+    recent_entries = Entry.objects.filter(user=request.user).select_related(
+        'chapter'
+    ).prefetch_related(
+        'tags'
+    ).order_by('-created_at')[:5]
+
+    # OPTIMIZED: Get time periods using database aggregation
+    # For PostgreSQL, use DATE_TRUNC; for MySQL, use DATE_FORMAT
+    from django.db import connection
+
+    if 'postgresql' in connection.settings_dict['ENGINE']:
+        # PostgreSQL version
+        time_periods_raw = Entry.objects.filter(user=request.user).extra(
+            select={
+                'period': "CONCAT('Q', EXTRACT(quarter FROM created_at), ' ', EXTRACT(year FROM created_at))"
             }
+        ).values('period').annotate(
+            count=Count('id'),
+            first_date=Min('created_at'),
+            last_date=Max('created_at')
+        ).order_by('-first_date')
+    else:
+        # MySQL/SQLite version
+        time_periods_raw = Entry.objects.filter(user=request.user).extra(
+            select={
+                'period': "CONCAT('Q', QUARTER(created_at), ' ', YEAR(created_at))"
+            }
+        ).values('period').annotate(
+            count=Count('id'),
+            first_date=Min('created_at'),
+            last_date=Max('created_at')
+        ).order_by('-first_date')
 
-        time_periods[period]['count'] += 1
-        time_periods[period]['entries'].append(entry)
-
-        # Keep track of first entry for preview
-        if time_periods[period]['first_entry'] is None or entry.created_at < time_periods[period]['first_entry'].created_at:
-            time_periods[period]['first_entry'] = entry
-
-    # Assign different colors to time periods
+    # Process time periods and add colors
     colors = ['sky-700', 'indigo-600', 'emerald-600', 'amber-600', 'rose-600']
-    for i, period_key in enumerate(time_periods.keys()):
-        time_periods[period_key]['color'] = colors[i % len(colors)]
+    time_periods = []
 
-    # Sort time periods by most recent first
-    sorted_periods = sorted(time_periods.values(), key=lambda x: x['period'], reverse=True)
+    for i, period_data in enumerate(time_periods_raw[:5]):  # Top 5 most recent
+        # Get a sample entry for preview (first entry in the period)
+        first_entry = Entry.objects.filter(
+            user=request.user,
+            created_at__gte=period_data['first_date'],
+            created_at__lte=period_data['last_date']
+        ).order_by('created_at').first()
 
-    # Get life chapters
-    chapters = LifeChapter.objects.filter(user=request.user)
+        time_periods.append({
+            'period': period_data['period'],
+            'count': period_data['count'],
+            'first_entry': first_entry,
+            'color': colors[i % len(colors)],
+            'entries': []  # Populated lazily if needed
+        })
 
-    # Get recent entries
-    recent_entries = entries.order_by('-created_at')[:5]
+    # OPTIMIZED: Get life chapters with entry counts
+    chapters = LifeChapter.objects.filter(user=request.user).annotate(
+        entry_count=Count('entries')
+    ).order_by('-entry_count', '-created_at')
 
-    # Get biography
+    # OPTIMIZED: Get biography efficiently
     biography = Biography.objects.filter(user=request.user).first()
 
-    # Get insights
-    insights = UserInsight.objects.filter(user=request.user)
+    # OPTIMIZED: Get insights with priority ordering
+    insights = UserInsight.objects.filter(user=request.user).order_by(
+        '-priority', '-created_at'
+    )[:5]  # Limit to 5 most important insights
 
-    # Calculate streak
-    streak = 0
-    today = timezone.now().date()
+    # OPTIMIZED: Calculate streak efficiently
+    streak = calculate_writing_streak(request.user)
 
-    # Check entries for consecutive days
-    for i in range(365):  # Check up to a year back
-        check_date = today - timedelta(days=i)
-        if entries.filter(created_at__date=check_date).exists():
-            if i == 0 or streak > 0:  # Today or continuing streak
-                streak += 1
-            else:
-                break  # Streak broken
-        elif streak > 0:  # No entry for this day, streak ends
-            break
+    # Calculate completion percentage if biography exists
+    completion_percentage = 0
+    if biography:
+        try:
+            completion_percentage = biography.completion_percentage()
+        except:
+            completion_percentage = 0
+
+    # OPTIMIZED: Use already calculated total_entries from user_stats
+    total_entries = user_stats['total_entries'] or 0
 
     context = {
-        'time_periods': sorted_periods[:5],  # Show top 5 most recent periods
+        'time_periods': time_periods,
         'chapters': chapters,
         'recent_entries': recent_entries,
         'biography': biography,
         'insights': insights,
         'streak': streak,
-        'total_entries': entries.count(),
-        'completion_percentage': biography.completion_percentage() if biography else 0
+        'total_entries': total_entries,
+        'completion_percentage': completion_percentage,
+        'user_stats': user_stats,  # Additional stats for dashboard widgets
+        # Dashboard metrics
+        'avg_word_count': int(user_stats['avg_word_count'] or 0),
+        'total_words': user_stats['total_words'] or 0,
+        'days_writing': (user_stats['last_entry_date'].date() - user_stats['first_entry_date'].date()).days + 1 if user_stats['first_entry_date'] and user_stats['last_entry_date'] else 0,
     }
 
     return render(request, 'diary/dashboard.html', context)
+
+def calculate_writing_streak(user):
+    """
+    Optimized function to calculate writing streak
+    """
+    today = timezone.now().date()
+
+    # Get all entry dates for the user in the last year, ordered by date
+    entry_dates = Entry.objects.filter(
+        user=user,
+        created_at__date__gte=today - timedelta(days=365)
+    ).values_list('created_at__date', flat=True).distinct().order_by('-created_at__date')
+
+    if not entry_dates:
+        return 0
+
+    # Convert to set for O(1) lookups
+    entry_dates_set = set(entry_dates)
+
+    streak = 0
+    check_date = today
+
+    # Check consecutive days
+    while check_date in entry_dates_set:
+        streak += 1
+        check_date -= timedelta(days=1)
+
+    return streak
 
 def custom_login(request):
     """Custom login view that handles save_after_login flag"""

@@ -149,9 +149,15 @@ def delete_entry(request, entry_id):
 
 @login_required
 def library(request):
-    """Library view with tabs for different ways to browse entries"""
-    # Get user entries - base queryset
-    all_entries = Entry.objects.filter(user=request.user).order_by('-created_at')
+    """Optimized library view with tabs for different ways to browse entries"""
+
+    # OPTIMIZED: Use select_related and prefetch_related for better query performance
+    all_entries = Entry.objects.filter(user=request.user).select_related(
+        'chapter'  # Fetch chapter data in a single query
+    ).prefetch_related(
+        'tags',    # Prefetch tags to avoid N+1 queries
+        'photos'   # Prefetch photos if needed
+    ).order_by('-created_at')
 
     # Default to showing all entries
     entries = all_entries
@@ -165,6 +171,7 @@ def library(request):
 
     # Apply filters based on GET parameters
     if tag_filter:
+        # OPTIMIZED: Use the already prefetched queryset
         entries = all_entries.filter(tags__name=tag_filter)
         active_tab = 'tags'
         active_filter = tag_filter
@@ -177,15 +184,19 @@ def library(request):
         # Get mood entries specifically for the mood tab
         mood_entries = entries
     elif chapter_filter:
-        # Assuming you have a model relationship between Entry and LifeChapter
-        chapter = get_object_or_404(LifeChapter, id=chapter_filter, user=request.user)
-        entries = all_entries.filter(chapter=chapter)
-        active_tab = 'time-periods'  # Show in the time periods tab with the chapter books
-        active_filter = chapter.title
+        # OPTIMIZED: Use select_related data that's already fetched
+        try:
+            chapter = LifeChapter.objects.get(id=chapter_filter, user=request.user)
+            entries = all_entries.filter(chapter=chapter)
+            active_tab = 'time-periods'  # Show in the time periods tab with the chapter books
+            active_filter = chapter.title
+        except LifeChapter.DoesNotExist:
+            # Handle invalid chapter filter gracefully
+            chapter_filter = None
 
-    # Get time periods (same code as before)
+    # OPTIMIZED: Get time periods with minimal database queries
     time_periods = {}
-    # Group entries by quarter/year
+    # Group entries by quarter/year using the already fetched data
     for entry in all_entries:  # Use all_entries to show all time periods
         period = entry.get_time_period()
         if period not in time_periods:
@@ -212,22 +223,24 @@ def library(request):
     # Sort time periods by most recent first
     sorted_periods = sorted(time_periods.values(), key=lambda x: x['period'], reverse=True)
 
-    # Get tags with counts from all entries
+    # OPTIMIZED: Get tags with counts using a single query with annotation
+    from django.db.models import Count
+
+    # Get tags with their usage counts in one query
+    user_tags = Tag.objects.filter(user=request.user).annotate(
+        entry_count=Count('entries', filter=models.Q(entries__user=request.user))
+    ).filter(entry_count__gt=0).order_by('-entry_count')
+
     tags = []
-    for tag in Tag.objects.filter(user=request.user):
-        count = all_entries.filter(tags=tag).count()
-        if count > 0:
-            tags.append({
-                'id': tag.id,
-                'name': tag.name,
-                'count': count,
-                'active': tag.name == tag_filter  # Mark as active if it's the current filter
-            })
+    for tag in user_tags:
+        tags.append({
+            'id': tag.id,
+            'name': tag.name,
+            'count': tag.entry_count,
+            'active': tag.name == tag_filter  # Mark as active if it's the current filter
+        })
 
-    # Sort tags by count
-    tags.sort(key=lambda x: x['count'], reverse=True)
-
-    # Get moods with counts
+    # OPTIMIZED: Get moods with counts using Python aggregation on already fetched data
     moods = []
     mood_counts = {}
     for entry in all_entries:  # Use all_entries to show all moods
@@ -244,16 +257,18 @@ def library(request):
     moods = list(mood_counts.values())
     moods.sort(key=lambda x: x['count'], reverse=True)
 
-    # Get chapters with counts
+    # OPTIMIZED: Get chapters with counts using annotation
+    user_chapters = LifeChapter.objects.filter(user=request.user).annotate(
+        entry_count=Count('entries')
+    ).order_by('-entry_count')
+
     chapters = []
-    for chapter in LifeChapter.objects.filter(user=request.user):
-        # Count entries in this chapter - adjust the query based on your relationship
-        count = all_entries.filter(chapter=chapter).count()
+    for chapter in user_chapters:
         chapters.append({
             'id': chapter.id,
             'title': chapter.title,
             'description': chapter.description,
-            'count': count,
+            'count': chapter.entry_count,
             'color': chapter.color,
             'active': str(chapter.id) == chapter_filter  # Mark as active if it's the current filter
         })
@@ -264,6 +279,10 @@ def library(request):
     if not mood_filter:
         mood_entries = all_entries
 
+    # OPTIMIZED: Calculate counts without additional queries
+    total_entries = len(all_entries)  # Use len() since we already have the queryset
+    filtered_count = len(entries) if entries != all_entries else total_entries
+
     context = {
         'time_periods': sorted_periods,
         'tags': tags,
@@ -272,8 +291,8 @@ def library(request):
         'entries': entries,  # These are the entries filtered by the active parameter
         'tagged_entries': tagged_entries if 'tagged_entries' in locals() else all_entries,
         'mood_entries': mood_entries if 'mood_entries' in locals() else all_entries,
-        'total_entries': all_entries.count(),
-        'filtered_count': entries.count(),
+        'total_entries': total_entries,
+        'filtered_count': filtered_count,
         'active_tab': active_tab,
         'active_filter': active_filter
     }

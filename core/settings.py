@@ -57,14 +57,16 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'diary.middleware.SecurityHeadersMiddleware',  # Enhanced security headers
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'diary.middleware.RateLimitMiddleware',
-    'diary.middleware.PendingEntryMiddleware',
+    'diary.middleware.RateLimitMiddleware',  # Your existing rate limiting
+    'diary.middleware.RequestLoggingMiddleware',  # Enhanced request logging
+    'diary.middleware.PendingEntryMiddleware',  # Your existing middleware
     'allauth.account.middleware.AccountMiddleware',
 ]
 
@@ -82,6 +84,16 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
+            ],
+            # Enhanced template caching for better performance
+            'loaders': [
+                ('django.template.loaders.cached.Loader', [
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                ]),
+            ] if not DEBUG else [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
             ],
         },
     },
@@ -131,15 +143,23 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Media Files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# File Upload Configuration
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
+
 # Custom adapters for auto-username generation
-# ACCOUNT_ADAPTER = 'diary.adapters.CustomAccountAdapter'
-# SOCIALACCOUNT_ADAPTER = 'diary.adapters.CustomSocialAccountAdapter'
+ACCOUNT_ADAPTER = 'diary.adapters.CustomAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'diary.adapters.CustomSocialAccountAdapter'
 
 SOCIALACCOUNT_FORMS = {}
 
@@ -151,10 +171,6 @@ SOCIALACCOUNT_EMAIL_REQUIRED = False  # Don't require email in signup form
 SOCIALACCOUNT_QUERY_EMAIL = True  # Always fetch email from provider
 SOCIALACCOUNT_LOGIN_ON_GET = True  # Social account settings (if using social login)
 SOCIALACCOUNT_STORE_TOKENS = False
-
-# ADDED: Force auto-signup even more aggressively
-ACCOUNT_ADAPTER = 'diary.adapters.CustomAccountAdapter'
-SOCIALACCOUNT_ADAPTER = 'diary.adapters.CustomSocialAccountAdapter'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -212,14 +228,42 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+# Enhanced Cache Configuration
 CACHES = {
     'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': os.environ.get('REDIS_URL', 'redis://localhost:6379/1'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'KEY_PREFIX': 'diary_cache',
+        'TIMEOUT': 300,  # Default cache timeout (5 minutes)
+    } if os.environ.get('REDIS_URL') else {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    },
+    'sessions': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': os.environ.get('REDIS_URL', 'redis://localhost:6379/2'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'KEY_PREFIX': 'diary_sessions',
+    } if os.environ.get('REDIS_URL') else {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'sessions',
     }
 }
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Use Redis for sessions if available
+if os.environ.get('REDIS_URL'):
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'sessions'
+
+# Cache key prefixes
+CACHE_MIDDLEWARE_ALIAS = 'default'
+CACHE_MIDDLEWARE_SECONDS = 600
+CACHE_MIDDLEWARE_KEY_PREFIX = 'diary'
 
 # Stripe Configuration
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
@@ -232,10 +276,6 @@ MARKETPLACE_SETTINGS = {
     'MINIMUM_PAYOUT': 50.00,     # Minimum earnings before payout
     'PAYOUT_SCHEDULE': 'monthly', # monthly, weekly, daily
 }
-
-# Celery for background tasks
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379')
 
 # Enhanced Marketplace Features (2025)
 MARKETPLACE_ENHANCED = {
@@ -259,10 +299,53 @@ MARKETPLACE_ENHANCED = {
     }
 }
 
+# AI Service Configuration
+AI_RATE_LIMIT_PER_USER_DAILY = 50
+AI_RATE_LIMIT_PER_IP_HOURLY = 100
+
+# API Quotas
+API_QUOTAS = {
+    'ai_generation_daily': 50,
+    'compilation_daily': 10,
+    'publishing_daily': 5,
+}
+
+# Celery Configuration
+CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+
+# Celery task configuration
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+CELERY_ENABLE_UTC = True
+
+# Task routing
+CELERY_TASK_ROUTES = {
+    'diary.tasks.generate_insights_async': {'queue': 'ai_tasks'},
+    'diary.tasks.generate_biography_async': {'queue': 'ai_tasks'},
+    'diary.tasks.generate_entry_summary_async': {'queue': 'ai_tasks'},
+    'diary.tasks.update_journal_analytics': {'queue': 'analytics'},
+    'diary.tasks.cleanup_old_ai_logs': {'queue': 'maintenance'},
+}
+
+# Task time limits
+CELERY_TASK_SOFT_TIME_LIMIT = 300  # 5 minutes
+CELERY_TASK_TIME_LIMIT = 600       # 10 minutes
+
+# Worker configuration
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 1000
+CELERY_WORKER_DISABLE_RATE_LIMITS = False
+
+# Result expiration
+CELERY_RESULT_EXPIRES = 3600  # 1 hour
+
 # Celery periodic tasks for automation
 from celery.schedules import crontab
 
 CELERY_BEAT_SCHEDULE = {
+    # Your existing tasks
     'update-dynamic-pricing': {
         'task': 'diary.tasks.update_dynamic_pricing',
         'schedule': crontab(hour=2, minute=0),  # Daily at 2 AM
@@ -275,10 +358,36 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'diary.tasks.generate_marketplace_insights',
         'schedule': crontab(hour=1, minute=0, day_of_week=1),  # Weekly Monday
     },
+
+    # Enhanced background tasks
+    'update-journal-analytics': {
+        'task': 'diary.tasks.update_journal_analytics',
+        'schedule': crontab(minute=0, hour='*/6'),  # Every 6 hours
+    },
+    'cleanup-old-ai-logs': {
+        'task': 'diary.tasks.cleanup_old_ai_logs',
+        'schedule': crontab(minute=0, hour=2),  # Daily at 2 AM
+    },
+    'update-marketplace-stats': {
+        'task': 'diary.tasks.update_marketplace_stats',
+        'schedule': crontab(minute=0),  # Every hour
+    },
+    'generate-daily-insights': {
+        'task': 'diary.tasks.generate_daily_insights_digest',
+        'schedule': crontab(minute=30, hour=9),  # 9:30 AM daily
+    },
+    'cleanup-expired-caches': {
+        'task': 'diary.tasks.cleanup_expired_caches',
+        'schedule': crontab(minute=15, hour='*/4'),  # Every 4 hours
+    },
 }
 
+# Create logs directory if it doesn't exist
+LOGS_DIR = os.path.join(BASE_DIR, 'logs')
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
 
-
+# Enhanced Logging Configuration
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -287,9 +396,35 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
         },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
     },
     'handlers': {
         'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'diary.log'),
+            'maxBytes': 1024*1024*15,  # 15MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+        'celery_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'celery.log'),
+            'maxBytes': 1024*1024*15,  # 15MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        # Keep your existing debug file handler
+        'debug_file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': '/home/ubuntu/DiaryVault/django_debug.log',
@@ -297,10 +432,58 @@ LOGGING = {
         },
     },
     'loggers': {
+        'diary': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'celery': {
+            'handlers': ['celery_file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'celery.task': {
+            'handlers': ['celery_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Keep your existing allauth debug logging
         'allauth': {
-            'handlers': ['file'],
+            'handlers': ['debug_file'],
             'level': 'DEBUG',
             'propagate': False,
         },
     },
 }
+
+# Security settings (enhanced for production readiness)
+if not DEBUG:
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # HTTPS settings
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+# Rate limiting settings
+RATELIMIT_ENABLE = True
+RATELIMIT_USE_CACHE = 'default'
+
+# Security settings
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# Email configuration (for notifications)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@diaryvault.com')

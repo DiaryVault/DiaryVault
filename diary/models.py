@@ -114,12 +114,22 @@ class Entry(models.Model):
     class Meta:
         ordering = ['-created_at']
         verbose_name_plural = 'entries'
-        # IMPROVED: Add database indexes for better query performance
+        # ENHANCED: Add comprehensive database indexes for better query performance
         indexes = [
+            # Basic indexes
             models.Index(fields=['user', 'created_at']),
             models.Index(fields=['user', 'mood']),
             models.Index(fields=['created_at']),
             models.Index(fields=['user', 'mood_rating']),
+            # Marketplace filtering
+            models.Index(fields=['user', 'published_in_journal']),
+            # Chapter filtering
+            models.Index(fields=['user', 'chapter']),
+            # Analytics
+            models.Index(fields=['word_count']),
+            # Composite indexes for common filter combinations
+            models.Index(fields=['user', 'mood', 'created_at']),
+            models.Index(fields=['user', 'chapter', 'created_at']),
         ]
 
     def save(self, *args, **kwargs):
@@ -282,6 +292,13 @@ class UserInsight(models.Model):
             models.Index(fields=['user', 'insight_type']),
             models.Index(fields=['user', 'created_at']),
             models.Index(fields=['user', 'priority']),
+        ]
+        # ENHANCED: Add data integrity constraints
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(confidence_score__gte=0.0) & models.Q(confidence_score__lte=1.0),
+                name='valid_confidence_score'
+            ),
         ]
 
 class AnalyticsEvent(models.Model):
@@ -675,6 +692,23 @@ class Journal(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        # ENHANCED: Add comprehensive database indexes for marketplace queries
+        indexes = [
+            # Basic marketplace filtering
+            models.Index(fields=['is_published', 'date_published']),
+            models.Index(fields=['is_published', 'price']),
+            models.Index(fields=['author', 'is_published']),
+            models.Index(fields=['is_published', 'popularity_score']),
+            models.Index(fields=['is_published', 'view_count']),
+            models.Index(fields=['is_published', 'like_count_cached']),
+            # Advanced marketplace filtering
+            models.Index(fields=['is_published', 'privacy_setting', 'date_published']),
+            models.Index(fields=['is_published', 'journal_type', 'date_published']),
+            # Search functionality
+            models.Index(fields=['is_published', 'title']),
+        ]
+
     def __str__(self):
         return self.title
 
@@ -806,6 +840,12 @@ class JournalPurchase(models.Model):
 
     class Meta:
         unique_together = ['user', 'journal']
+        # ENHANCED: Add indexes for purchase analytics
+        indexes = [
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['journal', 'created_at']),
+            models.Index(fields=['journal__author', 'created_at']),  # For author earnings
+        ]
 
 class JournalReview(models.Model):
     """Reviews and ratings for journals"""
@@ -989,5 +1029,3 @@ class AnalyticsPackage(models.Model):
     amount_paid = models.DecimalField(max_digits=8, decimal_places=2)
     valid_until = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
-
-
