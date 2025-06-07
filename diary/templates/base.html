@@ -366,7 +366,7 @@
         text-decoration: none;
       }
 
-      /* Enhanced Navigation Links for Desktop */
+      /* Enhanced Navigation Links for Logged-in Users */
       .nav-link {
         position: relative;
         color: #64748b;
@@ -431,7 +431,97 @@
         transform: translateX(-50%);
       }
 
-      /* Quick Action Buttons (Desktop Only) */
+      /* Enhanced User Profile Section */
+      .enhanced-user-profile {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 20px;
+        padding: 0.5rem;
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .enhanced-user-profile::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.08), transparent);
+        transition: left 0.5s ease;
+      }
+
+      .enhanced-user-profile:hover {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: rgba(99, 102, 241, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
+        text-decoration: none;
+      }
+
+      .enhanced-user-profile:hover::before {
+        left: 100%;
+      }
+
+      .enhanced-user-avatar {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        border-radius: 16px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .enhanced-user-avatar::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: transform 0.6s ease;
+        transform: rotate(-45deg) translate(-100%, -100%);
+      }
+
+      .enhanced-user-profile:hover .enhanced-user-avatar::before {
+        transform: rotate(-45deg) translate(100%, 100%);
+      }
+
+      .enhanced-user-profile:hover .enhanced-user-avatar {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+      }
+
+      /* Enhanced Notification Badge */
+      .enhanced-notification-badge {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        animation: glowPulse 2s ease-in-out infinite;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        border-radius: 50%;
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        min-width: 1rem;
+        height: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.625rem;
+        font-weight: 700;
+        border: 2px solid white;
+      }
+
+      /* Quick Action Buttons (Desktop Only) - Fixed specificity */
       .quick-action-btn {
         background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05)) !important;
         border: 1px solid rgba(99, 102, 241, 0.2) !important;
@@ -446,18 +536,10 @@
         text-decoration: none !important;
         display: inline-flex !important;
         align-items: center !important;
-        justify-content: center !important;
         gap: 0.375rem !important;
         font-size: 0.875rem !important;
         transform: none !important;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-        min-width: auto !important;
-        max-width: none !important;
-        width: auto !important;
-        height: auto !important;
-        flex-shrink: 0 !important;
-        flex-grow: 0 !important;
-        margin: 0 !important;
       }
 
       .quick-action-btn::before {
@@ -487,6 +569,42 @@
         transform: translateY(0) !important;
       }
 
+      /* Ensure quick action buttons are never affected by nav-link styles */
+      .quick-action-btn.nav-link,
+      .quick-action-btn.reliable-nav-link {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05)) !important;
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        color: #4f46e5 !important;
+        transform: none !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+      }
+
+      .quick-action-btn.nav-link:hover,
+      .quick-action-btn.reliable-nav-link:hover {
+        background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+        color: white !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3) !important;
+      }
+
+      /* Override any potential active state conflicts */
+      .quick-action-btn.active,
+      .quick-action-btn.nav-link.active,
+      .quick-action-btn.reliable-nav-link.active {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05)) !important;
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        color: #4f46e5 !important;
+        font-weight: 500 !important;
+        transform: none !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+      }
+
+      .quick-action-btn.active::after,
+      .quick-action-btn.nav-link.active::after,
+      .quick-action-btn.reliable-nav-link.active::after {
+        display: none !important;
+      }
+
       /* Enhanced Brand Badge */
       .brand-badge {
         background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
@@ -502,75 +620,47 @@
         animation: bounceGentle 2s ease-in-out infinite;
       }
 
-      /* MOBILE HEADER - Clean and Simple */
+      /* FIXED: Mobile Header - Compact Size */
       .mobile-header {
-        padding: 1rem 0;
-        min-height: 72px;
+        padding: 0.25rem 0;
       }
 
       @media screen and (max-width: 768px) {
-        /* Hide everything except logo and menu on mobile */
-        .hide-on-mobile {
-          display: none !important;
-        }
-
-        /* Clean mobile header layout */
-        .mobile-header-content {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          width: 100%;
-          gap: 1rem;
-        }
-
-        .mobile-logo-section {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          flex: 1;
-          min-width: 0;
-        }
-
         .mobile-logo {
-          padding: 0.5rem;
-          flex-shrink: 0;
+          padding: 0.375rem;
         }
 
         .mobile-logo svg {
-          height: 1.25rem;
-          width: 1.25rem;
+          height: 1rem;
+          width: 1rem;
         }
 
         .mobile-logo-text {
-          font-size: 1.125rem;
-          line-height: 1.5rem;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          font-size: 1rem;
+          line-height: 1.25rem;
         }
 
         .mobile-brand-badge {
-          transform: scale(0.8) rotate(-2deg);
-          flex-shrink: 0;
+          transform: scale(0.7) rotate(-2deg);
+          margin-left: -0.25rem;
         }
 
-        /* Enhanced Menu Toggle Button for Mobile */
+        .mobile-user-avatar {
+          height: 1.75rem;
+          width: 1.75rem;
+          font-size: 0.625rem;
+        }
+
+        /* FIXED: Menu Toggle Button - Compact Size */
         .menu-toggle-btn {
           background: rgba(255, 255, 255, 0.95);
           border: 1px solid rgba(99, 102, 241, 0.2);
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          padding: 0.75rem;
-          border-radius: 1rem;
+          padding: 0.5rem;
+          border-radius: 0.625rem;
           z-index: 20;
           position: relative;
           pointer-events: auto;
-          min-width: 48px;
-          min-height: 48px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          transition: all 0.3s ease;
         }
 
         .menu-toggle-btn:hover {
@@ -582,13 +672,91 @@
         .menu-toggle-btn svg {
           color: #1f2937;
           stroke-width: 2.5;
-          height: 1.25rem;
-          width: 1.25rem;
-          flex-shrink: 0;
+          height: 1rem;
+          width: 1rem;
+        }
+
+        .menu-toggle-btn:hover svg {
+          color: #111827;
+        }
+
+        /* Make header container more compact */
+        .mobile-header .container {
+          padding-left: 0.75rem;
+          padding-right: 0.75rem;
+        }
+
+        /* Smaller gap between logo elements */
+        .mobile-header .flex.items-center.gap-2 {
+          gap: 0.375rem;
+        }
+
+        /* Smaller gap in right navigation */
+        .mobile-header .flex.items-center.gap-2:last-child {
+          gap: 0.5rem;
+        }
+
+        /* Hide quick action buttons on mobile */
+        .quick-action-btn {
+          display: none;
         }
       }
 
-      /* Enhanced Mobile Menu */
+      @media (max-width: 1280px) {
+        .quick-action-btn {
+          display: none;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .nav-link {
+          padding: 0.5rem 0.75rem;
+          font-size: 0.875rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .nav-link {
+          display: none;
+        }
+      }
+
+      /* Modern Card System */
+      .feature-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 24px;
+        padding: 2rem;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        border-color: rgba(99, 102, 241, 0.2);
+      }
+
+      .feature-card:hover::before {
+        opacity: 1;
+      }
+
+      /* FIXED: Enhanced Mobile Menu - Cleaner Implementation */
       .mobile-menu {
         background: rgba(255, 255, 255, 0.98);
         backdrop-filter: blur(30px);
@@ -690,42 +858,6 @@
         box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
       }
 
-      /* Enhanced Notification Badge for Mobile Menu */
-      .enhanced-notification-badge {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-        animation: glowPulse 2s ease-in-out infinite;
-        box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-        border-radius: 50%;
-        position: absolute;
-        top: -2px;
-        right: -2px;
-        min-width: 1rem;
-        height: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 0.625rem;
-        font-weight: 700;
-        border: 2px solid white;
-      }
-
-      /* FIXED: Ensure all navigation links are properly clickable */
-      .reliable-nav-link {
-        position: relative;
-        z-index: 15;
-        pointer-events: auto;
-        text-decoration: none;
-        display: block;
-        -webkit-tap-highlight-color: transparent;
-      }
-
-      .reliable-nav-link:hover,
-      .reliable-nav-link:active,
-      .reliable-nav-link:focus {
-        text-decoration: none;
-      }
-
       /* Enhanced Form Elements */
       .form-input {
         background: rgba(255, 255, 255, 0.9);
@@ -813,39 +945,30 @@
         background: linear-gradient(135deg, #4f46e5, #4338ca);
       }
 
-      /* Modern Card System */
-      .feature-card {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 24px;
-        padding: 2rem;
-        transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+      /* FIXED: Ensure all navigation links are properly clickable */
+      .reliable-nav-link {
         position: relative;
-        overflow: hidden;
+        z-index: 15;
+        pointer-events: auto;
+        text-decoration: none;
+        display: block;
+        -webkit-tap-highlight-color: transparent;
       }
 
-      .feature-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
-        opacity: 0;
-        transition: opacity 0.3s ease;
+      .reliable-nav-link:hover,
+      .reliable-nav-link:active,
+      .reliable-nav-link:focus {
+        text-decoration: none;
       }
 
-      .feature-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        background: rgba(255, 255, 255, 0.95);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        border-color: rgba(99, 102, 241, 0.2);
+      /* Profile Arrow Animation */
+      .profile-arrow {
+        transition: all 0.3s ease;
       }
 
-      .feature-card:hover::before {
-        opacity: 1;
+      .enhanced-user-profile:hover .profile-arrow {
+        transform: translateX(2px);
+        color: #4f46e5;
       }
 
       /* Accessibility */
@@ -858,8 +981,8 @@
       /* Touch improvements */
       @media (hover: none) and (pointer: coarse) {
         .menu-toggle-btn {
-          min-height: 48px;
-          min-width: 48px;
+          min-height: 44px;
+          min-width: 44px;
         }
 
         .reliable-nav-link {
@@ -924,34 +1047,34 @@
 </head>
 
 <body class="min-h-screen flex flex-col bg-gradient-to-br text-secondary-800 custom-scrollbar pattern-dots">
-    <!-- Enhanced Header - Clean Mobile Layout -->
+    <!-- Enhanced Header -->
     <header class="sticky top-0 z-50 w-full glass-nav transition-all duration-300 mobile-header"
              x-data="{ scrolled: false }"
              x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 20 })"
              :class="{ 'shadow-soft-lg': scrolled }">
         <div class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-            <div class="mobile-header-content">
-                <!-- Logo Section -->
-                <div class="mobile-logo-section">
+            <div class="flex items-center justify-between">
+                <!-- Enhanced Logo -->
+                <div class="flex items-center">
                     <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center gap-2 group reliable-nav-link">
                         <div class="relative">
                             <div class="absolute inset-0 bg-primary-500 rounded-xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                            <div class="relative mobile-logo bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-soft group-hover:shadow-glow transition-all duration-300 group-hover:scale-105">
+                            <div class="relative mobile-logo p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-soft group-hover:shadow-glow transition-all duration-300 group-hover:scale-105">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                 </svg>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 min-w-0">
-                            <h1 class="mobile-logo-text font-bold text-gradient diary-font">DiaryVault</h1>
+                        <div class="flex items-center gap-2">
+                            <h1 class="mobile-logo-text text-lg font-bold text-gradient diary-font">DiaryVault</h1>
                             <span class="mobile-brand-badge brand-badge">Beta</span>
                         </div>
                     </a>
                 </div>
 
-                <!-- Desktop Navigation (Hidden on Mobile) -->
+                <!-- Enhanced Desktop Navigation for Logged-in Users -->
                 {% if user.is_authenticated %}
-                <nav class="hidden lg:flex items-center gap-2 hide-on-mobile">
+                <nav class="hidden lg:flex items-center gap-2">
                     <a href="{% url 'dashboard' %}" class="nav-link reliable-nav-link text-sm {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
@@ -984,7 +1107,7 @@
                     </a>
                 </nav>
                 {% else %}
-                <nav class="hidden lg:flex items-center gap-1 hide-on-mobile">
+                <nav class="hidden lg:flex items-center gap-1">
                     <a href="{% url 'account_signup' %}?feature=journal" class="nav-link reliable-nav-link text-sm">Journal</a>
                     <a href="{% url 'account_signup' %}?feature=library" class="nav-link reliable-nav-link text-sm">Library</a>
                     <a href="{% url 'account_signup' %}?feature=biography" class="nav-link reliable-nav-link text-sm">Biography</a>
@@ -993,11 +1116,11 @@
                 </nav>
                 {% endif %}
 
-                <!-- Desktop Right Section (Hidden on Mobile) -->
-                <div class="flex items-center gap-3 flex-shrink-0 hide-on-mobile">
+                <!-- Enhanced Right Navigation -->
+                <div class="flex items-center gap-3">
                     {% if user.is_authenticated %}
                     <!-- Quick Action Buttons (Desktop Only) -->
-                    <div class="hidden xl:flex gap-2">
+                    <div class="hidden xl:flex items-center gap-2">
                         <a href="{% url 'publish_journal' %}" class="quick-action-btn">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -1012,10 +1135,10 @@
                         </a>
                     </div>
 
-                    <!-- Enhanced User Profile (Desktop) -->
-                    <a href="{% url 'account_settings' %}" class="hidden sm:flex items-center gap-3 p-2 glass-card rounded-2xl hover:shadow-glow transition-all duration-300 group reliable-nav-link">
+                    <!-- Enhanced User Profile -->
+                    <a href="{% url 'account_settings' %}" class="enhanced-user-profile hidden sm:flex group reliable-nav-link">
                         <div class="relative">
-                            <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                            <div class="enhanced-user-avatar h-10 w-10 flex items-center justify-center text-white font-bold text-sm">
                                 {{ user.username|first|upper }}
                             </div>
                             {% if unread_notifications > 0 %}
@@ -1028,30 +1151,31 @@
                             <div class="text-sm font-semibold text-gray-700 group-hover:text-primary-600 transition-colors">{{ user.username }}</div>
                             <div class="text-xs text-gray-500">{{ total_entries|default:'0' }} entries</div>
                         </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 group-hover:text-primary-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <!-- Profile Arrow -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="profile-arrow h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                         </svg>
                     </a>
                     {% else %}
-                    <!-- Auth Buttons (Desktop) -->
+                    <!-- Auth Buttons -->
                     <div class="hidden md:flex gap-2 items-center">
                         <a href="{% url 'account_login' %}" class="btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium reliable-nav-link">Log in</a>
                         <a href="{% url 'account_signup' %}" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium reliable-nav-link">Sign up</a>
                     </div>
                     {% endif %}
-                </div>
 
-                <!-- Mobile Menu Button (Always Visible) -->
-                <button id="menuToggleBtn" class="menu-toggle-btn relative">
-                    {% if user.is_authenticated and unread_notifications > 0 %}
-                    <div class="enhanced-notification-badge">
-                        <span>{{ unread_notifications }}</span>
-                    </div>
-                    {% endif %}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
+                    <!-- Enhanced Menu Button -->
+                    <button id="menuToggleBtn" class="menu-toggle-btn relative hover:scale-105 transition-all duration-300 flex items-center justify-center">
+                        {% if user.is_authenticated and unread_notifications > 0 %}
+                        <div class="enhanced-notification-badge">
+                            <span>{{ unread_notifications }}</span>
+                        </div>
+                        {% endif %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -1087,7 +1211,7 @@
                     <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                         {{ user.username|first|upper }}
                     </div>
-                    <div class="ml-4 flex-1">
+                    <div class="ml-4">
                         <div class="font-semibold text-gray-800">{{ user.username }}</div>
                         <div class="text-xs text-gray-500">{{ total_entries|default:'0' }} journal entries</div>
                     </div>
@@ -1100,7 +1224,7 @@
             </a>
         </div>
 
-        <!-- Enhanced Quick Actions - Now Including Publish & Earnings -->
+        <!-- Enhanced Quick Actions -->
         <div class="px-6 pb-6">
             <div class="grid grid-cols-4 gap-3">
                 <a href="{% url 'new_entry' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item reliable-nav-link">
@@ -1109,7 +1233,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
                     </div>
-                    <span class="text-xs font-medium text-center">New Entry</span>
+                    <span class="text-xs font-medium">New Entry</span>
                 </a>
                 <a href="{% url 'publish_journal' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item reliable-nav-link">
                     <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mb-2">
@@ -1117,7 +1241,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
                     </div>
-                    <span class="text-xs font-medium text-center">Publish</span>
+                    <span class="text-xs font-medium">Publish</span>
                 </a>
                 <a href="{% url 'earnings_dashboard' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item reliable-nav-link">
                     <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center mb-2">
@@ -1125,7 +1249,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                         </svg>
                     </div>
-                    <span class="text-xs font-medium text-center">Earnings</span>
+                    <span class="text-xs font-medium">Earnings</span>
                 </a>
                 <a href="{% url 'insights' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item reliable-nav-link">
                     <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center mb-2">
@@ -1133,7 +1257,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                     </div>
-                    <span class="text-xs font-medium text-center">Insights</span>
+                    <span class="text-xs font-medium">Insights</span>
                 </a>
             </div>
         </div>
@@ -1165,6 +1289,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     <span class="font-medium">Biography</span>
+                </a>
+
+                <a href="{% url 'insights' %}" class="menu-category reliable-nav-link relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'insights' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
+                    {% if request.resolver_match.url_name == 'insights' %}<div class="active-pill"></div>{% endif %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span class="font-medium">Insights</span>
                 </a>
 
                 <a href="{% url 'marketplace' %}" class="menu-category reliable-nav-link relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'marketplace' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
@@ -1318,21 +1450,6 @@
     <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col">
         {% block content %}
         <!-- Page content will go here -->
-        <div class="text-center py-20">
-            <h1 class="text-4xl font-bold text-gradient diary-font mb-4">Welcome to DiaryVault</h1>
-            <p class="text-xl text-secondary-600 mb-8">Your personal digital journal experience</p>
-            <div class="space-y-4">
-                <p class="text-secondary-600">The mobile header has been completely redesigned:</p>
-                <ul class="text-left max-w-md mx-auto space-y-2 text-secondary-600">
-                    <li>✅ Only logo and hamburger menu on mobile</li>
-                    <li>✅ All functionality moved to hamburger menu</li>
-                    <li>✅ No more overlapping elements</li>
-                    <li>✅ Clean, simple mobile header layout</li>
-                    <li>✅ Publish & Earnings buttons in mobile menu</li>
-                    <li>✅ User profile accessible in mobile menu</li>
-                </ul>
-            </div>
-        </div>
         {% endblock %}
     </main>
 
@@ -1387,7 +1504,7 @@
     <!-- Enhanced JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DiaryVault Enhanced Navigation - v7.0 with Clean Mobile Layout');
+            console.log('DiaryVault Enhanced Navigation - v5.0 with Enhanced Header');
             console.log('User authenticated:', {{ user.is_authenticated|yesno:"true,false" }});
             console.log('Current page:', '{{ request.resolver_match.url_name }}');
 
@@ -1613,7 +1730,7 @@
 
             // Initialize page
             document.body.style.opacity = '1';
-            console.log('DiaryVault navigation initialized successfully with clean mobile layout');
+            console.log('DiaryVault navigation initialized successfully with enhanced header');
         });
 
         // Utility functions for external use
@@ -1629,7 +1746,7 @@
                 window.location.href = "{% url 'account_login' %}";
                 return false;
             },
-            version: '7.0-clean-mobile-layout'
+            version: '5.0-enhanced-header'
         };
 
         // Global error handler for debugging
