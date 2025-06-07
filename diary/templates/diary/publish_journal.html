@@ -669,10 +669,19 @@ class JournalCompiler {
 
     async loadInitialData() {
         try {
-            const savedDraft = localStorage.getItem('journalCompilerDraft');
-            if (savedDraft) {
-                const draftData = JSON.parse(savedDraft);
-                this.loadDraftData(draftData);
+            // Load any existing draft
+            const response = await fetch('/diary/api/load-draft/', {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': this.getCSRFToken(),
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.draft) {
+                    this.loadDraftData(data.draft);
+                }
             }
         } catch (error) {
             console.log('No existing draft found');
@@ -1038,9 +1047,22 @@ class JournalCompiler {
                 structure: this.generatedStructure
             };
 
-            localStorage.setItem('journalCompilerDraft', JSON.stringify(draftData));
+            const response = await fetch('/diary/api/save-draft/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: JSON.stringify(draftData)
+            });
 
-            window.showToast('Draft saved successfully!', 'success');
+            const data = await response.json();
+
+            if (data.success) {
+                window.showToast('Draft saved successfully!', 'success');
+            } else {
+                throw new Error(data.error || 'Failed to save draft');
+            }
 
         } catch (error) {
             console.error('Save draft error:', error);
@@ -1060,14 +1082,29 @@ class JournalCompiler {
         }
 
         try {
-            const mockMarketingCopy = {
-                tagline: `"Discover your journey through ${title}"`,
-                short_description: `${description} A must-read for anyone on a personal development journey.`,
-                social_media: `🌟 Just published: "${title}" - my personal journey documented and shared. Get inspired by real stories of growth and transformation! #PersonalJourney #SelfDevelopment`,
-                email_subject: `New Release: "${title}" - A Personal Journey Worth Reading`
-            };
+            const journalType = document.querySelector('input[name="journal_type"]:checked')?.value || 'growth';
 
-            this.displayMarketingCopy(mockMarketingCopy);
+            const response = await fetch('/diary/api/marketing-copy/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: JSON.stringify({
+                    title: title,
+                    description: description,
+                    journal_type: journalType,
+                    entry_ids: Array.from(this.selectedEntries)
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.displayMarketingCopy(data.marketing_copy);
+            } else {
+                throw new Error(data.error);
+            }
 
         } catch (error) {
             console.error('Marketing copy error:', error);
