@@ -118,6 +118,7 @@ urlpatterns = [
     # ============================================================================
     path('publish_journal/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler'),
     path('publish/smart-compiler/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler_alt'),
+    path('smart-compiler/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler'),  # Add this line
     path('publish/preview-structure/', journal_compiler.preview_journal_structure, name='preview_journal_structure'),
 
     # ============================================================================
