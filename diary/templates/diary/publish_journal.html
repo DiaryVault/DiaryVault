@@ -332,12 +332,12 @@
             <!-- Entry cards will be populated dynamically -->
             <div id="entryCardsContainer">
                 <!-- Placeholder entry cards -->
-                {% for entry in user.entries.all|slice:":12" %}
+                {% for entry in user.diary_entries.all|slice:":12" %}
                 <div class="entry-card glass-card rounded-xl p-4 border-2 border-transparent"
-                     data-word-count="{{ entry.content|wordcount }}"
+                     data-word-count="{{ entry.word_count }}"
                      data-tag-count="{{ entry.tags.count }}"
                      data-has-chapter="{{ entry.chapter|yesno:'true,false' }}"
-                     data-quality-score="75">
+                     data-quality-score="{{ entry.get_quality_score }}">
                     <div class="flex items-start space-x-3">
                         <input type="checkbox" name="entries" value="{{ entry.id }}" class="mt-1 text-primary-600">
                         <div class="flex-1">
@@ -345,7 +345,7 @@
                             <p class="text-sm text-secondary-600 mb-2">{{ entry.content|truncatechars:100 }}</p>
                             <div class="flex items-center justify-between text-xs text-secondary-500">
                                 <span>{{ entry.created_at|date:"M d, Y" }}</span>
-                                <span>{{ entry.content|wordcount }} words</span>
+                                <span>{{ entry.word_count }} words</span>
                             </div>
                             {% if entry.tags.exists %}
                             <div class="flex flex-wrap gap-1 mt-2">
