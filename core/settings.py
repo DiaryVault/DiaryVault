@@ -185,8 +185,11 @@ ACCOUNT_SESSION_REMEMBER = True  # Remember login sessions
 
 # ADDED: More aggressive settings to prevent signup forms
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
-ACCOUNT_UNIQUE_EMAIL = False  # Allow duplicate emails if needed - CRITICAL FOR YOUR CASE
+ACCOUNT_UNIQUE_EMAIL = True  # Allow duplicate emails if needed - CRITICAL FOR YOUR CASE
 ACCOUNT_PREVENT_ENUMERATION = False  # Don't block based on existing emails
+
+ACCOUNT_LOGIN_METHODS = {'email', 'username'}  # Allow both email and username login
+ACCOUNT_SIGNUP_FIELDS = ['email', 'password1', 'password2']  # Required signup fields
 
 # FIXED: Enhanced SOCIALACCOUNT_PROVIDERS with better configuration
 SOCIALACCOUNT_PROVIDERS = {
