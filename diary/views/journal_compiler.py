@@ -240,40 +240,71 @@ def preview_journal_structure(request):
 @login_required
 def edit_journal(request, journal_id):
     """Edit a published journal"""
+    journal = get_object_or_404(
+        Journal,
+        id=journal_id,
+        author=request.user,
+        is_published=True  # Only allow editing published journals
+    )
 
-    # Get the journal and make sure the user owns it
-    journal = get_object_or_404(Journal, id=journal_id, author=request.user)
+    # Get journal entries for display
+    journal_entries = journal.entries.filter(is_included=True).order_by('-entry_date')
 
     if request.method == 'POST':
-        # Handle form submission
         title = request.POST.get('title', '').strip()
         description = request.POST.get('description', '').strip()
         price = request.POST.get('price', '0')
 
-        if not title or not description:
-            messages.error(request, 'Title and description are required.')
-            return render(request, 'diary/edit_journal.html', {'journal': journal})
+        # Validate inputs
+        if not title:
+            messages.error(request, "Journal title is required.")
+            return render(request, 'diary/edit_journal.html', {
+                'journal': journal,
+                'journal_entries': journal_entries
+            })
+
+        if not description:
+            messages.error(request, "Journal description is required.")
+            return render(request, 'diary/edit_journal.html', {
+                'journal': journal,
+                'journal_entries': journal_entries
+            })
 
         try:
-            price = float(price)
-            if price < 0:
-                price = 0
-        except ValueError:
-            price = 0
+            # Update journal fields
+            journal.title = title
+            journal.description = description
 
-        # Update the journal
-        journal.title = title
-        journal.description = description
-        journal.price = price
-        journal.save()
+            # Update price if the field exists
+            try:
+                journal.price = float(price) if price else 0.00
+            except (ValueError, AttributeError):
+                pass  # Skip if price field doesn't exist or invalid value
 
-        messages.success(request, 'Journal updated successfully!')
-        return redirect('marketplace_journal_detail', journal_id=journal.id)
+            # Update modification timestamp if field exists
+            try:
+                journal.date_modified = timezone.now()
+            except AttributeError:
+                pass  # Skip if field doesn't exist
 
-    # GET request - show the edit form
+            journal.save()
+
+            messages.success(request, f'Journal "{title}" updated successfully!')
+
+            # Redirect to marketplace journal detail page
+            return redirect('marketplace_journal_detail', journal_id=journal.id)
+
+        except Exception as e:
+            messages.error(request, f'Error updating journal: {str(e)}')
+            return render(request, 'diary/edit_journal.html', {
+                'journal': journal,
+                'journal_entries': journal_entries
+            })
+
+    # GET request - show edit form
     context = {
         'journal': journal,
-        'journal_entries': journal.entries.all().order_by('date_created'),
+        'journal_entries': journal_entries,
     }
 
     return render(request, 'diary/edit_journal.html', context)

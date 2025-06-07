@@ -38,6 +38,19 @@
         border-color: #cbd5e1;
     }
 
+    .btn-success {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+    }
+
     .form-input {
         background: rgba(255, 255, 255, 0.9);
         border: 1px solid #e2e8f0;
@@ -61,6 +74,16 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
+
+    .success-animation {
+        animation: successPulse 0.6s ease-out;
+    }
+
+    @keyframes successPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
 </style>
 {% endblock %}
 
@@ -74,13 +97,23 @@
                 <p class="text-lg text-gray-600 mt-2">Update your journal's details and content</p>
             </div>
             <div class="flex items-center gap-3">
-                <a href="/marketplace/journal/{{ journal.id }}/" class="btn-secondary px-4 py-2 rounded-lg">
+                <!-- Updated: Use Django URL with journal.id -->
+                <a href="{% url 'marketplace_journal_detail' journal.id %}" class="btn-secondary px-4 py-2 rounded-lg">
                     <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                     View Journal
                 </a>
+
+                <!-- NEW: View in Marketplace button -->
+                <a href="{% url 'marketplace' %}" class="btn-success px-4 py-2 rounded-lg">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M8 11v6a2 2 0 002 2h4a2 2 0 002-2v-6M8 11h8"></path>
+                    </svg>
+                    Marketplace
+                </a>
+
                 {% if journal.is_published %}
                 <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
                     <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -106,7 +139,7 @@
                 <div class="text-sm text-gray-600">Entries</div>
             </div>
             <div class="text-center p-4 bg-white rounded-2xl">
-                <div class="text-2xl font-bold text-green-600">${{ journal.price }}</div>
+                <div class="text-2xl font-bold text-green-600">${{ journal.price|default:0 }}</div>
                 <div class="text-sm text-gray-600">Price</div>
             </div>
             <div class="text-center p-4 bg-white rounded-2xl">
@@ -114,7 +147,7 @@
                 <div class="text-sm text-gray-600">Views</div>
             </div>
             <div class="text-center p-4 bg-white rounded-2xl">
-                <div class="text-2xl font-bold text-orange-600">{{ journal.like_count|default:0 }}</div>
+                <div class="text-2xl font-bold text-orange-600">{{ journal.likes.count|default:0 }}</div>
                 <div class="text-sm text-gray-600">Likes</div>
             </div>
         </div>
@@ -125,12 +158,23 @@
         <div class="glass-card rounded-3xl p-8">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Journal Details</h2>
 
-            <form method="post" class="space-y-6">
+            <!-- Display Django messages -->
+            {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} p-4 mb-4 rounded-lg {% if message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200{% elif message.tags == 'success' %}bg-green-50 text-green-800 border border-green-200{% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" class="space-y-6" id="editJournalForm">
                 {% csrf_token %}
 
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
-                        Journal Title
+                        Journal Title *
                     </label>
                     <input type="text"
                            id="title"
@@ -138,19 +182,25 @@
                            value="{{ journal.title }}"
                            required
                            class="form-input w-full"
-                           placeholder="Enter journal title...">
+                           placeholder="Enter journal title..."
+                           maxlength="200">
+                    <p class="text-xs text-gray-500 mt-1">This will be displayed on the marketplace</p>
                 </div>
 
                 <div>
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                        Description
+                        Description *
                     </label>
                     <textarea id="description"
                               name="description"
                               rows="6"
                               required
                               class="form-input w-full resize-none"
-                              placeholder="Describe your journal...">{{ journal.description }}</textarea>
+                              placeholder="Describe your journal... What makes it special? What will readers learn or experience?"
+                              maxlength="1000">{{ journal.description }}</textarea>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span id="descriptionCount">{{ journal.description|length }}</span>/1000 characters
+                    </p>
                 </div>
 
                 <div>
@@ -160,21 +210,36 @@
                     <input type="number"
                            id="price"
                            name="price"
-                           value="{{ journal.price }}"
+                           value="{{ journal.price|default:0 }}"
                            step="0.01"
                            min="0"
+                           max="999.99"
                            class="form-input w-full"
                            placeholder="9.99">
-                    <p class="text-xs text-gray-500 mt-1">Set to 0 for a free journal</p>
+                    <p class="text-xs text-gray-500 mt-1">Set to 0 for a free journal. You can change this anytime.</p>
                 </div>
 
                 <div class="flex gap-4 pt-4">
-                    <button type="submit" class="btn-primary px-6 py-3 rounded-xl flex-1">
+                    <button type="submit" class="btn-primary px-6 py-3 rounded-xl flex-1" id="saveButton">
+                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
                         Save Changes
                     </button>
-                    <a href="/marketplace/journal/{{ journal.id }}/" class="btn-secondary px-6 py-3 rounded-xl text-center">
+                    <!-- Updated: Use Django URL with journal.id -->
+                    <a href="{% url 'marketplace_journal_detail' journal.id %}" class="btn-secondary px-6 py-3 rounded-xl text-center">
                         Cancel
                     </a>
+                </div>
+
+                <!-- Success indicator -->
+                <div id="successMessage" class="hidden p-4 bg-green-50 text-green-800 rounded-lg border border-green-200">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        Journal updated successfully! Redirecting to marketplace...
+                    </div>
                 </div>
             </form>
         </div>
@@ -190,7 +255,7 @@
                     <div class="flex justify-between items-start mb-2">
                         <h4 class="font-medium text-gray-800">{{ entry.title }}</h4>
                         <span class="text-xs text-gray-500">
-                            {{ entry.date_created|date:"M d, Y" }}
+                            {{ entry.entry_date|date:"M d, Y" }}
                         </span>
                     </div>
                     <p class="text-sm text-gray-600 line-clamp-3">
@@ -225,10 +290,68 @@
                 </div>
                 <div class="flex justify-between text-sm text-gray-600 mt-1">
                     <span>Estimated reading time:</span>
-                    <span class="font-medium">{{ journal_entries.count|floatformat:0|default:0 }} min</span>
+                    <span class="font-medium">{{ journal_entries.count|default:0 }} min</span>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="{% url 'marketplace_journal_detail' journal.id %}"
+                       class="btn-secondary px-4 py-2 rounded-lg text-center text-sm">
+                        👁️ Preview
+                    </a>
+                    <a href="{% url 'marketplace' %}"
+                       class="btn-success px-4 py-2 rounded-lg text-center text-sm">
+                        🏪 Marketplace
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Character counter for description
+    const descriptionTextarea = document.getElementById('description');
+    const descriptionCount = document.getElementById('descriptionCount');
+
+    if (descriptionTextarea && descriptionCount) {
+        descriptionTextarea.addEventListener('input', function() {
+            descriptionCount.textContent = this.value.length;
+        });
+    }
+
+    // Form submission handling
+    const form = document.getElementById('editJournalForm');
+    const saveButton = document.getElementById('saveButton');
+    const successMessage = document.getElementById('successMessage');
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Add loading state
+            saveButton.innerHTML = '<svg class="w-4 h-4 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Saving...';
+            saveButton.disabled = true;
+        });
+    }
+
+    // Show success message if there are Django success messages
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success' %}
+                if (successMessage) {
+                    successMessage.classList.remove('hidden');
+                    successMessage.classList.add('success-animation');
+
+                    // Auto-redirect after 2 seconds
+                    setTimeout(function() {
+                        window.location.href = "{% url 'marketplace_journal_detail' journal.id %}";
+                    }, 2000);
+                }
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+});
+</script>
 {% endblock %}
