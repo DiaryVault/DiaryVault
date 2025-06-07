@@ -64,7 +64,7 @@
         color: #475569;
     }
 
-    /* Enhanced step indicator with proper mobile support */
+    /* Mobile-optimized step indicator */
     .step-indicator {
         width: 2rem;
         height: 2rem;
@@ -76,42 +76,37 @@
         font-size: 0.875rem;
         transition: all 0.3s ease;
         flex-shrink: 0;
-        border: 2px solid transparent;
     }
 
     .step-indicator.completed {
-        background: linear-gradient(135deg, #10b981, #059669);
+        background: #10b981;
         color: white;
-        border-color: #10b981;
     }
 
     .step-indicator.active {
-        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        background: #6366f1;
         color: white;
-        border-color: #6366f1;
         animation: pulse 2s infinite;
     }
 
     .step-indicator.pending {
-        background: #f3f4f6;
+        background: #e5e7eb;
         color: #6b7280;
-        border-color: #e5e7eb;
     }
 
-    /* Enhanced step progress lines */
+    /* Mobile-friendly step progress */
     .step-line {
         height: 2px;
         background: #e5e7eb;
         flex-grow: 1;
         min-width: 1rem;
-        transition: all 0.3s ease;
     }
 
     .step-line.completed {
-        background: linear-gradient(90deg, #10b981, #059669);
+        background: #10b981;
     }
 
-    /* Mobile step progress - improved */
+    /* Mobile step progress - vertical layout for small screens */
     @media (max-width: 640px) {
         .desktop-steps {
             display: none;
@@ -119,10 +114,6 @@
 
         .mobile-steps {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            position: relative;
-            padding: 0 1rem;
         }
 
         .mobile-step-item {
@@ -131,23 +122,21 @@
             flex-direction: column;
             align-items: center;
             position: relative;
-            z-index: 2;
         }
 
         .mobile-step-item:not(:last-child)::after {
             content: '';
             position: absolute;
             top: 1rem;
-            left: 50%;
-            width: calc(100% + 2rem);
+            right: -50%;
+            width: 100%;
             height: 2px;
             background: #e5e7eb;
-            z-index: 1;
-            transition: all 0.3s ease;
+            z-index: -1;
         }
 
         .mobile-step-item.completed:not(:last-child)::after {
-            background: linear-gradient(90deg, #10b981, #059669);
+            background: #10b981;
         }
 
         .mobile-step-label {
@@ -155,8 +144,6 @@
             color: #6b7280;
             margin-top: 0.5rem;
             text-align: center;
-            font-weight: 500;
-            transition: all 0.3s ease;
         }
 
         .mobile-step-item.active .mobile-step-label {
@@ -166,50 +153,23 @@
 
         .mobile-step-item.completed .mobile-step-label {
             color: #10b981;
-            font-weight: 600;
         }
     }
 
-    /* Enhanced method cards with better interaction */
     .method-card {
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border: 2px solid transparent;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .method-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
-        transition: left 0.6s ease;
-        z-index: 1;
-    }
-
-    .method-card:hover::before {
-        left: 100%;
     }
 
     .method-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     }
 
     .method-card.selected {
         border-color: #6366f1;
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(79, 70, 229, 0.04));
-        transform: translateY(-2px);
-        box-shadow: 0 12px 20px -5px rgba(99, 102, 241, 0.2);
-    }
-
-    .method-card .card-content {
-        position: relative;
-        z-index: 2;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(79, 70, 229, 0.02));
     }
 
     /* Mobile-optimized method cards */
@@ -220,29 +180,17 @@
 
         .method-card h3 {
             font-size: 1.125rem;
-            line-height: 1.375rem;
         }
 
         .method-card p {
             font-size: 0.875rem;
-            line-height: 1.25rem;
-        }
-
-        .method-card:hover {
-            transform: none; /* Disable hover transform on mobile */
-        }
-
-        .method-card:active {
-            transform: scale(0.98);
         }
     }
 
-    /* Enhanced entry cards */
     .entry-card {
         transition: all 0.2s ease;
         cursor: pointer;
         border: 2px solid transparent;
-        position: relative;
     }
 
     .entry-card:hover {
@@ -253,7 +201,6 @@
     .entry-card.selected {
         border-color: #10b981;
         background: rgba(16, 185, 129, 0.05);
-        transform: translateY(-1px);
     }
 
     /* Mobile-optimized entry cards */
@@ -266,17 +213,41 @@
             width: 1.25rem;
             height: 1.25rem;
         }
+    }
 
-        .entry-card:hover {
-            transform: none;
+    .journal-card {
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+
+    .journal-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+        border-color: #cbd5e1;
+    }
+
+    /* Mobile-optimized journal cards */
+    @media (max-width: 768px) {
+        .journal-card {
+            padding: 1rem;
         }
 
-        .entry-card:active {
-            transform: scale(0.99);
+        .journal-card h3 {
+            font-size: 1rem;
+            line-height: 1.25rem;
+        }
+
+        .journal-card p {
+            font-size: 0.8125rem;
+        }
+
+        .journal-card .btn-primary,
+        .journal-card .btn-secondary {
+            font-size: 0.8125rem;
+            padding: 0.5rem 0.75rem;
         }
     }
 
-    /* Loading and modal improvements */
     .loading-overlay {
         position: fixed;
         top: 0;
@@ -289,7 +260,6 @@
         justify-content: center;
         z-index: 1000;
         padding: 1rem;
-        backdrop-filter: blur(4px);
     }
 
     .loading-spinner {
@@ -299,10 +269,9 @@
         text-align: center;
         max-width: 400px;
         width: 100%;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     }
 
-    /* Enhanced mobile modals */
+    /* Mobile-optimized modals */
     @media (max-width: 640px) {
         .loading-spinner {
             padding: 1.5rem;
@@ -313,131 +282,31 @@
         .modal-content {
             max-height: 90vh;
             overflow-y: auto;
-            margin: 1rem;
         }
     }
 
-    /* Enhanced animations */
     .fade-in {
-        animation: fadeIn 0.5s ease-out forwards;
-    }
-
-    .fade-out {
-        animation: fadeOut 0.3s ease-out forwards;
+        animation: fadeIn 0.5s ease-out;
     }
 
     @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes fadeOut {
-        from {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes pulse {
-        0%, 100% {
-            opacity: 1;
-            transform: scale(1);
-        }
-        50% {
-            opacity: 0.9;
-            transform: scale(1.05);
-        }
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
     }
 
-    /* Enhanced gradient text */
     .gradient-text {
-        background: linear-gradient(135deg, #6366f1, #4f46e5, #7c3aed);
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        background-size: 200% 200%;
-        animation: gradientShift 3s ease infinite;
     }
 
-    @keyframes gradientShift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-    }
-
-    /* Step content visibility management */
-    .step-content {
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .step-content.hidden {
-        display: none;
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    .step-content.visible {
-        display: block;
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    /* Enhanced toast notifications */
-    .toast {
-        position: fixed;
-        top: 1rem;
-        right: 1rem;
-        max-width: 28rem;
-        padding: 1rem 1.5rem;
-        border-radius: 0.75rem;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        z-index: 9999;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .toast.success {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
-        color: white;
-    }
-
-    .toast.error {
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9));
-        color: white;
-    }
-
-    @media (max-width: 640px) {
-        .toast {
-            left: 1rem;
-            right: 1rem;
-            max-width: none;
-            top: 2rem;
-        }
-    }
-
-    /* Enhanced form elements */
-    .form-input {
-        transition: all 0.2s ease;
-        border: 2px solid #e5e7eb;
-    }
-
-    .form-input:focus {
-        border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        outline: none;
-    }
-
-    /* Mobile-specific optimizations */
+    /* Mobile-optimized text sizes */
     @media (max-width: 640px) {
         .mobile-title {
             font-size: 2rem;
@@ -453,24 +322,26 @@
             font-size: 1.5rem;
             line-height: 2rem;
         }
+    }
 
-        /* Prevent zoom on form inputs for iOS */
-        input[type="text"],
-        input[type="number"],
-        textarea {
-            font-size: 16px;
-            padding: 0.875rem;
+    /* Color utilities */
+    .primary-600 { color: #4f46e5; }
+    .secondary-600 { color: #475569; }
+    .secondary-800 { color: #1e293b; }
+    .success-600 { color: #059669; }
+    .warning-600 { color: #d97706; }
+    .error-600 { color: #dc2626; }
+
+    /* Mobile-specific utilities */
+    @media (max-width: 640px) {
+        .mobile-grid-1 {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
         }
 
-        /* Better touch targets */
-        .method-card,
-        .entry-card,
-        .btn-primary,
-        .btn-secondary {
-            min-height: 48px;
+        .mobile-grid-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
-        /* Improved spacing */
         .mobile-gap-3 {
             gap: 0.75rem;
         }
@@ -486,12 +357,35 @@
         .mobile-p-6 {
             padding: 1.5rem;
         }
+
+        .mobile-space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+
+        .mobile-space-y-6 > * + * {
+            margin-top: 1.5rem;
+        }
+
+        .mobile-text-center {
+            text-align: center;
+        }
+
+        .mobile-full-width {
+            width: 100%;
+        }
     }
 
-    /* Touch device optimizations */
+    /* Touch-friendly interactive elements */
     @media (hover: none) and (pointer: coarse) {
+        .method-card,
+        .entry-card,
+        .journal-card {
+            transition: none;
+        }
+
         .method-card:hover,
-        .entry-card:hover {
+        .entry-card:hover,
+        .journal-card:hover {
             transform: none;
         }
 
@@ -501,30 +395,37 @@
         }
     }
 
-    /* Color utilities */
-    .primary-600 { color: #4f46e5; }
-    .secondary-600 { color: #475569; }
-    .secondary-800 { color: #1e293b; }
-    .success-600 { color: #059669; }
-    .warning-600 { color: #d97706; }
-    .error-600 { color: #dc2626; }
+    /* Improved form inputs for mobile */
+    @media (max-width: 640px) {
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            font-size: 16px; /* Prevents zoom on iOS */
+            padding: 0.875rem;
+        }
 
-    /* Debug styles (remove in production) */
-    .debug-step {
-        border: 2px dashed #f59e0b;
-        background: rgba(245, 158, 11, 0.1);
+        .form-row {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
-    <!-- Enhanced Header with Better Mobile Support -->
+    <!-- Mobile-Optimized Header -->
     <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-8">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 sm:mb-6 space-y-4 lg:space-y-0">
-            <div class="text-center lg:text-left">
-                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold gradient-text mb-2">Smart Journal Compiler</h1>
-                <p class="text-base sm:text-lg lg:text-xl text-secondary-600">Transform your journal entries into publishable content</p>
+            <div class="mobile-text-center lg:text-left">
+                <h1 class="text-3xl sm:text-4xl lg:mobile-title font-bold gradient-text">Smart Journal Compiler</h1>
+                <p class="text-base sm:text-lg lg:mobile-subtitle text-secondary-600 mt-2">Transform your journal entries into publishable content</p>
             </div>
 
             <!-- Desktop Progress Steps -->
@@ -559,7 +460,7 @@
             </div>
         </div>
 
-        <!-- Stats Overview -->
+        <!-- Mobile-Optimized Stats Overview -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div class="text-center p-3 sm:p-4 bg-white rounded-xl sm:rounded-2xl">
                 <div class="text-2xl sm:text-3xl font-bold text-primary-600">{{ analysis.total_entries|default:0 }}</div>
@@ -577,10 +478,13 @@
                 <div class="text-2xl sm:text-3xl font-bold text-error-600">{{ analysis.story_arcs|length|default:0 }}</div>
                 <div class="text-xs sm:text-sm text-secondary-600">Story Arcs</div>
             </div>
+        </div>
+    </div>
+
     <!-- Mobile-Optimized Recent Compiled Journals -->
     <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-2 sm:space-y-0">
-            <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-secondary-800">Your Compiled Journals</h2>
+            <h2 class="text-xl sm:text-2xl lg:mobile-section-title font-bold text-secondary-800">Your Compiled Journals</h2>
             {% if compiled_journals %}
             <span class="text-sm text-secondary-600">{{ compiled_journals|length }} journal{{ compiled_journals|length|pluralize }}</span>
             {% endif %}
@@ -589,7 +493,7 @@
         {% if compiled_journals %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {% for journal in compiled_journals %}
-            <div class="journal-card bg-white rounded-xl p-4 sm:p-6 border hover:shadow-lg transition-all duration-300">
+            <div class="journal-card bg-white rounded-xl p-4 sm:p-6">
                 <div class="flex items-start justify-between mb-3">
                     <h3 class="font-bold text-secondary-800 text-base sm:text-lg leading-tight flex-1 mr-3">{{ journal.title }}</h3>
                     <div class="flex items-center space-x-1 flex-shrink-0">
@@ -640,11 +544,11 @@
 
                 <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
                     {% if journal.is_published %}
-                    <a href="/marketplace/journal/{{ journal.id }}/" class="btn-primary w-full sm:flex-1 text-center py-2 text-sm">
+                    <a href="/marketplace/journal/{{ journal.id }}/" class="btn-primary mobile-full-width sm:flex-1 text-center">
                         View in Marketplace
                     </a>
                     {% else %}
-                    <a href="/diary/journal/{{ journal.id }}/edit/" class="btn-secondary w-full sm:flex-1 text-center py-2 text-sm">
+                    <a href="/diary/journal/{{ journal.id }}/edit/" class="btn-secondary mobile-full-width sm:flex-1 text-center">
                         Continue Editing
                     </a>
                     {% endif %}
@@ -670,7 +574,7 @@
         <div class="text-center py-8 sm:py-12">
             <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <svg class="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                 </svg>
             </div>
             <h3 class="text-lg font-medium text-secondary-800 mb-2">No journals yet</h3>
@@ -679,283 +583,201 @@
         {% endif %}
     </div>
 
-    <!-- Step 1: Method Selection -->
-    <div id="step1Content" class="step-content visible">
-        <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-8">
-            <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-secondary-800 mb-4 sm:mb-6">Choose Your Compilation Method</h2>
+    <!-- Mobile-Optimized Step 1: Method Selection -->
+    <div id="step1Content" class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-8">
+        <h2 class="text-xl sm:text-2xl lg:mobile-section-title font-bold text-secondary-800 mb-4 sm:mb-6">Choose Your Compilation Method</h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-                <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6" data-method="ai">
-                    <div class="card-content text-center">
-                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                            <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg sm:text-xl font-bold mb-2">AI Smart Compilation</h3>
-                        <p class="text-secondary-600 text-sm mb-3 sm:mb-4">Let AI analyze your entries and create the optimal structure</p>
-                        <div class="space-y-1 flex flex-col sm:block">
-                            <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Theme Detection</span>
-                            <span class="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">Story Arcs</span>
-                        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6" data-method="ai">
+                <div class="text-center">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                        <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
                     </div>
-                </div>
-
-                <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6" data-method="thematic">
-                    <div class="card-content text-center">
-                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                            <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg sm:text-xl font-bold mb-2">Thematic Collection</h3>
-                        <p class="text-secondary-600 text-sm mb-3 sm:mb-4">Organize entries around specific themes and topics</p>
-                        <div class="space-y-1 flex flex-col sm:block">
-                            <span class="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs">Travel</span>
-                            <span class="inline-block px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-xs">Growth</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6" data-method="chronological">
-                    <div class="card-content text-center">
-                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                            <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg sm:text-xl font-bold mb-2">Timeline Journey</h3>
-                        <p class="text-secondary-600 text-sm mb-3 sm:mb-4">Create a chronological narrative of your experiences</p>
-                        <div class="space-y-1 flex flex-col sm:block">
-                            <span class="inline-block px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs">Timeline</span>
-                            <span class="inline-block px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs">Journey</span>
-                        </div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-2">AI Smart Compilation</h3>
+                    <p class="text-secondary-600 text-sm mb-3 sm:mb-4">Let AI analyze your entries and create the optimal structure</p>
+                    <div class="space-y-1 flex flex-col sm:block">
+                        <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Theme Detection</span>
+                        <span class="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">Story Arcs</span>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-6 text-center">
-                <p class="text-sm text-secondary-600">Select a method above to continue to entry selection</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Step 2: Entry Selection -->
-    <div id="step2Content" class="step-content hidden">
-        <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
-                <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-secondary-800">Select Entries</h2>
-                <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                    <span class="text-sm text-secondary-600">Selected: <span id="selectedCount">0</span></span>
-                    <div class="flex space-x-2">
-                        <button id="selectAllBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">All</button>
-                        <button id="selectNoneBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">None</button>
+            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6" data-method="thematic">
+                <div class="text-center">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                        <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-2">Thematic Collection</h3>
+                    <p class="text-secondary-600 text-sm mb-3 sm:mb-4">Organize entries around specific themes and topics</p>
+                    <div class="space-y-1 flex flex-col sm:block">
+                        <span class="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs">Travel</span>
+                        <span class="inline-block px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-xs">Growth</span>
                     </div>
                 </div>
             </div>
 
-            <div id="entriesGrid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                {% for entry in entries %}
-                <div class="entry-card glass-card rounded-lg sm:rounded-xl p-3 sm:p-4" data-entry-id="{{ entry.id }}">
-                    <div class="flex items-start space-x-3">
-                        <input type="checkbox" class="entry-checkbox mt-1 w-4 h-4 sm:w-5 sm:h-5" value="{{ entry.id }}">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-medium text-secondary-800 flex-1 mr-2 entry-title text-sm sm:text-base" data-original="{{ entry.title }}">{{ entry.title|truncatechars:40 }}</h4>
-                                <button class="edit-entry-btn text-blue-600 hover:text-blue-800 text-sm flex-shrink-0" data-entry-id="{{ entry.id }}" title="Edit entry">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <p class="text-xs sm:text-sm text-secondary-600 mb-2 entry-content" data-original="{{ entry.content }}">{{ entry.content|truncatechars:80 }}</p>
-                            <div class="flex flex-col sm:flex-row sm:justify-between text-xs text-secondary-500 mb-2 space-y-1 sm:space-y-0">
-                                <span>{{ entry.created_at|date:"M d, Y" }}</span>
-                                <span class="word-count">{{ entry.content|wordcount }} words</span>
-                            </div>
-                            {% if entry.tags.exists %}
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                {% for tag in entry.tags.all|slice:":2" %}
-                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">{{ tag.name }}</span>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
+            <div class="method-card glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6" data-method="chronological">
+                <div class="text-center">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                        <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
                     </div>
-                </div>
-                {% empty %}
-                <!-- Fallback sample entries if no real entries exist -->
-                <div class="entry-card glass-card rounded-lg sm:rounded-xl p-3 sm:p-4" data-entry-id="sample1">
-                    <div class="flex items-start space-x-3">
-                        <input type="checkbox" class="entry-checkbox mt-1 w-4 h-4 sm:w-5 sm:h-5" value="sample1">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-medium text-secondary-800 flex-1 mr-2 entry-title text-sm sm:text-base">Sample Entry: My Journey Begins</h4>
-                                <button class="edit-entry-btn text-blue-600 hover:text-blue-800 text-sm flex-shrink-0" data-entry-id="sample1" title="Edit entry">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <p class="text-xs sm:text-sm text-secondary-600 mb-2 entry-content">Today marks the beginning of a new chapter in my life. I've decided to start journaling to track my personal growth and reflect on my experiences...</p>
-                            <div class="flex flex-col sm:flex-row sm:justify-between text-xs text-secondary-500 mb-2 space-y-1 sm:space-y-0">
-                                <span>Jan 15, 2024</span>
-                                <span class="word-count">234 words</span>
-                            </div>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">personal-growth</span>
-                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">reflection</span>
-                            </div>
-                        </div>
+                    <h3 class="text-lg sm:text-xl font-bold mb-2">Timeline Journey</h3>
+                    <p class="text-secondary-600 text-sm mb-3 sm:mb-4">Create a chronological narrative of your experiences</p>
+                    <div class="space-y-1 flex flex-col sm:block">
+                        <span class="inline-block px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs">Timeline</span>
+                        <span class="inline-block px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs">Journey</span>
                     </div>
-                </div>
-
-                <div class="entry-card glass-card rounded-lg sm:rounded-xl p-3 sm:p-4" data-entry-id="sample2">
-                    <div class="flex items-start space-x-3">
-                        <input type="checkbox" class="entry-checkbox mt-1 w-4 h-4 sm:w-5 sm:h-5" value="sample2">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-medium text-secondary-800 flex-1 mr-2 entry-title text-sm sm:text-base">Learning Something New Every Day</h4>
-                                <button class="edit-entry-btn text-blue-600 hover:text-blue-800 text-sm flex-shrink-0" data-entry-id="sample2" title="Edit entry">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <p class="text-xs sm:text-sm text-secondary-600 mb-2 entry-content">Started learning to code today. It's challenging but incredibly rewarding. The problem-solving aspect really appeals to me...</p>
-                            <div class="flex flex-col sm:flex-row sm:justify-between text-xs text-secondary-500 mb-2 space-y-1 sm:space-y-0">
-                                <span>Jan 20, 2024</span>
-                                <span class="word-count">189 words</span>
-                            </div>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">learning</span>
-                                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">coding</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="entry-card glass-card rounded-lg sm:rounded-xl p-3 sm:p-4" data-entry-id="sample3">
-                    <div class="flex items-start space-x-3">
-                        <input type="checkbox" class="entry-checkbox mt-1 w-4 h-4 sm:w-5 sm:h-5" value="sample3">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-medium text-secondary-800 flex-1 mr-2 entry-title text-sm sm:text-base">Mindfulness and Self-Care</h4>
-                                <button class="edit-entry-btn text-blue-600 hover:text-blue-800 text-sm flex-shrink-0" data-entry-id="sample3" title="Edit entry">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <p class="text-xs sm:text-sm text-secondary-600 mb-2 entry-content">Discovered the power of meditation and how it helps with daily stress. Taking time for myself has become a priority...</p>
-                            <div class="flex flex-col sm:flex-row sm:justify-between text-xs text-secondary-500 mb-2 space-y-1 sm:space-y-0">
-                                <span>Jan 25, 2024</span>
-                                <span class="word-count">156 words</span>
-                            </div>
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                <span class="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs">mindfulness</span>
-                                <span class="px-2 py-1 bg-pink-100 text-pink-800 rounded text-xs">self-care</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
-                <div class="text-sm text-secondary-600">
-                    Estimated: <span id="totalWords">0</span> words
-                </div>
-                <div class="flex space-x-3">
-                    <button id="backToMethodBtn" class="btn-secondary px-4 py-2 rounded-lg">
-                        ← Back to Methods
-                    </button>
-                    <button id="analyzeBtn" class="btn-primary px-6 py-3 rounded-xl" disabled>
-                        Analyze Selected Entries
-                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Step 3: Analysis Results -->
-    <div id="step3Content" class="step-content hidden">
-        <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-8">
-            <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-secondary-800 mb-4 sm:mb-6">Analysis Results</h2>
-            <div id="analysisResults">
-                <div class="text-center py-6 sm:py-8">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <div class="text-secondary-600">Analysis results will appear here...</div>
+    <!-- Mobile-Optimized Step 2: Entry Selection -->
+    <div id="step2Content" class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-8 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+            <h2 class="text-xl sm:text-2xl lg:mobile-section-title font-bold text-secondary-800">Select Entries</h2>
+            <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                <span class="text-sm text-secondary-600">Selected: <span id="selectedCount">0</span></span>
+                <div class="flex space-x-2">
+                    <button id="selectAllBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">All</button>
+                    <button id="selectNoneBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">None</button>
                 </div>
-            </div>
-            <div class="mt-4 sm:mt-6 flex justify-between">
-                <button id="backToSelectionBtn" class="btn-secondary px-4 py-2 rounded-lg">
-                    ← Back to Selection
-                </button>
-                <button id="generateStructureBtn" class="btn-primary px-6 py-3 rounded-xl" disabled>
-                    Generate Journal Structure
-                </button>
             </div>
         </div>
-    </div>
 
-    <!-- Step 4: Structure & Publishing -->
-    <div id="step4Content" class="step-content hidden">
-        <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-8">
-            <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-secondary-800 mb-4 sm:mb-6">Journal Structure & Publishing</h2>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-                <!-- Structure Preview -->
-                <div>
-                    <h3 class="font-bold text-secondary-800 mb-4">Generated Structure</h3>
-                    <div id="structurePreview" class="space-y-4">
-                        <div class="text-center py-6 sm:py-8 text-secondary-600">
-                            Structure will appear here...
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Publishing Form -->
-                <div>
-                    <h3 class="font-bold text-secondary-800 mb-4">Publishing Details</h3>
-                    <form id="publishForm" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                            <input type="text" id="journalTitle" required
-                                   class="form-input w-full px-4 py-3 border rounded-xl"
-                                   placeholder="Enter journal title...">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                            <textarea id="journalDescription" rows="4" required
-                                      class="form-input w-full px-4 py-3 border rounded-xl resize-none"
-                                      placeholder="Describe your journal..."></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
-                            <input type="number" id="journalPrice" step="0.01" min="0"
-                                   class="form-input w-full px-4 py-3 border rounded-xl"
-                                   placeholder="9.99">
-                        </div>
-
-                        <div class="pt-4 flex space-x-3">
-                            <button type="button" id="backToAnalysisBtn" class="btn-secondary flex-1 py-3 rounded-xl">
-                                ← Back to Analysis
-                            </button>
-                            <button type="submit" id="publishBtn" class="btn-primary flex-1 py-3 rounded-xl font-semibold">
-                                Publish Journal
+        <div id="entriesGrid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+            {% for entry in entries %}
+            <div class="entry-card glass-card rounded-lg sm:rounded-xl p-3 sm:p-4" data-entry-id="{{ entry.id }}">
+                <div class="flex items-start space-x-3">
+                    <input type="checkbox" class="entry-checkbox mt-1 w-4 h-4 sm:w-5 sm:h-5" value="{{ entry.id }}">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-medium text-secondary-800 flex-1 mr-2 entry-title text-sm sm:text-base" data-original="{{ entry.title }}">{{ entry.title|truncatechars:40 }}</h4>
+                            <button class="edit-entry-btn text-blue-600 hover:text-blue-800 text-sm flex-shrink-0" data-entry-id="{{ entry.id }}" title="Edit entry">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
                             </button>
                         </div>
-                    </form>
+                        <p class="text-xs sm:text-sm text-secondary-600 mb-2 entry-content" data-original="{{ entry.content }}">{{ entry.content|truncatechars:80 }}</p>
+                        <div class="flex flex-col sm:flex-row sm:justify-between text-xs text-secondary-500 mb-2 space-y-1 sm:space-y-0">
+                            <span>{{ entry.created_at|date:"M d, Y" }}</span>
+                            <span class="word-count">{{ entry.content|wordcount }} words</span>
+                        </div>
+                        {% if entry.tags.exists %}
+                        <div class="flex flex-wrap gap-1 mt-2">
+                            {% for tag in entry.tags.all|slice:":2" %}
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">{{ tag.name }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+            <div class="text-sm text-secondary-600">
+                Estimated: <span id="totalWords">0</span> words
+            </div>
+            <button id="analyzeBtn" class="btn-primary px-6 py-3 rounded-xl mobile-full-width sm:w-auto" disabled>
+                Analyze Selected Entries
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile-Optimized Step 3: Analysis Results -->
+    <div id="step3Content" class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-8 hidden">
+        <h2 class="text-xl sm:text-2xl lg:mobile-section-title font-bold text-secondary-800 mb-4 sm:mb-6">Analysis Results</h2>
+        <div id="analysisResults">
+            <div class="text-center py-6 sm:py-8">
+                <div class="text-secondary-600">Analysis results will appear here...</div>
+            </div>
+        </div>
+        <div class="mt-4 sm:mt-6 text-center">
+            <button id="generateStructureBtn" class="btn-primary px-6 py-3 rounded-xl mobile-full-width sm:w-auto" disabled>
+                Generate Journal Structure
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile-Optimized Step 4: Structure & Publishing -->
+    <div id="step4Content" class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-8 hidden">
+        <h2 class="text-xl sm:text-2xl lg:mobile-section-title font-bold text-secondary-800 mb-4 sm:mb-6">Journal Structure & Publishing</h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+            <!-- Structure Preview -->
+            <div>
+                <h3 class="font-bold text-secondary-800 mb-4">Generated Structure</h3>
+                <div id="structurePreview" class="space-y-4">
+                    <div class="text-center py-6 sm:py-8 text-secondary-600">
+                        Structure will appear here...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Publishing Form -->
+            <div>
+                <h3 class="font-bold text-secondary-800 mb-4">Publishing Details</h3>
+                <form id="publishForm" class="space-y-4">
+                    <div class="form-row">
+                        <label class="form-label">Title</label>
+                        <input type="text" id="journalTitle" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="Enter journal title...">
+                    </div>
+
+                    <div class="form-row">
+                        <label class="form-label">Description</label>
+                        <textarea id="journalDescription" rows="4" required
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                  placeholder="Describe your journal..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <label class="form-label">Price ($)</label>
+                        <input type="number" id="journalPrice" step="0.01" min="0"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="9.99">
+                    </div>
+
+                    <div class="form-row">
+                        <h4 class="form-label">Journal Type</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="journalType" value="growth" class="mr-3" checked>
+                                <span class="text-sm">Personal Growth</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="journalType" value="travel" class="mr-3">
+                                <span class="text-sm">Travel & Adventures</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="journalType" value="career" class="mr-3">
+                                <span class="text-sm">Career Journey</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" id="publishBtn" class="w-full btn-primary py-3 rounded-xl text-base sm:text-lg font-semibold">
+                            Publish Journal
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Enhanced Loading Overlay -->
+<!-- Mobile-Optimized Loading Overlay -->
 <div id="loadingOverlay" class="loading-overlay">
     <div class="loading-spinner">
         <div class="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -978,16 +800,16 @@
 
         <form id="editEntryForm" class="space-y-4">
             <input type="hidden" id="editEntryId">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+            <div class="form-row">
+                <label class="form-label">Title</label>
                 <input type="text" id="editEntryTitle" required
-                       class="form-input w-full px-4 py-3 border rounded-xl">
+                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Content</label>
+            <div class="form-row">
+                <label class="form-label">Content</label>
                 <textarea id="editEntryContent" rows="6" required
-                          class="form-input w-full px-4 py-3 border rounded-xl resize-none"></textarea>
+                          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"></textarea>
             </div>
 
             <div class="flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
@@ -995,6 +817,16 @@
                 <button type="submit" class="btn-primary px-6 py-2 rounded-lg order-1 sm:order-2">Save Changes</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Mobile-Optimized Success Modal -->
+<div id="successModal" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner">
+        <div class="text-4xl sm:text-6xl text-green-500 mb-4">✓</div>
+        <div class="text-secondary-800 font-medium text-lg sm:text-xl mb-2">Journal Published!</div>
+        <div class="text-sm text-secondary-600 mb-4">Your journal has been successfully published to the marketplace.</div>
+        <button id="viewJournalBtn" class="btn-primary px-6 py-2 rounded-lg">View Journal</button>
     </div>
 </div>
 
@@ -1015,47 +847,38 @@ class SmartJournalCompiler {
     }
 
     init() {
-        console.log('🚀 SmartJournalCompiler initialized');
         this.bindEvents();
         this.updateStepDisplay();
     }
 
     bindEvents() {
-        // Method selection with enhanced debugging
+        // Method selection
         document.querySelectorAll('.method-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                console.log('📝 Method card clicked:', card.dataset.method);
-                this.selectMethod(e);
-            });
+            card.addEventListener('click', (e) => this.selectMethod(e));
         });
 
         // Entry selection
         document.querySelectorAll('.entry-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', () => this.updateSelectedEntries());
+            checkbox.addEventListener('change', (e) => this.updateSelectedEntries());
         });
 
-        // Navigation buttons
-        document.getElementById('backToMethodBtn')?.addEventListener('click', () => this.goToStep(1));
-        document.getElementById('backToSelectionBtn')?.addEventListener('click', () => this.goToStep(2));
-        document.getElementById('backToAnalysisBtn')?.addEventListener('click', () => this.goToStep(3));
+        // Entry editing
+        document.querySelectorAll('.edit-entry-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.openEditModal(e));
+        });
 
-        // Selection controls
         document.getElementById('selectAllBtn')?.addEventListener('click', () => this.selectAllEntries());
         document.getElementById('selectNoneBtn')?.addEventListener('click', () => this.selectNoneEntries());
+
+        // Edit modal events
+        document.getElementById('closeEditModal')?.addEventListener('click', () => this.closeEditModal());
+        document.getElementById('cancelEdit')?.addEventListener('click', () => this.closeEditModal());
+        document.getElementById('editEntryForm')?.addEventListener('submit', (e) => this.saveEntryEdit(e));
 
         // Action buttons
         document.getElementById('analyzeBtn')?.addEventListener('click', (e) => this.analyzeEntries(e));
         document.getElementById('generateStructureBtn')?.addEventListener('click', (e) => this.generateStructure(e));
         document.getElementById('publishForm')?.addEventListener('submit', (e) => this.publishJournal(e));
-
-        // Entry editing (restored from original)
-        document.querySelectorAll('.edit-entry-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => this.openEditModal(e));
-        });
-
-        document.getElementById('closeEditModal')?.addEventListener('click', () => this.closeEditModal());
-        document.getElementById('cancelEdit')?.addEventListener('click', () => this.closeEditModal());
-        document.getElementById('editEntryForm')?.addEventListener('submit', (e) => this.saveEntryEdit(e));
 
         // Close modals on overlay click
         document.getElementById('editModal')?.addEventListener('click', (e) => {
@@ -1063,11 +886,15 @@ class SmartJournalCompiler {
                 this.closeEditModal();
             }
         });
+
+        document.getElementById('loadingOverlay')?.addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                // Prevent closing loading overlay by clicking
+            }
+        });
     }
 
     selectMethod(event) {
-        console.log('🎯 selectMethod called');
-
         // Remove previous selections
         document.querySelectorAll('.method-card').forEach(card => {
             card.classList.remove('selected');
@@ -1078,32 +905,15 @@ class SmartJournalCompiler {
         card.classList.add('selected');
         this.selectedMethod = card.dataset.method;
 
-        console.log('✅ Selected method:', this.selectedMethod);
+        console.log('Selected method:', this.selectedMethod);
 
-        // Add visual feedback
-        this.showSuccess(`${this.getMethodName(this.selectedMethod)} method selected!`);
-
-        // Move to next step after a brief delay
-        setTimeout(() => {
-            console.log('🔄 Moving to step 2');
-            this.goToStep(2);
-        }, 800);
-    }
-
-    getMethodName(method) {
-        const names = {
-            'ai': 'AI Smart Compilation',
-            'thematic': 'Thematic Collection',
-            'chronological': 'Timeline Journey'
-        };
-        return names[method] || method;
+        // Move to next step
+        this.goToStep(2);
     }
 
     updateSelectedEntries() {
         const checkboxes = document.querySelectorAll('.entry-checkbox:checked');
         this.selectedEntries = new Set(Array.from(checkboxes).map(cb => parseInt(cb.value)));
-
-        console.log('📊 Selected entries:', Array.from(this.selectedEntries));
 
         // Update UI
         document.getElementById('selectedCount').textContent = this.selectedEntries.size;
@@ -1122,11 +932,6 @@ class SmartJournalCompiler {
         const analyzeBtn = document.getElementById('analyzeBtn');
         if (analyzeBtn) {
             analyzeBtn.disabled = this.selectedEntries.size === 0;
-            if (this.selectedEntries.size > 0) {
-                analyzeBtn.textContent = `Analyze ${this.selectedEntries.size} Entries`;
-            } else {
-                analyzeBtn.textContent = 'Analyze Selected Entries';
-            }
         }
 
         // Update entry card styling
@@ -1146,8 +951,8 @@ class SmartJournalCompiler {
         const entryCard = event.currentTarget.closest('.entry-card');
 
         // Get current entry data
-        const title = entryCard.querySelector('.entry-title').dataset.original || entryCard.querySelector('.entry-title').textContent;
-        const content = entryCard.querySelector('.entry-content').dataset.original || entryCard.querySelector('.entry-content').textContent;
+        const title = entryCard.querySelector('.entry-title').dataset.original;
+        const content = entryCard.querySelector('.entry-content').dataset.original;
 
         // Populate modal
         document.getElementById('editEntryId').value = entryId;
@@ -1187,15 +992,32 @@ class SmartJournalCompiler {
             submitBtn.disabled = true;
             submitBtn.textContent = 'Saving...';
 
-            // For demo purposes, just update the UI
-            this.updateEntryCardAfterEdit(entryId, title, content);
-            this.closeEditModal();
-            this.showSuccess('Entry updated successfully!');
+            const response = await fetch(`/entry/${entryId}/edit/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: new URLSearchParams({
+                    'title': title,
+                    'content': content,
+                    'csrfmiddlewaretoken': this.getCSRFToken()
+                })
+            });
 
-            // If this entry was selected, update the word count
-            const checkbox = document.querySelector(`input[value="${entryId}"]`);
-            if (checkbox && checkbox.checked) {
-                this.updateSelectedEntries();
+            if (response.ok) {
+                // Update the entry card in the UI
+                this.updateEntryCardAfterEdit(entryId, title, content);
+                this.closeEditModal();
+                this.showSuccess('Entry updated successfully!');
+
+                // If this entry was selected, update the word count
+                const checkbox = document.querySelector(`input[value="${entryId}"]`);
+                if (checkbox && checkbox.checked) {
+                    this.updateSelectedEntries();
+                }
+            } else {
+                throw new Error('Failed to save entry');
             }
 
         } catch (error) {
@@ -1207,21 +1029,38 @@ class SmartJournalCompiler {
         }
     }
 
+    updateEntryCardAfterEdit(entryId, newTitle, newContent) {
+        const entryCard = document.querySelector(`[data-entry-id="${entryId}"]`);
+        if (!entryCard) return;
+
+        // Update title
+        const titleEl = entryCard.querySelector('.entry-title');
+        titleEl.textContent = newTitle.length > 40 ? newTitle.substring(0, 40) + '...' : newTitle;
+        titleEl.dataset.original = newTitle;
+
+        // Update content
+        const contentEl = entryCard.querySelector('.entry-content');
+        contentEl.textContent = newContent.length > 80 ? newContent.substring(0, 80) + '...' : newContent;
+        contentEl.dataset.original = newContent;
+
+        // Update word count
+        const wordCount = newContent.split(/\s+/).filter(word => word.length > 0).length;
+        const wordCountEl = entryCard.querySelector('.word-count');
+        wordCountEl.textContent = `${wordCount} words`;
+    }
+
     selectAllEntries() {
         document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = true);
         this.updateSelectedEntries();
-        this.showSuccess('All entries selected');
     }
 
     selectNoneEntries() {
         document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = false);
         this.updateSelectedEntries();
-        this.showSuccess('All entries deselected');
     }
 
     async analyzeEntries(event) {
         event.preventDefault();
-        console.log('🔍 Starting analysis...');
 
         if (!this.selectedMethod || this.selectedEntries.size === 0) {
             this.showError('Please select a method and entries first');
@@ -1236,24 +1075,31 @@ class SmartJournalCompiler {
             button.disabled = true;
             button.textContent = 'Analyzing...';
 
-            // Simulate API call for demo
-            await this.simulateAPICall(2000);
+            const response = await fetch('/diary/api/analyze-entries/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: JSON.stringify({
+                    method: this.selectedMethod,
+                    entry_ids: Array.from(this.selectedEntries)
+                })
+            });
 
-            // Mock analysis data
-            this.analysisData = {
-                total_entries: this.selectedEntries.size,
-                themes: ['Personal Growth', 'Travel', 'Career Development'],
-                quality_score: { score: 85 },
-                story_arcs: ['Beginning Journey', 'Challenges', 'Growth', 'Reflection'],
-                ai_insights: `Your ${this.selectedEntries.size} selected entries show strong thematic consistency around personal development and self-reflection. The ${this.getMethodName(this.selectedMethod)} approach will work well for organizing this content.`
-            };
+            const data = await response.json();
 
-            this.displayAnalysisResults(this.analysisData);
-            this.goToStep(3);
-            this.showSuccess('Analysis completed successfully!');
+            if (data.success) {
+                this.analysisData = data.analysis;
+                this.displayAnalysisResults(data.analysis);
+                this.goToStep(3);
+                this.showSuccess('Analysis completed successfully!');
+            } else {
+                throw new Error(data.error || 'Analysis failed');
+            }
 
         } catch (error) {
-            console.error('❌ Analysis error:', error);
+            console.error('Analysis error:', error);
             this.showError('Failed to analyze entries: ' + error.message);
         } finally {
             this.hideLoading();
@@ -1264,7 +1110,6 @@ class SmartJournalCompiler {
 
     async generateStructure(event) {
         event.preventDefault();
-        console.log('🏗️ Generating structure...');
 
         if (!this.analysisData) {
             this.showError('Please complete analysis first');
@@ -1279,30 +1124,36 @@ class SmartJournalCompiler {
             button.disabled = true;
             button.textContent = 'Generating...';
 
-            // Simulate API call
-            await this.simulateAPICall(1500);
+            const journalType = document.querySelector('input[name="journalType"]:checked')?.value || 'growth';
 
-            // Mock structure data
-            this.structureData = {
-                title: 'My Personal Growth Journey',
-                description: 'A compilation of personal reflections and experiences that showcase my journey of self-discovery and growth.',
-                chapters: [
-                    { title: 'Setting Out', entry_count: 3, description: 'The beginning of my journey' },
-                    { title: 'Discovering New Perspectives', entry_count: 5, description: 'Learning and growing through experiences' },
-                    { title: 'Overcoming Challenges', entry_count: 4, description: 'Facing obstacles and finding solutions' },
-                    { title: 'Reflection and Growth', entry_count: 3, description: 'Looking back and moving forward' }
-                ],
-                estimated_length: 2500,
-                suggested_price: '12.99'
-            };
+            const response = await fetch('/diary/api/generate-structure/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: JSON.stringify({
+                    method: this.selectedMethod,
+                    journal_type: journalType,
+                    entry_ids: Array.from(this.selectedEntries),
+                    ai_enhancements: []
+                })
+            });
 
-            this.displayStructure(this.structureData);
-            this.populatePublishingForm(this.structureData);
-            this.goToStep(4);
-            this.showSuccess('Structure generated successfully!');
+            const data = await response.json();
+
+            if (data.success) {
+                this.structureData = data.structure;
+                this.displayStructure(data.structure);
+                this.populatePublishingForm(data.structure);
+                this.goToStep(4);
+                this.showSuccess('Structure generated successfully!');
+            } else {
+                throw new Error(data.error || 'Structure generation failed');
+            }
 
         } catch (error) {
-            console.error('❌ Structure generation error:', error);
+            console.error('Structure generation error:', error);
             this.showError('Failed to generate structure: ' + error.message);
         } finally {
             this.hideLoading();
@@ -1313,16 +1164,16 @@ class SmartJournalCompiler {
 
     async publishJournal(event) {
         event.preventDefault();
-        console.log('📚 Publishing journal...');
 
         if (!this.structureData) {
             this.showError('Please generate structure first');
             return;
         }
 
-        const title = document.getElementById('journalTitle').value;
-        const description = document.getElementById('journalDescription').value;
-        const price = document.getElementById('journalPrice').value;
+        const formData = new FormData(event.target);
+        const title = formData.get('title') || document.getElementById('journalTitle').value;
+        const description = formData.get('description') || document.getElementById('journalDescription').value;
+        const price = parseFloat(document.getElementById('journalPrice').value || 0);
 
         if (!title || !description) {
             this.showError('Please fill in all required fields');
@@ -1341,14 +1192,30 @@ class SmartJournalCompiler {
             button.disabled = true;
             button.textContent = 'Publishing...';
 
-            // Simulate API call
-            await this.simulateAPICall(2000);
+            const response = await fetch('/diary/api/publish-journal/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: JSON.stringify({
+                    title: title,
+                    description: description,
+                    price: price
+                })
+            });
 
-            this.hideLoading();
-            this.showSuccessModal('123');
+            const data = await response.json();
+
+            if (data.success) {
+                this.hideLoading();
+                this.showSuccessModal(data.journal_id);
+            } else {
+                throw new Error(data.error || 'Publishing failed');
+            }
 
         } catch (error) {
-            console.error('❌ Publishing error:', error);
+            console.error('Publishing error:', error);
             this.showError('Failed to publish journal: ' + error.message);
             this.hideLoading();
             button.disabled = false;
@@ -1377,8 +1244,8 @@ class SmartJournalCompiler {
                     <div class="text-xs sm:text-sm text-gray-600">Story Arcs</div>
                 </div>
             </div>
-            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border-l-4 border-blue-500">
-                <h4 class="font-semibold text-blue-800 mb-2">🎯 Analysis Summary</h4>
+            <div class="bg-blue-50 rounded-xl p-4">
+                <h4 class="font-semibold text-blue-800 mb-2">Analysis Summary</h4>
                 <p class="text-blue-700 text-sm">${analysis.ai_insights || 'Your entries have been analyzed and are ready for compilation.'}</p>
             </div>
         `;
@@ -1392,8 +1259,8 @@ class SmartJournalCompiler {
         let chaptersHtml = '';
         if (structure.chapters) {
             chaptersHtml = structure.chapters.map((chapter, index) => `
-                <div class="border-l-4 border-gradient-to-b from-blue-500 to-purple-500 bg-gradient-to-r from-blue-50 to-purple-50 pl-4 py-3 rounded-r-lg">
-                    <h4 class="font-medium text-gray-800 text-sm sm:text-base">📖 ${chapter.title}</h4>
+                <div class="border-l-4 border-blue-500 pl-4 py-2">
+                    <h4 class="font-medium text-gray-800 text-sm sm:text-base">${chapter.title}</h4>
                     <p class="text-xs sm:text-sm text-gray-600">${chapter.entry_count || 0} entries</p>
                     <p class="text-xs text-gray-500">${chapter.description || ''}</p>
                 </div>
@@ -1402,21 +1269,15 @@ class SmartJournalCompiler {
 
         container.innerHTML = `
             <div class="space-y-4">
-                <div class="bg-gradient-to-r from-white to-blue-50 rounded-xl p-4 border border-blue-200">
-                    <h3 class="font-bold text-gray-800 mb-2 text-sm sm:text-base">📚 ${structure.title || 'Generated Journal'}</h3>
+                <div class="bg-white rounded-xl p-4">
+                    <h3 class="font-bold text-gray-800 mb-2 text-sm sm:text-base">${structure.title || 'Generated Journal'}</h3>
                     <p class="text-gray-600 text-xs sm:text-sm">${structure.description || ''}</p>
                 </div>
                 <div class="space-y-3">${chaptersHtml}</div>
-                <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+                <div class="bg-green-50 rounded-xl p-4">
                     <div class="text-xs sm:text-sm">
-                        <div class="flex justify-between items-center mb-2">
-                            <strong>📊 Estimated Length:</strong>
-                            <span>${(structure.estimated_length || 0).toLocaleString()} words</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <strong>💰 Suggested Price:</strong>
-                            <span class="text-green-600 font-bold">$${structure.suggested_price || '9.99'}</span>
-                        </div>
+                        <strong>Estimated Length:</strong> ${(structure.estimated_length || 0).toLocaleString()} words<br>
+                        <strong>Suggested Price:</strong> $${structure.suggested_price || '9.99'}
                     </div>
                 </div>
             </div>
@@ -1432,41 +1293,30 @@ class SmartJournalCompiler {
         }
         if (structure.suggested_price) {
             const price = typeof structure.suggested_price === 'string'
-                ? structure.suggested_price.replace('$', '')
+                ? structure.suggested_price.replace(', '')
                 : structure.suggested_price;
             document.getElementById('journalPrice').value = price;
         }
     }
 
     goToStep(step) {
-        console.log(`🔄 Going to step ${step} from step ${this.currentStep}`);
-
-        const previousStep = this.currentStep;
         this.currentStep = step;
-
-        // Hide all steps with fade out
-        for (let i = 1; i <= 4; i++) {
-            const content = document.getElementById(`step${i}Content`);
-            if (content) {
-                if (i === step) {
-                    content.classList.remove('hidden');
-                    content.classList.add('visible', 'fade-in');
-                    // Scroll to top of new step
-                    setTimeout(() => {
-                        content.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                } else {
-                    content.classList.add('hidden');
-                    content.classList.remove('visible', 'fade-in');
-                }
-            }
-        }
-
         this.updateStepDisplay();
     }
 
     updateStepDisplay() {
-        console.log(`📊 Updating step display for step ${this.currentStep}`);
+        // Hide all step contents
+        for (let i = 1; i <= 4; i++) {
+            const content = document.getElementById(`step${i}Content`);
+            if (content) {
+                if (i === this.currentStep) {
+                    content.classList.remove('hidden');
+                    content.classList.add('fade-in');
+                } else {
+                    content.classList.add('hidden');
+                }
+            }
+        }
 
         // Update desktop step indicators
         for (let i = 1; i <= 4; i++) {
@@ -1477,13 +1327,10 @@ class SmartJournalCompiler {
                 indicator.classList.remove('active', 'completed', 'pending');
                 if (i < this.currentStep) {
                     indicator.classList.add('completed');
-                    indicator.innerHTML = '✓';
                 } else if (i === this.currentStep) {
                     indicator.classList.add('active');
-                    indicator.innerHTML = i;
                 } else {
                     indicator.classList.add('pending');
-                    indicator.innerHTML = i;
                 }
             }
 
@@ -1506,15 +1353,12 @@ class SmartJournalCompiler {
                     if (i < this.currentStep) {
                         mobileStep.classList.add('completed');
                         indicator.classList.add('completed');
-                        indicator.innerHTML = '✓';
                     } else if (i === this.currentStep) {
                         mobileStep.classList.add('active');
                         indicator.classList.add('active');
-                        indicator.innerHTML = i;
                     } else {
                         mobileStep.classList.add('pending');
                         indicator.classList.add('pending');
-                        indicator.innerHTML = i;
                     }
                 }
             }
@@ -1524,38 +1368,38 @@ class SmartJournalCompiler {
     showLoading(message) {
         document.getElementById('loadingText').textContent = message;
         document.getElementById('loadingOverlay').style.display = 'flex';
+
+        // Prevent body scroll
         document.body.style.overflow = 'hidden';
     }
 
     hideLoading() {
         document.getElementById('loadingOverlay').style.display = 'none';
+
+        // Restore body scroll
         document.body.style.overflow = '';
     }
 
     showSuccessModal(journalId) {
-        // Simple success message for demo
-        this.showSuccess('🎉 Journal published successfully! Redirecting to marketplace...');
-        setTimeout(() => {
-            // In real app: window.location.href = `/marketplace/journal/${journalId}/`;
-            console.log('Would redirect to journal:', journalId);
-        }, 2000);
+        const modal = document.getElementById('successModal');
+        modal.style.display = 'flex';
+
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+
+        document.getElementById('viewJournalBtn').onclick = () => {
+            window.location.href = `/marketplace/journal/${journalId}/`;
+        };
     }
 
     showSuccess(message) {
-        this.showToast(message, 'success');
-    }
-
-    showError(message) {
-        this.showToast(message, 'error');
-    }
-
-    showToast(message, type = 'success') {
+        // Create a mobile-friendly toast notification
         const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
+        toast.className = 'fixed top-4 left-4 right-4 sm:top-4 sm:right-4 sm:left-auto sm:max-w-md bg-green-500 text-white px-4 sm:px-6 py-3 rounded-lg shadow-lg z-50 transform translate-y-full sm:translate-y-0 sm:translate-x-full transition-transform duration-300';
         toast.innerHTML = `
             <div class="flex items-center justify-between">
                 <span class="text-sm sm:text-base">${message}</span>
-                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 opacity-70 hover:opacity-100">
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -1565,23 +1409,53 @@ class SmartJournalCompiler {
 
         document.body.appendChild(toast);
 
-        // Auto remove
+        // Show toast
         setTimeout(() => {
-            if (document.body.contains(toast)) {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(-20px)';
-                setTimeout(() => {
-                    if (document.body.contains(toast)) {
-                        document.body.removeChild(toast);
-                    }
-                }, 300);
-            }
-        }, type === 'error' ? 4000 : 3000);
+            toast.classList.remove('translate-y-full', 'translate-x-full');
+        }, 100);
+
+        // Hide toast after 3 seconds
+        setTimeout(() => {
+            toast.classList.add('translate-y-full', 'sm:translate-y-0', 'sm:translate-x-full');
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
     }
 
-    // Utility method to simulate API calls
-    simulateAPICall(delay = 1000) {
-        return new Promise(resolve => setTimeout(resolve, delay));
+    showError(message) {
+        // Create a mobile-friendly toast notification for errors
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 left-4 right-4 sm:top-4 sm:right-4 sm:left-auto sm:max-w-md bg-red-500 text-white px-4 sm:px-6 py-3 rounded-lg shadow-lg z-50 transform translate-y-full sm:translate-y-0 sm:translate-x-full transition-transform duration-300';
+        toast.innerHTML = `
+            <div class="flex items-center justify-between">
+                <span class="text-sm sm:text-base">${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        `;
+
+        document.body.appendChild(toast);
+
+        // Show toast
+        setTimeout(() => {
+            toast.classList.remove('translate-y-full', 'translate-x-full');
+        }, 100);
+
+        // Hide toast after 4 seconds (errors stay a bit longer)
+        setTimeout(() => {
+            toast.classList.add('translate-y-full', 'sm:translate-y-0', 'sm:translate-x-full');
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
+        }, 4000);
     }
 
     getCSRFToken() {
@@ -1591,40 +1465,70 @@ class SmartJournalCompiler {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🌟 DOM loaded, initializing SmartJournalCompiler...');
+    // Add viewport meta tag if not present for better mobile experience
+    if (!document.querySelector('meta[name="viewport"]')) {
+        const viewport = document.createElement('meta');
+        viewport.name = 'viewport';
+        viewport.content = 'width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover';
+        document.head.appendChild(viewport);
+    }
 
     // Initialize the compiler
-    window.compiler = new SmartJournalCompiler();
+    new SmartJournalCompiler();
 
-    // Add mobile optimizations
-    if (window.innerWidth <= 768) {
-        document.body.classList.add('mobile-optimized');
+    // Add touch support for better mobile interaction
+    document.addEventListener('touchstart', function() {}, { passive: true });
 
-        // Set viewport height for mobile
-        const vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
-    }
+    // Prevent zoom on double tap for iOS
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
 
     // Handle orientation change
     window.addEventListener('orientationchange', function() {
-        setTimeout(() => {
-            const vh = window.innerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        setTimeout(function() {
+            // Force a repaint to fix any layout issues
+            document.body.style.display = 'none';
+            document.body.offsetHeight; // Trigger reflow
+            document.body.style.display = '';
         }, 100);
     });
 
-    console.log('✅ SmartJournalCompiler fully initialized');
+    // Add smooth scrolling behavior for mobile
+    if (window.innerWidth <= 768) {
+        const style = document.createElement('style');
+        style.textContent = `
+            html {
+                scroll-behavior: smooth;
+                -webkit-overflow-scrolling: touch;
+            }
+        `;
+        document.head.appendChild(style);
+    }
 });
 
-// Debug helper
-window.debugCompiler = () => {
-    console.log('🐛 Compiler Debug Info:', {
-        selectedMethod: window.compiler?.selectedMethod,
-        selectedEntries: window.compiler?.selectedEntries,
-        currentStep: window.compiler?.currentStep,
-        analysisData: window.compiler?.analysisData,
-        structureData: window.compiler?.structureData
-    });
-};
+// Handle window resize for responsive adjustments
+window.addEventListener('resize', function() {
+    // Debounce resize events
+    clearTimeout(window.resizeTimeout);
+    window.resizeTimeout = setTimeout(function() {
+        // Force layout recalculation on mobile
+        if (window.innerWidth <= 768) {
+            const viewportHeight = window.innerHeight;
+            document.documentElement.style.setProperty('--vh', `${viewportHeight * 0.01}px`);
+        }
+    }, 100);
+});
+
+// Set initial viewport height for mobile
+if (window.innerWidth <= 768) {
+    const viewportHeight = window.innerHeight;
+    document.documentElement.style.setProperty('--vh', `${viewportHeight * 0.01}px`);
+}
 </script>
 {% endblock %}
