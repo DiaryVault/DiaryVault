@@ -8,6 +8,8 @@ from ..models import Entry, Tag, SummaryVersion, LifeChapter, EntryPhoto
 from ..forms import EntryForm
 from ..services.ai_service import AIService
 from ..utils.analytics import get_mood_emoji, get_tag_color
+from django.db import models
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
