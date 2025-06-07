@@ -57,6 +57,8 @@ try:
         smart_journal_compiler,
         # Backend services (not conflicting with API endpoints)
         preview_journal_structure,
+        # Journal editing functionality
+        edit_journal,
         # Service classes
         JournalAnalysisService,
         JournalCompilerAI,

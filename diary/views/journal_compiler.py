@@ -236,6 +236,48 @@ def preview_journal_structure(request):
 
     return render(request, 'diary/journal_structure_preview.html', context)
 
+
+@login_required
+def edit_journal(request, journal_id):
+    """Edit a published journal"""
+
+    # Get the journal and make sure the user owns it
+    journal = get_object_or_404(Journal, id=journal_id, author=request.user)
+
+    if request.method == 'POST':
+        # Handle form submission
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
+        price = request.POST.get('price', '0')
+
+        if not title or not description:
+            messages.error(request, 'Title and description are required.')
+            return render(request, 'diary/edit_journal.html', {'journal': journal})
+
+        try:
+            price = float(price)
+            if price < 0:
+                price = 0
+        except ValueError:
+            price = 0
+
+        # Update the journal
+        journal.title = title
+        journal.description = description
+        journal.price = price
+        journal.save()
+
+        messages.success(request, 'Journal updated successfully!')
+        return redirect('marketplace_journal_detail', journal_id=journal.id)
+
+    # GET request - show the edit form
+    context = {
+        'journal': journal,
+        'journal_entries': journal.entries.all().order_by('date_created'),
+    }
+
+    return render(request, 'diary/edit_journal.html', context)
+
 # Service Classes
 
 class JournalAnalysisService:
@@ -1105,3 +1147,5 @@ class JournalTemplateService:
         ]
 
         return templates
+
+

@@ -175,6 +175,8 @@ urlpatterns = [
     path('accounts/settings/', views.account_settings, name='account_settings'),
     path('preferences/', views.preferences, name='preferences'),
 
+    path('journal/<int:journal_id>/edit/', views.edit_journal, name='edit_journal'),
+
     # ============================================================================
     # Static File Handling
     # ============================================================================
