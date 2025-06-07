@@ -78,7 +78,7 @@ def smart_journal_compiler(request):
         'has_enough_entries': entries.count() >= 5,
     }
 
-    return render(request, 'diary/smart_journal_compiler.html', context)
+    return render(request, 'diary/publish_journal.html', context)
 
 @login_required
 @require_POST
