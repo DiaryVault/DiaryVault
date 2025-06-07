@@ -48,7 +48,7 @@ from .journal_compiler import (
 )
 
 # NEW: API views for journal compiler
-from .api_views import (
+from .api import (
     save_draft, load_draft, generate_marketing_copy
 )
 
