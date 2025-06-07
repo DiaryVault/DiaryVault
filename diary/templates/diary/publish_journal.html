@@ -5,89 +5,54 @@
 
 {% block extra_css %}
 <style>
-    .theme-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
 
-    .story-arc {
-        background: linear-gradient(to right, #4ade80, #3b82f6, #8b5cf6, #f59e0b, #ef4444);
-        height: 4px;
-        border-radius: 2px;
-    }
-
-    .mood-gradient {
-        background: linear-gradient(to right, #dc2626, #f59e0b, #eab308, #22c55e, #3b82f6);
-    }
-
-    .compilation-method-card {
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
-        cursor: pointer;
-    }
-
-    .compilation-method-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.15);
-    }
-
-    .compilation-method-card.selected {
-        border-color: #6366f1;
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(79, 70, 229, 0.02));
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.2);
-    }
-
-    .template-card {
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
-        cursor: pointer;
-    }
-
-    .template-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .gradient-text {
+    .btn-primary {
         background: linear-gradient(135deg, #6366f1, #4f46e5);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: white;
+        border: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
     }
 
-    .ai-enhancement-option {
-        transition: all 0.2s ease;
-    }
-
-    .ai-enhancement-option:hover {
-        background: rgba(99, 102, 241, 0.05);
-        border-radius: 8px;
-    }
-
-    .chapter-preview {
-        transition: all 0.2s ease;
-    }
-
-    .chapter-preview:hover {
-        background: rgba(99, 102, 241, 0.02);
-        border-radius: 8px;
-        transform: translateX(4px);
-    }
-
-    .entry-card {
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-
-    .entry-card:hover {
+    .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
     }
 
-    .entry-card.recommended-for-method {
-        border-color: #10b981;
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.02));
+    .btn-primary:disabled {
+        opacity: 0.6;
+        transform: none;
+        cursor: not-allowed;
+    }
+
+    .btn-secondary {
+        background: #f8fafc;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
     }
 
     .step-indicator {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
         transition: all 0.3s ease;
     }
 
@@ -96,7 +61,7 @@
         color: white;
     }
 
-    .step-indicator.current {
+    .step-indicator.active {
         background: #6366f1;
         color: white;
         animation: pulse 2s infinite;
@@ -107,24 +72,46 @@
         color: #6b7280;
     }
 
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
+    .step-line {
+        height: 2px;
+        background: #e5e7eb;
+        width: 3rem;
     }
 
-    .animate-fade-in-up {
-        animation: fadeInUp 0.5s ease-out;
+    .step-line.completed {
+        background: #10b981;
     }
 
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .method-card {
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid transparent;
+    }
+
+    .method-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .method-card.selected {
+        border-color: #6366f1;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(79, 70, 229, 0.02));
+    }
+
+    .entry-card {
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+
+    .entry-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .entry-card.selected {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.05);
     }
 
     .loading-overlay {
@@ -145,169 +132,131 @@
         padding: 2rem;
         border-radius: 1rem;
         text-align: center;
+        max-width: 400px;
     }
 
-    /* Toast Notification Styles */
-    #toast-container {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 10000;
-        pointer-events: none;
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
     }
 
-    .toast {
-        pointer-events: auto;
-        margin-bottom: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.5rem;
-        color: white;
-        font-weight: 500;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        transform: translateX(100%);
-        transition: transform 0.3s ease-in-out;
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
-    .toast.show {
-        transform: translateX(0);
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
     }
 
-    .toast.success { background-color: #10b981; }
-    .toast.error { background-color: #ef4444; }
-    .toast.warning { background-color: #f59e0b; }
-    .toast.info { background-color: #3b82f6; }
+    .gradient-text {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .primary-600 { color: #4f46e5; }
+    .secondary-600 { color: #475569; }
+    .secondary-800 { color: #1e293b; }
+    .success-600 { color: #059669; }
+    .warning-600 { color: #d97706; }
+    .error-600 { color: #dc2626; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="journal-compiler-page max-w-6xl mx-auto space-y-8">
-    <!-- Progress Steps -->
-    <div class="glass-card rounded-3xl p-6">
+<div class="max-w-6xl mx-auto p-6 space-y-8">
+    <!-- Header -->
+    <div class="glass-card rounded-3xl p-8">
         <div class="flex items-center justify-between mb-6">
-            <h1 class="text-3xl font-bold gradient-text diary-font">Smart Journal Compiler</h1>
+            <div>
+                <h1 class="text-4xl font-bold gradient-text">Smart Journal Compiler</h1>
+                <p class="text-lg text-secondary-600 mt-2">Transform your journal entries into publishable content</p>
+            </div>
+
+            <!-- Progress Steps -->
             <div class="flex items-center space-x-4">
-                <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold current">1</div>
-                <div class="w-8 h-1 bg-gray-200"></div>
-                <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold pending">2</div>
-                <div class="w-8 h-1 bg-gray-200"></div>
-                <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold pending">3</div>
-                <div class="w-8 h-1 bg-gray-200"></div>
-                <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold pending">4</div>
+                <div class="step-indicator active" id="step1">1</div>
+                <div class="step-line" id="line1"></div>
+                <div class="step-indicator pending" id="step2">2</div>
+                <div class="step-line" id="line2"></div>
+                <div class="step-indicator pending" id="step3">3</div>
+                <div class="step-line" id="line3"></div>
+                <div class="step-indicator pending" id="step4">4</div>
             </div>
         </div>
-        <p class="text-lg text-secondary-600 max-w-2xl">AI-powered tools to help you create compelling journal products from your personal entries</p>
-    </div>
 
-    <!-- Stats Overview -->
-    <div class="glass-card rounded-3xl p-6 md:p-8">
-        <h2 class="text-2xl font-bold text-secondary-800 mb-6 flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            Your Journal Analysis
-        </h2>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
-            <div class="glass-card rounded-2xl p-4 text-center">
-                <div class="text-2xl md:text-3xl font-bold text-primary-600 mb-1">{{ analysis.total_entries|default:'247' }}</div>
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="text-center p-4 bg-white rounded-2xl">
+                <div class="text-3xl font-bold text-primary-600">{{ analysis.total_entries|default:0 }}</div>
                 <div class="text-sm text-secondary-600">Total Entries</div>
             </div>
-            <div class="glass-card rounded-2xl p-4 text-center">
-                <div class="text-2xl md:text-3xl font-bold text-success-600 mb-1">{{ analysis.themes|length|default:'12' }}</div>
-                <div class="text-sm text-secondary-600">Major Themes</div>
+            <div class="text-center p-4 bg-white rounded-2xl">
+                <div class="text-3xl font-bold text-success-600">{{ analysis.themes|length|default:0 }}</div>
+                <div class="text-sm text-secondary-600">Themes</div>
             </div>
-            <div class="glass-card rounded-2xl p-4 text-center">
-                <div class="text-2xl md:text-3xl font-bold text-warning-600 mb-1">{{ analysis.quality_score.score|default:'85' }}%</div>
+            <div class="text-center p-4 bg-white rounded-2xl">
+                <div class="text-3xl font-bold text-warning-600">{{ analysis.quality_score.score|default:0 }}%</div>
                 <div class="text-sm text-secondary-600">Quality Score</div>
             </div>
-            <div class="glass-card rounded-2xl p-4 text-center">
-                <div class="text-2xl md:text-3xl font-bold text-error-600 mb-1">{{ analysis.story_arcs|length|default:'6' }}</div>
+            <div class="text-center p-4 bg-white rounded-2xl">
+                <div class="text-3xl font-bold text-error-600">{{ analysis.story_arcs|length|default:0 }}</div>
                 <div class="text-sm text-secondary-600">Story Arcs</div>
             </div>
         </div>
-
-        <!-- AI Recommendations -->
-        {% if recommendations %}
-        <div class="bg-gradient-to-r from-primary-50 to-primary-100/50 rounded-2xl p-6">
-            <h3 class="text-lg font-bold text-secondary-800 mb-4 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                AI Recommendations
-            </h3>
-            <div class="space-y-3">
-                {% for recommendation in recommendations %}
-                <div class="flex items-start space-x-3">
-                    <div class="w-2 h-2 bg-primary-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <div>
-                        <p class="font-medium text-secondary-800">{{ recommendation.title }}</p>
-                        <p class="text-sm text-secondary-600">{{ recommendation.description }}</p>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
     </div>
 
-    <!-- Step 1: Compilation Method Selection -->
-    <div id="methodSelection" class="glass-card rounded-3xl p-6 md:p-8">
-        <h2 class="text-2xl font-bold text-secondary-800 mb-6">How would you like to compile your journal?</h2>
-        <div id="methodDescription" class="hidden bg-blue-50 rounded-xl p-4 mb-6">
-            <p class="text-blue-800"></p>
-        </div>
+    <!-- Step 1: Method Selection -->
+    <div id="step1Content" class="glass-card rounded-3xl p-8">
+        <h2 class="text-2xl font-bold text-secondary-800 mb-6">Choose Your Compilation Method</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- AI-Powered Compilation -->
-            <div class="compilation-method-card glass-card rounded-2xl p-6 border-2 border-transparent" data-method="ai">
+            <div class="method-card glass-card rounded-2xl p-6" data-method="ai">
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-secondary-800 mb-2">AI Smart Compilation</h3>
-                    <p class="text-secondary-600 text-sm mb-4">Let AI analyze your entries and suggest the best compilation strategies</p>
-                    <div class="flex flex-wrap gap-2 justify-center">
-                        <span class="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-xs">Theme Detection</span>
-                        <span class="px-3 py-1 bg-secondary-100 text-secondary-800 rounded-full text-xs">Story Arcs</span>
-                        <span class="px-3 py-1 bg-success-100 text-success-800 rounded-full text-xs">Quality Scoring</span>
+                    <h3 class="text-xl font-bold mb-2">AI Smart Compilation</h3>
+                    <p class="text-secondary-600 text-sm mb-4">Let AI analyze your entries and create the optimal structure</p>
+                    <div class="space-y-1">
+                        <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Theme Detection</span>
+                        <span class="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">Story Arcs</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Thematic Compilation -->
-            <div class="compilation-method-card glass-card rounded-2xl p-6 border-2 border-transparent" data-method="thematic">
+            <div class="method-card glass-card rounded-2xl p-6" data-method="thematic">
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-secondary-800 mb-2">Thematic Collection</h3>
-                    <p class="text-secondary-600 text-sm mb-4">Organize entries around specific themes, topics, or life events</p>
-                    <div class="flex flex-wrap gap-2 justify-center">
-                        <span class="px-3 py-1 bg-success-100 text-success-800 rounded-full text-xs">Travel</span>
-                        <span class="px-3 py-1 bg-error-100 text-error-800 rounded-full text-xs">Relationships</span>
-                        <span class="px-3 py-1 bg-warning-100 text-warning-800 rounded-full text-xs">Growth</span>
+                    <h3 class="text-xl font-bold mb-2">Thematic Collection</h3>
+                    <p class="text-secondary-600 text-sm mb-4">Organize entries around specific themes and topics</p>
+                    <div class="space-y-1">
+                        <span class="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs">Travel</span>
+                        <span class="inline-block px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-xs">Growth</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Chronological Compilation -->
-            <div class="compilation-method-card glass-card rounded-2xl p-6 border-2 border-transparent" data-method="chronological">
+            <div class="method-card glass-card rounded-2xl p-6" data-method="chronological">
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-success-500 to-success-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-secondary-800 mb-2">Timeline Journey</h3>
-                    <p class="text-secondary-600 text-sm mb-4">Create a chronological narrative of a specific period or transformation</p>
-                    <div class="flex flex-wrap gap-2 justify-center">
-                        <span class="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-xs">2024 Journey</span>
-                        <span class="px-3 py-1 bg-secondary-100 text-secondary-800 rounded-full text-xs">Career Transition</span>
-                        <span class="px-3 py-1 bg-warning-100 text-warning-800 rounded-full text-xs">Milestone Year</span>
+                    <h3 class="text-xl font-bold mb-2">Timeline Journey</h3>
+                    <p class="text-secondary-600 text-sm mb-4">Create a chronological narrative of your experiences</p>
+                    <div class="space-y-1">
+                        <span class="inline-block px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs">Timeline</span>
+                        <span class="inline-block px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs">Journey</span>
                     </div>
                 </div>
             </div>
@@ -315,531 +264,262 @@
     </div>
 
     <!-- Step 2: Entry Selection -->
-    <div id="entrySelection" class="hidden glass-card rounded-3xl p-6 md:p-8">
+    <div id="step2Content" class="glass-card rounded-3xl p-8 hidden">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-secondary-800">Select Entries to Include</h2>
+            <h2 class="text-2xl font-bold text-secondary-800">Select Entries</h2>
             <div class="flex items-center space-x-4">
-                <span class="text-sm text-secondary-600">Selected: <span id="selectedEntriesCount">0</span> entries</span>
-                <div class="flex space-x-2">
-                    <button id="selectAllBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">Select All</button>
+                <span class="text-sm text-secondary-600">Selected: <span id="selectedCount">0</span></span>
+                <div class="space-x-2">
+                    <button id="selectAllBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">All</button>
                     <button id="selectNoneBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">None</button>
-                    <button id="selectRecommendedBtn" class="btn-primary px-3 py-1 text-sm rounded-lg">Recommended</button>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            <!-- Entry cards will be populated dynamically -->
-            <div id="entryCardsContainer">
-                <!-- Placeholder entry cards -->
-                {% for entry in user.diary_entries.all|slice:":12" %}
-                <div class="entry-card glass-card rounded-xl p-4 border-2 border-transparent"
-                     data-word-count="{{ entry.word_count }}"
-                     data-tag-count="{{ entry.tags.count }}"
-                     data-has-chapter="{{ entry.chapter|yesno:'true,false' }}"
-                     data-quality-score="{{ entry.get_quality_score }}">
-                    <div class="flex items-start space-x-3">
-                        <input type="checkbox" name="entries" value="{{ entry.id }}" class="mt-1 text-primary-600">
-                        <div class="flex-1">
-                            <h4 class="font-medium text-secondary-800 mb-1">{{ entry.title|truncatechars:50 }}</h4>
-                            <p class="text-sm text-secondary-600 mb-2">{{ entry.content|truncatechars:100 }}</p>
-                            <div class="flex items-center justify-between text-xs text-secondary-500">
-                                <span>{{ entry.created_at|date:"M d, Y" }}</span>
-                                <span>{{ entry.word_count }} words</span>
-                            </div>
-                            {% if entry.tags.exists %}
-                            <div class="flex flex-wrap gap-1 mt-2">
-                                {% for tag in entry.tags.all|slice:":3" %}
-                                <span class="px-2 py-1 bg-primary-100 text-primary-800 rounded text-xs">{{ tag.name }}</span>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
+        <div id="entriesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            {% for entry in entries %}
+            <div class="entry-card glass-card rounded-xl p-4" data-entry-id="{{ entry.id }}">
+                <div class="flex items-start space-x-3">
+                    <input type="checkbox" class="entry-checkbox mt-1" value="{{ entry.id }}">
+                    <div class="flex-1">
+                        <h4 class="font-medium text-secondary-800 mb-1">{{ entry.title|truncatechars:40 }}</h4>
+                        <p class="text-sm text-secondary-600 mb-2">{{ entry.content|truncatechars:80 }}</p>
+                        <div class="flex justify-between text-xs text-secondary-500">
+                            <span>{{ entry.created_at|date:"M d, Y" }}</span>
+                            <span>{{ entry.content|wordcount }} words</span>
                         </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <div class="flex justify-between items-center">
-            <div class="text-sm text-secondary-600">
-                Estimated: <span id="estimatedWordCount">0</span> words • <span id="estimatedReadingTime">0</span> min read
-            </div>
-            <button id="analyzeEntriesBtn" class="btn-primary px-6 py-3 rounded-xl font-medium">Analyze Selected Entries</button>
-        </div>
-    </div>
-
-    <!-- Step 3: Analysis Results -->
-    <div id="analysisResults" class="hidden glass-card rounded-3xl p-6 md:p-8">
-        <h2 class="text-2xl font-bold text-secondary-800 mb-6">Entry Analysis Results</h2>
-        <!-- Analysis results will be populated dynamically -->
-    </div>
-
-    <!-- Step 4: Smart Journal Builder -->
-    <div id="structurePreview" class="hidden glass-card rounded-3xl p-6 md:p-8">
-        <h2 class="text-2xl font-bold text-secondary-800 mb-6 flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a1 1 0 01-1-1V9a1 1 0 011-1h1a2 2 0 100-4H4a1 1 0 01-1-1V5a1 1 0 011-1h3a1 1 0 001-1V3a2 2 0 012-2z" />
-            </svg>
-            Build Your Journal
-        </h2>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left Panel: Options -->
-            <div class="lg:col-span-1 space-y-6">
-                <!-- Journal Type Selector -->
-                <div class="glass-card rounded-2xl p-6">
-                    <h3 class="font-bold text-secondary-800 mb-4">Journal Focus</h3>
-                    <div class="space-y-3">
-                        <label class="ai-enhancement-option flex items-center space-x-3 cursor-pointer p-2 -m-2">
-                            <input type="radio" name="journal_type" value="growth" class="text-primary-600">
-                            <span class="text-sm">Personal Growth Journey</span>
-                        </label>
-                        <label class="ai-enhancement-option flex items-center space-x-3 cursor-pointer p-2 -m-2">
-                            <input type="radio" name="journal_type" value="travel" class="text-primary-600">
-                            <span class="text-sm">Travel & Adventures</span>
-                        </label>
-                        <label class="ai-enhancement-option flex items-center space-x-3 cursor-pointer p-2 -m-2">
-                            <input type="radio" name="journal_type" value="career" class="text-primary-600">
-                            <span class="text-sm">Career Transformation</span>
-                        </label>
-                        <label class="ai-enhancement-option flex items-center space-x-3 cursor-pointer p-2 -m-2">
-                            <input type="radio" name="journal_type" value="relationships" class="text-primary-600">
-                            <span class="text-sm">Relationships & Love</span>
-                        </label>
-                        <label class="ai-enhancement-option flex items-center space-x-3 cursor-pointer p-2 -m-2">
-                            <input type="radio" name="journal_type" value="creative" class="text-primary-600">
-                            <span class="text-sm">Creative Process</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- AI Enhancement Options -->
-                <div class="glass-card rounded-2xl p-6">
-                    <h3 class="font-bold text-secondary-800 mb-4">AI Enhancements</h3>
-                    <div class="space-y-3">
-                        <label class="ai-enhancement-option flex items-center space-x-3 p-2 -m-2 cursor-pointer">
-                            <input type="checkbox" name="chapter_introductions" class="text-primary-600">
-                            <span class="text-sm">Auto-generate chapter introductions</span>
-                        </label>
-                        <label class="ai-enhancement-option flex items-center space-x-3 p-2 -m-2 cursor-pointer">
-                            <input type="checkbox" name="reflection_questions" class="text-primary-600">
-                            <span class="text-sm">Add reflection questions</span>
-                        </label>
-                        <label class="ai-enhancement-option flex items-center space-x-3 p-2 -m-2 cursor-pointer">
-                            <input type="checkbox" name="thematic_connections" class="text-primary-600">
-                            <span class="text-sm">Create thematic connections</span>
-                        </label>
-                        <label class="ai-enhancement-option flex items-center space-x-3 p-2 -m-2 cursor-pointer">
-                            <input type="checkbox" name="readers_guide" class="text-primary-600">
-                            <span class="text-sm">Generate reader's guide</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Generate Structure Button -->
-                <button id="generateStructureBtn" class="btn-primary w-full px-6 py-3 rounded-xl font-medium">
-                    Generate Journal Structure
-                </button>
-            </div>
-
-            <!-- Right Panel: Preview -->
-            <div class="lg:col-span-2">
-                <div class="glass-card rounded-2xl p-6">
-                    <h3 class="font-bold text-secondary-800 mb-4 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                        Journal Preview
-                    </h3>
-
-                    <!-- Default Preview Content -->
-                    <div id="previewContent">
-                        <!-- Story Arc Visualization -->
-                        <div class="mb-6">
-                            <h4 class="font-medium text-secondary-700 mb-3">Story Arc</h4>
-                            <div class="relative">
-                                <div class="story-arc mb-2"></div>
-                                <div class="flex justify-between text-xs text-secondary-500">
-                                    <span>Setup</span>
-                                    <span>Challenge</span>
-                                    <span>Growth</span>
-                                    <span>Transformation</span>
-                                    <span>Resolution</span>
-                                </div>
-                            </div>
+                        {% if entry.tags.exists %}
+                        <div class="flex flex-wrap gap-1 mt-2">
+                            {% for tag in entry.tags.all|slice:":2" %}
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">{{ tag.name }}</span>
+                            {% endfor %}
                         </div>
-
-                        <!-- Chapter Breakdown -->
-                        <div class="space-y-4">
-                            <div class="chapter-preview border-l-4 border-primary-500 pl-4 p-2 -m-2">
-                                <h4 class="font-medium text-secondary-800">Chapter 1: The Beginning</h4>
-                                <p class="text-sm text-secondary-600">Select entries to see structure...</p>
-                            </div>
-                        </div>
+                        {% endif %}
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Publication Form -->
-    <div id="publicationForm" class="hidden glass-card rounded-3xl p-6 md:p-8">
-        <h2 class="text-2xl font-bold text-secondary-800 mb-6">Publish Your Journal</h2>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-secondary-700 mb-2">Journal Title</label>
-                    <input type="text" id="journalTitle" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Enter a compelling title...">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-secondary-700 mb-2">Description</label>
-                    <textarea id="journalDescription" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Describe your journal..."></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-secondary-700 mb-2">Price ($)</label>
-                    <input type="number" id="journalPrice" step="0.01" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="9.99">
-                </div>
-            </div>
-
-            <div>
-                <div id="pricingInsights" class="hidden"></div>
-
-                <div class="flex flex-col gap-4 mt-8">
-                    <button id="publishJournalBtn" class="btn-primary px-6 py-3 rounded-xl font-medium">
-                        Publish Journal
-                    </button>
-                    <div class="flex gap-2">
-                        <button id="saveDraftBtn" class="btn-secondary flex-1 px-4 py-2 rounded-lg">Save Draft</button>
-                        <button id="marketingCopyBtn" class="btn-secondary flex-1 px-4 py-2 rounded-lg">Marketing Copy</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Template Gallery -->
-    {% if templates %}
-    <div class="glass-card rounded-3xl p-6 md:p-8">
-        <h2 class="text-2xl font-bold text-secondary-800 mb-6 flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-            </svg>
-            Popular Journal Templates
-        </h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {% for template in templates %}
-            <div class="template-card glass-card rounded-2xl p-6" data-template-id="{{ template.id }}">
-                <div class="h-32 bg-gradient-to-br from-primary-400 to-secondary-500 rounded-xl mb-4 flex items-center justify-center">
-                    <span class="text-white font-bold text-lg handwritten">"{{ template.name }}"</span>
-                </div>
-                <h3 class="font-bold text-secondary-800 mb-2">{{ template.name }}</h3>
-                <p class="text-sm text-secondary-600 mb-3">{{ template.description }}</p>
-                <div class="flex justify-between items-center">
-                    <span class="text-xs text-success-600 font-medium flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {{ template.success_rate }}% success rate
-                    </span>
-                    <span class="text-xs text-secondary-500">Avg. ${{ template.average_price }}</span>
                 </div>
             </div>
             {% endfor %}
         </div>
-    </div>
-    {% endif %}
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-spinner">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-            <p class="text-secondary-800 font-medium">Processing your journal...</p>
-            <p class="text-sm text-secondary-600 mt-2">This may take a few minutes</p>
+        <div class="flex justify-between items-center">
+            <div class="text-sm text-secondary-600">
+                Estimated: <span id="totalWords">0</span> words
+            </div>
+            <button id="analyzeBtn" class="btn-primary px-6 py-3 rounded-xl" disabled>
+                Analyze Selected Entries
+            </button>
+        </div>
+    </div>
+
+    <!-- Step 3: Analysis Results -->
+    <div id="step3Content" class="glass-card rounded-3xl p-8 hidden">
+        <h2 class="text-2xl font-bold text-secondary-800 mb-6">Analysis Results</h2>
+        <div id="analysisResults">
+            <div class="text-center py-8">
+                <div class="text-secondary-600">Analysis results will appear here...</div>
+            </div>
+        </div>
+        <div class="mt-6 text-center">
+            <button id="generateStructureBtn" class="btn-primary px-6 py-3 rounded-xl" disabled>
+                Generate Journal Structure
+            </button>
+        </div>
+    </div>
+
+    <!-- Step 4: Structure & Publishing -->
+    <div id="step4Content" class="glass-card rounded-3xl p-8 hidden">
+        <h2 class="text-2xl font-bold text-secondary-800 mb-6">Journal Structure & Publishing</h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Structure Preview -->
+            <div>
+                <h3 class="font-bold text-secondary-800 mb-4">Generated Structure</h3>
+                <div id="structurePreview" class="space-y-4">
+                    <div class="text-center py-8 text-secondary-600">
+                        Structure will appear here...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Publishing Form -->
+            <div>
+                <h3 class="font-bold text-secondary-800 mb-4">Publishing Details</h3>
+                <form id="publishForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-secondary-700 mb-2">Title</label>
+                        <input type="text" id="journalTitle" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="Enter journal title...">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-secondary-700 mb-2">Description</label>
+                        <textarea id="journalDescription" rows="4" required
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Describe your journal..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-secondary-700 mb-2">Price ($)</label>
+                        <input type="number" id="journalPrice" step="0.01" min="0"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="9.99">
+                    </div>
+
+                    <div class="space-y-3">
+                        <h4 class="font-medium text-secondary-700">Journal Type</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="journalType" value="growth" class="mr-2" checked>
+                                <span class="text-sm">Personal Growth</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="journalType" value="travel" class="mr-2">
+                                <span class="text-sm">Travel & Adventures</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="journalType" value="career" class="mr-2">
+                                <span class="text-sm">Career Journey</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" id="publishBtn" class="w-full btn-primary py-3 rounded-xl text-lg font-semibold">
+                            Publish Journal
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Toast Container -->
-<div id="toast-container"></div>
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <div id="loadingText" class="text-secondary-800 font-medium">Processing...</div>
+        <div class="text-sm text-secondary-600 mt-2">This may take a moment</div>
+    </div>
+</div>
 
-<!-- CSRF Token -->
+<!-- Success Modal -->
+<div id="successModal" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner">
+        <div class="text-6xl text-green-500 mb-4">✓</div>
+        <div class="text-secondary-800 font-medium text-xl mb-2">Journal Published!</div>
+        <div class="text-sm text-secondary-600 mb-4">Your journal has been successfully published to the marketplace.</div>
+        <button id="viewJournalBtn" class="btn-primary px-6 py-2 rounded-lg">View Journal</button>
+    </div>
+</div>
+
 {% csrf_token %}
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Smart Journal Compiler JavaScript Integration
-class JournalCompiler {
+class SmartJournalCompiler {
     constructor() {
         this.selectedMethod = null;
         this.selectedEntries = new Set();
-        this.generatedStructure = null;
         this.currentStep = 1;
-        this.maxSteps = 4;
+        this.analysisData = null;
+        this.structureData = null;
 
         this.init();
     }
 
     init() {
-        console.log('Initializing Smart Journal Compiler');
         this.bindEvents();
-        this.loadInitialData();
-        this.startAutoSave();
-        this.createToastSystem();
+        this.updateStepDisplay();
     }
 
     bindEvents() {
-        // Compilation method selection
-        document.querySelectorAll('.compilation-method-card').forEach(card => {
-            card.addEventListener('click', (e) => this.selectCompilationMethod(e));
-        });
-
-        // Template selection
-        document.querySelectorAll('.template-card').forEach(card => {
-            card.addEventListener('click', (e) => this.selectTemplate(e));
+        // Method selection
+        document.querySelectorAll('.method-card').forEach(card => {
+            card.addEventListener('click', (e) => this.selectMethod(e));
         });
 
         // Entry selection
-        document.querySelectorAll('input[name="entries"]').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => this.toggleEntrySelection(e));
+        document.querySelectorAll('.entry-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => this.updateSelectedEntries());
         });
 
-        // Entry selection buttons
-        const selectAllBtn = document.getElementById('selectAllBtn');
-        if (selectAllBtn) {
-            selectAllBtn.addEventListener('click', () => this.selectAllEntries());
-        }
+        document.getElementById('selectAllBtn')?.addEventListener('click', () => this.selectAllEntries());
+        document.getElementById('selectNoneBtn')?.addEventListener('click', () => this.selectNoneEntries());
 
-        const selectNoneBtn = document.getElementById('selectNoneBtn');
-        if (selectNoneBtn) {
-            selectNoneBtn.addEventListener('click', () => this.selectNoneEntries());
-        }
-
-        const selectRecommendedBtn = document.getElementById('selectRecommendedBtn');
-        if (selectRecommendedBtn) {
-            selectRecommendedBtn.addEventListener('click', () => this.selectRecommendedEntries());
-        }
-
-        // Journal type and AI enhancements
-        document.querySelectorAll('input[name="journal_type"]').forEach(radio => {
-            radio.addEventListener('change', (e) => this.updateJournalType(e));
-        });
-
-        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-            if (checkbox.name !== 'entries') {
-                checkbox.addEventListener('change', (e) => this.updateAIEnhancements(e));
-            }
-        });
-
-        // Main action buttons
-        const analyzeBtn = document.getElementById('analyzeEntriesBtn');
-        if (analyzeBtn) {
-            analyzeBtn.addEventListener('click', (e) => this.analyzeEntries(e));
-        }
-
-        const generateBtn = document.getElementById('generateStructureBtn');
-        if (generateBtn) {
-            generateBtn.addEventListener('click', (e) => this.generateStructure(e));
-        }
-
-        const publishBtn = document.getElementById('publishJournalBtn');
-        if (publishBtn) {
-            publishBtn.addEventListener('click', (e) => this.publishJournal(e));
-        }
-
-        // Utility buttons
-        const saveDraftBtn = document.getElementById('saveDraftBtn');
-        if (saveDraftBtn) {
-            saveDraftBtn.addEventListener('click', (e) => this.saveDraft(e));
-        }
-
-        const marketingCopyBtn = document.getElementById('marketingCopyBtn');
-        if (marketingCopyBtn) {
-            marketingCopyBtn.addEventListener('click', (e) => this.generateMarketingCopy(e));
-        }
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
+        // Action buttons
+        document.getElementById('analyzeBtn')?.addEventListener('click', (e) => this.analyzeEntries(e));
+        document.getElementById('generateStructureBtn')?.addEventListener('click', (e) => this.generateStructure(e));
+        document.getElementById('publishForm')?.addEventListener('submit', (e) => this.publishJournal(e));
     }
 
-    async loadInitialData() {
-        try {
-            // Load any existing draft
-            const response = await fetch('/diary/api/load-draft/', {
-                method: 'GET',
-                headers: {
-                    'X-CSRFToken': this.getCSRFToken(),
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success && data.draft) {
-                    this.loadDraftData(data.draft);
-                }
-            }
-        } catch (error) {
-            console.log('No existing draft found');
-        }
-    }
-
-    createToastSystem() {
-        if (!window.showToast) {
-            window.showToast = (message, type = 'info', duration = 3000) => {
-                const container = document.getElementById('toast-container');
-                const toast = document.createElement('div');
-
-                toast.className = `toast ${type}`;
-                toast.textContent = message;
-
-                container.appendChild(toast);
-
-                // Show toast
-                setTimeout(() => toast.classList.add('show'), 100);
-
-                // Hide and remove toast
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => container.removeChild(toast), 300);
-                }, duration);
-            };
-        }
-    }
-
-    selectCompilationMethod(event) {
-        // Remove selection from all cards
-        document.querySelectorAll('.compilation-method-card').forEach(card => {
+    selectMethod(event) {
+        // Remove previous selections
+        document.querySelectorAll('.method-card').forEach(card => {
             card.classList.remove('selected');
         });
 
-        // Add selection to clicked card
+        // Select clicked method
         const card = event.currentTarget;
         card.classList.add('selected');
-
         this.selectedMethod = card.dataset.method;
-        console.log('Selected compilation method:', this.selectedMethod);
 
-        // Update UI based on method
-        this.updateMethodSpecificUI();
+        console.log('Selected method:', this.selectedMethod);
 
-        // Show feedback
-        const methodNames = {
-            'ai': 'AI Smart Compilation',
-            'thematic': 'Thematic Collection',
-            'chronological': 'Timeline Journey'
-        };
-        window.showToast(`Selected: ${methodNames[this.selectedMethod]}`, 'info', 2000);
-
-        // Enable next step
-        this.updateStepProgress(2);
+        // Move to next step
+        this.goToStep(2);
     }
 
-    selectTemplate(event) {
-        // Remove selection from all templates
-        document.querySelectorAll('.template-card').forEach(card => {
-            card.classList.remove('ring-2', 'ring-primary-500');
+    updateSelectedEntries() {
+        const checkboxes = document.querySelectorAll('.entry-checkbox:checked');
+        this.selectedEntries = new Set(Array.from(checkboxes).map(cb => parseInt(cb.value)));
+
+        // Update UI
+        document.getElementById('selectedCount').textContent = this.selectedEntries.size;
+
+        // Calculate total words
+        let totalWords = 0;
+        checkboxes.forEach(cb => {
+            const card = cb.closest('.entry-card');
+            const wordCount = card.querySelector('.text-xs span:last-child').textContent.match(/\d+/);
+            if (wordCount) totalWords += parseInt(wordCount[0]);
         });
-
-        // Add selection to clicked template
-        const card = event.currentTarget;
-        card.classList.add('ring-2', 'ring-primary-500');
-
-        const templateId = card.dataset.templateId;
-        console.log('Selected template:', templateId);
-
-        const templateName = card.querySelector('h3').textContent;
-        window.showToast(`Template selected: ${templateName}`, 'success', 2000);
-    }
-
-    toggleEntrySelection(event) {
-        const checkbox = event.target;
-        const entryId = parseInt(checkbox.value);
-
-        if (checkbox.checked) {
-            this.selectedEntries.add(entryId);
-        } else {
-            this.selectedEntries.delete(entryId);
-        }
-
-        console.log('Selected entries:', Array.from(this.selectedEntries));
-        this.updateSelectionUI();
-    }
-
-    updateSelectionUI() {
-        const count = this.selectedEntries.size;
-        const countDisplay = document.getElementById('selectedEntriesCount');
-        if (countDisplay) {
-            countDisplay.textContent = count;
-        }
-
-        // Update estimated metrics
-        this.updateEstimatedMetrics();
+        document.getElementById('totalWords').textContent = totalWords.toLocaleString();
 
         // Enable/disable analyze button
-        const analyzeBtn = document.getElementById('analyzeEntriesBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
         if (analyzeBtn) {
-            analyzeBtn.disabled = count === 0;
+            analyzeBtn.disabled = this.selectedEntries.size === 0;
         }
-    }
 
-    updateEstimatedMetrics() {
-        // Calculate estimated word count, reading time, etc.
-        const selectedEntryElements = document.querySelectorAll('input[name="entries"]:checked');
-        let totalWords = 0;
-
-        selectedEntryElements.forEach(checkbox => {
-            const entryCard = checkbox.closest('.entry-card');
-            const wordCount = parseInt(entryCard.dataset.wordCount || 0);
-            totalWords += wordCount;
+        // Update entry card styling
+        document.querySelectorAll('.entry-card').forEach(card => {
+            const checkbox = card.querySelector('.entry-checkbox');
+            if (checkbox.checked) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
         });
-
-        // Update UI elements
-        const wordCountDisplay = document.getElementById('estimatedWordCount');
-        if (wordCountDisplay) {
-            wordCountDisplay.textContent = totalWords.toLocaleString();
-        }
-
-        const readingTimeDisplay = document.getElementById('estimatedReadingTime');
-        if (readingTimeDisplay) {
-            const readingTime = Math.ceil(totalWords / 200); // 200 WPM average
-            readingTimeDisplay.textContent = `${readingTime}`;
-        }
     }
 
-    updateJournalType(event) {
-        const journalType = event.target.value;
-        console.log('Journal type changed to:', journalType);
-
-        // Update preview based on journal type
-        this.updatePreviewForType(journalType);
+    selectAllEntries() {
+        document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = true);
+        this.updateSelectedEntries();
     }
 
-    updateAIEnhancements(event) {
-        const enhancement = event.target.name;
-        const enabled = event.target.checked;
-
-        console.log('AI enhancement toggled:', enhancement, enabled);
-
-        const label = event.target.nextElementSibling.textContent;
-        const action = enabled ? 'enabled' : 'disabled';
-        window.showToast(`${label} ${action}`, 'info', 1500);
+    selectNoneEntries() {
+        document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = false);
+        this.updateSelectedEntries();
     }
 
     async analyzeEntries(event) {
         event.preventDefault();
 
-        if (!this.selectedMethod) {
-            this.showError('Please select a compilation method first');
-            return;
-        }
-
-        if (this.selectedEntries.size === 0) {
-            this.showError('Please select at least one entry to analyze');
+        if (!this.selectedMethod || this.selectedEntries.size === 0) {
+            this.showError('Please select a method and entries first');
             return;
         }
 
@@ -848,39 +528,37 @@ class JournalCompiler {
 
         try {
             this.showLoading('Analyzing your entries...');
-
-            // Show loading state
             button.disabled = true;
-            button.innerHTML = `
-                <svg class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Analyzing...
-            `;
+            button.textContent = 'Analyzing...';
 
-            // Simulate analysis
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            const response = await fetch('/diary/api/analyze-entries/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: JSON.stringify({
+                    method: this.selectedMethod,
+                    entry_ids: Array.from(this.selectedEntries)
+                })
+            });
 
-            const mockAnalysis = {
-                total_entries: this.selectedEntries.size,
-                themes: ['Personal Growth', 'Daily Reflections', 'Career Development'],
-                quality_score: { score: 78 },
-                story_arcs: ['Beginning', 'Challenge', 'Growth', 'Resolution'],
-                ai_insights: 'Your entries show strong personal reflection and growth themes. Consider organizing around key life events.'
-            };
+            const data = await response.json();
 
-            this.displayAnalysisResults(mockAnalysis);
-            this.updateStepProgress(3);
-
-            window.showToast('Analysis completed successfully!', 'success');
+            if (data.success) {
+                this.analysisData = data.analysis;
+                this.displayAnalysisResults(data.analysis);
+                this.goToStep(3);
+                this.showSuccess('Analysis completed successfully!');
+            } else {
+                throw new Error(data.error || 'Analysis failed');
+            }
 
         } catch (error) {
             console.error('Analysis error:', error);
             this.showError('Failed to analyze entries: ' + error.message);
         } finally {
             this.hideLoading();
-            // Restore button
             button.disabled = false;
             button.textContent = originalText;
         }
@@ -889,8 +567,8 @@ class JournalCompiler {
     async generateStructure(event) {
         event.preventDefault();
 
-        if (!this.selectedMethod || this.selectedEntries.size === 0) {
-            this.showError('Please complete the analysis step first');
+        if (!this.analysisData) {
+            this.showError('Please complete analysis first');
             return;
         }
 
@@ -899,66 +577,42 @@ class JournalCompiler {
 
         try {
             this.showLoading('Generating journal structure...');
-
-            // Show loading state
             button.disabled = true;
-            button.innerHTML = `
-                <svg class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Generating Structure...
-            `;
+            button.textContent = 'Generating...';
 
-            // Get form data
-            const journalType = document.querySelector('input[name="journal_type"]:checked')?.value || 'growth';
+            const journalType = document.querySelector('input[name="journalType"]:checked')?.value || 'growth';
 
-            // Simulate structure generation
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            const response = await fetch('/diary/api/generate-structure/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: JSON.stringify({
+                    method: this.selectedMethod,
+                    journal_type: journalType,
+                    entry_ids: Array.from(this.selectedEntries),
+                    ai_enhancements: []
+                })
+            });
 
-            const mockStructure = {
-                title: `My ${journalType.charAt(0).toUpperCase() + journalType.slice(1)} Journey`,
-                description: `A personal collection of reflections and insights from my ${journalType} journey.`,
-                chapters: [
-                    {
-                        title: 'Chapter 1: The Beginning',
-                        entry_count: Math.ceil(this.selectedEntries.size / 4),
-                        description: 'Setting the foundation and early experiences'
-                    },
-                    {
-                        title: 'Chapter 2: Challenges and Growth',
-                        entry_count: Math.ceil(this.selectedEntries.size / 3),
-                        description: 'Overcoming obstacles and learning valuable lessons'
-                    },
-                    {
-                        title: 'Chapter 3: Transformation',
-                        entry_count: Math.ceil(this.selectedEntries.size / 4),
-                        description: 'Key insights and personal evolution'
-                    },
-                    {
-                        title: 'Chapter 4: Looking Forward',
-                        entry_count: Math.floor(this.selectedEntries.size / 6),
-                        description: 'Future goals and reflections'
-                    }
-                ],
-                estimated_length: this.selectedEntries.size * 250,
-                suggested_price: '$12.99'
-            };
+            const data = await response.json();
 
-            this.generatedStructure = mockStructure;
-            this.displayStructurePreview(mockStructure);
-            this.updatePricingSuggestion('12.99');
-            this.updateStepProgress(4);
-            this.showPublicationForm();
-
-            window.showToast('Journal structure generated!', 'success');
+            if (data.success) {
+                this.structureData = data.structure;
+                this.displayStructure(data.structure);
+                this.populatePublishingForm(data.structure);
+                this.goToStep(4);
+                this.showSuccess('Structure generated successfully!');
+            } else {
+                throw new Error(data.error || 'Structure generation failed');
+            }
 
         } catch (error) {
             console.error('Structure generation error:', error);
             this.showError('Failed to generate structure: ' + error.message);
         } finally {
             this.hideLoading();
-            // Restore button
             button.disabled = false;
             button.textContent = originalText;
         }
@@ -967,124 +621,34 @@ class JournalCompiler {
     async publishJournal(event) {
         event.preventDefault();
 
-        if (!this.generatedStructure) {
-            this.showError('Please generate journal structure first');
+        if (!this.structureData) {
+            this.showError('Please generate structure first');
             return;
         }
 
-        // Get publication details
-        const title = document.getElementById('journalTitle')?.value?.trim();
-        const description = document.getElementById('journalDescription')?.value?.trim();
-        const price = parseFloat(document.getElementById('journalPrice')?.value || 0);
+        const formData = new FormData(event.target);
+        const title = formData.get('title') || document.getElementById('journalTitle').value;
+        const description = formData.get('description') || document.getElementById('journalDescription').value;
+        const price = parseFloat(document.getElementById('journalPrice').value || 0);
 
-        // Validate
-        if (!title) {
-            this.showError('Please enter a journal title');
+        if (!title || !description) {
+            this.showError('Please fill in all required fields');
             return;
         }
 
-        if (!description) {
-            this.showError('Please enter a journal description');
+        if (!confirm('Are you sure you want to publish this journal?')) {
             return;
         }
 
-        // Confirm publication
-        if (!confirm('Are you sure you want to publish this journal? This action cannot be undone.')) {
-            return;
-        }
-
-        const button = event.target;
+        const button = document.getElementById('publishBtn');
         const originalText = button.textContent;
 
         try {
             this.showLoading('Publishing your journal...');
-
-            // Show loading state
             button.disabled = true;
-            button.innerHTML = `
-                <svg class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Publishing...
-            `;
+            button.textContent = 'Publishing...';
 
-            // Simulate publishing
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            window.showToast('Journal published successfully!', 'success', 5000);
-
-            // Simulate redirect
-            setTimeout(() => {
-                alert('Journal published! (In a real app, this would redirect to the published journal)');
-            }, 2000);
-
-        } catch (error) {
-            console.error('Publication error:', error);
-            this.showError('Failed to publish journal: ' + error.message);
-
-            // Restore button
-            button.disabled = false;
-            button.textContent = originalText;
-        } finally {
-            this.hideLoading();
-        }
-    }
-
-    async saveDraft(event) {
-        event.preventDefault();
-
-        try {
-            const draftData = {
-                title: document.getElementById('journalTitle')?.value || '',
-                description: document.getElementById('journalDescription')?.value || '',
-                journal_type: document.querySelector('input[name="journal_type"]:checked')?.value || 'growth',
-                compilation_method: this.selectedMethod,
-                entry_ids: Array.from(this.selectedEntries),
-                ai_enhancements: Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
-                    .map(cb => cb.name)
-                    .filter(name => name !== 'entries'),
-                structure: this.generatedStructure
-            };
-
-            const response = await fetch('/diary/api/save-draft/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': this.getCSRFToken(),
-                },
-                body: JSON.stringify(draftData)
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                window.showToast('Draft saved successfully!', 'success');
-            } else {
-                throw new Error(data.error || 'Failed to save draft');
-            }
-
-        } catch (error) {
-            console.error('Save draft error:', error);
-            this.showError('Failed to save draft: ' + error.message);
-        }
-    }
-
-    async generateMarketingCopy(event) {
-        event.preventDefault();
-
-        const title = document.getElementById('journalTitle')?.value?.trim();
-        const description = document.getElementById('journalDescription')?.value?.trim();
-
-        if (!title || !description) {
-            this.showError('Please enter title and description first');
-            return;
-        }
-
-        try {
-            const journalType = document.querySelector('input[name="journal_type"]:checked')?.value || 'growth';
-
-            const response = await fetch('/diary/api/marketing-copy/', {
+            const response = await fetch('/diary/api/publish-journal/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1093,646 +657,180 @@ class JournalCompiler {
                 body: JSON.stringify({
                     title: title,
                     description: description,
-                    journal_type: journalType,
-                    entry_ids: Array.from(this.selectedEntries)
+                    price: price
                 })
             });
 
             const data = await response.json();
 
             if (data.success) {
-                this.displayMarketingCopy(data.marketing_copy);
+                this.hideLoading();
+                this.showSuccessModal(data.journal_id);
             } else {
-                throw new Error(data.error);
+                throw new Error(data.error || 'Publishing failed');
             }
 
         } catch (error) {
-            console.error('Marketing copy error:', error);
-            this.showError('Failed to generate marketing copy');
+            console.error('Publishing error:', error);
+            this.showError('Failed to publish journal: ' + error.message);
+            this.hideLoading();
+            button.disabled = false;
+            button.textContent = originalText;
         }
-    }
-
-    // UI Helper Methods
-
-    updateStepProgress(step) {
-        this.currentStep = Math.max(this.currentStep, step);
-
-        // Update progress indicators
-        document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
-            const stepNumber = index + 1;
-
-            if (stepNumber < this.currentStep) {
-                indicator.classList.add('completed');
-                indicator.classList.remove('current', 'pending');
-            } else if (stepNumber === this.currentStep) {
-                indicator.classList.add('current');
-                indicator.classList.remove('completed', 'pending');
-            } else {
-                indicator.classList.add('pending');
-                indicator.classList.remove('completed', 'current');
-            }
-        });
-
-        // Show/hide sections
-        this.updateStepSections();
-    }
-
-    updateStepSections() {
-        const sections = {
-            1: 'methodSelection',
-            2: 'entrySelection',
-            3: 'analysisResults',
-            4: 'structurePreview'
-        };
-
-        Object.entries(sections).forEach(([step, sectionId]) => {
-            const section = document.getElementById(sectionId);
-            if (section) {
-                if (parseInt(step) <= this.currentStep) {
-                    section.classList.remove('hidden');
-                    section.classList.add('animate-fade-in-up');
-                } else {
-                    section.classList.add('hidden');
-                }
-            }
-        });
-    }
-
-    updateMethodSpecificUI() {
-        const methodDescriptions = {
-            'ai': 'AI will analyze your entries to identify the best themes, story arcs, and optimal structure for maximum reader engagement.',
-            'thematic': 'Your entries will be organized around specific themes and topics, creating focused collections that are easy to navigate.',
-            'chronological': 'Create a timeline-based narrative showing your journey and growth over the selected time period.'
-        };
-
-        const descriptionElement = document.getElementById('methodDescription');
-        if (descriptionElement && this.selectedMethod) {
-            descriptionElement.querySelector('p').textContent = methodDescriptions[this.selectedMethod];
-            descriptionElement.classList.remove('hidden');
-        }
-
-        this.updateEntrySelectionForMethod();
-    }
-
-    updateEntrySelectionForMethod() {
-        if (!this.selectedMethod) return;
-
-        const entryCards = document.querySelectorAll('.entry-card');
-
-        entryCards.forEach(card => {
-            card.classList.remove('recommended-for-method');
-
-            if (this.selectedMethod === 'thematic') {
-                const tagCount = parseInt(card.dataset.tagCount || 0);
-                if (tagCount > 2) {
-                    card.classList.add('recommended-for-method');
-                }
-            } else if (this.selectedMethod === 'chronological') {
-                const hasChapter = card.dataset.hasChapter === 'true';
-                if (hasChapter) {
-                    card.classList.add('recommended-for-method');
-                }
-            } else if (this.selectedMethod === 'ai') {
-                const qualityScore = parseInt(card.dataset.qualityScore || 0);
-                if (qualityScore > 70) {
-                    card.classList.add('recommended-for-method');
-                }
-            }
-        });
     }
 
     displayAnalysisResults(analysis) {
-        const analysisContainer = document.getElementById('analysisResults');
-        if (!analysisContainer) return;
-
-        analysisContainer.innerHTML = `
-            <div class="space-y-4">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="text-center glass-card rounded-xl p-4">
-                        <div class="text-2xl font-bold text-primary-600">${analysis.total_entries}</div>
-                        <div class="text-sm text-secondary-600">Entries</div>
-                    </div>
-                    <div class="text-center glass-card rounded-xl p-4">
-                        <div class="text-2xl font-bold text-success-600">${analysis.themes?.length || 0}</div>
-                        <div class="text-sm text-secondary-600">Themes</div>
-                    </div>
-                    <div class="text-center glass-card rounded-xl p-4">
-                        <div class="text-2xl font-bold text-warning-600">${analysis.quality_score?.score || 0}%</div>
-                        <div class="text-sm text-secondary-600">Quality</div>
-                    </div>
-                    <div class="text-center glass-card rounded-xl p-4">
-                        <div class="text-2xl font-bold text-error-600">${analysis.story_arcs?.length || 0}</div>
-                        <div class="text-sm text-secondary-600">Story Arcs</div>
-                    </div>
+        const container = document.getElementById('analysisResults');
+        container.innerHTML = `
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="text-center p-4 bg-white rounded-xl">
+                    <div class="text-2xl font-bold text-blue-600">${analysis.total_entries || 0}</div>
+                    <div class="text-sm text-gray-600">Entries</div>
                 </div>
-
-                <div class="bg-gradient-to-r from-primary-50 to-primary-100/50 rounded-2xl p-4">
-                    <h4 class="font-semibold text-secondary-800 mb-2">Key Insights</h4>
-                    <p class="text-sm text-secondary-600">${analysis.ai_insights || 'Analysis completed successfully'}</p>
+                <div class="text-center p-4 bg-white rounded-xl">
+                    <div class="text-2xl font-bold text-green-600">${analysis.themes?.length || 0}</div>
+                    <div class="text-sm text-gray-600">Themes</div>
                 </div>
+                <div class="text-center p-4 bg-white rounded-xl">
+                    <div class="text-2xl font-bold text-yellow-600">${analysis.quality_score?.score || 0}%</div>
+                    <div class="text-sm text-gray-600">Quality</div>
+                </div>
+                <div class="text-center p-4 bg-white rounded-xl">
+                    <div class="text-2xl font-bold text-purple-600">${analysis.story_arcs?.length || 0}</div>
+                    <div class="text-sm text-gray-600">Story Arcs</div>
+                </div>
+            </div>
+            <div class="bg-blue-50 rounded-xl p-4">
+                <h4 class="font-semibold text-blue-800 mb-2">Analysis Summary</h4>
+                <p class="text-blue-700 text-sm">${analysis.ai_insights || 'Your entries have been analyzed and are ready for compilation.'}</p>
             </div>
         `;
 
-        analysisContainer.classList.remove('hidden');
+        document.getElementById('generateStructureBtn').disabled = false;
     }
 
-    displayStructurePreview(structure) {
-        const previewContainer = document.getElementById('previewContent');
-        if (!previewContainer) return;
+    displayStructure(structure) {
+        const container = document.getElementById('structurePreview');
 
         let chaptersHtml = '';
         if (structure.chapters) {
             chaptersHtml = structure.chapters.map((chapter, index) => `
-                <div class="chapter-preview border-l-4 border-primary-500 pl-4 p-2 -m-2">
-                    <h4 class="font-medium text-secondary-800">${chapter.title}</h4>
-                    <p class="text-sm text-secondary-600">${chapter.entry_count || 0} entries</p>
-                    <p class="text-sm text-secondary-500 mt-1">${chapter.description || ''}</p>
+                <div class="border-l-4 border-blue-500 pl-4 py-2">
+                    <h4 class="font-medium text-gray-800">${chapter.title}</h4>
+                    <p class="text-sm text-gray-600">${chapter.entry_count || 0} entries</p>
+                    <p class="text-xs text-gray-500">${chapter.description || ''}</p>
                 </div>
             `).join('');
         }
 
-        previewContainer.innerHTML = `
+        container.innerHTML = `
             <div class="space-y-4">
-                <div>
-                    <h3 class="text-lg font-bold text-secondary-800 mb-2">${structure.title || 'Generated Journal'}</h3>
-                    <p class="text-secondary-600 mb-4">${structure.description || ''}</p>
+                <div class="bg-white rounded-xl p-4">
+                    <h3 class="font-bold text-gray-800 mb-2">${structure.title || 'Generated Journal'}</h3>
+                    <p class="text-gray-600 text-sm">${structure.description || ''}</p>
                 </div>
-
-                <div class="space-y-3">
-                    ${chaptersHtml}
-                </div>
-
-                <div class="bg-success-50 rounded-xl p-4">
-                    <h4 class="font-semibold text-success-800 mb-2">Estimated Metrics</h4>
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <span class="text-success-600">Word Count:</span>
-                            <span class="font-medium">${(structure.estimated_length || 0).toLocaleString()}</span>
-                        </div>
-                        <div>
-                            <span class="text-success-600">Suggested Price:</span>
-                            <span class="font-medium">${structure.suggested_price || '$9.99'}</span>
-                        </div>
+                <div class="space-y-3">${chaptersHtml}</div>
+                <div class="bg-green-50 rounded-xl p-4">
+                    <div class="text-sm">
+                        <strong>Estimated Length:</strong> ${(structure.estimated_length || 0).toLocaleString()} words<br>
+                        <strong>Suggested Price:</strong> $${structure.suggested_price || '9.99'}
                     </div>
                 </div>
             </div>
         `;
     }
 
-    showPublicationForm() {
-        const form = document.getElementById('publicationForm');
-        if (form) {
-            form.classList.remove('hidden');
-            form.classList.add('animate-fade-in-up');
+    populatePublishingForm(structure) {
+        if (structure.title) {
+            document.getElementById('journalTitle').value = structure.title;
+        }
+        if (structure.description) {
+            document.getElementById('journalDescription').value = structure.description;
+        }
+        if (structure.suggested_price) {
+            const price = typeof structure.suggested_price === 'string'
+                ? structure.suggested_price.replace('$', '')
+                : structure.suggested_price;
+            document.getElementById('journalPrice').value = price;
+        }
+    }
 
-            // Populate form with generated data
-            if (this.generatedStructure) {
-                const titleInput = document.getElementById('journalTitle');
-                const descInput = document.getElementById('journalDescription');
+    goToStep(step) {
+        this.currentStep = step;
+        this.updateStepDisplay();
+    }
 
-                if (titleInput && !titleInput.value) {
-                    titleInput.value = this.generatedStructure.title || '';
+    updateStepDisplay() {
+        // Hide all step contents
+        for (let i = 1; i <= 4; i++) {
+            const content = document.getElementById(`step${i}Content`);
+            if (content) {
+                if (i === this.currentStep) {
+                    content.classList.remove('hidden');
+                    content.classList.add('fade-in');
+                } else {
+                    content.classList.add('hidden');
                 }
+            }
+        }
 
-                if (descInput && !descInput.value) {
-                    descInput.value = this.generatedStructure.description || '';
+        // Update step indicators
+        for (let i = 1; i <= 4; i++) {
+            const indicator = document.getElementById(`step${i}`);
+            const line = document.getElementById(`line${i}`);
+
+            if (indicator) {
+                indicator.classList.remove('active', 'completed', 'pending');
+                if (i < this.currentStep) {
+                    indicator.classList.add('completed');
+                } else if (i === this.currentStep) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.add('pending');
                 }
             }
-        }
-    }
 
-    updatePricingSuggestion(suggestedPrice) {
-        const priceInput = document.getElementById('journalPrice');
-        if (priceInput && suggestedPrice) {
-            priceInput.value = suggestedPrice;
-        }
-    }
-
-    displayMarketingCopy(marketingCopy) {
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-        modal.innerHTML = `
-            <div class="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-secondary-800">📢 Marketing Copy</h3>
-                    <button class="close-modal text-gray-400 hover:text-gray-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-secondary-700 mb-1">Tagline:</label>
-                        <div class="bg-primary-50 p-3 rounded-lg text-primary-800 flex justify-between items-center">
-                            <span>${marketingCopy.tagline}</span>
-                            <button onclick="window.journalCompilerUtils.copyToClipboard('${marketingCopy.tagline}')" class="text-primary-600 hover:text-primary-800">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-secondary-700 mb-1">Short Description:</label>
-                        <div class="bg-primary-50 p-3 rounded-lg text-primary-800 flex justify-between items-start">
-                            <span>${marketingCopy.short_description}</span>
-                            <button onclick="window.journalCompilerUtils.copyToClipboard('${marketingCopy.short_description}')" class="text-primary-600 hover:text-primary-800 ml-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-secondary-700 mb-1">Social Media Post:</label>
-                        <div class="bg-primary-50 p-3 rounded-lg text-primary-800 flex justify-between items-start">
-                            <span>${marketingCopy.social_media}</span>
-                            <button onclick="window.journalCompilerUtils.copyToClipboard('${marketingCopy.social_media}')" class="text-primary-600 hover:text-primary-800 ml-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-secondary-700 mb-1">Email Subject:</label>
-                        <div class="bg-primary-50 p-3 rounded-lg text-primary-800 flex justify-between items-center">
-                            <span>${marketingCopy.email_subject}</span>
-                            <button onclick="window.journalCompilerUtils.copyToClipboard('${marketingCopy.email_subject}')" class="text-primary-600 hover:text-primary-800">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex justify-end mt-6">
-                    <button class="close-modal btn-secondary px-4 py-2 rounded-lg">Close</button>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        // Close modal functionality
-        modal.querySelectorAll('.close-modal').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.body.removeChild(modal);
-            });
-        });
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                document.body.removeChild(modal);
-            }
-        });
-    }
-
-    // Utility Methods
-
-    selectAllEntries() {
-        const checkboxes = document.querySelectorAll('input[name="entries"]');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = true;
-            this.selectedEntries.add(parseInt(checkbox.value));
-        });
-        this.updateSelectionUI();
-
-        window.showToast('All entries selected', 'info', 1500);
-    }
-
-    selectNoneEntries() {
-        const checkboxes = document.querySelectorAll('input[name="entries"]');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = false;
-        });
-        this.selectedEntries.clear();
-        this.updateSelectionUI();
-
-        window.showToast('All entries deselected', 'info', 1500);
-    }
-
-    selectRecommendedEntries() {
-        // First clear all selections
-        this.selectNoneEntries();
-
-        // Select entries recommended for the current method
-        const recommendedCards = document.querySelectorAll('.entry-card.recommended-for-method');
-        recommendedCards.forEach(card => {
-            const checkbox = card.querySelector('input[name="entries"]');
-            if (checkbox) {
-                checkbox.checked = true;
-                this.selectedEntries.add(parseInt(checkbox.value));
-            }
-        });
-        this.updateSelectionUI();
-
-        window.showToast(`Selected ${recommendedCards.length} recommended entries`, 'success', 2000);
-    }
-
-    updatePreviewForType(journalType) {
-        // Update preview elements based on journal type
-        const previewElements = {
-            'growth': {
-                sample_chapters: ['The Beginning', 'Challenges', 'Breakthroughs', 'New Me']
-            },
-            'travel': {
-                sample_chapters: ['Departure', 'Adventures', 'Discoveries', 'Coming Home']
-            },
-            'career': {
-                sample_chapters: ['Starting Point', 'Learning Curve', 'Achievements', 'Future Goals']
-            },
-            'relationships': {
-                sample_chapters: ['Connections', 'Growing Together', 'Challenges', 'Deeper Understanding']
-            },
-            'creative': {
-                sample_chapters: ['Inspiration', 'Creative Process', 'Breakthroughs', 'Artistic Vision']
-            }
-        };
-
-        const typeData = previewElements[journalType] || previewElements['growth'];
-
-        // Update preview chapter titles if structure hasn't been generated yet
-        if (!this.generatedStructure) {
-            const chapterPreviews = document.querySelectorAll('.chapter-preview h4');
-            chapterPreviews.forEach((preview, index) => {
-                if (typeData.sample_chapters[index]) {
-                    preview.textContent = `Chapter ${index + 1}: ${typeData.sample_chapters[index]}`;
-                }
-            });
-        }
-    }
-
-    loadDraftData(draft) {
-        // Restore form state from draft
-        if (draft.title) {
-            const titleInput = document.getElementById('journalTitle');
-            if (titleInput) titleInput.value = draft.title;
-        }
-
-        if (draft.description) {
-            const descInput = document.getElementById('journalDescription');
-            if (descInput) descInput.value = draft.description;
-        }
-
-        if (draft.journal_type) {
-            const typeRadio = document.querySelector(`input[name="journal_type"][value="${draft.journal_type}"]`);
-            if (typeRadio) typeRadio.checked = true;
-        }
-
-        if (draft.compilation_method) {
-            this.selectedMethod = draft.compilation_method;
-            const methodCard = document.querySelector(`[data-method="${draft.compilation_method}"]`);
-            if (methodCard) {
-                methodCard.classList.add('selected');
-                this.updateMethodSpecificUI();
+            if (line && i < 4) {
+                line.classList.toggle('completed', i < this.currentStep);
             }
         }
-
-        if (draft.entry_ids) {
-            this.selectedEntries = new Set(draft.entry_ids);
-            draft.entry_ids.forEach(entryId => {
-                const checkbox = document.querySelector(`input[name="entries"][value="${entryId}"]`);
-                if (checkbox) checkbox.checked = true;
-            });
-            this.updateSelectionUI();
-        }
-
-        if (draft.ai_enhancements) {
-            draft.ai_enhancements.forEach(enhancement => {
-                const checkbox = document.querySelector(`input[name="${enhancement}"]`);
-                if (checkbox) checkbox.checked = true;
-            });
-        }
-
-        if (draft.structure) {
-            this.generatedStructure = draft.structure;
-            this.displayStructurePreview(draft.structure);
-            this.showPublicationForm();
-        }
-
-        // Update progress
-        if (this.selectedMethod) this.updateStepProgress(2);
-        if (this.selectedEntries.size > 0) this.updateStepProgress(3);
-        if (this.generatedStructure) this.updateStepProgress(4);
     }
 
-    // Loading and Error Management
-
-    showLoading(message = 'Processing...') {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.querySelector('p').textContent = message;
-            overlay.style.display = 'flex';
-        }
+    showLoading(message) {
+        document.getElementById('loadingText').textContent = message;
+        document.getElementById('loadingOverlay').style.display = 'flex';
     }
 
     hideLoading() {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.style.display = 'none';
-        }
+        document.getElementById('loadingOverlay').style.display = 'none';
     }
 
-    showError(message) {
-        window.showToast(message, 'error');
+    showSuccessModal(journalId) {
+        const modal = document.getElementById('successModal');
+        modal.style.display = 'flex';
+
+        document.getElementById('viewJournalBtn').onclick = () => {
+            window.location.href = `/marketplace/journal/${journalId}/`;
+        };
     }
 
     showSuccess(message) {
-        window.showToast(message, 'success');
+        // You can implement a toast notification here
+        console.log('Success:', message);
+    }
+
+    showError(message) {
+        alert('Error: ' + message);
     }
 
     getCSRFToken() {
-        return document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
-               document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-    }
-
-    // Keyboard Shortcuts
-
-    handleKeyboardShortcuts(event) {
-        if (event.ctrlKey || event.metaKey) {
-            switch(event.key) {
-                case 's':
-                    event.preventDefault();
-                    this.saveDraft(event);
-                    break;
-                case 'g':
-                    event.preventDefault();
-                    if (this.currentStep >= 3) {
-                        const generateBtn = document.getElementById('generateStructureBtn');
-                        if (generateBtn && !generateBtn.disabled) {
-                            this.generateStructure(event);
-                        }
-                    }
-                    break;
-                case 'p':
-                    event.preventDefault();
-                    if (this.currentStep >= 4) {
-                        const publishBtn = document.getElementById('publishJournalBtn');
-                        if (publishBtn && !publishBtn.disabled) {
-                            this.publishJournal(event);
-                        }
-                    }
-                    break;
-            }
-        } else if (event.altKey) {
-            switch(event.key) {
-                case '1':
-                    event.preventDefault();
-                    document.querySelector('[data-method="ai"]')?.click();
-                    break;
-                case '2':
-                    event.preventDefault();
-                    document.querySelector('[data-method="thematic"]')?.click();
-                    break;
-                case '3':
-                    event.preventDefault();
-                    document.querySelector('[data-method="chronological"]')?.click();
-                    break;
-                case 'a':
-                    event.preventDefault();
-                    this.selectAllEntries();
-                    break;
-                case 'n':
-                    event.preventDefault();
-                    this.selectNoneEntries();
-                    break;
-                case 'r':
-                    event.preventDefault();
-                    this.selectRecommendedEntries();
-                    break;
-            }
-        }
-    }
-
-    // Auto-save functionality
-
-    startAutoSave() {
-        setInterval(() => {
-            this.autoSave();
-        }, 30000); // Auto-save every 30 seconds
-    }
-
-    async autoSave() {
-        if (this.selectedEntries.size > 0 && this.selectedMethod) {
-            try {
-                await this.saveDraft({ preventDefault: () => {} });
-                console.log('Auto-saved draft');
-            } catch (error) {
-                console.error('Auto-save failed:', error);
-            }
-        }
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
     }
 }
-
-// Global helper functions for enhanced UX
-window.journalCompilerUtils = {
-    // Copy text to clipboard
-    copyToClipboard: function(text) {
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(text).then(() => {
-                window.showToast('Copied to clipboard!', 'success', 2000);
-            }).catch(() => {
-                this.fallbackCopyTextToClipboard(text);
-            });
-        } else {
-            this.fallbackCopyTextToClipboard(text);
-        }
-    },
-
-    fallbackCopyTextToClipboard: function(text) {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.top = '0';
-        textArea.style.left = '0';
-        textArea.style.position = 'fixed';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-
-        try {
-            document.execCommand('copy');
-            window.showToast('Copied to clipboard!', 'success', 2000);
-        } catch (err) {
-            window.showToast('Failed to copy text', 'error', 2000);
-        }
-
-        document.body.removeChild(textArea);
-    },
-
-    // Format numbers with commas
-    formatNumber: function(num) {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    },
-
-    // Calculate reading time
-    calculateReadingTime: function(wordCount, wpm = 200) {
-        return Math.ceil(wordCount / wpm);
-    },
-
-    // Validate email format
-    isValidEmail: function(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    },
-
-    // Debounce function for performance
-    debounce: function(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    },
-
-    // Generate a unique ID
-    generateId: function() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    },
-
-    // Smooth scroll to element
-    scrollToElement: function(elementId) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-    }
-};
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Only initialize on the journal compiler page
-    if (document.querySelector('.journal-compiler-page')) {
-        window.journalCompiler = new JournalCompiler();
-
-        console.log('Smart Journal Compiler initialized');
-        console.log('Keyboard shortcuts available:');
-        console.log('- Ctrl/Cmd+S: Save draft');
-        console.log('- Ctrl/Cmd+G: Generate structure');
-        console.log('- Ctrl/Cmd+P: Publish journal');
-        console.log('- Alt+1/2/3: Select compilation method');
-        console.log('- Alt+A: Select all entries');
-        console.log('- Alt+N: Select no entries');
-        console.log('- Alt+R: Select recommended entries');
-    }
+    new SmartJournalCompiler();
 });
-
-// Export for potential module use
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = JournalCompiler;
-}
 </script>
 {% endblock %}
