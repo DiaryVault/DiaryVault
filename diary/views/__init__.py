@@ -22,7 +22,7 @@ from .biography import (
     regenerate_chapter,
 )
 
-# API views
+# API views (existing)
 from .api import (
     demo_journal, regenerate_summary_ajax, save_generated_entry, chat_with_ai
 )
@@ -41,18 +41,37 @@ from .marketplace import (
     marketplace_search_suggestions
 )
 
-# NEW: Smart Journal Compiler views
-from .journal_compiler import (
-    smart_journal_compiler, analyze_entries_ajax, generate_journal_structure,
-    publish_compiled_journal
-)
+# NEW: Smart Journal Compiler views (only if files exist)
+try:
+    from .journal_compiler import (
+        smart_journal_compiler, analyze_entries_ajax, generate_journal_structure,
+        publish_compiled_journal
+    )
+except ImportError:
+    # Journal compiler views not yet created
+    pass
 
-# NEW: API views for journal compiler
-from .api import (
-    save_draft, load_draft, generate_marketing_copy
-)
+# NEW: API views for journal compiler (only if files exist)
+try:
+    from .api import (
+        save_draft, load_draft, generate_marketing_copy
+    )
+except ImportError:
+    # API views not yet created
+    pass
 
-# Import modules for URL patterns (if needed)
-from . import journal_compiler
-from . import marketplace as marketplace_views
-from . import api_views
+# Import modules for URL patterns (only if they exist)
+try:
+    from . import journal_compiler
+except ImportError:
+    journal_compiler = None
+
+try:
+    from . import marketplace as marketplace_views
+except ImportError:
+    marketplace_views = None
+
+try:
+    from . import api_views
+except ImportError:
+    api_views = None
