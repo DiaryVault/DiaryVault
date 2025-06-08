@@ -1251,7 +1251,8 @@ class SmartJournalCompiler {
             button.disabled = true;
             button.textContent = 'Generating...';
 
-            const journalType = document.querySelector('input[name="journalType"]:checked')?.value || 'growth';
+            const journalTypeInput = document.querySelector('input[name="journalType"]:checked');
+            const journalType = journalTypeInput ? journalTypeInput.value : 'growth';
 
             const response = await fetch('/diary/api/generate-structure/', {
                 method: 'POST',
@@ -1560,8 +1561,15 @@ class SmartJournalCompiler {
     }
 
     getCSRFToken() {
-        return document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
-               document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+
+        if (csrfInput) {
+            return csrfInput.value;
+        } else if (csrfMeta) {
+            return csrfMeta.getAttribute('content');
+        }
+        return '';
     }
 }
 
