@@ -1,1231 +1,2095 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Journal Compiler - DiaryVault</title>
-    <style>
-        /* Mobile-First Responsive Design */
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Smart Journal Compiler - DiaryVault{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Mobile-First Responsive Design */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        border: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.6;
+        transform: none;
+        cursor: not-allowed;
+    }
+
+    .btn-secondary {
+        background: #f8fafc;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+        color: #475569;
+        text-decoration: none;
+    }
+
+    /* Enhanced Image Upload Styles */
+    .image-upload-zone {
+        border: 2px dashed #d1d5db;
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .image-upload-zone:hover {
+        border-color: #6366f1;
+        background: linear-gradient(135deg, #eff6ff, #e0e7ff);
+        transform: translateY(-2px);
+    }
+
+    .image-upload-zone.drag-over {
+        border-color: #22c55e;
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        transform: scale(1.02);
+    }
+
+    .image-preview-container {
+        position: relative;
+        max-width: 300px;
+        margin: 0 auto;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .image-preview {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 1rem;
+        transition: transform 0.3s ease;
+    }
+
+    .image-preview:hover {
+        transform: scale(1.05);
+    }
+
+    .image-filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    .filter-option {
+        padding: 0.5rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 500;
+        background: white;
+    }
+
+    .filter-option:hover {
+        border-color: #6366f1;
+        transform: translateY(-1px);
+    }
+
+    .filter-option.selected {
+        border-color: #6366f1;
+        background: linear-gradient(135deg, #eff6ff, #e0e7ff);
+        color: #4f46e5;
+    }
+
+    .filter-preview {
+        width: 40px;
+        height: 40px;
+        border-radius: 0.5rem;
+        margin: 0 auto 0.25rem;
+        background-size: cover;
+        background-position: center;
+    }
+
+    /* Image filter effects */
+    .filter-vintage { filter: sepia(0.8) contrast(1.2) brightness(1.1); }
+    .filter-warm { filter: contrast(1.1) brightness(1.1) saturate(1.3) hue-rotate(15deg); }
+    .filter-cool { filter: contrast(1.1) brightness(1.1) saturate(1.2) hue-rotate(-15deg); }
+    .filter-mono { filter: grayscale(1) contrast(1.2); }
+    .filter-bright { filter: brightness(1.3) contrast(1.1) saturate(1.2); }
+
+    /* Mobile-Optimized Progress Steps */
+    .step-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .step-indicator {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .step-indicator.completed {
+        background: #10b981;
+        color: white;
+    }
+
+    .step-indicator.active {
+        background: #6366f1;
+        color: white;
+        animation: pulse 2s infinite;
+    }
+
+    .step-indicator.pending {
+        background: #e5e7eb;
+        color: #6b7280;
+    }
+
+    .step-line {
+        height: 2px;
+        background: #e5e7eb;
+        width: 1rem;
+        flex-shrink: 0;
+    }
+
+    .step-line.completed {
+        background: #10b981;
+    }
+
+    .step-label {
+        font-size: 0.625rem;
+        font-weight: 500;
+        text-align: center;
+        margin-top: 0.25rem;
+        color: #6b7280;
+        line-height: 1.2;
+    }
+
+    .step-label.active {
+        color: #6366f1;
+        font-weight: 600;
+    }
+
+    /* Method Cards - Mobile Optimized */
+    .method-card {
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .method-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .method-card.selected {
+        border-color: #6366f1;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05));
+    }
+
+    .method-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .method-card:hover::before {
+        left: 100%;
+    }
+
+    /* Entry Cards */
+    .entry-card {
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+
+    .entry-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .entry-card.selected {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.05);
+    }
+
+    /* Enhanced Journal Cards */
+    .enhanced-journal-card {
+        position: relative;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 1.5rem;
+        backdrop-filter: blur(20px);
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .enhanced-journal-card:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .enhanced-journal-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.6s ease;
+        z-index: 1;
+    }
+
+    .enhanced-journal-card:hover::before {
+        left: 100%;
+    }
+
+    /* Enhanced Status Badges */
+    .enhanced-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.625rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .enhanced-status-badge.published {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .enhanced-status-badge.draft {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.05));
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .enhanced-status-badge:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Enhanced Action Buttons */
+    .enhanced-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        min-height: 44px;
+    }
+
+    .enhanced-action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .enhanced-action-btn:hover::before {
+        left: 100%;
+    }
+
+    .enhanced-action-btn.primary {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+    }
+
+    .enhanced-action-btn.primary:hover {
+        background: linear-gradient(135deg, #4f46e5, #4338ca);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .enhanced-action-btn.secondary {
+        background: rgba(255, 255, 255, 0.8);
+        color: #6366f1;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .enhanced-action-btn.secondary:hover {
+        background: rgba(99, 102, 241, 0.05);
+        border-color: rgba(99, 102, 241, 0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15);
+        color: #4f46e5;
+        text-decoration: none;
+    }
+
+    .enhanced-action-btn.menu {
+        background: rgba(255, 255, 255, 0.8);
+        color: #64748b;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        padding: 0.75rem;
+        width: auto;
+        min-width: 44px;
+    }
+
+    .enhanced-action-btn.menu:hover {
+        background: rgba(148, 163, 184, 0.1);
+        color: #475569;
+        border-color: rgba(148, 163, 184, 0.3);
+        transform: translateY(-1px);
+    }
+
+    /* Price Tag Enhancement */
+    .price-tag {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .price-tag .font-bold {
+        font-size: 0.875rem;
+        font-weight: 700;
+    }
+
+    /* Line Clamp Utility */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+    }
+
+    .loading-spinner {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        text-align: center;
+        max-width: 300px;
+        width: 100%;
+    }
+
+    /* Animations */
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+
+    .gradient-text {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Mobile Enhancements */
+    @media (max-width: 768px) {
+        .container-mobile {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
         .glass-card {
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem !important;
+        }
+
+        .method-card {
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .method-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .method-card p {
+            font-size: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .entry-card {
+            padding: 0.75rem;
+        }
+
+        .journal-card {
+            padding: 1rem;
+        }
+
+        .mobile-title {
+            font-size: 1.5rem;
+            line-height: 1.3;
+            margin-bottom: 0.5rem;
+        }
+
+        .mobile-subtitle {
+            font-size: 0.875rem;
+            line-height: 1.4;
+            margin-bottom: 1rem;
+        }
+
+        .mobile-grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        .mobile-nav-buttons {
+            position: sticky;
+            bottom: 0;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            margin: 0 -1rem -1rem -1rem;
+            border-radius: 0 0 1rem 1rem;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            color: white;
-            border: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            transform: none;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: #f8fafc;
-            color: #475569;
-            border: 1px solid #e2e8f0;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .btn-secondary:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
-            color: #475569;
-            text-decoration: none;
-        }
-
-        /* Enhanced Image Upload Styles */
-        .image-upload-zone {
-            border: 2px dashed #d1d5db;
-            border-radius: 1rem;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .image-upload-zone:hover {
-            border-color: #6366f1;
-            background: linear-gradient(135deg, #eff6ff, #e0e7ff);
-            transform: translateY(-2px);
-        }
-
-        .image-upload-zone.drag-over {
-            border-color: #22c55e;
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-            transform: scale(1.02);
-        }
-
-        .image-preview-container {
-            position: relative;
-            max-width: 300px;
-            margin: 0 auto;
-            border-radius: 1rem;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .image-preview {
+        .btn-mobile {
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 0.75rem;
+            min-height: 44px;
             width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 1rem;
-            transition: transform 0.3s ease;
         }
 
-        .image-preview:hover {
-            transform: scale(1.05);
+        .form-input {
+            font-size: 16px; /* Prevents zoom on iOS */
+            padding: 0.75rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        .stats-card {
+            padding: 0.75rem;
+        }
+
+        .stats-value {
+            font-size: 1.5rem;
+        }
+
+        .stats-label {
+            font-size: 0.625rem;
+        }
+
+        .image-upload-zone {
+            padding: 1rem;
         }
 
         .image-filters {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 0.5rem;
-            margin: 1rem 0;
-        }
-
-        .filter-option {
-            padding: 0.5rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 0.75rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            font-size: 0.75rem;
-            font-weight: 500;
-            background: white;
-        }
-
-        .filter-option:hover {
-            border-color: #6366f1;
-            transform: translateY(-1px);
-        }
-
-        .filter-option.selected {
-            border-color: #6366f1;
-            background: linear-gradient(135deg, #eff6ff, #e0e7ff);
-            color: #4f46e5;
+            grid-template-columns: repeat(3, 1fr);
         }
 
         .filter-preview {
-            width: 40px;
-            height: 40px;
-            border-radius: 0.5rem;
-            margin: 0 auto 0.25rem;
-            background-size: cover;
-            background-position: center;
+            width: 30px;
+            height: 30px;
         }
 
-        /* Image filter effects */
-        .filter-vintage { filter: sepia(0.8) contrast(1.2) brightness(1.1); }
-        .filter-warm { filter: contrast(1.1) brightness(1.1) saturate(1.3) hue-rotate(15deg); }
-        .filter-cool { filter: contrast(1.1) brightness(1.1) saturate(1.2) hue-rotate(-15deg); }
-        .filter-mono { filter: grayscale(1) contrast(1.2); }
-        .filter-bright { filter: brightness(1.3) contrast(1.1) saturate(1.2); }
-
-        /* Progress Steps */
-        .step-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
+        .enhanced-journal-card {
             border-radius: 1rem;
-            margin-bottom: 1rem;
-            overflow-x: auto;
         }
 
-        .step-indicator {
-            width: 2rem;
-            height: 2rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.875rem;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
+        .enhanced-journal-card:hover {
+            transform: translateY(-2px) scale(1.01);
         }
 
-        .step-indicator.completed {
-            background: #10b981;
-            color: white;
+        .enhanced-action-btn {
+            padding: 0.625rem 0.875rem;
+            font-size: 0.8125rem;
         }
 
-        .step-indicator.active {
-            background: #6366f1;
-            color: white;
-            animation: pulse 2s infinite;
+        .enhanced-status-badge {
+            padding: 0.25rem 0.625rem;
+            font-size: 0.5625rem;
         }
 
-        .step-indicator.pending {
-            background: #e5e7eb;
-            color: #6b7280;
+        .price-tag .font-bold {
+            font-size: 0.8125rem;
+        }
+    }
+
+    /* Enhanced Hover Effects */
+    @media (hover: hover) {
+        .enhanced-journal-card:hover .enhanced-action-btn.primary {
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+    }
+
+    /* Touch Device Optimizations */
+    @media (hover: none) and (pointer: coarse) {
+        .enhanced-journal-card:hover {
+            transform: none;
         }
 
-        .step-line {
-            height: 2px;
-            background: #e5e7eb;
-            width: 1rem;
-            flex-shrink: 0;
+        .enhanced-journal-card:active {
+            transform: scale(0.98);
         }
 
-        .step-line.completed {
-            background: #10b981;
+        .enhanced-action-btn {
+            min-height: 48px;
         }
 
-        /* Method Cards */
-        .method-card {
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid transparent;
-            position: relative;
-            overflow: hidden;
+        .method-card,
+        .entry-card,
+        .journal-card,
+        button,
+        .btn-primary,
+        .btn-secondary {
+            min-height: 44px;
         }
+    }
 
-        .method-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
-        }
+    /* Utility Colors */
+    .primary-600 { color: #4f46e5; }
+    .secondary-600 { color: #475569; }
+    .secondary-800 { color: #1e293b; }
+    .success-600 { color: #059669; }
+    .warning-600 { color: #d97706; }
+    .error-600 { color: #dc2626; }
+</style>
+{% endblock %}
 
-        .method-card.selected {
-            border-color: #6366f1;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05));
-        }
+{% block content %}
+<div class="max-w-6xl mx-auto container-mobile py-4 space-y-4">
+    <!-- Mobile-Optimized Header -->
+    <div class="glass-card rounded-2xl p-4 md:p-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 md:mb-6">
+            <div class="mb-4 md:mb-0">
+                <h1 class="text-2xl md:text-4xl font-bold gradient-text mobile-title">Smart Journal Compiler</h1>
+                <p class="text-sm md:text-lg text-secondary-600 mt-1 md:mt-2 mobile-subtitle">Transform your journal entries into publishable content with AI-powered insights</p>
+            </div>
 
-        /* Entry Cards */
-        .entry-card {
-            transition: all 0.2s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .entry-card:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .entry-card.selected {
-            border-color: #10b981;
-            background: rgba(16, 185, 129, 0.05);
-        }
-
-        /* Loading States */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 1rem;
-        }
-
-        .loading-spinner {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 1rem;
-            text-align: center;
-            max-width: 300px;
-            width: 100%;
-        }
-
-        /* Modal Styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 1rem;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 1rem;
-            padding: 2rem;
-            max-width: 500px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        /* Animations */
-        .fade-in {
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .image-upload-zone {
-                padding: 1rem;
-            }
-
-            .image-filters {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .filter-preview {
-                width: 30px;
-                height: 30px;
-            }
-
-            .modal-content {
-                padding: 1rem;
-                margin: 0.5rem;
-            }
-        }
-
-        /* Utility Classes */
-        .hidden { display: none !important; }
-        .text-center { text-align: center; }
-        .mb-4 { margin-bottom: 1rem; }
-        .mb-6 { margin-bottom: 1.5rem; }
-        .p-4 { padding: 1rem; }
-        .p-6 { padding: 1.5rem; }
-        .rounded-xl { border-radius: 0.75rem; }
-        .w-full { width: 100%; }
-        .grid { display: grid; }
-        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .gap-4 { gap: 1rem; }
-        .gap-6 { gap: 1.5rem; }
-    </style>
-</head>
-<body class="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 min-h-screen">
-    <div class="max-w-6xl mx-auto p-4 space-y-4">
-        <!-- Header -->
-        <div class="glass-card rounded-xl p-6">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-                <div class="mb-4 md:mb-0">
-                    <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">
-                        Smart Journal Compiler
-                    </h1>
-                    <p class="text-gray-600 mt-2">Transform your journal entries into publishable content with AI-powered insights</p>
+            <!-- Mobile-Optimized Progress Steps -->
+            <div class="step-container">
+                <div class="flex flex-col items-center">
+                    <div class="step-indicator active" id="step1">1</div>
+                    <div class="step-label active">Method</div>
                 </div>
-
-                <!-- Progress Steps -->
-                <div class="step-container">
-                    <div class="flex flex-col items-center">
-                        <div class="step-indicator active" id="step1">1</div>
-                    </div>
-                    <div class="step-line" id="line1"></div>
-                    <div class="flex flex-col items-center">
-                        <div class="step-indicator pending" id="step2">2</div>
-                    </div>
-                    <div class="step-line" id="line2"></div>
-                    <div class="flex flex-col items-center">
-                        <div class="step-indicator pending" id="step3">3</div>
-                    </div>
-                    <div class="step-line" id="line3"></div>
-                    <div class="flex flex-col items-center">
-                        <div class="step-indicator pending" id="step4">4</div>
-                    </div>
+                <div class="step-line" id="line1"></div>
+                <div class="flex flex-col items-center">
+                    <div class="step-indicator pending" id="step2">2</div>
+                    <div class="step-label">Select</div>
+                </div>
+                <div class="step-line" id="line2"></div>
+                <div class="flex flex-col items-center">
+                    <div class="step-indicator pending" id="step3">3</div>
+                    <div class="step-label">Analyze</div>
+                </div>
+                <div class="step-line" id="line3"></div>
+                <div class="flex flex-col items-center">
+                    <div class="step-indicator pending" id="step4">4</div>
+                    <div class="step-label">Publish</div>
                 </div>
             </div>
         </div>
 
-        <!-- Step 1: Method Selection -->
-        <div id="step1Content" class="glass-card rounded-xl p-6">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Choose Your Compilation Method</h2>
+        <!-- Mobile-Optimized Stats Overview -->
+        <div class="stats-grid grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+            <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl">
+                <div class="stats-value text-xl md:text-3xl font-bold text-primary-600">{{ analysis.total_entries|default:0 }}</div>
+                <div class="stats-label text-xs md:text-sm text-secondary-600">Total Entries</div>
+            </div>
+            <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl">
+                <div class="stats-value text-xl md:text-3xl font-bold text-success-600">{{ analysis.themes|length|default:0 }}</div>
+                <div class="stats-label text-xs md:text-sm text-secondary-600">Themes</div>
+            </div>
+            <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl">
+                <div class="stats-value text-xl md:text-3xl font-bold text-warning-600">{{ analysis.quality_score.score|default:0 }}%</div>
+                <div class="stats-label text-xs md:text-sm text-secondary-600">Quality Score</div>
+            </div>
+            <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl">
+                <div class="stats-value text-xl md:text-3xl font-bold text-error-600">{{ analysis.story_arcs|length|default:0 }}</div>
+                <div class="stats-label text-xs md:text-sm text-secondary-600">Story Arcs</div>
+            </div>
+        </div>
+    </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="method-card glass-card rounded-xl p-6" data-method="ai">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                            </svg>
+    <!-- Enhanced Compiled Journals Section -->
+    <div class="glass-card rounded-2xl p-4 md:p-6 relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-5">
+            <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <defs>
+                    <pattern id="journal-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <circle cx="10" cy="10" r="1" fill="currentColor"/>
+                    </pattern>
+                </defs>
+                <rect width="100" height="100" fill="url(#journal-pattern)"/>
+            </svg>
+        </div>
+
+        <div class="relative z-10">
+            <!-- Enhanced Header -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 md:mb-8">
+                <div class="flex items-center gap-3 mb-4 md:mb-0">
+                    <div class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <svg class="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg md:text-2xl font-bold gradient-text">Your Compiled Journals</h2>
+                        <p class="text-xs md:text-sm text-secondary-600">Transform your memories into beautiful stories</p>
+                    </div>
+                </div>
+                {% if compiled_journals %}
+                <div class="flex items-center gap-3">
+                    <div class="px-3 py-1.5 bg-gradient-to-r from-blue-50 to-purple-50 rounded-full border border-blue-200">
+                        <span class="text-xs md:text-sm font-semibold text-blue-700">{{ compiled_journals|length }} journal{{ compiled_journals|length|pluralize }}</span>
+                    </div>
+                    {% if compiled_journals|length > 3 %}
+                    <a href="/diary/journals/" class="text-xs md:text-sm text-blue-600 hover:text-blue-800 font-medium">View All →</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            {% if compiled_journals %}
+            <div class="grid mobile-grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                {% for journal in compiled_journals %}
+                <div class="enhanced-journal-card group cursor-pointer">
+                    <!-- Card Background with Gradient -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-blue-50 rounded-2xl opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                    <!-- Card Content -->
+                    <div class="relative z-10 p-4 md:p-6">
+                        <!-- Header with Status -->
+                        <div class="flex items-start justify-between mb-3 md:mb-4">
+                            <div class="flex-1 mr-3">
+                                <h3 class="font-bold text-secondary-800 text-sm md:text-lg leading-tight line-clamp-2 group-hover:text-primary-600 transition-colors duration-300">{{ journal.title }}</h3>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                {% if journal.is_published %}
+                                <div class="enhanced-status-badge published">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>Live</span>
+                                </div>
+                                {% else %}
+                                <div class="enhanced-status-badge draft">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>Draft</span>
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
-                        <h3 class="text-xl font-bold mb-2">AI Smart Compilation</h3>
-                        <p class="text-gray-600 text-sm mb-4">Let AI analyze your entries and create the optimal structure</p>
-                        <div class="space-y-1">
-                            <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Theme Detection</span>
-                            <span class="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">Story Arcs</span>
+
+                        <!-- Description -->
+                        <p class="text-xs md:text-sm text-secondary-600 mb-4 line-clamp-3 leading-relaxed">{{ journal.description|truncatechars:120 }}</p>
+
+                        <!-- Enhanced Stats Row -->
+                        <div class="flex items-center justify-between mb-4 p-3 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl border border-gray-100">
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-1.5">
+                                    <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span class="text-xs font-medium text-secondary-700">{{ journal.date_published|date:"M d"|default:journal.created_at|date:"M d" }}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <svg class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <span class="text-xs font-medium text-secondary-700">
+                                        {% if journal.entries.count > 0 %}
+                                            {{ journal.entries.count }}
+                                        {% elif journal.entry_count_cached > 0 %}
+                                            {{ journal.entry_count_cached }}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="price-tag">
+                                {% if journal.price %}
+                                <span class="font-bold text-green-600">${{ journal.price }}</span>
+                                {% else %}
+                                <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">Free</span>
+                                {% endif %}
+                            </div>
                         </div>
+
+                        <!-- Enhanced Action Buttons -->
+                        <div class="flex gap-2">
+                            {% if journal.is_published %}
+                            <a href="/marketplace/journal/{{ journal.id }}/" class="enhanced-action-btn primary flex-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                <span>View Live</span>
+                            </a>
+                            {% else %}
+                            <a href="/diary/journal/{{ journal.id }}/edit/" class="enhanced-action-btn secondary flex-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                <span>Continue</span>
+                            </a>
+                            {% endif %}
+                            <button class="enhanced-action-btn menu" title="More options">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hover Effect Overlay -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if compiled_journals|length > 6 %}
+            <div class="text-center mt-6 md:mt-8">
+                <a href="/diary/journals/" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-50 to-blue-50 hover:from-blue-50 hover:to-purple-50 border border-gray-200 hover:border-blue-300 rounded-xl font-medium text-secondary-700 hover:text-primary-600 transition-all duration-300 group">
+                    <span>View All Journals</span>
+                    <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                    </svg>
+                </a>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <!-- Enhanced Empty State -->
+            <div class="text-center py-12 md:py-16">
+                <div class="relative inline-block mb-6">
+                    <!-- Animated Background -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 rounded-3xl animate-pulse"></div>
+                    <div class="relative w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center shadow-xl">
+                        <svg class="w-8 h-8 md:w-10 md:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
                     </div>
                 </div>
 
-                <div class="method-card glass-card rounded-xl p-6" data-method="thematic">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2">Thematic Collection</h3>
-                        <p class="text-gray-600 text-sm mb-4">Organize entries around specific themes and topics</p>
-                        <div class="space-y-1">
-                            <span class="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs">Travel</span>
-                            <span class="inline-block px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-xs">Growth</span>
-                        </div>
+                <div class="max-w-md mx-auto">
+                    <h3 class="text-lg md:text-xl font-bold text-secondary-800 mb-3">Ready to Create Magic?</h3>
+                    <p class="text-sm md:text-base text-secondary-600 mb-6 leading-relaxed">Transform your journal entries into beautiful, publishable stories that capture your journey and inspire others.</p>
+
+                    <div class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-500 to-purple-500 hover:from-primary-600 hover:to-purple-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <span>Start Your First Journal</span>
                     </div>
                 </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 
-                <div class="method-card glass-card rounded-xl p-6" data-method="chronological">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2">Timeline Journey</h3>
-                        <p class="text-gray-600 text-sm mb-4">Create a chronological narrative of your experiences</p>
-                        <div class="space-y-1">
-                            <span class="inline-block px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs">Timeline</span>
-                            <span class="inline-block px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs">Journey</span>
-                        </div>
+    <!-- Step 1: Method Selection -->
+    <div id="step1Content" class="glass-card rounded-2xl p-4 md:p-8">
+        <h2 class="text-lg md:text-2xl font-bold text-secondary-800 mb-4 md:mb-6">Choose Your Compilation Method</h2>
+
+        <div class="grid mobile-grid md:grid-cols-3 gap-4 md:gap-6">
+            <div class="method-card glass-card rounded-xl p-4 md:p-6" data-method="ai">
+                <div class="text-center">
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 md:mb-4">
+                        <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold mb-2">AI Smart Compilation</h3>
+                    <p class="text-secondary-600 text-sm mb-3 md:mb-4">Let AI analyze your entries and create the optimal structure</p>
+                    <div class="space-y-1">
+                        <span class="inline-block px-2 md:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Theme Detection</span>
+                        <span class="inline-block px-2 md:px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">Story Arcs</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="method-card glass-card rounded-xl p-4 md:p-6" data-method="thematic">
+                <div class="text-center">
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center mx-auto mb-3 md:mb-4">
+                        <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold mb-2">Thematic Collection</h3>
+                    <p class="text-secondary-600 text-sm mb-3 md:mb-4">Organize entries around specific themes and topics</p>
+                    <div class="space-y-1">
+                        <span class="inline-block px-2 md:px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs">Travel</span>
+                        <span class="inline-block px-2 md:px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-xs">Growth</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="method-card glass-card rounded-xl p-4 md:p-6" data-method="chronological">
+                <div class="text-center">
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center mx-auto mb-3 md:mb-4">
+                        <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold mb-2">Timeline Journey</h3>
+                    <p class="text-secondary-600 text-sm mb-3 md:mb-4">Create a chronological narrative of your experiences</p>
+                    <div class="space-y-1">
+                        <span class="inline-block px-2 md:px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs">Timeline</span>
+                        <span class="inline-block px-2 md:px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs">Journey</span>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Step 2: Entry Selection -->
-        <div id="step2Content" class="glass-card rounded-xl p-6 hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">Select Entries</h2>
-                <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-600">Selected: <span id="selectedCount">0</span></span>
-                    <div class="flex space-x-2">
-                        <button id="selectAllBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">All</button>
-                        <button id="selectNoneBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">None</button>
+    <!-- Step 2: Entry Selection -->
+    <div id="step2Content" class="glass-card rounded-2xl p-4 md:p-8 hidden">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 md:mb-6 space-y-2 md:space-y-0">
+            <h2 class="text-lg md:text-2xl font-bold text-secondary-800">Select Entries</h2>
+            <div class="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                <span class="text-sm text-secondary-600">Selected: <span id="selectedCount">0</span></span>
+                <div class="flex space-x-2">
+                    <button id="selectAllBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">All</button>
+                    <button id="selectNoneBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">None</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="entriesGrid" class="grid mobile-grid md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-4 md:mb-6">
+            {% for entry in entries %}
+            <div class="entry-card glass-card rounded-lg p-3 md:p-4" data-entry-id="{{ entry.id }}">
+                <div class="flex items-start space-x-2 md:space-x-3">
+                    <input type="checkbox" class="entry-checkbox mt-1" value="{{ entry.id }}">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-medium text-secondary-800 flex-1 mr-2 entry-title text-sm md:text-base truncate" data-original="{{ entry.title }}">{{ entry.title|truncatechars:40 }}</h4>
+                            <button class="edit-entry-btn text-blue-600 hover:text-blue-800 text-sm flex-shrink-0" data-entry-id="{{ entry.id }}" title="Edit entry">
+                                <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="text-xs md:text-sm text-secondary-600 mb-2 entry-content line-clamp-2" data-original="{{ entry.content }}">{{ entry.content|truncatechars:80 }}</p>
+                        <div class="flex justify-between text-xs text-secondary-500 mb-2">
+                            <span>{{ entry.created_at|date:"M d, Y" }}</span>
+                            <span class="word-count">{{ entry.content|wordcount }} words</span>
+                        </div>
+                        {% if entry.tags.exists %}
+                        <div class="flex flex-wrap gap-1 mt-2">
+                            {% for tag in entry.tags.all|slice:":2" %}
+                            <span class="px-1.5 md:px-2 py-0.5 md:py-1 bg-blue-100 text-blue-800 rounded text-xs">{{ tag.name }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
+            {% endfor %}
+        </div>
 
-            <div id="entriesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                <!-- Sample entry cards - these would be populated from backend -->
-                <div class="entry-card glass-card rounded-lg p-4" data-entry-id="1">
-                    <div class="flex items-start space-x-3">
-                        <input type="checkbox" class="entry-checkbox mt-1" value="1">
-                        <div class="flex-1">
-                            <h4 class="font-medium text-gray-800 mb-2">My First Day in Paris</h4>
-                            <p class="text-sm text-gray-600 mb-2">The city of lights welcomed me with open arms. Walking through the cobblestone streets...</p>
-                            <div class="flex justify-between text-xs text-gray-500 mb-2">
-                                <span>Mar 15, 2024</span>
-                                <span>247 words</span>
-                            </div>
-                            <div class="flex flex-wrap gap-1">
-                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">travel</span>
-                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">adventure</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="entry-card glass-card rounded-lg p-4" data-entry-id="2">
-                    <div class="flex items-start space-x-3">
-                        <input type="checkbox" class="entry-checkbox mt-1" value="2">
-                        <div class="flex-1">
-                            <h4 class="font-medium text-gray-800 mb-2">Learning to Let Go</h4>
-                            <p class="text-sm text-gray-600 mb-2">Today I realized that holding onto things that no longer serve me...</p>
-                            <div class="flex justify-between text-xs text-gray-500 mb-2">
-                                <span>Mar 10, 2024</span>
-                                <span>189 words</span>
-                            </div>
-                            <div class="flex flex-wrap gap-1">
-                                <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">growth</span>
-                                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">reflection</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex justify-between items-center">
-                <div class="text-sm text-gray-600">
+        <div class="mobile-nav-buttons">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
+                <div class="text-sm text-secondary-600">
                     Estimated: <span id="totalWords">0</span> words
                 </div>
-                <button id="analyzeBtn" class="btn-primary px-6 py-3 rounded-xl" disabled>
+                <button id="analyzeBtn" class="btn-primary btn-mobile px-6 py-3 rounded-xl" disabled>
                     Analyze Selected Entries
                 </button>
             </div>
         </div>
+    </div>
 
-        <!-- Step 3: Analysis Results -->
-        <div id="step3Content" class="glass-card rounded-xl p-6 hidden">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Analysis Results</h2>
-            <div id="analysisResults">
-                <div class="text-center py-8">
-                    <div class="text-gray-600">Analysis results will appear here...</div>
-                </div>
+    <!-- Step 3: Analysis Results -->
+    <div id="step3Content" class="glass-card rounded-2xl p-4 md:p-8 hidden">
+        <h2 class="text-lg md:text-2xl font-bold text-secondary-800 mb-4 md:mb-6">Analysis Results</h2>
+        <div id="analysisResults">
+            <div class="text-center py-6 md:py-8">
+                <div class="text-secondary-600">Analysis results will appear here...</div>
             </div>
-            <button id="generateStructureBtn" class="btn-primary px-6 py-3 rounded-xl w-full" disabled>
+        </div>
+        <div class="mobile-nav-buttons">
+            <button id="generateStructureBtn" class="btn-primary btn-mobile px-6 py-3 rounded-xl" disabled>
                 Generate Journal Structure
             </button>
         </div>
+    </div>
 
-        <!-- Step 4: Structure & Publishing with Photo Upload -->
-        <div id="step4Content" class="glass-card rounded-xl p-6 hidden">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Journal Structure & Publishing</h2>
+    <!-- Step 4: Structure & Publishing with Enhanced Photo Upload -->
+    <div id="step4Content" class="glass-card rounded-2xl p-4 md:p-8 hidden">
+        <h2 class="text-lg md:text-2xl font-bold text-secondary-800 mb-4 md:mb-6">Journal Structure & Publishing</h2>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Structure Preview -->
-                <div>
-                    <h3 class="font-bold text-gray-800 mb-4">Generated Structure</h3>
-                    <div id="structurePreview" class="space-y-4">
-                        <div class="text-center py-8 text-gray-600">
-                            Structure will appear here...
-                        </div>
+        <div class="grid mobile-grid lg:grid-cols-2 gap-4 md:gap-8">
+            <!-- Structure Preview -->
+            <div>
+                <h3 class="font-bold text-secondary-800 mb-4">Generated Structure</h3>
+                <div id="structurePreview" class="space-y-4">
+                    <div class="text-center py-6 md:py-8 text-secondary-600">
+                        Structure will appear here...
                     </div>
                 </div>
+            </div>
 
-                <!-- Publishing Form with Image Upload -->
-                <div>
-                    <h3 class="font-bold text-gray-800 mb-4">Publishing Details</h3>
-                    <form id="publishForm" class="space-y-4" enctype="multipart/form-data">
-                        <!-- Cover Image Upload -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Cover Image</label>
-                            <div id="imageUploadZone" class="image-upload-zone">
-                                <input type="file" id="coverImageInput" name="cover_image" accept="image/*" class="hidden">
-                                <div id="uploadPrompt">
-                                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                    </svg>
-                                    <p class="text-gray-600 font-medium mb-1">Drop image here or click to upload</p>
-                                    <p class="text-gray-500 text-sm">Supports JPG, PNG, WebP (max 5MB)</p>
-                                </div>
-                                <div id="imagePreviewContainer" class="hidden">
-                                    <div class="image-preview-container">
-                                        <img id="imagePreview" class="image-preview" alt="Cover preview">
-                                        <button type="button" id="removeImageBtn" class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
+            <!-- Publishing Form with Enhanced Photo Upload -->
+            <div>
+                <h3 class="font-bold text-secondary-800 mb-4">Publishing Details</h3>
+                <form id="publishForm" class="space-y-4" enctype="multipart/form-data">
+                    <!-- Enhanced Cover Image Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-secondary-700 mb-2">Cover Image</label>
+                        <div id="imageUploadZone" class="image-upload-zone">
+                            <input type="file" id="coverImageInput" name="cover_image" accept="image/*" class="hidden">
+                            <div id="uploadPrompt">
+                                <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                <p class="text-gray-600 font-medium mb-1">Drop image here or click to upload</p>
+                                <p class="text-gray-500 text-sm">Supports JPG, PNG, WebP (max 5MB)</p>
+                            </div>
+                            <div id="imagePreviewContainer" class="hidden">
+                                <div class="image-preview-container">
+                                    <img id="imagePreview" class="image-preview" alt="Cover preview">
+                                    <button type="button" id="removeImageBtn" class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Image Filters -->
-                        <div id="imageFiltersSection" class="hidden">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Image Filter</label>
-                            <div class="image-filters">
-                                <div class="filter-option selected" data-filter="none">
-                                    <div class="filter-preview" id="preview-none"></div>
-                                    <span>Original</span>
-                                </div>
-                                <div class="filter-option" data-filter="vintage">
-                                    <div class="filter-preview filter-vintage" id="preview-vintage"></div>
-                                    <span>Vintage</span>
-                                </div>
-                                <div class="filter-option" data-filter="warm">
-                                    <div class="filter-preview filter-warm" id="preview-warm"></div>
-                                    <span>Warm</span>
-                                </div>
-                                <div class="filter-option" data-filter="cool">
-                                    <div class="filter-preview filter-cool" id="preview-cool"></div>
-                                    <span>Cool</span>
-                                </div>
-                                <div class="filter-option" data-filter="mono">
-                                    <div class="filter-preview filter-mono" id="preview-mono"></div>
-                                    <span>B&W</span>
-                                </div>
-                                <div class="filter-option" data-filter="bright">
-                                    <div class="filter-preview filter-bright" id="preview-bright"></div>
-                                    <span>Bright</span>
-                                </div>
+                    <!-- Enhanced Image Filters -->
+                    <div id="imageFiltersSection" class="hidden">
+                        <label class="block text-sm font-medium text-secondary-700 mb-2">Image Filter</label>
+                        <div class="image-filters">
+                            <div class="filter-option selected" data-filter="none">
+                                <div class="filter-preview" id="preview-none"></div>
+                                <span>Original</span>
                             </div>
-                            <input type="hidden" id="selectedFilter" name="image_filter" value="none">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                            <input type="text" id="journalTitle" name="title" required
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                   placeholder="Enter journal title...">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                            <textarea id="journalDescription" name="description" rows="4" required
-                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                                      placeholder="Describe your journal..."></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
-                            <input type="number" id="journalPrice" name="price" step="0.01" min="0"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                   placeholder="9.99">
-                        </div>
-
-                        <div>
-                            <h4 class="font-medium text-gray-700 mb-3">Journal Type</h4>
-                            <div class="space-y-2">
-                                <label class="flex items-center">
-                                    <input type="radio" name="journal_type" value="growth" class="mr-2" checked>
-                                    <span class="text-sm">Personal Growth</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="journal_type" value="travel" class="mr-2">
-                                    <span class="text-sm">Travel & Adventures</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="journal_type" value="career" class="mr-2">
-                                    <span class="text-sm">Career Journey</span>
-                                </label>
+                            <div class="filter-option" data-filter="vintage">
+                                <div class="filter-preview filter-vintage" id="preview-vintage"></div>
+                                <span>Vintage</span>
+                            </div>
+                            <div class="filter-option" data-filter="warm">
+                                <div class="filter-preview filter-warm" id="preview-warm"></div>
+                                <span>Warm</span>
+                            </div>
+                            <div class="filter-option" data-filter="cool">
+                                <div class="filter-preview filter-cool" id="preview-cool"></div>
+                                <span>Cool</span>
+                            </div>
+                            <div class="filter-option" data-filter="mono">
+                                <div class="filter-preview filter-mono" id="preview-mono"></div>
+                                <span>B&W</span>
+                            </div>
+                            <div class="filter-option" data-filter="bright">
+                                <div class="filter-preview filter-bright" id="preview-bright"></div>
+                                <span>Bright</span>
                             </div>
                         </div>
+                        <input type="hidden" id="selectedFilter" name="image_filter" value="none">
+                    </div>
 
-                        <div class="pt-4">
-                            <button type="submit" id="publishBtn" class="w-full btn-primary py-3 rounded-xl text-lg font-semibold">
-                                Publish Journal
-                            </button>
+                    <div>
+                        <label class="block text-sm font-medium text-secondary-700 mb-2">Title</label>
+                        <input type="text" id="journalTitle" name="title" required
+                               class="form-input w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="Enter journal title...">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-secondary-700 mb-2">Description</label>
+                        <textarea id="journalDescription" name="description" rows="4" required
+                                  class="form-input w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                  placeholder="Describe your journal..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-secondary-700 mb-2">Price ($)</label>
+                        <input type="number" id="journalPrice" name="price" step="0.01" min="0"
+                               class="form-input w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="9.99">
+                    </div>
+
+                    <div class="space-y-3">
+                        <h4 class="font-medium text-secondary-700">Journal Type</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="journal_type" value="growth" class="mr-2" checked>
+                                <span class="text-sm">Personal Growth</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="journal_type" value="travel" class="mr-2">
+                                <span class="text-sm">Travel & Adventures</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="journal_type" value="career" class="mr-2">
+                                <span class="text-sm">Career Journey</span>
+                            </label>
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" id="publishBtn" class="btn-primary btn-mobile py-3 rounded-xl text-lg font-semibold">
+                            Publish Journal
+                        </button>
+                    </div>
+
+                    <!-- Hidden fields for backend integration -->
+                    <input type="hidden" id="selectedMethod" name="method" value="">
+                    <input type="hidden" id="selectedEntryIds" name="entry_ids" value="">
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-spinner">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <div id="loadingText" class="text-gray-800 font-medium">Processing...</div>
-            <div class="text-sm text-gray-600 mt-2">This may take a moment</div>
-        </div>
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner">
+        <div class="animate-spin rounded-full h-8 w-8 md:h-12 md:w-12 border-b-2 border-blue-600 mx-auto mb-3 md:mb-4"></div>
+        <div id="loadingText" class="text-secondary-800 font-medium text-sm md:text-base">Processing...</div>
+        <div class="text-xs md:text-sm text-secondary-600 mt-2">This may take a moment</div>
     </div>
+</div>
 
-    <!-- Success Modal -->
-    <div id="successModal" class="modal">
-        <div class="modal-content text-center">
-            <div class="text-6xl text-green-500 mb-4">✓</div>
-            <div class="text-gray-800 font-medium text-xl mb-2">Journal Published!</div>
-            <div class="text-sm text-gray-600 mb-4">Your journal has been successfully published to the marketplace.</div>
-            <button id="viewJournalBtn" class="btn-primary px-6 py-2 rounded-lg">View Journal</button>
+<!-- Edit Entry Modal -->
+<div id="editModal" class="loading-overlay" style="display: none;">
+    <div class="bg-white rounded-2xl p-4 md:p-6 max-w-2xl w-full mx-4 max-h-96 overflow-hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg md:text-xl font-bold text-secondary-800">Edit Entry</h3>
+            <button id="closeEditModal" class="text-gray-400 hover:text-gray-600 p-1">
+                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
         </div>
+
+        <form id="editEntryForm" class="space-y-4">
+            <input type="hidden" id="editEntryId">
+            <div>
+                <label class="block text-sm font-medium text-secondary-700 mb-2">Title</label>
+                <input type="text" id="editEntryTitle" required
+                       class="form-input w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-secondary-700 mb-2">Content</label>
+                <textarea id="editEntryContent" rows="6" required
+                          class="form-input w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"></textarea>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-end space-y-2 md:space-y-0 md:space-x-3 pt-4">
+                <button type="button" id="cancelEdit" class="btn-secondary px-4 py-2 rounded-lg">Cancel</button>
+                <button type="submit" class="btn-primary px-6 py-2 rounded-lg">Save Changes</button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <script>
-        class SmartJournalCompiler {
-            constructor() {
-                this.selectedMethod = null;
-                this.selectedEntries = new Set();
-                this.currentStep = 1;
-                this.analysisData = null;
-                this.structureData = null;
-                this.selectedImage = null;
-                this.selectedFilter = 'none';
+<!-- Success Modal -->
+<div id="successModal" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner">
+        <div class="text-4xl md:text-6xl text-green-500 mb-3 md:mb-4">✓</div>
+        <div class="text-secondary-800 font-medium text-lg md:text-xl mb-2">Journal Published!</div>
+        <div class="text-xs md:text-sm text-secondary-600 mb-3 md:mb-4">Your journal has been successfully published to the marketplace.</div>
+        <button id="viewJournalBtn" class="btn-primary px-6 py-2 rounded-lg">View Journal</button>
+    </div>
+</div>
 
-                this.init();
-            }
+{% csrf_token %}
+{% endblock %}
 
-            init() {
-                this.setupEventListeners();
-                this.updateStepDisplay();
-            }
+{% block extra_js %}
+<script>
+// Enhanced Smart Journal Compiler with Photo Upload Support
+console.log('Initializing Smart Journal Compiler with Photo Upload...');
 
-            setupEventListeners() {
-                // Method selection
-                document.querySelectorAll('.method-card').forEach(card => {
-                    card.addEventListener('click', (e) => {
-                        this.selectMethod(card.dataset.method);
-                    });
-                });
+class SmartJournalCompiler {
+    constructor() {
+        this.selectedMethod = null;
+        this.selectedEntries = new Set();
+        this.currentStep = 1;
+        this.analysisData = null;
+        this.structureData = null;
+        this.selectedImage = null;
+        this.selectedFilter = 'none';
 
-                // Entry selection
-                document.querySelectorAll('.entry-checkbox').forEach(checkbox => {
-                    checkbox.addEventListener('change', () => {
-                        this.updateSelectedEntries();
-                    });
-                });
+        console.log('SmartJournalCompiler created');
+        this.init();
+    }
 
-                // Image upload
-                this.setupImageUpload();
+    init() {
+        console.log('Initializing...');
+        this.setupEventListeners();
+        this.updateStepDisplay();
+        console.log('Initialization complete');
+    }
 
-                // Image filters
-                this.setupImageFilters();
+    setupEventListeners() {
+        console.log('Setting up event listeners...');
 
-                // Buttons
-                document.getElementById('selectAllBtn')?.addEventListener('click', () => this.selectAllEntries());
-                document.getElementById('selectNoneBtn')?.addEventListener('click', () => this.selectNoneEntries());
-                document.getElementById('analyzeBtn')?.addEventListener('click', (e) => this.analyzeEntries(e));
-                document.getElementById('generateStructureBtn')?.addEventListener('click', (e) => this.generateStructure(e));
+        // Method selection cards
+        const methodCards = document.querySelectorAll('.method-card');
+        console.log('Found method cards:', methodCards.length);
 
-                // Form submission
-                document.getElementById('publishForm')?.addEventListener('submit', (e) => this.publishJournal(e));
-            }
+        methodCards.forEach((card, index) => {
+            console.log('Setting up card', index, 'with method:', card.dataset.method);
 
-            setupImageUpload() {
-                const uploadZone = document.getElementById('imageUploadZone');
-                const fileInput = document.getElementById('coverImageInput');
-                const removeBtn = document.getElementById('removeImageBtn');
+            // Remove any existing listeners and add new ones
+            const newCard = card.cloneNode(true);
+            card.parentNode.replaceChild(newCard, card);
 
-                // Click to upload
-                uploadZone.addEventListener('click', () => {
-                    if (!document.getElementById('imagePreviewContainer').classList.contains('hidden')) return;
-                    fileInput.click();
-                });
+            newCard.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Method card clicked:', newCard.dataset.method);
+                this.selectMethod(newCard.dataset.method);
+            });
 
-                // File input change
-                fileInput.addEventListener('change', (e) => {
-                    if (e.target.files.length > 0) {
-                        this.handleImageUpload(e.target.files[0]);
-                    }
-                });
-
-                // Drag and drop
-                uploadZone.addEventListener('dragover', (e) => {
+            // Add keyboard support
+            newCard.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    uploadZone.classList.add('drag-over');
-                });
-
-                uploadZone.addEventListener('dragleave', () => {
-                    uploadZone.classList.remove('drag-over');
-                });
-
-                uploadZone.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    uploadZone.classList.remove('drag-over');
-
-                    const files = e.dataTransfer.files;
-                    if (files.length > 0 && files[0].type.startsWith('image/')) {
-                        this.handleImageUpload(files[0]);
-                    }
-                });
-
-                // Remove image
-                removeBtn?.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.removeImage();
-                });
-            }
-
-            setupImageFilters() {
-                document.querySelectorAll('.filter-option').forEach(option => {
-                    option.addEventListener('click', () => {
-                        this.selectFilter(option.dataset.filter);
-                    });
-                });
-            }
-
-            handleImageUpload(file) {
-                // Validate file
-                if (!file.type.startsWith('image/')) {
-                    this.showError('Please upload a valid image file');
-                    return;
+                    this.selectMethod(newCard.dataset.method);
                 }
+            });
 
-                if (file.size > 5 * 1024 * 1024) {
-                    this.showError('Image size must be less than 5MB');
-                    return;
-                }
+            // Make focusable
+            newCard.setAttribute('tabindex', '0');
+            newCard.setAttribute('role', 'button');
+        });
 
-                this.selectedImage = file;
-
-                // Create preview
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const preview = document.getElementById('imagePreview');
-                    preview.src = e.target.result;
-
-                    // Update filter previews
-                    this.updateFilterPreviews(e.target.result);
-
-                    // Show preview and filters
-                    document.getElementById('uploadPrompt').classList.add('hidden');
-                    document.getElementById('imagePreviewContainer').classList.remove('hidden');
-                    document.getElementById('imageFiltersSection').classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-
-            updateFilterPreviews(imageSrc) {
-                const filters = ['none', 'vintage', 'warm', 'cool', 'mono', 'bright'];
-                filters.forEach(filter => {
-                    const preview = document.getElementById(`preview-${filter}`);
-                    if (preview) {
-                        preview.style.backgroundImage = `url(${imageSrc})`;
-                    }
-                });
-            }
-
-            selectFilter(filter) {
-                // Update UI
-                document.querySelectorAll('.filter-option').forEach(option => {
-                    option.classList.remove('selected');
-                });
-                document.querySelector(`[data-filter="${filter}"]`).classList.add('selected');
-
-                // Apply filter to main preview
-                const preview = document.getElementById('imagePreview');
-                preview.className = `image-preview ${filter !== 'none' ? 'filter-' + filter : ''}`;
-
-                // Update hidden input
-                document.getElementById('selectedFilter').value = filter;
-                this.selectedFilter = filter;
-            }
-
-            removeImage() {
-                this.selectedImage = null;
-                document.getElementById('coverImageInput').value = '';
-                document.getElementById('uploadPrompt').classList.remove('hidden');
-                document.getElementById('imagePreviewContainer').classList.add('hidden');
-                document.getElementById('imageFiltersSection').classList.add('hidden');
-            }
-
-            selectMethod(method) {
-                // Remove previous selections
-                document.querySelectorAll('.method-card').forEach(card => {
-                    card.classList.remove('selected');
-                });
-
-                // Select new method
-                const selectedCard = document.querySelector(`[data-method="${method}"]`);
-                selectedCard.classList.add('selected');
-                this.selectedMethod = method;
-
-                // Move to next step
-                setTimeout(() => {
-                    this.goToStep(2);
-                }, 300);
-            }
-
-            updateSelectedEntries() {
-                const checkboxes = document.querySelectorAll('.entry-checkbox:checked');
-                this.selectedEntries = new Set(Array.from(checkboxes).map(cb => parseInt(cb.value)));
-
-                // Update UI
-                document.getElementById('selectedCount').textContent = this.selectedEntries.size;
-
-                // Calculate total words (mock calculation)
-                let totalWords = this.selectedEntries.size * 200; // Average 200 words per entry
-                document.getElementById('totalWords').textContent = totalWords.toLocaleString();
-
-                // Enable/disable analyze button
-                document.getElementById('analyzeBtn').disabled = this.selectedEntries.size === 0;
-
-                // Update entry card styling
-                document.querySelectorAll('.entry-card').forEach(card => {
-                    const checkbox = card.querySelector('.entry-checkbox');
-                    if (checkbox && checkbox.checked) {
-                        card.classList.add('selected');
-                    } else {
-                        card.classList.remove('selected');
-                    }
-                });
-            }
-
-            selectAllEntries() {
-                document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = true);
+        // Entry checkboxes
+        const checkboxes = document.querySelectorAll('.entry-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
                 this.updateSelectedEntries();
+            });
+        });
+
+        // Other buttons
+        this.setupButton('selectAllBtn', () => this.selectAllEntries());
+        this.setupButton('selectNoneBtn', () => this.selectNoneEntries());
+        this.setupButton('analyzeBtn', (e) => this.analyzeEntries(e));
+        this.setupButton('generateStructureBtn', (e) => this.generateStructure(e));
+
+        // Forms
+        const publishForm = document.getElementById('publishForm');
+        if (publishForm) {
+            publishForm.addEventListener('submit', (e) => this.publishJournal(e));
+        }
+
+        // Edit modal
+        this.setupButton('closeEditModal', () => this.closeEditModal());
+        this.setupButton('cancelEdit', () => this.closeEditModal());
+
+        const editForm = document.getElementById('editEntryForm');
+        if (editForm) {
+            editForm.addEventListener('submit', (e) => this.saveEntryEdit(e));
+        }
+
+        // Edit entry buttons
+        document.querySelectorAll('.edit-entry-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.openEditModal(e));
+        });
+
+        // Image upload functionality
+        this.setupImageUpload();
+
+        // Image filters
+        this.setupImageFilters();
+
+        console.log('Event listeners setup complete');
+    }
+
+    setupImageUpload() {
+        const uploadZone = document.getElementById('imageUploadZone');
+        const fileInput = document.getElementById('coverImageInput');
+        const removeBtn = document.getElementById('removeImageBtn');
+
+        if (!uploadZone || !fileInput) return;
+
+        // Click to upload
+        uploadZone.addEventListener('click', () => {
+            if (!document.getElementById('imagePreviewContainer').classList.contains('hidden')) return;
+            fileInput.click();
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                this.handleImageUpload(e.target.files[0]);
+            }
+        });
+
+        // Drag and drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('drag-over');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('drag-over');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('drag-over');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                this.handleImageUpload(files[0]);
+            }
+        });
+
+        // Remove image
+        if (removeBtn) {
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.removeImage();
+            });
+        }
+    }
+
+    setupImageFilters() {
+        document.querySelectorAll('.filter-option').forEach(option => {
+            option.addEventListener('click', () => {
+                this.selectFilter(option.dataset.filter);
+            });
+        });
+    }
+
+    handleImageUpload(file) {
+        // Validate file
+        if (!file.type.startsWith('image/')) {
+            this.showError('Please upload a valid image file');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            this.showError('Image size must be less than 5MB');
+            return;
+        }
+
+        this.selectedImage = file;
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const preview = document.getElementById('imagePreview');
+            preview.src = e.target.result;
+
+            // Update filter previews
+            this.updateFilterPreviews(e.target.result);
+
+            // Show preview and filters
+            document.getElementById('uploadPrompt').classList.add('hidden');
+            document.getElementById('imagePreviewContainer').classList.remove('hidden');
+            document.getElementById('imageFiltersSection').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    updateFilterPreviews(imageSrc) {
+        const filters = ['none', 'vintage', 'warm', 'cool', 'mono', 'bright'];
+        filters.forEach(filter => {
+            const preview = document.getElementById(`preview-${filter}`);
+            if (preview) {
+                preview.style.backgroundImage = `url(${imageSrc})`;
+            }
+        });
+    }
+
+    selectFilter(filter) {
+        // Update UI
+        document.querySelectorAll('.filter-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        document.querySelector(`[data-filter="${filter}"]`).classList.add('selected');
+
+        // Apply filter to main preview
+        const preview = document.getElementById('imagePreview');
+        preview.className = `image-preview ${filter !== 'none' ? 'filter-' + filter : ''}`;
+
+        // Update hidden input
+        document.getElementById('selectedFilter').value = filter;
+        this.selectedFilter = filter;
+    }
+
+    removeImage() {
+        this.selectedImage = null;
+        document.getElementById('coverImageInput').value = '';
+        document.getElementById('uploadPrompt').classList.remove('hidden');
+        document.getElementById('imagePreviewContainer').classList.add('hidden');
+        document.getElementById('imageFiltersSection').classList.add('hidden');
+    }
+
+    setupButton(id, handler) {
+        const button = document.getElementById(id);
+        if (button) {
+            button.addEventListener('click', handler);
+        }
+    }
+
+    selectMethod(method) {
+        console.log('selectMethod called with:', method);
+
+        if (!method) {
+            console.error('No method provided');
+            return;
+        }
+
+        // Remove previous selections
+        document.querySelectorAll('.method-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+
+        // Find and select the clicked card
+        const selectedCard = document.querySelector(`[data-method="${method}"]`);
+        if (selectedCard) {
+            selectedCard.classList.add('selected');
+            this.selectedMethod = method;
+            console.log('Selected method:', this.selectedMethod);
+
+            // Update hidden form field
+            const methodInput = document.getElementById('selectedMethod');
+            if (methodInput) {
+                methodInput.value = method;
             }
 
-            selectNoneEntries() {
-                document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = false);
-                this.updateSelectedEntries();
+            // Visual feedback
+            selectedCard.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                selectedCard.style.transform = '';
+            }, 150);
+
+            // Move to next step
+            setTimeout(() => {
+                console.log('Moving to step 2...');
+                this.goToStep(2);
+            }, 200);
+        } else {
+            console.error('Could not find card for method:', method);
+        }
+    }
+
+    updateSelectedEntries() {
+        const checkboxes = document.querySelectorAll('.entry-checkbox:checked');
+        this.selectedEntries = new Set(Array.from(checkboxes).map(cb => parseInt(cb.value)));
+
+        // Update UI
+        const selectedCountEl = document.getElementById('selectedCount');
+        if (selectedCountEl) {
+            selectedCountEl.textContent = this.selectedEntries.size;
+        }
+
+        // Calculate total words
+        let totalWords = 0;
+        checkboxes.forEach(cb => {
+            const card = cb.closest('.entry-card');
+            const wordCountEl = card.querySelector('.word-count');
+            if (wordCountEl) {
+                const wordCount = wordCountEl.textContent.match(/\d+/);
+                if (wordCount) totalWords += parseInt(wordCount[0]);
+            }
+        });
+
+        const totalWordsEl = document.getElementById('totalWords');
+        if (totalWordsEl) {
+            totalWordsEl.textContent = totalWords.toLocaleString();
+        }
+
+        // Update hidden form field
+        const entryIdsInput = document.getElementById('selectedEntryIds');
+        if (entryIdsInput) {
+            entryIdsInput.value = JSON.stringify(Array.from(this.selectedEntries));
+        }
+
+        // Enable/disable analyze button
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        if (analyzeBtn) {
+            analyzeBtn.disabled = this.selectedEntries.size === 0;
+        }
+
+        // Update entry card styling
+        document.querySelectorAll('.entry-card').forEach(card => {
+            const checkbox = card.querySelector('.entry-checkbox');
+            if (checkbox && checkbox.checked) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        });
+    }
+
+    selectAllEntries() {
+        document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = true);
+        this.updateSelectedEntries();
+    }
+
+    selectNoneEntries() {
+        document.querySelectorAll('.entry-checkbox').forEach(cb => cb.checked = false);
+        this.updateSelectedEntries();
+    }
+
+    async analyzeEntries(event) {
+        event.preventDefault();
+
+        if (!this.selectedMethod || this.selectedEntries.size === 0) {
+            this.showError('Please select a method and entries first');
+            return;
+        }
+
+        const button = event.target;
+        const originalText = button.textContent;
+
+        try {
+            this.showLoading('Analyzing your entries...');
+            button.disabled = true;
+            button.textContent = 'Analyzing...';
+
+            const response = await fetch('/diary/api/analyze-entries/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: JSON.stringify({
+                    method: this.selectedMethod,
+                    entry_ids: Array.from(this.selectedEntries)
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.analysisData = data.analysis;
+                this.displayAnalysisResults(data.analysis);
+                this.goToStep(3);
+                this.showSuccess('Analysis completed successfully!');
+            } else {
+                throw new Error(data.error || 'Analysis failed');
             }
 
-            async analyzeEntries(event) {
-                event.preventDefault();
+        } catch (error) {
+            console.error('Analysis error:', error);
+            this.showError('Failed to analyze entries: ' + error.message);
+        } finally {
+            this.hideLoading();
+            button.disabled = false;
+            button.textContent = originalText;
+        }
+    }
 
-                if (!this.selectedMethod || this.selectedEntries.size === 0) {
-                    this.showError('Please select a method and entries first');
-                    return;
+    async generateStructure(event) {
+        event.preventDefault();
+
+        if (!this.analysisData) {
+            this.showError('Please complete analysis first');
+            return;
+        }
+
+        const button = event.target;
+        const originalText = button.textContent;
+
+        try {
+            this.showLoading('Generating journal structure...');
+            button.disabled = true;
+            button.textContent = 'Generating...';
+
+            const journalTypeInput = document.querySelector('input[name="journal_type"]:checked');
+            const journalType = journalTypeInput ? journalTypeInput.value : 'growth';
+
+            const response = await fetch('/diary/api/generate-structure/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: JSON.stringify({
+                    method: this.selectedMethod,
+                    journal_type: journalType,
+                    entry_ids: Array.from(this.selectedEntries),
+                    ai_enhancements: []
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.structureData = data.structure;
+                this.displayStructure(data.structure);
+                this.populatePublishingForm(data.structure);
+                this.goToStep(4);
+                this.showSuccess('Structure generated successfully!');
+            } else {
+                throw new Error(data.error || 'Structure generation failed');
+            }
+
+        } catch (error) {
+            console.error('Structure generation error:', error);
+            this.showError('Failed to generate structure: ' + error.message);
+        } finally {
+            this.hideLoading();
+            button.disabled = false;
+            button.textContent = originalText;
+        }
+    }
+
+    async publishJournal(event) {
+        event.preventDefault();
+
+        if (!this.structureData) {
+            this.showError('Please generate structure first');
+            return;
+        }
+
+        const formData = new FormData(event.target);
+
+        // Add additional data
+        formData.append('method', this.selectedMethod);
+        formData.append('entry_ids', JSON.stringify(Array.from(this.selectedEntries)));
+
+        if (!formData.get('title') || !formData.get('description')) {
+            this.showError('Please fill in all required fields');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to publish this journal?')) {
+            return;
+        }
+
+        const button = document.getElementById('publishBtn');
+        const originalText = button.textContent;
+
+        try {
+            this.showLoading('Publishing your journal...');
+            button.disabled = true;
+            button.textContent = 'Publishing...';
+
+            const response = await fetch('/diary/smart-journal-compiler/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.hideLoading();
+                this.showSuccessModal(data.journal_id);
+            } else {
+                throw new Error(data.error || 'Publishing failed');
+            }
+
+        } catch (error) {
+            console.error('Publishing error:', error);
+            this.showError('Failed to publish journal: ' + error.message);
+            this.hideLoading();
+            button.disabled = false;
+            button.textContent = originalText;
+        }
+    }
+
+    openEditModal(event) {
+        event.stopPropagation();
+        const entryId = event.currentTarget.dataset.entryId;
+        const entryCard = event.currentTarget.closest('.entry-card');
+
+        // Get current entry data
+        const titleEl = entryCard.querySelector('.entry-title');
+        const contentEl = entryCard.querySelector('.entry-content');
+
+        const title = titleEl.dataset.original;
+        const content = contentEl.dataset.original;
+
+        // Populate modal
+        document.getElementById('editEntryId').value = entryId;
+        document.getElementById('editEntryTitle').value = title;
+        document.getElementById('editEntryContent').value = content;
+
+        // Show modal
+        const modal = document.getElementById('editModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        // Focus first input
+        setTimeout(() => {
+            document.getElementById('editEntryTitle').focus();
+        }, 100);
+    }
+
+    closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    async saveEntryEdit(event) {
+        event.preventDefault();
+
+        const entryId = document.getElementById('editEntryId').value;
+        const title = document.getElementById('editEntryTitle').value;
+        const content = document.getElementById('editEntryContent').value;
+
+        if (!title.trim() || !content.trim()) {
+            this.showError('Title and content are required');
+            return;
+        }
+
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+
+        try {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+
+            const response = await fetch('/entry/' + entryId + '/edit/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: new URLSearchParams({
+                    'title': title,
+                    'content': content,
+                    'csrfmiddlewaretoken': this.getCSRFToken()
+                })
+            });
+
+            if (response.ok) {
+                this.updateEntryCardAfterEdit(entryId, title, content);
+                this.closeEditModal();
+                this.showSuccess('Entry updated successfully!');
+
+                // Update word count if selected
+                const checkbox = document.querySelector('input[value="' + entryId + '"]');
+                if (checkbox && checkbox.checked) {
+                    this.updateSelectedEntries();
                 }
-
-                const button = event.target;
-                const originalText = button.textContent;
-
-                try {
-                    this.showLoading('Analyzing your entries...');
-                    button.disabled = true;
-                    button.textContent = 'Analyzing...';
-
-                    // Mock API call - replace with actual endpoint
-                    const response = await fetch('/diary/api/analyze-entries/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': this.getCSRFToken(),
-                        },
-                        body: JSON.stringify({
-                            method: this.selectedMethod,
-                            entry_ids: Array.from(this.selectedEntries)
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        this.analysisData = data.analysis;
-                        this.displayAnalysisResults(data.analysis);
-                        this.goToStep(3);
-                        this.showSuccess('Analysis completed successfully!');
-                    } else {
-                        throw new Error(data.error || 'Analysis failed');
-                    }
-
-                } catch (error) {
-                    console.error('Analysis error:', error);
-                    this.showError('Failed to analyze entries: ' + error.message);
-                } finally {
-                    this.hideLoading();
-                    button.disabled = false;
-                    button.textContent = originalText;
-                }
+            } else {
+                throw new Error('Failed to save entry');
             }
 
-            async generateStructure(event) {
-                event.preventDefault();
+        } catch (error) {
+            console.error('Save error:', error);
+            this.showError('Failed to save entry: ' + error.message);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    }
 
-                if (!this.analysisData) {
-                    this.showError('Please complete analysis first');
-                    return;
+    updateEntryCardAfterEdit(entryId, newTitle, newContent) {
+        const entryCard = document.querySelector('[data-entry-id="' + entryId + '"]');
+        if (!entryCard) return;
+
+        // Update title
+        const titleEl = entryCard.querySelector('.entry-title');
+        titleEl.textContent = newTitle.length > 40 ? newTitle.substring(0, 40) + '...' : newTitle;
+        titleEl.dataset.original = newTitle;
+
+        // Update content
+        const contentEl = entryCard.querySelector('.entry-content');
+        contentEl.textContent = newContent.length > 80 ? newContent.substring(0, 80) + '...' : newContent;
+        contentEl.dataset.original = newContent;
+
+        // Update word count
+        const wordCount = newContent.split(/\s+/).filter(word => word.length > 0).length;
+        const wordCountEl = entryCard.querySelector('.word-count');
+        wordCountEl.textContent = wordCount + ' words';
+    }
+
+    displayAnalysisResults(analysis) {
+        const container = document.getElementById('analysisResults');
+        const themesCount = analysis.themes && analysis.themes.length ? analysis.themes.length : 0;
+        const qualityScore = analysis.quality_score && analysis.quality_score.score ? analysis.quality_score.score : 0;
+        const storyArcsCount = analysis.story_arcs && analysis.story_arcs.length ? analysis.story_arcs.length : 0;
+
+        container.innerHTML =
+            '<div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6">' +
+                '<div class="text-center p-3 md:p-4 bg-white rounded-xl">' +
+                    '<div class="text-xl md:text-2xl font-bold text-blue-600">' + (analysis.total_entries || 0) + '</div>' +
+                    '<div class="text-xs md:text-sm text-gray-600">Entries</div>' +
+                '</div>' +
+                '<div class="text-center p-3 md:p-4 bg-white rounded-xl">' +
+                    '<div class="text-xl md:text-2xl font-bold text-green-600">' + themesCount + '</div>' +
+                    '<div class="text-xs md:text-sm text-gray-600">Themes</div>' +
+                '</div>' +
+                '<div class="text-center p-3 md:p-4 bg-white rounded-xl">' +
+                    '<div class="text-xl md:text-2xl font-bold text-yellow-600">' + qualityScore + '%</div>' +
+                    '<div class="text-xs md:text-sm text-gray-600">Quality</div>' +
+                '</div>' +
+                '<div class="text-center p-3 md:p-4 bg-white rounded-xl">' +
+                    '<div class="text-xl md:text-2xl font-bold text-purple-600">' + storyArcsCount + '</div>' +
+                    '<div class="text-xs md:text-sm text-gray-600">Story Arcs</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="bg-blue-50 rounded-xl p-3 md:p-4">' +
+                '<h4 class="font-semibold text-blue-800 mb-2 text-sm md:text-base">Analysis Summary</h4>' +
+                '<p class="text-blue-700 text-xs md:text-sm">' + (analysis.ai_insights || 'Your entries have been analyzed and are ready for compilation.') + '</p>' +
+            '</div>';
+
+        document.getElementById('generateStructureBtn').disabled = false;
+    }
+
+    displayStructure(structure) {
+        const container = document.getElementById('structurePreview');
+
+        let chaptersHtml = '';
+        if (structure.chapters) {
+            chaptersHtml = structure.chapters.map(function(chapter) {
+                return '<div class="border-l-4 border-blue-500 pl-3 md:pl-4 py-2">' +
+                    '<h4 class="font-medium text-gray-800 text-sm md:text-base">' + chapter.title + '</h4>' +
+                    '<p class="text-xs md:text-sm text-gray-600">' + (chapter.entry_count || 0) + ' entries</p>' +
+                    '<p class="text-xs text-gray-500">' + (chapter.description || '') + '</p>' +
+                '</div>';
+            }).join('');
+        }
+
+        container.innerHTML =
+            '<div class="space-y-4">' +
+                '<div class="bg-white rounded-xl p-3 md:p-4">' +
+                    '<h3 class="font-bold text-gray-800 mb-2 text-sm md:text-base">' + (structure.title || 'Generated Journal') + '</h3>' +
+                    '<p class="text-gray-600 text-xs md:text-sm">' + (structure.description || '') + '</p>' +
+                '</div>' +
+                '<div class="space-y-3">' + chaptersHtml + '</div>' +
+                '<div class="bg-green-50 rounded-xl p-3 md:p-4">' +
+                    '<div class="text-xs md:text-sm">' +
+                        '<strong>Estimated Length:</strong> ' + ((structure.estimated_length || 0).toLocaleString()) + ' words<br>' +
+                        '<strong>Suggested Price:</strong>  + (structure.suggested_price || '9.99') +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+    }
+
+    populatePublishingForm(structure) {
+        if (structure.title) {
+            document.getElementById('journalTitle').value = structure.title;
+        }
+        if (structure.description) {
+            document.getElementById('journalDescription').value = structure.description;
+        }
+        if (structure.suggested_price) {
+            const price = typeof structure.suggested_price === 'string'
+                ? structure.suggested_price.replace(', '')
+                : structure.suggested_price;
+            document.getElementById('journalPrice').value = price;
+        }
+    }
+
+    goToStep(step) {
+        console.log('Going to step:', step);
+        this.currentStep = step;
+        this.updateStepDisplay();
+
+        // Scroll to top on mobile
+        if (window.innerWidth < 768) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    updateStepDisplay() {
+        // Hide all step contents
+        for (let i = 1; i <= 4; i++) {
+            const content = document.getElementById('step' + i + 'Content');
+            if (content) {
+                if (i === this.currentStep) {
+                    content.classList.remove('hidden');
+                    content.classList.add('fade-in');
+                } else {
+                    content.classList.add('hidden');
+                    content.classList.remove('fade-in');
                 }
-
-                const button = event.target;
-                const originalText = button.textContent;
-
-                try {
-                    this.showLoading('Generating journal structure...');
-                    button.disabled = true;
-                    button.textContent = 'Generating...';
-
-                    // Mock API call - replace with actual endpoint
-                    const response = await fetch('/diary/api/generate-structure/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': this.getCSRFToken(),
-                        },
-                        body: JSON.stringify({
-                            method: this.selectedMethod,
-                            journal_type: 'growth',
-                            entry_ids: Array.from(this.selectedEntries),
-                            ai_enhancements: []
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        this.structureData = data.structure;
-                        this.displayStructure(data.structure);
-                        this.populatePublishingForm(data.structure);
-                        this.goToStep(4);
-                        this.showSuccess('Structure generated successfully!');
-                    } else {
-                        throw new Error(data.error || 'Structure generation failed');
-                    }
-
-                } catch (error) {
-                    console.error('Structure generation error:', error);
-                    this.showError('Failed to generate structure: ' + error.message);
-                } finally {
-                    this.hideLoading();
-                    button.disabled = false;
-                    button.textContent = originalText;
-                }
-            }
-
-            async publishJournal(event) {
-                event.preventDefault();
-
-                if (!this.structureData) {
-                    this.showError('Please generate structure first');
-                    return;
-                }
-
-                const formData = new FormData(event.target);
-
-                // Add selected entries
-                formData.append('entry_ids', JSON.stringify(Array.from(this.selectedEntries)));
-                formData.append('method', this.selectedMethod);
-
-                if (!formData.get('title') || !formData.get('description')) {
-                    this.showError('Please fill in all required fields');
-                    return;
-                }
-
-                if (!confirm('Are you sure you want to publish this journal?')) {
-                    return;
-                }
-
-                const button = document.getElementById('publishBtn');
-                const originalText = button.textContent;
-
-                try {
-                    this.showLoading('Publishing your journal...');
-                    button.disabled = true;
-                    button.textContent = 'Publishing...';
-
-                    const response = await fetch('/diary/smart-journal-compiler/', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': this.getCSRFToken(),
-                        },
-                        body: formData
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        this.hideLoading();
-                        this.showSuccessModal(data.journal_id);
-                    } else {
-                        throw new Error(data.error || 'Publishing failed');
-                    }
-
-                } catch (error) {
-                    console.error('Publishing error:', error);
-                    this.showError('Failed to publish journal: ' + error.message);
-                    this.hideLoading();
-                    button.disabled = false;
-                    button.textContent = originalText;
-                }
-            }
-
-            displayAnalysisResults(analysis) {
-                const container = document.getElementById('analysisResults');
-
-                container.innerHTML = `
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div class="text-center p-4 bg-white rounded-xl">
-                            <div class="text-2xl font-bold text-blue-600">${analysis.total_entries || 0}</div>
-                            <div class="text-sm text-gray-600">Entries</div>
-                        </div>
-                        <div class="text-center p-4 bg-white rounded-xl">
-                            <div class="text-2xl font-bold text-green-600">${analysis.themes?.length || 0}</div>
-                            <div class="text-sm text-gray-600">Themes</div>
-                        </div>
-                        <div class="text-center p-4 bg-white rounded-xl">
-                            <div class="text-2xl font-bold text-yellow-600">${analysis.quality_score?.score || 0}%</div>
-                            <div class="text-sm text-gray-600">Quality</div>
-                        </div>
-                        <div class="text-center p-4 bg-white rounded-xl">
-                            <div class="text-2xl font-bold text-purple-600">${analysis.story_arcs?.length || 0}</div>
-                            <div class="text-sm text-gray-600">Story Arcs</div>
-                        </div>
-                    </div>
-                    <div class="bg-blue-50 rounded-xl p-4">
-                        <h4 class="font-semibold text-blue-800 mb-2">Analysis Summary</h4>
-                        <p class="text-blue-700 text-sm">${analysis.ai_insights || 'Your entries have been analyzed and are ready for compilation.'}</p>
-                    </div>
-                `;
-
-                document.getElementById('generateStructureBtn').disabled = false;
-            }
-
-            displayStructure(structure) {
-                const container = document.getElementById('structurePreview');
-
-                let chaptersHtml = '';
-                if (structure.chapters) {
-                    chaptersHtml = structure.chapters.map(chapter => `
-                        <div class="border-l-4 border-blue-500 pl-4 py-2">
-                            <h4 class="font-medium text-gray-800">${chapter.title}</h4>
-                            <p class="text-sm text-gray-600">${chapter.entry_count || 0} entries</p>
-                            <p class="text-xs text-gray-500">${chapter.description || ''}</p>
-                        </div>
-                    `).join('');
-                }
-
-                container.innerHTML = `
-                    <div class="space-y-4">
-                        <div class="bg-white rounded-xl p-4">
-                            <h3 class="font-bold text-gray-800 mb-2">${structure.title || 'Generated Journal'}</h3>
-                            <p class="text-gray-600 text-sm">${structure.description || ''}</p>
-                        </div>
-                        <div class="space-y-3">${chaptersHtml}</div>
-                        <div class="bg-green-50 rounded-xl p-4">
-                            <div class="text-sm">
-                                <strong>Estimated Length:</strong> ${(structure.estimated_length || 0).toLocaleString()} words<br>
-                                <strong>Suggested Price:</strong> $${structure.suggested_price || '9.99'}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            populatePublishingForm(structure) {
-                if (structure.title) {
-                    document.getElementById('journalTitle').value = structure.title;
-                }
-                if (structure.description) {
-                    document.getElementById('journalDescription').value = structure.description;
-                }
-                if (structure.suggested_price) {
-                    const price = typeof structure.suggested_price === 'string'
-                        ? structure.suggested_price.replace('$', '')
-                        : structure.suggested_price;
-                    document.getElementById('journalPrice').value = price;
-                }
-            }
-
-            goToStep(step) {
-                this.currentStep = step;
-                this.updateStepDisplay();
-
-                // Scroll to top
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-
-            updateStepDisplay() {
-                // Hide all step contents
-                for (let i = 1; i <= 4; i++) {
-                    const content = document.getElementById('step' + i + 'Content');
-                    if (content) {
-                        if (i === this.currentStep) {
-                            content.classList.remove('hidden');
-                            content.classList.add('fade-in');
-                        } else {
-                            content.classList.add('hidden');
-                            content.classList.remove('fade-in');
-                        }
-                    }
-                }
-
-                // Update step indicators
-                for (let i = 1; i <= 4; i++) {
-                    const indicator = document.getElementById('step' + i);
-                    const line = document.getElementById('line' + i);
-
-                    if (indicator) {
-                        indicator.classList.remove('active', 'completed', 'pending');
-                        if (i < this.currentStep) {
-                            indicator.classList.add('completed');
-                        } else if (i === this.currentStep) {
-                            indicator.classList.add('active');
-                        } else {
-                            indicator.classList.add('pending');
-                        }
-                    }
-
-                    if (line && i < 4) {
-                        if (i < this.currentStep) {
-                            line.classList.add('completed');
-                        } else {
-                            line.classList.remove('completed');
-                        }
-                    }
-                }
-            }
-
-            showLoading(message) {
-                document.getElementById('loadingText').textContent = message;
-                document.getElementById('loadingOverlay').style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
-
-            hideLoading() {
-                document.getElementById('loadingOverlay').style.display = 'none';
-                document.body.style.overflow = '';
-            }
-
-            showSuccessModal(journalId) {
-                document.getElementById('successModal').style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-
-                document.getElementById('viewJournalBtn').onclick = function() {
-                    window.location.href = '/marketplace/journal/' + journalId + '/';
-                };
-            }
-
-            showSuccess(message) {
-                this.showToast(message, 'success');
-            }
-
-            showError(message) {
-                this.showToast(message, 'error');
-            }
-
-            showToast(message, type) {
-                const toast = document.createElement('div');
-                const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
-
-                toast.className = `fixed top-4 right-4 left-4 md:left-auto md:max-w-md p-4 rounded-lg shadow-lg z-50 text-white transform transition-transform duration-300 ${bgColor}`;
-                toast.textContent = message;
-                toast.style.transform = 'translateY(-100px)';
-
-                document.body.appendChild(toast);
-
-                setTimeout(() => {
-                    toast.style.transform = 'translateY(0)';
-                }, 100);
-
-                setTimeout(() => {
-                    toast.style.transform = 'translateY(-100px)';
-                    setTimeout(() => {
-                        if (document.body.contains(toast)) {
-                            document.body.removeChild(toast);
-                        }
-                    }, 300);
-                }, 4000);
-            }
-
-            getCSRFToken() {
-                const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
-                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-
-                if (csrfInput) {
-                    return csrfInput.value;
-                } else if (csrfMeta) {
-                    return csrfMeta.getAttribute('content');
-                }
-                return '';
             }
         }
 
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            window.journalCompiler = new SmartJournalCompiler();
+        // Update step indicators
+        for (let i = 1; i <= 4; i++) {
+            const indicator = document.getElementById('step' + i);
+            const line = document.getElementById('line' + i);
+
+            if (indicator) {
+                indicator.classList.remove('active', 'completed', 'pending');
+                if (i < this.currentStep) {
+                    indicator.classList.add('completed');
+                } else if (i === this.currentStep) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.add('pending');
+                }
+            }
+
+            if (line && i < 4) {
+                if (i < this.currentStep) {
+                    line.classList.add('completed');
+                } else {
+                    line.classList.remove('completed');
+                }
+            }
+        }
+
+        // Update step labels
+        const stepLabels = document.querySelectorAll('.step-label');
+        stepLabels.forEach(function(label, index) {
+            if (index + 1 === this.currentStep) {
+                label.classList.add('active');
+            } else {
+                label.classList.remove('active');
+            }
+        }.bind(this));
+    }
+
+    showLoading(message) {
+        const loadingText = document.getElementById('loadingText');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        if (loadingText) loadingText.textContent = message;
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    hideLoading() {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+
+    showSuccessModal(journalId) {
+        const modal = document.getElementById('successModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        const viewBtn = document.getElementById('viewJournalBtn');
+        if (viewBtn) {
+            viewBtn.onclick = function() {
+                window.location.href = '/marketplace/journal/' + journalId + '/';
+            };
+        }
+    }
+
+    showSuccess(message) {
+        // Use DiaryVault's existing toast system if available
+        if (window.showToast) {
+            window.showToast(message, 'success');
+        } else {
+            this.showToast(message, 'success');
+        }
+    }
+
+    showError(message) {
+        // Use DiaryVault's existing toast system if available
+        if (window.showToast) {
+            window.showToast(message, 'error');
+        } else {
+            this.showToast(message, 'error');
+        }
+    }
+
+    showToast(message, type) {
+        const toast = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+
+        toast.className = 'fixed top-4 right-4 left-4 md:left-auto md:max-w-md p-4 rounded-lg shadow-lg z-50 text-white transform transition-transform duration-300 ' + bgColor;
+        toast.textContent = message;
+        toast.style.transform = 'translateY(-100px)';
+
+        document.body.appendChild(toast);
+
+        // Show toast
+        setTimeout(function() {
+            toast.style.transform = 'translateY(0)';
+        }, 100);
+
+        // Hide toast after 4 seconds
+        setTimeout(function() {
+            toast.style.transform = 'translateY(-100px)';
+            setTimeout(function() {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
+        }, 4000);
+    }
+
+    getCSRFToken() {
+        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+
+        if (csrfInput) {
+            return csrfInput.value;
+        } else if (csrfMeta) {
+            return csrfMeta.getAttribute('content');
+        }
+        return '';
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, creating SmartJournalCompiler...');
+
+    // Add mobile class if needed
+    if (window.innerWidth < 768) {
+        document.body.classList.add('mobile-device');
+    }
+
+    // Initialize the compiler
+    window.journalCompiler = new SmartJournalCompiler();
+
+    // Prevent zoom on iOS inputs
+    const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+    inputs.forEach(function(input) {
+        input.addEventListener('focus', function() {
+            if (window.innerWidth < 768) {
+                input.style.fontSize = '16px';
+            }
         });
-    </script>
-</body>
-</html>
+        input.addEventListener('blur', function() {
+            input.style.fontSize = '';
+        });
+    });
+
+    // Handle orientation change
+    window.addEventListener('orientationchange', function() {
+        setTimeout(function() {
+            // Force a reflow
+            document.body.style.height = window.innerHeight + 'px';
+            setTimeout(function() {
+                document.body.style.height = '';
+            }, 100);
+        }, 100);
+    });
+
+    console.log('SmartJournalCompiler fully initialized with photo upload support!');
+});
+
+// Handle resize events
+window.addEventListener('resize', function() {
+    if (window.innerWidth < 768) {
+        document.body.classList.add('mobile-device');
+    } else {
+        document.body.classList.remove('mobile-device');
+    }
+});
+</script>
+{% endblock %}
