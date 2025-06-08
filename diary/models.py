@@ -679,6 +679,21 @@ class Journal(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='journals')
     cover_image = models.ImageField(upload_to='journal_covers/', blank=True, null=True)
 
+    # NEW: Image filter field for cover image
+    image_filter = models.CharField(
+        max_length=20,
+        default='none',
+        choices=[
+            ('none', 'Original'),
+            ('vintage', 'Vintage'),
+            ('warm', 'Warm'),
+            ('cool', 'Cool'),
+            ('mono', 'Monochrome'),
+            ('bright', 'Bright'),
+        ],
+        help_text="Filter applied to cover image"
+    )
+
     # Marketplace specific fields
     is_published = models.BooleanField(default=False)
     date_published = models.DateTimeField(null=True, blank=True)
@@ -758,6 +773,8 @@ class Journal(models.Model):
             models.Index(fields=['is_published', 'journal_type', 'date_published']),
             # Search functionality
             models.Index(fields=['is_published', 'title']),
+            # Image filter queries
+            models.Index(fields=['is_published', 'image_filter']),
         ]
 
     def __str__(self):
@@ -780,6 +797,39 @@ class Journal(models.Model):
     def author_display_name(self):
         return self.author.get_full_name() or self.author.username
 
+    @property
+    def has_cover_image(self):
+        """Check if journal has a cover image"""
+        return bool(self.cover_image)
+
+    @property
+    def cover_image_url(self):
+        """Get cover image URL with fallback"""
+        if self.cover_image:
+            return self.cover_image.url
+        return '/static/images/default-journal-cover.jpg'  # Fallback image
+
+    def get_image_filter_display_name(self):
+        """Get human-readable filter name"""
+        filter_names = {
+            'none': 'Original',
+            'vintage': 'Vintage',
+            'warm': 'Warm Tone',
+            'cool': 'Cool Tone',
+            'mono': 'Monochrome',
+            'bright': 'Bright',
+        }
+        return filter_names.get(self.image_filter, 'Original')
+
+    def get_cover_image_with_filter(self):
+        """Get cover image data with filter information"""
+        return {
+            'url': self.cover_image_url,
+            'filter': self.image_filter,
+            'filter_display': self.get_image_filter_display_name(),
+            'has_filter': self.image_filter != 'none'
+        }
+
     def update_cached_counts(self):
         """Update cached statistics"""
         self.like_count_cached = self.journal_likes.count() if hasattr(self, 'journal_likes') else self.likes.count()
@@ -795,8 +845,16 @@ class Journal(models.Model):
             self.first_entry_date = dates['first'].date() if dates['first'] else None
             self.last_entry_date = dates['last'].date() if dates['last'] else None
 
-        self.save(update_fields=['like_count_cached', 'review_count', 'entry_count_cached',
-                               'first_entry_date', 'last_entry_date'])
+        # Update AI enhancement flags based on entries
+        self.has_ai_introductions = self.entries.filter(entry_type='introduction').exists()
+        self.has_ai_questions = self.entries.filter(entry_type='reflection').exists()
+        self.has_readers_guide = self.entries.filter(entry_type='guide').exists()
+
+        self.save(update_fields=[
+            'like_count_cached', 'review_count', 'entry_count_cached',
+            'first_entry_date', 'last_entry_date', 'has_ai_introductions',
+            'has_ai_questions', 'has_readers_guide'
+        ])
 
     def calculate_popularity(self):
         """Calculate popularity score based on various metrics"""
@@ -825,6 +883,68 @@ class Journal(models.Model):
             return self.analytics
         except JournalAnalytics.DoesNotExist:
             return JournalAnalytics.objects.create(journal=self)
+
+    def get_reading_time_estimate(self):
+        """Estimate total reading time for the journal"""
+        total_words = sum(len(entry.content.split()) for entry in self.entries.filter(is_included=True))
+        # Average reading speed: 200 words per minute
+        minutes = max(1, round(total_words / 200))
+
+        if minutes < 60:
+            return f"{minutes} min read"
+        else:
+            hours = minutes // 60
+            remaining_minutes = minutes % 60
+            if remaining_minutes == 0:
+                return f"{hours} hour read"
+            else:
+                return f"{hours}h {remaining_minutes}m read"
+
+    def get_compilation_summary(self):
+        """Get summary of how this journal was compiled"""
+        if not self.compilation_method:
+            return "Manually created journal"
+
+        method_names = {
+            'ai': 'AI Smart Compilation',
+            'thematic': 'Thematic Collection',
+            'chronological': 'Timeline Journey'
+        }
+
+        summary = {
+            'method': method_names.get(self.compilation_method, 'Unknown'),
+            'type': self.journal_type.replace('_', ' ').title() if self.journal_type else 'General',
+            'ai_enhanced': bool(self.ai_enhancements_used),
+            'enhancement_count': len(self.ai_enhancements_used) if self.ai_enhancements_used else 0
+        }
+
+        return summary
+
+    def can_be_edited_by(self, user):
+        """Check if user can edit this journal"""
+        return self.author == user
+
+    def get_marketplace_data(self):
+        """Get data formatted for marketplace display"""
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'author': self.author_display_name,
+            'author_username': self.author.username,
+            'price': float(self.price),
+            'is_premium': self.is_premium,
+            'cover_image': self.get_cover_image_with_filter(),
+            'stats': {
+                'views': self.view_count,
+                'likes': self.like_count_cached,
+                'entries': self.entry_count_cached,
+                'reading_time': self.get_reading_time_estimate(),
+            },
+            'compilation': self.get_compilation_summary(),
+            'published_date': self.date_published.isoformat() if self.date_published else None,
+            'tags': [tag.name for tag in self.marketplace_tags.all()],
+        }
 
 class JournalEntry(models.Model):
     """Model representing an individual entry in a journal"""

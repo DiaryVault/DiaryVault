@@ -22,8 +22,131 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def smart_journal_compiler(request):
-    """Main view for the Smart Journal Compiler"""
+    """Main view for the Smart Journal Compiler with image upload support"""
 
+    # Handle POST request for publishing journals with images
+    if request.method == 'POST':
+        try:
+            # Get form data
+            title = request.POST.get('title', '').strip()
+            description = request.POST.get('description', '').strip()
+            price = request.POST.get('price', '0')
+            method = request.POST.get('method', 'ai')
+            entry_ids = request.POST.get('entry_ids', '[]')
+
+            # Handle image upload
+            cover_image = request.FILES.get('cover_image')
+            image_filter = request.POST.get('image_filter', 'none')
+
+            # Validate required fields
+            if not title or not description:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Title and description are required'
+                }, status=400)
+
+            # Parse entry IDs
+            try:
+                entry_ids_list = json.loads(entry_ids) if isinstance(entry_ids, str) else entry_ids
+            except (json.JSONDecodeError, TypeError):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Invalid entry selection'
+                }, status=400)
+
+            if not entry_ids_list:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Please select at least one entry'
+                }, status=400)
+
+            # Validate entries belong to user
+            user_entries = Entry.objects.filter(
+                id__in=entry_ids_list,
+                user=request.user
+            )
+
+            if user_entries.count() != len(entry_ids_list):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Invalid entry selection'
+                }, status=400)
+
+            # Create journal structure using your existing AI service
+            try:
+                structure = JournalCompilerAI.generate_journal_structure(
+                    user=request.user,
+                    entries=user_entries,
+                    compilation_method=method,
+                    journal_type='growth',  # Default, could be made configurable
+                    ai_enhancements=[]
+                )
+            except Exception as e:
+                logger.error(f"Failed to generate journal structure: {e}")
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Failed to generate journal structure'
+                }, status=500)
+
+            # Create the journal using your existing service
+            try:
+                journal = JournalCompilerAI.create_compiled_journal(
+                    user=request.user,
+                    title=title,
+                    description=description,
+                    price=float(price) if price else 0.00,
+                    structure=structure,
+                    entry_ids=entry_ids_list,
+                    cover_image_data=None  # We'll handle image separately
+                )
+
+                # Handle cover image upload
+                if cover_image:
+                    # Validate image
+                    if cover_image.size > 5 * 1024 * 1024:  # 5MB limit
+                        return JsonResponse({
+                            'success': False,
+                            'error': 'Image size must be less than 5MB'
+                        }, status=400)
+
+                    if not cover_image.content_type.startswith('image/'):
+                        return JsonResponse({
+                            'success': False,
+                            'error': 'Please upload a valid image file'
+                        }, status=400)
+
+                    # Save image to journal
+                    journal.cover_image = cover_image
+
+                    # Save image filter preference if you have this field
+                    if hasattr(journal, 'image_filter'):
+                        journal.image_filter = image_filter
+
+                    journal.save()
+
+                # Return success response
+                return JsonResponse({
+                    'success': True,
+                    'journal_id': journal.id,
+                    'redirect_url': f'/marketplace/journal/{journal.id}/',
+                    'message': f'Journal "{title}" published successfully!'
+                })
+
+            except Exception as e:
+                logger.error(f"Failed to create compiled journal: {e}")
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Failed to create journal'
+                }, status=500)
+
+        except Exception as e:
+            logger.error(f"Error in smart_journal_compiler POST: {e}")
+            return JsonResponse({
+                'success': False,
+                'error': 'An unexpected error occurred'
+            }, status=500)
+
+    # Handle GET request - show the compiler interface
     # Get user's entries and analyze them
     entries = Entry.objects.filter(user=request.user).order_by('-created_at')
 
@@ -163,14 +286,31 @@ def generate_journal_structure(request):
 @login_required
 @require_POST
 def publish_compiled_journal(request):
-    """Publish the compiled journal to marketplace"""
+    """Publish the compiled journal to marketplace with image upload support"""
     try:
-        data = json.loads(request.body)
+        # Handle both JSON and FormData (for image uploads)
+        if request.content_type and 'application/json' in request.content_type:
+            # Handle JSON data (no image)
+            data = json.loads(request.body)
+            title = data.get('title')
+            description = data.get('description')
+            price = float(data.get('price', 0))
+            cover_image = None
+            image_filter = 'none'
+        else:
+            # Handle FormData (with image)
+            title = request.POST.get('title')
+            description = request.POST.get('description')
+            price = float(request.POST.get('price', 0))
+            cover_image = request.FILES.get('cover_image')
+            image_filter = request.POST.get('image_filter', 'none')
 
-        title = data.get('title')
-        description = data.get('description')
-        price = float(data.get('price', 0))
-        cover_image_data = data.get('cover_image')
+        # Validate required fields
+        if not title or not description:
+            return JsonResponse({
+                'success': False,
+                'error': 'Title and description are required'
+            }, status=400)
 
         # Get structure from session
         structure = request.session.get('journal_structure')
@@ -182,6 +322,22 @@ def publish_compiled_journal(request):
                 'error': 'Journal structure not found. Please regenerate.'
             }, status=400)
 
+        # Validate image if provided
+        if cover_image:
+            # Check file size (5MB limit)
+            if cover_image.size > 5 * 1024 * 1024:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Image size must be less than 5MB'
+                }, status=400)
+
+            # Check file type
+            if not cover_image.content_type.startswith('image/'):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Please upload a valid image file (JPG, PNG, or WebP)'
+                }, status=400)
+
         # Create the journal
         journal = JournalCompilerAI.create_compiled_journal(
             user=request.user,
@@ -190,8 +346,18 @@ def publish_compiled_journal(request):
             price=price,
             structure=structure,
             entry_ids=entry_ids,
-            cover_image_data=cover_image_data
+            cover_image_data=None  # We'll handle image separately
         )
+
+        # Handle cover image upload
+        if cover_image:
+            journal.cover_image = cover_image
+
+            # Save image filter preference if you have this field
+            if hasattr(journal, 'image_filter'):
+                journal.image_filter = image_filter
+
+            journal.save()
 
         # Clear session data
         if 'journal_structure' in request.session:
@@ -202,7 +368,8 @@ def publish_compiled_journal(request):
         return JsonResponse({
             'success': True,
             'journal_id': journal.id,
-            'redirect_url': f'/marketplace/journal/{journal.id}/'
+            'redirect_url': f'/marketplace/journal/{journal.id}/',
+            'message': f'Journal "{title}" published successfully!'
         })
 
     except Exception as e:
