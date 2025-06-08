@@ -5,6 +5,7 @@
 
 {% block extra_css %}
 <style>
+    /* Mobile-First Responsive Design */
     .glass-card {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
@@ -18,11 +19,18 @@
         border: none;
         font-weight: 600;
         transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
     }
 
     .btn-primary:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        color: white;
+        text-decoration: none;
     }
 
     .btn-primary:disabled {
@@ -37,14 +45,21 @@
         border: 1px solid #e2e8f0;
         font-weight: 500;
         transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
     }
 
     .btn-secondary:hover {
         background: #f1f5f9;
         border-color: #cbd5e1;
+        color: #475569;
+        text-decoration: none;
     }
 
-    /* Enhanced Mobile-First Step Indicator */
+    /* Mobile-Optimized Progress Steps */
     .step-container {
         display: flex;
         align-items: center;
@@ -56,12 +71,7 @@
         border-radius: 1rem;
         margin-bottom: 1rem;
         overflow-x: auto;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-    }
-
-    .step-container::-webkit-scrollbar {
-        display: none;
+        -webkit-overflow-scrolling: touch;
     }
 
     .step-indicator {
@@ -75,7 +85,6 @@
         font-size: 0.875rem;
         transition: all 0.3s ease;
         flex-shrink: 0;
-        position: relative;
     }
 
     .step-indicator.completed {
@@ -105,7 +114,6 @@
         background: #10b981;
     }
 
-    /* Mobile-Optimized Step Labels */
     .step-label {
         font-size: 0.625rem;
         font-weight: 500;
@@ -120,13 +128,13 @@
         font-weight: 600;
     }
 
-    /* Mobile-Optimized Method Cards */
+    /* Method Cards - Mobile Optimized */
     .method-card {
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border: 2px solid transparent;
-        padding: 1rem;
-        text-align: center;
+        position: relative;
+        overflow: hidden;
     }
 
     .method-card:hover {
@@ -136,15 +144,29 @@
 
     .method-card.selected {
         border-color: #6366f1;
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(79, 70, 229, 0.02));
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05));
     }
 
-    /* Mobile-Optimized Entry Cards */
+    .method-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .method-card:hover::before {
+        left: 100%;
+    }
+
+    /* Entry Cards */
     .entry-card {
         transition: all 0.2s ease;
         cursor: pointer;
         border: 2px solid transparent;
-        padding: 0.75rem;
     }
 
     .entry-card:hover {
@@ -157,11 +179,10 @@
         background: rgba(16, 185, 129, 0.05);
     }
 
-    /* Mobile-Optimized Journal Cards */
+    /* Journal Cards */
     .journal-card {
         transition: all 0.3s ease;
         border: 1px solid #e5e7eb;
-        padding: 1rem;
     }
 
     .journal-card:hover {
@@ -170,7 +191,7 @@
         border-color: #cbd5e1;
     }
 
-    /* Enhanced Mobile Loading Overlay */
+    /* Loading Overlay */
     .loading-overlay {
         position: fixed;
         top: 0;
@@ -192,21 +213,9 @@
         text-align: center;
         max-width: 300px;
         width: 100%;
-        margin: 0 auto;
     }
 
-    /* Mobile-Optimized Modal */
-    .mobile-modal {
-        background: white;
-        border-radius: 1rem;
-        padding: 1rem;
-        max-width: 95vw;
-        width: 100%;
-        max-height: 90vh;
-        overflow-y: auto;
-        margin: 1rem;
-    }
-
+    /* Animations */
     .fade-in {
         animation: fadeIn 0.5s ease-out;
     }
@@ -228,15 +237,7 @@
         background-clip: text;
     }
 
-    /* Utility Colors */
-    .primary-600 { color: #4f46e5; }
-    .secondary-600 { color: #475569; }
-    .secondary-800 { color: #1e293b; }
-    .success-600 { color: #059669; }
-    .warning-600 { color: #d97706; }
-    .error-600 { color: #dc2626; }
-
-    /* Mobile-Specific Responsive Improvements */
+    /* Responsive breakpoints */
     @media (max-width: 768px) {
         .container-mobile {
             padding-left: 0.75rem;
@@ -246,21 +247,12 @@
         .glass-card {
             border-radius: 1rem;
             margin-bottom: 1rem;
+            padding: 1rem !important;
         }
 
         .method-card {
-            padding: 0.75rem;
-        }
-
-        .method-card .icon-container {
-            width: 3rem;
-            height: 3rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .method-card .icon-container svg {
-            width: 1.5rem;
-            height: 1.5rem;
+            padding: 1rem;
+            text-align: center;
         }
 
         .method-card h3 {
@@ -274,94 +266,13 @@
         }
 
         .entry-card {
-            padding: 0.5rem;
+            padding: 0.75rem;
         }
 
         .journal-card {
-            padding: 0.75rem;
+            padding: 1rem;
         }
 
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
-        }
-
-        .stats-card {
-            padding: 0.75rem;
-            text-align: center;
-        }
-
-        .stats-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-
-        .stats-label {
-            font-size: 0.625rem;
-            margin-top: 0.25rem;
-        }
-
-        /* Mobile Form Improvements */
-        .form-input {
-            font-size: 16px; /* Prevents zoom on iOS */
-            padding: 0.75rem;
-        }
-
-        .form-textarea {
-            font-size: 16px;
-            padding: 0.75rem;
-            min-height: 6rem;
-        }
-
-        /* Mobile Button Improvements */
-        .btn-mobile {
-            padding: 0.75rem 1rem;
-            font-size: 0.875rem;
-            border-radius: 0.75rem;
-            min-height: 44px; /* Touch target size */
-        }
-
-        .btn-mobile-full {
-            width: 100%;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Mobile Navigation Improvements */
-        .mobile-nav-buttons {
-            position: sticky;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 0.75rem;
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
-            margin: 0 -0.75rem -0.75rem -0.75rem;
-            border-radius: 0 0 1rem 1rem;
-        }
-
-        /* Mobile Checkbox and Radio Improvements */
-        .mobile-checkbox {
-            transform: scale(1.2);
-            margin-right: 0.75rem;
-        }
-
-        .mobile-radio {
-            transform: scale(1.2);
-            margin-right: 0.75rem;
-        }
-
-        /* Mobile Grid Improvements */
-        .mobile-grid {
-            grid-template-columns: 1fr;
-            gap: 0.75rem;
-        }
-
-        .mobile-grid-2 {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
-        }
-
-        /* Mobile Text Sizing */
         .mobile-title {
             font-size: 1.5rem;
             line-height: 1.3;
@@ -374,36 +285,54 @@
             margin-bottom: 1rem;
         }
 
-        .mobile-text {
-            font-size: 0.75rem;
-            line-height: 1.4;
+        .mobile-grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
         }
 
-        /* Hide desktop-only elements */
-        .desktop-only {
-            display: none;
+        .mobile-nav-buttons {
+            position: sticky;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            margin: 0 -1rem -1rem -1rem;
+            border-radius: 0 0 1rem 1rem;
         }
-    }
 
-    /* Tablet Specific */
-    @media (min-width: 769px) and (max-width: 1024px) {
-        .tablet-grid-2 {
+        .btn-mobile {
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 0.75rem;
+            min-height: 44px;
+            width: 100%;
+        }
+
+        .form-input {
+            font-size: 16px; /* Prevents zoom on iOS */
+            padding: 0.75rem;
+        }
+
+        .stats-grid {
             grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
         }
 
-        .tablet-grid-3 {
-            grid-template-columns: repeat(3, 1fr);
+        .stats-card {
+            padding: 0.75rem;
+        }
+
+        .stats-value {
+            font-size: 1.5rem;
+        }
+
+        .stats-label {
+            font-size: 0.625rem;
         }
     }
 
-    /* Desktop Specific */
-    @media (min-width: 1025px) {
-        .mobile-only {
-            display: none;
-        }
-    }
-
-    /* Improved Touch Targets */
+    /* Touch improvements */
     @media (hover: none) and (pointer: coarse) {
         .method-card,
         .entry-card,
@@ -412,45 +341,16 @@
         .btn-primary,
         .btn-secondary {
             min-height: 44px;
-            min-width: 44px;
-        }
-
-        .entry-checkbox,
-        .mobile-checkbox,
-        .mobile-radio {
-            min-height: 44px;
-            min-width: 44px;
         }
     }
 
-    /* Dark mode support for mobile */
-    @media (prefers-color-scheme: dark) {
-        .glass-card {
-            background: rgba(30, 41, 59, 0.9);
-            border-color: rgba(148, 163, 184, 0.2);
-        }
-
-        .loading-spinner {
-            background: rgba(30, 41, 59, 0.95);
-            color: white;
-        }
-
-        .mobile-modal {
-            background: rgba(30, 41, 59, 0.95);
-            color: white;
-        }
-    }
-
-    /* Accessibility improvements */
-    @media (prefers-reduced-motion: reduce) {
-        .method-card,
-        .entry-card,
-        .journal-card,
-        .step-indicator {
-            animation: none;
-            transition: none;
-        }
-    }
+    /* Utility Colors */
+    .primary-600 { color: #4f46e5; }
+    .secondary-600 { color: #475569; }
+    .secondary-800 { color: #1e293b; }
+    .success-600 { color: #059669; }
+    .warning-600 { color: #d97706; }
+    .error-600 { color: #dc2626; }
 </style>
 {% endblock %}
 
@@ -490,19 +390,19 @@
 
         <!-- Mobile-Optimized Stats Overview -->
         <div class="stats-grid grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-            <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl md:rounded-2xl">
+            <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl">
                 <div class="stats-value text-xl md:text-3xl font-bold text-primary-600">{{ analysis.total_entries|default:0 }}</div>
                 <div class="stats-label text-xs md:text-sm text-secondary-600">Total Entries</div>
             </div>
-            <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl md:rounded-2xl">
+            <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl">
                 <div class="stats-value text-xl md:text-3xl font-bold text-success-600">{{ analysis.themes|length|default:0 }}</div>
                 <div class="stats-label text-xs md:text-sm text-secondary-600">Themes</div>
             </div>
-            <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl md:rounded-2xl">
+            <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl">
                 <div class="stats-value text-xl md:text-3xl font-bold text-warning-600">{{ analysis.quality_score.score|default:0 }}%</div>
                 <div class="stats-label text-xs md:text-sm text-secondary-600">Quality Score</div>
             </div>
-            <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl md:rounded-2xl">
+            <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl">
                 <div class="stats-value text-xl md:text-3xl font-bold text-error-600">{{ analysis.story_arcs|length|default:0 }}</div>
                 <div class="stats-label text-xs md:text-sm text-secondary-600">Story Arcs</div>
             </div>
@@ -523,7 +423,7 @@
             {% for journal in compiled_journals %}
             <div class="journal-card bg-white rounded-xl">
                 <div class="flex items-start justify-between mb-2 md:mb-3">
-                    <h3 class="font-bold text-secondary-800 text-sm md:text-lg leading-tight flex-1 mr-2 md:mr-3">{{ journal.title }}</h3>
+                    <h3 class="font-bold text-secondary-800 text-sm md:text-lg leading-tight flex-1 mr-2">{{ journal.title }}</h3>
                     <div class="flex items-center space-x-1">
                         {% if journal.is_published %}
                         <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
@@ -572,19 +472,14 @@
 
                 <div class="flex flex-col md:flex-row items-stretch md:items-center space-y-2 md:space-y-0 md:space-x-2">
                     {% if journal.is_published %}
-                    <a href="/marketplace/journal/{{ journal.id }}/" class="btn-primary btn-mobile btn-mobile-full md:flex-1 text-center rounded-lg">
+                    <a href="/marketplace/journal/{{ journal.id }}/" class="btn-primary btn-mobile text-center rounded-lg px-4 py-2 text-sm">
                         View in Marketplace
                     </a>
                     {% else %}
-                    <a href="/diary/journal/{{ journal.id }}/edit/" class="btn-secondary btn-mobile btn-mobile-full md:flex-1 text-center rounded-lg">
+                    <a href="/diary/journal/{{ journal.id }}/edit/" class="btn-secondary btn-mobile text-center rounded-lg px-4 py-2 text-sm">
                         Continue Editing
                     </a>
                     {% endif %}
-                    <button class="desktop-only text-secondary-500 hover:text-secondary-700 p-2" title="More options">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
-                        </svg>
-                    </button>
                 </div>
             </div>
             {% endfor %}
@@ -592,7 +487,7 @@
 
         {% if compiled_journals|length > 6 %}
         <div class="text-center mt-4 md:mt-6">
-            <a href="/diary/journals/" class="btn-secondary btn-mobile px-6 py-2 rounded-lg">
+            <a href="/diary/journals/" class="btn-secondary px-6 py-2 rounded-lg">
                 View All Journals
             </a>
         </div>
@@ -600,7 +495,7 @@
 
         {% else %}
         <div class="text-center py-8 md:py-12">
-            <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4">
+            <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3 md:mb-4">
                 <svg class="w-6 h-6 md:w-8 md:h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                 </svg>
@@ -616,9 +511,9 @@
         <h2 class="text-lg md:text-2xl font-bold text-secondary-800 mb-4 md:mb-6">Choose Your Compilation Method</h2>
 
         <div class="grid mobile-grid md:grid-cols-3 gap-4 md:gap-6">
-            <div class="method-card glass-card rounded-xl md:rounded-2xl" data-method="ai">
+            <div class="method-card glass-card rounded-xl p-4 md:p-6" data-method="ai">
                 <div class="text-center">
-                    <div class="icon-container w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4">
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 md:mb-4">
                         <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                         </svg>
@@ -632,9 +527,9 @@
                 </div>
             </div>
 
-            <div class="method-card glass-card rounded-xl md:rounded-2xl" data-method="thematic">
+            <div class="method-card glass-card rounded-xl p-4 md:p-6" data-method="thematic">
                 <div class="text-center">
-                    <div class="icon-container w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4">
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center mx-auto mb-3 md:mb-4">
                         <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
                         </svg>
@@ -648,9 +543,9 @@
                 </div>
             </div>
 
-            <div class="method-card glass-card rounded-xl md:rounded-2xl" data-method="chronological">
+            <div class="method-card glass-card rounded-xl p-4 md:p-6" data-method="chronological">
                 <div class="text-center">
-                    <div class="icon-container w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4">
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center mx-auto mb-3 md:mb-4">
                         <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
@@ -673,17 +568,17 @@
             <div class="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
                 <span class="text-sm text-secondary-600">Selected: <span id="selectedCount">0</span></span>
                 <div class="flex space-x-2">
-                    <button id="selectAllBtn" class="btn-secondary btn-mobile px-3 py-1 text-sm rounded-lg">All</button>
-                    <button id="selectNoneBtn" class="btn-secondary btn-mobile px-3 py-1 text-sm rounded-lg">None</button>
+                    <button id="selectAllBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">All</button>
+                    <button id="selectNoneBtn" class="btn-secondary px-3 py-1 text-sm rounded-lg">None</button>
                 </div>
             </div>
         </div>
 
         <div id="entriesGrid" class="grid mobile-grid md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-4 md:mb-6">
             {% for entry in entries %}
-            <div class="entry-card glass-card rounded-lg md:rounded-xl" data-entry-id="{{ entry.id }}">
+            <div class="entry-card glass-card rounded-lg p-3 md:p-4" data-entry-id="{{ entry.id }}">
                 <div class="flex items-start space-x-2 md:space-x-3">
-                    <input type="checkbox" class="entry-checkbox mobile-checkbox mt-1" value="{{ entry.id }}">
+                    <input type="checkbox" class="entry-checkbox mt-1" value="{{ entry.id }}">
                     <div class="flex-1 min-w-0">
                         <div class="flex justify-between items-start mb-2">
                             <h4 class="font-medium text-secondary-800 flex-1 mr-2 entry-title text-sm md:text-base truncate" data-original="{{ entry.title }}">{{ entry.title|truncatechars:40 }}</h4>
@@ -716,7 +611,7 @@
                 <div class="text-sm text-secondary-600">
                     Estimated: <span id="totalWords">0</span> words
                 </div>
-                <button id="analyzeBtn" class="btn-primary btn-mobile btn-mobile-full md:w-auto px-6 py-3 rounded-xl" disabled>
+                <button id="analyzeBtn" class="btn-primary btn-mobile px-6 py-3 rounded-xl" disabled>
                     Analyze Selected Entries
                 </button>
             </div>
@@ -732,7 +627,7 @@
             </div>
         </div>
         <div class="mobile-nav-buttons">
-            <button id="generateStructureBtn" class="btn-primary btn-mobile btn-mobile-full px-6 py-3 rounded-xl" disabled>
+            <button id="generateStructureBtn" class="btn-primary btn-mobile px-6 py-3 rounded-xl" disabled>
                 Generate Journal Structure
             </button>
         </div>
@@ -760,21 +655,21 @@
                     <div>
                         <label class="block text-sm font-medium text-secondary-700 mb-2">Title</label>
                         <input type="text" id="journalTitle" required
-                               class="form-input w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               class="form-input w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                placeholder="Enter journal title...">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-secondary-700 mb-2">Description</label>
                         <textarea id="journalDescription" rows="4" required
-                                  class="form-textarea w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                  class="form-input w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                                   placeholder="Describe your journal..."></textarea>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-secondary-700 mb-2">Price ($)</label>
                         <input type="number" id="journalPrice" step="0.01" min="0"
-                               class="form-input w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               class="form-input w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                placeholder="9.99">
                     </div>
 
@@ -782,22 +677,22 @@
                         <h4 class="font-medium text-secondary-700">Journal Type</h4>
                         <div class="space-y-2">
                             <label class="flex items-center">
-                                <input type="radio" name="journalType" value="growth" class="mobile-radio mr-2" checked>
+                                <input type="radio" name="journalType" value="growth" class="mr-2" checked>
                                 <span class="text-sm">Personal Growth</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="radio" name="journalType" value="travel" class="mobile-radio mr-2">
+                                <input type="radio" name="journalType" value="travel" class="mr-2">
                                 <span class="text-sm">Travel & Adventures</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="radio" name="journalType" value="career" class="mobile-radio mr-2">
+                                <input type="radio" name="journalType" value="career" class="mr-2">
                                 <span class="text-sm">Career Journey</span>
                             </label>
                         </div>
                     </div>
 
                     <div class="pt-4">
-                        <button type="submit" id="publishBtn" class="btn-primary btn-mobile btn-mobile-full py-3 rounded-xl text-lg font-semibold">
+                        <button type="submit" id="publishBtn" class="btn-primary btn-mobile py-3 rounded-xl text-lg font-semibold">
                             Publish Journal
                         </button>
                     </div>
@@ -807,7 +702,7 @@
     </div>
 </div>
 
-<!-- Enhanced Mobile Loading Overlay -->
+<!-- Loading Overlay -->
 <div id="loadingOverlay" class="loading-overlay">
     <div class="loading-spinner">
         <div class="animate-spin rounded-full h-8 w-8 md:h-12 md:w-12 border-b-2 border-blue-600 mx-auto mb-3 md:mb-4"></div>
@@ -816,9 +711,9 @@
     </div>
 </div>
 
-<!-- Mobile-Optimized Edit Entry Modal -->
+<!-- Edit Entry Modal -->
 <div id="editModal" class="loading-overlay" style="display: none;">
-    <div class="mobile-modal">
+    <div class="bg-white rounded-2xl p-4 md:p-6 max-w-2xl w-full mx-4 max-h-96 overflow-hidden">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg md:text-xl font-bold text-secondary-800">Edit Entry</h3>
             <button id="closeEditModal" class="text-gray-400 hover:text-gray-600 p-1">
@@ -833,18 +728,18 @@
             <div>
                 <label class="block text-sm font-medium text-secondary-700 mb-2">Title</label>
                 <input type="text" id="editEntryTitle" required
-                       class="form-input w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                       class="form-input w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-secondary-700 mb-2">Content</label>
                 <textarea id="editEntryContent" rows="6" required
-                          class="form-textarea w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg md:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"></textarea>
+                          class="form-input w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"></textarea>
             </div>
 
             <div class="flex flex-col md:flex-row justify-end space-y-2 md:space-y-0 md:space-x-3 pt-4">
-                <button type="button" id="cancelEdit" class="btn-secondary btn-mobile px-4 py-2 rounded-lg">Cancel</button>
-                <button type="submit" class="btn-primary btn-mobile px-6 py-2 rounded-lg">Save Changes</button>
+                <button type="button" id="cancelEdit" class="btn-secondary px-4 py-2 rounded-lg">Cancel</button>
+                <button type="submit" class="btn-primary px-6 py-2 rounded-lg">Save Changes</button>
             </div>
         </form>
     </div>
@@ -856,7 +751,7 @@
         <div class="text-4xl md:text-6xl text-green-500 mb-3 md:mb-4">✓</div>
         <div class="text-secondary-800 font-medium text-lg md:text-xl mb-2">Journal Published!</div>
         <div class="text-xs md:text-sm text-secondary-600 mb-3 md:mb-4">Your journal has been successfully published to the marketplace.</div>
-        <button id="viewJournalBtn" class="btn-primary btn-mobile px-6 py-2 rounded-lg">View Journal</button>
+        <button id="viewJournalBtn" class="btn-primary px-6 py-2 rounded-lg">View Journal</button>
     </div>
 </div>
 
@@ -865,6 +760,9 @@
 
 {% block extra_js %}
 <script>
+// Simple, clean JavaScript implementation
+console.log('Initializing Smart Journal Compiler...');
+
 class SmartJournalCompiler {
     constructor() {
         this.selectedMethod = null;
@@ -873,150 +771,129 @@ class SmartJournalCompiler {
         this.analysisData = null;
         this.structureData = null;
 
+        console.log('SmartJournalCompiler created');
         this.init();
     }
 
     init() {
-        this.bindEvents();
+        console.log('Initializing...');
+        this.setupEventListeners();
         this.updateStepDisplay();
-        this.setupMobileOptimizations();
+        console.log('Initialization complete');
     }
 
-    setupMobileOptimizations() {
-        // Prevent zoom on iOS inputs
-        const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
-        inputs.forEach(input => {
-            input.addEventListener('focus', () => {
-                if (window.innerWidth < 768) {
-                    input.style.fontSize = '16px';
-                }
-            });
-            input.addEventListener('blur', () => {
-                input.style.fontSize = '';
-            });
-        });
+    setupEventListeners() {
+        console.log('Setting up event listeners...');
 
-        // Enhanced touch feedback
-        const cards = document.querySelectorAll('.method-card, .entry-card, .journal-card');
-        cards.forEach(card => {
-            card.addEventListener('touchstart', () => {
-                card.style.transform = 'scale(0.98)';
-            }, { passive: true });
-
-            card.addEventListener('touchend', () => {
-                card.style.transform = '';
-            }, { passive: true });
-        });
-
-        // Optimize scrolling for mobile
-        const scrollableElements = document.querySelectorAll('.step-container');
-        scrollableElements.forEach(element => {
-            element.style.webkitOverflowScrolling = 'touch';
-        });
-    }
-
-    bindEvents() {
-        // Method selection - with debugging
-        console.log('Setting up method card event listeners...');
+        // Method selection cards
         const methodCards = document.querySelectorAll('.method-card');
         console.log('Found method cards:', methodCards.length);
 
         methodCards.forEach((card, index) => {
-            console.log(`Setting up card ${index}:`, card.dataset.method);
-            card.addEventListener('click', (e) => {
-                console.log('Method card clicked:', e.currentTarget.dataset.method);
-                this.selectMethod(e);
+            console.log('Setting up card', index, 'with method:', card.dataset.method);
+
+            // Remove any existing listeners and add new ones
+            const newCard = card.cloneNode(true);
+            card.parentNode.replaceChild(newCard, card);
+
+            newCard.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Method card clicked:', newCard.dataset.method);
+                this.selectMethod(newCard.dataset.method);
             });
 
             // Add keyboard support
-            card.addEventListener('keydown', (e) => {
+            newCard.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    this.selectMethod(e);
+                    this.selectMethod(newCard.dataset.method);
                 }
             });
 
-            // Make cards focusable for accessibility
-            card.setAttribute('tabindex', '0');
-            card.setAttribute('role', 'button');
-            card.setAttribute('aria-label', `Select ${card.dataset.method} compilation method`);
+            // Make focusable
+            newCard.setAttribute('tabindex', '0');
+            newCard.setAttribute('role', 'button');
         });
 
-        // Entry selection
-        document.querySelectorAll('.entry-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => this.updateSelectedEntries());
+        // Entry checkboxes
+        const checkboxes = document.querySelectorAll('.entry-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                this.updateSelectedEntries();
+            });
         });
 
-        // Entry editing
+        // Other buttons
+        this.setupButton('selectAllBtn', () => this.selectAllEntries());
+        this.setupButton('selectNoneBtn', () => this.selectNoneEntries());
+        this.setupButton('analyzeBtn', (e) => this.analyzeEntries(e));
+        this.setupButton('generateStructureBtn', (e) => this.generateStructure(e));
+
+        // Forms
+        const publishForm = document.getElementById('publishForm');
+        if (publishForm) {
+            publishForm.addEventListener('submit', (e) => this.publishJournal(e));
+        }
+
+        // Edit modal
+        this.setupButton('closeEditModal', () => this.closeEditModal());
+        this.setupButton('cancelEdit', () => this.closeEditModal());
+
+        const editForm = document.getElementById('editEntryForm');
+        if (editForm) {
+            editForm.addEventListener('submit', (e) => this.saveEntryEdit(e));
+        }
+
+        // Edit entry buttons
         document.querySelectorAll('.edit-entry-btn').forEach(btn => {
             btn.addEventListener('click', (e) => this.openEditModal(e));
         });
 
-        document.getElementById('selectAllBtn')?.addEventListener('click', () => this.selectAllEntries());
-        document.getElementById('selectNoneBtn')?.addEventListener('click', () => this.selectNoneEntries());
-
-        // Edit modal events
-        document.getElementById('closeEditModal')?.addEventListener('click', () => this.closeEditModal());
-        document.getElementById('cancelEdit')?.addEventListener('click', () => this.closeEditModal());
-        document.getElementById('editEntryForm')?.addEventListener('submit', (e) => this.saveEntryEdit(e));
-
-        // Action buttons
-        document.getElementById('analyzeBtn')?.addEventListener('click', (e) => this.analyzeEntries(e));
-        document.getElementById('generateStructureBtn')?.addEventListener('click', (e) => this.generateStructure(e));
-        document.getElementById('publishForm')?.addEventListener('submit', (e) => this.publishJournal(e));
-
-        // Handle mobile back button
-        window.addEventListener('popstate', (e) => {
-            if (this.currentStep > 1) {
-                e.preventDefault();
-                this.goToStep(this.currentStep - 1);
-            }
-        });
-
-        console.log('All event listeners bound successfully');
+        console.log('Event listeners setup complete');
     }
 
-    selectMethod(event) {
-        console.log('selectMethod called with event:', event);
-        console.log('Event target:', event.currentTarget);
-        console.log('Dataset:', event.currentTarget.dataset);
+    setupButton(id, handler) {
+        const button = document.getElementById(id);
+        if (button) {
+            button.addEventListener('click', handler);
+        }
+    }
+
+    selectMethod(method) {
+        console.log('selectMethod called with:', method);
+
+        if (!method) {
+            console.error('No method provided');
+            return;
+        }
 
         // Remove previous selections
         document.querySelectorAll('.method-card').forEach(card => {
             card.classList.remove('selected');
-            card.style.transform = ''; // Reset any transforms
         });
 
-        // Select clicked method
-        const card = event.currentTarget;
-        card.classList.add('selected');
-        this.selectedMethod = card.dataset.method;
+        // Find and select the clicked card
+        const selectedCard = document.querySelector(`[data-method="${method}"]`);
+        if (selectedCard) {
+            selectedCard.classList.add('selected');
+            this.selectedMethod = method;
+            console.log('Selected method:', this.selectedMethod);
 
-        console.log('Selected method:', this.selectedMethod);
+            // Visual feedback
+            selectedCard.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                selectedCard.style.transform = '';
+            }, 150);
 
-        // Visual feedback
-        card.style.transform = 'scale(0.98)';
-        setTimeout(() => {
-            card.style.transform = '';
-        }, 150);
-
-        // Add haptic feedback for mobile
-        if (navigator.vibrate) {
-            navigator.vibrate(50);
+            // Move to next step
+            setTimeout(() => {
+                console.log('Moving to step 2...');
+                this.goToStep(2);
+            }, 200);
+        } else {
+            console.error('Could not find card for method:', method);
         }
-
-        // Ensure we have a valid method before proceeding
-        if (!this.selectedMethod) {
-            console.error('No method selected!');
-            this.showError('Please select a compilation method');
-            return;
-        }
-
-        // Move to next step with slight delay for visual feedback
-        setTimeout(() => {
-            console.log('Moving to step 2...');
-            this.goToStep(2);
-        }, 200);
     }
 
     updateSelectedEntries() {
@@ -1024,17 +901,26 @@ class SmartJournalCompiler {
         this.selectedEntries = new Set(Array.from(checkboxes).map(cb => parseInt(cb.value)));
 
         // Update UI
-        document.getElementById('selectedCount').textContent = this.selectedEntries.size;
+        const selectedCountEl = document.getElementById('selectedCount');
+        if (selectedCountEl) {
+            selectedCountEl.textContent = this.selectedEntries.size;
+        }
 
         // Calculate total words
         let totalWords = 0;
         checkboxes.forEach(cb => {
             const card = cb.closest('.entry-card');
             const wordCountEl = card.querySelector('.word-count');
-            const wordCount = wordCountEl.textContent.match(/\d+/);
-            if (wordCount) totalWords += parseInt(wordCount[0]);
+            if (wordCountEl) {
+                const wordCount = wordCountEl.textContent.match(/\d+/);
+                if (wordCount) totalWords += parseInt(wordCount[0]);
+            }
         });
-        document.getElementById('totalWords').textContent = totalWords.toLocaleString();
+
+        const totalWordsEl = document.getElementById('totalWords');
+        if (totalWordsEl) {
+            totalWordsEl.textContent = totalWords.toLocaleString();
+        }
 
         // Enable/disable analyze button
         const analyzeBtn = document.getElementById('analyzeBtn');
@@ -1045,130 +931,12 @@ class SmartJournalCompiler {
         // Update entry card styling
         document.querySelectorAll('.entry-card').forEach(card => {
             const checkbox = card.querySelector('.entry-checkbox');
-            if (checkbox.checked) {
+            if (checkbox && checkbox.checked) {
                 card.classList.add('selected');
             } else {
                 card.classList.remove('selected');
             }
         });
-
-        // Haptic feedback for mobile
-        if (navigator.vibrate && this.selectedEntries.size > 0) {
-            navigator.vibrate(25);
-        }
-    }
-
-    openEditModal(event) {
-        event.stopPropagation();
-        const entryId = event.currentTarget.dataset.entryId;
-        const entryCard = event.currentTarget.closest('.entry-card');
-
-        // Get current entry data
-        const title = entryCard.querySelector('.entry-title').dataset.original;
-        const content = entryCard.querySelector('.entry-content').dataset.original;
-
-        // Populate modal
-        document.getElementById('editEntryId').value = entryId;
-        document.getElementById('editEntryTitle').value = title;
-        document.getElementById('editEntryContent').value = content;
-
-        // Show modal
-        const modal = document.getElementById('editModal');
-        modal.style.display = 'flex';
-
-        // Focus first input for better UX
-        setTimeout(() => {
-            document.getElementById('editEntryTitle').focus();
-        }, 100);
-
-        // Prevent body scroll
-        document.body.style.overflow = 'hidden';
-    }
-
-    closeEditModal() {
-        document.getElementById('editModal').style.display = 'none';
-        document.body.style.overflow = '';
-    }
-
-    async saveEntryEdit(event) {
-        event.preventDefault();
-
-        const entryId = document.getElementById('editEntryId').value;
-        const title = document.getElementById('editEntryTitle').value;
-        const content = document.getElementById('editEntryContent').value;
-
-        if (!title.trim() || !content.trim()) {
-            this.showError('Title and content are required');
-            return;
-        }
-
-        const submitBtn = event.target.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-
-        try {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Saving...';
-
-            const response = await fetch(`/entry/${entryId}/edit/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': this.getCSRFToken(),
-                },
-                body: new URLSearchParams({
-                    'title': title,
-                    'content': content,
-                    'csrfmiddlewaretoken': this.getCSRFToken()
-                })
-            });
-
-            if (response.ok) {
-                // Update the entry card in the UI
-                this.updateEntryCardAfterEdit(entryId, title, content);
-                this.closeEditModal();
-                this.showSuccess('Entry updated successfully!');
-
-                // If this entry was selected, update the word count
-                const checkbox = document.querySelector(`input[value="${entryId}"]`);
-                if (checkbox && checkbox.checked) {
-                    this.updateSelectedEntries();
-                }
-
-                // Haptic feedback
-                if (navigator.vibrate) {
-                    navigator.vibrate([50, 50, 50]);
-                }
-            } else {
-                throw new Error('Failed to save entry');
-            }
-
-        } catch (error) {
-            console.error('Save error:', error);
-            this.showError('Failed to save entry: ' + error.message);
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-        }
-    }
-
-    updateEntryCardAfterEdit(entryId, newTitle, newContent) {
-        const entryCard = document.querySelector(`[data-entry-id="${entryId}"]`);
-        if (!entryCard) return;
-
-        // Update title
-        const titleEl = entryCard.querySelector('.entry-title');
-        titleEl.textContent = newTitle.length > 40 ? newTitle.substring(0, 40) + '...' : newTitle;
-        titleEl.dataset.original = newTitle;
-
-        // Update content
-        const contentEl = entryCard.querySelector('.entry-content');
-        contentEl.textContent = newContent.length > 80 ? newContent.substring(0, 80) + '...' : newContent;
-        contentEl.dataset.original = newContent;
-
-        // Update word count
-        const wordCount = newContent.split(/\s+/).filter(word => word.length > 0).length;
-        const wordCountEl = entryCard.querySelector('.word-count');
-        wordCountEl.textContent = `${wordCount} words`;
     }
 
     selectAllEntries() {
@@ -1216,11 +984,6 @@ class SmartJournalCompiler {
                 this.displayAnalysisResults(data.analysis);
                 this.goToStep(3);
                 this.showSuccess('Analysis completed successfully!');
-
-                // Haptic feedback
-                if (navigator.vibrate) {
-                    navigator.vibrate([100, 50, 100]);
-                }
             } else {
                 throw new Error(data.error || 'Analysis failed');
             }
@@ -1276,11 +1039,6 @@ class SmartJournalCompiler {
                 this.populatePublishingForm(data.structure);
                 this.goToStep(4);
                 this.showSuccess('Structure generated successfully!');
-
-                // Haptic feedback
-                if (navigator.vibrate) {
-                    navigator.vibrate([100, 50, 100]);
-                }
             } else {
                 throw new Error(data.error || 'Structure generation failed');
             }
@@ -1303,9 +1061,8 @@ class SmartJournalCompiler {
             return;
         }
 
-        const formData = new FormData(event.target);
-        const title = formData.get('title') || document.getElementById('journalTitle').value;
-        const description = formData.get('description') || document.getElementById('journalDescription').value;
+        const title = document.getElementById('journalTitle').value;
+        const description = document.getElementById('journalDescription').value;
         const price = parseFloat(document.getElementById('journalPrice').value || 0);
 
         if (!title || !description) {
@@ -1343,11 +1100,6 @@ class SmartJournalCompiler {
             if (data.success) {
                 this.hideLoading();
                 this.showSuccessModal(data.journal_id);
-
-                // Haptic feedback
-                if (navigator.vibrate) {
-                    navigator.vibrate([200, 100, 200, 100, 200]);
-                }
             } else {
                 throw new Error(data.error || 'Publishing failed');
             }
@@ -1361,35 +1113,143 @@ class SmartJournalCompiler {
         }
     }
 
+    openEditModal(event) {
+        event.stopPropagation();
+        const entryId = event.currentTarget.dataset.entryId;
+        const entryCard = event.currentTarget.closest('.entry-card');
+
+        // Get current entry data
+        const titleEl = entryCard.querySelector('.entry-title');
+        const contentEl = entryCard.querySelector('.entry-content');
+
+        const title = titleEl.dataset.original;
+        const content = contentEl.dataset.original;
+
+        // Populate modal
+        document.getElementById('editEntryId').value = entryId;
+        document.getElementById('editEntryTitle').value = title;
+        document.getElementById('editEntryContent').value = content;
+
+        // Show modal
+        const modal = document.getElementById('editModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        // Focus first input
+        setTimeout(() => {
+            document.getElementById('editEntryTitle').focus();
+        }, 100);
+    }
+
+    closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    async saveEntryEdit(event) {
+        event.preventDefault();
+
+        const entryId = document.getElementById('editEntryId').value;
+        const title = document.getElementById('editEntryTitle').value;
+        const content = document.getElementById('editEntryContent').value;
+
+        if (!title.trim() || !content.trim()) {
+            this.showError('Title and content are required');
+            return;
+        }
+
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+
+        try {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+
+            const response = await fetch('/entry/' + entryId + '/edit/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: new URLSearchParams({
+                    'title': title,
+                    'content': content,
+                    'csrfmiddlewaretoken': this.getCSRFToken()
+                })
+            });
+
+            if (response.ok) {
+                this.updateEntryCardAfterEdit(entryId, title, content);
+                this.closeEditModal();
+                this.showSuccess('Entry updated successfully!');
+
+                // Update word count if selected
+                const checkbox = document.querySelector('input[value="' + entryId + '"]');
+                if (checkbox && checkbox.checked) {
+                    this.updateSelectedEntries();
+                }
+            } else {
+                throw new Error('Failed to save entry');
+            }
+
+        } catch (error) {
+            console.error('Save error:', error);
+            this.showError('Failed to save entry: ' + error.message);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    }
+
+    updateEntryCardAfterEdit(entryId, newTitle, newContent) {
+        const entryCard = document.querySelector('[data-entry-id="' + entryId + '"]');
+        if (!entryCard) return;
+
+        // Update title
+        const titleEl = entryCard.querySelector('.entry-title');
+        titleEl.textContent = newTitle.length > 40 ? newTitle.substring(0, 40) + '...' : newTitle;
+        titleEl.dataset.original = newTitle;
+
+        // Update content
+        const contentEl = entryCard.querySelector('.entry-content');
+        contentEl.textContent = newContent.length > 80 ? newContent.substring(0, 80) + '...' : newContent;
+        contentEl.dataset.original = newContent;
+
+        // Update word count
+        const wordCount = newContent.split(/\s+/).filter(word => word.length > 0).length;
+        const wordCountEl = entryCard.querySelector('.word-count');
+        wordCountEl.textContent = wordCount + ' words';
+    }
+
     displayAnalysisResults(analysis) {
         const container = document.getElementById('analysisResults');
-        container.innerHTML = `
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6">
-                <div class="text-center p-3 md:p-4 bg-white rounded-xl">
-                    <div class="text-xl md:text-2xl font-bold text-blue-600">${analysis.total_entries || 0}</div>
-                    <div class="text-xs md:text-sm text-gray-600">Entries</div>
-                </div>
-                <div class="text-center p-3 md:p-4 bg-white rounded-xl">
-                    <div class="text-xl md:text-2xl font-bold text-green-600">${analysis.themes?.length || 0}</div>
-                    <div class="text-xs md:text-sm text-gray-600">Themes</div>
-                </div>
-                <div class="text-center p-3 md:p-4 bg-white rounded-xl">
-                    <div class="text-xl md:text-2xl font-bold text-yellow-600">${analysis.quality_score?.score || 0}%</div>
-                    <div class="text-xs md:text-sm text-gray-600">Quality</div>
-                </div>
-                <div class="text-center p-3 md:p-4 bg-white rounded-xl">
-                    <div class="text-xl md:text-2xl font-bold text-purple-600">${analysis.story_arcs?.length || 0}</div>
-                    <div class="text-xs md:text-sm text-gray-600">Story Arcs</div>
-                </div>
-            </div>
-            <div class="bg-blue-50 rounded-xl p-3 md:p-4">
-                <h4 class="font-semibold text-blue-800 mb-2 text-sm md:text-base">Analysis Summary</h4>
-                <p class="text-blue-700 text-xs md:text-sm">${analysis.ai_insights || 'Your entries have been analyzed and are ready for compilation.'}</p>
-            </div>
-        `;
+        const themesCount = analysis.themes && analysis.themes.length ? analysis.themes.length : 0;
+        const qualityScore = analysis.quality_score && analysis.quality_score.score ? analysis.quality_score.score : 0;
+        const storyArcsCount = analysis.story_arcs && analysis.story_arcs.length ? analysis.story_arcs.length : 0;
 
-        document.getElementById('generateStructureBtn').disabled = false;
-    }
+        container.innerHTML =
+            '<div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6">' +
+                '<div class="text-center p-3 md:p-4 bg-white rounded-xl">' +
+                    '<div class="text-xl md:text-2xl font-bold text-blue-600">' + (analysis.total_entries || 0) + '</div>' +
+                    '<div class="text-xs md:text-sm text-gray-600">Entries</div>' +
+                '</div>' +
+                '<div class="text-center p-3 md:p-4 bg-white rounded-xl">' +
+                    '<div class="text-xl md:text-2xl font-bold text-green-600">' + themesCount + '</div>' +
+                    '<div class="text-xs md:text-sm text-gray-600">Themes</div>' +
+                '</div>' +
+                '<div class="text-center p-3 md:p-4 bg-white rounded-xl">' +
+                    '<div class="text-xl md:text-2xl font-bold text-yellow-600">' + qualityScore + '%</div>' +
+                    '<div class="text-xs md:text-sm text-gray-600">Quality</div>' +
+                '</div>' +
+                '<div class="text-center p-3 md:p-4 bg-white rounded-xl">' +
+                    '<div class="text-xl md:text-2xl font-bold text-purple-600">' + storyArcsCount + '</div>' +
+                    '<div class="text-xs md:text-sm text-gray-600">Story Arcs</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="bg-blue-50 rounded-xl p-3 md:p-4">' +
+                '<h4 class="font-semibold text-blue-800 mb-2 text-sm md:text-base">Analysis Summary</h4>' +
+                '<p class="text-blue-700 text-xs md:text-sm">' + (analysis.ai_insights || 'Your entries have been analyzed and are ready for compilation.') + '</p>' +
+            '</div>';
 
         document.getElementById('generateStructureBtn').disabled = false;
     }
@@ -1399,30 +1259,29 @@ class SmartJournalCompiler {
 
         let chaptersHtml = '';
         if (structure.chapters) {
-            chaptersHtml = structure.chapters.map((chapter, index) => `
-                <div class="border-l-4 border-blue-500 pl-3 md:pl-4 py-2">
-                    <h4 class="font-medium text-gray-800 text-sm md:text-base">${chapter.title}</h4>
-                    <p class="text-xs md:text-sm text-gray-600">${chapter.entry_count || 0} entries</p>
-                    <p class="text-xs text-gray-500">${chapter.description || ''}</p>
-                </div>
-            `).join('');
+            chaptersHtml = structure.chapters.map(function(chapter) {
+                return '<div class="border-l-4 border-blue-500 pl-3 md:pl-4 py-2">' +
+                    '<h4 class="font-medium text-gray-800 text-sm md:text-base">' + chapter.title + '</h4>' +
+                    '<p class="text-xs md:text-sm text-gray-600">' + (chapter.entry_count || 0) + ' entries</p>' +
+                    '<p class="text-xs text-gray-500">' + (chapter.description || '') + '</p>' +
+                '</div>';
+            }).join('');
         }
 
-        container.innerHTML = `
-            <div class="space-y-4">
-                <div class="bg-white rounded-xl p-3 md:p-4">
-                    <h3 class="font-bold text-gray-800 mb-2 text-sm md:text-base">${structure.title || 'Generated Journal'}</h3>
-                    <p class="text-gray-600 text-xs md:text-sm">${structure.description || ''}</p>
-                </div>
-                <div class="space-y-3">${chaptersHtml}</div>
-                <div class="bg-green-50 rounded-xl p-3 md:p-4">
-                    <div class="text-xs md:text-sm">
-                        <strong>Estimated Length:</strong> ${(structure.estimated_length || 0).toLocaleString()} words<br>
-                        <strong>Suggested Price:</strong> ${structure.suggested_price || '9.99'}
-                    </div>
-                </div>
-            </div>
-        `;
+        container.innerHTML =
+            '<div class="space-y-4">' +
+                '<div class="bg-white rounded-xl p-3 md:p-4">' +
+                    '<h3 class="font-bold text-gray-800 mb-2 text-sm md:text-base">' + (structure.title || 'Generated Journal') + '</h3>' +
+                    '<p class="text-gray-600 text-xs md:text-sm">' + (structure.description || '') + '</p>' +
+                '</div>' +
+                '<div class="space-y-3">' + chaptersHtml + '</div>' +
+                '<div class="bg-green-50 rounded-xl p-3 md:p-4">' +
+                    '<div class="text-xs md:text-sm">' +
+                        '<strong>Estimated Length:</strong> ' + ((structure.estimated_length || 0).toLocaleString()) + ' words<br>' +
+                        '<strong>Suggested Price:</strong> $' + (structure.suggested_price || '9.99') +
+                    '</div>' +
+                '</div>' +
+            '</div>';
     }
 
     populatePublishingForm(structure) {
@@ -1434,17 +1293,18 @@ class SmartJournalCompiler {
         }
         if (structure.suggested_price) {
             const price = typeof structure.suggested_price === 'string'
-                ? structure.suggested_price.replace(', '')
+                ? structure.suggested_price.replace('$', '')
                 : structure.suggested_price;
             document.getElementById('journalPrice').value = price;
         }
     }
 
     goToStep(step) {
+        console.log('Going to step:', step);
         this.currentStep = step;
         this.updateStepDisplay();
 
-        // Scroll to top on mobile when changing steps
+        // Scroll to top on mobile
         if (window.innerWidth < 768) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -1453,7 +1313,7 @@ class SmartJournalCompiler {
     updateStepDisplay() {
         // Hide all step contents
         for (let i = 1; i <= 4; i++) {
-            const content = document.getElementById(`step${i}Content`);
+            const content = document.getElementById('step' + i + 'Content');
             if (content) {
                 if (i === this.currentStep) {
                     content.classList.remove('hidden');
@@ -1467,8 +1327,8 @@ class SmartJournalCompiler {
 
         // Update step indicators
         for (let i = 1; i <= 4; i++) {
-            const indicator = document.getElementById(`step${i}`);
-            const line = document.getElementById(`line${i}`);
+            const indicator = document.getElementById('step' + i);
+            const line = document.getElementById('line' + i);
 
             if (indicator) {
                 indicator.classList.remove('active', 'completed', 'pending');
@@ -1482,40 +1342,57 @@ class SmartJournalCompiler {
             }
 
             if (line && i < 4) {
-                line.classList.toggle('completed', i < this.currentStep);
+                if (i < this.currentStep) {
+                    line.classList.add('completed');
+                } else {
+                    line.classList.remove('completed');
+                }
             }
         }
 
         // Update step labels
         const stepLabels = document.querySelectorAll('.step-label');
-        stepLabels.forEach((label, index) => {
+        stepLabels.forEach(function(label, index) {
             if (index + 1 === this.currentStep) {
                 label.classList.add('active');
             } else {
                 label.classList.remove('active');
             }
-        });
+        }.bind(this));
     }
 
     showLoading(message) {
-        document.getElementById('loadingText').textContent = message;
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+        const loadingText = document.getElementById('loadingText');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        if (loadingText) loadingText.textContent = message;
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
     }
 
     hideLoading() {
-        document.getElementById('loadingOverlay').style.display = 'none';
-        document.body.style.overflow = '';
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+            document.body.style.overflow = '';
+        }
     }
 
     showSuccessModal(journalId) {
         const modal = document.getElementById('successModal');
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
 
-        document.getElementById('viewJournalBtn').onclick = () => {
-            window.location.href = `/marketplace/journal/${journalId}/`;
-        };
+        const viewBtn = document.getElementById('viewJournalBtn');
+        if (viewBtn) {
+            viewBtn.onclick = function() {
+                window.location.href = '/marketplace/journal/' + journalId + '/';
+            };
+        }
     }
 
     showSuccess(message) {
@@ -1526,38 +1403,30 @@ class SmartJournalCompiler {
         this.showToast(message, 'error');
     }
 
-    showToast(message, type = 'info', duration = 4000) {
-        // Use the global toast function if available, otherwise create a simple fallback
-        if (window.showToast) {
-            window.showToast(message, type, duration);
-        } else {
-            // Simple fallback for mobile
-            const toast = document.createElement('div');
-            toast.className = `fixed top-4 right-4 left-4 md:left-auto md:max-w-md p-4 rounded-lg shadow-lg z-50 transform transition-transform duration-300 ${
-                type === 'success' ? 'bg-green-500 text-white' :
-                type === 'error' ? 'bg-red-500 text-white' :
-                'bg-blue-500 text-white'
-            }`;
-            toast.textContent = message;
+    showToast(message, type) {
+        const toast = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+
+        toast.className = 'fixed top-4 right-4 left-4 md:left-auto md:max-w-md p-4 rounded-lg shadow-lg z-50 text-white transform transition-transform duration-300 ' + bgColor;
+        toast.textContent = message;
+        toast.style.transform = 'translateY(-100px)';
+
+        document.body.appendChild(toast);
+
+        // Show toast
+        setTimeout(function() {
+            toast.style.transform = 'translateY(0)';
+        }, 100);
+
+        // Hide toast after 4 seconds
+        setTimeout(function() {
             toast.style.transform = 'translateY(-100px)';
-
-            document.body.appendChild(toast);
-
-            // Show toast
-            setTimeout(() => {
-                toast.style.transform = 'translateY(0)';
-            }, 100);
-
-            // Hide toast
-            setTimeout(() => {
-                toast.style.transform = 'translateY(-100px)';
-                setTimeout(() => {
-                    if (document.body.contains(toast)) {
-                        document.body.removeChild(toast);
-                    }
-                }, 300);
-            }, duration);
-        }
+            setTimeout(function() {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
+        }, 4000);
     }
 
     getCSRFToken() {
@@ -1575,92 +1444,50 @@ class SmartJournalCompiler {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded - Initializing Smart Journal Compiler...');
+    console.log('DOM loaded, creating SmartJournalCompiler...');
 
-    // Check if we're on mobile and add appropriate class
+    // Add mobile class if needed
     if (window.innerWidth < 768) {
         document.body.classList.add('mobile-device');
-        console.log('Mobile device detected');
     }
 
-    // Wait a bit to ensure all elements are rendered
-    setTimeout(() => {
-        // Initialize the compiler
-        const compiler = new SmartJournalCompiler();
+    // Initialize the compiler
+    window.journalCompiler = new SmartJournalCompiler();
 
-        // Make it globally accessible for debugging
-        window.journalCompiler = compiler;
-
-        console.log('SmartJournalCompiler initialized:', compiler);
-
-        // Verify method cards are present
-        const methodCards = document.querySelectorAll('.method-card');
-        console.log('Method cards found after init:', methodCards.length);
-        methodCards.forEach((card, index) => {
-            console.log(`Card ${index}:`, card.dataset.method, card.classList.contains('method-card'));
+    // Prevent zoom on iOS inputs
+    const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+    inputs.forEach(function(input) {
+        input.addEventListener('focus', function() {
+            if (window.innerWidth < 768) {
+                input.style.fontSize = '16px';
+            }
         });
-    }, 100);
-
-    // Add viewport meta tag if not present (for better mobile experience)
-    if (!document.querySelector('meta[name="viewport"]')) {
-        const viewport = document.createElement('meta');
-        viewport.name = 'viewport';
-        viewport.content = 'width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0';
-        document.head.appendChild(viewport);
-    }
-
-    // Prevent double-tap zoom on mobile
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', function (event) {
-        const now = (new Date()).getTime();
-        if (now - lastTouchEnd <= 300) {
-            event.preventDefault();
-        }
-        lastTouchEnd = now;
-    }, { passive: false });
+        input.addEventListener('blur', function() {
+            input.style.fontSize = '';
+        });
+    });
 
     // Handle orientation change
     window.addEventListener('orientationchange', function() {
-        setTimeout(() => {
-            // Force a reflow to handle any layout issues
+        setTimeout(function() {
+            // Force a reflow
             document.body.style.height = window.innerHeight + 'px';
-            setTimeout(() => {
+            setTimeout(function() {
                 document.body.style.height = '';
             }, 100);
         }, 100);
     });
 
-    // Handle safe area for devices with notches
-    if (CSS.supports('padding-top: env(safe-area-inset-top)')) {
-        document.documentElement.style.setProperty('--safe-area-top', 'env(safe-area-inset-top)');
-        document.documentElement.style.setProperty('--safe-area-bottom', 'env(safe-area-inset-bottom)');
-    }
-
-    console.log('Mobile-optimized Smart Journal Compiler initialization complete');
+    console.log('SmartJournalCompiler fully initialized and ready!');
 });
 
 // Handle resize events
 window.addEventListener('resize', function() {
-    // Update mobile class based on screen size
     if (window.innerWidth < 768) {
         document.body.classList.add('mobile-device');
     } else {
         document.body.classList.remove('mobile-device');
     }
-}, { passive: true });
-
-// Performance optimization: Throttle scroll events
-let ticking = false;
-function updateScrollPosition() {
-    // Add any scroll-based animations or effects here
-    ticking = false;
-}
-
-window.addEventListener('scroll', function() {
-    if (!ticking) {
-        requestAnimationFrame(updateScrollPosition);
-        ticking = true;
-    }
-}, { passive: true });
+});
 </script>
 {% endblock %}
