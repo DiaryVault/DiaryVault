@@ -717,19 +717,19 @@
         <!-- Mobile-Optimized Stats Overview -->
         <div class="stats-grid grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
             <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl">
-                <div class="stats-value text-xl md:text-3xl font-bold text-primary-600">{{ analysis.total_entries|default:0 }}</div>
+                <div class="stats-value text-xl md:text-3xl font-bold text-primary-600">{{ analysis.total_entries|default:"0" }}</div>
                 <div class="stats-label text-xs md:text-sm text-secondary-600">Total Entries</div>
             </div>
             <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl">
-                <div class="stats-value text-xl md:text-3xl font-bold text-success-600">{{ analysis.themes|length|default:0 }}</div>
+                <div class="stats-value text-xl md:text-3xl font-bold text-success-600">{% if analysis.themes %}{{ analysis.themes|length }}{% else %}0{% endif %}</div>
                 <div class="stats-label text-xs md:text-sm text-secondary-600">Themes</div>
             </div>
             <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl">
-                <div class="stats-value text-xl md:text-3xl font-bold text-warning-600">{{ analysis.quality_score.score|default:0 }}%</div>
+                <div class="stats-value text-xl md:text-3xl font-bold text-warning-600">{% if analysis.quality_score.score %}{{ analysis.quality_score.score }}{% else %}0{% endif %}%</div>
                 <div class="stats-label text-xs md:text-sm text-secondary-600">Quality Score</div>
             </div>
             <div class="stats-card text-center p-3 md:p-4 bg-white rounded-xl">
-                <div class="stats-value text-xl md:text-3xl font-bold text-error-600">{{ analysis.story_arcs|length|default:0 }}</div>
+                <div class="stats-value text-xl md:text-3xl font-bold text-error-600">{% if analysis.story_arcs %}{{ analysis.story_arcs|length }}{% else %}0{% endif %}</div>
                 <div class="stats-label text-xs md:text-sm text-secondary-600">Story Arcs</div>
             </div>
         </div>
@@ -1849,11 +1849,12 @@ class SmartJournalCompiler {
         const themesCount = analysis.themes && analysis.themes.length ? analysis.themes.length : 0;
         const qualityScore = analysis.quality_score && analysis.quality_score.score ? analysis.quality_score.score : 0;
         const storyArcsCount = analysis.story_arcs && analysis.story_arcs.length ? analysis.story_arcs.length : 0;
+        const totalEntries = analysis.total_entries || 0;
 
         container.innerHTML =
             '<div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6">' +
                 '<div class="text-center p-3 md:p-4 bg-white rounded-xl">' +
-                    '<div class="text-xl md:text-2xl font-bold text-blue-600">' + (analysis.total_entries || 0) + '</div>' +
+                    '<div class="text-xl md:text-2xl font-bold text-blue-600">' + totalEntries + '</div>' +
                     '<div class="text-xs md:text-sm text-gray-600">Entries</div>' +
                 '</div>' +
                 '<div class="text-center p-3 md:p-4 bg-white rounded-xl">' +
