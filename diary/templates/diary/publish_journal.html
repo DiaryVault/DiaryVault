@@ -916,9 +916,30 @@ class SmartJournalCompiler {
     }
 
     bindEvents() {
-        // Method selection
-        document.querySelectorAll('.method-card').forEach(card => {
-            card.addEventListener('click', (e) => this.selectMethod(e));
+        // Method selection - with debugging
+        console.log('Setting up method card event listeners...');
+        const methodCards = document.querySelectorAll('.method-card');
+        console.log('Found method cards:', methodCards.length);
+
+        methodCards.forEach((card, index) => {
+            console.log(`Setting up card ${index}:`, card.dataset.method);
+            card.addEventListener('click', (e) => {
+                console.log('Method card clicked:', e.currentTarget.dataset.method);
+                this.selectMethod(e);
+            });
+
+            // Add keyboard support
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.selectMethod(e);
+                }
+            });
+
+            // Make cards focusable for accessibility
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('role', 'button');
+            card.setAttribute('aria-label', `Select ${card.dataset.method} compilation method`);
         });
 
         // Entry selection
@@ -951,12 +972,19 @@ class SmartJournalCompiler {
                 this.goToStep(this.currentStep - 1);
             }
         });
+
+        console.log('All event listeners bound successfully');
     }
 
     selectMethod(event) {
+        console.log('selectMethod called with event:', event);
+        console.log('Event target:', event.currentTarget);
+        console.log('Dataset:', event.currentTarget.dataset);
+
         // Remove previous selections
         document.querySelectorAll('.method-card').forEach(card => {
             card.classList.remove('selected');
+            card.style.transform = ''; // Reset any transforms
         });
 
         // Select clicked method
@@ -966,15 +994,29 @@ class SmartJournalCompiler {
 
         console.log('Selected method:', this.selectedMethod);
 
+        // Visual feedback
+        card.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+            card.style.transform = '';
+        }, 150);
+
         // Add haptic feedback for mobile
         if (navigator.vibrate) {
             navigator.vibrate(50);
         }
 
+        // Ensure we have a valid method before proceeding
+        if (!this.selectedMethod) {
+            console.error('No method selected!');
+            this.showError('Please select a compilation method');
+            return;
+        }
+
         // Move to next step with slight delay for visual feedback
         setTimeout(() => {
+            console.log('Moving to step 2...');
             this.goToStep(2);
-        }, 150);
+        }, 200);
     }
 
     updateSelectedEntries() {
@@ -1522,13 +1564,31 @@ class SmartJournalCompiler {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - Initializing Smart Journal Compiler...');
+
     // Check if we're on mobile and add appropriate class
     if (window.innerWidth < 768) {
         document.body.classList.add('mobile-device');
+        console.log('Mobile device detected');
     }
 
-    // Initialize the compiler
-    new SmartJournalCompiler();
+    // Wait a bit to ensure all elements are rendered
+    setTimeout(() => {
+        // Initialize the compiler
+        const compiler = new SmartJournalCompiler();
+
+        // Make it globally accessible for debugging
+        window.journalCompiler = compiler;
+
+        console.log('SmartJournalCompiler initialized:', compiler);
+
+        // Verify method cards are present
+        const methodCards = document.querySelectorAll('.method-card');
+        console.log('Method cards found after init:', methodCards.length);
+        methodCards.forEach((card, index) => {
+            console.log(`Card ${index}:`, card.dataset.method, card.classList.contains('method-card'));
+        });
+    }, 100);
 
     // Add viewport meta tag if not present (for better mobile experience)
     if (!document.querySelector('meta[name="viewport"]')) {
@@ -1565,7 +1625,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.style.setProperty('--safe-area-bottom', 'env(safe-area-inset-bottom)');
     }
 
-    console.log('Mobile-optimized Smart Journal Compiler initialized');
+    console.log('Mobile-optimized Smart Journal Compiler initialization complete');
 });
 
 // Handle resize events
