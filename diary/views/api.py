@@ -251,7 +251,26 @@ def chat_with_ai(request):
             user_message = request.POST.get('message', '')
             conversation_history = request.POST.get('conversation_history', '[]')
             chat_mode = request.POST.get('chat_mode', 'free-form')
-            photo = request.FILES.get('photo')
+
+            # Check for photo with multiple possible field names
+            photo = None
+            for field_name in ['photo', 'entry_photo', 'journal_photo']:
+                if field_name in request.FILES:
+                    photo = request.FILES[field_name]
+                    logger.info(f"Photo found with field name: {field_name}")
+                    break
+
+            # Validate photo if present
+            if photo:
+                # Check file size (5MB limit)
+                if photo.size > 5 * 1024 * 1024:
+                    return JsonResponse({'error': 'Image file is too large. Please select an image under 5MB.'}, status=400)
+
+                # Check file type
+                if not photo.content_type.startswith('image/'):
+                    return JsonResponse({'error': 'Only image files are allowed.'}, status=400)
+
+                logger.info(f"Valid photo uploaded: {photo.name}, size: {photo.size} bytes")
         else:
             data = json.loads(request.body)
             user_message = data.get('message', '')
@@ -259,8 +278,8 @@ def chat_with_ai(request):
             chat_mode = data.get('chat_mode', 'free-form')
             photo = None
 
-        if not user_message:
-            return JsonResponse({'error': 'No message provided'}, status=400)
+        if not user_message and not photo:
+            return JsonResponse({'error': 'Please provide a message or photo'}, status=400)
 
         # Parse conversation history if it's a string
         if isinstance(conversation_history, str):
@@ -281,8 +300,9 @@ def chat_with_ai(request):
         # Add metadata
         ai_response_data['request_time'] = round(time.time() - start_time, 2)
         ai_response_data['request_id'] = request_id
+        ai_response_data['photo_uploaded'] = photo is not None
 
-        logger.info(f"Chat request {request_id} completed in {ai_response_data['request_time']}s")
+        logger.info(f"Chat request {request_id} completed in {ai_response_data['request_time']}s, photo: {photo is not None}")
         return JsonResponse(ai_response_data)
 
     except json.JSONDecodeError:
@@ -291,7 +311,7 @@ def chat_with_ai(request):
         logger.error(f"Chat request {request_id} failed: {str(e)}", exc_info=True)
         return JsonResponse({
             'error': 'Server error processing your request',
-            'error_details': str(e),
+            'error_details': str(e) if settings.DEBUG else 'Please try again',
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }, status=500)
 

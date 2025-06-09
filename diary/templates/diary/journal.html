@@ -1740,11 +1740,13 @@ function sendMessageToLLM(userMessage, isInitial = false) {
   formData.append('conversation_history', JSON.stringify(chatHistory));
   formData.append('chat_mode', currentJournalTemplate || 'free-form');
 
+  // Add photo with the field name your backend expects
   if (quickPhotoFile) {
-    formData.append('photo', quickPhotoFile);
+    formData.append('photo', quickPhotoFile);  // This matches your backend
+    console.log('Photo attached:', quickPhotoFile.name, quickPhotoFile.size);
   }
 
-  // Make API call to your new LLM chat endpoint
+  // Make API call to your chat endpoint
   fetch('/api/chat/', {
     method: 'POST',
     headers: {
@@ -1771,14 +1773,24 @@ function sendMessageToLLM(userMessage, isInitial = false) {
     chatHistory.push({ role: 'assistant', content: data.ai_message });
 
     // Check if we should generate journal entry
-    if (data.should_switch_to_form) {
-      // AI decided we have enough content - generate journal entry
-      populateFormWithAIContent(data.journal_entry);
+    if (data.should_switch_to_form || data.type === 'journal_entry') {
+      // Handle journal entry generation
+      if (data.journal_entry) {
+        populateFormWithAIContent(data.journal_entry);
+      } else {
+        // Fallback for older response format
+        populateFormWithAIContent({
+          entry: data.ai_message,
+          title: generateTitleFromContent(data.ai_message)
+        });
+      }
       switchToManualForm();
       showFeedback('✨ Created your personalized journal entry!', 'success');
     } else {
       // Continue conversation
-      updateConversationSuggestions(data.conversation_suggestions);
+      if (data.conversation_suggestions) {
+        updateConversationSuggestions(data.conversation_suggestions);
+      }
 
       // Re-enable send button
       const sendBtn = document.getElementById('smartSendBtn');
@@ -1794,6 +1806,11 @@ function sendMessageToLLM(userMessage, isInitial = false) {
     }
 
     updateConversationProgress();
+
+    // Log success
+    if (data.photo_uploaded) {
+      console.log('Photo successfully processed by backend');
+    }
   })
   .catch(error => {
     console.error('Error:', error);
@@ -3405,11 +3422,9 @@ function populateFormWithAIContent(data) {
     contentField.style.height = newHeight + 'px';
   }
 
-  // Transfer photo if exists
-  if (quickPhotoFile) {
-    currentPhotoFile = quickPhotoFile;
-    currentPhotoDataUrl = quickPhotoDataUrl;
-
+  // Transfer photo if exists from AI chat
+  if (quickPhotoFile && quickPhotoDataUrl) {
+    // Update main form photo preview
     const preview = document.getElementById('photoPreview');
     if (preview) {
       preview.src = quickPhotoDataUrl;
@@ -3425,28 +3440,48 @@ function populateFormWithAIContent(data) {
       photoName.textContent = quickPhotoFile.name;
     }
 
-    // Set the file input
+    // Transfer the file to the main form input
     const fileInput = document.getElementById('journalPhoto');
     if (fileInput) {
-      const dataTransfer = new DataTransfer();
-      dataTransfer.items.add(quickPhotoFile);
-      fileInput.files = dataTransfer.files;
+      try {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(quickPhotoFile);
+        fileInput.files = dataTransfer.files;
+        console.log('Photo transferred to main form:', quickPhotoFile.name);
+      } catch (error) {
+        console.warn('Could not transfer photo to main form:', error);
+        // Fallback: Keep the photo data for manual submission
+        window.pendingPhotoFile = quickPhotoFile;
+      }
     }
   }
 
   // Update character count
   countChars();
 
-  // Re-initialize mood slider and tags
+  // Re-initialize form components
   if (typeof initModernMoodSlider === 'function') {
     initModernMoodSlider();
   }
   if (typeof initModernTagsInput === 'function') {
     initModernTagsInput();
   }
+}
 
-  // Show editing tips
-  showEditingTips();
+// Helper function to generate title from content
+function generateTitleFromContent(content) {
+  if (!content) return 'My Journal Entry';
+
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+
+  // Try to extract a meaningful title from the first sentence
+  const firstSentence = content.split(/[.!?]/)[0].trim();
+  if (firstSentence.length > 10 && firstSentence.length < 50) {
+    return firstSentence;
+  }
+
+  return `Journal Entry - ${dateStr}`;
 }
 
 // Show editing tips after AI generation

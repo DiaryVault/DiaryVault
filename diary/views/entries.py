@@ -28,25 +28,42 @@ def journal(request):
             # Save many-to-many relationships if any
             form.save_m2m()
 
-            photo_file = request.FILES.get('entry_photo')
+            # Handle photo upload - Check for both possible field names
+            photo_file = request.FILES.get('entry_photo') or request.FILES.get('journal_photo')
             if photo_file:
                 EntryPhoto.objects.create(entry=entry, photo=photo_file)
 
             # Generate AI summary
-            AIService.generate_entry_summary(entry)
+            try:
+                AIService.generate_entry_summary(entry)
+            except Exception as e:
+                logger.warning(f"Could not generate AI summary: {e}")
 
             messages.success(request, 'Entry saved successfully!')
 
             # If there are enough entries, regenerate insights
             entry_count = Entry.objects.filter(user=request.user).count()
             if entry_count % 5 == 0:  # Every 5 entries, update insights
-                AIService.generate_insights(request.user)
+                try:
+                    AIService.generate_insights(request.user)
+                except Exception as e:
+                    logger.warning(f"Could not generate insights: {e}")
 
             return redirect('entry_detail', entry_id=entry.id)
+        else:
+            # Log form errors for debugging
+            logger.error(f"Form errors: {form.errors}")
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = EntryForm(user=request.user)
 
-    return render(request, 'diary/journal.html', {'form': form, 'today': timezone.now()})
+    return render(request, 'diary/journal.html', {
+        'form': form,
+        'today': timezone.now(),
+        'is_edit_mode': False
+    })
 
 @login_required
 def entry_detail(request, entry_id):
