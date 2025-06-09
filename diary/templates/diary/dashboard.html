@@ -4,233 +4,136 @@
 
 {% block extra_css %}
 <style>
-  /* Book styling */
+  /* Base mobile-first styles */
+  .container {
+    padding: 1rem;
+    max-width: 100%;
+  }
+
+  /* Book styling - simplified for mobile */
   .book {
-    transition: all 0.3s ease;
-    transform-style: preserve-3d;
-    perspective: 1000px;
+    transition: transform 0.2s ease;
     position: relative;
   }
-  .book:hover {
-    transform: rotateY(-15deg) translateY(-10px);
-    z-index: 10;
-  }
+
   .book-spine {
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
-    width: 30px;
-    background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0));
+    width: 20px;
+    background: linear-gradient(to right, rgba(0,0,0,0.15), rgba(0,0,0,0));
+    border-radius: 0.5rem 0 0 0.5rem;
   }
 
-  /* Timeline styling */
-  .timeline-entry::before {
-    content: '';
-    position: absolute;
-    left: -29px;
-    top: 0;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: #6366f1;
-    border: 2px solid white;
-    z-index: 1;
-  }
-  .timeline-line {
-    position: absolute;
-    left: -24px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background-color: #e2e8f0;
-  }
+  /* Mobile-first responsive text */
+  .text-mobile-lg { font-size: 1.125rem; line-height: 1.75rem; }
+  .text-mobile-xl { font-size: 1.25rem; line-height: 1.75rem; }
+  .text-mobile-2xl { font-size: 1.5rem; line-height: 2rem; }
+  .text-mobile-3xl { font-size: 1.875rem; line-height: 2.25rem; }
 
-  /* Mobile optimizations */
-  @media (max-width: 640px) {
-    .book {
-      transform: none !important;
-    }
-    .book:hover {
-      transform: translateY(-5px) !important;
-    }
-    .timeline-entry::before {
-      left: -22px;
-    }
-    .timeline-line {
-      left: -17px;
-    }
+  /* Mobile spacing */
+  .space-mobile-y-3 > * + * { margin-top: 0.75rem; }
+  .space-mobile-y-4 > * + * { margin-top: 1rem; }
+  .space-mobile-y-6 > * + * { margin-top: 1.5rem; }
 
-    /* Mobile-specific adjustments */
-    .mobile-stack {
-      flex-direction: column;
-      gap: 1rem;
-    }
+  /* Mobile padding */
+  .p-mobile-3 { padding: 0.75rem; }
+  .p-mobile-4 { padding: 1rem; }
+  .p-mobile-5 { padding: 1.25rem; }
 
-    .mobile-full-width {
-      width: 100%;
-    }
+  /* Mobile margins */
+  .mb-mobile-4 { margin-bottom: 1rem; }
+  .mb-mobile-6 { margin-bottom: 1.5rem; }
+  .mb-mobile-8 { margin-bottom: 2rem; }
 
-    .mobile-text-center {
-      text-align: center;
-    }
-
-    .mobile-justify-center {
-      justify-content: center;
-    }
-
-    .mobile-hidden {
-      display: none;
-    }
-
-    .mobile-show {
-      display: block;
-    }
-
-    /* Adjust quick actions for mobile */
-    .quick-action-mobile {
-      padding: 0.75rem 0.5rem;
-      min-height: 4rem;
-    }
-
-    /* Book grid adjustments */
-    .book-grid-mobile {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.75rem;
-    }
-
-    /* Form adjustments */
-    .mobile-form-spacing {
-      padding: 1rem;
-    }
-
-    /* Button stack on mobile */
-    .mobile-button-stack {
-      flex-direction: column;
-      width: 100%;
-    }
-
-    .mobile-button-stack > * {
-      width: 100%;
-      justify-content: center;
-    }
+  /* Touch targets */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
   }
 
-  /* Tablet optimizations */
-  @media (min-width: 641px) and (max-width: 1024px) {
-    .tablet-grid-3 {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    .tablet-spacing {
-      padding: 1.5rem;
-    }
+  /* Mobile button styles */
+  .btn-mobile {
+    padding: 0.875rem 1.5rem;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
   }
 
-  /* Large screen optimizations */
-  @media (min-width: 1025px) {
-    .desktop-max-width {
-      max-width: 1200px;
-    }
-  }
-
-  /* Utility classes for responsive design */
-  .responsive-text-sm {
-    font-size: 0.75rem;
-  }
-
-  @media (min-width: 640px) {
-    .responsive-text-sm {
-      font-size: 0.875rem;
-    }
-  }
-
-  .responsive-text-base {
+  .btn-mobile-sm {
+    padding: 0.625rem 1rem;
     font-size: 0.875rem;
   }
 
-  @media (min-width: 640px) {
-    .responsive-text-base {
-      font-size: 1rem;
-    }
+  /* Mobile card styles */
+  .card-mobile {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
-  .responsive-text-lg {
-    font-size: 1rem;
+  .card-mobile-lg {
+    padding: 1.25rem;
+    border-radius: 1.25rem;
   }
 
-  @media (min-width: 640px) {
-    .responsive-text-lg {
-      font-size: 1.125rem;
-    }
+  /* Mobile form styles */
+  .form-mobile {
+    width: 100%;
   }
 
-  .responsive-text-xl {
-    font-size: 1.125rem;
+  .input-mobile {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    font-size: 1rem; /* Prevents zoom on iOS */
+    background: #fafafa;
+    transition: all 0.2s ease;
   }
 
-  @media (min-width: 640px) {
-    .responsive-text-xl {
-      font-size: 1.25rem;
-    }
+  .input-mobile:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   }
 
-  .responsive-text-2xl {
-    font-size: 1.25rem;
+  .textarea-mobile {
+    min-height: 120px;
+    resize: vertical;
+    font-family: inherit;
+    line-height: 1.6;
   }
 
-  @media (min-width: 640px) {
-    .responsive-text-2xl {
-      font-size: 1.5rem;
-    }
-  }
+  /* Mobile grid systems */
+  .grid-mobile-1 { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+  .grid-mobile-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  .grid-mobile-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
 
-  .responsive-text-3xl {
-    font-size: 1.5rem;
-  }
+  /* Mobile flexbox utilities */
+  .flex-mobile-col { display: flex; flex-direction: column; }
+  .flex-mobile-row { display: flex; flex-direction: row; align-items: center; }
+  .flex-mobile-between { display: flex; justify-content: space-between; align-items: center; }
+  .flex-mobile-center { display: flex; justify-content: center; align-items: center; }
+  .flex-mobile-wrap { flex-wrap: wrap; gap: 0.5rem; }
 
-  @media (min-width: 640px) {
-    .responsive-text-3xl {
-      font-size: 1.875rem;
-    }
-  }
-
-  /* Enhanced mobile journal form */
-  @media (max-width: 640px) {
-    .journal-form-mobile {
-      border-radius: 1rem;
-      margin: 0 0.5rem;
-    }
-
-    .suggestion-buttons-mobile {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .suggestion-buttons-mobile button {
-      margin-bottom: 0.5rem;
-      text-align: center;
-      padding: 0.75rem;
-    }
-
-    .mobile-textarea {
-      min-height: 100px;
-      font-size: 1rem; /* Prevents zoom on iOS */
-    }
-
-    .mobile-action-bar {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0.75rem;
-    }
-
-    .mobile-action-bar > * {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-
-  /* Loading dots animation */
+  /* Mobile-specific animations */
   .loading-dots::after {
     content: '';
     animation: loading-dots 1.5s infinite;
@@ -243,200 +146,361 @@
     80%, 100% { content: '...'; }
   }
 
-  /* Scale in animation for mobile */
   .scale-in {
     animation: scaleIn 0.3s ease-out;
   }
 
   @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Mobile active states */
+  .active-mobile:active {
+    transform: scale(0.98);
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  /* Tablet and up styles */
+  @media (min-width: 768px) {
+    .container {
+      padding: 1.5rem;
+      max-width: 768px;
+      margin: 0 auto;
     }
-    to {
-      opacity: 1;
-      transform: scale(1);
+
+    .text-mobile-lg { font-size: 1.25rem; }
+    .text-mobile-xl { font-size: 1.5rem; }
+    .text-mobile-2xl { font-size: 1.875rem; }
+    .text-mobile-3xl { font-size: 2.25rem; }
+
+    .grid-mobile-2 { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .grid-mobile-3 { grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+    .btn-mobile {
+      width: auto;
+      padding: 0.75rem 1.5rem;
+    }
+
+    .card-mobile {
+      padding: 1.5rem;
+    }
+
+    .flex-mobile-col {
+      flex-direction: row;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .book:hover {
+      transform: rotateY(-10deg) translateY(-5px);
     }
   }
 
-  /* Improved touch targets for mobile */
-  @media (max-width: 640px) {
-    .touch-target {
-      min-height: 44px;
-      min-width: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+  /* Desktop styles */
+  @media (min-width: 1024px) {
+    .container {
+      max-width: 1024px;
+      padding: 2rem;
     }
 
-    .entry-item-mobile {
-      padding: 1rem;
-      border-radius: 0.75rem;
-    }
+    .grid-mobile-2 { grid-template-columns: repeat(4, 1fr); }
+    .grid-mobile-3 { grid-template-columns: repeat(5, 1fr); }
 
-    .entry-item-mobile:active {
-      background-color: rgba(0, 0, 0, 0.05);
+    .book:hover {
+      transform: rotateY(-15deg) translateY(-10px);
+      z-index: 10;
     }
+  }
+
+  /* Hide/show utilities */
+  .mobile-only { display: block; }
+  .desktop-only { display: none; }
+
+  @media (min-width: 768px) {
+    .mobile-only { display: none; }
+    .desktop-only { display: block; }
+  }
+
+  /* Specific component styles */
+  .quick-action {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1rem;
+    border-radius: 1rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-height: 100px;
+  }
+
+  .quick-action:active {
+    transform: scale(0.98);
+    background: rgba(255, 255, 255, 1);
+  }
+
+  .suggestion-btn {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .suggestion-btn:active {
+    background: #e2e8f0;
+    transform: scale(0.98);
+  }
+
+  .entry-item {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #f3f4f6;
+    transition: all 0.2s ease;
+  }
+
+  .entry-item:active {
+    background: #f9fafb;
+    transform: scale(0.99);
+  }
+
+  .book-item {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 1rem;
+    padding: 1rem;
+    color: white;
+    text-decoration: none;
+    height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .book-content {
+    background: rgba(255, 255, 255, 0.95);
+    color: #374151;
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .add-book {
+    background: #f3f4f6;
+    border: 2px dashed #d1d5db;
+    border-radius: 1rem;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #6b7280;
+    transition: all 0.2s ease;
+  }
+
+  .add-book:active {
+    background: #e5e7eb;
+    transform: scale(0.98);
+  }
+
+  /* Loading spinner */
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    border-radius: 4px;
+    transition: width 0.5s ease;
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-7xl desktop-max-width mx-auto px-4 sm:px-6 lg:px-8">
+<div class="container">
   <!-- Success Message -->
-  <div id="entrySuccess" class="mb-4 sm:mb-6 bg-green-50 border border-green-200 text-green-800 rounded-xl p-4 scale-in hidden">
-    <div class="flex gap-3 items-start">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-      </svg>
-      <div class="flex-1">
-        <h4 class="font-medium text-green-800">Journal Entry Saved!</h4>
-        <p class="text-sm">Your journal entry has been successfully added to your collection.</p>
+  <div id="entrySuccess" class="mb-mobile-4 hidden">
+    <div class="card-mobile" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d;">
+      <div class="flex-mobile-between">
+        <div class="flex-mobile-row" style="gap: 0.75rem;">
+          <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          <div>
+            <div class="font-semibold text-mobile-lg">Entry Saved!</div>
+            <div class="text-sm opacity-75">Your journal entry has been added to your collection.</div>
+          </div>
+        </div>
+        <button class="touch-target" onclick="document.getElementById('entrySuccess').classList.add('hidden')">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
       </div>
-      <button class="touch-target" onclick="document.getElementById('entrySuccess').classList.add('hidden')">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-        </svg>
-      </button>
     </div>
   </div>
 
   <!-- Welcome & Stats Section -->
-  <div class="glass-effect rounded-xl p-4 sm:p-6 shadow-md mb-4 sm:mb-6 border border-white/20">
-    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-      <div class="mobile-text-center lg:text-left">
-        <h2 class="responsive-text-3xl font-bold diary-font mb-1">Welcome back, {{ request.user.username }}</h2>
-        <p class="text-gray-600 responsive-text-base">Continue your journey or explore past memories</p>
+  <div class="card-mobile-lg mb-mobile-6">
+    <div class="space-mobile-y-4">
+      <div class="text-center">
+        <h1 class="text-mobile-3xl font-bold mb-2" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome back, {{ request.user.username }}</h1>
+        <p class="text-gray-600">Continue your journey or explore past memories</p>
       </div>
-      <div class="grid grid-cols-3 w-full lg:w-auto gap-2 sm:gap-3 lg:flex">
-        <div class="text-center bg-white p-2 sm:p-3 rounded-xl shadow-sm border border-white/50">
-          <div class="responsive-text-2xl font-bold gradient-text">{{ total_entries }}</div>
-          <div class="responsive-text-sm text-gray-500">Entries</div>
+
+      <div class="grid-mobile-3">
+        <div class="text-center bg-white p-mobile-3 rounded-xl border border-gray-100">
+          <div class="text-mobile-2xl font-bold text-blue-600">{{ total_entries }}</div>
+          <div class="text-sm text-gray-500">Entries</div>
         </div>
-        <div class="text-center bg-white p-2 sm:p-3 rounded-xl shadow-sm border border-white/50">
-          <div class="responsive-text-2xl font-bold text-emerald-600">{{ streak }}</div>
-          <div class="responsive-text-sm text-gray-500">Streak</div>
+        <div class="text-center bg-white p-mobile-3 rounded-xl border border-gray-100">
+          <div class="text-mobile-2xl font-bold text-green-600">{{ streak }}</div>
+          <div class="text-sm text-gray-500">Streak</div>
         </div>
-        <div class="text-center bg-white p-2 sm:p-3 rounded-xl shadow-sm border border-white/50">
-          <div class="responsive-text-2xl font-bold text-primary-600">{{ completion_percentage }}%</div>
-          <div class="responsive-text-sm text-gray-500">Biography</div>
+        <div class="text-center bg-white p-mobile-3 rounded-xl border border-gray-100">
+          <div class="text-mobile-2xl font-bold text-purple-600">{{ completion_percentage }}%</div>
+          <div class="text-sm text-gray-500">Biography</div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Quick Actions -->
-  <div class="grid grid-cols-3 gap-2 sm:gap-3 mb-6 sm:mb-8">
-    <a href="{% url 'new_entry' %}" class="glass-effect rounded-xl p-3 sm:p-4 shadow-md hover:shadow-lg transition flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-2 sm:gap-3 card-hover border border-white/20 quick-action-mobile">
-      <div class="bg-secondary-100 p-2 rounded-lg shadow-sm flex-shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <div class="grid-mobile-3 mb-mobile-6">
+    <a href="{% url 'new_entry' %}" class="quick-action active-mobile">
+      <div class="w-12 h-12 bg-blue-100 rounded-xl flex-mobile-center mb-2">
+        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
         </svg>
       </div>
-      <div class="text-center sm:text-left">
-        <h3 class="font-semibold text-gray-800 responsive-text-sm">New Entry</h3>
-        <p class="responsive-text-sm text-gray-600 hidden sm:block">Record today</p>
-      </div>
+      <div class="text-sm font-semibold text-gray-800">New Entry</div>
+      <div class="text-xs text-gray-500">Record today</div>
     </a>
 
-    <a href="{% url 'biography' %}" class="glass-effect rounded-xl p-3 sm:p-4 shadow-md hover:shadow-lg transition flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-2 sm:gap-3 card-hover border border-white/20 quick-action-mobile">
-      <div class="bg-primary-100 p-2 rounded-lg shadow-sm flex-shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <a href="{% url 'biography' %}" class="quick-action active-mobile">
+      <div class="w-12 h-12 bg-purple-100 rounded-xl flex-mobile-center mb-2">
+        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       </div>
-      <div class="text-center sm:text-left">
-        <h3 class="font-semibold text-gray-800 responsive-text-sm">Biography</h3>
-        <p class="responsive-text-sm text-gray-600 hidden sm:block">Life story</p>
-      </div>
+      <div class="text-sm font-semibold text-gray-800">Biography</div>
+      <div class="text-xs text-gray-500">Life story</div>
     </a>
 
-    <a href="{% url 'insights' %}" class="glass-effect rounded-xl p-3 sm:p-4 shadow-md hover:shadow-lg transition flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-2 sm:gap-3 card-hover border border-white/20 quick-action-mobile">
-      <div class="bg-emerald-100 p-2 rounded-lg shadow-sm flex-shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <a href="{% url 'insights' %}" class="quick-action active-mobile">
+      <div class="w-12 h-12 bg-green-100 rounded-xl flex-mobile-center mb-2">
+        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
       </div>
-      <div class="text-center sm:text-left">
-        <h3 class="font-semibold text-gray-800 responsive-text-sm">Insights</h3>
-        <p class="responsive-text-sm text-gray-600 hidden sm:block">Analytics</p>
-      </div>
+      <div class="text-sm font-semibold text-gray-800">Insights</div>
+      <div class="text-xs text-gray-500">Analytics</div>
     </a>
   </div>
 
   <!-- Journal Entry Form -->
-  <div class="mb-6 sm:mb-8 bg-white rounded-xl shadow-lg overflow-hidden border border-white journal-form-mobile">
-    <div class="p-4 sm:p-5 border-b border-gray-100">
-      <h3 class="responsive-text-lg font-bold diary-font flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-600 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+  <div class="card-mobile mb-mobile-8">
+    <div class="mb-4 pb-4 border-b border-gray-100">
+      <h2 class="text-mobile-xl font-bold text-gray-800 flex items-center gap-2 mb-1">
+        <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd" />
         </svg>
         Quick Journal Entry
-      </h3>
-      <p class="responsive-text-sm text-gray-600">Share your thoughts directly from your dashboard</p>
+      </h2>
+      <p class="text-sm text-gray-600">Share your thoughts directly from your dashboard</p>
     </div>
 
-    <form id="dashboardJournalForm" class="w-full relative z-10">
+    <form id="dashboardJournalForm" class="form-mobile">
       {% csrf_token %}
-      <div class="mobile-form-spacing p-4 sm:p-5">
-        <!-- Character counter -->
-        <div class="flex justify-between items-center mb-3">
-          <div class="responsive-text-sm font-medium bg-gray-100 px-3 py-1 rounded-full text-gray-500 flex items-center gap-1 shadow-inner">
-            <span id="charCount">0</span>
-            <span>characters</span>
-          </div>
-        </div>
 
-        <!-- Text area -->
-        <textarea
-          id="journalInput"
-          name="journal_content"
-          class="w-full p-3 sm:p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary-400 focus:border-secondary-400 transition diary-font shadow-inner bg-gray-50/50 min-h-[120px] mobile-textarea"
-          placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am..."
-          oninput="countChars()"></textarea>
-
-        <!-- Suggestions -->
-        <div class="mt-3">
-          <div class="responsive-text-sm font-medium text-gray-600 mb-2">Suggested topics:</div>
-          <div class="flex flex-wrap gap-1 sm:gap-2 suggestion-buttons-mobile">
-            <button type="button" onclick="addSuggestion('Today I accomplished')" class="bg-secondary-50 hover:bg-secondary-100 text-secondary-700 px-3 py-1.5 rounded-full responsive-text-sm font-medium transition shadow-sm border border-secondary-200/50 mb-1">Today I accomplished</button>
-            <button type="button" onclick="addSuggestion('I felt happy when')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full responsive-text-sm font-medium transition shadow-sm border border-emerald-200/50 mb-1">I felt happy when</button>
-            <button type="button" onclick="addSuggestion('I learned that')" class="bg-primary-50 hover:bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full responsive-text-sm font-medium transition shadow-sm border border-primary-200/50 mb-1">I learned that</button>
-            <button type="button" onclick="addSuggestion('I met with')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full responsive-text-sm font-medium transition shadow-sm border border-purple-200/50 mb-1">I met with</button>
-            <button type="button" onclick="addSuggestion('I\\'m grateful for')" class="bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full responsive-text-sm font-medium transition shadow-sm border border-amber-200/50 mb-1">I'm grateful for</button>
-          </div>
-        </div>
-
-        <!-- Personalization options -->
-        <div class="mt-3 border-t border-gray-200 pt-3">
-          <div class="flex items-start mb-2">
-            <input type="checkbox" id="personalizationToggle" class="h-4 w-4 text-secondary-600 focus:ring-secondary-400 border-gray-300 rounded mt-0.5 flex-shrink-0">
-            <label for="personalizationToggle" class="ml-2 responsive-text-sm font-medium text-gray-700">
-              <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-1">
-                <span>Use personalized style</span>
-                <span class="text-xs text-secondary-600">(based on your preferences)</span>
-                <a href="{% url 'preferences' %}" class="text-xs text-secondary-700 hover:text-secondary-900 underline">
-                  Edit preferences
-                </a>
-              </div>
-            </label>
-          </div>
+      <!-- Character counter -->
+      <div class="flex-mobile-between mb-3">
+        <div class="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-600">
+          <span id="charCount">0</span> characters
         </div>
       </div>
 
+      <!-- Text area -->
+      <textarea
+        id="journalInput"
+        name="journal_content"
+        class="input-mobile textarea-mobile mb-4"
+        placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am..."
+        oninput="countChars()"></textarea>
+
+      <!-- Suggestions -->
+      <div class="mb-4">
+        <div class="text-sm font-medium text-gray-700 mb-3">Suggested topics:</div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestion-btn">Today I accomplished</button>
+          <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestion-btn">I felt happy when</button>
+          <button type="button" onclick="addSuggestion('I learned that')" class="suggestion-btn">I learned that</button>
+          <button type="button" onclick="addSuggestion('I met with')" class="suggestion-btn">I met with</button>
+          <button type="button" onclick="addSuggestion('I\\'m grateful for')" class="suggestion-btn">I'm grateful for</button>
+        </div>
+      </div>
+
+      <!-- Personalization -->
+      <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+        <label class="flex items-start gap-3">
+          <input type="checkbox" id="personalizationToggle" class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded">
+          <div class="text-sm">
+            <div class="font-medium text-gray-700">Use personalized style</div>
+            <div class="text-gray-500">Based on your preferences</div>
+            <a href="{% url 'preferences' %}" class="text-blue-600 hover:underline">Edit preferences</a>
+          </div>
+        </label>
+      </div>
+
       <!-- Action buttons -->
-      <div class="bg-gradient-to-r from-secondary-50 to-primary-50 px-4 sm:px-5 py-3 flex flex-col sm:flex-row justify-between items-center gap-3 border-t border-white mobile-action-bar">
-        <div class="responsive-text-sm text-gray-600 flex items-center gap-2 mobile-text-center">
-          <span class="h-6 w-6 bg-white rounded-full flex items-center justify-center shadow-sm flex-shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-600" viewBox="0 0 20 20" fill="currentColor">
+      <div class="space-mobile-y-3">
+        <div class="flex-mobile-row text-sm text-gray-600 justify-center gap-2">
+          <div class="w-6 h-6 bg-blue-100 rounded-full flex-mobile-center">
+            <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
             </svg>
-          </span>
+          </div>
           <span>AI-powered journal generation</span>
         </div>
-        <button type="button" id="generateButton" onclick="generateEntry()" class="btn-gradient text-white px-5 py-2 rounded-full responsive-text-sm font-medium flex items-center justify-center gap-2 shadow-md mobile-full-width sm:w-auto">
+        <button type="button" id="generateButton" onclick="generateEntry()" class="btn-mobile" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">
           <span>Generate Entry</span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
           </svg>
         </button>
@@ -444,55 +508,57 @@
     </form>
 
     <!-- Loading indicator -->
-    <div id="loadingIndicator" class="p-6 hidden">
-      <div class="flex flex-col items-center justify-center">
-        <div class="w-12 h-12 border-4 border-secondary-200 border-t-secondary-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-center text-gray-600 handwritten responsive-text-lg">Crafting your journal entry<span class="loading-dots"></span></p>
-        <p class="text-center text-gray-500 responsive-text-sm mt-2">This takes just a moment</p>
-      </div>
+    <div id="loadingIndicator" class="p-6 text-center hidden">
+      <div class="spinner mx-auto mb-4"></div>
+      <p class="text-gray-600 text-mobile-lg font-medium">Crafting your journal entry<span class="loading-dots"></span></p>
+      <p class="text-sm text-gray-500 mt-2">This takes just a moment</p>
     </div>
 
     <!-- Results preview -->
     <div id="resultPreview" class="hidden scale-in">
-      <div class="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between">
-        <div>
-          <h3 class="font-bold text-gray-800 responsive-text-base mb-1 diary-font">Your Journal Entry</h3>
-          <p class="text-gray-600 responsive-text-sm">Generated based on your day</p>
-        </div>
-        <button class="h-8 w-8 bg-gray-50 rounded-full flex items-center justify-center text-secondary-600 shadow-sm border border-gray-100 touch-target" onclick="editJournalEntry()">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-          </svg>
-        </button>
-      </div>
-
-      <div class="p-4 sm:p-5 bg-gradient-to-br from-white to-gray-50">
-        <div id="journalEntry" class="handwritten responsive-text-lg text-gray-800 leading-relaxed">
-          <!-- AI-generated entry will appear here -->
-        </div>
-      </div>
-
-      <!-- Result actions -->
-      <div class="bg-gradient-to-r from-secondary-50 to-primary-50 p-4 sm:p-5 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 border-t border-white">
-        <div class="text-gray-600 responsive-text-sm diary-font mobile-text-center lg:text-left">
-          <span class="text-secondary-600 font-medium">Title:</span>
-          <span id="entryTitle">My Day - {{ current_date|default:"Today" }}</span>
-        </div>
-        <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto mobile-button-stack">
-          <button type="button" onclick="editJournalEntry()" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-3 py-1.5 rounded-full responsive-text-sm transition shadow-sm flex items-center gap-1 justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+      <div class="border-t border-gray-100 pt-4 mt-4">
+        <div class="flex-mobile-between mb-4">
+          <div>
+            <h3 class="text-mobile-lg font-bold text-gray-800">Your Journal Entry</h3>
+            <p class="text-sm text-gray-600">Generated based on your day</p>
+          </div>
+          <button class="touch-target bg-gray-100 rounded-full" onclick="editJournalEntry()">
+            <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
             </svg>
-            Edit
           </button>
-          <button type="button" onclick="restartEntry()" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-3 py-1.5 rounded-full responsive-text-sm transition shadow-sm flex items-center gap-1 justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Try Again
-          </button>
-          <a href="{% url 'dashboard' %}?entry_saved=true" id="saveDashboardButton" class="btn-gradient text-white px-4 py-1.5 rounded-full responsive-text-sm font-medium shadow-md flex items-center gap-1 justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        </div>
+
+        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+          <div id="journalEntry" class="text-gray-800 leading-relaxed" style="font-family: 'Georgia', serif;">
+            <!-- AI-generated entry will appear here -->
+          </div>
+        </div>
+
+        <div class="mb-4 text-center">
+          <div class="text-sm text-gray-600">
+            <span class="font-medium">Title:</span>
+            <span id="entryTitle">My Day - {{ current_date|default:"Today" }}</span>
+          </div>
+        </div>
+
+        <div class="space-mobile-y-3">
+          <div class="grid-mobile-2" style="gap: 0.75rem;">
+            <button type="button" onclick="editJournalEntry()" class="btn-mobile-sm bg-white border border-gray-300 text-gray-700">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Edit
+            </button>
+            <button type="button" onclick="restartEntry()" class="btn-mobile-sm bg-white border border-gray-300 text-gray-700">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Try Again
+            </button>
+          </div>
+          <a href="{% url 'dashboard' %}?entry_saved=true" id="saveDashboardButton" class="btn-mobile" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
             Save Entry
@@ -503,83 +569,88 @@
   </div>
 
   <!-- Recent Entries Section -->
-  <div class="mb-6 sm:mb-8">
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="responsive-text-lg font-semibold diary-font text-gray-800">Recent Entries</h3>
-      <a href="{% url 'library' %}" class="responsive-text-sm text-secondary-600 hover:underline flex items-center gap-1">
+  <div class="mb-mobile-8">
+    <div class="flex-mobile-between mb-4">
+      <h2 class="text-mobile-xl font-bold text-gray-800">Recent Entries</h2>
+      <a href="{% url 'library' %}" class="text-sm text-blue-600 hover:underline flex items-center gap-1">
         <span>View all</span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </a>
     </div>
 
-    <div class="glass-effect rounded-xl shadow-md overflow-hidden border border-white/20">
-      <div class="divide-y divide-gray-200/30">
-        {% for entry in recent_entries %}
-        <div class="p-4 hover:bg-white/50 transition entry-item-mobile">
-          <div class="flex justify-between items-start gap-2">
-            <div class="flex-1 min-w-0">
-              <h4 class="font-semibold text-gray-800 responsive-text-sm truncate">{{ entry.title }}</h4>
-              <p class="responsive-text-sm text-gray-500 mt-1">{{ entry.created_at|date:"F j, Y \a\t g:i a" }}</p>
-            </div>
-            <div class="flex gap-1 flex-wrap flex-shrink-0">
-              {% if entry.mood %}
-                <span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full whitespace-nowrap">{{ entry.mood }}</span>
-              {% endif %}
-              {% for tag in entry.tags.all %}
-                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full whitespace-nowrap">{{ tag.name }}</span>
-              {% endfor %}
-            </div>
-          </div>
-          <p class="text-gray-600 mt-2 diary-font responsive-text-sm">{{ entry.content|truncatechars:150 }}</p>
-          <div class="mt-2 text-right">
-            <a href="{% url 'entry_detail' entry.id %}" class="text-secondary-600 responsive-text-sm hover:underline">Read more</a>
-          </div>
+    <div class="card-mobile">
+      {% for entry in recent_entries %}
+      <div class="entry-item active-mobile">
+        <div class="flex-mobile-between mb-2">
+          <h3 class="font-semibold text-gray-800 text-sm">{{ entry.title }}</h3>
+          <div class="text-xs text-gray-500">{{ entry.created_at|date:"M j" }}</div>
         </div>
-        {% empty %}
-        <div class="p-6 text-center">
-          <div class="bg-gray-100/50 rounded-full p-3 inline-block mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
+
+        <p class="text-sm text-gray-600 mb-3 leading-relaxed">{{ entry.content|truncatechars:120 }}</p>
+
+        <div class="flex-mobile-between">
+          <div class="flex-mobile-wrap">
+            {% if entry.mood %}
+              <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">{{ entry.mood }}</span>
+            {% endif %}
+            {% for tag in entry.tags.all %}
+              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">{{ tag.name }}</span>
+            {% endfor %}
           </div>
-          <p class="text-gray-600 mb-3 responsive-text-base">No entries yet. Start journaling to see your recent entries here.</p>
-          <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-4 py-2 rounded-full responsive-text-sm font-medium inline-block">Create Your First Entry</a>
+          <a href="{% url 'entry_detail' entry.id %}" class="text-sm text-blue-600 hover:underline">Read more</a>
         </div>
-        {% endfor %}
       </div>
+      {% empty %}
+      <div class="text-center py-8">
+        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex-mobile-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </div>
+        <h3 class="text-mobile-lg font-semibold text-gray-800 mb-2">No entries yet</h3>
+        <p class="text-gray-600 mb-4">Start journaling to see your recent entries here.</p>
+        <a href="{% url 'new_entry' %}" class="btn-mobile" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">Create Your First Entry</a>
+      </div>
+      {% endfor %}
     </div>
   </div>
 
   <!-- Biography Preview -->
-  <div class="bg-gradient-to-r from-secondary-50 to-primary-50 rounded-xl p-4 sm:p-5 border border-primary-100 shadow-md mb-6 sm:mb-8">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-3">
-      <h3 class="responsive-text-lg font-bold diary-font text-gray-800 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <div class="card-mobile-lg mb-mobile-8" style="background: linear-gradient(135deg, #f8fafc, #e2e8f0);">
+    <div class="flex-mobile-between mb-4">
+      <h2 class="text-mobile-xl font-bold text-gray-800 flex items-center gap-2">
+        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
         Biography Preview
-      </h3>
-      <div class="responsive-text-sm text-gray-500">Updated today</div>
+      </h2>
+      <div class="text-sm text-gray-500">Updated today</div>
     </div>
-    <div class="mb-3">
-      <div class="flex flex-col sm:flex-row justify-between responsive-text-sm text-gray-600 mb-1 gap-1">
+
+    <div class="mb-4">
+      <div class="flex-mobile-between text-sm text-gray-600 mb-2">
         <span>{{ total_entries }} entries processed</span>
         <span>{{ completion_percentage }}% complete</span>
       </div>
-      <div class="h-2 bg-white/50 rounded-full overflow-hidden backdrop-blur-sm">
-        <div class="h-full bg-primary-600 rounded-full transition-all duration-500" style="width: {{ completion_percentage }}%"></div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: {{ completion_percentage }}%"></div>
       </div>
     </div>
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-white">
-      <div class="handwritten responsive-text-base text-gray-800 leading-relaxed">
-        <p>{% if biography_preview %}{{ biography_preview }}{% else %}As you add more entries, your AI-generated biography will appear here. Start journaling to see your life story unfold.{% endif %}</p>
+
+    <div class="bg-white p-4 rounded-xl">
+      <div class="text-gray-800 leading-relaxed" style="font-family: 'Georgia', serif;">
+        {% if biography_preview %}
+          {{ biography_preview }}
+        {% else %}
+          As you add more entries, your AI-generated biography will appear here. Start journaling to see your life story unfold.
+        {% endif %}
       </div>
-      <div class="mt-3 text-right">
-        <a href="{% url 'biography' %}" class="responsive-text-sm text-primary-600 hover:underline inline-flex items-center gap-1">
-          Continue reading
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="mt-4 text-center">
+        <a href="{% url 'biography' %}" class="text-purple-600 hover:underline flex items-center justify-center gap-1">
+          <span>Continue reading</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
         </a>
@@ -587,70 +658,64 @@
     </div>
   </div>
 
-  <!-- Time Period Collection -->
-  <div class="mb-6 sm:mb-8">
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="responsive-text-lg font-semibold diary-font text-gray-800">Time Periods</h3>
-      <a href="{% url 'library' %}" class="responsive-text-sm text-secondary-600 hover:underline flex items-center gap-1">
+  <!-- Time Periods Collection -->
+  <div class="mb-mobile-8">
+    <div class="flex-mobile-between mb-4">
+      <h2 class="text-mobile-xl font-bold text-gray-800">Time Periods</h2>
+      <a href="{% url 'library' %}" class="text-sm text-blue-600 hover:underline flex items-center gap-1">
         <span>View all</span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </a>
     </div>
 
-    <div class="grid book-grid-mobile sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div class="grid-mobile-2">
       {% for period in time_periods %}
-      <a href="{% url 'library' %}" class="block">
-        <div class="h-40 sm:h-48 bg-{{ period.color|default:'secondary' }}-500 rounded-xl shadow-lg book relative">
-          <div class="absolute inset-1 bg-white rounded-lg p-3 flex flex-col justify-between">
-            <div>
-              <div class="book-title text-center font-bold text-gray-800 responsive-text-sm">{{ period.period }}</div>
-              <div class="responsive-text-sm text-center text-gray-500 mb-2">
-                {% if 'Q1' in period.period %}Jan - Mar{% endif %}
-                {% if 'Q2' in period.period %}Apr - Jun{% endif %}
-                {% if 'Q3' in period.period %}Jul - Sep{% endif %}
-                {% if 'Q4' in period.period %}Oct - Dec{% endif %}
-              </div>
-              <div class="h-12 sm:h-16 overflow-hidden">
-                <div class="handwritten text-xs text-gray-600 leading-relaxed">
-                  {% if period.first_entry %}
-                    {{ period.first_entry.content|truncatechars:100 }}
-                  {% else %}
-                    Start adding entries to this time period...
-                  {% endif %}
-                </div>
-              </div>
+      <a href="{% url 'library' %}" class="book-item active-mobile">
+        <div class="book-spine"></div>
+        <div class="book-content">
+          <div>
+            <div class="font-bold text-sm text-center mb-1">{{ period.period }}</div>
+            <div class="text-xs text-center text-gray-500 mb-2">
+              {% if 'Q1' in period.period %}Jan - Mar{% endif %}
+              {% if 'Q2' in period.period %}Apr - Jun{% endif %}
+              {% if 'Q3' in period.period %}Jul - Sep{% endif %}
+              {% if 'Q4' in period.period %}Oct - Dec{% endif %}
             </div>
-            <div class="responsive-text-sm text-center text-{{ period.color|default:'secondary' }}-500">{{ period.count }} entries</div>
+            <div class="text-xs text-gray-600 leading-relaxed overflow-hidden" style="height: 60px;">
+              {% if period.first_entry %}
+                {{ period.first_entry.content|truncatechars:80 }}
+              {% else %}
+                Start adding entries to this time period...
+              {% endif %}
+            </div>
           </div>
-          <div class="book-spine"></div>
+          <div class="text-xs text-center font-medium">{{ period.count }} entries</div>
         </div>
       </a>
       {% empty %}
-      <div class="col-span-full glass-effect rounded-xl p-6 text-center border border-white/20">
-        <div class="bg-gray-100 rounded-lg p-4 inline-block mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="col-span-full text-center py-8">
+        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex-mobile-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
           </svg>
         </div>
-        <h3 class="responsive-text-lg font-medium text-gray-900 mb-2">No entries yet</h3>
-        <p class="text-gray-600 mb-4 responsive-text-base">Start journaling to build your library of memories.</p>
-        <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-4 py-2 rounded-lg hover:shadow-lg transition responsive-text-sm">Create Your First Entry</a>
+        <h3 class="text-mobile-lg font-semibold text-gray-800 mb-2">No entries yet</h3>
+        <p class="text-gray-600 mb-4">Start journaling to build your library of memories.</p>
+        <a href="{% url 'new_entry' %}" class="btn-mobile" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">Create Your First Entry</a>
       </div>
       {% endfor %}
 
       <!-- Add New -->
-      <a href="{% url 'new_entry' %}" class="block">
-        <div class="h-40 sm:h-48 bg-gray-100/60 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center hover:bg-white/50 transition">
-          <div class="text-center">
-            <div class="h-8 w-8 sm:h-10 sm:w-10 bg-white mx-auto rounded-full flex items-center justify-center mb-2 shadow-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-            </div>
-            <div class="responsive-text-sm text-gray-600">Create New</div>
+      <a href="{% url 'new_entry' %}" class="add-book active-mobile">
+        <div class="text-center">
+          <div class="w-12 h-12 bg-white rounded-full flex-mobile-center mx-auto mb-2">
+            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
           </div>
+          <div class="text-sm font-medium">Create New</div>
         </div>
       </a>
     </div>
@@ -666,7 +731,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('entry_saved') === 'true') {
       document.getElementById('entrySuccess').classList.remove('hidden');
-      // Update URL without the parameter (to avoid showing the message on refresh)
+      // Update URL without the parameter
       history.replaceState(null, '', window.location.pathname);
     }
 
@@ -694,33 +759,27 @@
     countChars();
   }
 
-  // Generate journal entry based on the input
+  // Generate journal entry
   function generateEntry() {
     const journalInput = document.getElementById('journalInput');
     const inputText = journalInput.value.trim();
 
-    // Validate input
     if (!inputText) {
       alert('Please enter some notes about your day first.');
       return;
     }
 
-    // Show loading indicator and hide the form
+    // Show loading
     document.getElementById('dashboardJournalForm').classList.add('hidden');
     document.getElementById('loadingIndicator').classList.remove('hidden');
 
-    // In a real application, this would make an API call to a backend
-    // For now, we'll simulate an API call with a timeout
+    // Simulate API call
     setTimeout(() => {
       generateJournalContent(inputText).then(generatedText => {
-        // Hide loading and show result
         document.getElementById('loadingIndicator').classList.add('hidden');
         document.getElementById('resultPreview').classList.remove('hidden');
-
-        // Update the preview with the generated text
         document.getElementById('journalEntry').textContent = generatedText;
 
-        // Set a default title based on the current date
         const today = new Date();
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('entryTitle').textContent = "My Day - " + today.toLocaleDateString(undefined, options);
@@ -728,27 +787,20 @@
     }, 1500);
   }
 
-  // API function to generate journal content
+  // Generate journal content
   async function generateJournalContent(input) {
-    // In a real app, this would be an API call to a backend service
-    // For demonstration, we're implementing it directly
-
     const usePersonalizedStyle = document.getElementById('personalizationToggle').checked;
 
     try {
-      // For demo, generate text locally:
       return generateSampleEntry(input, usePersonalizedStyle);
-
     } catch (error) {
       console.error('Error generating journal entry:', error);
       return "There was an error generating your journal entry. Please try again.";
     }
   }
 
-  // Helper function to generate a sample entry (replace with actual API in production)
+  // Generate sample entry
   function generateSampleEntry(input, usePersonalizedStyle) {
-    // This is just a placeholder. In a real app, you would call your backend API
-
     const introductions = [
       "Dear Diary,",
       "Today was quite a day.",
@@ -766,10 +818,8 @@
     const intro = introductions[Math.floor(Math.random() * introductions.length)];
     const conclusion = conclusions[Math.floor(Math.random() * conclusions.length)];
 
-    // Extract key points from the input
     const points = input.split(/[.,;]/).filter(point => point.trim().length > 0);
 
-    // Expand each point into a sentence or two
     const expandedPoints = points.map(point => {
       const trimmed = point.trim();
       if (trimmed.toLowerCase().includes('breakfast')) {
@@ -784,92 +834,34 @@
       return '';
     }).filter(point => point.length > 0);
 
-    // Style variations based on user preference
     let style = usePersonalizedStyle ?
       "I'm noticing patterns in my daily routine that bring me joy. " :
       "";
 
-    // Combine everything into a coherent entry
     return `${intro}\n\n${expandedPoints.join(' ')}\n\n${style}${conclusion}`;
   }
 
-  // Edit the generated journal entry
+  // Edit journal entry
   function editJournalEntry() {
     const journalEntry = document.getElementById('journalEntry').textContent;
     const journalInput = document.getElementById('journalInput');
 
-    // Copy the generated text back to the input for editing
     journalInput.value = journalEntry;
-
-    // Show the form and hide the preview
     document.getElementById('dashboardJournalForm').classList.remove('hidden');
     document.getElementById('resultPreview').classList.add('hidden');
 
-    // Update character count
     countChars();
-
-    // Focus the input for immediate editing
     journalInput.focus();
   }
 
-  // Restart the entry process
+  // Restart entry
   function restartEntry() {
-    // Clear the input and show the form
     document.getElementById('journalInput').value = '';
     document.getElementById('dashboardJournalForm').classList.remove('hidden');
     document.getElementById('resultPreview').classList.add('hidden');
 
-    // Reset character count
     countChars();
-
-    // Focus the input for a new entry
     document.getElementById('journalInput').focus();
-  }
-
-  // Save journal entry
-  function saveJournalEntry() {
-    const entryContent = document.getElementById('journalEntry').textContent;
-    const entryTitle = document.getElementById('entryTitle').textContent;
-
-    // In a real application, this would be an API call to save to the database
-    // For demonstration purposes, we'll redirect to the success URL
-    window.location.href = '/?entry_saved=true';
-
-    /* In production, you would use code like this:
-
-    // Create form data for submission
-    const formData = new FormData();
-    formData.append('title', entryTitle);
-    formData.append('content', entryContent);
-    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-
-    // Save the entry via AJAX
-    fetch('/api/save-entry/', {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.success) {
-        // Redirect to dashboard with success message
-        window.location.href = '/?entry_saved=true';
-      } else {
-        alert('Error saving entry: ' + data.error);
-      }
-    })
-    .catch(error => {
-      console.error('Error saving journal entry:', error);
-      alert('There was an error saving your journal entry. Please try again.');
-    });
-    */
   }
 </script>
 {% endblock %}
