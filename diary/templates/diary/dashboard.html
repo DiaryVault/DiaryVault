@@ -26,6 +26,56 @@
     border-radius: 0.5rem 0 0 0.5rem;
   }
 
+  /* Enhanced photo memory styles */
+  .memory-card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+    transform: translateY(0);
+    cursor: pointer;
+  }
+
+  .memory-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .memory-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .memory-card:hover .memory-image {
+    transform: scale(1.05);
+  }
+
+  .memory-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+    color: white;
+  }
+
+  .memory-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .memory-date {
+    font-size: 0.75rem;
+    opacity: 0.9;
+  }
+
   /* Mobile-first responsive text */
   .text-mobile-lg { font-size: 1.125rem; line-height: 1.75rem; }
   .text-mobile-xl { font-size: 1.25rem; line-height: 1.75rem; }
@@ -126,6 +176,22 @@
   .grid-mobile-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
   .grid-mobile-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
 
+  /* Photo memory grid for mobile */
+  .photo-memories-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .photo-memory-large {
+    grid-column: span 2;
+    height: 200px;
+  }
+
+  .photo-memory-small {
+    height: 120px;
+  }
+
   /* Mobile flexbox utilities */
   .flex-mobile-col { display: flex; flex-direction: column; }
   .flex-mobile-row { display: flex; flex-direction: row; align-items: center; }
@@ -195,12 +261,28 @@
     .book:hover {
       transform: rotateY(-10deg) translateY(-5px);
     }
+
+    /* Tablet photo memories grid */
+    .photo-memories-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .photo-memory-large {
+      grid-column: span 2;
+      grid-row: span 2;
+      height: 250px;
+    }
+
+    .photo-memory-small {
+      height: 120px;
+    }
   }
 
   /* Desktop styles */
   @media (min-width: 1024px) {
     .container {
-      max-width: 1024px;
+      max-width: 1200px;
       padding: 2rem;
     }
 
@@ -210,6 +292,37 @@
     .book:hover {
       transform: rotateY(-15deg) translateY(-10px);
       z-index: 10;
+    }
+
+    /* Desktop photo memories grid */
+    .photo-memories-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+
+    .photo-memory-large {
+      grid-column: span 2;
+      grid-row: span 2;
+      height: 300px;
+    }
+
+    .photo-memory-small {
+      height: 140px;
+    }
+
+    /* Desktop layout improvements */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+    }
+
+    .main-content {
+      grid-column: 1;
+    }
+
+    .sidebar-content {
+      grid-column: 2;
     }
   }
 
@@ -349,6 +462,42 @@
     border-radius: 4px;
     transition: width 0.5s ease;
   }
+
+  /* Enhanced photo styles */
+  .gradient-bg-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .gradient-bg-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+  .gradient-bg-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+  .gradient-bg-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+  .gradient-bg-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+  .gradient-bg-6 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+
+  /* Photo overlay improvements */
+  .photo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .memory-card:hover .photo-overlay {
+    opacity: 1;
+  }
+
+  .overlay-icon {
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
 </style>
 {% endblock %}
 
@@ -376,200 +525,340 @@
     </div>
   </div>
 
-  <!-- Welcome & Stats Section -->
-  <div class="card-mobile-lg mb-mobile-6">
-    <div class="space-mobile-y-4">
-      <div class="text-center">
-        <h1 class="text-mobile-3xl font-bold mb-2" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome back, {{ request.user.username }}</h1>
-        <p class="text-gray-600">Continue your journey or explore past memories</p>
-      </div>
-
-      <div class="grid-mobile-3">
-        <div class="text-center bg-white p-mobile-3 rounded-xl border border-gray-100">
-          <div class="text-mobile-2xl font-bold text-blue-600">{{ total_entries }}</div>
-          <div class="text-sm text-gray-500">Entries</div>
-        </div>
-        <div class="text-center bg-white p-mobile-3 rounded-xl border border-gray-100">
-          <div class="text-mobile-2xl font-bold text-green-600">{{ streak }}</div>
-          <div class="text-sm text-gray-500">Streak</div>
-        </div>
-        <div class="text-center bg-white p-mobile-3 rounded-xl border border-gray-100">
-          <div class="text-mobile-2xl font-bold text-purple-600">{{ completion_percentage }}%</div>
-          <div class="text-sm text-gray-500">Biography</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Quick Actions -->
-  <div class="grid-mobile-3 mb-mobile-6">
-    <a href="{% url 'new_entry' %}" class="quick-action active-mobile">
-      <div class="w-12 h-12 bg-blue-100 rounded-xl flex-mobile-center mb-2">
-        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-        </svg>
-      </div>
-      <div class="text-sm font-semibold text-gray-800">New Entry</div>
-      <div class="text-xs text-gray-500">Record today</div>
-    </a>
-
-    <a href="{% url 'biography' %}" class="quick-action active-mobile">
-      <div class="w-12 h-12 bg-purple-100 rounded-xl flex-mobile-center mb-2">
-        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      </div>
-      <div class="text-sm font-semibold text-gray-800">Biography</div>
-      <div class="text-xs text-gray-500">Life story</div>
-    </a>
-
-    <a href="{% url 'insights' %}" class="quick-action active-mobile">
-      <div class="w-12 h-12 bg-green-100 rounded-xl flex-mobile-center mb-2">
-        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      </div>
-      <div class="text-sm font-semibold text-gray-800">Insights</div>
-      <div class="text-xs text-gray-500">Analytics</div>
-    </a>
-  </div>
-
-  <!-- Journal Entry Form -->
-  <div class="card-mobile mb-mobile-8">
-    <div class="mb-4 pb-4 border-b border-gray-100">
-      <h2 class="text-mobile-xl font-bold text-gray-800 flex items-center gap-2 mb-1">
-        <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd" />
-        </svg>
-        Quick Journal Entry
-      </h2>
-      <p class="text-sm text-gray-600">Share your thoughts directly from your dashboard</p>
-    </div>
-
-    <form id="dashboardJournalForm" class="form-mobile">
-      {% csrf_token %}
-
-      <!-- Character counter -->
-      <div class="flex-mobile-between mb-3">
-        <div class="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-600">
-          <span id="charCount">0</span> characters
-        </div>
-      </div>
-
-      <!-- Text area -->
-      <textarea
-        id="journalInput"
-        name="journal_content"
-        class="input-mobile textarea-mobile mb-4"
-        placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am..."
-        oninput="countChars()"></textarea>
-
-      <!-- Suggestions -->
-      <div class="mb-4">
-        <div class="text-sm font-medium text-gray-700 mb-3">Suggested topics:</div>
-        <div class="flex flex-wrap gap-2">
-          <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestion-btn">Today I accomplished</button>
-          <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestion-btn">I felt happy when</button>
-          <button type="button" onclick="addSuggestion('I learned that')" class="suggestion-btn">I learned that</button>
-          <button type="button" onclick="addSuggestion('I met with')" class="suggestion-btn">I met with</button>
-          <button type="button" onclick="addSuggestion('I\\'m grateful for')" class="suggestion-btn">I'm grateful for</button>
-        </div>
-      </div>
-
-      <!-- Personalization -->
-      <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-        <label class="flex items-start gap-3">
-          <input type="checkbox" id="personalizationToggle" class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded">
-          <div class="text-sm">
-            <div class="font-medium text-gray-700">Use personalized style</div>
-            <div class="text-gray-500">Based on your preferences</div>
-            <a href="{% url 'preferences' %}" class="text-blue-600 hover:underline">Edit preferences</a>
+  <!-- Desktop grid layout -->
+  <div class="dashboard-grid">
+    <div class="main-content">
+      <!-- Welcome & Stats Section -->
+      <div class="card-mobile-lg mb-mobile-6">
+        <div class="space-mobile-y-4">
+          <div class="text-center lg:text-left">
+            <h1 class="text-mobile-3xl font-bold mb-2" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome back, {{ request.user.username }}</h1>
+            <p class="text-gray-600">Continue your journey or explore past memories</p>
           </div>
-        </label>
+
+          <div class="grid-mobile-3">
+            <div class="text-center bg-white p-mobile-3 rounded-xl border border-gray-100">
+              <div class="text-mobile-2xl font-bold text-blue-600">{{ total_entries }}</div>
+              <div class="text-sm text-gray-500">Entries</div>
+            </div>
+            <div class="text-center bg-white p-mobile-3 rounded-xl border border-gray-100">
+              <div class="text-mobile-2xl font-bold text-green-600">{{ streak }}</div>
+              <div class="text-sm text-gray-500">Streak</div>
+            </div>
+            <div class="text-center bg-white p-mobile-3 rounded-xl border border-gray-100">
+              <div class="text-mobile-2xl font-bold text-purple-600">{{ completion_percentage }}%</div>
+              <div class="text-sm text-gray-500">Biography</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Action buttons -->
-      <div class="space-mobile-y-3">
-        <div class="flex-mobile-row text-sm text-gray-600 justify-center gap-2">
-          <div class="w-6 h-6 bg-blue-100 rounded-full flex-mobile-center">
-            <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+      <!-- Quick Actions -->
+      <div class="grid-mobile-3 mb-mobile-6">
+        <a href="{% url 'new_entry' %}" class="quick-action active-mobile">
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex-mobile-center mb-2">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
           </div>
-          <span>AI-powered journal generation</span>
-        </div>
-        <button type="button" id="generateButton" onclick="generateEntry()" class="btn-mobile" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">
-          <span>Generate Entry</span>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-          </svg>
-        </button>
+          <div class="text-sm font-semibold text-gray-800">New Entry</div>
+          <div class="text-xs text-gray-500">Record today</div>
+        </a>
+
+        <a href="{% url 'biography' %}" class="quick-action active-mobile">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex-mobile-center mb-2">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div class="text-sm font-semibold text-gray-800">Biography</div>
+          <div class="text-xs text-gray-500">Life story</div>
+        </a>
+
+        <a href="{% url 'insights' %}" class="quick-action active-mobile">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex-mobile-center mb-2">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div class="text-sm font-semibold text-gray-800">Insights</div>
+          <div class="text-xs text-gray-500">Analytics</div>
+        </a>
       </div>
-    </form>
 
-    <!-- Loading indicator -->
-    <div id="loadingIndicator" class="p-6 text-center hidden">
-      <div class="spinner mx-auto mb-4"></div>
-      <p class="text-gray-600 text-mobile-lg font-medium">Crafting your journal entry<span class="loading-dots"></span></p>
-      <p class="text-sm text-gray-500 mt-2">This takes just a moment</p>
-    </div>
-
-    <!-- Results preview -->
-    <div id="resultPreview" class="hidden scale-in">
-      <div class="border-t border-gray-100 pt-4 mt-4">
+      <!-- Photo Memories Section -->
+      <div class="card-mobile mb-mobile-6">
         <div class="flex-mobile-between mb-4">
-          <div>
-            <h3 class="text-mobile-lg font-bold text-gray-800">Your Journal Entry</h3>
-            <p class="text-sm text-gray-600">Generated based on your day</p>
-          </div>
-          <button class="touch-target bg-gray-100 rounded-full" onclick="editJournalEntry()">
-            <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+          <h2 class="text-mobile-xl font-bold text-gray-800">Recent Memories</h2>
+          <a href="{% url 'library' %}" class="text-sm text-blue-600 hover:underline flex items-center gap-1">
+            <span>View all</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
-          </button>
-        </div>
-
-        <div class="bg-gray-50 p-4 rounded-lg mb-4">
-          <div id="journalEntry" class="text-gray-800 leading-relaxed" style="font-family: 'Georgia', serif;">
-            <!-- AI-generated entry will appear here -->
-          </div>
-        </div>
-
-        <div class="mb-4 text-center">
-          <div class="text-sm text-gray-600">
-            <span class="font-medium">Title:</span>
-            <span id="entryTitle">My Day - {{ current_date|default:"Today" }}</span>
-          </div>
-        </div>
-
-        <div class="space-mobile-y-3">
-          <div class="grid-mobile-2" style="gap: 0.75rem;">
-            <button type="button" onclick="editJournalEntry()" class="btn-mobile-sm bg-white border border-gray-300 text-gray-700">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-              Edit
-            </button>
-            <button type="button" onclick="restartEntry()" class="btn-mobile-sm bg-white border border-gray-300 text-gray-700">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Try Again
-            </button>
-          </div>
-          <a href="{% url 'dashboard' %}?entry_saved=true" id="saveDashboardButton" class="btn-mobile" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Save Entry
           </a>
         </div>
+
+        {% if recent_entries %}
+        <div class="photo-memories-grid">
+          {% for entry in recent_entries|slice:":6" %}
+          <a href="{% url 'entry_detail' entry.id %}" class="memory-card {% cycle 'photo-memory-large' 'photo-memory-small' 'photo-memory-small' 'photo-memory-small' 'photo-memory-small' 'photo-memory-large' %}">
+            {% if entry.photos.first %}
+              <img src="{{ entry.photos.first.photo.url }}" alt="Entry photo" class="memory-image" />
+            {% elif entry.photo.url|default:'' %}
+              <img src="{{ entry.photo.url }}" alt="Entry photo" class="memory-image" />
+            {% else %}
+              <div class="memory-image gradient-bg-{{ forloop.counter|add:1 }} flex items-center justify-center">
+                <div class="text-white text-center p-4">
+                  <div class="text-2xl mb-2">📝</div>
+                  <div class="font-medium text-sm opacity-90">{{ entry.title|default:"Untitled" }}</div>
+                </div>
+              </div>
+            {% endif %}
+            <div class="photo-overlay">
+              <div class="overlay-icon">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+            </div>
+            <div class="memory-content">
+              <div class="memory-title">{{ entry.title|default:"Untitled Memory" }}</div>
+              <div class="memory-date">{{ entry.created_at|date:"M j" }}</div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+          <div class="w-16 h-16 bg-gray-100 rounded-2xl flex-mobile-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 class="text-mobile-lg font-semibold text-gray-800 mb-2">No memories yet</h3>
+          <p class="text-gray-600 mb-4">Start journaling to see your memories here.</p>
+          <a href="{% url 'new_entry' %}" class="btn-mobile" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">Create Your First Memory</a>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Journal Entry Form -->
+      <div class="card-mobile mb-mobile-8">
+        <div class="mb-4 pb-4 border-b border-gray-100">
+          <h2 class="text-mobile-xl font-bold text-gray-800 flex items-center gap-2 mb-1">
+            <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd" />
+            </svg>
+            Quick Journal Entry
+          </h2>
+          <p class="text-sm text-gray-600">Share your thoughts directly from your dashboard</p>
+        </div>
+
+        <form id="dashboardJournalForm" class="form-mobile">
+          {% csrf_token %}
+
+          <!-- Character counter -->
+          <div class="flex-mobile-between mb-3">
+            <div class="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-600">
+              <span id="charCount">0</span> characters
+            </div>
+          </div>
+
+          <!-- Text area -->
+          <textarea
+            id="journalInput"
+            name="journal_content"
+            class="input-mobile textarea-mobile mb-4"
+            placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am..."
+            oninput="countChars()"></textarea>
+
+          <!-- Suggestions -->
+          <div class="mb-4">
+            <div class="text-sm font-medium text-gray-700 mb-3">Suggested topics:</div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestion-btn">Today I accomplished</button>
+              <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestion-btn">I felt happy when</button>
+              <button type="button" onclick="addSuggestion('I learned that')" class="suggestion-btn">I learned that</button>
+              <button type="button" onclick="addSuggestion('I met with')" class="suggestion-btn">I met with</button>
+              <button type="button" onclick="addSuggestion('I\\'m grateful for')" class="suggestion-btn">I'm grateful for</button>
+            </div>
+          </div>
+
+          <!-- Personalization -->
+          <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+            <label class="flex items-start gap-3">
+              <input type="checkbox" id="personalizationToggle" class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded">
+              <div class="text-sm">
+                <div class="font-medium text-gray-700">Use personalized style</div>
+                <div class="text-gray-500">Based on your preferences</div>
+                <a href="{% url 'preferences' %}" class="text-blue-600 hover:underline">Edit preferences</a>
+              </div>
+            </label>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="space-mobile-y-3">
+            <div class="flex-mobile-row text-sm text-gray-600 justify-center gap-2">
+              <div class="w-6 h-6 bg-blue-100 rounded-full flex-mobile-center">
+                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <span>AI-powered journal generation</span>
+            </div>
+            <button type="button" id="generateButton" onclick="generateEntry()" class="btn-mobile" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">
+              <span>Generate Entry</span>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
+          </div>
+        </form>
+
+        <!-- Loading indicator -->
+        <div id="loadingIndicator" class="p-6 text-center hidden">
+          <div class="spinner mx-auto mb-4"></div>
+          <p class="text-gray-600 text-mobile-lg font-medium">Crafting your journal entry<span class="loading-dots"></span></p>
+          <p class="text-sm text-gray-500 mt-2">This takes just a moment</p>
+        </div>
+
+        <!-- Results preview -->
+        <div id="resultPreview" class="hidden scale-in">
+          <div class="border-t border-gray-100 pt-4 mt-4">
+            <div class="flex-mobile-between mb-4">
+              <div>
+                <h3 class="text-mobile-lg font-bold text-gray-800">Your Journal Entry</h3>
+                <p class="text-sm text-gray-600">Generated based on your day</p>
+              </div>
+              <button class="touch-target bg-gray-100 rounded-full" onclick="editJournalEntry()">
+                <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+              <div id="journalEntry" class="text-gray-800 leading-relaxed" style="font-family: 'Georgia', serif;">
+                <!-- AI-generated entry will appear here -->
+              </div>
+            </div>
+
+            <div class="mb-4 text-center">
+              <div class="text-sm text-gray-600">
+                <span class="font-medium">Title:</span>
+                <span id="entryTitle">My Day - {{ current_date|default:"Today" }}</span>
+              </div>
+            </div>
+
+            <div class="space-mobile-y-3">
+              <div class="grid-mobile-2" style="gap: 0.75rem;">
+                <button type="button" onclick="editJournalEntry()" class="btn-mobile-sm bg-white border border-gray-300 text-gray-700">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Edit
+                </button>
+                <button type="button" onclick="restartEntry()" class="btn-mobile-sm bg-white border border-gray-300 text-gray-700">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Try Again
+                </button>
+              </div>
+              <a href="{% url 'dashboard' %}?entry_saved=true" id="saveDashboardButton" class="btn-mobile" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Save Entry
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar Content (Desktop only) -->
+    <div class="sidebar-content desktop-only">
+      <!-- Biography Preview -->
+      <div class="card-mobile-lg mb-mobile-8" style="background: linear-gradient(135deg, #f8fafc, #e2e8f0);">
+        <div class="flex-mobile-between mb-4">
+          <h2 class="text-mobile-xl font-bold text-gray-800 flex items-center gap-2">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Biography Preview
+          </h2>
+          <div class="text-sm text-gray-500">Updated today</div>
+        </div>
+
+        <div class="mb-4">
+          <div class="flex-mobile-between text-sm text-gray-600 mb-2">
+            <span>{{ total_entries }} entries processed</span>
+            <span>{{ completion_percentage }}% complete</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ completion_percentage }}%"></div>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl">
+          <div class="text-gray-800 leading-relaxed" style="font-family: 'Georgia', serif;">
+            {% if biography_preview %}
+              {{ biography_preview }}
+            {% else %}
+              As you add more entries, your AI-generated biography will appear here. Start journaling to see your life story unfold.
+            {% endif %}
+          </div>
+          <div class="mt-4 text-center">
+            <a href="{% url 'biography' %}" class="text-purple-600 hover:underline flex items-center justify-center gap-1">
+              <span>Continue reading</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Time Periods -->
+      <div class="card-mobile">
+        <div class="flex-mobile-between mb-4">
+          <h2 class="text-mobile-xl font-bold text-gray-800">Time Periods</h2>
+          <a href="{% url 'library' %}" class="text-sm text-blue-600 hover:underline flex items-center gap-1">
+            <span>View all</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+
+        <div class="space-y-3">
+          {% for period in time_periods|slice:":3" %}
+          <a href="{% url 'library' %}" class="block p-3 bg-white rounded-lg border border-gray-200 hover:border-purple-300 transition-colors">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-semibold text-gray-800">{{ period.period }}</div>
+                <div class="text-sm text-gray-500">{{ period.count }} entries</div>
+              </div>
+              <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+            </div>
+          </a>
+          {% empty %}
+          <div class="text-center py-6">
+            <div class="text-gray-500 text-sm">No time periods yet</div>
+          </div>
+          {% endfor %}
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Recent Entries Section -->
-  <div class="mb-mobile-8">
+  <!-- Recent Entries Section (Mobile Only) -->
+  <div class="mobile-only mb-mobile-8">
     <div class="flex-mobile-between mb-4">
       <h2 class="text-mobile-xl font-bold text-gray-800">Recent Entries</h2>
       <a href="{% url 'library' %}" class="text-sm text-blue-600 hover:underline flex items-center gap-1">
@@ -581,7 +870,7 @@
     </div>
 
     <div class="card-mobile">
-      {% for entry in recent_entries %}
+      {% for entry in recent_entries|slice:":3" %}
       <div class="entry-item active-mobile">
         <div class="flex-mobile-between mb-2">
           <h3 class="font-semibold text-gray-800 text-sm">{{ entry.title }}</h3>
@@ -617,8 +906,8 @@
     </div>
   </div>
 
-  <!-- Biography Preview -->
-  <div class="card-mobile-lg mb-mobile-8" style="background: linear-gradient(135deg, #f8fafc, #e2e8f0);">
+  <!-- Biography Preview (Mobile Only) -->
+  <div class="mobile-only card-mobile-lg mb-mobile-8" style="background: linear-gradient(135deg, #f8fafc, #e2e8f0);">
     <div class="flex-mobile-between mb-4">
       <h2 class="text-mobile-xl font-bold text-gray-800 flex items-center gap-2">
         <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -658,8 +947,8 @@
     </div>
   </div>
 
-  <!-- Time Periods Collection -->
-  <div class="mb-mobile-8">
+  <!-- Time Periods Collection (Mobile Only) -->
+  <div class="mobile-only mb-mobile-8">
     <div class="flex-mobile-between mb-4">
       <h2 class="text-mobile-xl font-bold text-gray-800">Time Periods</h2>
       <a href="{% url 'library' %}" class="text-sm text-blue-600 hover:underline flex items-center gap-1">
@@ -737,7 +1026,41 @@
 
     // Initialize character counter
     countChars();
+
+    // Initialize photo memory interactions
+    initPhotoMemories();
   });
+
+  // Photo memory interactions
+  function initPhotoMemories() {
+    const memoryCards = document.querySelectorAll('.memory-card');
+
+    memoryCards.forEach(card => {
+      // Add click handler for mobile
+      card.addEventListener('click', function(e) {
+        // Prevent default link behavior temporarily
+        e.preventDefault();
+
+        // Add a slight scale effect
+        this.style.transform = 'scale(0.98)';
+
+        // Navigate after brief delay for visual feedback
+        setTimeout(() => {
+          this.style.transform = '';
+          window.location.href = this.href;
+        }, 150);
+      });
+
+      // Add touch feedback
+      card.addEventListener('touchstart', function() {
+        this.style.transform = 'scale(0.98)';
+      });
+
+      card.addEventListener('touchend', function() {
+        this.style.transform = '';
+      });
+    });
+  }
 
   // Character counter for journal input
   function countChars() {
