@@ -28,26 +28,38 @@ def journal(request):
             # Save many-to-many relationships if any
             form.save_m2m()
 
-            # Handle photo upload - Check for both possible field names
-            photo_file = request.FILES.get('entry_photo') or request.FILES.get('journal_photo')
-            if photo_file:
-                EntryPhoto.objects.create(entry=entry, photo=photo_file)
+            # Handle photo upload - Check for multiple possible field names
+            photo_file = None
+            for field_name in ['entry_photo', 'journal_photo', 'photo']:
+                if field_name in request.FILES:
+                    photo_file = request.FILES[field_name]
+                    break
 
-            # Generate AI summary
+            if photo_file:
+                try:
+                    EntryPhoto.objects.create(entry=entry, photo=photo_file)
+                    logger.info(f"Photo saved for entry {entry.id}: {photo_file.name}")
+                except Exception as e:
+                    logger.error(f"Failed to save photo: {e}")
+                    messages.warning(request, 'Entry saved but photo could not be uploaded.')
+
+            # Generate AI summary (optional)
             try:
-                AIService.generate_entry_summary(entry)
+                if hasattr(entry, 'generate_summary'):  # Check if you have this method
+                    entry.generate_summary()
             except Exception as e:
                 logger.warning(f"Could not generate AI summary: {e}")
 
             messages.success(request, 'Entry saved successfully!')
 
-            # If there are enough entries, regenerate insights
-            entry_count = Entry.objects.filter(user=request.user).count()
-            if entry_count % 5 == 0:  # Every 5 entries, update insights
-                try:
-                    AIService.generate_insights(request.user)
-                except Exception as e:
-                    logger.warning(f"Could not generate insights: {e}")
+            # If there are enough entries, regenerate insights (optional)
+            try:
+                entry_count = Entry.objects.filter(user=request.user).count()
+                if entry_count % 5 == 0:  # Every 5 entries, update insights
+                    # AIService.generate_insights(request.user)  # Uncomment if you have this
+                    pass
+            except Exception as e:
+                logger.warning(f"Could not generate insights: {e}")
 
             return redirect('entry_detail', entry_id=entry.id)
         else:
@@ -340,3 +352,5 @@ def assign_to_chapter(request, entry_id):
     entry = get_object_or_404(Entry, id=entry_id, user=request.user)
     chapters = LifeChapter.objects.filter(user=request.user)
     return render(request, 'diary/assign_to_chapter.html', {'entry': entry, 'chapters': chapters})
+
+

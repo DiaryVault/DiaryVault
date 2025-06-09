@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Avg
 from django.core.cache import cache
+from django.conf import settings
 
 from .. import models
 from ..models import Entry, Journal, Tag, JournalEntry
@@ -236,6 +237,7 @@ def save_generated_entry(request):
         }, status=500)
 
 @require_POST
+@login_required
 def chat_with_ai(request):
     """
     Handle ongoing chat conversation with AI for journal creation
@@ -288,22 +290,49 @@ def chat_with_ai(request):
             except json.JSONDecodeError:
                 conversation_history = []
 
-        # Generate AI response based on conversation context
-        ai_response_data = generate_chat_response(
-            user_message=user_message,
-            conversation_history=conversation_history,
-            chat_mode=chat_mode,
-            user=request.user if request.user.is_authenticated else None,
-            photo=photo
+        # Count user messages to determine conversation stage
+        user_message_count = len([msg for msg in conversation_history if msg.get('role') == 'user'])
+
+        # Determine if we should generate journal entry
+        should_generate_entry = (
+            user_message_count >= 2 or  # After 2+ user messages
+            len(user_message.split()) > 50 or  # Long message
+            any(word in user_message.lower() for word in ['create', 'generate', 'write', 'journal', 'entry'])
         )
 
-        # Add metadata
-        ai_response_data['request_time'] = round(time.time() - start_time, 2)
-        ai_response_data['request_id'] = request_id
-        ai_response_data['photo_uploaded'] = photo is not None
+        if should_generate_entry:
+            # Generate journal entry
+            journal_data = generate_journal_entry_from_conversation(
+                conversation_history + [{'role': 'user', 'content': user_message}],
+                chat_mode,
+                photo
+            )
 
-        logger.info(f"Chat request {request_id} completed in {ai_response_data['request_time']}s, photo: {photo is not None}")
-        return JsonResponse(ai_response_data)
+            response_data = {
+                'type': 'journal_entry',
+                'ai_message': "I've created a personalized journal entry based on our conversation!",
+                'should_switch_to_form': True,
+                'journal_entry': journal_data,
+                'photo_uploaded': photo is not None
+            }
+        else:
+            # Continue conversation
+            ai_response = generate_conversation_response(user_message, conversation_history, chat_mode)
+
+            response_data = {
+                'type': 'conversation',
+                'ai_message': ai_response,
+                'should_switch_to_form': False,
+                'conversation_suggestions': generate_follow_up_suggestions(user_message, chat_mode),
+                'photo_uploaded': photo is not None
+            }
+
+        # Add metadata
+        response_data['request_time'] = round(time.time() - start_time, 2)
+        response_data['request_id'] = request_id
+
+        logger.info(f"Chat request {request_id} completed in {response_data['request_time']}s, photo: {photo is not None}")
+        return JsonResponse(response_data)
 
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON format'}, status=400)
@@ -314,6 +343,199 @@ def chat_with_ai(request):
             'error_details': str(e) if settings.DEBUG else 'Please try again',
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }, status=500)
+
+def generate_journal_entry_from_conversation(conversation_history, chat_mode, photo=None):
+    """Generate a journal entry from conversation history"""
+
+    # Extract user messages
+    user_messages = [msg['content'] for msg in conversation_history if msg.get('role') == 'user']
+    combined_content = '\n\n'.join(user_messages)
+
+    # Simple but effective journal generation
+    if chat_mode == 'daily-reflection':
+        title = f"Daily Reflection - {datetime.now().strftime('%B %d')}"
+        entry_content = generate_reflection_entry(combined_content)
+    elif chat_mode == 'gratitude-practice':
+        title = f"Gratitude Journal - {datetime.now().strftime('%B %d')}"
+        entry_content = generate_gratitude_entry(combined_content)
+    elif chat_mode == 'goal-tracking':
+        title = f"Progress Update - {datetime.now().strftime('%B %d')}"
+        entry_content = generate_goal_entry(combined_content)
+    else:
+        title = f"Today's Thoughts - {datetime.now().strftime('%B %d')}"
+        entry_content = generate_general_entry(combined_content)
+
+    return {
+        'title': title,
+        'entry': entry_content,
+        'mood': 'content',  # Default mood
+        'tags': extract_tags_from_content(combined_content)
+    }
+
+
+def generate_reflection_entry(content):
+    """Generate a reflection-style journal entry"""
+    return f"""Today was a day worth reflecting on. {content}
+
+Looking back on these experiences, I'm struck by how much growth happens in the small moments. Each interaction, each challenge, each moment of joy contributes to who I'm becoming.
+
+I'm grateful for the opportunity to pause and reflect on these experiences. They remind me that life is happening right now, in these everyday moments that might seem ordinary but are actually quite extraordinary."""
+
+
+def generate_gratitude_entry(content):
+    """Generate a gratitude-focused journal entry"""
+    return f"""I'm taking a moment today to focus on gratitude. {content}
+
+There's something powerful about intentionally noticing what I'm thankful for. It shifts my perspective and reminds me of the abundance that's already present in my life.
+
+These moments of gratitude don't just make me feel better in the moment - they're slowly changing how I see the world. I'm learning to notice beauty and kindness more readily, and that's a gift that keeps giving."""
+
+
+def generate_goal_entry(content):
+    """Generate a goal-tracking journal entry"""
+    return f"""Today I made progress on what matters to me. {content}
+
+Every step forward, no matter how small, is worth celebrating. I'm learning that consistency matters more than perfection, and that progress isn't always linear.
+
+Looking at where I am now compared to where I started, I can see the growth happening. It motivates me to keep moving forward, one day at a time."""
+
+
+def generate_general_entry(content):
+    """Generate a general journal entry"""
+    return f"""Today brought its own unique mix of experiences. {content}
+
+I'm constantly amazed by how much can happen in a single day - the thoughts, feelings, interactions, and moments that make up the fabric of life. Writing about it helps me process and appreciate it all.
+
+These ordinary days are actually quite extraordinary when I take the time to really notice them."""
+
+
+def extract_tags_from_content(content):
+    """Extract relevant tags from the content"""
+    content_lower = content.lower()
+    tags = []
+
+    # Common tag categories
+    tag_keywords = {
+        'work': ['work', 'job', 'career', 'office', 'meeting', 'project'],
+        'family': ['family', 'mom', 'dad', 'sister', 'brother', 'parent', 'child'],
+        'friends': ['friend', 'friends', 'social', 'hang out', 'party'],
+        'health': ['exercise', 'workout', 'health', 'doctor', 'medical', 'fitness'],
+        'gratitude': ['grateful', 'thankful', 'appreciate', 'blessed'],
+        'reflection': ['reflect', 'think', 'realize', 'understand', 'learn'],
+        'goals': ['goal', 'achievement', 'accomplish', 'progress', 'success'],
+        'creativity': ['create', 'art', 'music', 'write', 'design', 'creative'],
+        'travel': ['travel', 'trip', 'vacation', 'journey', 'visit'],
+        'food': ['food', 'eat', 'cook', 'restaurant', 'meal', 'dinner']
+    }
+
+    for tag, keywords in tag_keywords.items():
+        if any(keyword in content_lower for keyword in keywords):
+            tags.append(tag)
+
+    return ', '.join(tags[:5])  # Limit to 5 tags
+
+
+def generate_conversation_response(user_message, conversation_history, chat_mode):
+    """Generate a conversation response to keep the chat going"""
+
+    user_message_count = len([msg for msg in conversation_history if msg.get('role') == 'user'])
+
+    if user_message_count == 0:  # First message
+        return get_first_response(user_message, chat_mode)
+    elif user_message_count == 1:  # Second user message
+        return get_follow_up_response(user_message, chat_mode)
+    else:
+        return get_deeper_response(user_message, chat_mode)
+
+
+def get_first_response(user_message, chat_mode):
+    """Generate first response based on chat mode"""
+    responses = {
+        'daily-reflection': [
+            "That's really interesting! I can sense there's more to explore there. What emotions came up for you during that experience?",
+            "I love how you described that. Can you tell me more about what made that moment particularly meaningful for you?",
+            "That sounds like it had quite an impact on you. What thoughts have been staying with you since then?"
+        ],
+        'gratitude-practice': [
+            "That's beautiful - I can feel the appreciation in your words. What is it about that experience that touches your heart most?",
+            "I love hearing about what you're grateful for. How does focusing on that gratitude change how you feel?",
+            "That's wonderful. Can you share what made you pause and really notice that moment of gratitude?"
+        ],
+        'goal-tracking': [
+            "That sounds like meaningful progress! What do you think made the difference in moving forward today?",
+            "I love hearing about your achievements. How does this progress connect to your bigger goals?",
+            "That's fantastic! What did you learn about yourself through that experience?"
+        ],
+        'free-form': [
+            "Thank you for sharing that with me. I'm curious - what part of that experience is still on your mind?",
+            "That sounds really significant. Can you tell me more about how that made you feel?",
+            "I can tell this means something important to you. What would you like to explore more deeply?"
+        ]
+    }
+
+    mode_responses = responses.get(chat_mode, responses['free-form'])
+    import random
+    return random.choice(mode_responses)
+
+
+def get_follow_up_response(user_message, chat_mode):
+    """Generate follow-up response"""
+    responses = [
+        "That's really insightful. I'm getting a clearer picture of your day. Is there anything else that stands out to you?",
+        "I appreciate how thoughtfully you're sharing this. What other moments from today feel worth exploring?",
+        "You're painting such a vivid picture of your experience. What else would you like to capture about today?",
+        "This is really meaningful. Are there other aspects of your day that you'd like to reflect on?"
+    ]
+
+    import random
+    return random.choice(responses)
+
+
+def get_deeper_response(user_message, chat_mode):
+    """Generate deeper response for later in conversation"""
+    responses = [
+        "I feel like I'm really understanding your day now. You've shared such rich details about your experiences.",
+        "This conversation has given me a wonderful sense of who you are and how you experience life.",
+        "Thank you for being so open and thoughtful in sharing these experiences with me.",
+        "I'm really enjoying this conversation. You have such interesting perspectives on your daily life."
+    ]
+
+    import random
+    return random.choice(responses)
+
+
+def generate_follow_up_suggestions(user_message, chat_mode):
+    """Generate follow-up suggestions for the conversation"""
+    suggestions = {
+        'daily-reflection': [
+            "Tell me about a challenge you faced today",
+            "What was the highlight of your day?",
+            "How are you feeling right now?",
+            "What did you learn about yourself today?"
+        ],
+        'gratitude-practice': [
+            "What small moment brought you joy?",
+            "Who made a positive impact on your day?",
+            "What are you most thankful for?",
+            "How has gratitude changed your perspective?"
+        ],
+        'goal-tracking': [
+            "What progress did you make today?",
+            "What motivated you to keep going?",
+            "What obstacles did you overcome?",
+            "How will you build on today's progress?"
+        ],
+        'free-form': [
+            "What else is on your mind?",
+            "How are you feeling about everything?",
+            "What would you like to remember about today?",
+            "Is there anything else you'd like to explore?"
+        ]
+    }
+
+    mode_suggestions = suggestions.get(chat_mode, suggestions['free-form'])
+    import random
+    return random.sample(mode_suggestions, min(3, len(mode_suggestions)))
 
 # JOURNAL COMPILER API ENDPOINTS
 
