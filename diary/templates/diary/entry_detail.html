@@ -3,494 +3,924 @@
 
 {% block title %}{{ entry.title|default:"Untitled Entry" }} - DiaryVault{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Enhanced CSS for better visual design */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border-radius: 20px;
+    }
+
+    .gradient-text {
+        background: linear-gradient(135deg, #6366f1, #4f46e5, #7c3aed);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .floating-blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(20px);
+        opacity: 0.3;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .floating-blob:nth-child(1) {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(45deg, #ff6b6b, #ffa8a8);
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+
+    .floating-blob:nth-child(2) {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(45deg, #4ecdc4, #7fdbda);
+        top: 60%;
+        right: 15%;
+        animation-delay: 2s;
+    }
+
+    .floating-blob:nth-child(3) {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(45deg, #45b7d1, #96cdf0);
+        bottom: 20%;
+        left: 20%;
+        animation-delay: 4s;
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+        33% {
+            transform: translateY(-20px) rotate(120deg);
+        }
+        66% {
+            transform: translateY(10px) rotate(240deg);
+        }
+    }
+
+    .scale-in {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+        animation: scaleIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes scaleIn {
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .photo-gallery {
+        display: grid;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .photo-gallery.single {
+        grid-template-columns: 1fr;
+    }
+
+    .photo-gallery.dual {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .photo-gallery.triple {
+        grid-template-columns: 2fr 1fr 1fr;
+    }
+
+    .photo-gallery.quad {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+
+    .photo-item {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        cursor: pointer;
+    }
+
+    .photo-item:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .photo-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .photo-item:hover img {
+        transform: scale(1.1);
+    }
+
+    .photo-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.7) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        align-items: flex-end;
+        padding: 1.5rem;
+    }
+
+    .photo-item:hover .photo-overlay {
+        opacity: 1;
+    }
+
+    .photo-caption {
+        color: white;
+        font-weight: 500;
+    }
+
+    .tag-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .tag-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #6366f1;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .tag-item:hover {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+        border-color: rgba(99, 102, 241, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .mood-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        border-radius: 25px;
+        font-weight: 600;
+        color: #059669;
+        font-size: 0.875rem;
+    }
+
+    .entry-content {
+        font-size: 1.125rem;
+        line-height: 1.8;
+        color: #374151;
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    .entry-content p {
+        margin-bottom: 1.5rem;
+    }
+
+    .ai-insights {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+        border: 1px solid rgba(99, 102, 241, 0.1);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+
+    .ai-insights-header {
+        display: flex;
+        align-items: center;
+        justify-content: between;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .ai-insights-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #6366f1;
+    }
+
+    .regenerate-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .regenerate-btn:hover {
+        background: linear-gradient(135deg, #4f46e5, #4338ca);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, rgba(248, 250, 252, 0.8), rgba(241, 245, 249, 0.8));
+        border-radius: 0 0 20px 20px;
+        border-top: 1px solid rgba(226, 232, 240, 0.5);
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #4f46e5, #4338ca);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+    }
+
+    .related-entries {
+        margin-top: 3rem;
+    }
+
+    .related-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .related-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .related-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border-color: #6366f1;
+    }
+
+    .related-card h4 {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+
+    .related-card p {
+        color: #6b7280;
+        font-size: 0.875rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .related-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.75rem;
+        color: #9ca3af;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-content {
+        position: relative;
+        max-width: 90vw;
+        max-height: 90vh;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-content img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .modal-close:hover {
+        background: rgba(0, 0, 0, 0.7);
+    }
+
+    .toast {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        background: #10b981;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        z-index: 1001;
+    }
+
+    .toast.show {
+        transform: translateX(0);
+    }
+
+    @media (max-width: 768px) {
+        .photo-gallery.dual,
+        .photo-gallery.triple,
+        .photo-gallery.quad {
+            grid-template-columns: 1fr;
+        }
+
+        .ai-insights-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .related-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="max-w-4xl w-full mx-auto pt-8 px-5 sm:px-6 lg:px-8 relative">
-  <!-- Enhanced Decorative Elements -->
-  <div class="absolute -top-10 -left-16 h-40 w-40 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
-  <div class="absolute top-1/3 right-0 h-36 w-36 bg-primary-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-  <div class="absolute bottom-1/4 -left-8 h-28 w-28 bg-amber-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+    <!-- Floating background elements -->
+    <div class="floating-blob"></div>
+    <div class="floating-blob"></div>
+    <div class="floating-blob"></div>
 
-  <!-- Improved Flash Messages with dismiss button -->
-  {% if messages %}
-  <div class="mb-8 space-y-3">
-    {% for message in messages %}
-    <div class="px-5 py-4 rounded-xl border mb-4 shadow-sm scale-in text-sm flex justify-between items-center
-      {% if message.tags == 'error' %}bg-red-50 border-red-300 text-red-700
-      {% elif message.tags == 'success' %}bg-green-50 border-green-300 text-green-700
-      {% else %}bg-blue-50 border-blue-300 text-blue-700{% endif %}">
-      <div class="flex items-center">
-        <span class="mr-3">
-          {% if message.tags == 'error' %}
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-          </svg>
-          {% elif message.tags == 'success' %}
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-          </svg>
-          {% else %}
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-          </svg>
-          {% endif %}
-        </span>
-        {{ message }}
-      </div>
-      <button class="dismiss-message ml-4 focus:outline-none">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 hover:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+    <!-- Toast notification -->
+    <div id="toast" class="toast">
+        <div class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span id="toast-message">Action completed successfully!</span>
+        </div>
     </div>
-    {% endfor %}
-  </div>
-  {% endif %}
 
-  <!-- Enhanced Entry Header -->
-  <div class="text-center mb-8 relative z-10">
-    <div class="inline-block mb-4">
-      <span class="px-4 py-1.5 bg-white/50 backdrop-blur-sm rounded-full text-sm font-medium text-gray-600 shadow-sm border border-white/50 hover:border-primary-200 transition-all duration-300">
-        {{ entry.created_at|date:"F j, Y" }}
-      </span>
-    </div>
-    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 relative inline-block diary-font">
-      <span class="absolute inset-0 rounded-full bg-purple-100 blur-lg opacity-30 transform scale-110"></span>
-      <span class="relative z-10">{{ entry.title|default:"Untitled Entry" }}</span>
-    </h2>
-
-    {% if entry.mood or entry.tags.all %}
-    <div class="flex flex-wrap items-center justify-center gap-2 max-w-lg mx-auto mt-4">
-      {% if entry.mood %}
-      <span class="bg-secondary-50 text-secondary-700 text-sm px-3 py-1 rounded-full shadow-sm border border-secondary-100 hover:bg-secondary-100 transition-colors duration-200">
-        <span class="mr-1.5">{% if entry.mood == 'Happy' %}😊{% elif entry.mood == 'Sad' %}😔{% elif entry.mood == 'Angry' %}😠{% elif entry.mood == 'Anxious' %}😰{% elif entry.mood == 'Calm' %}😌{% elif entry.mood == 'Excited' %}🤩{% else %}✨{% endif %}</span>
-        {{ entry.mood }}
-      </span>
-      {% endif %}
-
-      {% for tag in entry.tags.all %}
-      <span class="bg-primary-50 text-primary-700 text-sm px-3 py-1 rounded-full shadow-sm border border-primary-100 hover:bg-primary-100 transition-colors duration-200">
-        #{{ tag.name }}
-      </span>
-      {% endfor %}
+    <!-- Flash Messages -->
+    {% if messages %}
+    <div class="mb-8 space-y-3">
+        {% for message in messages %}
+        <div class="glass-card p-4 flex items-center justify-between scale-in
+            {% if message.tags == 'error' %}border-red-200 bg-red-50/80
+            {% elif message.tags == 'success' %}border-green-200 bg-green-50/80
+            {% else %}border-blue-200 bg-blue-50/80{% endif %}"
+            style="animation-delay: {{ forloop.counter0|add:1 }}00ms">
+            <div class="flex items-center gap-3">
+                <div class="flex-shrink-0">
+                    {% if message.tags == 'error' %}
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    {% elif message.tags == 'success' %}
+                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    {% else %}
+                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    {% endif %}
+                </div>
+                <span class="font-medium {% if message.tags == 'error' %}text-red-800
+                    {% elif message.tags == 'success' %}text-green-800
+                    {% else %}text-blue-800{% endif %}">{{ message }}</span>
+            </div>
+            <button class="dismiss-message text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        {% endfor %}
     </div>
     {% endif %}
-  </div>
 
-  <!-- Improved Entry Content Card -->
-  <div class="journal-card scale-in mb-10 relative z-10 transform hover:scale-[1.01] transition-all duration-300">
-    <div class="p-6 sm:p-8 diary-font page-texture relative rounded-xl shadow-lg">
-      <div class="page-curl"></div>
-
-      {% if entry.photos.exists %}
-        <div class="grid grid-cols-1 {% if entry.photos.count > 1 %}sm:grid-cols-2{% endif %} gap-4 mb-8">
-          {% for photo in entry.photos.all %}
-          <div class="entry-photo-container relative group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
-            <img src="{{ photo.photo.url }}" alt="Entry photo" class="entry-photo w-full h-64 object-cover transform hover:scale-105 transition-transform duration-500">
-            <div class="entry-photo-overlay absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div class="photo-caption absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-              <span class="block text-sm font-medium mb-1">{% if photo.caption %}{{ photo.caption }}{% else %}{{ entry.created_at|date:"F j, Y" }}{% endif %}</span>
-              <a href="{{ photo.photo.url }}" target="_blank" class="text-white/90 hover:text-white text-xs flex items-center gap-1 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    <!-- Entry Header -->
+    <div class="text-center mb-8 scale-in" style="animation-delay: 300ms">
+        <div class="inline-block mb-4">
+            <div class="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-white/50">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
-                View full size
-              </a>
+                <span class="text-sm font-medium text-gray-600">{{ entry.created_at|date:"F j, Y \a\t g:i A" }}</span>
             </div>
-          </div>
-          {% endfor %}
         </div>
-      {% elif entry.photo %}
-        <div class="entry-photo-container mb-8 relative group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
-          <img src="{{ entry.photo.url }}" alt="Entry photo" class="entry-photo w-full h-80 object-cover transform hover:scale-105 transition-transform duration-500">
-          <div class="entry-photo-overlay absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div class="photo-caption absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-            <span class="block text-sm font-medium mb-1">{{ entry.created_at|date:"F j, Y" }}</span>
-            <a href="{{ entry.photo.url }}" target="_blank" class="text-white/90 hover:text-white text-xs flex items-center gap-1 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              View full size
-            </a>
-          </div>
-        </div>
-      {% endif %}
 
-      <div class="prose max-w-none text-gray-800 text-lg leading-relaxed">
-        {{ entry.content|linebreaks }}
-      </div>
-    </div>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold gradient-text mb-6">
+            {{ entry.title|default:"Untitled Entry" }}
+        </h1>
 
-    {% if entry.summary %}
-    <div class="border-t border-gray-200">
-      <div class="ai-insights-container p-6 sm:p-8">
-        <div class="ai-insights-header flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-5">
-          <h2 class="text-xl font-semibold text-secondary-700 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            AI Insights
-          </h2>
-          <form method="post" class="inline">{% csrf_token %}
-            <input type="hidden" name="regenerate_summary" value="true">
-            <button type="submit" class="btn-modern btn-primary text-white text-sm flex items-center px-4 py-2 rounded-full shadow-sm transition hover:shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Regenerate Insights
-            </button>
-          </form>
-        </div>
-        <div class="ai-insights-content">
-          <div class="glass-effect rounded-lg border border-white/30 p-6 shadow-md hover:shadow-lg transition-shadow duration-300 bg-gradient-to-br from-white/80 to-white/60">
-            <div class="handwritten text-lg sm:text-xl text-gray-800 leading-relaxed">
-              {{ entry.summary|linebreaks }}
+        <!-- Mood and Tags -->
+        {% if entry.mood or entry.tags.all %}
+        <div class="flex flex-wrap items-center justify-center gap-3 max-w-2xl mx-auto">
+            {% if entry.mood %}
+            <div class="mood-indicator">
+                <span class="text-lg">
+                    {% if entry.mood == 'happy' or entry.mood == 'Happy' %}😊
+                    {% elif entry.mood == 'sad' or entry.mood == 'Sad' %}😔
+                    {% elif entry.mood == 'angry' or entry.mood == 'Angry' %}😠
+                    {% elif entry.mood == 'anxious' or entry.mood == 'Anxious' %}😰
+                    {% elif entry.mood == 'calm' or entry.mood == 'Calm' %}😌
+                    {% elif entry.mood == 'excited' or entry.mood == 'Excited' %}🤩
+                    {% elif entry.mood == 'grateful' or entry.mood == 'Grateful' %}🙏
+                    {% elif entry.mood == 'confused' or entry.mood == 'Confused' %}😕
+                    {% elif entry.mood == 'content' or entry.mood == 'Content' %}😌
+                    {% elif entry.mood == 'overwhelmed' or entry.mood == 'Overwhelmed' %}😵
+                    {% else %}✨{% endif %}
+                </span>
+                <span>{{ entry.mood|title }}</span>
             </div>
-          </div>
+            {% endif %}
 
-          {% if summary_versions %}
-          <div class="mt-5">
-            <details class="versions-accordion group">
-              <summary class="text-sm font-medium text-gray-700 mb-3 cursor-pointer flex items-center hover:text-secondary-600 transition-colors">
-                <span>Previous insights</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 transform group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </summary>
-              <div class="space-y-3 mt-3 pl-1">
-                {% for version in summary_versions %}
-                <div class="version-card border border-gray-200 p-4 rounded-lg hover:border-secondary-200 hover:bg-secondary-50/30 transition-all duration-200">
-                  <div class="text-xs text-gray-500 mb-2 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Generated on {{ version.created_at|date:"F j, Y g:i a" }}
-                  </div>
-                  <div class="text-sm text-gray-600">
-                    {{ version.summary|truncatechars:120 }}
-                  </div>
-                  <form method="post" class="mt-3 text-right">{% csrf_token %}
-                    <input type="hidden" name="restore_version" value="true">
-                    <input type="hidden" name="version_id" value="{{ version.id }}">
-                    <button type="submit" class="text-secondary-600 text-xs hover:text-secondary-800 bg-secondary-50 hover:bg-secondary-100 px-3 py-1.5 rounded-full border border-secondary-100 transition-colors duration-200">Restore this version</button>
-                  </form>
+            <div class="tag-cloud">
+                {% for tag in entry.tags.all %}
+                <div class="tag-item" data-tag="{{ tag.name }}">
+                    <span>#{{ tag.name }}</span>
                 </div>
                 {% endfor %}
-              </div>
-            </details>
-          </div>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-    {% endif %}
-
-    <!-- Improved Actions -->
-    <div class="border-t border-gray-200 p-5 sm:p-6 flex flex-wrap justify-between items-center gap-4 bg-gradient-to-r from-secondary-50 to-primary-50 rounded-b-lg">
-      <div class="flex flex-wrap gap-3">
-        <a href="{% url 'edit_entry' entry.id %}" class="btn-modern btn-secondary flex items-center text-sm px-5 py-2.5 hover:bg-secondary-100 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-          Edit Entry
-        </a>
-        <form method="post" action="{% url 'delete_entry' entry.id %}" class="inline" onsubmit="return confirm('Are you sure you want to delete this entry? This action cannot be undone.');">
-          {% csrf_token %}
-          <button type="submit" class="btn-modern btn-secondary text-red-600 hover:bg-red-50 flex items-center text-sm px-5 py-2.5 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            Delete Entry
-          </button>
-        </form>
-      </div>
-      <a href="{% url 'library' %}" class="btn-modern btn-secondary flex items-center text-sm px-5 py-2.5 hover:bg-primary-100 transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Back to Library
-      </a>
-    </div>
-  </div>
-
-  <!-- Improved Related Entries -->
-  {% if related_entries %}
-  <div class="mb-16">
-    <h3 class="text-2xl font-semibold text-gray-800 mb-6 diary-font flex items-center">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-      </svg>
-      Related Entries
-    </h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-      {% for related in related_entries %}
-      <a href="{% url 'entry_detail' related.id %}" class="related-entry-card p-5 scale-in rounded-xl border border-gray-200 hover:border-primary-200 transform hover:scale-[1.02] hover:shadow-md transition-all duration-300" style="animation-delay: {{ forloop.counter | add:2 }}00ms">
-        {% if related.photos.first %}
-        <div class="mb-3 h-36 rounded-lg overflow-hidden">
-          <img src="{{ related.photos.first.photo.url }}" alt="Entry photo" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700">
+            </div>
         </div>
         {% endif %}
-        <div class="flex justify-between items-start mb-2">
-          <h4 class="font-semibold text-gray-800 text-base mb-1 diary-font">{{ related.title }}</h4>
-          <p class="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-full">{{ related.created_at|date:"M j, Y" }}</p>
-        </div>
-        <p class="text-sm text-gray-600 diary-font line-clamp-3 mb-3">{{ related.content|truncatechars:120 }}</p>
-        <div class="mt-2 flex gap-1.5 flex-wrap">
-          {% if related.mood %}
-          <span class="bg-secondary-50 text-secondary-700 text-xs px-2 py-0.5 rounded-full border border-secondary-100">
-            {% if related.mood == 'Happy' %}😊{% elif related.mood == 'Sad' %}😔{% elif related.mood == 'Angry' %}😠{% elif related.mood == 'Anxious' %}😰{% elif related.mood == 'Calm' %}😌{% elif related.mood == 'Excited' %}🤩{% else %}✨{% endif %} {{ related.mood }}
-          </span>
-          {% endif %}
-          {% for tag in related.tags.all %}
-          <span class="bg-primary-50 text-primary-700 text-xs px-2 py-0.5 rounded-full border border-primary-100">#{{ tag.name }}</span>
-          {% endfor %}
-        </div>
-      </a>
-      {% endfor %}
     </div>
-  </div>
-  {% endif %}
+
+    <!-- Main Entry Card -->
+    <div class="glass-card mb-8 scale-in" style="animation-delay: 600ms">
+        <div class="p-6 sm:p-8">
+            <!-- Photo Gallery -->
+            {% if entry.photos.exists %}
+                {% with photo_count=entry.photos.count %}
+                <div class="photo-gallery {% if photo_count == 1 %}single{% elif photo_count == 2 %}dual{% elif photo_count == 3 %}triple{% else %}quad{% endif %} mb-8">
+                    {% for photo in entry.photos.all %}
+                    <div class="photo-item h-64 {% if photo_count == 3 and forloop.first %}row-span-2 h-full{% endif %}"
+                         data-src="{{ photo.photo.url }}"
+                         data-caption="{% if photo.caption %}{{ photo.caption }}{% else %}{{ entry.created_at|date:'F j, Y' }}{% endif %}">
+                        <img src="{{ photo.photo.url }}" alt="Entry photo" loading="lazy">
+                        <div class="photo-overlay">
+                            <div class="photo-caption">
+                                <p class="font-medium">{% if photo.caption %}{{ photo.caption }}{% else %}{{ entry.created_at|date:"F j, Y" }}{% endif %}</p>
+                                <p class="text-sm opacity-75">Click to view full size</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endwith %}
+            {% elif entry.photo %}
+                <div class="photo-gallery single mb-8">
+                    <div class="photo-item h-80" data-src="{{ entry.photo.url }}" data-caption="{{ entry.created_at|date:'F j, Y' }}">
+                        <img src="{{ entry.photo.url }}" alt="Entry photo" loading="lazy">
+                        <div class="photo-overlay">
+                            <div class="photo-caption">
+                                <p class="font-medium">{{ entry.created_at|date:"F j, Y" }}</p>
+                                <p class="text-sm opacity-75">Click to view full size</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Entry Content -->
+            <div class="entry-content">
+                {{ entry.content|linebreaks }}
+            </div>
+        </div>
+
+        <!-- AI Insights Section -->
+        {% if entry.summary %}
+        <div class="ai-insights">
+            <div class="ai-insights-header">
+                <div class="ai-insights-title">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <span>AI Insights</span>
+                </div>
+                <form method="post" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="regenerate_summary" value="true">
+                    <button type="submit" class="regenerate-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Regenerate
+                    </button>
+                </form>
+            </div>
+
+            <div class="ai-content bg-white/80 rounded-16 p-6 border border-white/50">
+                <div class="text-lg leading-relaxed text-gray-700">
+                    {{ entry.summary|linebreaks }}
+                </div>
+            </div>
+
+            <!-- Previous Versions -->
+            {% if summary_versions %}
+            <details class="mt-6">
+                <summary class="cursor-pointer text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                    <span>View previous insights ({{ summary_versions.count }})</span>
+                </summary>
+                <div class="mt-4 space-y-3">
+                    {% for version in summary_versions %}
+                    <div class="bg-gray-50 rounded-12 p-4 border border-gray-200">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs text-gray-500">{{ version.created_at|date:"F j, Y g:i A" }}</span>
+                            <form method="post" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="restore_version" value="true">
+                                <input type="hidden" name="version_id" value="{{ version.id }}">
+                                <button type="submit" class="text-xs bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full hover:bg-indigo-100 transition-colors">
+                                    Restore
+                                </button>
+                            </form>
+                        </div>
+                        <p class="text-sm text-gray-600">{{ version.summary|truncatechars:150 }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </details>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="{% url 'edit_entry' entry.id %}" class="btn-action btn-primary">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                <span>Edit Entry</span>
+            </a>
+
+            <a href="{% url 'library' %}" class="btn-action btn-secondary">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back to Library</span>
+            </a>
+
+            <form method="post" action="{% url 'delete_entry' entry.id %}" class="inline" id="deleteForm">
+                {% csrf_token %}
+                <button type="button" class="btn-action btn-danger" onclick="confirmDelete()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H9a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    <span>Delete Entry</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Related Entries -->
+    {% if related_entries %}
+    <div class="related-entries scale-in" style="animation-delay: 900ms">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            <span>Related Entries</span>
+        </h3>
+
+        <div class="related-grid">
+            {% for related in related_entries %}
+            <a href="{% url 'entry_detail' related.id %}" class="related-card group">
+                {% if related.photos.first %}
+                <div class="h-40 mb-4 rounded-12 overflow-hidden">
+                    <img src="{{ related.photos.first.photo.url }}" alt="Entry photo"
+                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                </div>
+                {% endif %}
+
+                <h4>{{ related.title|truncatechars:50 }}</h4>
+                <p>{{ related.content|truncatechars:120 }}</p>
+
+                <div class="related-meta">
+                    <span>{{ related.created_at|date:"M j, Y" }}</span>
+                    {% if related.mood %}
+                    <span class="flex items-center gap-1">
+                        <span>
+                            {% if related.mood == 'happy' or related.mood == 'Happy' %}😊
+                            {% elif related.mood == 'sad' or related.mood == 'Sad' %}😔
+                            {% elif related.mood == 'angry' or related.mood == 'Angry' %}😠
+                            {% elif related.mood == 'anxious' or related.mood == 'Anxious' %}😰
+                            {% elif related.mood == 'calm' or related.mood == 'Calm' %}😌
+                            {% elif related.mood == 'excited' or related.mood == 'Excited' %}🤩
+                            {% else %}✨{% endif %}
+                        </span>
+                        {{ related.mood|title }}
+                    </span>
+                    {% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Photo Modal -->
+<div id="photoModal" class="modal-overlay">
+    <div class="modal-content">
+        <img id="modalImage" src="" alt="Full size photo">
+        <button class="modal-close" onclick="closePhotoModal()">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Enhanced animations for entry cards with staggered effect
-    const entryCards = document.querySelectorAll('.scale-in');
-    entryCards.forEach((card, index) => {
-      setTimeout(() => {
-        card.style.animation = 'scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
-      }, 120 * index);
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize animations
+    initializeAnimations();
+
+    // Setup photo modal
+    setupPhotoModal();
+
+    // Setup message dismissal
+    setupMessageDismissal();
+
+    // Setup keyboard shortcuts
+    setupKeyboardShortcuts();
+
+    // Setup tag interactions
+    setupTagInteractions();
+});
+
+function initializeAnimations() {
+    // Stagger animations for scale-in elements
+    const scaleElements = document.querySelectorAll('.scale-in');
+    scaleElements.forEach((element, index) => {
+        element.style.animationDelay = `${index * 200 + 300}ms`;
     });
 
-    // Enhanced click handler for photos with smooth transition
-    const entryPhotos = document.querySelectorAll('.entry-photo');
-    if (entryPhotos.length > 0) {
-      entryPhotos.forEach(photo => {
-        photo.addEventListener('click', function() {
-          const fullSizeLink = this.closest('.entry-photo-container').querySelector('.photo-caption a');
-          if (fullSizeLink) {
-            window.open(fullSizeLink.href, '_blank');
-          }
-        });
-      });
-    }
-
-    // Add dismiss functionality for flash messages
-    const dismissButtons = document.querySelectorAll('.dismiss-message');
-    if (dismissButtons.length > 0) {
-      dismissButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          const message = this.closest('div');
-          message.style.opacity = '0';
-          message.style.transform = 'translateY(-10px)';
-          message.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-
-          setTimeout(() => {
-            message.style.height = '0';
-            message.style.margin = '0';
-            message.style.padding = '0';
-            message.style.overflow = 'hidden';
-            message.style.transition = 'all 0.3s ease';
-          }, 300);
-
-          setTimeout(() => {
-            message.remove();
-          }, 600);
-        });
-      });
-    }
-
-    // Add hover effect to header date
-    const dateSpan = document.querySelector('.text-center .inline-block span');
-    if (dateSpan) {
-      dateSpan.addEventListener('mouseenter', function() {
-        this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
-      });
-
-      dateSpan.addEventListener('mouseleave', function() {
-        this.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
-      });
-    }
-
-    // Add smooth scrolling for tag clicks
-    const tagSpans = document.querySelectorAll('.bg-primary-50, .bg-secondary-50');
-    if (tagSpans.length > 0) {
-      tagSpans.forEach(tag => {
-        tag.addEventListener('click', function(e) {
-          if (this.closest('a') && this.closest('a').href) {
-            // Don't interfere with link clicking
-            return;
-          }
-          e.preventDefault();
-          const tagText = this.textContent.trim();
-          // Future functionality: could scroll to related entries with same tag
-          console.log(`Tag clicked: ${tagText}`);
-        });
-      });
-    }
-  });
-
-  // Add lazy loading animations as elements come into viewport
-  document.addEventListener('DOMContentLoaded', function() {
+    // Setup intersection observer for scroll animations
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in-view');
-          observer.unobserve(entry.target);
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animationPlayState = 'running';
+            }
+        });
+    }, { threshold: 0.1 });
+
+    scaleElements.forEach(element => {
+        observer.observe(element);
+    });
+}
+
+function setupPhotoModal() {
+    const photoItems = document.querySelectorAll('.photo-item');
+    const modal = document.getElementById('photoModal');
+    const modalImage = document.getElementById('modalImage');
+
+    photoItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const src = this.dataset.src;
+            const caption = this.dataset.caption;
+
+            modalImage.src = src;
+            modalImage.alt = caption;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    // Close modal on overlay click
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closePhotoModal();
         }
-      });
-    }, {
-      threshold: 0.1
     });
 
-    const animatedElements = document.querySelectorAll('.related-entry-card, .ai-insights-content, .entry-photo-container');
-    animatedElements.forEach(el => {
-      observer.observe(el);
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closePhotoModal();
+        }
     });
-  });
+}
 
-  // Add smooth page transitions
-  window.addEventListener('beforeunload', function() {
-    document.body.classList.add('page-transition');
-  });
+function closePhotoModal() {
+    const modal = document.getElementById('photoModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+}
 
-  // Add keydown navigation
-  document.addEventListener('keydown', function(e) {
-    // Left arrow key to go back to library
-    if (e.key === 'ArrowLeft' && !e.ctrlKey && !e.metaKey) {
-      const backButton = document.querySelector('a[href*="library"]');
-      if (backButton) backButton.click();
+function setupMessageDismissal() {
+    const dismissButtons = document.querySelectorAll('.dismiss-message');
+    dismissButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const message = this.closest('div');
+            message.style.opacity = '0';
+            message.style.transform = 'translateY(-10px)';
+
+            setTimeout(() => {
+                message.remove();
+            }, 300);
+        });
+    });
+}
+
+function setupKeyboardShortcuts() {
+    document.addEventListener('keydown', function(e) {
+        // Don't trigger shortcuts if user is typing in an input
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+
+        switch(e.key) {
+            case 'e':
+            case 'E':
+                // Edit entry
+                const editButton = document.querySelector('a[href*="edit_entry"]');
+                if (editButton) editButton.click();
+                break;
+            case 'Escape':
+            case 'Backspace':
+                // Go back to library
+                const backButton = document.querySelector('a[href*="library"]');
+                if (backButton) backButton.click();
+                break;
+            case 'r':
+            case 'R':
+                // Regenerate AI insights
+                const regenerateButton = document.querySelector('button[name="regenerate_summary"]');
+                if (regenerateButton) regenerateButton.click();
+                break;
+        }
+    });
+}
+
+function setupTagInteractions() {
+    const tagItems = document.querySelectorAll('.tag-item');
+    tagItems.forEach(tag => {
+        tag.addEventListener('click', function() {
+            const tagName = this.dataset.tag;
+            showToast(`Searching for entries with tag: #${tagName}`);
+
+            // Future functionality: could navigate to library filtered by tag
+            setTimeout(() => {
+                window.location.href = `/library/?tag=${encodeURIComponent(tagName)}`;
+            }, 1000);
+        });
+    });
+}
+
+function confirmDelete() {
+    const confirmed = confirm('Are you sure you want to delete this entry? This action cannot be undone.');
+    if (confirmed) {
+        document.getElementById('deleteForm').submit();
     }
+}
 
-    // 'E' key to edit
-    if (e.key === 'e' && !e.ctrlKey && !e.metaKey) {
-      const editButton = document.querySelector('a[href*="edit_entry"]');
-      if (editButton) editButton.click();
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+
+    toastMessage.textContent = message;
+    toast.classList.add('show');
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+// Photo gallery navigation with arrow keys
+document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('photoModal');
+    if (!modal.classList.contains('active')) return;
+
+    const photos = Array.from(document.querySelectorAll('.photo-item'));
+    const currentSrc = document.getElementById('modalImage').src;
+    const currentIndex = photos.findIndex(photo => photo.dataset.src === currentSrc);
+
+    if (e.key === 'ArrowRight' && currentIndex < photos.length - 1) {
+        const nextPhoto = photos[currentIndex + 1];
+        document.getElementById('modalImage').src = nextPhoto.dataset.src;
+        document.getElementById('modalImage').alt = nextPhoto.dataset.caption;
+    } else if (e.key === 'ArrowLeft' && currentIndex > 0) {
+        const prevPhoto = photos[currentIndex - 1];
+        document.getElementById('modalImage').src = prevPhoto.dataset.src;
+        document.getElementById('modalImage').alt = prevPhoto.dataset.caption;
     }
-  });
+});
+
+// Add smooth scroll behavior
+document.documentElement.style.scrollBehavior = 'smooth';
 </script>
-
-<style>
-  /* Additional styles to enhance UI */
-  .in-view {
-    animation: fadeInUp 0.6s ease forwards;
-  }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  .page-transition {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .handwritten {
-    font-family: 'Satisfy', cursive, var(--diary-font);
-  }
-
-  .glass-effect {
-    backdrop-filter: blur(8px);
-  }
-
-  .entry-photo-container {
-    transform-origin: center;
-  }
-
-  .animate-blob {
-    animation: blob 7s infinite;
-  }
-
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
-
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
-
-  @keyframes blob {
-    0% {
-      transform: translate(0px, 0px) scale(1);
-    }
-    33% {
-      transform: translate(30px, -50px) scale(1.1);
-    }
-    66% {
-      transform: translate(-20px, 20px) scale(0.9);
-    }
-    100% {
-      transform: translate(0px, 0px) scale(1);
-    }
-  }
-
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .journal-card {
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  }
-
-  .page-texture {
-    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
-  }
-
-  .page-curl {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, transparent 50%, rgba(230, 230, 230, 0.4) 55%, rgba(230, 230, 230, 0.8) 100%);
-    border-radius: 0 0 0 10px;
-    box-shadow: -2px -2px 5px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-  }
-
-  .journal-card:hover .page-curl {
-    width: 50px;
-    height: 50px;
-  }
-
-  .btn-modern {
-    font-weight: 500;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
-  }
-
-  .btn-modern:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .btn-modern:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-</style>
 {% endblock %}
