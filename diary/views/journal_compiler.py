@@ -12,6 +12,11 @@ from django.views.decorators.http import require_POST
 from django.db.models import Count, Q
 from django.utils import timezone
 from django.core.paginator import Paginator
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from PIL import Image
+import io
+import os
 
 from ..models import Entry, Tag, Journal, JournalEntry, LifeChapter
 from ..services.ai_service import AIService
@@ -406,7 +411,7 @@ def preview_journal_structure(request):
 
 @login_required
 def edit_journal(request, journal_id):
-    """Edit a published journal"""
+    """Edit a published journal with enhanced image upload support"""
     journal = get_object_or_404(
         Journal,
         id=journal_id,
@@ -422,22 +427,82 @@ def edit_journal(request, journal_id):
         description = request.POST.get('description', '').strip()
         price = request.POST.get('price', '0')
 
+        # Image handling
+        cover_image = request.FILES.get('cover_image')
+        image_filter = request.POST.get('image_filter', 'none')
+        remove_cover_image = request.POST.get('remove_cover_image', 'false') == 'true'
+
         # Validate inputs
         if not title:
             messages.error(request, "Journal title is required.")
             return render(request, 'diary/edit_journal.html', {
                 'journal': journal,
-                'journal_entries': journal_entries
+                'journal_entries': journal_entries,
+                'filter_choices': get_filter_choices()
             })
 
         if not description:
             messages.error(request, "Journal description is required.")
             return render(request, 'diary/edit_journal.html', {
                 'journal': journal,
-                'journal_entries': journal_entries
+                'journal_entries': journal_entries,
+                'filter_choices': get_filter_choices()
             })
 
         try:
+            # Handle cover image removal
+            if remove_cover_image and journal.cover_image:
+                # Delete the old image file
+                if journal.cover_image and default_storage.exists(journal.cover_image.name):
+                    default_storage.delete(journal.cover_image.name)
+                journal.cover_image = None
+                journal.image_filter = 'none'
+
+            # Handle new cover image upload
+            elif cover_image:
+                # Validate image
+                if not cover_image.content_type.startswith('image/'):
+                    messages.error(request, 'Please upload a valid image file (PNG, JPG, WebP).')
+                    return render(request, 'diary/edit_journal.html', {
+                        'journal': journal,
+                        'journal_entries': journal_entries,
+                        'filter_choices': get_filter_choices()
+                    })
+
+                if cover_image.size > 5 * 1024 * 1024:  # 5MB limit
+                    messages.error(request, 'Image size must be less than 5MB.')
+                    return render(request, 'diary/edit_journal.html', {
+                        'journal': journal,
+                        'journal_entries': journal_entries,
+                        'filter_choices': get_filter_choices()
+                    })
+
+                # Process and save the image
+                try:
+                    # Delete old image if it exists
+                    if journal.cover_image and default_storage.exists(journal.cover_image.name):
+                        default_storage.delete(journal.cover_image.name)
+
+                    # Process the new image
+                    processed_image = process_uploaded_image(cover_image)
+
+                    # Save the processed image
+                    journal.cover_image = processed_image
+                    journal.image_filter = image_filter
+
+                except Exception as e:
+                    logger.error(f"Error processing image: {e}")
+                    messages.error(request, 'Error processing image. Please try a different image.')
+                    return render(request, 'diary/edit_journal.html', {
+                        'journal': journal,
+                        'journal_entries': journal_entries,
+                        'filter_choices': get_filter_choices()
+                    })
+
+            # Update image filter if no new image but filter changed
+            elif not remove_cover_image and journal.cover_image:
+                journal.image_filter = image_filter
+
             # Update journal fields
             journal.title = title
             journal.description = description
@@ -462,19 +527,225 @@ def edit_journal(request, journal_id):
             return redirect('marketplace_journal_detail', journal_id=journal.id)
 
         except Exception as e:
+            logger.error(f"Error updating journal: {e}")
             messages.error(request, f'Error updating journal: {str(e)}')
             return render(request, 'diary/edit_journal.html', {
                 'journal': journal,
-                'journal_entries': journal_entries
+                'journal_entries': journal_entries,
+                'filter_choices': get_filter_choices()
             })
 
     # GET request - show edit form
     context = {
         'journal': journal,
         'journal_entries': journal_entries,
+        'filter_choices': get_filter_choices()
     }
 
     return render(request, 'diary/edit_journal.html', context)
+
+
+def get_filter_choices():
+    """Get available image filter choices"""
+    return [
+        ('none', 'Original'),
+        ('vintage', 'Vintage'),
+        ('warm', 'Warm'),
+        ('cool', 'Cool'),
+        ('mono', 'Monochrome'),
+        ('bright', 'Bright'),
+    ]
+
+
+def process_uploaded_image(uploaded_file):
+    """Process uploaded image - resize and optimize"""
+    try:
+        # Open the image
+        image = Image.open(uploaded_file)
+
+        # Convert to RGB if necessary (for RGBA images)
+        if image.mode in ('RGBA', 'LA', 'P'):
+            background = Image.new('RGB', image.size, (255, 255, 255))
+            if image.mode == 'P':
+                image = image.convert('RGBA')
+            background.paste(image, mask=image.split()[-1] if 'A' in image.mode else None)
+            image = background
+
+        # Calculate new dimensions (max width/height of 1200px)
+        max_size = 1200
+        width, height = image.size
+
+        if width > max_size or height > max_size:
+            # Calculate aspect ratio
+            if width > height:
+                new_width = max_size
+                new_height = int((height * max_size) / width)
+            else:
+                new_height = max_size
+                new_width = int((width * max_size) / height)
+
+            image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+        # Save to bytes
+        output = io.BytesIO()
+
+        # Determine format
+        original_format = uploaded_file.content_type
+        if 'jpeg' in original_format or 'jpg' in original_format:
+            image.save(output, format='JPEG', quality=85, optimize=True)
+            extension = '.jpg'
+        elif 'png' in original_format:
+            image.save(output, format='PNG', optimize=True)
+            extension = '.png'
+        elif 'webp' in original_format:
+            image.save(output, format='WEBP', quality=85, optimize=True)
+            extension = '.webp'
+        else:
+            # Default to JPEG
+            image.save(output, format='JPEG', quality=85, optimize=True)
+            extension = '.jpg'
+
+        output.seek(0)
+
+        # Create a new ContentFile
+        file_name = f"journal_cover_{timezone.now().strftime('%Y%m%d_%H%M%S')}{extension}"
+        return ContentFile(output.read(), name=file_name)
+
+    except Exception as e:
+        logger.error(f"Error processing image: {e}")
+        raise e
+
+
+# Alternative version if you want to handle image upload via AJAX
+@login_required
+@require_POST
+def upload_journal_cover_ajax(request, journal_id):
+    """AJAX endpoint for uploading journal cover image"""
+    journal = get_object_or_404(
+        Journal,
+        id=journal_id,
+        author=request.user,
+        is_published=True
+    )
+
+    try:
+        cover_image = request.FILES.get('cover_image')
+        image_filter = request.POST.get('image_filter', 'none')
+
+        if not cover_image:
+            return JsonResponse({
+                'success': False,
+                'error': 'No image provided'
+            }, status=400)
+
+        # Validate image
+        if not cover_image.content_type.startswith('image/'):
+            return JsonResponse({
+                'success': False,
+                'error': 'Please upload a valid image file (PNG, JPG, WebP)'
+            }, status=400)
+
+        if cover_image.size > 5 * 1024 * 1024:  # 5MB limit
+            return JsonResponse({
+                'success': False,
+                'error': 'Image size must be less than 5MB'
+            }, status=400)
+
+        # Delete old image if it exists
+        if journal.cover_image and default_storage.exists(journal.cover_image.name):
+            default_storage.delete(journal.cover_image.name)
+
+        # Process and save the new image
+        processed_image = process_uploaded_image(cover_image)
+        journal.cover_image = processed_image
+        journal.image_filter = image_filter
+        journal.save(update_fields=['cover_image', 'image_filter'])
+
+        return JsonResponse({
+            'success': True,
+            'image_url': journal.cover_image.url,
+            'message': 'Cover image updated successfully!'
+        })
+
+    except Exception as e:
+        logger.error(f"Error uploading cover image: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Error processing image. Please try again.'
+        }, status=500)
+
+
+@login_required
+@require_POST
+def remove_journal_cover_ajax(request, journal_id):
+    """AJAX endpoint for removing journal cover image"""
+    journal = get_object_or_404(
+        Journal,
+        id=journal_id,
+        author=request.user,
+        is_published=True
+    )
+
+    try:
+        if journal.cover_image:
+            # Delete the image file
+            if default_storage.exists(journal.cover_image.name):
+                default_storage.delete(journal.cover_image.name)
+
+            journal.cover_image = None
+            journal.image_filter = 'none'
+            journal.save(update_fields=['cover_image', 'image_filter'])
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Cover image removed successfully!'
+        })
+
+    except Exception as e:
+        logger.error(f"Error removing cover image: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Error removing image. Please try again.'
+        }, status=500)
+
+
+@login_required
+@require_POST
+def update_image_filter_ajax(request, journal_id):
+    """AJAX endpoint for updating image filter"""
+    journal = get_object_or_404(
+        Journal,
+        id=journal_id,
+        author=request.user,
+        is_published=True
+    )
+
+    try:
+        data = json.loads(request.body)
+        image_filter = data.get('filter', 'none')
+
+        # Validate filter
+        valid_filters = [choice[0] for choice in get_filter_choices()]
+        if image_filter not in valid_filters:
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid filter selection'
+            }, status=400)
+
+        journal.image_filter = image_filter
+        journal.save(update_fields=['image_filter'])
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Image filter updated successfully!'
+        })
+
+    except Exception as e:
+        logger.error(f"Error updating image filter: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Error updating filter. Please try again.'
+        }, status=500)
 
 # Service Classes
 
