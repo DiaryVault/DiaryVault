@@ -37,48 +37,158 @@
   }
 
   .privacy-nav {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(15px);
-    border-radius: 20px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(99, 102, 241, 0.1);
     position: sticky;
     top: 100px;
     z-index: 10;
+    overflow: hidden;
+  }
+
+  .privacy-nav::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.3), transparent);
+  }
+
+  .nav-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+  }
+
+  .nav-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  }
+
+  .nav-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+  }
+
+  .nav-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+    font-weight: 400;
   }
 
   .privacy-nav ul {
     list-style: none;
     padding: 0;
     margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0.75rem;
   }
 
   .privacy-nav li {
-    flex: 1;
-    min-width: 200px;
+    position: relative;
   }
 
   .privacy-nav a {
-    display: block;
-    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
     text-decoration: none;
-    color: #6b7280;
-    border-radius: 12px;
-    transition: all 0.3s ease;
+    color: #4b5563;
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-weight: 500;
     font-size: 0.875rem;
-    border: 1px solid transparent;
+    border: 1px solid rgba(229, 231, 235, 0.8);
+    background: rgba(255, 255, 255, 0.6);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+
+  .privacy-nav a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .nav-link-icon {
+    width: 20px;
+    height: 20px;
+    color: #9ca3af;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+
+  .nav-link-text {
+    flex: 1;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .nav-link-arrow {
+    width: 16px;
+    height: 16px;
+    color: #d1d5db;
+    transition: all 0.3s ease;
+    transform: translateX(-4px);
+    opacity: 0;
   }
 
   .privacy-nav a:hover {
-    background: rgba(99, 102, 241, 0.1);
-    color: #4f46e5;
-    border-color: rgba(99, 102, 241, 0.2);
-    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.9);
+    color: #1f2937;
+    border-color: rgba(99, 102, 241, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
+  }
+
+  .privacy-nav a:hover::before {
+    left: 100%;
+  }
+
+  .privacy-nav a:hover .nav-link-icon {
+    color: #6366f1;
+    transform: scale(1.1);
+  }
+
+  .privacy-nav a:hover .nav-link-text {
+    color: #1f2937;
+    font-weight: 600;
+  }
+
+  .privacy-nav a:hover .nav-link-arrow {
+    opacity: 1;
+    transform: translateX(0);
+    color: #6366f1;
+  }
+
+  .privacy-nav a:active {
+    transform: translateY(0);
   }
 
   .section-title {
@@ -237,27 +347,154 @@
     <p class="text-lg text-gray-600 max-w-2xl mx-auto">Your privacy is fundamental to everything we do at DiaryVault. Learn how we protect your personal information and journal entries.</p>
   </div>
 
-  <!-- Quick Navigation -->
+  <!-- Enhanced Quick Navigation -->
   <nav class="privacy-nav">
-    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-      Quick Navigation
-    </h3>
+    <div class="nav-header">
+      <div class="nav-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      </div>
+      <div>
+        <h3 class="nav-title">Privacy Policy Navigation</h3>
+        <p class="nav-subtitle">Jump to any section quickly</p>
+      </div>
+    </div>
     <ul>
-      <li><a href="#overview">Overview</a></li>
-      <li><a href="#information-collection">Information We Collect</a></li>
-      <li><a href="#information-use">How We Use Information</a></li>
-      <li><a href="#information-sharing">Information Sharing</a></li>
-      <li><a href="#data-security">Data Security</a></li>
-      <li><a href="#user-rights">Your Rights</a></li>
-      <li><a href="#cookies">Cookies & Tracking</a></li>
-      <li><a href="#marketplace">Marketplace Privacy</a></li>
-      <li><a href="#children">Children's Privacy</a></li>
-      <li><a href="#international">International Users</a></li>
-      <li><a href="#changes">Policy Changes</a></li>
-      <li><a href="#contact">Contact Us</a></li>
+      <li>
+        <a href="#overview">
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span class="nav-link-text">Overview</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href="#information-collection">
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span class="nav-link-text">Information We Collect</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href="#information-use">
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span class="nav-link-text">How We Use Information</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href="#information-sharing">
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+          </svg>
+          <span class="nav-link-text">Information Sharing</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href="#data-security">
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <span class="nav-link-text">Data Security</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href="#user-rights">
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <span class="nav-link-text">Your Rights & Choices</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href="#cookies">
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          <span class="nav-link-text">Cookies & Tracking</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href="#marketplace">
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5m6.5-2.5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm0 0a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+          </svg>
+          <span class="nav-link-text">Marketplace Privacy</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href="#children">
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+          </svg>
+          <span class="nav-link-text">Children's Privacy</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href="#international">
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="nav-link-text">International Users</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href="#changes">
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span class="nav-link-text">Policy Changes</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href="#contact">
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span class="nav-link-text">Contact Us</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="nav-link-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </li>
     </ul>
   </nav>
 
