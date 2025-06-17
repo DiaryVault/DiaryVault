@@ -122,8 +122,6 @@
               'slide-up': 'slideUp 0.3s ease-out',
               'pulse-badge': 'pulseBadge 2s ease-in-out infinite',
               'glow-pulse': 'glowPulse 2s ease-in-out infinite',
-              'shake': 'shake 0.5s ease-in-out',
-              'wiggle': 'wiggle 1s ease-in-out infinite',
             },
             keyframes: {
               fadeIn: {
@@ -180,20 +178,6 @@
                   boxShadow: '0 0 20px rgba(239, 68, 68, 0.8)',
                   transform: 'scale(1.05)'
                 },
-              },
-              shake: {
-                '0%, 100%': { transform: 'translateX(0)' },
-                '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-10px)' },
-                '20%, 40%, 60%, 80%': { transform: 'translateX(10px)' },
-              },
-              wiggle: {
-                '0%, 7%': { transform: 'rotateZ(0)' },
-                '15%': { transform: 'rotateZ(-15deg)' },
-                '20%': { transform: 'rotateZ(10deg)' },
-                '25%': { transform: 'rotateZ(-10deg)' },
-                '30%': { transform: 'rotateZ(6deg)' },
-                '35%': { transform: 'rotateZ(-4deg)' },
-                '40%, 100%': { transform: 'rotateZ(0)' },
               },
             },
             spacing: {
@@ -987,59 +971,6 @@
         color: #4f46e5;
       }
 
-      /* Pulse Animation for Important Elements */
-      .pulse-on-load {
-        animation: pulseSoft 2s ease-in-out 3;
-      }
-
-      /* Enhanced Footer Link Style */
-      .footer-link {
-        position: relative;
-        text-decoration: none;
-        color: #64748b;
-        font-weight: 500;
-        padding: 0.5rem 0.75rem;
-        border-radius: 0.5rem;
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
-        font-size: 0.875rem;
-        border: 1px solid transparent;
-        backdrop-filter: blur(10px);
-      }
-
-      .footer-link::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: rgba(99, 102, 241, 0.08);
-        border-radius: inherit;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-
-      .footer-link:hover {
-        color: #4f46e5;
-        border-color: rgba(99, 102, 241, 0.2);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
-        text-decoration: none;
-      }
-
-      .footer-link:hover::before {
-        opacity: 1;
-      }
-
-      .footer-link svg {
-        transition: all 0.3s ease;
-      }
-
-      .footer-link:hover svg {
-        transform: scale(1.1);
-        color: #4f46e5;
-      }
-
       /* Accessibility */
       :focus-visible {
         outline: 2px solid #6366f1;
@@ -1058,11 +989,6 @@
           min-height: 44px;
           display: flex;
           align-items: center;
-        }
-
-        .footer-link {
-          min-height: 44px;
-          padding: 0.75rem;
         }
       }
 
@@ -1091,14 +1017,6 @@
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
         }
-
-        .footer-link {
-          color: #94a3b8;
-        }
-
-        .footer-link:hover {
-          color: #818cf8;
-        }
       }
 
       /* Reduced Motion */
@@ -1108,10 +1026,6 @@
           animation-iteration-count: 1 !important;
           transition-duration: 0.01ms !important;
           scroll-behavior: auto !important;
-        }
-
-        .gradientShift {
-          animation: none !important;
         }
       }
 
@@ -1126,45 +1040,6 @@
         .mobile-menu, .glass-nav {
           display: none !important;
         }
-      }
-
-      /* Enhanced Status Indicators */
-      .status-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-      }
-
-      .status-indicator.online {
-        background: rgba(34, 197, 94, 0.1);
-        color: #15803d;
-        border: 1px solid rgba(34, 197, 94, 0.2);
-      }
-
-      .status-indicator.offline {
-        background: rgba(239, 68, 68, 0.1);
-        color: #dc2626;
-        border: 1px solid rgba(239, 68, 68, 0.2);
-      }
-
-      .status-indicator::before {
-        content: '';
-        width: 0.5rem;
-        height: 0.5rem;
-        border-radius: 50%;
-        animation: pulse 2s infinite;
-      }
-
-      .status-indicator.online::before {
-        background: #22c55e;
-      }
-
-      .status-indicator.offline::before {
-        background: #ef4444;
       }
     </style>
 
@@ -1452,15 +1327,6 @@
                     </svg>
                     <span class="font-medium">Journal Preferences</span>
                 </a>
-
-                <!-- NEW: Privacy Policy Link for Mobile -->
-                <a href="{% url 'privacy_policy' %}" class="menu-category reliable-nav-link relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'privacy_policy' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                    {% if request.resolver_match.url_name == 'privacy_policy' %}<div class="active-pill"></div>{% endif %}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                    <span class="font-medium">Privacy Policy</span>
-                </a>
             </div>
 
             <!-- Enhanced Logout Button -->
@@ -1543,14 +1409,6 @@
                     </svg>
                     <span class="font-medium">Marketplace</span>
                 </a>
-                
-                <!-- NEW: Privacy Policy Link for Non-logged in users -->
-                <a href="{% url 'privacy_policy' %}" class="flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'privacy_policy' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent reliable-nav-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                    <span class="font-medium">Privacy Policy</span>
-                </a>
             </div>
 
             <!-- Enhanced Auth section -->
@@ -1596,71 +1454,71 @@
     </main>
 
     <!-- Enhanced Footer -->
-    <footer class="mt-8 glass-nav border-t border-primary-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                <!-- Company Info -->
-                <div class="flex items-center gap-3">
-                    <div class="p-1.5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg shadow-soft">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h3 class="font-bold text-sm text-gradient diary-font">DiaryVault</h3>
-                            <span class="brand-badge scale-75">Beta</span>
+        <footer class="mt-8 glass-nav border-t border-primary-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                    <!-- Company Info -->
+                    <div class="flex items-center gap-3">
+                        <div class="p-1.5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg shadow-soft">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
                         </div>
-                        <p class="text-xs text-secondary-500">© 2025 DiaryVault, Inc. All rights reserved.</p>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-bold text-sm text-gradient diary-font">DiaryVault</h3>
+                                <span class="brand-badge scale-75">Beta</span>
+                            </div>
+                            <p class="text-xs text-secondary-500">© 2025 DiaryVault, Inc. All rights reserved.</p>
+                        </div>
+                    </div>
+
+                    <!-- Footer Links -->
+                    <div class="flex flex-col sm:flex-row gap-6 lg:gap-8">
+                        <!-- Legal Links -->
+                        <div class="flex flex-wrap items-center gap-3 text-xs">
+                            <a href="{% url 'privacy_policy' %}" class="flex items-center gap-1.5 text-secondary-600 hover:text-primary-600 transition-all duration-300 px-2 py-1 rounded-lg hover:bg-primary-50/50 reliable-nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                <span class="font-medium">Privacy Policy</span>
+                            </a>
+                            <span class="text-secondary-300">•</span>
+                            <a href="mailto:diaryvaultinc@gmail.com" class="flex items-center gap-1.5 text-secondary-600 hover:text-primary-600 transition-all duration-300 px-2 py-1 rounded-lg hover:bg-primary-50/50 reliable-nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                <span class="font-medium">Contact Us</span>
+                            </a>
+                        </div>
+
+                        <!-- Partner Links -->
+                        <div class="flex flex-wrap items-center gap-3 text-xs">
+                            <a href="https://crene.com" target="_blank" rel="noopener" class="flex items-center gap-1.5 text-secondary-600 hover:text-primary-600 transition-all duration-300 px-2 py-1 rounded-lg hover:bg-primary-50/50 reliable-nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                </svg>
+                                <span class="font-medium">Crene.com</span>
+                            </a>
+                            <span class="text-secondary-300">•</span>
+                            <a href="https://euphorie.com" target="_blank" rel="noopener" class="flex items-center gap-1.5 text-secondary-600 hover:text-primary-600 transition-all duration-300 px-2 py-1 rounded-lg hover:bg-primary-50/50 reliable-nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                                <span class="font-medium">Euphorie.com</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Footer Links -->
-                <div class="flex flex-col sm:flex-row gap-6 lg:gap-8">
-                    <!-- Legal Links -->
-                    <div class="flex flex-wrap items-center gap-3 text-xs">
-                        <a href="{% url 'privacy_policy' %}" class="footer-link">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                            <span class="font-medium">Privacy Policy</span>
-                        </a>
-                        <span class="text-secondary-300">•</span>
-                        <a href="mailto:diaryvaultinc@gmail.com" class="footer-link">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            <span class="font-medium">Contact Us</span>
-                        </a>
-                    </div>
-
-                    <!-- Partner Links -->
-                    <div class="flex flex-wrap items-center gap-3 text-xs">
-                        <a href="https://crene.com" target="_blank" rel="noopener" class="footer-link">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                            </svg>
-                            <span class="font-medium">Crene.com</span>
-                        </a>
-                        <span class="text-secondary-300">•</span>
-                        <a href="https://euphorie.com" target="_blank" rel="noopener" class="footer-link">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                            <span class="font-medium">Euphorie.com</span>
-                        </a>
-                    </div>
+                <!-- Company Address (Legal Requirement) -->
+                <div class="mt-4 pt-4 border-t border-primary-100/50">
+                    <p class="text-xs text-secondary-400 text-center">
+                        DiaryVault, Inc. • 1160 Battery Street, Suite 110, San Francisco, CA 94111, United States
+                    </p>
                 </div>
             </div>
-
-            <!-- Company Address (Legal Requirement) -->
-            <div class="mt-4 pt-4 border-t border-primary-100/50">
-                <p class="text-xs text-secondary-400 text-center">
-                    DiaryVault, Inc. • 1160 Battery Street, Suite 110, San Francisco, CA 94111, United States
-                </p>
-            </div>
-        </div>
-    </footer>
+        </footer>
 
     <!-- Toast Notification Container -->
     <div id="toastContainer" class="fixed top-6 right-6 z-50 space-y-3 pointer-events-none">
@@ -1670,18 +1528,9 @@
     <!-- Enhanced JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DiaryVault Enhanced Navigation - v5.1 with Mobile Privacy Policy');
+            console.log('DiaryVault Enhanced Navigation - v5.0 with Enhanced Header');
             console.log('User authenticated:', {{ user.is_authenticated|yesno:"true,false" }});
             console.log('Current page:', '{{ request.resolver_match.url_name }}');
-
-            // Connection status indicator
-            window.addEventListener('online', function() {
-                window.showToast && window.showToast('Connection restored', 'success', 3000);
-            });
-
-            window.addEventListener('offline', function() {
-                window.showToast && window.showToast('Connection lost - some features may be limited', 'warning', 5000);
-            });
 
             // Mobile menu functionality with proper event handling
             const menuToggleBtn = document.getElementById('menuToggleBtn');
@@ -1700,15 +1549,6 @@
                         menuSheet.classList.add('open');
                         document.body.style.overflow = 'hidden';
                         console.log('Menu opened');
-                        
-                        // Add pulse effect to menu items on first open
-                        const menuItems = menuSheet.querySelectorAll('.menu-category, .menu-item');
-                        menuItems.forEach((item, index) => {
-                            setTimeout(() => {
-                                item.classList.add('pulse-on-load');
-                                setTimeout(() => item.classList.remove('pulse-on-load'), 2000);
-                            }, index * 50);
-                        });
                     } else {
                         // Hide menu
                         menuSheet.classList.remove('open');
@@ -1785,8 +1625,8 @@
             }
 
             // Enhanced navigation link handling
-            const allNavLinks = document.querySelectorAll('.reliable-nav-link, .footer-link');
-            console.log('Found navigation links:', allNavLinks.length);
+            const allNavLinks = document.querySelectorAll('.reliable-nav-link');
+            console.log('Found reliable nav links:', allNavLinks.length);
 
             allNavLinks.forEach((link, index) => {
                 console.log(`Setting up nav link ${index}:`, link.href);
@@ -1794,12 +1634,10 @@
                 link.addEventListener('click', function(e) {
                     console.log('Navigation link clicked:', this.href);
 
-                    // Add visual feedback with enhanced animation
+                    // Add visual feedback
                     this.style.opacity = '0.7';
-                    this.style.transform = 'scale(0.95)';
                     setTimeout(() => {
                         this.style.opacity = '';
-                        this.style.transform = '';
                     }, 150);
 
                     // Close mobile menu if open and this is a navigation link
@@ -1813,33 +1651,22 @@
                     }
                 }, { capture: false, passive: false });
 
-                // Enhanced touch support for mobile
+                // Touch support for mobile
                 link.addEventListener('touchstart', function() {
                     this.style.transform = 'scale(0.97)';
-                    this.style.transition = 'transform 0.1s ease';
                 }, { passive: true });
 
                 link.addEventListener('touchend', function() {
                     this.style.transform = '';
-                    setTimeout(() => {
-                        this.style.transition = '';
-                    }, 100);
-                }, { passive: true });
-
-                // Add haptic feedback on supported devices
-                link.addEventListener('touchstart', function() {
-                    if ('vibrate' in navigator) {
-                        navigator.vibrate(10);
-                    }
                 }, { passive: true });
             });
 
-            // Enhanced toast notification system with improved animations
+            // Enhanced toast notification system
             window.showToast = function(message, type = 'info', duration = 4000) {
                 console.log('Showing toast:', message, type);
 
                 const toast = document.createElement('div');
-                toast.className = `notification ${type} p-4 max-w-md pointer-events-auto animate-scale-in`;
+                toast.className = `notification ${type} p-4 max-w-md pointer-events-auto animate-slide-up`;
 
                 const icons = {
                     success: '<svg class="h-5 w-5 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
@@ -1856,7 +1683,7 @@
                         <div class="flex-1">
                             <p class="font-medium text-secondary-800">${message}</p>
                         </div>
-                        <button onclick="this.closest('.notification').remove()" class="flex-shrink-0 text-secondary-400 hover:text-secondary-600 transition-colors p-1 rounded-lg hover:bg-secondary-100">
+                        <button onclick="this.closest('.notification').remove()" class="flex-shrink-0 text-secondary-400 hover:text-secondary-600 transition-colors">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -1868,10 +1695,10 @@
                 if (container) {
                     container.appendChild(toast);
 
-                    // Auto remove with improved animation
+                    // Auto remove
                     setTimeout(() => {
                         toast.style.opacity = '0';
-                        toast.style.transform = 'translateY(-20px) scale(0.95)';
+                        toast.style.transform = 'translateY(-20px)';
                         setTimeout(() => toast.remove(), 300);
                     }, duration);
                 } else {
@@ -1879,7 +1706,7 @@
                 }
             };
 
-            // Enhanced keyboard shortcuts with improved feedback
+            // Enhanced keyboard shortcuts
             document.addEventListener('keydown', function(e) {
                 // Skip if user is typing
                 if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
@@ -1892,29 +1719,13 @@
                         'l': "{% url 'library' %}",
                         'b': "{% url 'biography' %}",
                         'i': "{% url 'insights' %}",
-                        'm': "{% url 'marketplace' %}",
-                        'p': "{% url 'privacy_policy' %}"
+                        'm': "{% url 'marketplace' %}"
                     };
 
                     if ((e.ctrlKey || e.metaKey) && shortcuts[e.key]) {
                         e.preventDefault();
                         console.log('Keyboard shortcut:', e.key, '→', shortcuts[e.key]);
-                        
-                        // Show toast for keyboard navigation
-                        const names = {
-                            'n': 'New Entry',
-                            'd': 'Dashboard',
-                            'l': 'Library',
-                            'b': 'Biography',
-                            'i': 'Insights',
-                            'm': 'Marketplace',
-                            'p': 'Privacy Policy'
-                        };
-                        window.showToast(`Navigating to ${names[e.key]}`, 'info', 2000);
-                        
-                        setTimeout(() => {
-                            window.location.href = shortcuts[e.key];
-                        }, 200);
+                        window.location.href = shortcuts[e.key];
                     }
                 }
 
@@ -1926,73 +1737,27 @@
                         menuToggleBtn.click();
                     }
                 }
-
-                // Help shortcut
-                if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
-                    e.preventDefault();
-                    const shortcuts = {{ user.is_authenticated|yesno:"true,false" }} 
-                        ? 'Ctrl+N: New Entry, Ctrl+D: Dashboard, Ctrl+L: Library, Ctrl+B: Biography, Ctrl+I: Insights, Ctrl+M: Marketplace, Ctrl+K: Menu'
-                        : 'Ctrl+K: Menu';
-                    window.showToast(shortcuts, 'info', 5000);
-                }
             });
 
-            // Prevent horizontal scrolling with improved handling
-            let scrollTimeout;
+            // Prevent horizontal scrolling
             window.addEventListener('scroll', function() {
                 if (window.scrollX !== 0) {
                     window.scrollTo(0, window.scrollY);
                 }
-                
-                // Clear existing timeout
-                clearTimeout(scrollTimeout);
-                
-                // Add scroll class for performance optimizations
-                document.body.classList.add('scrolling');
-                scrollTimeout = setTimeout(() => {
-                    document.body.classList.remove('scrolling');
-                }, 150);
             }, { passive: true });
 
-            // Enhanced page visibility handling
+            // Handle page visibility for better performance
             document.addEventListener('visibilitychange', function() {
                 const isHidden = document.hidden;
                 console.log('Page visibility changed:', isHidden ? 'hidden' : 'visible');
-                
-                if (!isHidden) {
-                    // Page became visible - check for updates
-                    console.log('Page became visible - refreshing state');
-                }
             });
 
-            // Performance monitoring
-            if ('performance' in window) {
-                window.addEventListener('load', function() {
-                    setTimeout(() => {
-                        const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
-                        console.log('Page load time:', loadTime + 'ms');
-                        
-                        if (loadTime > 3000) {
-                            console.warn('Slow page load detected');
-                        }
-                    }, 0);
-                });
-            }
-
-            // Initialize page with enhanced feedback
+            // Initialize page
             document.body.style.opacity = '1';
-            console.log('DiaryVault navigation initialized successfully with enhanced features');
-            
-            // Show welcome message for new users (optional)
-            if (sessionStorage.getItem('firstVisit') === null) {
-                sessionStorage.setItem('firstVisit', 'false');
-                setTimeout(() => {
-                    window.showToast && window.showToast('Welcome to DiaryVault! 👋', 'info', 4000);
-                }, 1000);
-            }
+            console.log('DiaryVault navigation initialized successfully with enhanced header');
         });
 
-        // Enhanced utility functions for external use
+        // Utility functions for external use
         window.DiaryVault = {
             showToast: window.showToast,
             navigateToMarketplace: function() {
@@ -2005,52 +1770,29 @@
                 window.location.href = "{% url 'account_login' %}";
                 return false;
             },
-            navigateToPrivacyPolicy: function() {
-                console.log('Forcing navigation to privacy policy');
-                window.location.href = "{% url 'privacy_policy' %}";
-                return false;
-            },
-            version: '5.1-enhanced-mobile-privacy'
+            version: '5.0-enhanced-header'
         };
 
-        // Enhanced error handler for debugging
+        // Global error handler for debugging
         window.addEventListener('error', function(e) {
             console.error('JavaScript Error:', e.error);
             if (e.error && e.error.stack) {
                 console.error('Stack trace:', e.error.stack);
             }
-            
-            // Show user-friendly error message
-            if (window.showToast) {
-                window.showToast('Something went wrong. Please refresh the page.', 'error', 5000);
-            }
         });
 
-        // Improved click event debugging
+        // Additional debugging for click events
         document.addEventListener('click', function(e) {
-            if (e.target.closest('a, button')) {
-                const element = e.target.closest('a, button');
-                console.log('Interactive element clicked:', {
-                    tag: element.tagName,
-                    href: element.href || 'N/A',
-                    text: element.textContent.trim().substring(0, 50),
+            if (e.target.closest('a')) {
+                const link = e.target.closest('a');
+                console.log('Link clicked:', {
+                    href: link.href,
+                    text: link.textContent.trim(),
                     target: e.target,
-                    prevented: e.defaultPrevented,
-                    classes: element.className
+                    prevented: e.defaultPrevented
                 });
             }
         });
-
-        // Service Worker registration for better caching (optional)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                    console.log('ServiceWorker registration successful');
-                }).catch(function(err) {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
-            });
-        }
     </script>
 
     {% block extra_js %}{% endblock %}
