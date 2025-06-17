@@ -42,6 +42,11 @@ urlpatterns = [
     path('password-reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
 
     # ============================================================================
+    # Legal and Policy Pages
+    # ============================================================================
+    path('privacy/', TemplateView.as_view(template_name='legal/privacy_policy.html'), name='privacy_policy'),
+
+    # ============================================================================
     # Dashboard & Main App
     # ============================================================================
     path('dashboard/', views.dashboard, name='dashboard'),
@@ -185,6 +190,10 @@ urlpatterns = [
         url=staticfiles_storage.url('favicon.ico'),
         permanent=True
     ), name='favicon'),
+
+    # ============================================================================
+    # Sitemap and SEO
+    # ============================================================================
 ]
 
 # Serve media files in development
