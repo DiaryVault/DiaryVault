@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -32,18 +32,20 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
     <!-- Enhanced Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS with Enhanced Config -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
                         'sans': ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'segoe ui', 'Roboto', 'helvetica neue', 'Arial', 'noto sans', 'sans-serif'],
                         'serif': ['Playfair Display', 'Georgia', 'serif'],
                         'handwritten': ['Caveat', 'cursive'],
+                        'mono': ['JetBrains Mono', 'ui-monospace', 'monospace'],
                     },
                     colors: {
                         'primary': {
@@ -72,6 +74,18 @@
                             800: '#1e293b',
                             900: '#0f172a',
                             950: '#020617',
+                        },
+                        'accent': {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            300: '#fdba74',
+                            400: '#fb923c',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
                         }
                     },
                     animation: {
@@ -82,12 +96,33 @@
                         'slide-up': 'slideUp 0.4s ease-out',
                         'slide-down': 'slideDown 0.4s ease-out',
                         'bounce-gentle': 'bounceGentle 2s ease-in-out infinite',
+                        'gradient-x': 'gradientX 8s ease-in-out infinite',
+                        'gradient-y': 'gradientY 6s ease-in-out infinite',
+                        'morph': 'morph 8s ease-in-out infinite',
+                        'levitate': 'levitate 4s ease-in-out infinite',
+                        'text-reveal': 'textReveal 1s ease-out',
+                        'scale-in': 'scaleIn 0.3s ease-out',
+                        'rotate-in': 'rotateIn 0.6s ease-out',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
                     },
                     backdropBlur: {
                         'xs': '2px',
                     },
                     screens: {
                         'xs': '475px',
+                        '3xl': '1600px',
+                    },
+                    spacing: {
+                        '18': '4.5rem',
+                        '88': '22rem',
+                        '128': '32rem',
+                    },
+                    zIndex: {
+                        '60': '60',
+                        '70': '70',
+                        '80': '80',
+                        '90': '90',
+                        '100': '100',
                     }
                 }
             }
@@ -105,11 +140,23 @@
             --primary-gradient: linear-gradient(135deg, #6366f1, #4f46e5);
             --glass-bg: rgba(255, 255, 255, 0.95);
             --glass-border: rgba(255, 255, 255, 0.3);
+            --shadow-colored: 0 25px 50px -12px rgba(99, 102, 241, 0.25);
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         /* Enhanced Base Styles */
         * {
             box-sizing: border-box;
+        }
+
+        ::selection {
+            background: rgba(99, 102, 241, 0.2);
+            color: #4338ca;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 5rem;
         }
 
         body {
@@ -119,8 +166,10 @@
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
             overflow-x: hidden;
+            transition: background-color 0.3s ease;
         }
 
+        /* Enhanced Typography */
         .diary-font {
             font-family: 'Playfair Display', serif;
             letter-spacing: -0.025em;
@@ -132,12 +181,24 @@
             font-feature-settings: 'liga' 1;
         }
 
-        /* Enhanced Glass Morphism */
+        .text-gradient {
+            background: linear-gradient(135deg, #6366f1, #4f46e5, #7c3aed);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientX 8s ease-in-out infinite;
+        }
+
+        /* Advanced Glass Morphism */
         .glass {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
+            box-shadow:
+                0 8px 32px rgba(31, 38, 135, 0.37),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .glass-strong {
@@ -145,9 +206,22 @@
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow:
+                0 8px 32px rgba(31, 38, 135, 0.37),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
-        /* Premium Animations */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow:
+                0 8px 32px rgba(31, 38, 135, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        /* Advanced Animations */
         @keyframes float {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-10px) rotate(180deg); }
@@ -189,28 +263,103 @@
             50% { transform: translateY(-5px); }
         }
 
+        @keyframes gradientX {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes gradientY {
+            0%, 100% { background-position: 50% 0%; }
+            50% { background-position: 50% 100%; }
+        }
+
+        @keyframes morph {
+            0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+        }
+
+        @keyframes levitate {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+        }
+
+        @keyframes textReveal {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) rotateX(90deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) rotateX(0deg);
+            }
+        }
+
+        @keyframes scaleIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes rotateIn {
+            0% {
+                opacity: 0;
+                transform: rotate(-180deg) scale(0.5);
+            }
+            100% {
+                opacity: 1;
+                transform: rotate(0deg) scale(1);
+            }
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+            }
+            to {
+                box-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
+            }
+        }
+
         /* Enhanced Interactive Elements */
         .interactive {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .interactive::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+            z-index: 1;
         }
 
         .interactive:hover {
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-colored);
+        }
+
+        .interactive:hover::before {
+            left: 100%;
         }
 
         .interactive:active {
-            transform: translateY(0);
+            transform: translateY(0) scale(0.98);
         }
 
-        /* Touch Device Optimizations */
-        @media (hover: none) and (pointer: coarse) {
-            .interactive:hover {
-                transform: none;
-            }
-
-            .interactive:active {
-                transform: scale(0.98);
-            }
+        /* Magnetic Effect for Interactive Elements */
+        .magnetic {
+            transition: transform 0.2s ease-out;
         }
 
         /* Enhanced Button Styles */
@@ -218,6 +367,8 @@
             position: relative;
             overflow: hidden;
             background: var(--primary-gradient);
+            background-size: 200% 200%;
+            animation: gradientX 3s ease-in-out infinite;
         }
 
         .btn-primary::before {
@@ -227,15 +378,21 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             transition: left 0.5s ease;
+            z-index: 1;
         }
 
         .btn-primary:hover::before {
             left: 100%;
         }
 
-        /* Enhanced Avatar System */
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Advanced Avatar System */
         .avatar-initials {
             display: flex;
             align-items: center;
@@ -246,6 +403,24 @@
             border-radius: 50%;
             text-transform: uppercase;
             font-size: 0.875rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .avatar-initials::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .avatar-initials:hover::before {
+            transform: scale(1);
         }
 
         .avatar-color-1 { --avatar-bg: linear-gradient(135deg, #6366f1, #4f46e5); }
@@ -259,6 +434,7 @@
         .nav-link {
             position: relative;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
         }
 
         .nav-link::after {
@@ -291,6 +467,19 @@
             transform: rotate(-2deg);
             box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
             animation: bounceGentle 2s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
         }
 
         /* Enhanced Notification Badge */
@@ -299,39 +488,57 @@
             background: linear-gradient(135deg, #ef4444, #dc2626);
             border: 2px solid white;
             box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+            position: relative;
         }
 
-        /* Mobile Header Animations */
-        @media (max-width: 1023px) {
-            .mobile-header {
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            }
+        .notification-badge::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: inherit;
+            padding: 2px;
+            background: linear-gradient(45deg, #ef4444, #f97316, #ef4444);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: xor;
+            animation: glow 2s linear infinite;
+        }
 
-            .mobile-header.header-hidden {
-                transform: translateY(-100%);
-            }
+        /* Enhanced Search Input */
+        .search-enhanced {
+            position: relative;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
 
-            .mobile-categories {
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            .mobile-categories.categories-hidden {
-                transform: translateY(-100%);
-            }
+        .search-enhanced:focus {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            transform: translateY(-1px);
+            box-shadow:
+                0 10px 30px rgba(99, 102, 241, 0.2),
+                0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
         /* Enhanced Dropdown Styles */
-        .dropdown-animation {
+        .dropdown-enhanced {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow:
+                0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 10px 10px -5px rgba(0, 0, 0, 0.04),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
             animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .dropdown-item {
+        .dropdown-item-enhanced {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
         }
 
-        .dropdown-item::before {
+        .dropdown-item-enhanced::before {
             content: '';
             position: absolute;
             left: 0;
@@ -342,13 +549,14 @@
             transition: width 0.3s ease;
         }
 
-        .dropdown-item:hover::before {
+        .dropdown-item-enhanced:hover::before {
             width: 100%;
         }
 
-        .dropdown-item:hover {
+        .dropdown-item-enhanced:hover {
             color: #4f46e5;
             transform: translateX(4px);
+            background: rgba(99, 102, 241, 0.05);
         }
 
         /* Enhanced Mobile Menu Styles */
@@ -356,14 +564,34 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(99, 102, 241, 0.2));
         }
 
         .mobile-menu-panel {
             background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
             border-radius: 24px 0 0 24px;
-            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1), -5px 0 15px rgba(0, 0, 0, 0.05);
+            box-shadow:
+                -20px 0 40px rgba(0, 0, 0, 0.15),
+                -10px 0 20px rgba(0, 0, 0, 0.1),
+                inset 1px 0 0 rgba(255, 255, 255, 0.2);
             transform: translateX(100%);
             transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mobile-menu-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 60% 60%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+            pointer-events: none;
         }
 
         .mobile-menu-panel.open {
@@ -371,13 +599,15 @@
         }
 
         /* Enhanced Menu Items */
-        .menu-item {
+        .menu-item-enhanced {
             position: relative;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
         }
 
-        .menu-item::before {
+        .menu-item-enhanced::before {
             content: '';
             position: absolute;
             left: 0;
@@ -391,20 +621,82 @@
             z-index: 0;
         }
 
-        .menu-item:hover::before {
+        .menu-item-enhanced:hover::before {
             width: 4px;
             height: 80%;
         }
 
-        .menu-item:hover {
+        .menu-item-enhanced:hover {
             background: linear-gradient(90deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.04));
             transform: translateX(8px);
+            backdrop-filter: blur(20px);
         }
 
-        /* Enhanced Message Styles */
-        .message-container {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Enhanced Loading States */
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s ease-in-out infinite;
         }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Floating Action Elements */
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .floating-orb:nth-child(1) { animation-delay: 0s; }
+        .floating-orb:nth-child(2) { animation-delay: 2s; }
+        .floating-orb:nth-child(3) { animation-delay: 4s; }
+
+        /* Parallax Background */
+        .parallax-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+            animation: gradientY 10s ease-in-out infinite;
+        }
+
+        /* Improved Message Styles */
+        .message-enhanced {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .message-enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--message-color, #6366f1);
+        }
+
+        .message-enhanced.success { --message-color: #10b981; }
+        .message-enhanced.error { --message-color: #ef4444; }
+        .message-enhanced.warning { --message-color: #f59e0b; }
+        .message-enhanced.info { --message-color: #3b82f6; }
 
         /* Line Clamp Utilities */
         .line-clamp-1 {
@@ -431,23 +723,6 @@
             line-height: 1.5;
         }
 
-        /* Enhanced Loading States */
-        .loading-skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: skeleton-loading 1.5s ease-in-out infinite;
-        }
-
-        @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* Page Transition */
-        main {
-            animation: fadeIn 0.4s ease-out;
-        }
-
         /* Touch Optimizations */
         .touch-target {
             min-height: 44px;
@@ -457,10 +732,11 @@
             justify-content: center;
         }
 
-        /* Print Styles */
-        @media print {
-            .no-print {
-                display: none !important;
+        /* Dark Mode Styles */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --glass-bg: rgba(15, 23, 42, 0.8);
+                --glass-border: rgba(255, 255, 255, 0.1);
             }
         }
 
@@ -482,27 +758,92 @@
                 transition-duration: 0.01ms !important;
             }
         }
+
+        /* Print Styles */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: white !important;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #4f46e5, #4338ca);
+        }
+
+        /* Focus Indicators */
+        .focus-visible:focus-visible {
+            outline: 2px solid #6366f1;
+            outline-offset: 2px;
+        }
+
+        /* Utility Classes */
+        .text-shadow {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .bg-noise {
+            background-image:
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+        }
+
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(135deg, #6366f1, #4f46e5, #7c3aed) border-box;
+            border: 1px solid transparent;
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
 </head>
 
-<body class="bg-gradient-to-br from-slate-50 via-white to-gray-50 text-gray-900 min-h-screen font-sans flex flex-col">
+<body class="bg-gradient-to-br from-slate-50 via-white to-gray-50 text-gray-900 min-h-screen font-sans flex flex-col bg-noise">
+    <!-- Parallax Background -->
+    <div class="parallax-bg"></div>
+
+    <!-- Floating Orbs -->
+    <div class="floating-orb w-64 h-64 bg-gradient-to-r from-primary-400 to-blue-400 top-10 left-10"></div>
+    <div class="floating-orb w-48 h-48 bg-gradient-to-r from-purple-400 to-pink-400 top-1/3 right-20"></div>
+    <div class="floating-orb w-32 h-32 bg-gradient-to-r from-green-400 to-cyan-400 bottom-20 left-1/3"></div>
 
     <!-- Enhanced Main Navbar -->
-    <nav class="glass-strong shadow-lg sticky top-0 z-50 transition-all duration-300 mobile-header no-print" id="main-header">
+    <nav class="glass-strong shadow-lg sticky top-0 z-50 transition-all duration-300 mobile-header no-print border-b border-white/20" id="main-header">
         <div class="max-w-8xl mx-auto px-3 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-14 md:h-16 lg:h-18">
                 <!-- Enhanced Logo and Brand -->
                 <div class="flex-shrink-0 flex items-center">
-                    <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center space-x-2 group">
-                        <div class="p-1.5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg shadow-soft">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center space-x-3 group">
+                        <div class="p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg group-hover:shadow-primary-500/50 transition-all duration-300 transform group-hover:scale-110 group-hover:rotate-6 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                             </svg>
                         </div>
-                        <span class="text-lg md:text-xl lg:text-2xl font-black bg-gradient-to-r from-primary-600 to-primary-500 text-transparent bg-clip-text group-hover:from-primary-700 group-hover:to-primary-600 transition duration-300 diary-font">DiaryVault</span>
-                        <span class="ml-2 px-2 py-0.5 text-xs font-bold text-primary-600 border border-primary-600 rounded-full">BETA</span>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xl md:text-2xl lg:text-3xl font-black text-gradient diary-font text-shadow">DiaryVault</span>
+                            <div class="brand-badge">BETA</div>
+                        </div>
                     </a>
                 </div>
 
@@ -516,12 +857,12 @@
                                 name="q"
                                 placeholder="Search entries, insights, memories..."
                                 value="{{ request.GET.q }}"
-                                class="search-focus px-12 py-3 w-80 xl:w-96 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white shadow-sm hover:shadow-md"
+                                class="search-enhanced px-12 py-3 w-80 xl:w-96 border border-gray-200/50 rounded-2xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition-all duration-300 shadow-sm hover:shadow-md"
                             />
-                            <div class="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-primary-600 transition-colors">
+                            <div class="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-primary-600 transition-colors duration-300">
                                 <i class="fas fa-search"></i>
                             </div>
-                            <button type="submit" class="absolute right-3 top-2.5 text-gray-400 hover:text-primary-600 transition-all duration-300 p-1.5 rounded-lg hover:bg-primary-50">
+                            <button type="submit" class="absolute right-3 top-2.5 text-gray-400 hover:text-primary-600 transition-all duration-300 p-1.5 rounded-lg hover:bg-primary-50 interactive">
                                 <i class="fas fa-arrow-right"></i>
                             </button>
                         </div>
@@ -530,20 +871,20 @@
                     <!-- Enhanced Primary Navigation -->
                     {% if user.is_authenticated %}
                     <div class="flex items-center space-x-4">
-                        <a href="{% url 'new_entry' %}" class="nav-link px-6 py-3 rounded-2xl text-sm font-bold {% if request.resolver_match.url_name == 'new_entry' %}text-white bg-gradient-to-r from-primary-600 to-primary-500 shadow-lg shadow-primary-500/25{% else %}text-gray-700 hover:text-primary-600 hover:bg-primary-50{% endif %} transition-all duration-300 interactive">
+                        <a href="{% url 'new_entry' %}" class="nav-link magnetic px-6 py-3 rounded-2xl text-sm font-bold {% if request.resolver_match.url_name == 'new_entry' %}text-white bg-gradient-to-r from-primary-600 to-primary-500 shadow-lg shadow-primary-500/25{% else %}text-gray-700 hover:text-primary-600 glass-card{% endif %} transition-all duration-300 interactive">
                             <i class="fas fa-pen mr-2"></i>Write
                         </a>
 
-                        <a href="{% url 'library' %}" class="nav-link px-6 py-3 rounded-2xl text-sm font-bold text-primary-600 hover:text-primary-700 border-2 border-primary-200 hover:border-primary-300 hover:bg-primary-50 transition-all duration-300 interactive">
+                        <a href="{% url 'library' %}" class="nav-link magnetic px-6 py-3 rounded-2xl text-sm font-bold text-primary-600 hover:text-primary-700 glass-card border-2 border-primary-200/50 hover:border-primary-300 hover:bg-primary-50/50 transition-all duration-300 interactive">
                             <i class="fas fa-upload mr-2"></i>Publish
                         </a>
                     </div>
                     {% else %}
                     <div class="flex items-center space-x-4">
-                        <a href="{% url 'account_login' %}" class="nav-link px-6 py-3 rounded-2xl text-sm font-bold text-primary-600 hover:text-primary-700 transition-all duration-300 interactive">
+                        <a href="{% url 'account_login' %}" class="nav-link magnetic px-6 py-3 rounded-2xl text-sm font-bold text-primary-600 hover:text-primary-700 transition-all duration-300 interactive glass-card">
                             <i class="fas fa-sign-in-alt mr-2"></i>Login
                         </a>
-                        <a href="{% url 'account_signup' %}" class="nav-link px-6 py-3 rounded-2xl text-sm font-bold text-white bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 shadow-lg shadow-primary-500/25 transition-all duration-300 interactive btn-primary">
+                        <a href="{% url 'account_signup' %}" class="nav-link magnetic px-6 py-3 rounded-2xl text-sm font-bold text-white bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 shadow-lg shadow-primary-500/25 transition-all duration-300 interactive btn-primary">
                             <i class="fas fa-user-plus mr-2"></i>Sign Up
                         </a>
                     </div>
@@ -553,7 +894,7 @@
                     {% if user.is_authenticated %}
                         <!-- Enhanced Notification Bell -->
                         <div class="relative">
-                            <a href="#" class="relative inline-flex items-center p-3 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-2xl hover:bg-gray-100 transition-all duration-300 interactive">
+                            <a href="#" class="relative inline-flex items-center p-3 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-2xl glass-card hover:shadow-lg transition-all duration-300 interactive magnetic">
                                 <i class="fas fa-bell text-lg"></i>
                                 {% if unread_notifications > 0 %}
                                 <span class="notification-badge absolute -top-1 -right-1 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
@@ -565,14 +906,14 @@
 
                         <!-- Enhanced User Dropdown -->
                         <div class="relative ml-3">
-                            <button id="user-dropdown-button" class="flex items-center text-sm font-medium text-gray-700 hover:text-primary-600 focus:outline-none transition-all duration-300 rounded-2xl px-4 py-3 hover:bg-gray-50 interactive">
+                            <button id="user-dropdown-button" class="flex items-center text-sm font-medium text-gray-700 hover:text-primary-600 focus:outline-none transition-all duration-300 rounded-2xl px-4 py-3 glass-card hover:shadow-lg interactive magnetic">
                                 <div class="h-9 w-9 rounded-full avatar-initials mr-3 shadow-md border-2 border-white" data-username="{{ user.username }}" data-initials></div>
-                                <span class="hidden xl:inline font-semibold">{{ user.username }}</span>
+                                <span class="hidden xl:inline font-semibold text-shadow">{{ user.username }}</span>
                                 <i class="fas fa-chevron-down ml-2 text-xs transition-transform duration-300"></i>
                             </button>
 
                             <!-- Enhanced Desktop Dropdown Menu -->
-                            <div id="user-dropdown-menu" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dropdown-animation">
+                            <div id="user-dropdown-menu" class="hidden absolute right-0 mt-3 w-80 dropdown-enhanced rounded-3xl overflow-hidden">
                                 <!-- Enhanced User Profile Header -->
                                 <div class="px-6 py-5 bg-gradient-to-br from-primary-600 via-primary-500 to-primary-400 text-white relative overflow-hidden">
                                     <div class="absolute top-0 right-0 w-24 h-24 bg-white bg-opacity-10 rounded-full transform translate-x-8 -translate-y-8 animate-float"></div>
@@ -584,7 +925,7 @@
                                             <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-3 border-white animate-pulse"></div>
                                         </div>
                                         <div>
-                                            <p class="font-bold text-xl">{{ user.username }}</p>
+                                            <p class="font-bold text-xl text-shadow">{{ user.username }}</p>
                                             <p class="text-white/80 text-sm truncate max-w-48">{{ user.email }}</p>
                                             {% if total_entries %}
                                             <div class="flex items-center mt-2">
@@ -596,16 +937,16 @@
                                     </div>
                                 </div>
 
-                                <!-- Enhanced Content Sections with Scrolling -->
-                                <div class="max-h-96 overflow-y-auto">
+                                <!-- Enhanced Content Sections -->
+                                <div class="max-h-96 overflow-y-auto premium-scrollbar">
                                     <!-- Main Navigation Section -->
-                                    <div class="border-b border-gray-100">
-                                        <div class="px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100">
-                                            <h3 class="text-xs uppercase font-bold text-gray-600 tracking-wide">Navigation</h3>
+                                    <div class="border-b border-gray-100/50">
+                                        <div class="px-4 py-2 bg-gradient-to-r from-gray-50/50 to-gray-100/50 backdrop-blur-sm">
+                                            <h3 class="text-xs uppercase font-bold text-gray-600 tracking-wide text-shadow">Navigation</h3>
                                         </div>
                                         <div class="py-2">
-                                            <a href="{% url 'dashboard' %}" class="dropdown-item flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary-700 transition-all duration-300 relative">
-                                                <div class="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center mr-3">
+                                            <a href="{% url 'dashboard' %}" class="dropdown-item-enhanced flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary-700 transition-all duration-300 relative">
+                                                <div class="w-10 h-10 bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl flex items-center justify-center mr-3 shadow-sm">
                                                     <i class="fas fa-home text-primary-600"></i>
                                                 </div>
                                                 <div class="flex-1">
@@ -613,8 +954,8 @@
                                                     <p class="text-xs text-gray-500">Overview & stats</p>
                                                 </div>
                                             </a>
-                                            <a href="{% url 'library' %}" class="dropdown-item flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary-700 transition-all duration-300 relative">
-                                                <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center mr-3">
+                                            <a href="{% url 'library' %}" class="dropdown-item-enhanced flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary-700 transition-all duration-300 relative">
+                                                <div class="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center mr-3 shadow-sm">
                                                     <i class="fas fa-archive text-purple-600"></i>
                                                 </div>
                                                 <div class="flex-1">
@@ -622,8 +963,8 @@
                                                     <p class="text-xs text-gray-500">Your entries</p>
                                                 </div>
                                             </a>
-                                            <a href="{% url 'biography' %}" class="dropdown-item flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary-700 transition-all duration-300 relative">
-                                                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3">
+                                            <a href="{% url 'biography' %}" class="dropdown-item-enhanced flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary-700 transition-all duration-300 relative">
+                                                <div class="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mr-3 shadow-sm">
                                                     <i class="fas fa-user text-blue-600"></i>
                                                 </div>
                                                 <div class="flex-1">
@@ -631,8 +972,8 @@
                                                     <p class="text-xs text-gray-500">Life story</p>
                                                 </div>
                                             </a>
-                                            <a href="{% url 'insights' %}" class="dropdown-item flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary-700 transition-all duration-300 relative">
-                                                <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mr-3">
+                                            <a href="{% url 'insights' %}" class="dropdown-item-enhanced flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary-700 transition-all duration-300 relative">
+                                                <div class="w-10 h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center mr-3 shadow-sm">
                                                     <i class="fas fa-chart-line text-green-600"></i>
                                                 </div>
                                                 <div class="flex-1">
@@ -644,13 +985,13 @@
                                     </div>
 
                                     <!-- Account Section -->
-                                    <div class="border-b border-gray-100">
-                                        <div class="px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100">
-                                            <h3 class="text-xs uppercase font-bold text-gray-600 tracking-wide">Account</h3>
+                                    <div class="border-b border-gray-100/50">
+                                        <div class="px-4 py-2 bg-gradient-to-r from-gray-50/50 to-gray-100/50 backdrop-blur-sm">
+                                            <h3 class="text-xs uppercase font-bold text-gray-600 tracking-wide text-shadow">Account</h3>
                                         </div>
                                         <div class="py-2">
-                                            <a href="{% url 'account_settings' %}" class="dropdown-item flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary-700 transition-all duration-300 relative">
-                                                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mr-3">
+                                            <a href="{% url 'account_settings' %}" class="dropdown-item-enhanced flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary-700 transition-all duration-300 relative">
+                                                <div class="w-10 h-10 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-xl flex items-center justify-center mr-3 shadow-sm">
                                                     <i class="fas fa-cog text-indigo-600"></i>
                                                 </div>
                                                 <div class="flex-1">
@@ -658,8 +999,8 @@
                                                     <p class="text-xs text-gray-500">Manage account</p>
                                                 </div>
                                             </a>
-                                            <a href="{% url 'preferences' %}" class="dropdown-item flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary-700 transition-all duration-300 relative">
-                                                <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center mr-3">
+                                            <a href="{% url 'preferences' %}" class="dropdown-item-enhanced flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary-700 transition-all duration-300 relative">
+                                                <div class="w-10 h-10 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-xl flex items-center justify-center mr-3 shadow-sm">
                                                     <i class="fas fa-sliders-h text-yellow-600"></i>
                                                 </div>
                                                 <div class="flex-1">
@@ -667,8 +1008,8 @@
                                                     <p class="text-xs text-gray-500">Customize experience</p>
                                                 </div>
                                             </a>
-                                            <a href="{% url 'library' %}" class="dropdown-item flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary-700 transition-all duration-300 relative">
-                                                <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mr-3">
+                                            <a href="{% url 'library' %}" class="dropdown-item-enhanced flex items-center px-4 py-3 text-sm text-gray-700 hover:text-primary-700 transition-all duration-300 relative">
+                                                <div class="w-10 h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center mr-3 shadow-sm">
                                                     <i class="fas fa-dollar-sign text-green-600"></i>
                                                 </div>
                                                 <div class="flex-1">
@@ -681,10 +1022,10 @@
                                 </div>
 
                                 <!-- Enhanced Logout Section -->
-                                <div class="border-t border-gray-100 p-4">
+                                <div class="border-t border-gray-100/50 p-4 bg-gradient-to-r from-gray-50/30 to-white/30 backdrop-blur-sm">
                                     <form method="post" action="{% url 'account_logout' %}">
                                         {% csrf_token %}
-                                        <button type="submit" class="w-full flex items-center justify-center px-4 py-3 rounded-2xl text-white font-bold bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/25 interactive">
+                                        <button type="submit" class="w-full flex items-center justify-center px-4 py-3 rounded-2xl text-white font-bold bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/25 interactive btn-primary">
                                             <i class="fas fa-sign-out-alt mr-3"></i>
                                             Sign Out
                                         </button>
@@ -698,7 +1039,7 @@
                 <!-- Enhanced Mobile menu button -->
                 <div class="flex items-center space-x-2 lg:hidden">
                     {% if user.is_authenticated %}
-                        <a href="#" class="relative inline-flex items-center p-2 text-gray-600 hover:text-gray-900 rounded-xl hover:bg-gray-100 transition-all duration-300 touch-target">
+                        <a href="#" class="relative inline-flex items-center p-2 text-gray-600 hover:text-gray-900 rounded-xl glass-card hover:shadow-lg transition-all duration-300 touch-target magnetic">
                             <i class="fas fa-bell text-lg"></i>
                             {% if unread_notifications > 0 %}
                             <span class="notification-badge absolute -top-1 -right-1 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -708,11 +1049,11 @@
                         </a>
                     {% endif %}
 
-                    <a href="{% url 'library' %}" class="inline-flex items-center p-2 text-gray-600 hover:text-gray-900 rounded-xl hover:bg-gray-100 touch-target transition-all duration-300" id="mobile-search-button">
+                    <a href="{% url 'library' %}" class="inline-flex items-center p-2 text-gray-600 hover:text-gray-900 rounded-xl glass-card hover:shadow-lg touch-target transition-all duration-300 magnetic" id="mobile-search-button">
                         <i class="fas fa-search text-lg"></i>
                     </a>
 
-                    <button id="menu-toggle" class="inline-flex items-center justify-center p-2 rounded-xl text-primary-600 hover:text-primary-700 hover:bg-gray-100 focus:outline-none transition-all duration-300 touch-target">
+                    <button id="menu-toggle" class="inline-flex items-center justify-center p-2 rounded-xl text-primary-600 hover:text-primary-700 glass-card hover:shadow-lg focus:outline-none transition-all duration-300 touch-target magnetic">
                         <i class="fas fa-bars text-lg"></i>
                     </button>
                 </div>
@@ -721,9 +1062,9 @@
     </nav>
 
     <!-- Enhanced Mobile Menu -->
-    <div id="mobile-menu" class="fixed inset-0 z-50 transform transition-all duration-500 ease-out translate-x-full lg:hidden no-print">
+    <div id="mobile-menu" class="fixed inset-0 z-80 transform transition-all duration-500 ease-out translate-x-full lg:hidden no-print">
         <!-- Enhanced Backdrop -->
-        <div class="mobile-menu-overlay absolute inset-0 bg-gradient-to-br from-slate-900/70 via-primary-900/40 to-slate-900/80 backdrop-blur-2xl transition-all duration-700" id="mobile-menu-backdrop">
+        <div class="mobile-menu-overlay absolute inset-0 backdrop-blur-2xl transition-all duration-700" id="mobile-menu-backdrop">
             <!-- Floating Orbs Background -->
             <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-primary-500/20 rounded-full blur-3xl animate-pulse"></div>
             <div class="absolute bottom-1/3 right-1/4 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl animate-pulse animation-delay-1000"></div>
@@ -731,16 +1072,7 @@
         </div>
 
         <!-- Enhanced Menu Panel -->
-        <div class="mobile-menu-panel absolute right-0 top-0 h-full w-[92vw] max-w-md flex flex-col glass-panel shadow-2xl border-l border-white/30 overflow-hidden">
-            <!-- Animated Background Gradient -->
-            <div class="absolute inset-0 bg-gradient-to-br from-white via-primary-50/50 to-blue-50/30 opacity-80"></div>
-            <div class="absolute inset-0 bg-gradient-to-tl from-transparent via-primary-100/20 to-blue-100/20"></div>
-
-            <!-- Floating Particles -->
-            <div class="absolute top-20 left-10 w-2 h-2 bg-primary-400 rounded-full animate-ping opacity-60"></div>
-            <div class="absolute top-40 right-16 w-1 h-1 bg-blue-400 rounded-full animate-ping opacity-40 animation-delay-1000"></div>
-            <div class="absolute bottom-32 left-20 w-1.5 h-1.5 bg-purple-400 rounded-full animate-ping opacity-50 animation-delay-2000"></div>
-
+        <div class="mobile-menu-panel absolute right-0 top-0 h-full w-[92vw] max-w-md flex flex-col shadow-2xl border-l border-white/30 overflow-hidden">
             <!-- Header Section -->
             <div class="relative flex-shrink-0 px-6 py-6 border-b border-white/20 bg-gradient-to-r from-primary-500/10 via-blue-500/10 to-primary-500/10 backdrop-blur-xl">
                 <div class="flex items-center justify-between">
@@ -758,18 +1090,18 @@
                         </div>
                         <div class="flex items-center space-x-3">
                             <div class="relative">
-                                <span class="text-3xl font-black bg-gradient-to-r from-primary-600 via-primary-500 to-blue-500 bg-clip-text text-transparent drop-shadow-sm diary-font">DiaryVault</span>
+                                <span class="text-3xl font-black text-gradient drop-shadow-sm diary-font">DiaryVault</span>
                             </div>
                             <div class="relative overflow-hidden rounded-full">
-                                <span class="px-3 py-1.5 text-xs font-bold text-primary-600 border-2 border-primary-400/40 rounded-full bg-primary-50/80 backdrop-blur-sm animate-pulse hover:animate-bounce transition-all duration-300 shadow-lg hover:shadow-primary-300/50">BETA</span>
+                                <span class="brand-badge">BETA</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Close Button -->
-                    <button id="close-mobile-menu" class="group relative w-12 h-12 rounded-2xl flex items-center justify-center bg-white/80 hover:bg-red-50 transition-all duration-500 hover:scale-110 active:scale-95 overflow-hidden backdrop-blur-sm border border-white/30 hover:border-red-200 shadow-lg hover:shadow-red-300/30">
+                    <button id="close-mobile-menu" class="group relative w-12 h-12 rounded-2xl flex items-center justify-center glass-card hover:shadow-lg transition-all duration-500 hover:scale-110 active:scale-95 overflow-hidden magnetic">
                         <div class="absolute inset-0 bg-red-500/10 scale-0 group-hover:scale-100 transition-transform duration-500 rounded-2xl"></div>
-                        <i class="fas fa-times text-lg text-gray-600 group-hover:text-red-600 group-hover:rotate-180 transition-all duration-500 relative z-10 drop-shadow-sm"></i>
+                        <i class="fas fa-times text-lg text-gray-600 group-hover:text-red-600 group-hover:rotate-180 transition-all duration-500 relative z-10"></i>
                     </button>
                 </div>
             </div>
@@ -790,14 +1122,14 @@
                     </div>
 
                     <div class="flex-1 min-w-0">
-                        <p class="font-bold text-base truncate drop-shadow-sm">{{ user.username }}</p>
+                        <p class="font-bold text-base truncate text-shadow">{{ user.username }}</p>
                         <div class="flex items-center mt-1">
                             <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse shadow-lg"></div>
                             <span class="text-sm text-white/90">{{ total_entries|default:'0' }} entries</span>
                         </div>
                     </div>
 
-                    <div class="bg-white/20 backdrop-blur-sm rounded-xl px-2 py-1 border border-white/30">
+                    <div class="glass-card rounded-xl px-2 py-1 border border-white/30">
                         <i class="fas fa-book text-blue-300 text-sm animate-pulse"></i>
                     </div>
                 </div>
@@ -806,15 +1138,15 @@
 
             <!-- Quick Actions -->
             <div class="flex-shrink-0 px-4 mb-4">
-                <div class="flex items-center gap-2 bg-white/60 backdrop-blur-xl rounded-2xl p-3 border border-white/30 shadow-lg">
-                    <a href="{% url 'new_entry' %}" class="group flex-1 relative bg-gradient-to-r from-primary-500 to-blue-500 text-white px-4 py-3 text-center overflow-hidden rounded-xl hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-500 transform hover:scale-105 active:scale-95 border border-white/20">
+                <div class="flex items-center gap-2 glass-card rounded-2xl p-3 border border-white/30 shadow-lg">
+                    <a href="{% url 'new_entry' %}" class="group flex-1 relative bg-gradient-to-r from-primary-500 to-blue-500 text-white px-4 py-3 text-center overflow-hidden rounded-xl hover:shadow-xl hover:shadow-primary-500/40 transition-all duration-500 transform hover:scale-105 active:scale-95 border border-white/20 magnetic">
                         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                         <div class="relative z-10 flex items-center justify-center space-x-2">
                             <i class="fas fa-pen text-sm group-hover:scale-125 group-hover:rotate-12 transition-all duration-300"></i>
                             <span class="text-sm font-bold">Write</span>
                         </div>
                     </a>
-                    <a href="{% url 'library' %}" class="group flex-1 relative bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-3 text-center overflow-hidden rounded-xl hover:shadow-xl hover:shadow-amber-500/40 transition-all duration-500 transform hover:scale-105 active:scale-95 border border-white/20">
+                    <a href="{% url 'library' %}" class="group flex-1 relative bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-3 text-center overflow-hidden rounded-xl hover:shadow-xl hover:shadow-amber-500/40 transition-all duration-500 transform hover:scale-105 active:scale-95 border border-white/20 magnetic">
                         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                         <div class="relative z-10 flex items-center justify-center space-x-2">
                             <i class="fas fa-upload text-sm group-hover:scale-125 group-hover:rotate-12 transition-all duration-300"></i>
@@ -830,13 +1162,13 @@
                 <!-- Main Navigation -->
                 <div class="mb-6">
                     <div class="mb-4">
-                        <h3 class="text-xs uppercase font-bold text-gray-600 tracking-wider px-2 flex items-center">
+                        <h3 class="text-xs uppercase font-bold text-gray-600 tracking-wider px-2 flex items-center text-shadow">
                             <i class="fas fa-book mr-2 text-primary-500"></i>
                             Journal
                         </h3>
                     </div>
                     <nav class="space-y-3">
-                        <a href="{% url 'dashboard' %}" class="menu-item group relative flex items-center p-4 rounded-3xl transition-all duration-500 bg-white/70 hover:bg-primary-50/80 backdrop-blur-xl hover:shadow-2xl hover:shadow-primary-500/20 transform hover:scale-[1.02] active:scale-[0.98] border border-white/30 hover:border-primary-200/50 overflow-hidden">
+                        <a href="{% url 'dashboard' %}" class="menu-item-enhanced group relative flex items-center p-4 rounded-3xl transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] border border-white/30 hover:border-primary-200/50 overflow-hidden magnetic">
                             <div class="absolute inset-0 bg-gradient-to-r from-primary-500/10 via-transparent to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div class="absolute left-0 top-1/2 w-1 h-0 bg-gradient-to-b from-primary-500 to-blue-500 rounded-r-full transform -translate-y-1/2 group-hover:h-8 transition-all duration-500"></div>
 
@@ -845,14 +1177,14 @@
                                     <i class="fas fa-home text-white text-sm"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="font-bold text-gray-800 group-hover:text-primary-700 text-sm transition-colors duration-300">Dashboard</span>
+                                    <span class="font-bold text-gray-800 group-hover:text-primary-700 text-sm transition-colors duration-300 text-shadow">Dashboard</span>
                                     <p class="text-xs text-gray-500 mt-0.5 group-hover:text-primary-600 transition-colors duration-300">Overview & stats</p>
                                 </div>
                                 <i class="fas fa-chevron-right text-gray-400 text-xs group-hover:translate-x-1 group-hover:text-primary-600 transition-all duration-300"></i>
                             </div>
                         </a>
 
-                        <a href="{% url 'library' %}" class="menu-item group relative flex items-center p-4 rounded-3xl transition-all duration-500 bg-white/70 hover:bg-purple-50/80 backdrop-blur-xl hover:shadow-2xl hover:shadow-purple-500/20 transform hover:scale-[1.02] active:scale-[0.98] border border-white/30 hover:border-purple-200/50 overflow-hidden">
+                        <a href="{% url 'library' %}" class="menu-item-enhanced group relative flex items-center p-4 rounded-3xl transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] border border-white/30 hover:border-purple-200/50 overflow-hidden magnetic">
                             <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-transparent to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div class="absolute left-0 top-1/2 w-1 h-0 bg-gradient-to-b from-purple-500 to-pink-500 rounded-r-full transform -translate-y-1/2 group-hover:h-8 transition-all duration-500"></div>
 
@@ -861,14 +1193,14 @@
                                     <i class="fas fa-archive text-white text-sm"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="font-bold text-gray-800 group-hover:text-purple-700 text-sm transition-colors duration-300">Library</span>
+                                    <span class="font-bold text-gray-800 group-hover:text-purple-700 text-sm transition-colors duration-300 text-shadow">Library</span>
                                     <p class="text-xs text-gray-500 mt-0.5 group-hover:text-purple-600 transition-colors duration-300">Your entries</p>
                                 </div>
                                 <i class="fas fa-chevron-right text-gray-400 text-xs group-hover:translate-x-1 group-hover:text-purple-600 transition-all duration-300"></i>
                             </div>
                         </a>
 
-                        <a href="{% url 'biography' %}" class="menu-item group relative flex items-center p-4 rounded-3xl transition-all duration-500 bg-white/70 hover:bg-blue-50/80 backdrop-blur-xl hover:shadow-2xl hover:shadow-blue-500/20 transform hover:scale-[1.02] active:scale-[0.98] border border-white/30 hover:border-blue-200/50 overflow-hidden">
+                        <a href="{% url 'biography' %}" class="menu-item-enhanced group relative flex items-center p-4 rounded-3xl transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] border border-white/30 hover:border-blue-200/50 overflow-hidden magnetic">
                             <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-transparent to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div class="absolute left-0 top-1/2 w-1 h-0 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-r-full transform -translate-y-1/2 group-hover:h-8 transition-all duration-500"></div>
 
@@ -877,14 +1209,14 @@
                                     <i class="fas fa-user text-white text-sm"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="font-bold text-gray-800 group-hover:text-blue-700 text-sm transition-colors duration-300">Biography</span>
+                                    <span class="font-bold text-gray-800 group-hover:text-blue-700 text-sm transition-colors duration-300 text-shadow">Biography</span>
                                     <p class="text-xs text-gray-500 mt-0.5 group-hover:text-blue-600 transition-colors duration-300">Life story</p>
                                 </div>
                                 <i class="fas fa-chevron-right text-gray-400 text-xs group-hover:translate-x-1 group-hover:text-blue-600 transition-all duration-300"></i>
                             </div>
                         </a>
 
-                        <a href="{% url 'insights' %}" class="menu-item group relative flex items-center p-4 rounded-3xl transition-all duration-500 bg-white/70 hover:bg-green-50/80 backdrop-blur-xl hover:shadow-2xl hover:shadow-green-500/20 transform hover:scale-[1.02] active:scale-[0.98] border border-white/30 hover:border-green-200/50 overflow-hidden">
+                        <a href="{% url 'insights' %}" class="menu-item-enhanced group relative flex items-center p-4 rounded-3xl transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] border border-white/30 hover:border-green-200/50 overflow-hidden magnetic">
                             <div class="absolute inset-0 bg-gradient-to-r from-green-500/10 via-transparent to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div class="absolute left-0 top-1/2 w-1 h-0 bg-gradient-to-b from-green-500 to-emerald-500 rounded-r-full transform -translate-y-1/2 group-hover:h-8 transition-all duration-500"></div>
 
@@ -893,7 +1225,7 @@
                                     <i class="fas fa-chart-line text-white text-sm"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="font-bold text-gray-800 group-hover:text-green-700 text-sm transition-colors duration-300">Insights</span>
+                                    <span class="font-bold text-gray-800 group-hover:text-green-700 text-sm transition-colors duration-300 text-shadow">Insights</span>
                                     <p class="text-xs text-gray-500 mt-0.5 group-hover:text-green-600 transition-colors duration-300">Analytics</p>
                                 </div>
                                 <i class="fas fa-chevron-right text-gray-400 text-xs group-hover:translate-x-1 group-hover:text-green-600 transition-all duration-300"></i>
@@ -905,49 +1237,49 @@
                 <!-- Account Section -->
                 <div class="mb-6">
                     <div class="mb-4">
-                        <h3 class="text-xs uppercase font-bold text-gray-600 tracking-wider px-2 flex items-center">
+                        <h3 class="text-xs uppercase font-bold text-gray-600 tracking-wider px-2 flex items-center text-shadow">
                             <i class="fas fa-user-cog mr-2 text-primary-500"></i>
                             Account
                         </h3>
                     </div>
                     <nav class="space-y-2">
-                        <a href="{% url 'account_settings' %}" class="menu-item group relative flex items-center p-3 rounded-2xl transition-all duration-500 bg-white/60 hover:bg-indigo-50/80 backdrop-blur-xl hover:shadow-lg hover:shadow-indigo-200/30 transform hover:scale-[1.01] active:scale-[0.99] border border-white/30 hover:border-indigo-200/50 overflow-hidden">
+                        <a href="{% url 'account_settings' %}" class="menu-item-enhanced group relative flex items-center p-3 rounded-2xl transition-all duration-500 transform hover:scale-[1.01] active:scale-[0.99] border border-white/30 hover:border-indigo-200/50 overflow-hidden magnetic">
                             <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div class="flex items-center w-full relative z-10">
                                 <div class="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl mr-3 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300 shadow-md">
                                     <i class="fas fa-cog text-white text-xs"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="font-semibold text-gray-800 group-hover:text-indigo-700 text-sm transition-colors duration-300">Settings</span>
+                                    <span class="font-semibold text-gray-800 group-hover:text-indigo-700 text-sm transition-colors duration-300 text-shadow">Settings</span>
                                 </div>
                                 <i class="fas fa-chevron-right text-gray-400 text-xs group-hover:translate-x-0.5 group-hover:text-indigo-600 transition-all duration-300"></i>
                             </div>
                         </a>
 
-                        <a href="{% url 'preferences' %}" class="menu-item group relative flex items-center p-3 rounded-2xl transition-all duration-500 bg-white/60 hover:bg-yellow-50/80 backdrop-blur-xl hover:shadow-lg hover:shadow-yellow-200/30 transform hover:scale-[1.01] active:scale-[0.99] border border-white/30 hover:border-yellow-200/50 overflow-hidden">
+                        <a href="{% url 'preferences' %}" class="menu-item-enhanced group relative flex items-center p-3 rounded-2xl transition-all duration-500 transform hover:scale-[1.01] active:scale-[0.99] border border-white/30 hover:border-yellow-200/50 overflow-hidden magnetic">
                             <div class="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div class="flex items-center w-full relative z-10">
                                 <div class="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl mr-3 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300 shadow-md">
                                     <i class="fas fa-sliders-h text-white text-xs"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="font-semibold text-gray-800 group-hover:text-yellow-700 text-sm transition-colors duration-300">Preferences</span>
+                                    <span class="font-semibold text-gray-800 group-hover:text-yellow-700 text-sm transition-colors duration-300 text-shadow">Preferences</span>
                                 </div>
                                 <i class="fas fa-chevron-right text-gray-400 text-xs group-hover:translate-x-0.5 group-hover:text-yellow-600 transition-all duration-300"></i>
                             </div>
                         </a>
 
-                        <a href="{% url 'library' %}" class="menu-item group relative flex items-center p-3 rounded-2xl transition-all duration-500 bg-white/60 hover:bg-green-50/80 backdrop-blur-xl hover:shadow-lg hover:shadow-green-200/30 transform hover:scale-[1.01] active:scale-[0.99] border border-white/30 hover:border-green-200/50 overflow-hidden">
+                        <a href="{% url 'library' %}" class="menu-item-enhanced group relative flex items-center p-3 rounded-2xl transition-all duration-500 transform hover:scale-[1.01] active:scale-[0.99] border border-white/30 hover:border-green-200/50 overflow-hidden magnetic">
                             <div class="absolute inset-0 bg-gradient-to-r from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div class="flex items-center w-full relative z-10">
                                 <div class="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl mr-3 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300 shadow-md">
                                     <i class="fas fa-dollar-sign text-white text-xs"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="font-semibold text-gray-800 group-hover:text-green-700 text-sm transition-colors duration-300">Library</span>
+                                    <span class="font-semibold text-gray-800 group-hover:text-green-700 text-sm transition-colors duration-300 text-shadow">Library</span>
                                 </div>
                                 <div class="text-right mr-2">
-                                    <span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-lg">Entries</span>
+                                    <span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-lg shadow-sm">Entries</span>
                                 </div>
                             </div>
                         </a>
@@ -958,13 +1290,13 @@
                 <!-- Get Started Section -->
                 <div class="mb-8">
                     <div class="mb-4">
-                        <h3 class="text-xs uppercase font-bold text-gray-600 tracking-wider px-2 flex items-center">
+                        <h3 class="text-xs uppercase font-bold text-gray-600 tracking-wider px-2 flex items-center text-shadow">
                             <i class="fas fa-rocket mr-2 text-primary-500"></i>
                             Get Started
                         </h3>
                     </div>
                     <nav class="space-y-4">
-                        <a href="{% url 'account_login' %}" class="menu-item group relative flex items-center p-5 rounded-3xl transition-all duration-500 bg-white/70 hover:bg-blue-50/80 backdrop-blur-xl hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-[1.03] active:scale-[0.97] border border-white/30 hover:border-blue-200/50 overflow-hidden">
+                        <a href="{% url 'account_login' %}" class="menu-item-enhanced group relative flex items-center p-5 rounded-3xl transition-all duration-500 transform hover:scale-[1.03] active:scale-[0.97] border border-white/30 hover:border-blue-200/50 overflow-hidden magnetic">
                             <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-transparent to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div class="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-700"></div>
 
@@ -973,14 +1305,14 @@
                                     <i class="fas fa-sign-in-alt text-white text-lg"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="font-bold text-gray-800 group-hover:text-blue-700 text-base transition-colors duration-300">Login</span>
+                                    <span class="font-bold text-gray-800 group-hover:text-blue-700 text-base transition-colors duration-300 text-shadow">Login</span>
                                     <p class="text-sm text-gray-500 mt-1 group-hover:text-blue-600 transition-colors duration-300">Access your journal</p>
                                 </div>
                                 <i class="fas fa-chevron-right text-gray-400 text-lg group-hover:translate-x-2 group-hover:text-blue-600 transition-all duration-300"></i>
                             </div>
                         </a>
 
-                        <a href="{% url 'account_signup' %}" class="menu-item group relative flex items-center p-5 rounded-3xl transition-all duration-500 bg-white/70 hover:bg-primary-50/80 backdrop-blur-xl hover:shadow-2xl hover:shadow-primary-500/30 transform hover:scale-[1.03] active:scale-[0.97] border border-white/30 hover:border-primary-200/50 overflow-hidden">
+                        <a href="{% url 'account_signup' %}" class="menu-item-enhanced group relative flex items-center p-5 rounded-3xl transition-all duration-500 transform hover:scale-[1.03] active:scale-[0.97] border border-white/30 hover:border-primary-200/50 overflow-hidden magnetic">
                             <div class="absolute inset-0 bg-gradient-to-r from-primary-500/10 via-transparent to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div class="absolute top-0 right-0 w-20 h-20 bg-primary-500/10 rounded-full transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-700"></div>
 
@@ -989,7 +1321,7 @@
                                     <i class="fas fa-user-plus text-white text-lg"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="font-bold text-gray-800 group-hover:text-primary-700 text-base transition-colors duration-300">Sign Up</span>
+                                    <span class="font-bold text-gray-800 group-hover:text-primary-700 text-base transition-colors duration-300 text-shadow">Sign Up</span>
                                     <p class="text-sm text-gray-500 mt-1 group-hover:text-primary-600 transition-colors duration-300">Start journaling</p>
                                 </div>
                                 <i class="fas fa-chevron-right text-gray-400 text-lg group-hover:translate-x-2 group-hover:text-primary-600 transition-all duration-300"></i>
@@ -1001,20 +1333,20 @@
                 <!-- Features Section -->
                 <div class="mb-6">
                     <div class="mb-4">
-                        <h3 class="text-xs uppercase font-bold text-gray-600 tracking-wider px-2 flex items-center">
+                        <h3 class="text-xs uppercase font-bold text-gray-600 tracking-wider px-2 flex items-center text-shadow">
                             <i class="fas fa-star mr-2 text-primary-500"></i>
                             Features
                         </h3>
                     </div>
                     <nav class="space-y-2">
-                        <a href="{% url 'marketplace' %}" class="menu-item group relative flex items-center p-3 rounded-2xl transition-all duration-500 bg-white/60 hover:bg-purple-50/80 backdrop-blur-xl hover:shadow-lg hover:shadow-purple-200/30 transform hover:scale-[1.01] active:scale-[0.99] border border-white/30 hover:border-purple-200/50 overflow-hidden">
+                        <a href="{% url 'marketplace' %}" class="menu-item-enhanced group relative flex items-center p-3 rounded-2xl transition-all duration-500 transform hover:scale-[1.01] active:scale-[0.99] border border-white/30 hover:border-purple-200/50 overflow-hidden magnetic">
                             <div class="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div class="flex items-center w-full relative z-10">
                                 <div class="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl mr-3 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300 shadow-md">
                                     <i class="fas fa-store text-white text-xs"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <span class="font-semibold text-gray-800 group-hover:text-purple-700 text-sm transition-colors duration-300">Marketplace</span>
+                                    <span class="font-semibold text-gray-800 group-hover:text-purple-700 text-sm transition-colors duration-300 text-shadow">Marketplace</span>
                                 </div>
                                 <i class="fas fa-chevron-right text-gray-400 text-xs group-hover:translate-x-0.5 group-hover:text-purple-600 transition-all duration-300"></i>
                             </div>
@@ -1036,12 +1368,12 @@
 
                 <form method="post" action="{% url 'account_logout' %}">
                     {% csrf_token %}
-                    <button type="submit" class="group relative w-full flex items-center justify-center px-6 py-4 rounded-3xl text-white font-bold bg-gradient-to-r from-red-500 via-red-600 to-red-700 hover:from-red-600 hover:via-red-700 hover:to-red-800 transition-all duration-500 hover:shadow-2xl hover:shadow-red-500/40 transform hover:scale-[1.02] active:scale-[0.98] overflow-hidden border border-white/20">
+                    <button type="submit" class="group relative w-full flex items-center justify-center px-6 py-4 rounded-3xl text-white font-bold bg-gradient-to-r from-red-500 via-red-600 to-red-700 hover:from-red-600 hover:via-red-700 hover:to-red-800 transition-all duration-500 hover:shadow-2xl hover:shadow-red-500/40 transform hover:scale-[1.02] active:scale-[0.98] overflow-hidden border border-white/20 magnetic">
                         <!-- Shimmer Effect -->
                         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
 
                         <i class="fas fa-sign-out-alt mr-3 relative z-10 group-hover:rotate-12 transition-transform duration-300"></i>
-                        <span class="relative z-10">Sign Out</span>
+                        <span class="relative z-10 text-shadow">Sign Out</span>
                     </button>
                 </form>
 
@@ -1049,7 +1381,7 @@
                 <div class="text-center mt-4">
                     <p class="text-xs text-gray-500 flex items-center justify-center group hover:text-primary-600 transition-colors duration-300">
                         <span class="w-2 h-2 bg-primary-500 rounded-full mr-2 animate-pulse group-hover:animate-bounce"></span>
-                        <span class="font-medium">DiaryVault v2.0</span>
+                        <span class="font-medium text-shadow">DiaryVault v2.0</span>
                         <span class="ml-2 px-2 py-0.5 bg-primary-100 text-primary-600 rounded-full text-xs font-bold animate-pulse">BETA</span>
                     </p>
                 </div>
@@ -1059,25 +1391,25 @@
     </div>
 
     <!-- Enhanced Mobile Search Popup -->
-    <div id="mobile-search-popup" class="fixed inset-0 z-50 transform transition-all duration-300 ease-out hidden no-print">
-        <div class="absolute inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm" id="mobile-search-backdrop"></div>
+    <div id="mobile-search-popup" class="fixed inset-0 z-70 transform transition-all duration-300 ease-out hidden no-print">
+        <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" id="mobile-search-backdrop"></div>
 
-        <div class="absolute top-0 left-0 right-0 bg-white shadow-xl transform transition-transform duration-300 ease-out rounded-b-2xl">
-            <div class="p-4 flex items-center border-b border-gray-200">
+        <div class="absolute top-0 left-0 right-0 glass-strong shadow-xl transform transition-transform duration-300 ease-out rounded-b-2xl border-b border-white/20">
+            <div class="p-4 flex items-center border-b border-gray-200/50">
                 <form action="{% url 'library' %}" method="get" class="flex-1 relative">
                     <input
                         type="text"
                         name="q"
                         placeholder="Search entries, insights, memories..."
                         value="{{ request.GET.q }}"
-                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-2xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-gray-50 focus:bg-white transition-all duration-300"
+                        class="w-full pl-12 pr-4 py-3 border border-gray-300/50 rounded-2xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 search-enhanced focus:outline-none transition-all duration-300"
                         autofocus
                     />
                     <span class="absolute left-4 top-3.5 text-gray-400">
                         <i class="fas fa-search"></i>
                     </span>
                 </form>
-                <button id="close-mobile-search" class="ml-3 text-gray-500 hover:text-gray-700 p-2 rounded-xl hover:bg-gray-100 transition-all duration-300">
+                <button id="close-mobile-search" class="ml-3 text-gray-500 hover:text-gray-700 p-2 rounded-xl glass-card hover:shadow-lg transition-all duration-300 magnetic">
                     <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
@@ -1085,37 +1417,43 @@
     </div>
 
     <!-- Enhanced Main Content -->
-    <main class="flex-grow min-h-screen pb-0">
+    <main class="flex-grow min-h-screen pb-0 relative z-10">
         <div class="max-w-8xl mx-auto">
             <!-- Enhanced Messages Section -->
             {% if messages %}
                 <div class="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
                     {% for message in messages %}
-                        <div class="message-container p-4 mb-4 rounded-2xl shadow-lg flex items-start animate-slide-up
+                        <div class="message-enhanced p-4 mb-4 rounded-2xl shadow-lg flex items-start animate-slide-up
                             {% if message.tags == 'success' %}
-                                bg-gradient-to-r from-green-50 to-emerald-50 text-green-800 border border-green-200
+                                success bg-gradient-to-r from-green-50/80 to-emerald-50/80 text-green-800 border border-green-200/50
                             {% elif message.tags == 'error' %}
-                                bg-gradient-to-r from-red-50 to-pink-50 text-red-800 border border-red-200
+                                error bg-gradient-to-r from-red-50/80 to-pink-50/80 text-red-800 border border-red-200/50
+                            {% elif message.tags == 'warning' %}
+                                warning bg-gradient-to-r from-yellow-50/80 to-amber-50/80 text-yellow-800 border border-yellow-200/50
                             {% else %}
-                                bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-800 border border-blue-200
+                                info bg-gradient-to-r from-blue-50/80 to-indigo-50/80 text-blue-800 border border-blue-200/50
                             {% endif %}">
                             <div class="flex-shrink-0 mr-3">
                                 {% if message.tags == 'success' %}
-                                    <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                    <div class="w-6 h-6 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-sm">
                                         <i class="fas fa-check text-white text-sm"></i>
                                     </div>
                                 {% elif message.tags == 'error' %}
-                                    <div class="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                                    <div class="w-6 h-6 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-sm">
                                         <i class="fas fa-exclamation text-white text-sm"></i>
                                     </div>
+                                {% elif message.tags == 'warning' %}
+                                    <div class="w-6 h-6 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center shadow-sm">
+                                        <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                                    </div>
                                 {% else %}
-                                    <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <div class="w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-sm">
                                         <i class="fas fa-info text-white text-sm"></i>
                                     </div>
                                 {% endif %}
                             </div>
-                            <div class="flex-grow font-medium">{{ message }}</div>
-                            <button class="ml-auto text-gray-500 hover:text-gray-700 message-close p-1 rounded-lg hover:bg-white/50 transition-all duration-300">
+                            <div class="flex-grow font-medium text-shadow">{{ message }}</div>
+                            <button class="ml-auto text-gray-500 hover:text-gray-700 message-close p-1 rounded-lg hover:bg-white/50 transition-all duration-300 magnetic">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -1128,29 +1466,29 @@
     </main>
 
     <!-- Enhanced Footer -->
-    <footer class="glass-strong border-t border-gray-200/50 mt-auto pb-16 lg:pb-0 no-print">
-        <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-1">
-            <div class="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
+    <footer class="glass-strong border-t border-gray-200/50 mt-auto pb-16 lg:pb-0 no-print relative z-10">
+        <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                 <div class="text-center md:text-left">
-                    <div class="flex items-center justify-center md:justify-start mb-1">
-                        <div class="p-1.5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg shadow-soft mr-2">
+                    <div class="flex items-center justify-center md:justify-start mb-2">
+                        <div class="p-1.5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg shadow-lg mr-2 transform hover:scale-110 hover:rotate-6 transition-all duration-300">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                             </svg>
                         </div>
-                        <span class="text-2xl font-black bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent diary-font">DiaryVault</span>
-                        <span class="ml-2 px-2 py-0.5 text-xs font-bold text-primary-600 border border-primary-600 rounded-full">BETA</span>
+                        <span class="text-2xl font-black text-gradient diary-font text-shadow">DiaryVault</span>
+                        <span class="ml-2 brand-badge scale-75">BETA</span>
                     </div>
-                    <p class="text-sm text-gray-600 font-medium mb-0">&copy; 2025 DiaryVault, Inc. All rights reserved.</p>
+                    <p class="text-sm text-gray-600 font-medium text-shadow">&copy; 2025 DiaryVault, Inc. All rights reserved.</p>
                 </div>
                 <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-                    <a href="https://crene.com" target="_blank" class="text-primary-600 hover:text-primary-700 font-semibold text-sm hover:underline transition-all duration-300 interactive">Crene</a>
+                    <a href="https://crene.com" target="_blank" class="text-primary-600 hover:text-primary-700 font-semibold text-sm hover:underline transition-all duration-300 interactive magnetic text-shadow">Crene</a>
                     <span class="text-gray-300 hidden sm:inline">|</span>
-                    <a href="https://euphorie.com" target="_blank" class="text-primary-600 hover:text-primary-700 font-semibold text-sm hover:underline transition-all duration-300 interactive">Euphorie</a>
+                    <a href="https://euphorie.com" target="_blank" class="text-primary-600 hover:text-primary-700 font-semibold text-sm hover:underline transition-all duration-300 interactive magnetic text-shadow">Euphorie</a>
                     <span class="text-gray-300 hidden sm:inline">|</span>
-                    <a href="#" class="text-gray-600 hover:text-primary-700 font-semibold text-sm hover:underline transition-all duration-300 interactive">Privacy Policy</a>
+                    <a href="#" class="text-gray-600 hover:text-primary-700 font-semibold text-sm hover:underline transition-all duration-300 interactive magnetic text-shadow">Privacy Policy</a>
                     <span class="text-gray-300 hidden sm:inline">|</span>
-                    <a href="mailto:diaryvaultinc@gmail.com" class="text-gray-600 hover:text-primary-700 font-semibold text-sm hover:underline transition-all duration-300 interactive">Contact Us</a>
+                    <a href="mailto:diaryvaultinc@gmail.com" class="text-gray-600 hover:text-primary-700 font-semibold text-sm hover:underline transition-all duration-300 interactive magnetic text-shadow">Contact Us</a>
                 </div>
             </div>
         </div>
@@ -1180,18 +1518,6 @@
             box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5);
         }
 
-        /* Glass Panel Effect */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow:
-                0 25px 50px -12px rgba(0, 0, 0, 0.25),
-                0 0 0 1px rgba(255, 255, 255, 0.3) inset,
-                0 0 50px rgba(99, 102, 241, 0.1);
-        }
-
         /* Animation Delays */
         .animation-delay-1000 {
             animation-delay: 1s;
@@ -1200,213 +1526,210 @@
         .animation-delay-2000 {
             animation-delay: 2s;
         }
-
-        /* Enhanced Focus Styles */
-        .search-focus {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .search-focus:focus {
-            transform: translateY(-1px);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
     </style>
 
     <script>
         /**
-         * 🚀 Enhanced Mobile Menu System - DiaryVault Style
+         * 🚀 Enhanced DiaryVault Interactive System
          */
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 DiaryVault Menu System initializing...');
+            console.log('🚀 DiaryVault Enhanced System initializing...');
 
-            // Get all required elements
-            const menuToggle = document.getElementById('menu-toggle');
-            const mobileMenu = document.getElementById('mobile-menu');
-            const mobileMenuPanel = mobileMenu?.querySelector('.mobile-menu-panel');
-            const closeButton = document.getElementById('close-mobile-menu');
-            const backdrop = document.getElementById('mobile-menu-backdrop');
-
-            // Mobile search elements
-            const mobileSearchButton = document.getElementById('mobile-search-button');
-            const mobileSearchPopup = document.getElementById('mobile-search-popup');
-            const closeMobileSearchBtn = document.getElementById('close-mobile-search');
-            const mobileSearchBackdrop = document.getElementById('mobile-search-backdrop');
-
-            // User dropdown elements
-            const userDropdownButton = document.getElementById('user-dropdown-button');
-            const userDropdownMenu = document.getElementById('user-dropdown-menu');
-
-            // State tracking
-            let mobileMenuOpen = false;
-            let mobileSearchOpen = false;
-            let userDropdownOpen = false;
-            let isAnimating = false;
-
-            // Initialize avatars
+            // Initialize all systems
+            initializeMobileMenu();
+            initializeMobileSearch();
+            initializeUserDropdown();
             initializeAvatars();
+            initializeMessages();
+            initializeMagneticEffects();
+            initializeInteractiveElements();
+            initializeScrollEffects();
 
-            // Mobile Menu Functions
-            function openMobileMenu() {
-                if (isAnimating || mobileMenuOpen) return;
+            console.log('✅ DiaryVault Enhanced System ready');
 
-                console.log('📱 Opening mobile menu...');
-                isAnimating = true;
-                mobileMenuOpen = true;
+            // Mobile Menu System
+            function initializeMobileMenu() {
+                const menuToggle = document.getElementById('menu-toggle');
+                const mobileMenu = document.getElementById('mobile-menu');
+                const mobileMenuPanel = mobileMenu?.querySelector('.mobile-menu-panel');
+                const closeButton = document.getElementById('close-mobile-menu');
+                const backdrop = document.getElementById('mobile-menu-backdrop');
 
-                mobileMenu.classList.remove('translate-x-full');
-                document.body.classList.add('overflow-hidden');
-                document.body.style.overflow = 'hidden';
+                let mobileMenuOpen = false;
+                let isAnimating = false;
 
-                requestAnimationFrame(() => {
-                    mobileMenuPanel.style.transform = 'translateX(0)';
-                    mobileMenuPanel.classList.add('open');
+                function openMobileMenu() {
+                    if (isAnimating || mobileMenuOpen) return;
+                    console.log('📱 Opening enhanced mobile menu...');
+
+                    isAnimating = true;
+                    mobileMenuOpen = true;
+
+                    mobileMenu.classList.remove('translate-x-full');
+                    document.body.classList.add('overflow-hidden');
+                    document.body.style.overflow = 'hidden';
+
+                    requestAnimationFrame(() => {
+                        mobileMenuPanel.style.transform = 'translateX(0)';
+                        mobileMenuPanel.classList.add('open');
+
+                        setTimeout(() => {
+                            isAnimating = false;
+                        }, 500);
+                    });
+                }
+
+                function closeMobileMenu() {
+                    if (isAnimating || !mobileMenuOpen) return;
+                    console.log('📱 Closing enhanced mobile menu...');
+
+                    isAnimating = true;
+                    mobileMenuOpen = false;
+
+                    mobileMenuPanel.style.transform = 'translateX(100%)';
+                    mobileMenuPanel.classList.remove('open');
 
                     setTimeout(() => {
+                        mobileMenu.classList.add('translate-x-full');
+                        document.body.classList.remove('overflow-hidden');
+                        document.body.style.overflow = 'auto';
                         isAnimating = false;
-                    }, 500);
-                });
+                    }, 300);
+                }
+
+                if (menuToggle && mobileMenu) {
+                    menuToggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        mobileMenuOpen ? closeMobileMenu() : openMobileMenu();
+                    });
+
+                    closeButton?.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        closeMobileMenu();
+                    });
+
+                    backdrop?.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        closeMobileMenu();
+                    });
+
+                    // Keyboard support
+                    document.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape' && mobileMenuOpen) {
+                            closeMobileMenu();
+                        }
+                    });
+
+                    // Cleanup on resize
+                    window.addEventListener('resize', function() {
+                        if (window.innerWidth >= 1024 && mobileMenuOpen) {
+                            closeMobileMenu();
+                        }
+                    });
+                }
             }
 
-            function closeMobileMenu() {
-                if (isAnimating || !mobileMenuOpen) return;
+            // Mobile Search System
+            function initializeMobileSearch() {
+                const mobileSearchButton = document.getElementById('mobile-search-button');
+                const mobileSearchPopup = document.getElementById('mobile-search-popup');
+                const closeMobileSearchBtn = document.getElementById('close-mobile-search');
+                const mobileSearchBackdrop = document.getElementById('mobile-search-backdrop');
 
-                console.log('📱 Closing mobile menu...');
-                isAnimating = true;
-                mobileMenuOpen = false;
+                let mobileSearchOpen = false;
 
-                mobileMenuPanel.style.transform = 'translateX(100%)';
-                mobileMenuPanel.classList.remove('open');
+                function openMobileSearch() {
+                    if (!mobileSearchPopup) return;
+                    console.log('🔍 Opening enhanced mobile search...');
 
-                setTimeout(() => {
-                    mobileMenu.classList.add('translate-x-full');
+                    mobileSearchOpen = true;
+                    mobileSearchPopup.classList.remove('hidden');
+                    document.body.classList.add('overflow-hidden');
+
+                    setTimeout(() => {
+                        const searchInput = mobileSearchPopup.querySelector('input[name="q"]');
+                        if (searchInput) {
+                            searchInput.focus();
+                        }
+                    }, 100);
+                }
+
+                function closeMobileSearch() {
+                    if (!mobileSearchPopup) return;
+                    console.log('🔍 Closing enhanced mobile search...');
+
+                    mobileSearchOpen = false;
+                    mobileSearchPopup.classList.add('hidden');
                     document.body.classList.remove('overflow-hidden');
-                    document.body.style.overflow = 'auto';
-                    isAnimating = false;
-                }, 300);
-            }
-
-            function toggleMobileMenu() {
-                if (mobileMenuOpen) {
-                    closeMobileMenu();
-                } else {
-                    openMobileMenu();
-                }
-            }
-
-            // Mobile Search Functions
-            function openMobileSearch() {
-                if (!mobileSearchPopup) return;
-
-                console.log('🔍 Opening mobile search...');
-                mobileSearchOpen = true;
-                mobileSearchPopup.classList.remove('hidden');
-                document.body.classList.add('overflow-hidden');
-
-                setTimeout(() => {
-                    const searchInput = mobileSearchPopup.querySelector('input[name="q"]');
-                    if (searchInput) {
-                        searchInput.focus();
-                    }
-                }, 100);
-            }
-
-            function closeMobileSearch() {
-                if (!mobileSearchPopup) return;
-
-                console.log('🔍 Closing mobile search...');
-                mobileSearchOpen = false;
-                mobileSearchPopup.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-            }
-
-            // User Dropdown Functions
-            function toggleUserDropdown() {
-                if (userDropdownOpen) {
-                    closeUserDropdown();
-                } else {
-                    openUserDropdown();
-                }
-            }
-
-            function openUserDropdown() {
-                if (!userDropdownMenu) return;
-
-                console.log('👤 Opening user dropdown...');
-                userDropdownOpen = true;
-                userDropdownMenu.classList.remove('hidden');
-
-                const chevron = userDropdownButton.querySelector('i.fa-chevron-down');
-                if (chevron) {
-                    chevron.style.transform = 'rotate(180deg)';
-                }
-            }
-
-            function closeUserDropdown() {
-                if (!userDropdownMenu) return;
-
-                console.log('👤 Closing user dropdown...');
-                userDropdownOpen = false;
-                userDropdownMenu.classList.add('hidden');
-
-                const chevron = userDropdownButton.querySelector('i.fa-chevron-down');
-                if (chevron) {
-                    chevron.style.transform = 'rotate(0deg)';
-                }
-            }
-
-            // Event Listeners
-            if (menuToggle && mobileMenu) {
-                menuToggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toggleMobileMenu();
-                });
-
-                if (closeButton) {
-                    closeButton.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        closeMobileMenu();
-                    });
                 }
 
-                if (backdrop) {
-                    backdrop.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        closeMobileMenu();
-                    });
-                }
-            }
-
-            // Mobile Search Handlers
-            if (mobileSearchButton && mobileSearchPopup) {
-                mobileSearchButton.addEventListener('click', function(e) {
+                mobileSearchButton?.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     openMobileSearch();
                 });
 
-                if (closeMobileSearchBtn) {
-                    closeMobileSearchBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        closeMobileSearch();
-                    });
-                }
+                closeMobileSearchBtn?.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeMobileSearch();
+                });
 
-                if (mobileSearchBackdrop) {
-                    mobileSearchBackdrop.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
+                mobileSearchBackdrop?.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeMobileSearch();
+                });
+
+                // Keyboard support
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && mobileSearchOpen) {
                         closeMobileSearch();
-                    });
-                }
+                    }
+                });
             }
 
-            // User Dropdown Handlers
-            if (userDropdownButton && userDropdownMenu) {
-                userDropdownButton.addEventListener('click', function(e) {
+            // User Dropdown System
+            function initializeUserDropdown() {
+                const userDropdownButton = document.getElementById('user-dropdown-button');
+                const userDropdownMenu = document.getElementById('user-dropdown-menu');
+
+                let userDropdownOpen = false;
+
+                function toggleUserDropdown() {
+                    userDropdownOpen ? closeUserDropdown() : openUserDropdown();
+                }
+
+                function openUserDropdown() {
+                    if (!userDropdownMenu) return;
+                    console.log('👤 Opening enhanced user dropdown...');
+
+                    userDropdownOpen = true;
+                    userDropdownMenu.classList.remove('hidden');
+
+                    const chevron = userDropdownButton.querySelector('i.fa-chevron-down');
+                    if (chevron) {
+                        chevron.style.transform = 'rotate(180deg)';
+                    }
+                }
+
+                function closeUserDropdown() {
+                    if (!userDropdownMenu) return;
+                    console.log('👤 Closing enhanced user dropdown...');
+
+                    userDropdownOpen = false;
+                    userDropdownMenu.classList.add('hidden');
+
+                    const chevron = userDropdownButton.querySelector('i.fa-chevron-down');
+                    if (chevron) {
+                        chevron.style.transform = 'rotate(0deg)';
+                    }
+                }
+
+                userDropdownButton?.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     toggleUserDropdown();
@@ -1419,36 +1742,16 @@
                         closeUserDropdown();
                     }
                 });
-            }
 
-            // Keyboard Support
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    if (mobileMenuOpen) {
-                        closeMobileMenu();
-                    }
-                    if (mobileSearchOpen) {
-                        closeMobileSearch();
-                    }
-                    if (userDropdownOpen) {
+                // Keyboard support
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && userDropdownOpen) {
                         closeUserDropdown();
                     }
-                }
-            });
+                });
+            }
 
-            // Message Dismissal
-            setupMessageHandlers();
-
-            // Cleanup on resize
-            window.addEventListener('resize', function() {
-                if (window.innerWidth >= 1024 && mobileMenuOpen) {
-                    closeMobileMenu();
-                }
-            });
-
-            console.log('✅ DiaryVault Menu System initialized');
-
-            // Avatar Initialization
+            // Avatar System
             function initializeAvatars() {
                 const avatarElements = document.querySelectorAll('[data-initials]');
 
@@ -1462,43 +1765,43 @@
                         avatar.classList.add(`avatar-color-${colorIndex}`);
                     }
                 });
-            }
 
-            function generateInitials(username) {
-                return username
-                    .split(/[\s_.-]+/)
-                    .slice(0, 2)
-                    .map(part => part[0])
-                    .join('')
-                    .toUpperCase();
-            }
-
-            function generateColorIndex(username) {
-                let hash = 0;
-                for (let i = 0; i < username.length; i++) {
-                    hash = username.charCodeAt(i) + ((hash << 5) - hash);
+                function generateInitials(username) {
+                    return username
+                        .split(/[\s_.-]+/)
+                        .slice(0, 2)
+                        .map(part => part[0])
+                        .join('')
+                        .toUpperCase();
                 }
-                return (Math.abs(hash) % 6) + 1;
+
+                function generateColorIndex(username) {
+                    let hash = 0;
+                    for (let i = 0; i < username.length; i++) {
+                        hash = username.charCodeAt(i) + ((hash << 5) - hash);
+                    }
+                    return (Math.abs(hash) % 6) + 1;
+                }
             }
 
-            // Message Dismissal
-            function setupMessageHandlers() {
+            // Message System
+            function initializeMessages() {
                 const messageCloseButtons = document.querySelectorAll('.message-close');
 
                 messageCloseButtons.forEach(button => {
                     button.addEventListener('click', function(e) {
                         e.preventDefault();
-                        const message = button.closest('.message-container');
+                        const message = button.closest('.message-enhanced');
                         if (message) {
                             message.style.opacity = '0';
-                            message.style.transform = 'translateY(-20px)';
+                            message.style.transform = 'translateY(-20px) scale(0.95)';
                             setTimeout(() => message.remove(), 300);
                         }
                     });
                 });
 
-                // Auto-dismiss messages
-                const messages = document.querySelectorAll('.message-container');
+                // Auto-dismiss messages with staggered timing
+                const messages = document.querySelectorAll('.message-enhanced');
                 messages.forEach((message, index) => {
                     setTimeout(() => {
                         if (message.parentElement) {
@@ -1509,6 +1812,114 @@
                         }
                     }, 8000 + (index * 1000));
                 });
+            }
+
+            // Magnetic Effects
+            function initializeMagneticEffects() {
+                const magneticElements = document.querySelectorAll('.magnetic');
+
+                magneticElements.forEach(element => {
+                    element.addEventListener('mousemove', function(e) {
+                        const rect = element.getBoundingClientRect();
+                        const x = e.clientX - rect.left - rect.width / 2;
+                        const y = e.clientY - rect.top - rect.height / 2;
+
+                        const moveX = x * 0.1;
+                        const moveY = y * 0.1;
+
+                        element.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                    });
+
+                    element.addEventListener('mouseleave', function() {
+                        element.style.transform = 'translate(0, 0)';
+                    });
+                });
+            }
+
+            // Interactive Elements
+            function initializeInteractiveElements() {
+                const interactiveElements = document.querySelectorAll('.interactive');
+
+                interactiveElements.forEach(element => {
+                    // Add ripple effect on click
+                    element.addEventListener('click', function(e) {
+                        const ripple = document.createElement('span');
+                        const rect = element.getBoundingClientRect();
+                        const size = Math.max(rect.width, rect.height);
+                        const x = e.clientX - rect.left - size / 2;
+                        const y = e.clientY - rect.top - size / 2;
+
+                        ripple.style.cssText = `
+                            position: absolute;
+                            width: ${size}px;
+                            height: ${size}px;
+                            left: ${x}px;
+                            top: ${y}px;
+                            background: rgba(99, 102, 241, 0.3);
+                            border-radius: 50%;
+                            transform: scale(0);
+                            animation: ripple 0.6s linear;
+                            pointer-events: none;
+                            z-index: 10;
+                        `;
+
+                        element.style.position = 'relative';
+                        element.appendChild(ripple);
+
+                        setTimeout(() => {
+                            ripple.remove();
+                        }, 600);
+                    });
+                });
+
+                // Add ripple animation
+                if (!document.getElementById('ripple-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'ripple-styles';
+                    style.textContent = `
+                        @keyframes ripple {
+                            to {
+                                transform: scale(4);
+                                opacity: 0;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+
+            // Scroll Effects
+            function initializeScrollEffects() {
+                let ticking = false;
+
+                function updateScrollEffects() {
+                    const scrollY = window.scrollY;
+                    const header = document.getElementById('main-header');
+
+                    // Header background opacity based on scroll
+                    if (header) {
+                        const opacity = Math.min(scrollY / 100, 1);
+                        header.style.setProperty('--header-opacity', opacity);
+                    }
+
+                    // Parallax effect for floating orbs
+                    const orbs = document.querySelectorAll('.floating-orb');
+                    orbs.forEach((orb, index) => {
+                        const speed = 0.5 + (index * 0.2);
+                        orb.style.transform = `translateY(${scrollY * speed}px)`;
+                    });
+
+                    ticking = false;
+                }
+
+                function onScroll() {
+                    if (!ticking) {
+                        requestAnimationFrame(updateScrollEffects);
+                        ticking = true;
+                    }
+                }
+
+                window.addEventListener('scroll', onScroll, { passive: true });
             }
         });
     </script>
