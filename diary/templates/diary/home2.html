@@ -5,29 +5,18 @@
 {% block extra_css %}
 <style>
 
-  /* LAYOUT FIX: Proper overflow management */
+  /* SCROLL FIX: Remove conflicting scroll behaviors */
   html, body {
-    overflow-x: hidden !important; /* Changed from visible to hidden */
+    /* Remove any overflow settings that conflict with base.html */
+    overflow-x: visible !important;
     scroll-behavior: smooth !important;
-    max-width: 100vw !important;
-    box-sizing: border-box;
   }
 
-  /* LAYOUT FIX: Container width constraints */
-  .container, .max-w-4xl, .max-w-7xl, .w-full {
-    max-width: 100% !important;
-    box-sizing: border-box;
-  }
-
-  /* LAYOUT FIX: Main container improvements */
+  /* SCROLL FIX: Ensure main container doesn't create extra scroll context */
   #main-content {
-    width: 100%;
-    max-width: 100%;
+    /* Remove any height constraints that might cause scroll issues */
     min-height: auto;
     overflow: visible;
-    box-sizing: border-box;
-    padding-left: 1rem;
-    padding-right: 1rem;
   }
 
   /* Core branding elements */
@@ -142,10 +131,10 @@
     opacity: 1;
   }
 
-  /* LAYOUT FIX: Real marketplace card styling */
+  /* Real marketplace card styling - PERFORMANCE OPTIMIZED */
   .real-marketplace-card {
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px); /* REDUCED blur for performance */
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -155,9 +144,7 @@
     height: 420px;
     display: flex;
     flex-direction: column;
-    width: 100%; /* LAYOUT FIX: Ensure proper width */
-    max-width: 100%; /* LAYOUT FIX: Prevent overflow */
-    box-sizing: border-box; /* LAYOUT FIX: Include padding in width */
+    /* SCROLL FIX: Hardware acceleration */
     will-change: transform;
     transform: translateZ(0);
     backface-visibility: hidden;
@@ -172,7 +159,6 @@
     position: relative;
     height: 180px;
     overflow: hidden;
-    width: 100%; /* LAYOUT FIX */
   }
 
   .real-image-overlay {
@@ -208,7 +194,7 @@
     height: 32px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px); /* REDUCED blur */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -228,8 +214,6 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    width: 100%; /* LAYOUT FIX */
-    box-sizing: border-box; /* LAYOUT FIX */
   }
 
   .real-author {
@@ -387,7 +371,7 @@
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   }
 
-  /* LAYOUT FIX: Improved focus states */
+  /* SCROLL FIX: Improved focus states */
   :focus {
     outline: 2px solid #6366f1 !important;
     outline-offset: 2px;
@@ -402,7 +386,7 @@
     outline-offset: 2px;
   }
 
-  /* LAYOUT FIX: Custom scrollbar - ensure single scrollbar */
+  /* SCROLL FIX: Custom scrollbar - ensure single scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -423,15 +407,13 @@
     background: linear-gradient(135deg, #4f46e5, #4338ca);
   }
 
-  /* LAYOUT FIX: Improved form input styling */
+  /* SCROLL FIX: Improved form input styling */
   #journalContainer {
     transition: all 0.2s ease;
     border-color: rgba(99, 102, 241, 0.3);
+    /* Remove any height constraints that might cause scroll issues */
     max-height: none;
     overflow: visible;
-    width: 100%; /* LAYOUT FIX */
-    max-width: 100%; /* LAYOUT FIX */
-    box-sizing: border-box; /* LAYOUT FIX */
   }
 
   #journalContainer:focus-within {
@@ -440,14 +422,12 @@
     background-color: white;
   }
 
-  /* LAYOUT FIX: Better textarea handling */
+  /* SCROLL FIX: Better textarea handling */
   #journalInput {
+    /* Prevent textarea from creating its own scroll context */
     resize: none;
     overflow: hidden;
-    max-height: 400px;
-    width: 100%; /* LAYOUT FIX */
-    max-width: 100%; /* LAYOUT FIX */
-    box-sizing: border-box; /* LAYOUT FIX */
+    max-height: 400px; /* Reasonable max height */
   }
 
   /* Better chat bubbles - OPTIMIZED */
@@ -461,7 +441,6 @@
     max-width: 85%;
     margin-bottom: 1rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    word-wrap: break-word; /* LAYOUT FIX: Prevent text overflow */
   }
 
   .chat-bubble:hover {
@@ -512,21 +491,13 @@
     animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
   }
 
-  /* LAYOUT FIX: Mobile optimizations */
+  /* SCROLL FIX: Mobile optimizations */
   @media (max-width: 640px) {
-    #main-content {
-      padding-left: 0.75rem;
-      padding-right: 0.75rem;
-      max-width: 100%;
-    }
-
     /* Ensure proper input sizing without scroll issues */
     input, textarea, select {
       font-size: 16px !important; /* Prevent zoom on iOS */
       padding-top: 0.75rem;
       padding-bottom: 0.75rem;
-      max-width: 100%;
-      box-sizing: border-box;
     }
 
     .card-hover {
@@ -543,24 +514,18 @@
       margin-bottom: 1.5rem;
     }
 
-    /* LAYOUT FIX: Better mobile textarea handling */
+    /* SCROLL FIX: Better mobile textarea handling */
     #journalContainer {
       min-height: 120px;
-      max-height: 300px;
-      width: 100%;
-      max-width: 100%;
+      max-height: 300px; /* Prevent taking up entire screen */
     }
 
     #journalInput {
-      max-height: 280px;
-      width: 100%;
-      max-width: 100%;
+      max-height: 280px; /* Slightly less than container */
     }
 
-    .marketplace-card, .real-marketplace-card {
+    .marketplace-card {
       margin-bottom: 1.5rem;
-      width: 100%;
-      max-width: 100%;
     }
 
     button,
@@ -594,11 +559,11 @@
       transform: translateX(0);
     }
 
-    /* LAYOUT FIX: Ensure mobile doesn't have scroll conflicts */
+    /* SCROLL FIX: Ensure mobile doesn't have scroll conflicts */
     body {
-      overflow-x: hidden !important;
+      /* Remove any mobile-specific scroll constraints */
+      overflow-x: visible !important;
       -webkit-overflow-scrolling: touch;
-      max-width: 100vw;
     }
   }
 
@@ -615,14 +580,12 @@
     80%, 100% { content: ''; }
   }
 
-  /* LAYOUT FIX: Input container improvements */
+  /* SCROLL FIX: Input container improvements */
   #journalContainer {
     box-sizing: border-box;
-    overflow: visible;
+    overflow: visible; /* Changed from hidden */
     position: relative;
     transition: all 0.2s ease-in-out;
-    width: 100%;
-    max-width: 100%;
   }
 
   #journalInput {
@@ -630,8 +593,7 @@
     outline: none !important;
     border: none !important;
     width: 100%;
-    max-width: 100%;
-    overflow-y: auto;
+    overflow-y: auto; /* Allow internal scrolling when needed */
   }
 
   /* Custom class for focused state */
@@ -700,25 +662,38 @@
     color: white;
   }
 
-  /* LAYOUT FIX: Enhanced responsive grid for 18 journals */
-  .journal-grid-18 {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
-  /* LAYOUT FIX: Responsive grid fallback for smaller screens */
-  @media (max-width: 320px) {
+  /* SCROLL FIX: Enhanced responsive grid for 18 journals */
+  @media (min-width: 1536px) {
     .journal-grid-18 {
-      grid-template-columns: 1fr;
-      gap: 1rem;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
     }
   }
 
-  /* LAYOUT FIX: Hover effects for clickable cards - OPTIMIZED */
+  @media (min-width: 1280px) and (max-width: 1535px) {
+    .journal-grid-18 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    .journal-grid-18 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .journal-grid-18 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 767px) {
+    .journal-grid-18 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+  }
+
+  /* SCROLL FIX: Hover effects for clickable cards - OPTIMIZED */
   .real-marketplace-card {
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -756,16 +731,17 @@
   .real-marketplace-card:nth-child(17) { animation-delay: 800ms; }
   .real-marketplace-card:nth-child(18) { animation-delay: 850ms; }
 
-  /* LAYOUT FIX: Performance optimizations for scrolling */
+  /* SCROLL FIX: Performance optimizations for scrolling */
   .animate-fade-in,
   .animate-scale-in,
   .animate-float,
   .animate-blob {
+    /* Ensure animations don't interfere with scrolling */
     backface-visibility: hidden;
     perspective: 1000px;
   }
 
-  /* LAYOUT FIX: Reduce motion blur during scroll */
+  /* SCROLL FIX: Reduce motion blur during scroll */
   .is-scrolling .real-marketplace-card,
   .is-scrolling .animate-blob,
   .is-scrolling .animate-float {
@@ -779,7 +755,7 @@
 <!-- Skip link for accessibility -->
 <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-secondary-600 focus:outline-offset-0">Skip to main content</a>
 
-<!-- LAYOUT FIX: Simplified main container with proper width constraints -->
+<!-- SCROLL FIX: Simplified main container -->
 <div id="main-content" class="max-w-4xl w-full mx-auto relative">
   <!-- Enhanced decorative elements - REDUCED for performance -->
   <div class="hidden sm:block absolute -top-10 -left-16 h-48 w-48 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob"></div>
@@ -846,9 +822,9 @@
           </div>
         </div>
 
-        <!-- LAYOUT FIX: Enhanced integrated input container -->
+        <!-- SCROLL FIX: Enhanced integrated input container -->
         <div id="journalContainer" class="relative border border-gray-200 rounded-xl focus-within:border-secondary-400 transition bg-gray-50/50 min-h-[150px] sm:min-h-[200px] shadow-inner">
-          <!-- LAYOUT FIX: Input textarea with improved styling -->
+          <!-- SCROLL FIX: Input textarea with improved styling -->
           <textarea
             id="journalInput"
             name="journal_content"
@@ -1142,8 +1118,8 @@
       <p class="text-gray-600 text-sm max-w-xl mx-auto">Read authentic stories, experiences, and insights shared by our community.</p>
     </div>
 
-    <!-- LAYOUT FIX: Enhanced Marketplace Cards with 18 Journals in responsive grid -->
-    <div class="journal-grid-18 mb-8">
+    <!-- Enhanced Marketplace Cards with 18 Journals in responsive grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
       {% for journal in featured_journals %}
         <div class="real-marketplace-card animate-fade-in-up cursor-pointer"
             style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms"
@@ -1413,14 +1389,14 @@
   </div>
 </div>
 
-<!-- LAYOUT FIX: Enhanced JavaScript with scroll optimizations -->
+<!-- SCROLL FIX: Enhanced JavaScript with scroll optimizations -->
 <script>
 // Enhanced JavaScript with scroll performance fixes
 let cart = JSON.parse(localStorage.getItem('diaryvault_cart') || '[]');
 let wishlist = JSON.parse(localStorage.getItem('diaryvault_wishlist') || '[]');
 let comparison = JSON.parse(localStorage.getItem('diaryvault_comparison') || '[]');
 
-// LAYOUT FIX: Optimized cache initialization
+// SCROLL FIX: Optimized cache initialization
 const journalCache = {
   init: function() {
     if (typeof localStorage !== 'undefined') {
@@ -1494,7 +1470,7 @@ const journalCache = {
 let currentPhotoFile = null;
 let currentPhotoDataUrl = null;
 
-// LAYOUT FIX: Optimized debounce function
+// SCROLL FIX: Optimized debounce function
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
@@ -1507,7 +1483,7 @@ function debounce(func, wait) {
   };
 }
 
-// LAYOUT FIX: Initialize with better performance
+// SCROLL FIX: Initialize with better performance
 document.addEventListener('DOMContentLoaded', function() {
   journalCache.init();
   initializeMarketplaceFeatures();
@@ -1515,11 +1491,11 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeAnimations();
   setupEnhancedUX();
 
-  // LAYOUT FIX: Add scroll performance monitoring
+  // SCROLL FIX: Add scroll performance monitoring
   setupScrollOptimizations();
 });
 
-// LAYOUT FIX: New scroll optimization function
+// SCROLL FIX: New scroll optimization function
 function setupScrollOptimizations() {
   let isScrolling = false;
   let scrollTimeout;
@@ -1540,7 +1516,7 @@ function setupScrollOptimizations() {
     }
   }
 
-  // LAYOUT FIX: Optimized scroll event handler
+  // SCROLL FIX: Optimized scroll event handler
   window.addEventListener('scroll', function() {
     if (!isScrolling) {
       isScrolling = true;
@@ -1555,7 +1531,7 @@ function setupScrollOptimizations() {
     }, 150);
   }, { passive: true });
 
-  // LAYOUT FIX: Prevent scroll jank on mobile
+  // SCROLL FIX: Prevent scroll jank on mobile
   if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
     document.addEventListener('touchmove', function(e) {
       const target = e.target.closest('#journalContainer, .mobile-menu, .real-marketplace-card');
@@ -1732,7 +1708,7 @@ function quickView(journalId) {
     });
 }
 
-// LAYOUT FIX: Initialize journal form with better performance
+// SCROLL FIX: Initialize journal form with better performance
 function initializeJournalForm() {
   const personalizationToggle = document.getElementById('personalizationToggle');
   const personalizationOptions = document.getElementById('personalizationOptions');
@@ -1749,11 +1725,11 @@ function initializeJournalForm() {
 
   setupOptimizedDragAndDrop();
 
-  // LAYOUT FIX: Better textarea handling
+  // SCROLL FIX: Better textarea handling
   const journalInput = document.getElementById('journalInput');
   if (journalInput) {
     const debouncedResize = debounce(function() {
-      // LAYOUT FIX: Limit max height to prevent scroll issues
+      // SCROLL FIX: Limit max height to prevent scroll issues
       const maxHeight = window.innerHeight * 0.4; // 40% of viewport height
       this.style.height = 'auto';
       const newHeight = Math.min(this.scrollHeight, maxHeight);
@@ -1765,7 +1741,7 @@ function initializeJournalForm() {
       debouncedResize.call(this);
     });
 
-    // LAYOUT FIX: Initial sizing with height limit
+    // SCROLL FIX: Initial sizing with height limit
     setTimeout(() => {
       const maxHeight = window.innerHeight * 0.4;
       journalInput.style.height = 'auto';
@@ -1813,7 +1789,7 @@ function initFeedbackSystem() {
   }
 }
 
-// LAYOUT FIX: Optimized feedback system
+// SCROLL FIX: Optimized feedback system
 function showFeedback(message, type = 'info', duration = 3000) {
   const container = document.getElementById('feedback-container');
   if (!container) return;
@@ -2041,7 +2017,7 @@ function setupEnhancedValidation() {
   }
 }
 
-// LAYOUT FIX: Optimized drag and drop
+// SCROLL FIX: Optimized drag and drop
 function setupOptimizedDragAndDrop() {
   const dropArea = document.getElementById('journalContainer');
   const dropIndicator = document.getElementById('dropZoneIndicator');
@@ -2380,7 +2356,7 @@ function displayJournalEntry(data) {
   if (resultPreview) {
     resultPreview.classList.remove('hidden');
 
-    // LAYOUT FIX: Better scroll to result
+    // SCROLL FIX: Better scroll to result
     setTimeout(() => {
       resultPreview.scrollIntoView({
         behavior: 'smooth',
