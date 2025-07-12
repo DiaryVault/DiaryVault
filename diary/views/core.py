@@ -21,10 +21,9 @@ from django.urls import reverse_lazy, reverse
 from django.db.models import Count, Sum, Avg, Min, Max, F, Q
 
 from ..models import (
-    Entry, Tag, SummaryVersion, LifeChapter, Biography,
-    UserInsight, EntryTag, UserPreference, Journal, JournalTag
+    Entry, Tag, SummaryVersion, UserInsight, EntryTag, UserPreference, Journal, JournalTag
 )
-from ..forms import EntryForm, SignUpForm, LifeChapterForm
+from ..forms import EntryForm, SignUpForm
 from ..services.ai_service import AIService
 
 from allauth.account.utils import get_next_redirect_url
@@ -143,7 +142,7 @@ def get_featured_journals():
 
             # Ensure view_count exists
             if not hasattr(journal, 'view_count') or journal.view_count is None:
-                journal.view_codeunt = 0
+                journal.view_count = 0
 
         # Shuffle the final list for variety on each page load
         import random
@@ -274,20 +273,20 @@ def signup(request):
             'description': 'Create beautiful journal entries powered by AI. Track your daily experiences, emotions, and reflections.',
             'icon': 'pencil'
         },
-        'library': {
-            'title': 'Browse Your Memory Library',
-            'description': 'Organize and explore your journal entries by time period, mood, and themes.',
+        'series': {
+            'title': 'Organize Your Series',
+            'description': 'Group your journal entries into themed collections and track your progress over time.',
             'icon': 'book'
+        },
+        'stories': {
+            'title': 'Write Your Stories',
+            'description': 'Create fiction, memoirs, poetry, and creative writing with chapter-based organization.',
+            'icon': 'feather'
         },
         'insights': {
             'title': 'Discover Personal Insights',
             'description': 'Get AI-powered analytics about your writing patterns, mood trends, and personal growth.',
             'icon': 'chart'
-        },
-        'biography': {
-            'title': 'Create Your Life Story',
-            'description': 'DiaryVault transforms your journal entries into beautiful chapter-based biographies.',
-            'icon': 'document'
         }
     }
 
@@ -315,17 +314,17 @@ def signup(request):
             redirect_url = 'dashboard'  # Default redirect
 
             if feature == 'journal':
-                redirect_url = 'new_entry'
+                redirect_url = 'journal'
                 messages.success(request, "Your account has been created! Start your first journal entry.")
-            elif feature == 'library':
-                redirect_url = 'library'
-                messages.success(request, "Your account has been created! Explore your journal library.")
+            elif feature == 'series':
+                redirect_url = 'journal'  # For now, redirect to journal until series is implemented
+                messages.success(request, "Your account has been created! Start creating journal series.")
+            elif feature == 'stories':
+                redirect_url = 'journal'  # For now, redirect to journal until stories is implemented
+                messages.success(request, "Your account has been created! Start writing your stories.")
             elif feature == 'insights':
                 redirect_url = 'insights'
                 messages.success(request, "Your account has been created! Discover insights about your journaling.")
-            elif feature == 'biography':
-                redirect_url = 'biography'
-                messages.success(request, "Your account has been created! Start building your biography.")
             else:
                 messages.success(request, "Welcome to DiaryVault! Your account has been created successfully.")
 
@@ -348,7 +347,7 @@ def signup(request):
 
 @login_required
 def dashboard(request):
-    """Main dashboard with books and recent entries"""
+    """Main dashboard with time periods and recent entries"""
     # Check for save_after_login flag
     if request.session.pop('save_after_login', False):
         try:
@@ -388,14 +387,8 @@ def dashboard(request):
     # Sort time periods by most recent first
     sorted_periods = sorted(time_periods.values(), key=lambda x: x['period'], reverse=True)
 
-    # Get life chapters
-    chapters = LifeChapter.objects.filter(user=request.user)
-
     # Get recent entries
     recent_entries = entries.order_by('-created_at')[:5]
-
-    # Get biography
-    biography = Biography.objects.filter(user=request.user).first()
 
     # Get insights
     insights = UserInsight.objects.filter(user=request.user)
@@ -422,15 +415,27 @@ def dashboard(request):
                 else:
                     break
 
+    # Calculate stats for dashboard cards
+    total_entries = entries.count()
+    total_words = sum(len(entry.content.split()) for entry in entries) if entries.exists() else 0
+    
+    # Get mood distribution for quick stats
+    mood_counts = {}
+    for entry in entries:
+        if entry.mood:
+            mood_counts[entry.mood] = mood_counts.get(entry.mood, 0) + 1
+    
+    dominant_mood = max(mood_counts.items(), key=lambda x: x[1])[0] if mood_counts else None
+
     context = {
         'time_periods': sorted_periods[:5],  # Show top 5 most recent periods
-        'chapters': chapters,
         'recent_entries': recent_entries,
-        'biography': biography,
         'insights': insights,
         'streak': streak,
-        'total_entries': entries.count(),
-        'completion_percentage': biography.completion_percentage() if biography else 0
+        'total_entries': total_entries,
+        'total_words': total_words,
+        'dominant_mood': dominant_mood,
+        'mood_counts': mood_counts,
     }
 
     return render(request, 'diary/dashboard.html', context)
@@ -781,20 +786,20 @@ class CustomSignupView(AllauthSignupView):
                 'description': 'Create beautiful journal entries powered by AI. Track your daily experiences, emotions, and reflections.',
                 'icon': 'pencil'
             },
-            'library': {
-                'title': 'Browse Your Memory Library',
-                'description': 'Organize and explore your journal entries by time period, mood, and themes.',
+            'series': {
+                'title': 'Organize Your Series',
+                'description': 'Group your journal entries into themed collections and track your progress over time.',
                 'icon': 'book'
+            },
+            'stories': {
+                'title': 'Write Your Stories',
+                'description': 'Create fiction, memoirs, poetry, and creative writing with chapter-based organization.',
+                'icon': 'feather'
             },
             'insights': {
                 'title': 'Discover Personal Insights',
                 'description': 'Get AI-powered analytics about your writing patterns, mood trends, and personal growth.',
                 'icon': 'chart'
-            },
-            'biography': {
-                'title': 'Create Your Life Story',
-                'description': 'DiaryVault transforms your journal entries into beautiful chapter-based biographies.',
-                'icon': 'document'
             }
         }
 
@@ -807,13 +812,13 @@ class CustomSignupView(AllauthSignupView):
         feature = self.request.GET.get('feature', None)
 
         if feature == 'journal':
-            return reverse('new_entry')
-        elif feature == 'library':
-            return reverse('library')
+            return reverse('journal')
+        elif feature == 'series':
+            return reverse('journal')  # For now, redirect to journal until series is implemented
+        elif feature == 'stories':
+            return reverse('journal')  # For now, redirect to journal until stories is implemented
         elif feature == 'insights':
             return reverse('insights')
-        elif feature == 'biography':
-            return reverse('biography')
         else:
             return reverse('dashboard')
 
@@ -831,14 +836,13 @@ class CustomSignupView(AllauthSignupView):
         feature = self.request.GET.get('feature', None)
         if feature == 'journal':
             messages.success(self.request, "Your account has been created! Start your first journal entry.")
-        elif feature == 'library':
-            messages.success(self.request, "Your account has been created! Explore your journal library.")
+        elif feature == 'series':
+            messages.success(self.request, "Your account has been created! Start creating journal series.")
+        elif feature == 'stories':
+            messages.success(self.request, "Your account has been created! Start writing your stories.")
         elif feature == 'insights':
             messages.success(self.request, "Your account has been created! Discover insights about your journaling.")
-        elif feature == 'biography':
-            messages.success(self.request, "Your account has been created! Start building your biography.")
         else:
             messages.success(self.request, "Welcome to DiaryVault! Your account has been created successfully.")
 
         return response
-

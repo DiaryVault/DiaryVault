@@ -11,7 +11,7 @@ from .views.marketplace import (
     like_journal, tip_author, marketplace_author_profile,
     marketplace_monetization, marketplace_contest, marketplace_faq,
     purchase_journal_api, tip_author_api, earnings_dashboard,
-    publish_biography, my_published_journals
+    my_published_journals
 )
 from .views import journal_compiler, marketplace_views
 from .views import api
@@ -80,15 +80,6 @@ urlpatterns = [
     path('delete-chapter/<int:chapter_id>/', views.user.delete_chapter, name='delete_chapter'),
 
     # ============================================================================
-    # Biography Feature
-    # ============================================================================
-    path('biography/', views.biography, name='biography'),
-    path('biography/manage-chapters/', views.manage_chapters, name='manage_chapters'),
-    path('biography/edit-chapter/<int:chapter_id>/', views.edit_chapter, name='edit_chapter'),
-    path('biography/delete-chapter/<int:chapter_id>/', views.delete_chapter, name='delete_chapter'),
-    path('biography/regenerate-chapter/<int:chapter_id>/', views.regenerate_chapter, name='regenerate_chapter'),
-
-    # ============================================================================
     # Insights & Analytics
     # ============================================================================
     path('insights/', views.insights, name='insights'),
@@ -101,7 +92,6 @@ urlpatterns = [
 
     # Publishing functionality
     path('marketplace/publish/', journal_compiler.smart_journal_compiler, name='publish_journal'),
-    path('marketplace/publish-biography/', publish_biography, name='publish_biography'),
 
     # Journal detail and interactions
     path('marketplace/journal/<int:journal_id>/', marketplace_journal_detail, name='marketplace_journal_detail'),
@@ -132,9 +122,6 @@ urlpatterns = [
     # Journal Generation & Management
     path('api/demo-journal/', views.demo_journal, name='demo_journal'),
     path('save-generated-entry/', views.save_generated_entry, name='save_generated_entry'),
-
-    # Biography API
-    path('api/biography/generate/', views.generate_biography_api, name='generate_biography_api'),
 
     # Entry Management API
     path('api/entry/<int:entry_id>/regenerate-summary/', views.regenerate_summary_ajax, name='regenerate_summary_ajax'),

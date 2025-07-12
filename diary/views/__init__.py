@@ -15,13 +15,6 @@ from .insights import (
     generate_mood_trends, generate_user_insights
 )
 
-# Biography views
-from .biography import (
-    biography, manage_chapters, edit_chapter, delete_chapter,
-    generate_biography_api,
-    regenerate_chapter,
-)
-
 # API views (existing functionality)
 from .api import (
     # Original API views
@@ -103,10 +96,6 @@ __all__ = [
     # Insights views
     'insights', 'generate_mood_distribution', 'generate_tag_distribution',
     'generate_mood_trends', 'generate_user_insights',
-
-    # Biography views
-    'biography', 'manage_chapters', 'edit_chapter', 'delete_chapter',
-    'generate_biography_api', 'regenerate_chapter',
 
     # Original API views
     'demo_journal', 'regenerate_summary_ajax', 'save_generated_entry', 'chat_with_ai',
