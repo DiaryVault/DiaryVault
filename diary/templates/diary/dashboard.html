@@ -546,8 +546,8 @@
               <div class="text-sm text-gray-500">Streak</div>
             </div>
             <div class="text-center bg-white p-mobile-3 rounded-xl border border-gray-100">
-              <div class="text-mobile-2xl font-bold text-purple-600">{{ completion_percentage }}%</div>
-              <div class="text-sm text-gray-500">Biography</div>
+              <div class="text-mobile-2xl font-bold text-purple-600">{{ total_words|default:0 }}</div>
+              <div class="text-sm text-gray-500">Words</div>
             </div>
           </div>
         </div>
@@ -565,14 +565,14 @@
           <div class="text-xs text-gray-500">Record today</div>
         </a>
 
-        <a href="{% url 'biography' %}" class="quick-action active-mobile">
+        <a href="{% url 'library' %}" class="quick-action active-mobile">
           <div class="w-12 h-12 bg-purple-100 rounded-xl flex-mobile-center mb-2">
             <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           </div>
-          <div class="text-sm font-semibold text-gray-800">Biography</div>
-          <div class="text-xs text-gray-500">Life story</div>
+          <div class="text-sm font-semibold text-gray-800">Collections</div>
+          <div class="text-xs text-gray-500">Browse all</div>
         </a>
 
         <a href="{% url 'insights' %}" class="quick-action active-mobile">
@@ -779,47 +779,6 @@
 
     <!-- Sidebar Content (Desktop only) -->
     <div class="sidebar-content desktop-only">
-      <!-- Biography Preview -->
-      <div class="card-mobile-lg mb-mobile-6" style="background: linear-gradient(135deg, #f8fafc, #e2e8f0);">
-        <div class="flex-mobile-between mb-4">
-          <h2 class="text-mobile-xl font-bold text-gray-800 flex items-center gap-2">
-            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Biography Preview
-          </h2>
-          <div class="text-sm text-gray-500">Updated today</div>
-        </div>
-
-        <div class="mb-4">
-          <div class="flex-mobile-between text-sm text-gray-600 mb-2">
-            <span>{{ total_entries }} entries processed</span>
-            <span>{{ completion_percentage }}% complete</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: {{ completion_percentage }}%"></div>
-          </div>
-        </div>
-
-        <div class="bg-white p-4 rounded-xl">
-          <div class="text-gray-800 leading-relaxed" style="font-family: 'Georgia', serif;">
-            {% if biography_preview %}
-              {{ biography_preview }}
-            {% else %}
-              As you add more entries, your AI-generated biography will appear here. Start journaling to see your life story unfold.
-            {% endif %}
-          </div>
-          <div class="mt-4 text-center">
-            <a href="{% url 'biography' %}" class="text-purple-600 hover:underline flex items-center justify-center gap-1">
-              <span>Continue reading</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
-          </div>
-        </div>
-      </div>
-
       <!-- AI Insights Preview -->
       <div class="card-mobile mb-mobile-6" style="background: linear-gradient(135deg, #eff6ff, #dbeafe);">
         <div class="flex-mobile-between mb-4">
@@ -953,47 +912,6 @@
         <a href="{% url 'new_entry' %}" class="btn-mobile" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">Create Your First Entry</a>
       </div>
       {% endfor %}
-    </div>
-  </div>
-
-  <!-- Biography Preview (Mobile Only) -->
-  <div class="mobile-only card-mobile-lg mb-mobile-8" style="background: linear-gradient(135deg, #f8fafc, #e2e8f0);">
-    <div class="flex-mobile-between mb-4">
-      <h2 class="text-mobile-xl font-bold text-gray-800 flex items-center gap-2">
-        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        Biography Preview
-      </h2>
-      <div class="text-sm text-gray-500">Updated today</div>
-    </div>
-
-    <div class="mb-4">
-      <div class="flex-mobile-between text-sm text-gray-600 mb-2">
-        <span>{{ total_entries }} entries processed</span>
-        <span>{{ completion_percentage }}% complete</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" style="width: {{ completion_percentage }}%"></div>
-      </div>
-    </div>
-
-    <div class="bg-white p-4 rounded-xl">
-      <div class="text-gray-800 leading-relaxed" style="font-family: 'Georgia', serif;">
-        {% if biography_preview %}
-          {{ biography_preview }}
-        {% else %}
-          As you add more entries, your AI-generated biography will appear here. Start journaling to see your life story unfold.
-        {% endif %}
-      </div>
-      <div class="mt-4 text-center">
-        <a href="{% url 'biography' %}" class="text-purple-600 hover:underline flex items-center justify-center gap-1">
-          <span>Continue reading</span>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </a>
-      </div>
     </div>
   </div>
 
