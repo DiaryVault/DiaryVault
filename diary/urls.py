@@ -70,16 +70,6 @@ urlpatterns = [
     path('library/time-period/<str:period>/', views.time_period_view, name='time_period'),
 
     # ============================================================================
-    # Life Chapters Management
-    # ============================================================================
-    path('manage-chapters/', views.user.manage_chapters, name='manage_chapters'),
-    path('create-chapter/', views.user.create_chapter, name='create_chapter'),
-    path('update-chapter/', views.user.update_chapter, name='update_chapter'),
-    path('close-chapter/<int:chapter_id>/', views.user.close_chapter, name='close_chapter'),
-    path('reactivate-chapter/<int:chapter_id>/', views.user.reactivate_chapter, name='reactivate_chapter'),
-    path('delete-chapter/<int:chapter_id>/', views.user.delete_chapter, name='delete_chapter'),
-
-    # ============================================================================
     # Insights & Analytics
     # ============================================================================
     path('insights/', views.insights, name='insights'),
