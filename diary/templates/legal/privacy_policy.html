@@ -4,7 +4,7 @@
 
 {% block extra_css %}
 <style>
-  /* Enhanced Privacy Policy - Integrated with base.html design system */
+  /* Enhanced Privacy Policy - Streamlined without floating navigation */
   
   /* Override container constraints for full-width design */
   .privacy-main {
@@ -22,67 +22,15 @@
     position: relative;
   }
 
-  /* Floating Navigation - matches base.html glass morphism */
-  .floating-nav {
+  /* Progress Indicator */
+  .progress-indicator {
     position: fixed;
-    right: 2rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border-radius: 24px;
-    padding: 1rem;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    z-index: 100;
-    max-height: 80vh;
-    overflow-y: auto;
-    width: 280px;
-    transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
-  }
-
-  .floating-nav:hover {
-    transform: translateY(-50%) scale(1.02);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-  }
-
-  .floating-nav.hidden {
-    transform: translateY(-50%) translateX(calc(100% + 2rem));
-    opacity: 0;
-  }
-
-  /* Navigation toggle - matches base.html button system */
-  .nav-toggle {
-    position: fixed;
-    right: 2rem;
-    top: 2rem;
-    width: 56px;
-    height: 56px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 101;
-    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
-    transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
-    border: none;
-  }
-
-  .nav-toggle:hover {
-    transform: scale(1.1);
-    box-shadow: 0 12px 35px rgba(99, 102, 241, 0.4);
-  }
-
-  .nav-toggle svg {
-    color: white;
-    transition: transform 0.3s ease;
-  }
-
-  .nav-toggle.active svg {
-    transform: rotate(180deg);
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+    z-index: 1000;
+    transition: width 0.3s ease;
   }
 
   /* Enhanced Hero - integrates with base.html gradients */
@@ -135,6 +83,154 @@
   @keyframes heroFloat {
     0%, 100% { transform: translateY(0px) rotate(0deg); }
     50% { transform: translateY(-10px) rotate(2deg); }
+  }
+
+  /* Table of Contents Navigation */
+  .table-of-contents {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 100px;
+    z-index: 10;
+    overflow: hidden;
+  }
+
+  .table-of-contents::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.3), transparent);
+  }
+
+  .toc-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+  }
+
+  .toc-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  }
+
+  .toc-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .toc-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .toc-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    text-decoration: none;
+    color: #4b5563;
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+    font-size: 0.875rem;
+    border: 1px solid rgba(229, 231, 235, 0.8);
+    background: rgba(255, 255, 255, 0.6);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+
+  .toc-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .toc-item-icon {
+    width: 20px;
+    height: 20px;
+    color: #9ca3af;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+
+  .toc-item-text {
+    flex: 1;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .toc-item-arrow {
+    width: 16px;
+    height: 16px;
+    color: #d1d5db;
+    transition: all 0.3s ease;
+    transform: translateX(-4px);
+    opacity: 0;
+  }
+
+  .toc-item:hover {
+    background: rgba(255, 255, 255, 0.9);
+    color: #1f2937;
+    border-color: rgba(99, 102, 241, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
+    text-decoration: none;
+  }
+
+  .toc-item:hover::before {
+    left: 100%;
+  }
+
+  .toc-item:hover .toc-item-icon {
+    color: #6366f1;
+    transform: scale(1.1);
+  }
+
+  .toc-item:hover .toc-item-text {
+    color: #1f2937;
+    font-weight: 600;
+  }
+
+  .toc-item:hover .toc-item-arrow {
+    opacity: 1;
+    transform: translateX(0);
+    color: #6366f1;
   }
 
   /* Enhanced Sections - use base.html glass-card system */
@@ -321,62 +417,6 @@
     box-shadow: 0 8px 25px rgba(245, 158, 11, 0.2);
   }
 
-  /* Floating Navigation Items - match base.html nav-link styles */
-  .nav-item {
-    display: block;
-    padding: 0.75rem 1rem;
-    color: #64748b;
-    text-decoration: none;
-    border-radius: 12px;
-    margin-bottom: 0.5rem;
-    transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
-    border: 1px solid transparent;
-    position: relative;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(10px);
-  }
-
-  .nav-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
-    transition: left 0.5s ease;
-  }
-
-  .nav-item:hover {
-    color: #1e293b;
-    background: rgba(99, 102, 241, 0.05);
-    border-color: rgba(99, 102, 241, 0.2);
-    transform: translateX(8px);
-    text-decoration: none;
-  }
-
-  .nav-item:hover::before {
-    left: 100%;
-  }
-
-  .nav-item.active {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: white;
-    font-weight: 600;
-  }
-
-  /* Progress Indicator */
-  .progress-indicator {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
-    z-index: 1000;
-    transition: width 0.3s ease;
-  }
-
   /* Enhanced Contact Section - match base.html button styles */
   .contact-section {
     background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
@@ -456,14 +496,6 @@
 
   /* Responsive Design - match base.html breakpoints */
   @media (max-width: 1024px) {
-    .floating-nav {
-      display: none;
-    }
-    
-    .nav-toggle {
-      display: none;
-    }
-    
     .privacy-container {
       padding: 1rem;
     }
@@ -474,6 +506,15 @@
     
     .privacy-hero {
       padding: 4rem 1.5rem;
+    }
+
+    .table-of-contents {
+      position: static;
+      margin-bottom: 2rem;
+    }
+
+    .toc-grid {
+      grid-template-columns: 1fr;
     }
   }
 
@@ -496,6 +537,10 @@
       justify-content: center;
       margin: 0.5rem 0;
     }
+
+    .toc-item {
+      padding: 0.75rem 1rem;
+    }
   }
 
   /* Target highlighting */
@@ -508,25 +553,6 @@
     100% { background: rgba(255, 255, 255, 0.9); }
   }
 
-  /* Custom scrollbar for floating nav */
-  .floating-nav::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .floating-nav::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 3px;
-  }
-
-  .floating-nav::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    border-radius: 3px;
-  }
-
-  .floating-nav::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #5856eb, #7c3aed);
-  }
-
   /* Dark mode compatibility with base.html */
   @media (prefers-color-scheme: dark) {
     .privacy-section {
@@ -534,20 +560,58 @@
       border-color: rgba(148, 163, 184, 0.2);
     }
 
-    .floating-nav {
+    .table-of-contents {
       background: rgba(15, 23, 42, 0.95);
       border-color: rgba(148, 163, 184, 0.2);
     }
 
-    .nav-item {
+    .toc-item {
       background: rgba(30, 41, 59, 0.6);
       color: #94a3b8;
     }
 
-    .nav-item:hover {
+    .toc-item:hover {
       color: #f8fafc;
       background: rgba(99, 102, 241, 0.2);
     }
+  }
+
+  /* Enhanced scrolling experience */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Back to top button */
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+    opacity: 0;
+    transform: translateY(20px);
+    z-index: 100;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: 0 12px 35px rgba(99, 102, 241, 0.4);
+    text-decoration: none;
+    color: white;
   }
 </style>
 {% endblock %}
@@ -557,33 +621,6 @@
 <div class="privacy-main">
   <!-- Progress Indicator -->
   <div class="progress-indicator" id="progressBar"></div>
-
-  <!-- Floating Navigation Toggle -->
-  <button class="nav-toggle" id="navToggle">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-  </button>
-
-  <!-- Floating Navigation -->
-  <nav class="floating-nav" id="floatingNav">
-    <div class="text-center mb-4">
-      <h3 class="font-bold text-gray-800 mb-1 diary-font">Quick Navigation</h3>
-      <p class="text-sm text-gray-600">Jump to any section</p>
-    </div>
-    <a href="#overview" class="nav-item" data-section="overview">📖 Overview</a>
-    <a href="#information-collection" class="nav-item" data-section="information-collection">📋 Information Collection</a>
-    <a href="#information-use" class="nav-item" data-section="information-use">⚙️ How We Use Info</a>
-    <a href="#information-sharing" class="nav-item" data-section="information-sharing">🔗 Information Sharing</a>
-    <a href="#data-security" class="nav-item" data-section="data-security">🔒 Data Security</a>
-    <a href="#user-rights" class="nav-item" data-section="user-rights">👤 Your Rights</a>
-    <a href="#cookies" class="nav-item" data-section="cookies">🍪 Cookies & Tracking</a>
-    <a href="#marketplace" class="nav-item" data-section="marketplace">🛒 Marketplace Privacy</a>
-    <a href="#children" class="nav-item" data-section="children">👶 Children's Privacy</a>
-    <a href="#international" class="nav-item" data-section="international">🌍 International Users</a>
-    <a href="#changes" class="nav-item" data-section="changes">🔄 Policy Changes</a>
-    <a href="#contact" class="nav-item" data-section="contact">📧 Contact Us</a>
-  </nav>
 
   <div class="privacy-container">
     <!-- Enhanced Hero Section -->
@@ -604,6 +641,107 @@
         </div>
       </div>
     </div>
+
+    <!-- Table of Contents -->
+    <nav class="table-of-contents">
+      <div class="toc-header">
+        <div class="toc-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="toc-title">Privacy Policy Navigation</h3>
+          <p class="toc-subtitle">Jump to any section quickly</p>
+        </div>
+      </div>
+      <div class="toc-grid">
+        <a href="#overview" class="toc-item">
+          <div class="toc-item-icon">📖</div>
+          <span class="toc-item-text">Overview</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="toc-item-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+        <a href="#information-collection" class="toc-item">
+          <div class="toc-item-icon">📋</div>
+          <span class="toc-item-text">Information Collection</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="toc-item-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+        <a href="#information-use" class="toc-item">
+          <div class="toc-item-icon">⚙️</div>
+          <span class="toc-item-text">How We Use Info</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="toc-item-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+        <a href="#information-sharing" class="toc-item">
+          <div class="toc-item-icon">🔗</div>
+          <span class="toc-item-text">Information Sharing</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="toc-item-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+        <a href="#data-security" class="toc-item">
+          <div class="toc-item-icon">🔒</div>
+          <span class="toc-item-text">Data Security</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="toc-item-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+        <a href="#user-rights" class="toc-item">
+          <div class="toc-item-icon">👤</div>
+          <span class="toc-item-text">Your Rights</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="toc-item-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+        <a href="#cookies" class="toc-item">
+          <div class="toc-item-icon">🍪</div>
+          <span class="toc-item-text">Cookies & Tracking</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="toc-item-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+        <a href="#marketplace" class="toc-item">
+          <div class="toc-item-icon">🛒</div>
+          <span class="toc-item-text">Marketplace Privacy</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="toc-item-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+        <a href="#children" class="toc-item">
+          <div class="toc-item-icon">👶</div>
+          <span class="toc-item-text">Children's Privacy</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="toc-item-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+        <a href="#international" class="toc-item">
+          <div class="toc-item-icon">🌍</div>
+          <span class="toc-item-text">International Users</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="toc-item-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+        <a href="#changes" class="toc-item">
+          <div class="toc-item-icon">🔄</div>
+          <span class="toc-item-text">Policy Changes</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="toc-item-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+        <a href="#contact" class="toc-item">
+          <div class="toc-item-icon">📧</div>
+          <span class="toc-item-text">Contact Us</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="toc-item-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+    </nav>
 
     <!-- Privacy Policy Sections -->
     <section id="overview" class="privacy-section">
@@ -811,26 +949,22 @@
       <p class="text-gray-600">Version 2.1 - Effective January 1, 2025</p>
     </div>
   </div>
+
+  <!-- Back to Top Button -->
+  <a href="#" class="back-to-top" id="backToTop">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+    </svg>
+  </a>
 </div>
 
 <script>
-// Enhanced JavaScript for better UX - integrated with base.html
+// Enhanced JavaScript for streamlined UX
 document.addEventListener('DOMContentLoaded', function() {
   // Use base.html toast system if available
   const showToast = window.showToast || function(message, type) {
     console.log(`[${type.toUpperCase()}] ${message}`);
   };
-
-  // Floating navigation toggle
-  const navToggle = document.getElementById('navToggle');
-  const floatingNav = document.getElementById('floatingNav');
-  
-  if (navToggle && floatingNav) {
-    navToggle.addEventListener('click', function() {
-      floatingNav.classList.toggle('hidden');
-      navToggle.classList.toggle('active');
-    });
-  }
 
   // Progress indicator
   const progressBar = document.getElementById('progressBar');
@@ -847,15 +981,58 @@ document.addEventListener('DOMContentLoaded', function() {
   
   window.addEventListener('scroll', updateProgressBar, { passive: true });
 
-  // Active section highlighting
-  const navItems = document.querySelectorAll('.nav-item');
+  // Back to top button
+  const backToTop = document.getElementById('backToTop');
+  
+  function toggleBackToTop() {
+    if (window.pageYOffset > 300) {
+      backToTop.classList.add('visible');
+    } else {
+      backToTop.classList.remove('visible');
+    }
+  }
+  
+  window.addEventListener('scroll', toggleBackToTop, { passive: true });
+  
+  backToTop.addEventListener('click', function(e) {
+    e.preventDefault();
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+    showToast('Scrolled to top', 'info');
+  });
+
+  // Smooth scroll for table of contents
+  const tocItems = document.querySelectorAll('.toc-item');
+  
+  tocItems.forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href').substring(1);
+      const targetSection = document.getElementById(targetId);
+      
+      if (targetSection) {
+        const offsetTop = targetSection.offsetTop - 100; // Account for header
+        window.scrollTo({
+          top: offsetTop,
+          behavior: 'smooth'
+        });
+        
+        // Show toast feedback
+        showToast(`Navigating to ${this.querySelector('.toc-item-text').textContent.trim()}`, 'info');
+      }
+    });
+  });
+
+  // Enhanced section highlighting
   const sections = document.querySelectorAll('.privacy-section');
   
-  function highlightActiveSection() {
+  function highlightCurrentSection() {
     let currentSection = '';
     
     sections.forEach(section => {
-      const sectionTop = section.offsetTop - 100;
+      const sectionTop = section.offsetTop - 150;
       const sectionHeight = section.clientHeight;
       
       if (pageYOffset >= sectionTop && pageYOffset < sectionTop + sectionHeight) {
@@ -863,48 +1040,22 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
     
-    navItems.forEach(item => {
-      item.classList.remove('active');
-      if (item.getAttribute('data-section') === currentSection) {
-        item.classList.add('active');
+    // Update TOC active state
+    tocItems.forEach(item => {
+      const href = item.getAttribute('href').substring(1);
+      if (href === currentSection) {
+        item.style.background = 'rgba(99, 102, 241, 0.1)';
+        item.style.color = '#6366f1';
+        item.style.borderColor = 'rgba(99, 102, 241, 0.3)';
+      } else {
+        item.style.background = '';
+        item.style.color = '';
+        item.style.borderColor = '';
       }
     });
   }
   
-  window.addEventListener('scroll', highlightActiveSection, { passive: true });
-
-  // Smooth scroll for nav items
-  navItems.forEach(item => {
-    item.addEventListener('click', function(e) {
-      e.preventDefault();
-      const targetId = this.getAttribute('href').substring(1);
-      const targetSection = document.getElementById(targetId);
-      
-      if (targetSection) {
-        targetSection.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-        
-        // Show toast feedback
-        showToast(`Navigating to ${this.textContent.trim()}`, 'info');
-      }
-    });
-  });
-
-  // Hide floating nav on mobile/tablet
-  function checkScreenSize() {
-    if (window.innerWidth <= 1024) {
-      if (floatingNav) floatingNav.style.display = 'none';
-      if (navToggle) navToggle.style.display = 'none';
-    } else {
-      if (floatingNav) floatingNav.style.display = 'block';
-      if (navToggle) navToggle.style.display = 'flex';
-    }
-  }
-  
-  window.addEventListener('resize', checkScreenSize, { passive: true });
-  checkScreenSize(); // Initial check
+  window.addEventListener('scroll', highlightCurrentSection, { passive: true });
 
   // Add loading animation to icons on page load
   const icons = document.querySelectorAll('.section-icon svg');
@@ -917,18 +1068,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }, index * 200);
   });
 
-  // Keyboard shortcuts integration with base.html
+  // Keyboard shortcuts
   document.addEventListener('keydown', function(e) {
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
-    if (e.key === 'Escape' && floatingNav && !floatingNav.classList.contains('hidden')) {
-      floatingNav.classList.add('hidden');
-      navToggle && navToggle.classList.remove('active');
+    // Home key - scroll to top
+    if (e.key === 'Home') {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast('Scrolled to top', 'info');
     }
 
-    if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+    // End key - scroll to bottom
+    if (e.key === 'End') {
       e.preventDefault();
-      if (navToggle) navToggle.click();
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      showToast('Scrolled to bottom', 'info');
+    }
+
+    // Spacebar - page down
+    if (e.key === ' ') {
+      e.preventDefault();
+      window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' });
     }
   });
 
@@ -940,7 +1101,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  console.log('Enhanced Privacy Policy initialized with base.html integration');
+  // Initialize
+  updateProgressBar();
+  toggleBackToTop();
+  highlightCurrentSection();
+  
+  console.log('Streamlined Privacy Policy initialized');
 });
 
 // Add styles for icon spin animation
