@@ -1752,25 +1752,42 @@ function initializeJournalForm() {
   // LAYOUT FIX: Better textarea handling
   const journalInput = document.getElementById('journalInput');
   if (journalInput) {
-    const debouncedResize = debounce(function() {
-      // LAYOUT FIX: Limit max height to prevent scroll issues
-      const maxHeight = window.innerHeight * 0.4; // 40% of viewport height
-      this.style.height = 'auto';
-      const newHeight = Math.min(this.scrollHeight, maxHeight);
-      this.style.height = newHeight + 'px';
+    // Store reference to the element for the debounced function
+    const debouncedResize = debounce(function(element) {
+      if (!element || !element.style) {
+        console.warn('Invalid element passed to debouncedResize');
+        return;
+      }
+      
+      try {
+        // LAYOUT FIX: Limit max height to prevent scroll issues
+        const maxHeight = window.innerHeight * 0.4; // 40% of viewport height
+        element.style.height = 'auto';
+        const newHeight = Math.min(element.scrollHeight, maxHeight);
+        element.style.height = newHeight + 'px';
+      } catch (error) {
+        console.error('Error in debouncedResize:', error);
+      }
     }, 100);
 
     journalInput.addEventListener('input', function() {
       countChars();
-      debouncedResize.call(this);
+      // Pass the element explicitly to the debounced function
+      debouncedResize(this);
     });
 
     // LAYOUT FIX: Initial sizing with height limit
     setTimeout(() => {
-      const maxHeight = window.innerHeight * 0.4;
-      journalInput.style.height = 'auto';
-      const newHeight = Math.min(journalInput.scrollHeight, maxHeight);
-      journalInput.style.height = newHeight + 'px';
+      if (journalInput && journalInput.style) {
+        try {
+          const maxHeight = window.innerHeight * 0.4;
+          journalInput.style.height = 'auto';
+          const newHeight = Math.min(journalInput.scrollHeight, maxHeight);
+          journalInput.style.height = newHeight + 'px';
+        } catch (error) {
+          console.error('Error in initial textarea sizing:', error);
+        }
+      }
     }, 100);
 
     const journalContainer = document.getElementById('journalContainer');
