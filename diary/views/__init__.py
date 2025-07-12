@@ -6,7 +6,7 @@ from .core import home, signup, dashboard, custom_login, CustomLoginView
 # Entry views
 from .entries import (
     journal, entry_detail, edit_entry, delete_entry,
-    library, time_period_view, assign_to_chapter
+    library, time_period_view
 )
 
 # Insights views
@@ -91,7 +91,7 @@ __all__ = [
 
     # Entry views
     'journal', 'entry_detail', 'edit_entry', 'delete_entry',
-    'library', 'time_period_view', 'assign_to_chapter',
+    'library', 'time_period_view',
 
     # Insights views
     'insights', 'generate_mood_distribution', 'generate_tag_distribution',
