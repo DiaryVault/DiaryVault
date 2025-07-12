@@ -160,46 +160,41 @@ SOCIALACCOUNT_ADAPTER = 'diary.adapters.CustomSocialAccountAdapter'
 
 SOCIALACCOUNT_FORMS = {}
 
-# FIXED: Enhanced social account settings for seamless login
-SOCIALACCOUNT_AUTO_SIGNUP = True  # Skip signup form entirely
-SOCIALACCOUNT_SIGNUP_FORM_CLASS = None  # No signup form
-SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Don't require email verification
-SOCIALACCOUNT_EMAIL_REQUIRED = False  # Don't require email in signup form
-SOCIALACCOUNT_QUERY_EMAIL = True  # Always fetch email from provider
-SOCIALACCOUNT_LOGIN_ON_GET = True  # Social account settings (if using social login)
-SOCIALACCOUNT_STORE_TOKENS = False
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# FIXED: Django-allauth specific settings for seamless login
-ACCOUNT_LOGIN_REDIRECT_URL = '/dashboard/'
-ACCOUNT_LOGOUT_REDIRECT_URL = '/login/'
-ACCOUNT_SIGNUP_REDIRECT_URL = '/dashboard/'
-
-# ADDED: Force redirect to dashboard for social logins
-LOGIN_REDIRECT_URL = '/dashboard/'
-SOCIALACCOUNT_LOGIN_ON_GET = True
-
-# ADDED: Additional redirect settings to prevent /accounts/profile/ redirect
-LOGIN_URL = '/login/'
-LOGOUT_URL = '/logout/'
-
-# FIXED: Enhanced allauth configuration - KEY CHANGES HERE
+# FIXED: Django-allauth settings for proper signup form
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'  # Allow both username and email login
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True  # This ensures username field appears in signup
 ACCOUNT_EMAIL_VERIFICATION = 'optional'  # No email verification required
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 ACCOUNT_LOGOUT_ON_GET = False  # Require POST for logout (security)
 ACCOUNT_SESSION_REMEMBER = True  # Remember login sessions
 
-# ADDED: More aggressive settings to prevent signup forms
+# Redirect settings
+ACCOUNT_LOGIN_REDIRECT_URL = '/dashboard/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/login/'
+ACCOUNT_SIGNUP_REDIRECT_URL = '/dashboard/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGIN_URL = '/login/'
+LOGOUT_URL = '/logout/'
+
+# Additional allauth settings
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
-ACCOUNT_UNIQUE_EMAIL = True  # Allow duplicate emails if needed - CRITICAL FOR YOUR CASE
+ACCOUNT_UNIQUE_EMAIL = True  # Allow duplicate emails if needed
 ACCOUNT_PREVENT_ENUMERATION = False  # Don't block based on existing emails
 
-ACCOUNT_LOGIN_METHODS = ['email']
-ACCOUNT_SIGNUP_FIELDS = ['email']
+# FIXED: Social account settings (separate from regular signup)
+SOCIALACCOUNT_AUTO_SIGNUP = True  # Skip signup form for social accounts
+SOCIALACCOUNT_SIGNUP_FORM_CLASS = None  # No additional signup form for social
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Don't require email verification for social
+SOCIALACCOUNT_EMAIL_REQUIRED = False  # Don't require email in social signup (will use provider email)
+SOCIALACCOUNT_QUERY_EMAIL = True  # Always fetch email from provider
+SOCIALACCOUNT_LOGIN_ON_GET = True  # Allow social login via GET
+SOCIALACCOUNT_STORE_TOKENS = False
 
 # FIXED: Enhanced SOCIALACCOUNT_PROVIDERS with better configuration
 SOCIALACCOUNT_PROVIDERS = {
@@ -212,7 +207,6 @@ SOCIALACCOUNT_PROVIDERS = {
             'access_type': 'online',
         },
         'OAUTH_PKCE_ENABLED': True,
-        # ADDED: These help with seamless signup
         'VERIFIED_EMAIL': True,
     },
     'apple': {
@@ -220,7 +214,6 @@ SOCIALACCOUNT_PROVIDERS = {
         'certificate_key': '''-----BEGIN PRIVATE KEY-----
         # Your Apple certificate key will go here
         -----END PRIVATE KEY-----''',
-        # ADDED: These help with seamless signup
         'VERIFIED_EMAIL': True,
     }
 }
