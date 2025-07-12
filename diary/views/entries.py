@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 
-from ..models import Entry, Tag, SummaryVersion, LifeChapter, EntryPhoto
+from ..models import Entry, Tag, SummaryVersion, EntryPhoto
 from ..forms import EntryForm
 from ..services.ai_service import AIService
 from ..utils.analytics import get_mood_emoji, get_tag_color
@@ -183,9 +183,7 @@ def library(request):
     """Optimized library view with tabs for different ways to browse entries"""
 
     # OPTIMIZED: Use select_related and prefetch_related for better query performance
-    all_entries = Entry.objects.filter(user=request.user).select_related(
-        'chapter'  # Fetch chapter data in a single query
-    ).prefetch_related(
+    all_entries = Entry.objects.filter(user=request.user).prefetch_related(
         'tags',    # Prefetch tags to avoid N+1 queries
         'photos'   # Prefetch photos if needed
     ).order_by('-created_at')
@@ -198,7 +196,6 @@ def library(request):
     # Check for filter parameters
     tag_filter = request.GET.get('tag')
     mood_filter = request.GET.get('mood')
-    chapter_filter = request.GET.get('chapter')
 
     # Apply filters based on GET parameters
     if tag_filter:
@@ -214,16 +211,6 @@ def library(request):
         active_filter = mood_filter
         # Get mood entries specifically for the mood tab
         mood_entries = entries
-    elif chapter_filter:
-        # OPTIMIZED: Use select_related data that's already fetched
-        try:
-            chapter = LifeChapter.objects.get(id=chapter_filter, user=request.user)
-            entries = all_entries.filter(chapter=chapter)
-            active_tab = 'time-periods'  # Show in the time periods tab with the chapter books
-            active_filter = chapter.title
-        except LifeChapter.DoesNotExist:
-            # Handle invalid chapter filter gracefully
-            chapter_filter = None
 
     # OPTIMIZED: Get time periods with minimal database queries
     time_periods = {}
@@ -288,22 +275,6 @@ def library(request):
     moods = list(mood_counts.values())
     moods.sort(key=lambda x: x['count'], reverse=True)
 
-    # OPTIMIZED: Get chapters with counts using annotation
-    user_chapters = LifeChapter.objects.filter(user=request.user).annotate(
-        entry_count=Count('entries')
-    ).order_by('-entry_count')
-
-    chapters = []
-    for chapter in user_chapters:
-        chapters.append({
-            'id': chapter.id,
-            'title': chapter.title,
-            'description': chapter.description,
-            'count': chapter.entry_count,
-            'color': chapter.color,
-            'active': str(chapter.id) == chapter_filter  # Mark as active if it's the current filter
-        })
-
     # If no specific entries are filtered, use all entries for the respective tabs
     if not tag_filter:
         tagged_entries = all_entries
@@ -318,7 +289,6 @@ def library(request):
         'time_periods': sorted_periods,
         'tags': tags,
         'moods': moods,
-        'chapters': chapters,
         'entries': entries,  # These are the entries filtered by the active parameter
         'tagged_entries': tagged_entries if 'tagged_entries' in locals() else all_entries,
         'mood_entries': mood_entries if 'mood_entries' in locals() else all_entries,
@@ -348,9 +318,8 @@ def time_period_view(request, period):
 
 @login_required
 def assign_to_chapter(request, entry_id):
-    """Assign an entry to a life chapter"""
+    """Assign an entry to a life chapter - REMOVED since LifeChapter no longer exists"""
+    # This function can be removed or redirected since chapters are part of biography
     entry = get_object_or_404(Entry, id=entry_id, user=request.user)
-    chapters = LifeChapter.objects.filter(user=request.user)
-    return render(request, 'diary/assign_to_chapter.html', {'entry': entry, 'chapters': chapters})
-
-
+    messages.info(request, "Chapter assignment is no longer available.")
+    return redirect('entry_detail', entry_id=entry.id)

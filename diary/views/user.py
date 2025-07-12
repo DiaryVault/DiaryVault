@@ -13,7 +13,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 
-from ..models import Entry, Tag, UserPreference, LifeChapter
+from ..models import Entry, Tag, UserPreference
 
 logger = logging.getLogger(__name__)
 
@@ -192,172 +192,14 @@ def save_pending_entry(sender, user, request, **kwargs):
         except Exception as e:
             logger.error(f"Error creating entry after login: {str(e)}", exc_info=True)
 
-def manage_chapters(request):
-    # Get the active chapter
-    active_chapter = None
-    try:
-        # Instead of get(), use filter() and get the most recent one
-        active_chapters = LifeChapter.objects.filter(user=request.user, is_active=True).order_by('-start_date')
-        if active_chapters.exists():
-            active_chapter = active_chapters.first()
-            # Add some statistics
-            active_chapter.entry_count = Entry.objects.filter(chapter=active_chapter).count()
-            active_chapter.duration_days = (timezone.now().date() - active_chapter.start_date).days + 1
-            # You could add more stats here
+# NOTE: Chapter management functions have been removed since LifeChapter model no longer exists
+# These were related to the biography feature that has been removed:
+# - manage_chapters
+# - create_chapter  
+# - update_chapter
+# - close_chapter
+# - reactivate_chapter
+# - delete_chapter
 
-            # Optionally, fix the data inconsistency by deactivating other active chapters
-            if active_chapters.count() > 1:
-                for chapter in active_chapters[1:]:
-                    chapter.is_active = False
-                    chapter.end_date = timezone.now().date()
-                    chapter.save()
-    except Exception as e:
-        # Handle any other exceptions
-        print(f"Error retrieving active chapter: {e}")
-
-    # Get past chapters
-    past_chapters = LifeChapter.objects.filter(
-        user=request.user,
-        is_active=False
-    ).order_by('-end_date')
-
-    # Add stats to past chapters
-    for chapter in past_chapters:
-        chapter.entry_count = Entry.objects.filter(chapter=chapter).count()
-        if chapter.start_date and chapter.end_date:
-            chapter.duration_days = (chapter.end_date - chapter.start_date).days + 1
-
-    context = {
-        'active_chapter': active_chapter,
-        'past_chapters': past_chapters
-    }
-    return render(request, 'diary/chapters.html', context)
-
-
-@login_required
-@require_POST
-def create_chapter(request):
-    try:
-        title = request.POST.get('title')
-        description = request.POST.get('description', '')
-        color = request.POST.get('color', 'indigo')
-        start_date = request.POST.get('start_date')
-
-        if not start_date:
-            start_date = timezone.now().date()
-
-        # If there's an active chapter, close it first
-        try:
-            active_chapter = LifeChapter.objects.get(user=request.user, is_active=True)
-            active_chapter.is_active = False
-            active_chapter.end_date = timezone.now().date()
-            active_chapter.save()
-        except LifeChapter.DoesNotExist:
-            pass
-
-        # Create new chapter
-        LifeChapter.objects.create(
-            user=request.user,
-            title=title,
-            description=description,
-            color=color,
-            start_date=start_date,
-            is_active=True
-        )
-
-        return JsonResponse({'success': True})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
-
-@login_required
-@require_POST
-def update_chapter(request):
-    try:
-        chapter_id = request.POST.get('chapter_id')
-        chapter = LifeChapter.objects.get(id=chapter_id, user=request.user)
-
-        chapter.title = request.POST.get('title')
-        chapter.description = request.POST.get('description', '')
-        chapter.color = request.POST.get('color', chapter.color)
-
-        # Handle active status
-        is_active = request.POST.get('is_active') == 'on'
-
-        # If making this chapter active, deactivate any currently active chapter
-        if is_active and not chapter.is_active:
-            try:
-                active_chapter = LifeChapter.objects.get(user=request.user, is_active=True)
-                active_chapter.is_active = False
-                active_chapter.end_date = timezone.now().date()
-                active_chapter.save()
-            except LifeChapter.DoesNotExist:
-                pass
-
-            chapter.is_active = True
-            chapter.end_date = None
-        # If deactivating this chapter
-        elif not is_active and chapter.is_active:
-            chapter.is_active = False
-            chapter.end_date = timezone.now().date()
-
-        chapter.save()
-        return JsonResponse({'success': True})
-    except LifeChapter.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'Chapter not found'})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
-
-@login_required
-@require_POST
-def close_chapter(request, chapter_id):
-    try:
-        chapter = LifeChapter.objects.get(id=chapter_id, user=request.user, is_active=True)
-        chapter.is_active = False
-        chapter.end_date = timezone.now().date()
-        chapter.save()
-        return JsonResponse({'success': True})
-    except LifeChapter.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'Active chapter not found'})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
-
-@login_required
-@require_POST
-def reactivate_chapter(request, chapter_id):
-    try:
-        # First deactivate any currently active chapter
-        try:
-            active_chapter = LifeChapter.objects.get(user=request.user, is_active=True)
-            active_chapter.is_active = False
-            active_chapter.end_date = timezone.now().date()
-            active_chapter.save()
-        except LifeChapter.DoesNotExist:
-            pass
-
-        # Now reactivate the requested chapter
-        chapter = LifeChapter.objects.get(id=chapter_id, user=request.user, is_active=False)
-        chapter.is_active = True
-        chapter.end_date = None
-        chapter.save()
-        return JsonResponse({'success': True})
-    except LifeChapter.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'Chapter not found'})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
-
-@login_required
-@require_POST
-def delete_chapter(request, chapter_id):
-    try:
-        chapter = LifeChapter.objects.get(id=chapter_id, user=request.user)
-
-        # Update any entries that were in this chapter
-        Entry.objects.filter(chapter=chapter).update(chapter=None)
-
-        # Delete the chapter
-        chapter.delete()
-        return JsonResponse({'success': True})
-    except LifeChapter.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'Chapter not found'})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
+# If you need chapter functionality in the future, it should be part of a new Series feature
+# rather than the removed Biography feature.
