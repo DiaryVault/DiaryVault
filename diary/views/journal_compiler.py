@@ -18,7 +18,7 @@ from PIL import Image
 import io
 import os
 
-from ..models import Entry, Tag, Journal, JournalEntry, LifeChapter
+from ..models import Entry, Tag, Journal, JournalEntry
 from ..services.ai_service import AIService
 from ..utils.analytics import get_mood_emoji, get_tag_color
 from ..views.marketplace_service import MarketplaceService
@@ -901,24 +901,9 @@ class JournalAnalysisService:
         # Group entries by time periods and themes
         arcs = []
 
-        # Temporal arcs (by chapters or time periods)
-        chapter_arcs = defaultdict(list)
-        for entry in entries:
-            if entry.chapter:
-                chapter_arcs[entry.chapter.title].append(entry)
-
-        for chapter_name, chapter_entries in chapter_arcs.items():
-            if len(chapter_entries) >= 3:  # Minimum for a story arc
-                arcs.append({
-                    'type': 'chapter',
-                    'title': chapter_name,
-                    'entry_count': len(chapter_entries),
-                    'date_range': {
-                        'start': min(e.created_at for e in chapter_entries).date(),
-                        'end': max(e.created_at for e in chapter_entries).date()
-                    }
-                })
-
+        # REMOVED: Chapter-based arcs since LifeChapter no longer exists
+        # Temporal arcs (by chapters or time periods) - REMOVED
+        
         # Thematic arcs (by dominant themes)
         theme_arcs = defaultdict(list)
         for entry in entries:
@@ -1192,10 +1177,11 @@ class JournalCompilerAI:
         }
         score += frequency_scores.get(frequency, 5)
 
-        # Story arc factor
+        # REMOVED: Story arc factor that referenced chapters
         arcs = analysis.get('story_arcs', [])
-        chapter_arcs = [arc for arc in arcs if arc.get('type') == 'chapter']
-        score += min(10, len(chapter_arcs) * 3)
+        # Only count thematic arcs now
+        thematic_arcs = [arc for arc in arcs if arc.get('type') == 'theme']
+        score += min(10, len(thematic_arcs) * 3)
 
         return min(100, score)
 
@@ -1616,5 +1602,3 @@ class JournalTemplateService:
         ]
 
         return templates
-
-
