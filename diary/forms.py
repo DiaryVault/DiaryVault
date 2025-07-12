@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
-from .models import Entry, Tag, LifeChapter, Biography, Journal, JournalTag, JournalReview, EntryPhoto
+from .models import Entry, Tag, Journal, JournalTag, JournalReview, EntryPhoto
 from django.db import models
 
 def auto_generate_tags(content, mood=None):
@@ -44,7 +44,7 @@ class EntryForm(forms.ModelForm):
 
     class Meta:
         model = Entry
-        fields = ['title', 'content', 'mood', 'chapter']
+        fields = ['title', 'content', 'mood']  # REMOVED: 'chapter' field
         widgets = {
             'content': forms.Textarea(attrs={'class': 'diary-font'}),
             'title': forms.TextInput(attrs={
@@ -53,9 +53,6 @@ class EntryForm(forms.ModelForm):
             }),
             'mood': forms.Select(attrs={
                 'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none'
-            }),
-            'chapter': forms.Select(attrs={
-                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none'
             })
         }
 
@@ -63,9 +60,7 @@ class EntryForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
-        # Filter chapters to only show user's chapters
-        if self.user:
-            self.fields['chapter'].queryset = LifeChapter.objects.filter(user=self.user)
+        # REMOVED: Chapter filtering logic since LifeChapter no longer exists
 
         # If this is an existing entry, populate the tags field
         if self.instance and self.instance.pk:
@@ -142,32 +137,7 @@ class SignUpForm(UserCreationForm):
             'placeholder': 'Confirm password'
         })
 
-class LifeChapterForm(forms.ModelForm):
-    class Meta:
-        model = LifeChapter
-        fields = ['title', 'description', 'color']
-        widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
-                'placeholder': 'Chapter title'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-sky-400 focus:outline-none',
-                'placeholder': 'Describe this chapter of your life...',
-                'rows': 3
-            }),
-            'color': forms.Select(attrs={
-                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none'
-            }, choices=[
-                ('sky-600', 'Blue'),
-                ('indigo-600', 'Indigo'),
-                ('emerald-600', 'Green'),
-                ('amber-600', 'Amber'),
-                ('rose-600', 'Red'),
-                ('purple-700', 'Purple'),
-                ('pink-600', 'Pink')
-            ])
-        }
+# REMOVED: LifeChapterForm class since LifeChapter model no longer exists
 
 # Marketplace Forms
 class PublishJournalForm(forms.ModelForm):
@@ -412,3 +382,54 @@ class JournalSearchForm(forms.Form):
         except:
             # Fallback if JournalTag doesn't exist yet
             self.fields['category'].widget.choices = [('all', 'All Categories')]
+
+# ENHANCED: Add forms for journal compilation if needed in the future
+class JournalCompilationForm(forms.Form):
+    """Form for compiling journals using the Smart Journal Compiler"""
+    
+    COMPILATION_METHODS = [
+        ('ai', 'AI Smart Compilation'),
+        ('thematic', 'Thematic Collection'),
+        ('chronological', 'Timeline Journey'),
+    ]
+    
+    JOURNAL_TYPES = [
+        ('growth', 'Personal Growth'),
+        ('travel', 'Travel & Adventures'),
+        ('career', 'Career Development'),
+        ('relationships', 'Relationships & Love'),
+        ('creative', 'Creative Process'),
+        ('health', 'Health & Wellness'),
+        ('family', 'Family Life'),
+        ('learning', 'Learning & Education'),
+    ]
+    
+    compilation_method = forms.ChoiceField(
+        choices=COMPILATION_METHODS,
+        initial='ai',
+        widget=forms.RadioSelect()
+    )
+    
+    journal_type = forms.ChoiceField(
+        choices=JOURNAL_TYPES,
+        initial='growth',
+        widget=forms.Select(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none'
+        })
+    )
+    
+    selected_entries = forms.ModelMultipleChoiceField(
+        queryset=Entry.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        help_text="Leave empty to include all your entries, or select specific ones"
+    )
+    
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        if user:
+            self.fields['selected_entries'].queryset = Entry.objects.filter(
+                user=user
+            ).order_by('-created_at')
