@@ -85,7 +85,6 @@ class Entry(models.Model):
 
     summary = models.TextField(blank=True, null=True)
     summary_generated_at = models.DateTimeField(null=True, blank=True)
-    chapter = models.ForeignKey(LifeChapter, on_delete=models.SET_NULL, null=True, blank=True, related_name='entries')
 
     # Marketplace integration - link to published journal
     published_in_journal = models.ForeignKey('Journal', on_delete=models.SET_NULL, null=True, blank=True, related_name='source_entries')
@@ -93,7 +92,7 @@ class Entry(models.Model):
     class Meta:
         ordering = ['-created_at']
         verbose_name_plural = 'entries'
-        # FIXED: Remove any indexes with relationship lookups (no __ allowed)
+        # FIXED: Remove any indexes with relationship lookups and chapter references
         indexes = [
             # Basic indexes
             models.Index(fields=['user', 'created_at']),
@@ -102,13 +101,10 @@ class Entry(models.Model):
             models.Index(fields=['user', 'mood_rating']),
             # Marketplace filtering
             models.Index(fields=['user', 'published_in_journal']),
-            # Chapter filtering
-            models.Index(fields=['user', 'chapter']),
             # Analytics
             models.Index(fields=['word_count']),
             # Composite indexes for common filter combinations
             models.Index(fields=['user', 'mood', 'created_at']),
-            models.Index(fields=['user', 'chapter', 'created_at']),
             # Additional performance indexes
             models.Index(fields=['user']),
             models.Index(fields=['mood']),
@@ -189,8 +185,9 @@ class Entry(models.Model):
         except Exception:
             pass
 
-        if self.chapter:
-            score += 5
+        # REMOVED: Chapter reference
+        # if self.chapter:
+        #     score += 5
 
         return min(100, score)
 
@@ -957,14 +954,12 @@ class JournalPurchase(models.Model):
 
     class Meta:
         unique_together = ['user', 'journal']
-        # FIXED: Remove the invalid index with journal__author
         indexes = [
             models.Index(fields=['user', 'created_at']),
             models.Index(fields=['journal', 'created_at']),
-            # REMOVED: models.Index(fields=['journal__author', 'created_at']),  # This is invalid
-            # Instead, if you need to query by author, create a separate index on journal only
             models.Index(fields=['journal']),  # This allows efficient author lookups via journal.author
         ]
+
 class JournalReview(models.Model):
     """Reviews and ratings for journals"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
