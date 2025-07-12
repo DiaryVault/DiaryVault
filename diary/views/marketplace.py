@@ -18,7 +18,7 @@ from django.db import transaction, models
 from ..views.marketplace_service import MarketplaceService
 
 from ..models import (
-    Journal, JournalTag, JournalLike, JournalPurchase, Biography,
+    Journal, JournalTag, JournalLike, JournalPurchase,
     JournalReview, Entry, JournalEntry, Tip
 )
 
@@ -1159,42 +1159,6 @@ def marketplace_search_suggestions(request):
 
 
 @login_required
-def publish_biography(request):
-    """Publish user's biography to marketplace"""
-    biography = Biography.objects.filter(user=request.user).first()
-
-    if not biography:
-        messages.error(request, "You need to generate a biography first.")
-        return redirect('biography')
-
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        price = request.POST.get('price', '0.00')
-
-        try:
-            journal = MarketplaceService.publish_biography_as_journal(
-                user=request.user,
-                biography=biography,
-                price=float(price),
-                title=title,
-                description=description
-            )
-
-            messages.success(request, f'Biography "{title}" published successfully!')
-            return redirect('marketplace_journal_detail', journal_id=journal.id)
-
-        except Exception as e:
-            messages.error(request, f'Error publishing biography: {str(e)}')
-
-    context = {
-        'biography': biography,
-        'stripe_publishable_key': getattr(settings, 'STRIPE_PUBLISHABLE_KEY', '')
-    }
-
-    return render(request, 'diary/publish_biography.html', context)
-
-@login_required
 @require_POST
 def purchase_journal_api(request, journal_id):
     """API endpoint for purchasing journals"""
@@ -1313,10 +1277,10 @@ def my_published_journals(request):
     for journal in journals:
         journal.total_purchases = journal.purchases.count()
         journal.total_revenue = journal.purchases.aggregate(
-            total=Sum('amount')  # ← Fixed: Use Sum instead of models.Sum
+            total=Sum('amount')
         )['total'] or Decimal('0.00')
         journal.total_tips_received = journal.tips.aggregate(
-            total=Sum('amount')  # ← Fixed: Use Sum instead of models.Sum
+            total=Sum('amount')
         )['total'] or Decimal('0.00')
 
     context = {
