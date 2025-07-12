@@ -1749,28 +1749,45 @@ function initializeJournalForm() {
 
   setupOptimizedDragAndDrop();
 
-  // LAYOUT FIX: Better textarea handling
+  // LAYOUT FIX: Better textarea handling with error prevention
   const journalInput = document.getElementById('journalInput');
   if (journalInput) {
     const debouncedResize = debounce(function() {
-      // LAYOUT FIX: Limit max height to prevent scroll issues
-      const maxHeight = window.innerHeight * 0.4; // 40% of viewport height
-      this.style.height = 'auto';
-      const newHeight = Math.min(this.scrollHeight, maxHeight);
-      this.style.height = newHeight + 'px';
+      // LAYOUT FIX: Safeguard against undefined elements
+      if (!this || !this.style) {
+        console.warn('Textarea resize called on undefined element');
+        return;
+      }
+      
+      try {
+        // LAYOUT FIX: Limit max height to prevent scroll issues
+        const maxHeight = window.innerHeight * 0.4; // 40% of viewport height
+        this.style.height = 'auto';
+        const newHeight = Math.min(this.scrollHeight || 0, maxHeight);
+        this.style.height = newHeight + 'px';
+      } catch (error) {
+        console.warn('Error during textarea resize:', error);
+      }
     }, 100);
 
     journalInput.addEventListener('input', function() {
       countChars();
+      // Use call to ensure proper 'this' context
       debouncedResize.call(this);
     });
 
-    // LAYOUT FIX: Initial sizing with height limit
+    // LAYOUT FIX: Initial sizing with height limit and error handling
     setTimeout(() => {
-      const maxHeight = window.innerHeight * 0.4;
-      journalInput.style.height = 'auto';
-      const newHeight = Math.min(journalInput.scrollHeight, maxHeight);
-      journalInput.style.height = newHeight + 'px';
+      try {
+        if (journalInput && journalInput.style) {
+          const maxHeight = window.innerHeight * 0.4;
+          journalInput.style.height = 'auto';
+          const newHeight = Math.min(journalInput.scrollHeight || 0, maxHeight);
+          journalInput.style.height = newHeight + 'px';
+        }
+      } catch (error) {
+        console.warn('Error during initial textarea sizing:', error);
+      }
     }, 100);
 
     const journalContainer = document.getElementById('journalContainer');
@@ -2435,8 +2452,13 @@ function restartDemo() {
     demoForm.scrollIntoView({ behavior: 'smooth' });
   }
 
+  // LAYOUT FIX: Safe height reset with error handling
   if (journalInput) {
-    journalInput.style.height = 'auto';
+    try {
+      journalInput.style.height = 'auto';
+    } catch (error) {
+      console.warn('Error resetting textarea height:', error);
+    }
   }
 
   showFeedback('Ready for a new journal entry', 'info', 2000);
@@ -2468,7 +2490,10 @@ function editJournalEntry() {
   const journalEntry = document.getElementById('journalEntry');
   const entryTitle = document.getElementById('entryTitle');
 
-  if (!journalEntry || !entryTitle) return;
+  if (!journalEntry || !entryTitle) {
+    console.warn('Required elements not found for edit function');
+    return;
+  }
 
   const generatedEntry = journalEntry.innerHTML;
   const titleText = entryTitle.textContent;
@@ -2509,18 +2534,22 @@ function editJournalEntry() {
   countChars();
 
   if (journalInput) {
-    const inputEvent = new Event('input');
-    journalInput.dispatchEvent(inputEvent);
+    try {
+      const inputEvent = new Event('input');
+      journalInput.dispatchEvent(inputEvent);
 
-    const demoFormElement = document.getElementById('demoForm');
-    if (demoFormElement) {
-      demoFormElement.scrollIntoView({ behavior: 'smooth' });
-    }
+      const demoFormElement = document.getElementById('demoForm');
+      if (demoFormElement) {
+        demoFormElement.scrollIntoView({ behavior: 'smooth' });
+      }
 
-    journalInput.focus();
+      journalInput.focus();
 
-    if (window.onUnsavedChanges) {
-      window.onUnsavedChanges();
+      if (window.onUnsavedChanges) {
+        window.onUnsavedChanges();
+      }
+    } catch (error) {
+      console.warn('Error during edit journal entry setup:', error);
     }
   }
 

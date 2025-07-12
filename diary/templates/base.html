@@ -2245,14 +2245,25 @@
             }
         });
 
-        // Service Worker registration for better caching (optional)
+        // Service Worker registration for better caching (optional) - FIXED
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                    console.log('ServiceWorker registration successful');
-                }).catch(function(err) {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
+                // Only register if sw.js actually exists
+                fetch('/sw.js', { method: 'HEAD' })
+                    .then(response => {
+                        if (response.ok) {
+                            navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                                console.log('ServiceWorker registration successful');
+                            }).catch(function(err) {
+                                console.log('ServiceWorker registration failed: ', err);
+                            });
+                        } else {
+                            console.log('ServiceWorker file not found, skipping registration');
+                        }
+                    })
+                    .catch(() => {
+                        console.log('ServiceWorker check failed, skipping registration');
+                    });
             });
         }
 
