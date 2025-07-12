@@ -3,8 +3,8 @@ from decimal import Decimal
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
-from ..models import Journal, JournalEntry, JournalPurchase, Tip, Biography, Entry
-from django.db import transaction, models
+from ..models import Journal, JournalEntry, JournalPurchase, Tip, Entry
+from django.db import models
 from django.db.models import Sum, Min, Max
 
 # Set up Stripe
@@ -18,11 +18,11 @@ class MarketplaceService:
         """Get total earnings for an author"""
         total_sales = JournalPurchase.objects.filter(
             journal__author=user
-        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')  # ← Fixed
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
 
         total_tips = Tip.objects.filter(
             recipient=user
-        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')  # ← Fixed
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
 
         # Platform takes 10% of sales, 5% of tips
         sales_after_fees = total_sales * Decimal('0.90')
@@ -35,52 +35,6 @@ class MarketplaceService:
             'total_tips': total_tips,
             'platform_fees': (total_sales * Decimal('0.10')) + (total_tips * Decimal('0.05'))
         }
-
-    @staticmethod
-    def publish_biography_as_journal(user, biography, price=0.00, title=None, description=None):
-        """Convert a user's biography into a sellable journal"""
-        with transaction.atomic():
-            # Create the journal
-            journal = Journal.objects.create(
-                title=title or f"{user.get_full_name()}'s Life Story",
-                description=description or "An AI-generated biography based on personal journal entries",
-                author=user,
-                price=Decimal(str(price)),
-                is_published=True,
-                date_published=timezone.now(),
-                privacy_setting='public'
-            )
-
-            # Create journal entries from biography chapters
-            if biography.chapters_data:
-                for chapter_title, chapter_content in biography.chapters_data.items():
-                    if isinstance(chapter_content, dict):
-                        content = chapter_content.get('content', '')
-                    else:
-                        content = str(chapter_content)
-
-                    if content.strip():
-                        JournalEntry.objects.create(
-                            journal=journal,
-                            title=chapter_title,
-                            content=content,
-                            entry_date=timezone.now().date(),
-                            is_included=True
-                        )
-            else:
-                # Create a single entry with the full biography
-                JournalEntry.objects.create(
-                    journal=journal,
-                    title="My Complete Biography",
-                    content=biography.content,
-                    entry_date=timezone.now().date(),
-                    is_included=True
-                )
-
-            # Update cached counts
-            journal.update_cached_counts()
-
-            return journal
 
     @staticmethod
     def publish_entries_as_journal(user, entry_ids, title, description, price=0.00, cover_image=None):
@@ -116,8 +70,8 @@ class MarketplaceService:
             # Update journal metadata
             if entries.exists():
                 dates = entries.aggregate(
-                    first=Min('created_at'),  # ← Fixed: Use Min instead of models.Min
-                    last=Max('created_at')    # ← Fixed: Use Max instead of models.Max
+                    first=Min('created_at'),
+                    last=Max('created_at')
                 )
                 journal.first_entry_date = dates['first'].date() if dates['first'] else None
                 journal.last_entry_date = dates['last'].date() if dates['last'] else None
@@ -202,26 +156,3 @@ class MarketplaceService:
 
         except stripe.error.StripeError as e:
             raise Exception(f"Tip processing failed: {str(e)}")
-
-    @staticmethod
-    def get_author_earnings(user):
-        """Get total earnings for an author"""
-        total_sales = JournalPurchase.objects.filter(
-            journal__author=user
-        ).aggregate(total=models.Sum('amount'))['total'] or Decimal('0.00')
-
-        total_tips = Tip.objects.filter(
-            recipient=user
-        ).aggregate(total=models.Sum('amount'))['total'] or Decimal('0.00')
-
-        # Platform takes 10% of sales, 5% of tips
-        sales_after_fees = total_sales * Decimal('0.90')
-        tips_after_fees = total_tips * Decimal('0.95')
-
-        return {
-            'total_gross': total_sales + total_tips,
-            'total_net': sales_after_fees + tips_after_fees,
-            'total_sales': total_sales,
-            'total_tips': total_tips,
-            'platform_fees': (total_sales * Decimal('0.10')) + (total_tips * Decimal('0.05'))
-        }
