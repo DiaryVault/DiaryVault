@@ -164,10 +164,10 @@ SOCIALACCOUNT_FORMS = {}
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# FIXED: Django-allauth settings for proper signup form
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'  # Allow both username and email login
+# FIXED: Django-allauth settings for email-only signup (username auto-generated)
+ACCOUNT_AUTHENTICATION_METHOD = 'email'  # Use email for login (cleaner UX)
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = True  # This ensures username field appears in signup
+ACCOUNT_USERNAME_REQUIRED = False  # Don't require username during signup - auto-generate it
 ACCOUNT_EMAIL_VERIFICATION = 'optional'  # No email verification required
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
