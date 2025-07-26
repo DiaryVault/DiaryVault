@@ -70,7 +70,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'diary.middleware.RateLimitMiddleware',  # Your existing rate limiting
+     # 'diary.middleware.RateLimitMiddleware',  # Your existing rate limiting
     'diary.middleware.PendingEntryMiddleware',  # Your existing middleware
     'allauth.account.middleware.AccountMiddleware',
 ]

@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Entry, Tag, SummaryVersion, UserInsight, UserProfile, Web3Nonce, WalletSession
+from .models import Entry, Tag, SummaryVersion, UserInsight, UserProfile
+# Remove Web3 models for now: Web3Nonce, WalletSession
 
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth import get_user_model
@@ -81,57 +82,37 @@ class UserProfileInline(admin.StackedInline):
     fields = ('profile_picture', 'bio', 'birth_date', 'location', 'website')
     readonly_fields = ('created_at', 'updated_at')
 
-# Updated UserAdmin to include Web3 fields
+# Updated UserAdmin - using only standard Django User fields
 class UserAdmin(BaseUserAdmin):
     inlines = (UserProfileInline,)
     
-    # Combine both list_display configurations
+    # Standard Django User fields only
     list_display = [
         'username', 
         'email',
-        'wallet_address', 
-        'wallet_type', 
-        'is_web3_verified', 
-        'total_rewards_earned', 
-        'streak_days',
+        'first_name',
+        'last_name',
         'is_staff',
         'is_active',
         'date_joined'
     ]
     
-    # Combine both list_filter configurations
+    # Standard Django User filters only
     list_filter = [
-        'is_web3_verified', 
-        'wallet_type', 
-        'is_anonymous_mode', 
-        'encryption_enabled',
         'is_staff',
         'is_superuser',
         'is_active',
         'date_joined'
     ]
     
-    # Combine search fields
-    search_fields = ['username', 'email', 'wallet_address', 'first_name', 'last_name']
+    # Standard search fields
+    search_fields = ['username', 'email', 'first_name', 'last_name']
     
-    # Combine readonly fields
-    readonly_fields = ['date_joined', 'last_login', 'last_wallet_login']
+    # Standard readonly fields
+    readonly_fields = ['date_joined', 'last_login']
     
-    # Add Web3 fieldsets to the existing ones
-    fieldsets = BaseUserAdmin.fieldsets + (
-        ('Web3 Information', {
-            'fields': ('wallet_address', 'wallet_type', 'is_web3_verified', 'last_wallet_login'),
-            'classes': ('collapse',)
-        }),
-        ('Rewards & Gamification', {
-            'fields': ('total_rewards_earned', 'streak_days'),
-            'classes': ('collapse',)
-        }),
-        ('Privacy Settings', {
-            'fields': ('is_anonymous_mode', 'encryption_enabled'),
-            'classes': ('collapse',)
-        }),
-    )
+    # Use standard Django User fieldsets
+    # (No custom Web3 fieldsets for now)
     
     actions = ['generate_profile_pictures']
     
@@ -140,7 +121,6 @@ class UserAdmin(BaseUserAdmin):
         user_ids = list(queryset.values_list('id', flat=True))
         
         try:
-            # You would need to modify the management command to accept specific user IDs
             success_count = 0
             for user in queryset:
                 if not hasattr(user, 'userprofile') or not user.userprofile.profile_picture:
@@ -182,27 +162,27 @@ class UserProfileAdmin(admin.ModelAdmin):
     
     generate_missing_pictures.short_description = "Generate profile pictures for selected profiles"
 
-# Web3 Authentication Admin Models
-@admin.register(Web3Nonce)
-class Web3NonceAdmin(admin.ModelAdmin):
-    list_display = ['wallet_address', 'nonce', 'is_used', 'timestamp', 'expires_at']
-    list_filter = ['is_used', 'timestamp']
-    search_fields = ['wallet_address']
-    readonly_fields = ['timestamp']
+# Web3 Authentication Admin Models - COMMENTED OUT FOR NOW
+# @admin.register(Web3Nonce)
+# class Web3NonceAdmin(admin.ModelAdmin):
+#     list_display = ['wallet_address', 'nonce', 'is_used', 'timestamp', 'expires_at']
+#     list_filter = ['is_used', 'timestamp']
+#     search_fields = ['wallet_address']
+#     readonly_fields = ['timestamp']
 
-@admin.register(WalletSession)
-class WalletSessionAdmin(admin.ModelAdmin):
-    list_display = [
-        'user', 
-        'wallet_address', 
-        'chain_id', 
-        'is_active', 
-        'created_at', 
-        'last_activity'
-    ]
-    list_filter = ['is_active', 'chain_id', 'created_at']
-    search_fields = ['user__username', 'wallet_address']
-    readonly_fields = ['session_id', 'created_at']
+# @admin.register(WalletSession)
+# class WalletSessionAdmin(admin.ModelAdmin):
+#     list_display = [
+#         'user', 
+#         'wallet_address', 
+#         'chain_id', 
+#         'is_active', 
+#         'created_at', 
+#         'last_activity'
+#     ]
+#     list_filter = ['is_active', 'chain_id', 'created_at']
+#     search_fields = ['user__username', 'wallet_address']
+#     readonly_fields = ['session_id', 'created_at']
 
 # ENHANCED: Add admin for marketplace models if they exist
 try:
