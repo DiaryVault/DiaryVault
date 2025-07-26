@@ -6,22 +6,21 @@
 
 {% block extra_css %}
 <style>
-  /* CRITICAL SCROLLBAR FIX - Remove conflicting styles */
+  /* CRITICAL: Work with base.html, don't override it */
   .login-container {
+    width: 100%;
     max-width: 100vw;
     overflow-x: hidden;
     box-sizing: border-box;
-    width: 100%;
+    padding-top: 2rem;
   }
   
-  .login-card-wrapper {
-    max-width: 28rem;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0 1rem;
-    box-sizing: border-box;
+  /* Ensure no element creates horizontal scrollbars */
+  * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
-  
+
   /* Enhanced Web3-focused login styles */
   .diary-font {
     font-family: 'Playfair Display', serif;
@@ -64,6 +63,12 @@
     50% { box-shadow: 0 0 30px rgba(99, 102, 241, 0.5); }
   }
 
+  @keyframes coin-flip {
+    0% { transform: rotateY(0deg); }
+    50% { transform: rotateY(180deg); }
+    100% { transform: rotateY(360deg); }
+  }
+
   .animate-fade-in {
     animation: fadeIn 0.8s ease forwards;
   }
@@ -82,6 +87,10 @@
 
   .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-coin-flip {
+    animation: coin-flip 3s ease-in-out infinite;
   }
 
   .animation-delay-300 {
@@ -166,15 +175,18 @@
     box-shadow: 0 12px 30px rgba(246, 133, 27, 0.4);
   }
 
-  /* Alternative wallet buttons */
-  .wallet-btn-alt {
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(226, 232, 240, 0.8);
-  }
-
-  .wallet-btn-alt:hover {
-    background: rgba(255, 255, 255, 1);
-    border-color: rgba(99, 102, 241, 0.2);
+  /* Trust/reward indicators */
+  .trust-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 50px;
+    color: #059669;
+    font-size: 0.75rem;
+    font-weight: 500;
   }
 
   /* Loading state for wallet buttons */
@@ -229,23 +241,25 @@
 
   /* Enhanced form inputs */
   .form-input {
-    transition: all 0.2s ease;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(226, 232, 240, 1);
-    border-radius: 12px;
-    padding: 0.875rem 1rem;
-    font-weight: 500;
-    box-sizing: border-box;
-    max-width: 100%;
+    width: 100% !important;
+    padding: 0.875rem 1rem !important;
+    padding-left: 2.5rem !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+    outline: none !important;
+    transition: all 0.2s ease !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(8px) !important;
+    font-size: 14px !important;
+    box-sizing: border-box !important;
   }
 
   .form-input:focus {
-    background: rgba(255, 255, 255, 1);
+    background: rgba(255, 255, 255, 1) !important;
     border-color: #6366f1 !important;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
-    transform: translateY(-1px);
-    outline: none;
+    transform: translateY(-1px) !important;
   }
 
   /* Enhanced gradient background */
@@ -276,50 +290,6 @@
     margin-bottom: 1.5rem;
   }
 
-  /* Trust indicators */
-  .trust-indicator {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: rgba(34, 197, 94, 0.1);
-    border: 1px solid rgba(34, 197, 94, 0.2);
-    border-radius: 50px;
-    color: #059669;
-    font-size: 0.75rem;
-    font-weight: 500;
-  }
-
-  /* Web3 features grid */
-  .web3-feature {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 16px;
-    padding: 1.5rem;
-    text-align: center;
-    transition: all 0.3s ease;
-    box-sizing: border-box;
-    max-width: 100%;
-  }
-
-  .web3-feature:hover {
-    background: rgba(255, 255, 255, 0.8);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  }
-
-  .web3-feature-icon {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-    color: white;
-  }
-
   /* Enhanced testimonial */
   .testimonial-card {
     background: rgba(255, 255, 255, 0.8);
@@ -347,10 +317,6 @@
 
   /* Mobile optimizations */
   @media (max-width: 640px) {
-    .login-card-wrapper {
-      padding: 0 0.75rem;
-    }
-    
     .wallet-btn {
       min-height: 60px;
       padding: 1rem;
@@ -358,12 +324,8 @@
     }
 
     .form-input {
-      min-height: 48px;
-      font-size: 16px; /* Prevents zoom on iOS */
-    }
-
-    .web3-feature {
-      padding: 1rem;
+      min-height: 48px !important;
+      font-size: 16px !important; /* Prevents zoom on iOS */
     }
 
     .testimonial-card {
@@ -380,13 +342,6 @@
   .password-toggle:hover {
     color: #6366f1;
     transform: scale(1.1);
-  }
-
-  /* Success states */
-  .success-state {
-    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-    border-color: #bbf7d0;
-    color: #065f46;
   }
 
   /* Connection status indicator */
@@ -432,311 +387,304 @@
 {% endblock %}
 
 {% block content %}
-<div class="login-container py-8">
-  <div class="login-card-wrapper">
-    <div id="main-content" class="relative animate-scale-in">
-      <!-- Enhanced decorative elements -->
-      <div class="absolute -top-12 -left-20 h-32 w-32 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-      <div class="absolute -bottom-8 -right-20 h-32 w-32 bg-gradient-to-br from-secondary-400 to-secondary-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div class="absolute top-1/3 left-1/4 h-24 w-24 bg-gradient-to-br from-primary-300 to-primary-500 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob animation-delay-4000"></div>
+<!-- Skip link for accessibility -->
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-secondary-600 focus:outline-offset-0">Skip to main content</a>
 
-      <!-- Enhanced main card -->
-      <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/50 relative z-10">
-        <!-- Enhanced header -->
-        <div class="gradient-bg p-8 text-center relative">
-          <div class="relative z-10">
-            <div class="animate-float mb-4">
-              <div class="w-16 h-16 mx-auto bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-            </div>
-            <h1 class="text-3xl font-bold text-white diary-font mb-2">Connect Your Wallet</h1>
-            <p class="text-white/90 text-sm font-medium">No email. No tracking. No ads. Just your words.</p>
-          </div>
-        </div>
+<div class="h-full flex items-center justify-center px-4 py-4" style="width: 100%; overflow: hidden;">
+  <div id="main-content" class="w-full max-w-md mx-auto relative animate-scale-in" style="max-width: 100%; overflow: hidden;">
+    <!-- Enhanced decorative elements -->
+    <div class="absolute -top-12 -left-20 h-32 w-32 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+    <div class="absolute -bottom-8 -right-20 h-32 w-32 bg-gradient-to-br from-secondary-400 to-secondary-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+    <div class="absolute top-1/3 left-1/4 h-24 w-24 bg-gradient-to-br from-primary-300 to-primary-500 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob animation-delay-4000"></div>
 
-        <div class="p-8">
-          <!-- Connection status (hidden by default, shown when needed) -->
-          <div id="connectionStatus" class="hidden">
-            <div class="connection-status disconnected" id="statusIndicator">
-              <span id="statusText">Wallet not connected</span>
-            </div>
-          </div>
-
-          <!-- Trust indicators -->
-          <div class="flex flex-wrap justify-center gap-2 mb-6 animate-fade-in">
-            <div class="trust-indicator">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+    <!-- Enhanced main card -->
+    <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/50 relative z-10">
+      <!-- Enhanced header -->
+      <div class="gradient-bg p-8 text-center relative">
+        <div class="relative z-10">
+          <div class="animate-float mb-4">
+            <div class="w-16 h-16 mx-auto bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              <span>Encrypted</span>
-            </div>
-            <div class="trust-indicator">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              <span>Base Network</span>
-            </div>
-            <div class="trust-indicator">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>Earn Rewards</span>
             </div>
           </div>
-
-          <!-- Enhanced error display -->
-          {% if form.errors or form.non_field_errors %}
-          <div class="error-container animate-fade-in">
-            <div class="flex items-center gap-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-              </svg>
-              <div>
-                <p class="font-medium text-red-800">Connection Failed</p>
-                {% if form.non_field_errors %}
-                  {% for error in form.non_field_errors %}
-                    <p class="text-red-700 text-sm">{{ error }}</p>
-                  {% endfor %}
-                {% else %}
-                  <p class="text-red-700 text-sm">Please try connecting your wallet again.</p>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-          {% endif %}
-
-          <!-- Enhanced Wallet Connection Options -->
-          <div class="space-y-4 mb-6 animate-fade-in animation-delay-300">
-            <!-- MetaMask (Primary) -->
-            <button
-              onclick="connectWallet('metamask', this)"
-              class="wallet-btn wallet-btn-primary animate-pulse-glow"
-              aria-label="Connect with MetaMask"
-              id="metamask-btn">
-
-              <div class="btn-content flex items-center w-full">
-                <div class="flex items-center flex-1">
-                  <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mr-4">
-                    <svg class="w-7 h-7" viewBox="0 0 318.6 318.6" fill="none">
-                      <path d="M274.1 35.5l-99.5 73.9L193 65.8z" fill="#E2761B" stroke="#E2761B"/>
-                      <path d="M44.4 35.5l98.7 74.6-17.5-43.3z" fill="#E4761B" stroke="#E4761B"/>
-                      <path d="M238.3 206.8l-26.5 40.6 56.7 15.6 16.3-55.3z" fill="#E4761B" stroke="#E4761B"/>
-                      <path d="M33.9 207.7L50.1 263l56.7-15.6-26.5-40.6z" fill="#E4761B" stroke="#E4761B"/>
-                    </svg>
-                  </div>
-                  <div class="text-left">
-                    <span class="font-semibold text-lg">MetaMask</span>
-                    <p class="text-sm text-white/80">Most popular wallet</p>
-                  </div>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </div>
-
-              <!-- Loading spinner -->
-              <div class="loading-spinner">
-                <svg class="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </div>
-            </button>
-
-            <!-- WalletConnect -->
-            <button
-              onclick="connectWallet('walletconnect', this)"
-              class="wallet-btn wallet-btn-alt"
-              aria-label="Connect with WalletConnect"
-              id="walletconnect-btn">
-
-              <div class="btn-content flex items-center w-full">
-                <div class="flex items-center flex-1">
-                  <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-4">
-                    <svg class="w-7 h-7 text-white" viewBox="0 0 512 512" fill="currentColor">
-                      <path d="M152.036 328.121c-45.78-44.47-45.78-116.63 0-161.1l161.1-157.38c6.5-6.33 17.2-6.33 23.7 0l161.1 157.38c45.78 44.47 45.78 116.63 0 161.1L336.836 485.5c-6.5 6.33-17.2 6.33-23.7 0L152.036 328.121z"/>
-                    </svg>
-                  </div>
-                  <div class="text-left">
-                    <span class="font-semibold text-gray-800">WalletConnect</span>
-                    <p class="text-sm text-gray-600">Connect any wallet</p>
-                  </div>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </div>
-
-              <!-- Loading spinner -->
-              <div class="loading-spinner">
-                <svg class="animate-spin h-6 w-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </div>
-            </button>
-
-            <!-- Coinbase Wallet -->
-            <button
-              onclick="connectWallet('coinbase', this)"
-              class="wallet-btn wallet-btn-alt"
-              aria-label="Connect with Coinbase Wallet"
-              id="coinbase-btn">
-
-              <div class="btn-content flex items-center w-full">
-                <div class="flex items-center flex-1">
-                  <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center mr-4">
-                    <svg class="w-7 h-7 text-white" viewBox="0 0 28 28" fill="currentColor">
-                      <circle cx="14" cy="14" r="14"/>
-                      <rect x="9" y="9" width="10" height="10" rx="2" fill="white"/>
-                    </svg>
-                  </div>
-                  <div class="text-left">
-                    <span class="font-semibold text-gray-800">Coinbase Wallet</span>
-                    <p class="text-sm text-gray-600">Easy mobile connection</p>
-                  </div>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </div>
-
-              <!-- Loading spinner -->
-              <div class="loading-spinner">
-                <svg class="animate-spin h-6 w-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </div>
-            </button>
-          </div>
-
-          <!-- Enhanced divider -->
-          <div class="divider animate-fade-in animation-delay-500">
-            <span>or continue with email (optional)</span>
-          </div>
-
-          <!-- Enhanced traditional form - fallback option -->
-          {% url 'account_login' as login_url %}
-          <form method="post" action="{{ login_url }}" class="space-y-4 animate-fade-in animation-delay-500" id="loginForm">
-            {% csrf_token %}
-
-            {% for field in form %}
-              <div class="form-group">
-                <label for="{{ field.id_for_label }}" class="block text-gray-700 text-sm font-medium mb-2">
-                  {% if field.name == 'login' %}
-                    Email or Username
-                  {% else %}
-                    {{ field.label }}
-                  {% endif %}
-                </label>
-                <div class="relative">
-                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    {% if field.name == 'login' %}
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    {% elif field.name == 'password' %}
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                    {% endif %}
-                  </div>
-
-                  {{ field|add_class:"form-input w-full pl-10 pr-4 py-3" }}
-
-                  {% if field.name == 'password' %}
-                    <button type="button" class="password-toggle absolute inset-y-0 right-0 pr-3 flex items-center" onclick="togglePassword('{{ field.id_for_label }}')" aria-label="Toggle password visibility">
-                      <svg id="eye-closed-{{ field.id_for_label }}" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464a12.067 12.067 0 01-2.35-1.878m13.832.08L17.45 9.12m2.5-2.5l-2.5 2.5M12 3v.01M12 3v.01M12 3a10.05 10.05 0 00-9.543 7c1.275 4.057 5.065 7 9.543 7" />
-                      </svg>
-                      <svg id="eye-open-{{ field.id_for_label }}" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    </button>
-                  {% endif %}
-                </div>
-
-                {% if field.errors %}
-                  <div class="mt-1 text-sm text-red-600">
-                    {% for error in field.errors %}
-                      <p>{{ error }}</p>
-                    {% endfor %}
-                  </div>
-                {% endif %}
-              </div>
-            {% endfor %}
-
-            <div class="flex items-center justify-between">
-              <div class="flex items-center">
-                <input id="remember_me" name="remember" type="checkbox"
-                       class="h-4 w-4 text-secondary-600 focus:ring-secondary-400 border-gray-300 rounded">
-                <label for="remember_me" class="ml-2 block text-sm text-gray-700 cursor-pointer">
-                  Remember me
-                </label>
-              </div>
-              <a href="{% url 'account_reset_password' %}" class="text-sm font-medium text-secondary-600 hover:text-secondary-800">
-                Forgot password?
-              </a>
-            </div>
-
-            {% if redirect_field_value %}
-              <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-            {% endif %}
-
-            <button type="submit" class="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white py-3 px-4 rounded-xl font-medium hover:from-gray-700 hover:to-gray-800 transition-all duration-300 shadow-lg">
-              Sign In with Email
-            </button>
-          </form>
-
-          <!-- Enhanced sign up section -->
-          <div class="mt-6 text-center animate-fade-in animation-delay-700">
-            <p class="text-gray-600 text-sm mb-3">Don't have any wallet?</p>
-            <a href="{% url 'account_signup' %}" class="text-secondary-600 font-medium hover:text-secondary-800 text-sm inline-flex items-center gap-2 group">
-              <span>Get a free wallet & start earning</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
-            </a>
-          </div>
-
-          <!-- Enhanced back to home -->
-          <div class="mt-6 pt-4 border-t border-gray-200 text-center">
-            <a href="{% url 'home' %}" class="text-gray-500 text-sm hover:text-secondary-600 flex items-center justify-center gap-1 transition-colors group">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span>Back to home</span>
-            </a>
-          </div>
+          <h1 class="text-3xl font-bold text-white diary-font mb-2">Connect Your Wallet</h1>
+          <p class="text-white/90 text-sm font-medium">No email. No tracking. No ads. Just your words.</p>
         </div>
       </div>
 
-      <!-- Enhanced testimonial quote -->
-      <div class="mt-8 text-center animate-fade-in animation-delay-500">
-        <div class="testimonial-card inline-block max-w-sm">
-          <div class="flex items-center justify-center mb-3">
-            <div class="flex text-yellow-400">
-              {% for i in "12345" %}
-                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                </svg>
-              {% endfor %}
+      <div class="p-8">
+        <!-- Connection status (hidden by default, shown when needed) -->
+        <div id="connectionStatus" class="hidden">
+          <div class="connection-status disconnected" id="statusIndicator">
+            <span id="statusText">Wallet not connected</span>
+          </div>
+        </div>
+
+        <!-- Trust indicators -->
+        <div class="flex flex-wrap justify-center gap-2 mb-6 animate-fade-in">
+          <div class="trust-indicator">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <span>Encrypted</span>
+          </div>
+          <div class="trust-indicator">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span>Base Network</span>
+          </div>
+          <div class="trust-indicator">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Earn Rewards</span>
+          </div>
+        </div>
+
+        <!-- Enhanced error display -->
+        {% if form.errors or form.non_field_errors %}
+        <div class="error-container animate-fade-in">
+          <div class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+            <div>
+              <p class="font-medium text-red-800">Connection Failed</p>
+              {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                  <p class="text-red-700 text-sm">{{ error }}</p>
+                {% endfor %}
+              {% else %}
+                <p class="text-red-700 text-sm">Please try connecting your wallet again.</p>
+              {% endif %}
             </div>
           </div>
-          <p class="handwritten text-gray-700 text-lg leading-relaxed mb-4">"My thoughts are safe, private, and I earn rewards for writing. Perfect."</p>
-          <div class="flex items-center justify-center gap-3">
-            <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-              A
+        </div>
+        {% endif %}
+
+        <!-- Enhanced Wallet Connection Options -->
+        <div class="space-y-4 mb-6 animate-fade-in animation-delay-300">
+          <!-- MetaMask (Primary) -->
+          <button
+            onclick="connectWallet('metamask', this)"
+            class="wallet-btn wallet-btn-primary animate-pulse-glow"
+            aria-label="Connect with MetaMask"
+            id="metamask-btn">
+
+            <div class="btn-content flex items-center w-full">
+              <div class="flex items-center flex-1">
+                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mr-4">
+                  <svg class="w-7 h-7" viewBox="0 0 318.6 318.6" fill="none">
+                    <path d="M274.1 35.5l-99.5 73.9L193 65.8z" fill="#E2761B" stroke="#E2761B"/>
+                    <path d="M44.4 35.5l98.7 74.6-17.5-43.3z" fill="#E4761B" stroke="#E4761B"/>
+                    <path d="M238.3 206.8l-26.5 40.6 56.7 15.6 16.3-55.3z" fill="#E4761B" stroke="#E4761B"/>
+                    <path d="M33.9 207.7L50.1 263l56.7-15.6-26.5-40.6z" fill="#E4761B" stroke="#E4761B"/>
+                  </svg>
+                </div>
+                <div class="text-left">
+                  <span class="font-semibold text-lg">MetaMask</span>
+                  <p class="text-sm text-white/80">Most popular wallet</p>
+                </div>
+              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
             </div>
-            <div class="text-left">
-              <p class="text-sm font-medium text-gray-900">Alex K.</p>
-              <p class="text-xs text-gray-500">Web3 Writer</p>
+
+            <!-- Loading spinner -->
+            <div class="loading-spinner">
+              <svg class="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
             </div>
+          </button>
+
+          <!-- WalletConnect -->
+          <button
+            onclick="connectWallet('walletconnect', this)"
+            class="wallet-btn"
+            aria-label="Connect with WalletConnect"
+            id="walletconnect-btn">
+
+            <div class="btn-content flex items-center w-full">
+              <div class="flex items-center flex-1">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-4">
+                  <svg class="w-7 h-7 text-white" viewBox="0 0 512 512" fill="currentColor">
+                    <path d="M152.036 328.121c-45.78-44.47-45.78-116.63 0-161.1l161.1-157.38c6.5-6.33 17.2-6.33 23.7 0l161.1 157.38c45.78 44.47 45.78 116.63 0 161.1L336.836 485.5c-6.5 6.33-17.2 6.33-23.7 0L152.036 328.121z"/>
+                  </svg>
+                </div>
+                <div class="text-left">
+                  <span class="font-semibold text-gray-800">WalletConnect</span>
+                  <p class="text-sm text-gray-600">Connect any wallet</p>
+                </div>
+              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </div>
+
+            <!-- Loading spinner -->
+            <div class="loading-spinner">
+              <svg class="animate-spin h-6 w-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+          </button>
+
+          <!-- Get a Free Wallet Option -->
+          <button
+            onclick="showWalletOptions()"
+            class="wallet-btn"
+            aria-label="Get a free wallet"
+            id="get-wallet-btn">
+
+            <div class="btn-content flex items-center w-full">
+              <div class="flex items-center flex-1">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mr-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <div class="text-left">
+                  <span class="font-semibold text-gray-800">Get a Free Wallet</span>
+                  <p class="text-sm text-gray-600">New to crypto? Start here</p>
+                </div>
+              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </div>
+          </button>
+        </div>
+
+        <!-- Enhanced divider -->
+        <div class="divider animate-fade-in animation-delay-500">
+          <span>or continue with email (optional)</span>
+        </div>
+
+        <!-- Enhanced traditional form - fallback option -->
+        {% url 'account_login' as login_url %}
+        <form method="post" action="{{ login_url }}" class="space-y-4 animate-fade-in animation-delay-500 opacity-75" id="loginForm">
+          {% csrf_token %}
+
+          {% for field in form %}
+            <div class="form-group">
+              <label for="{{ field.id_for_label }}" class="block text-gray-600 text-sm font-medium mb-2">
+                {% if field.name == 'login' %}
+                  Email or Username
+                {% else %}
+                  {{ field.label }}
+                {% endif %}
+                {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  {% if field.name == 'login' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  {% elif field.name == 'password' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  {% endif %}
+                </div>
+
+                {{ field|add_class:"form-input" }}
+
+                {% if field.name == 'password' %}
+                  <button type="button" class="password-toggle absolute inset-y-0 right-0 pr-3 flex items-center" onclick="togglePassword('{{ field.id_for_label }}')" aria-label="Toggle password visibility">
+                    <svg id="eye-closed-{{ field.id_for_label }}" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464a12.067 12.067 0 01-2.35-1.878m13.832.08L17.45 9.12m2.5-2.5l-2.5 2.5M12 3v.01M12 3v.01M12 3a10.05 10.05 0 00-9.543 7c1.275 4.057 5.065 7 9.543 7" />
+                    </svg>
+                    <svg id="eye-open-{{ field.id_for_label }}" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </button>
+                {% endif %}
+              </div>
+
+              {% if field.errors %}
+                <div class="mt-1 text-sm text-red-600">
+                  {% for error in field.errors %}
+                    <p>{{ error }}</p>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <input id="remember_me" name="remember" type="checkbox"
+                     class="h-4 w-4 text-secondary-600 focus:ring-secondary-400 border-gray-300 rounded">
+              <label for="remember_me" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                Remember me
+              </label>
+            </div>
+            <a href="{% url 'account_reset_password' %}" class="text-sm font-medium text-secondary-600 hover:text-secondary-800">
+              Forgot password?
+            </a>
+          </div>
+
+          {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+          {% endif %}
+
+          <button type="submit" class="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white py-3 px-4 rounded-xl font-medium hover:from-gray-700 hover:to-gray-800 transition-all duration-300 shadow-lg">
+            Sign In with Email
+          </button>
+        </form>
+
+        <!-- Enhanced sign up section -->
+        <div class="mt-6 text-center animate-fade-in animation-delay-700">
+          <p class="text-gray-600 text-sm mb-3">Don't have any wallet?</p>
+          <a href="{% url 'account_signup' %}" class="text-secondary-600 font-medium hover:text-secondary-800 text-sm inline-flex items-center gap-2 group">
+            <span>Get a free wallet & start earning</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </a>
+        </div>
+
+        <!-- Enhanced back to home -->
+        <div class="mt-6 pt-4 border-t border-gray-200 text-center">
+          <a href="{% url 'home' %}" class="text-gray-500 text-sm hover:text-secondary-600 flex items-center justify-center gap-1 transition-colors group">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span>Back to home</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced testimonial quote -->
+    <div class="mt-8 text-center animate-fade-in animation-delay-500">
+      <div class="testimonial-card inline-block max-w-sm">
+        <div class="flex items-center justify-center mb-3">
+          <div class="flex text-yellow-400">
+            {% for i in "12345" %}
+              <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+              </svg>
+            {% endfor %}
+          </div>
+        </div>
+        <p class="handwritten text-gray-700 text-lg leading-relaxed mb-4">"My thoughts are safe, private, and I earn rewards for writing. Perfect."</p>
+        <div class="flex items-center justify-center gap-3">
+          <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+            A
+          </div>
+          <div class="text-left">
+            <p class="text-sm font-medium text-gray-900">Alex K.</p>
+            <p class="text-xs text-gray-500">Web3 Writer</p>
           </div>
         </div>
       </div>
@@ -773,9 +721,6 @@ async function connectWallet(walletType, button) {
         break;
       case 'walletconnect':
         await connectWalletConnect();
-        break;
-      case 'coinbase':
-        await connectCoinbaseWallet();
         break;
       default:
         throw new Error('Unknown wallet type');
@@ -828,12 +773,6 @@ async function connectWalletConnect() {
   throw new Error('WalletConnect integration coming soon');
 }
 
-async function connectCoinbaseWallet() {
-  // Simulate Coinbase Wallet integration
-  // In production, you'd use the actual Coinbase Wallet SDK
-  throw new Error('Coinbase Wallet integration coming soon');
-}
-
 async function switchToBaseNetwork() {
   try {
     await window.ethereum.request({
@@ -858,6 +797,23 @@ async function switchToBaseNetwork() {
         }],
       });
     }
+  }
+}
+
+function showWalletOptions() {
+  // Show modal or redirect to wallet education page
+  const message = `
+    New to crypto wallets? Here are some free options:
+    
+    🦊 MetaMask (Most popular)
+    📱 Coinbase Wallet (Easy for beginners)
+    🔗 Rainbow Wallet (Beautiful & simple)
+    
+    All are free and take 2 minutes to set up!
+  `;
+  
+  if (confirm(message + '\n\nWould you like to get MetaMask now?')) {
+    window.open('https://metamask.io/download/', '_blank');
   }
 }
 
