@@ -20,6 +20,31 @@
     <meta name="csrf-token" content="{{ csrf_token }}">
     <meta name="theme-color" content="#6366f1" />
 
+    <!-- Modern Reown AppKit Integration -->
+    <script type="module">
+      import { createAppKit } from 'https://esm.sh/@reown/appkit@1.0.0'
+      import { EthersAdapter } from 'https://esm.sh/@reown/appkit-adapter-ethers@1.0.0'
+      
+      // Make available globally
+      window.createAppKit = createAppKit
+      window.EthersAdapter = EthersAdapter
+    </script>
+
+    <!-- Web3 Configuration -->
+    <script>
+      window.REOWN_PROJECT_ID = '9be88bc3efb4e4401afe7f28ed0fc59e';
+      window.INFURA_ID = '76345518a13649768a7834fcd4bf7eba';
+      
+      // Base Network Configuration
+      window.BASE_NETWORK_CONFIG = {
+        chainId: 8453,
+        name: 'Base',
+        currency: 'ETH',
+        explorerUrl: 'https://basescan.org',
+        rpcUrl: `https://mainnet.base.org`
+      };
+    </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.3/cdn.min.js" defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -410,6 +435,40 @@
         color: #4f46e5;
         border-color: rgba(99, 102, 241, 0.1);
         text-decoration: none;
+      }
+
+      /* Wallet Connection Styles */
+      .wallet-status {
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #15803d;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-sizing: border-box;
+      }
+
+      .wallet-status.disconnected {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.2);
+        color: #dc2626;
+      }
+
+      .wallet-status::before {
+        content: '';
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        background: #22c55e;
+        animation: pulse 2s infinite;
+      }
+
+      .wallet-status.disconnected::before {
+        background: #ef4444;
       }
 
       /* Enhanced Navigation Links with proper width handling */
@@ -1288,12 +1347,16 @@
                 <!-- Enhanced Right Navigation -->
                 <div class="flex items-center gap-3">
                     {% if user.is_authenticated %}
-
+                    <!-- Wallet Status Indicator -->
+                    <div id="wallet-status" class="hidden wallet-status">
+                        <span id="wallet-address">Not connected</span>
+                        <button onclick="disconnectWallet()" class="text-red-500 text-sm ml-2 hover:text-red-700 transition-colors">Disconnect</button>
+                    </div>
                     {% else %}
                     <!-- Auth Buttons -->
                     <div class="hidden md:flex gap-2 items-center">
-                        <a href="{% url 'account_login' %}" class="btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium reliable-nav-link">Connect Wallet</a>
-                        <a href="{% url 'account_signup' %}" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium reliable-nav-link">Start Earning</a>
+                        <button onclick="connectWallet()" class="btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium reliable-nav-link">Connect Wallet</button>
+                        <button onclick="openWalletModal()" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium reliable-nav-link">Start Earning</button>
                     </div>
                     {% endif %}
 
@@ -1511,19 +1574,19 @@
 
             <!-- Enhanced Auth section -->
             <div class="space-y-4">
-                <a href="{% url 'account_login' %}" class="flex items-center justify-center gap-3 py-4 px-4 glass-card hover:bg-white/80 rounded-2xl transition-all duration-300 font-semibold border border-gray-200/50 hover:shadow-lg reliable-nav-link">
+                <button onclick="connectWallet()" class="flex items-center justify-center gap-3 py-4 px-4 glass-card hover:bg-white/80 rounded-2xl transition-all duration-300 font-semibold border border-gray-200/50 hover:shadow-lg reliable-nav-link w-full">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                     <span>Connect Wallet</span>
-                </a>
+                </button>
 
-                <a href="{% url 'account_signup' %}" class="flex items-center justify-center gap-3 py-4 px-4 btn-primary rounded-2xl transition-all duration-300 shadow-lg font-semibold hover:shadow-xl hover:-translate-y-1 active:translate-y-0 reliable-nav-link">
+                <button onclick="openWalletModal()" class="flex items-center justify-center gap-3 py-4 px-4 btn-primary rounded-2xl transition-all duration-300 shadow-lg font-semibold hover:shadow-xl hover:-translate-y-1 active:translate-y-0 reliable-nav-link w-full">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span>Start Earning</span>
-                </a>
+                </button>
             </div>
 
             <div class="mt-8 p-6 glass-card rounded-2xl border border-primary-100/50 shadow-lg">
@@ -1642,9 +1705,219 @@
         <!-- Notifications will be inserted here -->
     </div>
 
-    <!-- Enhanced JavaScript -->
+    <!-- Modern Reown Web3 Integration -->
     <script>
+        // Global wallet state
+        window.walletState = {
+            isConnected: false,
+            address: null,
+            chainId: null,
+            appKit: null
+        };
+
+        // Initialize Reown AppKit
+        async function initializeWallet() {
+            try {
+                if (!window.createAppKit || !window.EthersAdapter) {
+                    console.warn('Reown AppKit not loaded yet, retrying...');
+                    setTimeout(initializeWallet, 1000);
+                    return;
+                }
+
+                const { createAppKit } = window;
+                const { EthersAdapter } = window;
+
+                // Configure Base network
+                const baseMainnet = {
+                    chainId: 8453,
+                    name: 'Base',
+                    currency: 'ETH',
+                    explorerUrl: 'https://basescan.org',
+                    rpcUrl: 'https://mainnet.base.org'
+                };
+
+                // Create adapter
+                const ethersAdapter = new EthersAdapter();
+
+                // Create AppKit instance
+                const appKit = createAppKit({
+                    adapters: [ethersAdapter],
+                    projectId: window.REOWN_PROJECT_ID,
+                    networks: [baseMainnet],
+                    defaultNetwork: baseMainnet,
+                    metadata: {
+                        name: 'DiaryVault',
+                        description: 'Your thoughts. Encrypted. Rewarded.',
+                        url: window.location.origin,
+                        icons: [`${window.location.origin}/static/favicon-32x32.png`]
+                    },
+                    features: {
+                        analytics: true,
+                        email: true,
+                        socials: ['google', 'github', 'apple'],
+                        emailShowWallets: true,
+                        onramp: true,
+                        swaps: true,
+                        history: true
+                    },
+                    themeMode: 'light',
+                    themeVariables: {
+                        '--w3m-color-mix': '#6366f1',
+                        '--w3m-color-mix-strength': 20,
+                        '--w3m-font-family': 'Inter, system-ui, sans-serif',
+                        '--w3m-border-radius-master': '16px'
+                    }
+                });
+
+                window.walletState.appKit = appKit;
+
+                // Listen for connection events
+                appKit.subscribeState((state) => {
+                    handleConnectionChange(state.selectedNetworkId, state.address);
+                });
+
+                // Check for existing connection
+                const state = appKit.getState();
+                if (state.address) {
+                    handleConnectionChange(state.selectedNetworkId, state.address);
+                }
+
+                console.log('✅ Reown AppKit initialized successfully');
+
+            } catch (error) {
+                console.error('❌ Error initializing Reown AppKit:', error);
+                window.showToast?.('Failed to initialize wallet connection', 'error');
+            }
+        }
+
+        // Handle connection state changes
+        function handleConnectionChange(chainId, address) {
+            const wasConnected = window.walletState.isConnected;
+            const isConnected = !!address;
+
+            window.walletState.isConnected = isConnected;
+            window.walletState.address = address;
+            window.walletState.chainId = chainId;
+
+            // Update UI
+            updateWalletUI(isConnected, address, chainId);
+
+            // Dispatch custom event
+            window.dispatchEvent(new CustomEvent('walletConnectionChanged', {
+                detail: { isConnected, address, chainId, wasConnected }
+            }));
+
+            // Show notifications
+            if (isConnected && !wasConnected) {
+                window.showToast?.(`Wallet connected: ${address.slice(0, 6)}...${address.slice(-4)}`, 'success');
+                
+                // Check if we're on the correct network
+                if (chainId !== 8453) {
+                    switchToBaseNetwork();
+                }
+            } else if (!isConnected && wasConnected) {
+                window.showToast?.('Wallet disconnected', 'info');
+            }
+        }
+
+        // Update wallet UI elements
+        function updateWalletUI(isConnected, address, chainId) {
+            const walletStatus = document.getElementById('wallet-status');
+            const walletAddress = document.getElementById('wallet-address');
+
+            if (walletStatus && walletAddress) {
+                if (isConnected) {
+                    walletStatus.classList.remove('hidden', 'disconnected');
+                    walletAddress.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+                    
+                    if (chainId !== 8453) {
+                        walletStatus.classList.add('disconnected');
+                        walletAddress.textContent += ' (Wrong Network)';
+                    }
+                } else {
+                    walletStatus.classList.add('hidden');
+                }
+            }
+        }
+
+        // Switch to Base network
+        async function switchToBaseNetwork() {
+            try {
+                if (!window.walletState.appKit) return;
+
+                await window.walletState.appKit.switchNetwork(8453);
+                window.showToast?.('Switched to Base network', 'success');
+            } catch (error) {
+                console.error('Error switching network:', error);
+                window.showToast?.('Please switch to Base network manually', 'warning');
+            }
+        }
+
+        // Connect wallet (direct connection)
+        async function connectWallet() {
+            try {
+                if (!window.walletState.appKit) {
+                    window.showToast?.('Wallet system not ready. Please try again.', 'warning');
+                    return;
+                }
+
+                await window.walletState.appKit.open();
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                window.showToast?.('Failed to connect wallet', 'error');
+            }
+        }
+
+        // Open wallet modal (includes email/social options)
+        async function openWalletModal() {
+            try {
+                if (!window.walletState.appKit) {
+                    window.showToast?.('Wallet system not ready. Please try again.', 'warning');
+                    return;
+                }
+
+                await window.walletState.appKit.open();
+            } catch (error) {
+                console.error('Error opening wallet modal:', error);
+                window.showToast?.('Failed to open wallet modal', 'error');
+            }
+        }
+
+        // Disconnect wallet
+        async function disconnectWallet() {
+            try {
+                if (!window.walletState.appKit) return;
+
+                await window.walletState.appKit.disconnect();
+                window.showToast?.('Wallet disconnected successfully', 'info');
+            } catch (error) {
+                console.error('Error disconnecting wallet:', error);
+                window.showToast?.('Failed to disconnect wallet', 'error');
+            }
+        }
+
+        // Get wallet info
+        function getWalletInfo() {
+            return {
+                isConnected: window.walletState.isConnected,
+                address: window.walletState.address,
+                chainId: window.walletState.chainId,
+                isCorrectNetwork: window.walletState.chainId === 8453
+            };
+        }
+
+        // Make functions globally available
+        window.connectWallet = connectWallet;
+        window.openWalletModal = openWalletModal;
+        window.disconnectWallet = disconnectWallet;
+        window.getWalletInfo = getWalletInfo;
+        window.switchToBaseNetwork = switchToBaseNetwork;
+
+        // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize wallet system
+            initializeWallet();
+
             // CRITICAL: Simple horizontal scroll prevention only
             function preventHorizontalScroll() {
                 if (window.scrollX !== 0) {
@@ -1876,12 +2149,22 @@
                     }
                 }
 
+                // Wallet shortcuts
+                if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
+                    e.preventDefault();
+                    if (window.walletState.isConnected) {
+                        disconnectWallet();
+                    } else {
+                        connectWallet();
+                    }
+                }
+
                 // Help shortcut
                 if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
                     e.preventDefault();
                     const shortcuts = {{ user.is_authenticated|yesno:"true,false" }} 
-                        ? 'Ctrl+N: New Entry, Ctrl+D: Dashboard, Ctrl+L: Collections, Ctrl+I: Insights, Ctrl+K: Menu'
-                        : 'Ctrl+K: Menu';
+                        ? 'Ctrl+N: New Entry, Ctrl+D: Dashboard, Ctrl+L: Collections, Ctrl+I: Insights, Ctrl+K: Menu, Ctrl+W: Wallet'
+                        : 'Ctrl+K: Menu, Ctrl+W: Wallet';
                     window.showToast(shortcuts, 'info', 5000);
                 }
             });
@@ -1919,6 +2202,10 @@
         // Enhanced utility functions for external use
         window.DiaryVault = {
             showToast: window.showToast,
+            connectWallet: connectWallet,
+            disconnectWallet: disconnectWallet,
+            getWalletInfo: getWalletInfo,
+            switchToBaseNetwork: switchToBaseNetwork,
             navigateToLogin: function() {
                 window.location.href = "{% url 'account_login' %}";
                 return false;
@@ -1927,7 +2214,7 @@
                 window.location.href = "{% url 'privacy_policy' %}";
                 return false;
             },
-            version: '7.0-crypto-native'
+            version: '8.0-reown-appkit'
         };
 
         // Enhanced error handler
