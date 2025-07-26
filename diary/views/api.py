@@ -30,7 +30,7 @@ from ..utils.analytics import get_content_hash, auto_generate_tags
 from ..services.ai_service import AIService
 from .journal_compiler import JournalAnalysisService, JournalCompilerAI
 from diary.models import Web3Nonce, WalletSession
-from .serializers import (
+from ..serializers import (
     NonceRequestSerializer, Web3LoginSerializer, UserProfileSerializer
 )
 from .utils import Web3Utils
