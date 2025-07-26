@@ -18,13 +18,14 @@ from .views import api
 
 from . import views
 
-# Web3 auth URLs
+# Web3 auth URLs - Updated to use existing api views
 web3_patterns = [
-    path('nonce/', views.request_nonce, name='web3_nonce'),
-    path('login/', views.web3_login, name='web3_login'),
-    path('disconnect/', views.disconnect_wallet, name='web3_disconnect'),
-    path('profile/', views.user_profile, name='web3_profile'),
-    path('profile/update/', views.update_profile, name='web3_update_profile'),
+    path('nonce/', api.request_nonce, name='web3_nonce'),
+    path('login/', api.web3_login, name='web3_login'),
+    path('disconnect/', api.disconnect_wallet, name='web3_disconnect'),
+    path('profile/', api.user_profile, name='web3_profile'),
+    path('profile/update/', api.update_profile, name='web3_update_profile'),
+    path('health/', api.health_check, name='web3_health'),
 ]
 
 urlpatterns = [
@@ -41,8 +42,8 @@ urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='login'),  # For mobile menu compatibility
     path('accounts/login/', CustomLoginView.as_view(), name='account_login'),
 
-    # Web3 Authentication URLs
-    path('connect-wallet/', views.connect_wallet_view, name='connect_wallet'),
+    # Web3 Authentication URLs - Updated to use connect wallet view from core
+    path('connect-wallet/', core.connect_wallet_view, name='connect_wallet'),
     path('api/web3/', include(web3_patterns)),
 
     # ============================================================================
