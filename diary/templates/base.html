@@ -1274,7 +1274,6 @@
                     <a href="{% url 'account_signup' %}?feature=journal" class="nav-link reliable-nav-link text-sm">Journal</a>
                     <a href="{% url 'account_signup' %}?feature=collections" class="nav-link reliable-nav-link text-sm">Collections</a>
                     <a href="{% url 'account_signup' %}?feature=insights" class="nav-link reliable-nav-link text-sm">Insights</a>
-                    <a href="{% url 'marketplace' %}" class="nav-link reliable-nav-link text-sm {% if request.resolver_match.url_name == 'marketplace' %}active{% endif %}">Marketplace</a>
                 </nav>
                 {% endif %}
 
@@ -1452,14 +1451,6 @@
                     </svg>
                     <span class="font-medium">Insights</span>
                 </a>
-
-                <a href="{% url 'marketplace' %}" class="menu-category reliable-nav-link relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'marketplace' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                    {% if request.resolver_match.url_name == 'marketplace' %}<div class="active-pill"></div>{% endif %}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span class="font-medium">Marketplace</span>
-                </a>
             </div>
 
             <h3 class="text-xs uppercase text-gray-500 font-semibold mt-6 mb-3 px-2">Settings</h3>
@@ -1553,13 +1544,6 @@
 
             <!-- Available features section -->
             <div class="space-y-2 mb-8">
-                <a href="{% url 'marketplace' %}" class="flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'marketplace' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent reliable-nav-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span class="font-medium">Marketplace</span>
-                </a>
-                
                 <!-- Privacy Policy Link for Non-logged in users -->
                 <a href="{% url 'privacy_policy' %}" class="flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'privacy_policy' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent reliable-nav-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1705,7 +1689,7 @@
     <!-- Enhanced JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DiaryVault Enhanced Navigation - v5.3 Biography Removed');
+            console.log('DiaryVault Enhanced Navigation - v5.4 Marketplace Removed');
             console.log('User authenticated:', {{ user.is_authenticated|yesno:"true,false" }});
             console.log('Current page:', '{{ request.resolver_match.url_name }}');
 
@@ -1942,7 +1926,7 @@
                 }
             };
 
-            // Enhanced keyboard shortcuts with improved feedback - UPDATED (removed biography shortcut)
+            // Enhanced keyboard shortcuts with improved feedback - Marketplace removed
             document.addEventListener('keydown', function(e) {
                 // Skip if user is typing
                 if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
@@ -1954,7 +1938,6 @@
                         'd': "{% url 'dashboard' %}",
                         'l': "{% url 'library' %}",
                         'i': "{% url 'insights' %}",
-                        'm': "{% url 'marketplace' %}",
                         'p': "{% url 'privacy_policy' %}"
                     };
 
@@ -1968,7 +1951,6 @@
                             'd': 'Dashboard',
                             'l': 'Collections',
                             'i': 'Insights',
-                            'm': 'Marketplace',
                             'p': 'Privacy Policy'
                         };
                         window.showToast(`Navigating to ${names[e.key]}`, 'info', 2000);
@@ -1988,11 +1970,11 @@
                     }
                 }
 
-                // Help shortcut - UPDATED (removed biography reference)
+                // Help shortcut - Marketplace reference removed
                 if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
                     e.preventDefault();
                     const shortcuts = {{ user.is_authenticated|yesno:"true,false" }} 
-                        ? 'Ctrl+N: New Entry, Ctrl+D: Dashboard, Ctrl+L: Collections, Ctrl+I: Insights, Ctrl+M: Marketplace, Ctrl+K: Menu'
+                        ? 'Ctrl+N: New Entry, Ctrl+D: Dashboard, Ctrl+L: Collections, Ctrl+I: Insights, Ctrl+K: Menu'
                         : 'Ctrl+K: Menu';
                     window.showToast(shortcuts, 'info', 5000);
                 }
@@ -2056,7 +2038,7 @@
 
             // Initialize page with enhanced feedback
             document.body.style.opacity = '1';
-            console.log('DiaryVault navigation initialized successfully - Biography removed, Collections added');
+            console.log('DiaryVault navigation initialized successfully - Marketplace removed');
             
             // LAYOUT FIX: Initial layout check
             setTimeout(() => {
@@ -2064,14 +2046,9 @@
             }, 100);
         });
 
-        // Enhanced utility functions for external use
+        // Enhanced utility functions for external use - Marketplace removed
         window.DiaryVault = {
             showToast: window.showToast,
-            navigateToMarketplace: function() {
-                console.log('Forcing navigation to marketplace');
-                window.location.href = "{% url 'marketplace' %}";
-                return false;
-            },
             navigateToLogin: function() {
                 console.log('Forcing navigation to login');
                 window.location.href = "{% url 'account_login' %}";
@@ -2082,7 +2059,7 @@
                 window.location.href = "{% url 'privacy_policy' %}";
                 return false;
             },
-            version: '5.3-biography-removed'
+            version: '5.4-marketplace-removed'
         };
 
         // Enhanced error handler for debugging
