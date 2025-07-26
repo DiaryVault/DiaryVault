@@ -44,7 +44,7 @@ urlpatterns = [
 
     # Web3 Authentication URLs - Updated to use connect wallet view from core
     # path('connect-wallet/', core.connect_wallet_view, name='connect_wallet'),
-    path('api/web3/', include(web3_patterns)),
+    # path('api/web3/', include(web3_patterns)),
 
     # ============================================================================
     # Main Pages
