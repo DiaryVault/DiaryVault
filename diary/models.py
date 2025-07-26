@@ -1141,67 +1141,6 @@ class AnalyticsPackage(models.Model):
     valid_until = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-class User(AbstractUser):
-    """Extended user model with Web3 capabilities"""
-    
-    # Web3 fields
-    wallet_address = models.CharField(max_length=42, unique=True, null=True, blank=True)
-    wallet_type = models.CharField(max_length=20, null=True, blank=True, 
-                                 choices=[('metamask', 'MetaMask'), 
-                                         ('walletconnect', 'WalletConnect'),
-                                         ('coinbase', 'Coinbase Wallet')])
-    
-    # Profile fields
-    is_web3_verified = models.BooleanField(default=False)
-    last_wallet_login = models.DateTimeField(null=True, blank=True)
-    preferred_chain_id = models.IntegerField(default=8453)  # Base network
-    
-    # Rewards & gamification
-    total_rewards_earned = models.DecimalField(max_digits=18, decimal_places=8, default=0)
-    diary_entries_count = models.IntegerField(default=0)
-    streak_days = models.IntegerField(default=0)
-    last_entry_date = models.DateField(null=True, blank=True)
-    
-    # Privacy settings
-    is_anonymous_mode = models.BooleanField(default=True)
-    encryption_enabled = models.BooleanField(default=True)
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=['wallet_address']),
-            models.Index(fields=['is_web3_verified']),
-            models.Index(fields=['last_wallet_login']),
-        ]
-
-    def __str__(self):
-        if self.wallet_address:
-            return f"{self.username} ({self.wallet_address[:6]}...{self.wallet_address[-4:]})"
-        return self.username
-
-    def get_display_address(self):
-        """Return formatted wallet address for display"""
-        if self.wallet_address:
-            return f"{self.wallet_address[:6]}...{self.wallet_address[-4:]}"
-        return None
-
-    def update_login_streak(self):
-        """Update user's diary writing streak"""
-        today = timezone.now().date()
-        if self.last_entry_date:
-            days_diff = (today - self.last_entry_date).days
-            if days_diff == 1:
-                self.streak_days += 1
-            elif days_diff > 1:
-                self.streak_days = 1
-        else:
-            self.streak_days = 1
-        
-        self.last_entry_date = today
-        self.save(update_fields=['streak_days', 'last_entry_date'])
-
 
 class Web3Nonce(models.Model):
     """Store nonces for Web3 authentication"""
