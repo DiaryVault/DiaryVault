@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'diary',
+    'web3auth',  # 👈 ADD THIS - Your new Web3 authentication app
     'widget_tweaks',
     'django.contrib.sites',
 
@@ -53,9 +54,15 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.apple',
     'allauth.socialaccount.providers.microsoft',
+    
+    # Web3 & API support
+    'corsheaders',  # 👈 ADD THIS - For Web3 API CORS
+    'rest_framework',  # 👈 ADD THIS - For Web3 API
+    'rest_framework.authtoken',  # 👈 ADD THIS - For Web3 token auth
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # 👈 ADD THIS - Must be at the top
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -146,6 +153,12 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Static files finders (for Web3 JS files)
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
 # Media Files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -163,6 +176,55 @@ SOCIALACCOUNT_FORMS = {}
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ===========================================
+# 🚀 WEB3 AUTHENTICATION CONFIGURATION
+# ===========================================
+
+# Web3 Configuration
+WEB3_SETTINGS = {
+    'RPC_URL': 'https://mainnet.base.org',  # Base network
+    'CHAIN_ID': 8453,  # Base mainnet
+    'SUPPORTED_CHAINS': [1, 8453],  # Ethereum mainnet, Base
+    'MESSAGE_TEMPLATE': 'Welcome to DiaryVault!\n\nSign this message to authenticate:\n{nonce}\n\nTimestamp: {timestamp}',
+    'NONCE_EXPIRY': 300,  # 5 minutes
+}
+
+# CORS settings for Web3 frontend
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "https://diaryvault.com",
+    "https://www.diaryvault.com",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+# Allow CORS for Web3 API endpoints
+CORS_URLS_REGEX = r'^/api/web3/.*$'
+
+# REST Framework for Web3 API
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
+}
+
+# ===========================================
+# END WEB3 CONFIGURATION
+# ===========================================
 
 # FIXED: Django-allauth settings for email-only signup (username auto-generated)
 ACCOUNT_AUTHENTICATION_METHOD = 'email'  # Use email for login (cleaner UX)
@@ -370,6 +432,16 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'diary.tasks.cleanup_expired_caches',
         'schedule': crontab(minute=15, hour='*/4'),  # Every 4 hours
     },
+    
+    # 👈 ADD WEB3 CLEANUP TASKS
+    'cleanup-expired-nonces': {
+        'task': 'web3auth.tasks.cleanup_expired_nonces',
+        'schedule': crontab(minute='*/5'),  # Every 5 minutes
+    },
+    'cleanup-inactive-sessions': {
+        'task': 'web3auth.tasks.cleanup_inactive_sessions',
+        'schedule': crontab(hour=3, minute=0),  # Daily at 3 AM
+    },
 }
 
 # Create logs directory if it doesn't exist
@@ -408,6 +480,14 @@ LOGGING = {
             'backupCount': 10,
             'formatter': 'verbose',
         },
+        'web3_file': {  # 👈 ADD WEB3 LOGGING
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGS_DIR, 'web3.log'),
+            'maxBytes': 1024*1024*15,  # 15MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
@@ -424,6 +504,11 @@ LOGGING = {
     'loggers': {
         'diary': {
             'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'web3auth': {  # 👈 ADD WEB3 LOGGING
+            'handlers': ['web3_file', 'console'],
             'level': 'INFO',
             'propagate': True,
         },

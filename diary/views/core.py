@@ -846,3 +846,5 @@ class CustomSignupView(AllauthSignupView):
             messages.success(self.request, "Welcome to DiaryVault! Your account has been created successfully.")
 
         return response
+    
+

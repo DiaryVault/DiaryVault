@@ -1,9 +1,11 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.core.validators import MinValueValidator, MaxValueValidator
-from .models import Entry, Tag, Journal, JournalTag, JournalReview, EntryPhoto
+from .models import Entry, Tag, Journal, JournalTag, JournalReview, EntryPhoto, UserProfile
 from django.db import models
+
+User = get_user_model()
 
 def auto_generate_tags(content, mood=None):
     """Generate tags based on entry content and mood"""
@@ -38,13 +40,146 @@ def auto_generate_tags(content, mood=None):
 
     return list(tags)
 
+# ============================================================================
+# User Authentication Forms (Enhanced with Web3)
+# ============================================================================
+
+class CustomUserCreationForm(UserCreationForm):
+    """Custom user creation form with Web3 fields"""
+    
+    email = forms.EmailField(
+        max_length=254, 
+        required=False, 
+        widget=forms.EmailInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
+            'placeholder': 'Email address (optional)'
+        })
+    )
+    
+    wallet_address = forms.CharField(
+        max_length=42,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
+            'placeholder': 'Wallet address (optional)'
+        })
+    )
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'wallet_address', 'wallet_type', 'password1', 'password2')
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
+                'placeholder': 'Username'
+            }),
+            'wallet_type': forms.Select(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none'
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].required = False
+        self.fields['wallet_address'].required = False
+        
+        # Add CSS classes to password fields
+        self.fields['password1'].widget.attrs.update({
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
+            'placeholder': 'Password'
+        })
+        self.fields['password2'].widget.attrs.update({
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
+            'placeholder': 'Confirm password'
+        })
+
+class CustomUserChangeForm(UserChangeForm):
+    """Custom user change form with Web3 fields"""
+    
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'wallet_address', 'wallet_type', 'is_anonymous_mode', 'encryption_enabled')
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'wallet_address': forms.TextInput(attrs={'class': 'form-control'}),
+            'wallet_type': forms.Select(attrs={'class': 'form-control'}),
+            'is_anonymous_mode': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'encryption_enabled': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove password field from change form
+        if 'password' in self.fields:
+            del self.fields['password']
+
+class UserProfileForm(forms.ModelForm):
+    """Form for users to update their profile"""
+    
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'is_anonymous_mode', 'encryption_enabled', 'preferred_chain_id')
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none'
+            }),
+            'preferred_chain_id': forms.Select(
+                choices=[(1, 'Ethereum Mainnet'), (8453, 'Base'), (11155111, 'Sepolia Testnet')],
+                attrs={'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none'}
+            ),
+            'is_anonymous_mode': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'encryption_enabled': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email and User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("This email is already in use.")
+        return email
+
+# Legacy SignUpForm (keeping for backwards compatibility)
+class SignUpForm(UserCreationForm):
+    email = forms.EmailField(max_length=254, required=True, widget=forms.EmailInput(attrs={
+        'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
+        'placeholder': 'Email address'
+    }))
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password1', 'password2')
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
+                'placeholder': 'Username'
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password1'].widget.attrs.update({
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
+            'placeholder': 'Password'
+        })
+        self.fields['password2'].widget.attrs.update({
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
+            'placeholder': 'Confirm password'
+        })
+
+# ============================================================================
+# Journal Entry Forms
+# ============================================================================
+
 class EntryForm(forms.ModelForm):
     tags = forms.CharField(required=False, help_text="Comma-separated tags")
     entry_photo = forms.ImageField(required=False, help_text="Upload a photo for this entry")
 
     class Meta:
         model = Entry
-        fields = ['title', 'content', 'mood']  # REMOVED: 'chapter' field
+        fields = ['title', 'content', 'mood']
         widgets = {
             'content': forms.Textarea(attrs={'class': 'diary-font'}),
             'title': forms.TextInput(attrs={
@@ -59,8 +194,6 @@ class EntryForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-
-        # REMOVED: Chapter filtering logic since LifeChapter no longer exists
 
         # If this is an existing entry, populate the tags field
         if self.instance and self.instance.pk:
@@ -110,36 +243,10 @@ class EntryForm(forms.ModelForm):
 
         return entry
 
-class SignUpForm(UserCreationForm):
-    email = forms.EmailField(max_length=254, required=True, widget=forms.EmailInput(attrs={
-        'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
-        'placeholder': 'Email address'
-    }))
-
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'password1', 'password2')
-        widgets = {
-            'username': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
-                'placeholder': 'Username'
-            })
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['password1'].widget.attrs.update({
-            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
-            'placeholder': 'Password'
-        })
-        self.fields['password2'].widget.attrs.update({
-            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
-            'placeholder': 'Confirm password'
-        })
-
-# REMOVED: LifeChapterForm class since LifeChapter model no longer exists
-
+# ============================================================================
 # Marketplace Forms
+# ============================================================================
+
 class PublishJournalForm(forms.ModelForm):
     """Form for publishing a journal to the marketplace"""
 
@@ -383,7 +490,10 @@ class JournalSearchForm(forms.Form):
             # Fallback if JournalTag doesn't exist yet
             self.fields['category'].widget.choices = [('all', 'All Categories')]
 
-# ENHANCED: Add forms for journal compilation if needed in the future
+# ============================================================================
+# Journal Compilation Forms
+# ============================================================================
+
 class JournalCompilationForm(forms.Form):
     """Form for compiling journals using the Smart Journal Compiler"""
     
@@ -433,3 +543,89 @@ class JournalCompilationForm(forms.Form):
             self.fields['selected_entries'].queryset = Entry.objects.filter(
                 user=user
             ).order_by('-created_at')
+
+# ============================================================================
+# Web3 Profile Forms
+# ============================================================================
+
+class Web3ProfileForm(forms.ModelForm):
+    """Enhanced profile form with Web3 and traditional features"""
+    
+    # UserProfile fields
+    bio = forms.CharField(
+        max_length=500,
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': 3,
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
+            'placeholder': 'Tell us about yourself...'
+        })
+    )
+    
+    location = forms.CharField(
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
+            'placeholder': 'Your location'
+        })
+    )
+    
+    website = forms.URLField(
+        required=False,
+        widget=forms.URLInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
+            'placeholder': 'https://yourwebsite.com'
+        })
+    )
+    
+    birth_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none'
+        })
+    )
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'wallet_address', 'is_anonymous_mode', 'encryption_enabled')
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none'
+            }),
+            'wallet_address': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none',
+                'readonly': True
+            }),
+            'is_anonymous_mode': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'encryption_enabled': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Pre-populate UserProfile fields if they exist
+        if self.instance and hasattr(self.instance, 'userprofile'):
+            profile = self.instance.userprofile
+            self.fields['bio'].initial = profile.bio
+            self.fields['location'].initial = profile.location
+            self.fields['website'].initial = profile.website
+            self.fields['birth_date'].initial = profile.birth_date
+
+    def save(self, commit=True):
+        user = super().save(commit=commit)
+        
+        if commit:
+            # Update or create UserProfile
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            profile.bio = self.cleaned_data.get('bio', '')
+            profile.location = self.cleaned_data.get('location', '')
+            profile.website = self.cleaned_data.get('website', '')
+            profile.birth_date = self.cleaned_data.get('birth_date')
+            profile.save()
+        
+        return user

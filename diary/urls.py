@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView, TemplateView
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -18,6 +18,15 @@ from .views import api
 
 from . import views
 
+# Web3 auth URLs
+web3_patterns = [
+    path('nonce/', views.request_nonce, name='web3_nonce'),
+    path('login/', views.web3_login, name='web3_login'),
+    path('disconnect/', views.disconnect_wallet, name='web3_disconnect'),
+    path('profile/', views.user_profile, name='web3_profile'),
+    path('profile/update/', views.update_profile, name='web3_update_profile'),
+]
+
 urlpatterns = [
     # ============================================================================
     # Authentication - These MUST come FIRST to override allauth
@@ -31,6 +40,10 @@ urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='account_login'),
     path('login/', CustomLoginView.as_view(), name='login'),  # For mobile menu compatibility
     path('accounts/login/', CustomLoginView.as_view(), name='account_login'),
+
+    # Web3 Authentication URLs
+    path('connect-wallet/', views.connect_wallet_view, name='connect_wallet'),
+    path('api/web3/', include(web3_patterns)),
 
     # ============================================================================
     # Main Pages

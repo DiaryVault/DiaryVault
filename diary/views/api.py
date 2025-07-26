@@ -3,23 +3,40 @@ import logging
 import time
 from datetime import datetime
 
-from django.utils import timezone
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
-from django.db.models import Count, Avg
-from django.core.cache import cache
+# Django core
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import get_user_model, login
+from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
+from django.db.models import Count, Avg
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
+# Django REST framework
+from rest_framework import status, permissions
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+
+# Local imports
 from .. import models
 from ..models import Entry, Journal, Tag, JournalEntry
 from ..utils.ai_helpers import generate_ai_content, generate_ai_content_personalized
 from ..utils.analytics import get_content_hash, auto_generate_tags
 from ..services.ai_service import AIService
 from .journal_compiler import JournalAnalysisService, JournalCompilerAI
+from .models import Web3Nonce, WalletSession
+from .serializers import (
+    NonceRequestSerializer, Web3LoginSerializer, UserProfileSerializer
+)
+from .utils import Web3Utils
 
+# Initialize
+User = get_user_model()
 logger = logging.getLogger(__name__)
 
 @require_POST
@@ -1604,3 +1621,202 @@ class AIService:
                 },
                 'success': True
             }
+
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def request_nonce(request):
+    """Generate and return a nonce for wallet authentication"""
+    
+    serializer = NonceRequestSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    wallet_address = serializer.validated_data['wallet_address']
+    
+    try:
+        # Generate nonce
+        nonce = Web3Utils.generate_nonce()
+        
+        # Create expiry time
+        expires_at = timezone.now() + timedelta(
+            seconds=settings.WEB3_SETTINGS['NONCE_EXPIRY']
+        )
+        
+        # Store nonce in database
+        Web3Nonce.objects.create(
+            wallet_address=wallet_address,
+            nonce=nonce,
+            expires_at=expires_at
+        )
+        
+        # Create message for signing
+        message = Web3Utils.create_auth_message(wallet_address, nonce)
+        
+        return Response({
+            'nonce': nonce,
+            'message': message,
+            'expires_at': expires_at.isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Nonce generation failed: {e}")
+        return Response(
+            {'error': 'Failed to generate nonce'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def web3_login(request):
+    """Authenticate user with Web3 signature"""
+    
+    serializer = Web3LoginSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    wallet_address = serializer.validated_data['wallet_address']
+    signature = serializer.validated_data['signature']
+    nonce = serializer.validated_data['nonce']
+    wallet_type = serializer.validated_data.get('wallet_type', 'unknown')
+    chain_id = serializer.validated_data.get('chain_id', 8453)
+    
+    try:
+        # Verify nonce exists and is valid
+        nonce_obj = Web3Nonce.objects.filter(
+            wallet_address=wallet_address,
+            nonce=nonce,
+            is_used=False
+        ).first()
+        
+        if not nonce_obj:
+            return Response(
+                {'error': 'Invalid or expired nonce'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if nonce_obj.is_expired():
+            return Response(
+                {'error': 'Nonce has expired'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Verify chain ID
+        if not Web3Utils.is_valid_chain_id(chain_id):
+            return Response(
+                {'error': 'Unsupported blockchain network'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Create and verify signature
+        message = Web3Utils.create_auth_message(wallet_address, nonce)
+        
+        if not Web3Utils.verify_signature(message, signature, wallet_address):
+            return Response(
+                {'error': 'Invalid signature'}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        # Mark nonce as used
+        nonce_obj.is_used = True
+        nonce_obj.save()
+        
+        # Get or create user
+        user, created = User.objects.get_or_create(
+            wallet_address=wallet_address,
+            defaults={
+                'username': f'user_{wallet_address[-8:]}',
+                'wallet_type': wallet_type,
+                'is_web3_verified': True,
+                'preferred_chain_id': chain_id,
+                'last_wallet_login': timezone.now()
+            }
+        )
+        
+        if not created:
+            # Update existing user
+            user.last_wallet_login = timezone.now()
+            user.wallet_type = wallet_type
+            user.preferred_chain_id = chain_id
+            user.is_web3_verified = True
+            user.save()
+        
+        # Create or get auth token
+        token, _ = Token.objects.get_or_create(user=user)
+        
+        # Create wallet session
+        session = WalletSession.objects.create(
+            user=user,
+            wallet_address=wallet_address,
+            chain_id=chain_id,
+            ip_address=request.META.get('REMOTE_ADDR', ''),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+        
+        # Login user to Django session
+        login(request, user)
+        
+        return Response({
+            'token': token.key,
+            'user': UserProfileSerializer(user).data,
+            'session_id': str(session.session_id),
+            'message': 'Successfully authenticated with Web3'
+        })
+        
+    except Exception as e:
+        logger.error(f"Web3 login failed: {e}")
+        return Response(
+            {'error': 'Authentication failed'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+def disconnect_wallet(request):
+    """Disconnect wallet and invalidate session"""
+    
+    try:
+        # Deactivate wallet sessions
+        WalletSession.objects.filter(
+            user=request.user, 
+            is_active=True
+        ).update(is_active=False)
+        
+        # Delete auth token
+        Token.objects.filter(user=request.user).delete()
+        
+        return Response({'message': 'Wallet disconnected successfully'})
+        
+    except Exception as e:
+        logger.error(f"Wallet disconnection failed: {e}")
+        return Response(
+            {'error': 'Failed to disconnect wallet'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+def user_profile(request):
+    """Get current user's profile"""
+    
+    serializer = UserProfileSerializer(request.user)
+    return Response(serializer.data)
+
+
+@api_view(['PATCH'])
+def update_profile(request):
+    """Update user profile settings"""
+    
+    serializer = UserProfileSerializer(
+        request.user, 
+        data=request.data, 
+        partial=True
+    )
+    
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
