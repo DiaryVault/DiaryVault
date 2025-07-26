@@ -227,14 +227,17 @@
     <style>
       /* CRITICAL SCROLLBAR FIX: Single scrollbar strategy */
       
-      /* 1. Global scrollbar control - only document should scroll */
+      /* CRITICAL SCROLLBAR FIX: Only show scrollbar when content actually overflows */
+      
+      /* 1. Global scrollbar control - clean approach */
       html {
         overflow-x: hidden !important;
-        overflow-y: auto !important;
+        overflow-y: auto !important; /* Only show when content overflows */
         scroll-behavior: smooth;
         width: 100vw;
         max-width: 100vw !important;
         -webkit-text-size-adjust: 100%;
+        height: 100%;
       }
 
       body {
@@ -256,6 +259,8 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
+        min-height: 100vh; /* Full height but not forcing overflow */
+        height: auto; /* Let content determine height */
       }
 
       /* 2. Prevent ANY element from creating horizontal scrollbars */
