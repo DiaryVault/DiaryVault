@@ -7,7 +7,7 @@
 
   /* LAYOUT FIX: Proper overflow management */
   html, body {
-    overflow-x: hidden !important; /* Changed from visible to hidden */
+    overflow-x: hidden !important;
     scroll-behavior: smooth !important;
     max-width: 100vw !important;
     box-sizing: border-box;
@@ -91,7 +91,7 @@
   .btn-gradient {
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateZ(0); /* Hardware acceleration */
+    transform: translateZ(0);
   }
 
   .btn-gradient:hover {
@@ -102,7 +102,7 @@
 
   .card-hover {
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    transform: translateZ(0); /* Hardware acceleration */
+    transform: translateZ(0);
   }
 
   .card-hover:hover {
@@ -178,9 +178,9 @@
     border-color: rgba(99, 102, 241, 0.3);
     max-height: none;
     overflow: visible;
-    width: 100%; /* LAYOUT FIX */
-    max-width: 100%; /* LAYOUT FIX */
-    box-sizing: border-box; /* LAYOUT FIX */
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   #journalContainer:focus-within {
@@ -189,14 +189,15 @@
     background-color: white;
   }
 
-  /* LAYOUT FIX: Better textarea handling */
+  /* LAYOUT FIX: Better textarea handling - FIXED SCROLLING */
   #journalInput {
     resize: none;
-    overflow: hidden;
+    overflow-y: auto; /* FIXED: Allow vertical scroll when needed */
+    overflow-x: hidden; /* FIXED: Prevent horizontal scroll */
     max-height: 400px;
-    width: 100%; /* LAYOUT FIX */
-    max-width: 100%; /* LAYOUT FIX */
-    box-sizing: border-box; /* LAYOUT FIX */
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   /* Better chat bubbles - OPTIMIZED */
@@ -210,7 +211,7 @@
     max-width: 85%;
     margin-bottom: 1rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    word-wrap: break-word; /* LAYOUT FIX: Prevent text overflow */
+    word-wrap: break-word;
   }
 
   .chat-bubble:hover {
@@ -795,7 +796,7 @@
   </div>
 </div>
 
-<!-- LAYOUT FIX: Enhanced JavaScript with scroll optimizations -->
+<!-- SIMPLIFIED JavaScript with scroll fixes -->
 <script>
 
 // LAYOUT FIX: Optimized cache initialization
@@ -816,7 +817,7 @@ const journalCache = {
           return;
         }
       } catch (e) {
-        console.error('Error loading cache:', e);
+        // Silent error handling
       }
     }
     this.entries = {};
@@ -832,7 +833,7 @@ const journalCache = {
         };
         localStorage.setItem('diaryVaultCache', JSON.stringify(cacheData));
       } catch (e) {
-        console.error('Error saving cache:', e);
+        // Silent error handling
       }
     }
   },
@@ -891,69 +892,19 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeJournalForm();
   initializeAnimations();
   setupEnhancedUX();
-
-  // LAYOUT FIX: Add scroll performance monitoring
-  setupScrollOptimizations();
+  
+  // SIMPLIFIED scroll optimization - just prevent horizontal scroll
+  setupSimpleScrollOptimization();
 });
 
-// LAYOUT FIX: New scroll optimization function
-function setupScrollOptimizations() {
-  let isScrolling = false;
-  let scrollTimeout;
-  let ticking = false;
-
-  function handleScrollPerformance() {
-    if (!ticking) {
-      requestAnimationFrame(() => {
-        // Pause heavy animations during scrolling
-        if (isScrolling) {
-          document.body.classList.add('is-scrolling');
-        } else {
-          document.body.classList.remove('is-scrolling');
-        }
-        ticking = false;
-      });
-      ticking = true;
-    }
-  }
-
-  // LAYOUT FIX: Optimized scroll event handler
+// LAYOUT FIX: SIMPLIFIED scroll optimization function
+function setupSimpleScrollOptimization() {
+  // Simple horizontal scroll prevention
   window.addEventListener('scroll', function() {
-    if (!isScrolling) {
-      isScrolling = true;
+    if (window.scrollX !== 0) {
+      window.scrollTo(0, window.scrollY);
     }
-
-    handleScrollPerformance();
-
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-      isScrolling = false;
-      handleScrollPerformance();
-    }, 150);
   }, { passive: true });
-
-  // LAYOUT FIX: Prevent scroll jank on mobile
-  if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-    document.addEventListener('touchmove', function(e) {
-      const target = e.target.closest('#journalContainer, .mobile-menu');
-      if (!target) return;
-
-      // Allow scrolling within specific containers
-      if (target.id === 'journalContainer' || target.classList.contains('mobile-menu')) {
-        return;
-      }
-
-      // Prevent overscroll bounce
-      const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-      const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-      const clientHeight = document.documentElement.clientHeight;
-
-      if ((scrollTop === 0 && e.touches[0].clientY > e.touches[0].clientY) ||
-          (scrollTop + clientHeight >= scrollHeight && e.touches[0].clientY < e.touches[0].clientY)) {
-        e.preventDefault();
-      }
-    }, { passive: false });
-  }
 }
 
 // LAYOUT FIX: Initialize journal form with better performance
@@ -979,7 +930,6 @@ function initializeJournalForm() {
     // Store reference to the element for the debounced function
     const debouncedResize = debounce(function(element) {
       if (!element || !element.style) {
-        console.warn('Invalid element passed to debouncedResize');
         return;
       }
       
@@ -990,7 +940,7 @@ function initializeJournalForm() {
         const newHeight = Math.min(element.scrollHeight, maxHeight);
         element.style.height = newHeight + 'px';
       } catch (error) {
-        console.error('Error in debouncedResize:', error);
+        // Silent error handling
       }
     }, 100);
 
@@ -1009,7 +959,7 @@ function initializeJournalForm() {
           const newHeight = Math.min(journalInput.scrollHeight, maxHeight);
           journalInput.style.height = newHeight + 'px';
         } catch (error) {
-          console.error('Error in initial textarea sizing:', error);
+          // Silent error handling
         }
       }
     }, 100);
@@ -1259,7 +1209,6 @@ function setupOptimizedDragAndDrop() {
   const dropIndicator = document.getElementById('dropZoneIndicator');
 
   if (!dropArea || !dropIndicator) {
-    console.error("Missing drag and drop elements");
     return;
   }
 
@@ -1459,7 +1408,6 @@ function generateDemo() {
 
   const cachedEntry = journalCache.get(cacheKey);
   if (cachedEntry && !currentPhotoFile) {
-    console.log('Entry served from client cache');
     displayJournalEntry(cachedEntry);
     showFeedback('Journal entry generated!', 'success');
     return;
@@ -1547,7 +1495,6 @@ function generateDemo() {
     }
   })
   .catch(error => {
-    console.error('Error:', error);
     showFeedback(error.message || 'Sorry, we encountered an error. Please try again later.', 'error');
 
     if (loadingIndicator) {
@@ -1818,7 +1765,6 @@ function saveEntryToDatabase() {
     if (error === 'Login required') {
       return;
     }
-    console.error('Error:', error);
     saveButton.innerHTML = originalText;
     saveButton.disabled = false;
     showFeedback('Failed to save entry. Please try again.', 'error');
