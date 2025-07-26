@@ -29,7 +29,7 @@ from ..utils.ai_helpers import generate_ai_content, generate_ai_content_personal
 from ..utils.analytics import get_content_hash, auto_generate_tags
 from ..services.ai_service import AIService
 from .journal_compiler import JournalAnalysisService, JournalCompilerAI
-from .models import Web3Nonce, WalletSession
+from web3auth.models import Web3Nonce, WalletSession
 from .serializers import (
     NonceRequestSerializer, Web3LoginSerializer, UserProfileSerializer
 )
