@@ -4,45 +4,27 @@
 
 {% block extra_css %}
 <style>
-  /* CRITICAL SCROLLBAR FIX: Textarea-specific fixes */
-  
-  /* Fix the competing textarea scrollbar - CRITICAL */
-  #journalInput {
-    overflow: hidden !important; /* Remove textarea's internal scrollbar */
-    resize: none !important;
-    width: 100% !important;
+
+  /* LAYOUT FIX: Proper overflow management */
+  html, body {
+    overflow-x: hidden !important;
+    scroll-behavior: smooth !important;
+    max-width: 100vw !important;
+    box-sizing: border-box;
+  }
+
+  /* LAYOUT FIX: Container width constraints */
+  .container, .max-w-4xl, .max-w-7xl, .w-full {
     max-width: 100% !important;
-    border: none !important;
-    outline: none !important;
-    min-height: 150px;
-    max-height: 400px; /* Set reasonable limit to prevent excessive growth */
-    box-sizing: border-box !important;
-    /* Let it expand naturally by adjusting height instead of scrolling */
-    field-sizing: content; /* Modern browsers */
-    overflow-wrap: break-word;
+    box-sizing: border-box;
   }
 
-  #journalContainer {
-    overflow: visible !important; /* Let content expand naturally */
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    transition: all 0.2s ease;
-    border-color: rgba(99, 102, 241, 0.3);
-    position: relative;
-  }
-
-  #journalContainer:focus-within {
-    border-color: rgba(99, 102, 241, 0.8) !important;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
-    background-color: white;
-  }
-
-  /* Ensure main content doesn't create competing scrollbars */
+  /* LAYOUT FIX: Main container improvements */
   #main-content {
     width: 100%;
     max-width: 100%;
-    overflow: visible !important; /* No internal scrolling */
+    min-height: auto;
+    overflow: visible;
     box-sizing: border-box;
     padding-left: 1rem;
     padding-right: 1rem;
@@ -154,6 +136,70 @@
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   }
 
+  /* LAYOUT FIX: Improved focus states */
+  :focus {
+    outline: 2px solid #6366f1 !important;
+    outline-offset: 2px;
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none !important;
+  }
+
+  :focus-visible {
+    outline: 2px solid #6366f1 !important;
+    outline-offset: 2px;
+  }
+
+  /* LAYOUT FIX: Custom scrollbar - ensure single scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(241, 245, 249, 0.5);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
+  }
+
+  /* LAYOUT FIX: Improved form input styling */
+  #journalContainer {
+    transition: all 0.2s ease;
+    border-color: rgba(99, 102, 241, 0.3);
+    max-height: none;
+    overflow: visible;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  #journalContainer:focus-within {
+    border-color: rgba(99, 102, 241, 0.8) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+    background-color: white;
+  }
+
+  /* LAYOUT FIX: Better textarea handling - FIXED SCROLLING */
+  #journalInput {
+    resize: none;
+    overflow-y: auto; /* FIXED: Allow vertical scroll when needed */
+    overflow-x: hidden; /* FIXED: Prevent horizontal scroll */
+    max-height: 400px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
   /* Better chat bubbles - OPTIMIZED */
   .chat-bubble {
     will-change: transform;
@@ -216,7 +262,7 @@
     animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
   }
 
-  /* Mobile optimizations */
+  /* LAYOUT FIX: Mobile optimizations */
   @media (max-width: 640px) {
     #main-content {
       padding-left: 0.75rem;
@@ -247,7 +293,7 @@
       margin-bottom: 1.5rem;
     }
 
-    /* Better mobile textarea handling */
+    /* LAYOUT FIX: Better mobile textarea handling */
     #journalContainer {
       min-height: 120px;
       max-height: 300px;
@@ -277,6 +323,13 @@
     .form-group {
       margin-bottom: 1.25rem;
     }
+
+    /* LAYOUT FIX: Ensure mobile doesn't have scroll conflicts */
+    body {
+      overflow-x: hidden !important;
+      -webkit-overflow-scrolling: touch;
+      max-width: 100vw;
+    }
   }
 
   /* Animation for loading dots */
@@ -290,6 +343,25 @@
     40% { content: '..'; }
     60% { content: '...'; }
     80%, 100% { content: ''; }
+  }
+
+  /* LAYOUT FIX: Input container improvements */
+  #journalContainer {
+    box-sizing: border-box;
+    overflow: visible;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #journalInput {
+    box-sizing: border-box;
+    outline: none !important;
+    border: none !important;
+    width: 100%;
+    max-width: 100%;
+    overflow-y: auto;
   }
 
   /* Custom class for focused state */
@@ -358,7 +430,7 @@
     color: white;
   }
 
-  /* Performance optimizations for scrolling */
+  /* LAYOUT FIX: Performance optimizations for scrolling */
   .animate-fade-in,
   .animate-scale-in,
   .animate-float,
@@ -366,6 +438,7 @@
     backface-visibility: hidden;
     perspective: 1000px;
   }
+
 </style>
 {% endblock %}
 
@@ -373,7 +446,7 @@
 <!-- Skip link for accessibility -->
 <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-secondary-600 focus:outline-offset-0">Skip to main content</a>
 
-<!-- FIXED: Simplified main container with proper width constraints -->
+<!-- LAYOUT FIX: Simplified main container with proper width constraints -->
 <div id="main-content" class="max-w-4xl w-full mx-auto relative">
   <!-- Enhanced decorative elements - REDUCED for performance -->
   <div class="hidden sm:block absolute -top-10 -left-16 h-48 w-48 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob"></div>
@@ -420,7 +493,7 @@
     </div>
   </div>
 
-  <!-- FIXED: Main input form with improved styling and NO competing scrollbars -->
+  <!-- Enhanced Main input form with improved styling -->
   <form id="demoForm" class="w-full relative z-10 animate-scale-in" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden border border-white transition-all hover:shadow-2xl card-hover">
@@ -440,9 +513,9 @@
           </div>
         </div>
 
-        <!-- CRITICAL FIX: Enhanced integrated input container with NO internal scrolling -->
+        <!-- LAYOUT FIX: Enhanced integrated input container -->
         <div id="journalContainer" class="relative border border-gray-200 rounded-xl focus-within:border-secondary-400 transition bg-gray-50/50 min-h-[150px] sm:min-h-[200px] shadow-inner">
-          <!-- CRITICAL FIX: Input textarea with NO internal scrollbar -->
+          <!-- LAYOUT FIX: Input textarea with improved styling -->
           <textarea
             id="journalInput"
             name="journal_content"
@@ -718,10 +791,10 @@
   </div>
 </div>
 
-<!-- FIXED JavaScript with NO competing scrollbars -->
+<!-- SIMPLIFIED JavaScript with scroll fixes -->
 <script>
 
-// CRITICAL FIX: Cache initialization - simplified
+// LAYOUT FIX: Optimized cache initialization
 const journalCache = {
   init: function() {
     if (typeof localStorage !== 'undefined') {
@@ -795,7 +868,7 @@ const journalCache = {
 let currentPhotoFile = null;
 let currentPhotoDataUrl = null;
 
-// CRITICAL FIX: Optimized debounce function
+// LAYOUT FIX: Optimized debounce function
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
@@ -808,15 +881,28 @@ function debounce(func, wait) {
   };
 }
 
-// CRITICAL FIX: Initialize with NO competing scrollbars
+// LAYOUT FIX: Initialize with better performance
 document.addEventListener('DOMContentLoaded', function() {
   journalCache.init();
   initializeJournalForm();
   initializeAnimations();
   setupEnhancedUX();
+  
+  // SIMPLIFIED scroll optimization - just prevent horizontal scroll
+  setupSimpleScrollOptimization();
 });
 
-// CRITICAL FIX: Initialize journal form with FIXED textarea handling
+// LAYOUT FIX: SIMPLIFIED scroll optimization function
+function setupSimpleScrollOptimization() {
+  // Simple horizontal scroll prevention
+  window.addEventListener('scroll', function() {
+    if (window.scrollX !== 0) {
+      window.scrollTo(0, window.scrollY);
+    }
+  }, { passive: true });
+}
+
+// LAYOUT FIX: Initialize journal form with better performance
 function initializeJournalForm() {
   const personalizationToggle = document.getElementById('personalizationToggle');
   const personalizationOptions = document.getElementById('personalizationOptions');
@@ -833,24 +919,46 @@ function initializeJournalForm() {
 
   setupOptimizedDragAndDrop();
 
-  // CRITICAL FIX: Textarea auto-resize WITHOUT internal scrolling
+  // LAYOUT FIX: Better textarea handling
   const journalInput = document.getElementById('journalInput');
   if (journalInput) {
-    // FIXED: Simple auto-resize that expands height instead of creating scrollbars
-    const autoResize = debounce(function() {
-      // Reset height to auto to get the correct scrollHeight
-      journalInput.style.height = 'auto';
-      // Set height to scrollHeight, but cap at reasonable maximum
-      const newHeight = Math.min(journalInput.scrollHeight, 400);
-      journalInput.style.height = newHeight + 'px';
-    }, 50);
+    // Store reference to the element for the debounced function
+    const debouncedResize = debounce(function(element) {
+      if (!element || !element.style) {
+        return;
+      }
+      
+      try {
+        // LAYOUT FIX: Limit max height to prevent scroll issues
+        const maxHeight = window.innerHeight * 0.4; // 40% of viewport height
+        element.style.height = 'auto';
+        const newHeight = Math.min(element.scrollHeight, maxHeight);
+        element.style.height = newHeight + 'px';
+      } catch (error) {
+        // Silent error handling
+      }
+    }, 100);
 
     journalInput.addEventListener('input', function() {
       countChars();
-      autoResize();
+      // Pass the element explicitly to the debounced function
+      debouncedResize(this);
     });
 
-    // Focus/blur handling for container styling
+    // LAYOUT FIX: Initial sizing with height limit
+    setTimeout(() => {
+      if (journalInput && journalInput.style) {
+        try {
+          const maxHeight = window.innerHeight * 0.4;
+          journalInput.style.height = 'auto';
+          const newHeight = Math.min(journalInput.scrollHeight, maxHeight);
+          journalInput.style.height = newHeight + 'px';
+        } catch (error) {
+          // Silent error handling
+        }
+      }
+    }, 100);
+
     const journalContainer = document.getElementById('journalContainer');
     if (journalContainer) {
       journalInput.addEventListener('focus', function() {
@@ -861,11 +969,6 @@ function initializeJournalForm() {
         journalContainer.classList.remove('input-focused');
       });
     }
-
-    // Initial sizing
-    setTimeout(() => {
-      autoResize();
-    }, 100);
   }
 
   countChars();
@@ -1038,7 +1141,7 @@ function setupEnhancedValidation() {
   }
 }
 
-// CRITICAL FIX: Optimized drag and drop
+// LAYOUT FIX: Optimized drag and drop
 function setupOptimizedDragAndDrop() {
   const dropArea = document.getElementById('journalContainer');
   const dropIndicator = document.getElementById('dropZoneIndicator');
@@ -1359,7 +1462,7 @@ function displayJournalEntry(data) {
   if (resultPreview) {
     resultPreview.classList.remove('hidden');
 
-    // Smooth scroll to result
+    // LAYOUT FIX: Better scroll to result
     setTimeout(() => {
       resultPreview.scrollIntoView({
         behavior: 'smooth',
@@ -1388,8 +1491,6 @@ function restartDemo() {
   const journalInput = document.getElementById('journalInput');
   if (journalInput) {
     journalInput.value = '';
-    // Reset height
-    journalInput.style.height = 'auto';
   }
 
   const resultPreview = document.getElementById('resultPreview');
@@ -1414,6 +1515,10 @@ function restartDemo() {
   const demoForm = document.getElementById('demoForm');
   if (demoForm) {
     demoForm.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  if (journalInput) {
+    journalInput.style.height = 'auto';
   }
 }
 
@@ -1453,12 +1558,6 @@ function editJournalEntry() {
   const journalInput = document.getElementById('journalInput');
   if (journalInput) {
     journalInput.value = cleanedEntry;
-    // Reset height and trigger auto-resize
-    journalInput.style.height = 'auto';
-    setTimeout(() => {
-      const newHeight = Math.min(journalInput.scrollHeight, 400);
-      journalInput.style.height = newHeight + 'px';
-    }, 0);
   }
 
   const resultPreview = document.getElementById('resultPreview');
