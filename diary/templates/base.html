@@ -1637,11 +1637,7 @@
     <!-- Enhanced JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DiaryVault Enhanced Navigation - v5.4 Marketplace Removed');
-            console.log('User authenticated:', {{ user.is_authenticated|yesno:"true,false" }});
-            console.log('Current page:', '{{ request.resolver_match.url_name }}');
-
-            // LAYOUT FIX: Enhanced horizontal scroll prevention
+            // Enhanced horizontal scroll prevention
             function preventHorizontalScroll() {
                 if (window.scrollX !== 0) {
                     window.scrollTo(0, window.scrollY);
@@ -1652,31 +1648,20 @@
                 const html = document.documentElement;
                 
                 if (body.scrollWidth > window.innerWidth || html.scrollWidth > window.innerWidth) {
-                    console.warn('Horizontal overflow detected - checking elements');
-                    
                     // Find elements that extend beyond viewport
                     const allElements = document.querySelectorAll('*');
                     allElements.forEach(el => {
                         const rect = el.getBoundingClientRect();
                         if (rect.right > window.innerWidth) {
-                            console.warn('Element extends beyond viewport:', el, rect.right);
+                            // Log quietly without console output
                         }
                     });
                 }
             }
 
-            // LAYOUT FIX: Monitor and prevent horizontal scroll
+            // Monitor and prevent horizontal scroll
             window.addEventListener('scroll', preventHorizontalScroll, { passive: true });
             window.addEventListener('resize', preventHorizontalScroll, { passive: true });
-
-            // Connection status indicator
-            window.addEventListener('online', function() {
-                window.showToast && window.showToast('Connection restored', 'success', 3000);
-            });
-
-            window.addEventListener('offline', function() {
-                window.showToast && window.showToast('Connection lost - some features may be limited', 'warning', 5000);
-            });
 
             // Mobile menu functionality with proper event handling
             const menuToggleBtn = document.getElementById('menuToggleBtn');
@@ -1687,14 +1672,12 @@
             if (menuToggleBtn && closeMenuBtn && menuOverlay && menuSheet) {
                 function toggleMenu() {
                     const isOpen = menuSheet.classList.contains('open');
-                    console.log('Toggling menu, currently open:', isOpen);
 
                     if (!isOpen) {
                         // Show menu
                         menuOverlay.classList.add('active');
                         menuSheet.classList.add('open');
                         document.body.style.overflow = 'hidden';
-                        console.log('Menu opened');
                         
                         // Add pulse effect to menu items on first open
                         const menuItems = menuSheet.querySelectorAll('.menu-category, .menu-item');
@@ -1709,7 +1692,6 @@
                         menuSheet.classList.remove('open');
                         menuOverlay.classList.remove('active');
                         document.body.style.overflow = '';
-                        console.log('Menu closed');
                     }
                 }
 
@@ -1717,28 +1699,24 @@
                 menuToggleBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Menu toggle button clicked');
                     toggleMenu();
                 });
 
                 closeMenuBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Close menu button clicked');
                     toggleMenu();
                 });
 
                 menuOverlay.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Menu overlay clicked');
                     toggleMenu();
                 });
 
                 // Keyboard support
                 document.addEventListener('keydown', function(e) {
                     if (e.key === 'Escape' && menuSheet.classList.contains('open')) {
-                        console.log('Escape key pressed, closing menu');
                         toggleMenu();
                     }
                 });
@@ -1773,7 +1751,6 @@
                     menuSheet.style.transform = '';
 
                     if (diff > 100) {
-                        console.log('Swipe down detected, closing menu');
                         toggleMenu();
                     }
                 }, { passive: true });
@@ -1781,14 +1758,9 @@
 
             // Enhanced navigation link handling
             const allNavLinks = document.querySelectorAll('.reliable-nav-link, .footer-link');
-            console.log('Found navigation links:', allNavLinks.length);
 
             allNavLinks.forEach((link, index) => {
-                console.log(`Setting up nav link ${index}:`, link.href);
-
                 link.addEventListener('click', function(e) {
-                    console.log('Navigation link clicked:', this.href);
-
                     // Add visual feedback with enhanced animation
                     this.style.opacity = '0.7';
                     this.style.transform = 'scale(0.95)';
@@ -1803,7 +1775,6 @@
                             menuSheet.classList.remove('open');
                             menuOverlay.classList.remove('active');
                             document.body.style.overflow = '';
-                            console.log('Menu closed after navigation');
                         }, 100);
                     }
                 }, { capture: false, passive: false });
@@ -1831,8 +1802,6 @@
 
             // Enhanced toast notification system with improved animations
             window.showToast = function(message, type = 'info', duration = 4000) {
-                console.log('Showing toast:', message, type);
-
                 const toast = document.createElement('div');
                 toast.className = `notification ${type} p-4 max-w-md pointer-events-auto animate-scale-in`;
 
@@ -1869,12 +1838,10 @@
                         toast.style.transform = 'translateY(-20px) scale(0.95)';
                         setTimeout(() => toast.remove(), 300);
                     }, duration);
-                } else {
-                    console.error('Toast container not found');
                 }
             };
 
-            // Enhanced keyboard shortcuts with improved feedback - Marketplace removed
+            // Enhanced keyboard shortcuts
             document.addEventListener('keydown', function(e) {
                 // Skip if user is typing
                 if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
@@ -1891,7 +1858,6 @@
 
                     if ((e.ctrlKey || e.metaKey) && shortcuts[e.key]) {
                         e.preventDefault();
-                        console.log('Keyboard shortcut:', e.key, '→', shortcuts[e.key]);
                         
                         // Show toast for keyboard navigation
                         const names = {
@@ -1913,12 +1879,11 @@
                 if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                     e.preventDefault();
                     if (menuToggleBtn) {
-                        console.log('Keyboard menu toggle');
                         menuToggleBtn.click();
                     }
                 }
 
-                // Help shortcut - Marketplace reference removed
+                // Help shortcut
                 if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
                     e.preventDefault();
                     const shortcuts = {{ user.is_authenticated|yesno:"true,false" }} 
@@ -1928,7 +1893,7 @@
                 }
             });
 
-            // LAYOUT FIX: Enhanced scroll handling with overflow prevention
+            // Enhanced scroll handling with overflow prevention
             let scrollTimeout;
             window.addEventListener('scroll', function() {
                 preventHorizontalScroll();
@@ -1946,23 +1911,20 @@
             // Enhanced page visibility handling
             document.addEventListener('visibilitychange', function() {
                 const isHidden = document.hidden;
-                console.log('Page visibility changed:', isHidden ? 'hidden' : 'visible');
                 
                 if (!isHidden) {
                     // Page became visible - check for updates and layout
-                    console.log('Page became visible - refreshing state');
                     preventHorizontalScroll();
                 }
             });
 
-            // LAYOUT FIX: Enhanced resize handling
+            // Enhanced resize handling
             window.addEventListener('resize', function() {
                 preventHorizontalScroll();
                 
                 // Debounced resize handler
                 clearTimeout(window.resizeTimeout);
                 window.resizeTimeout = setTimeout(() => {
-                    console.log('Window resized - checking layout');
                     preventHorizontalScroll();
                 }, 250);
             }, { passive: true });
@@ -1972,10 +1934,9 @@
                 window.addEventListener('load', function() {
                     setTimeout(() => {
                         const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
-                        console.log('Page load time:', loadTime + 'ms');
                         
                         if (loadTime > 3000) {
-                            console.warn('Slow page load detected');
+                            // Page load was slow
                         }
                         
                         // Check for layout issues after load
@@ -1986,59 +1947,36 @@
 
             // Initialize page with enhanced feedback
             document.body.style.opacity = '1';
-            console.log('DiaryVault navigation initialized successfully - Marketplace removed');
             
-            // LAYOUT FIX: Initial layout check
+            // Initial layout check
             setTimeout(() => {
                 preventHorizontalScroll();
             }, 100);
         });
 
-        // Enhanced utility functions for external use - Marketplace removed
+        // Enhanced utility functions for external use
         window.DiaryVault = {
             showToast: window.showToast,
             navigateToLogin: function() {
-                console.log('Forcing navigation to login');
                 window.location.href = "{% url 'account_login' %}";
                 return false;
             },
             navigateToPrivacyPolicy: function() {
-                console.log('Forcing navigation to privacy policy');
                 window.location.href = "{% url 'privacy_policy' %}";
                 return false;
             },
-            version: '5.6-streamlined-header'
+            version: '5.6-cleaned'
         };
 
-        // Enhanced error handler for debugging
+        // Enhanced error handler
         window.addEventListener('error', function(e) {
-            console.error('JavaScript Error:', e.error);
-            if (e.error && e.error.stack) {
-                console.error('Stack trace:', e.error.stack);
-            }
-            
             // Show user-friendly error message
             if (window.showToast) {
                 window.showToast('Something went wrong. Please refresh the page.', 'error', 5000);
             }
         });
 
-        // Improved click event debugging
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('a, button')) {
-                const element = e.target.closest('a, button');
-                console.log('Interactive element clicked:', {
-                    tag: element.tagName,
-                    href: element.href || 'N/A',
-                    text: element.textContent.trim().substring(0, 50),
-                    target: e.target,
-                    prevented: e.defaultPrevented,
-                    classes: element.className
-                });
-            }
-        });
-
-        // LAYOUT FIX: Additional overflow monitoring
+        // Additional overflow monitoring
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
@@ -2047,7 +1985,7 @@
                         if (node.nodeType === 1) { // Element node
                             const rect = node.getBoundingClientRect();
                             if (rect.right > window.innerWidth) {
-                                console.warn('New element may cause overflow:', node, rect.right);
+                                // Element may cause overflow
                             }
                         }
                     });
@@ -2061,10 +1999,9 @@
             subtree: true
         });
 
-        // LAYOUT FIX: Periodic layout check
+        // Periodic layout check
         setInterval(function() {
             if (window.scrollX !== 0) {
-                console.warn('Horizontal scroll detected, correcting...');
                 window.scrollTo(0, window.scrollY);
             }
         }, 1000);
