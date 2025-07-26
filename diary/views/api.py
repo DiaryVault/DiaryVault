@@ -33,7 +33,7 @@ from diary.models import Web3Nonce, WalletSession
 from ..serializers import (
     NonceRequestSerializer, Web3LoginSerializer, UserProfileSerializer
 )
-from diary.utils import Web3Utils
+from diary.utils.Web3Utils import Web3Utils
 
 # Initialize
 User = get_user_model()
