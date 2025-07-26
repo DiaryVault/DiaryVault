@@ -19,14 +19,14 @@ from .views import api
 from . import views
 
 # Web3 auth URLs - Updated to use existing api views
-web3_patterns = [
-    path('nonce/', api.request_nonce, name='web3_nonce'),
-    path('login/', api.web3_login, name='web3_login'),
-    path('disconnect/', api.disconnect_wallet, name='web3_disconnect'),
-    path('profile/', api.user_profile, name='web3_profile'),
-    path('profile/update/', api.update_profile, name='web3_update_profile'),
-    path('health/', api.health_check, name='web3_health'),
-]
+# web3_patterns = [
+#     path('nonce/', api.request_nonce, name='web3_nonce'),
+#     path('login/', api.web3_login, name='web3_login'),
+#     path('disconnect/', api.disconnect_wallet, name='web3_disconnect'),
+#     path('profile/', api.user_profile, name='web3_profile'),
+#     path('profile/update/', api.update_profile, name='web3_update_profile'),
+#     path('health/', api.health_check, name='web3_health'),
+# ]
 
 urlpatterns = [
     # ============================================================================
