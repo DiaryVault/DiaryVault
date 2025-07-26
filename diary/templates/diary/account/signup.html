@@ -7,14 +7,30 @@
 
 {% block extra_css %}
 <style>
-  /* CRITICAL: Prevent any scrollbars on signup page */
-  html, body {
+  /* CRITICAL: Override base.html scrollbar settings completely */
+  html {
     overflow-x: hidden !important;
-    max-width: 100vw !important;
-    box-sizing: border-box !important;
+    overflow-y: hidden !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
   }
   
-  /* Ensure all content stays within bounds */
+  body {
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+  }
+  
+  /* Make main content scrollable instead */
+  main {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: calc(100vh - 120px) !important;
+    max-height: calc(100vh - 120px) !important;
+  }
+  
+  /* Ensure no element creates scrollbars */
   * {
     max-width: 100% !important;
     box-sizing: border-box !important;
@@ -435,8 +451,8 @@
 <!-- Skip link for accessibility -->
 <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-secondary-600 focus:outline-offset-0">Skip to main content</a>
 
-<div class="flex items-center justify-center px-4 py-8" style="width: 100%; max-width: 100vw; overflow-x: hidden; box-sizing: border-box;">
-  <div id="main-content" class="max-w-md w-full mx-auto relative animate-scale-in" style="max-width: 100%; box-sizing: border-box;">
+<div class="h-full flex items-center justify-center px-4 py-4" style="width: 100%; overflow: hidden;">
+  <div id="main-content" class="w-full max-w-md mx-auto relative animate-scale-in" style="max-width: 100%; overflow: hidden;">
     <!-- Enhanced decorative elements with earning theme -->
     <div class="absolute -top-12 -left-20 h-32 w-32 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
     <div class="absolute -bottom-8 -right-20 h-32 w-32 bg-gradient-to-br from-secondary-400 to-secondary-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
