@@ -13,7 +13,7 @@ from .views.marketplace import (
     purchase_journal_api, tip_author_api, earnings_dashboard,
     my_published_journals
 )
-from .views import journal_compiler, marketplace_views
+from .views import journal_compiler
 from .views import api
 
 from . import views
