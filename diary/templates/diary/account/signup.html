@@ -504,7 +504,7 @@
       </div>
 
       <div class="p-8">
-        <!-- Connection status (dynamically updated by web3-auth.js) -->
+        <!-- Connection status (dynamically updated by base.html) -->
         <div id="connectionStatus" class="hidden">
           <div class="connection-status disconnected" id="statusIndicator">
             <span id="statusText">Wallet not connected</span>
@@ -554,14 +554,14 @@
         </div>
         {% endif %}
 
-        <!-- Modern Wallet Connection Options (Primary) -->
+        <!-- Updated Wallet Connection Options (Primary) -->
         <div class="space-y-4 mb-6 animate-fade-in animation-delay-300">
-          <!-- Any Wallet (Primary - Start Earning) -->
+          <!-- Primary: Connect & Get Rewarded -->
           <button
-            onclick="handleWalletConnection('reown')"
+            onclick="handleWalletConnection('metamask')"
             class="wallet-btn wallet-btn-primary animate-pulse-glow"
             aria-label="Start earning with any wallet"
-            id="reown-btn">
+            id="metamask-primary-btn">
 
             <div class="btn-content flex items-center w-full">
               <div class="flex items-center flex-1">
@@ -572,7 +572,7 @@
                 </div>
                 <div class="text-left">
                   <span class="font-semibold text-lg">Connect & Get Rewarded</span>
-                  <p class="text-sm text-white/80" id="reown-status">Email, Social, or 300+ wallets</p>
+                  <p class="text-sm text-white/80" id="metamask-primary-status">MetaMask, Coinbase, and 300+ wallets</p>
                 </div>
               </div>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -589,7 +589,7 @@
             </div>
           </button>
 
-          <!-- MetaMask (Secondary - Direct) -->
+          <!-- Secondary: MetaMask Direct -->
           <button
             onclick="handleWalletConnection('metamask')"
             class="wallet-btn wallet-btn-secondary"
@@ -829,9 +829,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Load simplified web3-auth.js helper -->
-<script src="{% static 'js/web3-auth.js' %}"></script>
-
 <!-- Signup page specific enhancements -->
 <script>
 // Initialize signup page enhancements
@@ -877,12 +874,20 @@ function togglePassword(fieldId) {
   }
 }
 
-// Enhanced wallet connection handlers that use web3-auth.js
+// Enhanced wallet connection handlers that use the simplified web3 system
 async function handleWalletConnection(walletType) {
-  const button = document.getElementById(`${walletType}-btn`);
+  const button = document.getElementById(`${walletType}-btn`) || 
+                document.getElementById(`${walletType}-primary-btn`);
   
-  // Use the connectWallet function from web3-auth.js (which redirects to ?first_time=true)
-  await window.connectWallet(walletType, button);
+  // Use the connectWallet function from base.html
+  if (window.connectWallet) {
+    await window.connectWallet(walletType, button);
+  } else {
+    console.error('Wallet connection system not available');
+    if (window.showToast) {
+      window.showToast('Wallet system not ready. Please refresh the page.', 'error');
+    }
+  }
 }
 
 // Track user interest in features
@@ -899,11 +904,11 @@ document.addEventListener('keydown', function(e) {
   // Skip if user is typing
   if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
-  // Alt + E for Earning (Any Wallet)
-  if (e.altKey && e.key === 'e') {
+  // Alt + C for Connect (primary button)
+  if (e.altKey && e.key === 'c') {
     e.preventDefault();
-    const reownBtn = document.getElementById('reown-btn');
-    if (reownBtn) reownBtn.click();
+    const connectBtn = document.getElementById('metamask-primary-btn');
+    if (connectBtn) connectBtn.click();
   }
 
   // Alt + M for MetaMask

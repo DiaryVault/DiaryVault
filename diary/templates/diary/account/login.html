@@ -165,7 +165,7 @@
     transform: translateY(-1px);
   }
 
-  /* Primary wallet button (Modern Reown) */
+  /* Primary wallet button */
   .wallet-btn-primary {
     background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
     color: white;
@@ -491,14 +491,14 @@
         </div>
         {% endif %}
 
-        <!-- Modern Reown AppKit Wallet Connection -->
+        <!-- Updated Wallet Connection Buttons -->
         <div class="space-y-4 mb-6 animate-fade-in animation-delay-300">
-          <!-- Primary: Modern Reown AppKit (Email + Social + Wallet) -->
+          <!-- Primary: Connect Wallet -->
           <button
-            onclick="handleWalletConnection('reown')"
+            onclick="handleWalletConnection('metamask')"
             class="wallet-btn wallet-btn-primary animate-pulse-glow"
-            aria-label="Connect with Any Wallet"
-            id="reown-btn">
+            aria-label="Connect with Wallet"
+            id="metamask-primary-btn">
 
             <div class="btn-content flex items-center w-full">
               <div class="flex items-center flex-1">
@@ -508,8 +508,8 @@
                   </svg>
                 </div>
                 <div class="text-left">
-                  <span class="font-semibold text-lg">Any Wallet</span>
-                  <p class="text-sm text-white/80" id="reown-status">Email, Social, or 300+ wallets</p>
+                  <span class="font-semibold text-lg">Connect Wallet</span>
+                  <p class="text-sm text-white/80" id="metamask-primary-status">MetaMask, Coinbase, and 300+ wallets</p>
                 </div>
               </div>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -720,9 +720,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Load simplified web3-auth.js helper -->
-<script src="{% static 'js/web3-auth.js' %}"></script>
-
 <!-- Login page specific enhancements -->
 <script>
 // Initialize login page enhancements
@@ -778,12 +775,20 @@ function togglePassword(fieldId) {
   }
 }
 
-// Enhanced wallet connection handlers that use web3-auth.js
+// Enhanced wallet connection handlers that use the simplified web3 system
 async function handleWalletConnection(walletType) {
-  const button = document.getElementById(`${walletType}-btn`);
+  const button = document.getElementById(`${walletType}-btn`) || 
+                document.getElementById(`${walletType}-primary-btn`);
   
-  // Use the connectWallet function from web3-auth.js
-  await window.connectWallet(walletType, button);
+  // Use the connectWallet function from base.html
+  if (window.connectWallet) {
+    await window.connectWallet(walletType, button);
+  } else {
+    console.error('Wallet connection system not available');
+    if (window.showToast) {
+      window.showToast('Wallet system not ready. Please refresh the page.', 'error');
+    }
+  }
 }
 
 // Keyboard shortcuts for accessibility
@@ -791,14 +796,14 @@ document.addEventListener('keydown', function(e) {
   // Skip if user is typing
   if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
-  // Alt + R for Reown AppKit
-  if (e.altKey && e.key === 'r') {
+  // Alt + C for Connect Wallet (primary button)
+  if (e.altKey && e.key === 'c') {
     e.preventDefault();
-    const reownBtn = document.getElementById('reown-btn');
-    if (reownBtn) reownBtn.click();
+    const connectBtn = document.getElementById('metamask-primary-btn');
+    if (connectBtn) connectBtn.click();
   }
 
-  // Alt + M for MetaMask
+  // Alt + M for MetaMask (secondary button)
   if (e.altKey && e.key === 'm') {
     e.preventDefault();
     const metamaskBtn = document.getElementById('metamask-btn');
