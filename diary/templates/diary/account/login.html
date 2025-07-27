@@ -114,7 +114,7 @@
     animation-delay: 4s;
   }
 
-  /* Enhanced wallet connection buttons */
+  /* Enhanced wallet connection buttons - FIXED to work with base.html system */
   .wallet-btn {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(12px);
@@ -134,7 +134,8 @@
     box-sizing: border-box;
     max-width: 100%;
     cursor: pointer;
-    border: none;
+    font-family: inherit;
+    font-size: inherit;
   }
 
   .wallet-btn::before {
@@ -205,14 +206,19 @@
     font-weight: 500;
   }
 
-  /* Loading state for wallet buttons */
+  /* Loading state for wallet buttons - FIXED */
   .wallet-btn.loading {
     pointer-events: none;
     opacity: 0.7;
+    position: relative;
+  }
+
+  .wallet-btn .btn-content {
+    transition: opacity 0.3s ease;
   }
 
   .wallet-btn.loading .btn-content {
-    opacity: 0;
+    opacity: 0.3;
   }
 
   .wallet-btn .loading-spinner {
@@ -222,6 +228,7 @@
     transform: translate(-50%, -50%);
     opacity: 0;
     transition: opacity 0.3s ease;
+    pointer-events: none;
   }
 
   .wallet-btn.loading .loading-spinner {
@@ -360,7 +367,7 @@
     transform: scale(1.1);
   }
 
-  /* Connection status indicator */
+  /* Connection status indicator - FIXED to work with base.html */
   .connection-status {
     display: inline-flex;
     align-items: center;
@@ -491,14 +498,14 @@
         </div>
         {% endif %}
 
-        <!-- Updated Wallet Connection Buttons -->
+        <!-- FIXED Wallet Connection Buttons - Compatible with base.html system -->
         <div class="space-y-4 mb-6 animate-fade-in animation-delay-300">
-          <!-- Primary: Connect Wallet -->
+          <!-- Primary: Multi-Wallet Selector -->
           <button
-            onclick="handleWalletConnection('metamask')"
+            onclick="handleWalletConnection('any')"
             class="wallet-btn wallet-btn-primary animate-pulse-glow"
-            aria-label="Connect with Wallet"
-            id="metamask-primary-btn">
+            aria-label="Connect with any wallet"
+            id="any-wallet-btn">
 
             <div class="btn-content flex items-center w-full">
               <div class="flex items-center flex-1">
@@ -509,7 +516,7 @@
                 </div>
                 <div class="text-left">
                   <span class="font-semibold text-lg">Connect Wallet</span>
-                  <p class="text-sm text-white/80" id="metamask-primary-status">MetaMask, Coinbase, and 300+ wallets</p>
+                  <p class="text-sm text-white/80" id="any-status">MetaMask, Coinbase, Trust, Rainbow + 300 more</p>
                 </div>
               </div>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -530,7 +537,7 @@
           <button
             onclick="handleWalletConnection('metamask')"
             class="wallet-btn wallet-btn-secondary"
-            aria-label="Connect with MetaMask"
+            aria-label="Connect directly with MetaMask"
             id="metamask-btn">
 
             <div class="btn-content flex items-center w-full">
@@ -544,8 +551,8 @@
                   </svg>
                 </div>
                 <div class="text-left">
-                  <span class="font-semibold text-white">MetaMask</span>
-                  <p class="text-sm text-white/80" id="metamask-status">Direct connection</p>
+                  <span class="font-semibold text-white">MetaMask Direct</span>
+                  <p class="text-sm text-white/80" id="metamask-status">Skip the wallet selector</p>
                 </div>
               </div>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -720,12 +727,13 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Login page specific enhancements -->
+<!-- FIXED: Login page JavaScript that's compatible with base.html -->
 <script>
 // Initialize login page enhancements
 document.addEventListener('DOMContentLoaded', function() {
   setupFormEnhancements();
   initializeLoginForm();
+  setupWalletIntegration();
 });
 
 function setupFormEnhancements() {
@@ -759,6 +767,74 @@ function initializeLoginForm() {
   }
 }
 
+function setupWalletIntegration() {
+  // Listen for wallet connection changes from base.html
+  window.addEventListener('walletConnectionChanged', function(event) {
+    const { isConnected, address, chainId } = event.detail;
+    
+    console.log('Wallet connection changed:', { isConnected, address, chainId });
+    
+    // Update connection status
+    updateConnectionStatus(isConnected, address, chainId);
+    
+    // If successfully connected, redirect to dashboard
+    if (isConnected && address) {
+      if (window.showToast) {
+        window.showToast('Wallet connected! Redirecting to dashboard...', 'success');
+      }
+      
+      // Redirect after a short delay
+      setTimeout(() => {
+        window.location.href = "{% url 'dashboard' %}";
+      }, 1500);
+    }
+  });
+}
+
+function updateConnectionStatus(isConnected, address, chainId) {
+  const connectionStatus = document.getElementById('connectionStatus');
+  const statusIndicator = document.getElementById('statusIndicator');
+  const statusText = document.getElementById('statusText');
+
+  if (connectionStatus && statusIndicator && statusText) {
+    connectionStatus.classList.remove('hidden');
+    
+    if (isConnected) {
+      statusIndicator.className = 'connection-status connected';
+      statusText.textContent = `Connected: ${address ? address.slice(0, 6) + '...' + address.slice(-4) : 'Unknown'}`;
+      
+      if (chainId && chainId !== 8453) {
+        statusIndicator.className = 'connection-status disconnected';
+        statusText.textContent += ' (Wrong Network - Please switch to Base)';
+      }
+    } else {
+      statusIndicator.className = 'connection-status disconnected';
+      statusText.textContent = 'Wallet not connected';
+    }
+  }
+
+  // Update button status text
+  updateButtonStatusText(isConnected, address);
+}
+
+function updateButtonStatusText(isConnected, address) {
+  const statusElements = {
+    'any-status': 'MetaMask, Coinbase, Trust, Rainbow + 300 more',
+    'metamask-status': 'Skip the wallet selector'
+  };
+
+  Object.entries(statusElements).forEach(([id, defaultText]) => {
+    const element = document.getElementById(id);
+    if (element) {
+      if (isConnected && address) {
+        element.textContent = `Connected: ${address.slice(0, 6)}...${address.slice(-4)} (Click to Switch)`;
+      } else {
+        element.textContent = defaultText;
+      }
+    }
+  });
+}
+
 function togglePassword(fieldId) {
   const passwordInput = document.getElementById(fieldId);
   const eyeClosed = document.getElementById('eye-closed-' + fieldId);
@@ -775,44 +851,61 @@ function togglePassword(fieldId) {
   }
 }
 
-// Enhanced wallet connection handlers that use the multi-wallet system
+// FIXED: Wallet connection handler that properly uses base.html functions
 async function handleWalletConnection(walletType) {
-  const button = document.getElementById(`${walletType}-wallet-btn`) || 
-                document.getElementById(`${walletType}-btn`);
+  console.log(`🔗 Login page: Handling wallet connection for: ${walletType}`);
   
-  // Use the connectWallet function from base.html multi-wallet system
-  if (window.connectWallet) {
-    await window.connectWallet(walletType, button);
-  } else {
-    console.error('Multi-wallet connection system not available');
+  // Find the button that was clicked
+  const button = document.getElementById(`${walletType}-wallet-btn`) || 
+                document.getElementById(`${walletType}-btn`) ||
+                document.getElementById(`any-wallet-btn`) ||
+                document.getElementById(`metamask-btn`);
+  
+  // Add loading state to button
+  if (button) {
+    button.classList.add('loading');
+    button.disabled = true;
+  }
+
+  try {
+    // Check if the multi-wallet system from base.html is available
+    if (window.handleWalletConnection && typeof window.handleWalletConnection === 'function') {
+      // Use the base.html function
+      await window.handleWalletConnection(walletType);
+    }
+    // Fallback to direct functions
+    else if (window.connectWallet && typeof window.connectWallet === 'function') {
+      await window.connectWallet(walletType);
+    }
+    // Final fallback
+    else {
+      console.error('No wallet connection system available');
+      if (window.showToast) {
+        window.showToast('Wallet system not ready. Please refresh the page.', 'error');
+      } else {
+        alert('Wallet system not ready. Please refresh the page.');
+      }
+    }
+  } catch (error) {
+    console.error('Error in login page wallet connection:', error);
     if (window.showToast) {
-      window.showToast('Wallet system not ready. Please refresh the page.', 'error');
+      window.showToast('Failed to connect wallet. Please try again.', 'error');
+    } else {
+      alert('Failed to connect wallet. Please try again.');
+    }
+  } finally {
+    // Remove loading state from button
+    if (button) {
+      button.classList.remove('loading');
+      button.disabled = false;
     }
   }
 }
 
-// Keyboard shortcuts for accessibility
-document.addEventListener('keydown', function(e) {
-  // Skip if user is typing
-  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
-
-  // Alt + A for Any Wallet (primary button)
-  if (e.altKey && e.key === 'a') {
-    e.preventDefault();
-    const anyWalletBtn = document.getElementById('any-wallet-btn');
-    if (anyWalletBtn) anyWalletBtn.click();
-  }
-
-  // Alt + M for MetaMask (secondary button)
-  if (e.altKey && e.key === 'm') {
-    e.preventDefault();
-    const metamaskBtn = document.getElementById('metamask-btn');
-    if (metamaskBtn) metamaskBtn.click();
-  }
-});
-
 // Make functions globally available for onclick handlers
 window.handleWalletConnection = handleWalletConnection;
 window.togglePassword = togglePassword;
+
+console.log('✅ Login page wallet integration loaded and compatible with base.html');
 </script>
 {% endblock %}
