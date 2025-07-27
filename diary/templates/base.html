@@ -1694,8 +1694,7 @@
     <div id="toastContainer" class="fixed top-6 right-6 z-50 space-y-3 pointer-events-none">
         <!-- Notifications will be inserted here -->
     </div>
-
-    <!-- Web3 Configuration -->
+<!-- Web3 Configuration -->
     <script>
         window.REOWN_PROJECT_ID = '9be88bc3efb4e4401afe7f28ed0fc59e';
         window.INFURA_ID = '76345518a13649768a7834fcd4bf7eba';
@@ -1715,7 +1714,7 @@
     <script src="https://unpkg.com/@wagmi/core@2.6.17/dist/index.umd.js"></script>
     <script src="https://unpkg.com/viem@2.9.20/dist/index.umd.js"></script>
 
-    <!-- Multi-Wallet Web3 Integration with Wallet Switching -->
+    <!-- Enhanced Multi-Wallet Web3 Integration with Better Error Handling -->
     <script>
         // Global wallet state
         window.walletState = {
@@ -1955,35 +1954,35 @@
             } catch (error) {
                 console.error('Error connecting wallet:', error);
                 
-                // Better error handling
+                // Enhanced error handling with specific actions
                 if (error.code === 4001) {
                     if (window.showToast) {
-                        window.showToast('Connection cancelled. Click "Connect Wallet" to try again.', 'info');
+                        window.showToast('Connection cancelled. Click "Connect Wallet" when ready to try again.', 'info');
                     }
                 } else if (error.code === -32603) {
-                    console.log('Web3Modal error detected, trying MetaMask fallback...');
-                    try {
-                        await connectMetaMaskDirect();
-                    } catch (fallbackError) {
-                        console.error('MetaMask fallback also failed:', fallbackError);
-                        if (window.showToast) {
-                            window.showToast('No wallet found. Please install MetaMask or another Web3 wallet.', 'error');
-                        }
+                    if (window.showToast) {
+                        window.showToast('Wallet setup needed. Please unlock MetaMask or install a wallet.', 'warning');
+                    }
+                    // Show wallet options to help user
+                    setTimeout(() => {
                         showWalletOptions();
+                    }, 2000);
+                } else if (error.code === -32002) {
+                    if (window.showToast) {
+                        window.showToast('Wallet request pending. Please check your wallet app.', 'warning');
+                    }
+                } else if (error.message && error.message.includes('locked')) {
+                    if (window.showToast) {
+                        window.showToast('Please unlock your wallet and try again.', 'warning');
                     }
                 } else {
                     if (window.showToast) {
-                        window.showToast('Failed to connect wallet. Trying MetaMask...', 'warning');
+                        window.showToast('Connection failed. Please ensure your wallet is set up properly.', 'error');
                     }
-                    // Try MetaMask as fallback
-                    try {
-                        await connectMetaMaskDirect();
-                    } catch (fallbackError) {
-                        if (window.showToast) {
-                            window.showToast('Please install a Web3 wallet to continue.', 'error');
-                        }
+                    // Try to help the user
+                    setTimeout(() => {
                         showWalletOptions();
-                    }
+                    }, 2000);
                 }
             }
         }
@@ -2013,10 +2012,44 @@
 
                 console.log('🦊 Connecting to MetaMask...');
 
-                // Request account access
-                const accounts = await provider.request({
-                    method: 'eth_requestAccounts'
-                });
+                // First, check if MetaMask is unlocked and has accounts
+                let accounts;
+                try {
+                    // Try to get existing accounts first (won't prompt if locked)
+                    accounts = await provider.request({ method: 'eth_accounts' });
+                    
+                    if (accounts.length === 0) {
+                        console.log('🔓 No accounts found, requesting account access...');
+                        // Request account access (this will prompt unlock if needed)
+                        accounts = await provider.request({ method: 'eth_requestAccounts' });
+                    } else {
+                        console.log('✅ Found existing accounts, using first account');
+                    }
+                } catch (accountError) {
+                    console.log('🔓 Account access needed, requesting permission...');
+                    
+                    // Handle specific MetaMask errors
+                    if (accountError.code === -32603) {
+                        // MetaMask is likely locked or needs setup
+                        if (window.showToast) {
+                            window.showToast('Please unlock MetaMask and try again', 'warning');
+                        }
+                        // Try to prompt user to unlock
+                        try {
+                            accounts = await provider.request({ method: 'eth_requestAccounts' });
+                        } catch (unlockError) {
+                            if (unlockError.code === 4001) {
+                                throw new Error('User rejected the connection request');
+                            } else if (unlockError.code === -32603) {
+                                throw new Error('MetaMask is locked. Please unlock MetaMask and try again.');
+                            } else {
+                                throw unlockError;
+                            }
+                        }
+                    } else {
+                        throw accountError;
+                    }
+                }
 
                 if (accounts && accounts.length > 0) {
                     console.log('✅ MetaMask connected:', accounts[0]);
@@ -2042,22 +2075,31 @@
             } catch (error) {
                 console.error('❌ MetaMask connection failed:', error);
                 
+                // Enhanced error handling with user-friendly messages
                 if (error.code === 4001) {
                     // User rejected the request
                     if (window.showToast) {
-                        window.showToast('Connection cancelled. Please try again.', 'info');
+                        window.showToast('Connection cancelled. Please try again when ready.', 'info');
                     }
                 } else if (error.code === -32002) {
                     // Request already pending
                     if (window.showToast) {
-                        window.showToast('MetaMask request already pending. Please check your wallet.', 'warning');
+                        window.showToast('MetaMask request pending. Please check your wallet.', 'warning');
+                    }
+                } else if (error.code === -32603) {
+                    // Internal error - usually means MetaMask is locked or needs setup
+                    if (window.showToast) {
+                        window.showToast('Please unlock MetaMask or complete setup, then try again.', 'warning');
+                    }
+                } else if (error.message && error.message.includes('locked')) {
+                    if (window.showToast) {
+                        window.showToast('MetaMask is locked. Please unlock it and try again.', 'warning');
                     }
                 } else {
                     // Other errors
                     if (window.showToast) {
                         window.showToast('Failed to connect to MetaMask. Please try again.', 'error');
                     }
-                    showWalletOptions();
                 }
                 
                 throw error;
@@ -2276,15 +2318,28 @@
             }
         }
 
-        // Show wallet options for users without wallets
+        // Enhanced wallet options modal with better guidance
         function showWalletOptions() {
             const message = `
                 <div class="text-center">
-                    <h3 class="font-semibold mb-3">Get a Crypto Wallet</h3>
-                    <p class="text-sm text-gray-600 mb-4">You'll need a crypto wallet to use DiaryVault's Web3 features.</p>
+                    <h3 class="font-semibold mb-3">Wallet Setup Required</h3>
+                    <p class="text-sm text-gray-600 mb-4">To use DiaryVault's Web3 features, you need a crypto wallet. Here are the best options:</p>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div class="text-left p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                            <h4 class="font-medium text-orange-800 mb-1">Already have MetaMask?</h4>
+                            <p class="text-sm text-orange-700">Make sure it's unlocked and set up with at least one account.</p>
+                        </div>
+                        
+                        <div class="text-left p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <h4 class="font-medium text-blue-800 mb-1">New to crypto?</h4>
+                            <p class="text-sm text-blue-700">MetaMask is the most popular and user-friendly option.</p>
+                        </div>
+                    </div>
+                    
                     <div class="space-y-2">
                         <a href="https://metamask.io/download/" target="_blank" class="block p-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
-                            🦊 Install MetaMask (Most Popular)
+                            🦊 Install MetaMask (Recommended)
                         </a>
                         <a href="https://www.coinbase.com/wallet" target="_blank" class="block p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
                             💼 Get Coinbase Wallet
@@ -2296,7 +2351,18 @@
                             🌈 Get Rainbow Wallet
                         </a>
                     </div>
-                    <p class="text-xs text-gray-500 mt-3">These are free and take just a few minutes to set up.</p>
+                    
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <p class="text-xs text-gray-600 mb-2"><strong>Setup Steps:</strong></p>
+                        <ol class="text-xs text-gray-600 text-left space-y-1">
+                            <li>1. Install a wallet from above</li>
+                            <li>2. Create a new wallet or import existing</li>
+                            <li>3. Make sure it's unlocked</li>
+                            <li>4. Return here and click "Connect Wallet"</li>
+                        </ol>
+                    </div>
+                    
+                    <p class="text-xs text-gray-500 mt-3">These wallets are free and secure. Choose any one you prefer!</p>
                 </div>
             `;
 
@@ -2708,10 +2774,10 @@
                 window.location.href = "{% url 'privacy_policy' %}";
                 return false;
             },
-            version: '12.0-multi-wallet-switching'
+            version: '13.0-enhanced-error-handling'
         };
 
-        console.log('✅ DiaryVault Multi-Wallet system with switching loaded (v12.0)');
+        console.log('✅ DiaryVault Multi-Wallet system with enhanced error handling loaded (v13.0)');
     </script>
     
     {% block extra_js %}{% endblock %}
