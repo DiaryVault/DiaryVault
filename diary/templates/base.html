@@ -1914,39 +1914,199 @@
         }
     }
 
-    // Show wallet options
+    // Show wallet options with mobile menu integration
     function showWalletOptions() {
-        const message = `
-            <div class="text-center">
-                <h3 class="font-semibold mb-3 text-lg">Get a Crypto Wallet</h3>
-                <p class="text-sm text-gray-600 mb-4">You'll need a crypto wallet to use DiaryVault's Web3 features.</p>
-                <div class="space-y-3">
-                    <a href="https://metamask.io/download/" target="_blank" rel="noopener" class="block p-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
-                        🦊 Install MetaMask (Most Popular)
-                    </a>
-                    <a href="https://www.coinbase.com/wallet" target="_blank" rel="noopener" class="block p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                        💼 Get Coinbase Wallet
-                    </a>
-                    <a href="https://trustwallet.com/" target="_blank" rel="noopener" class="block p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                        🛡️ Download Trust Wallet
-                    </a>
+        // Close mobile menu first if it's open
+        closeMenu();
+        
+        // Wait for menu animation to complete before showing wallet popup
+        setTimeout(() => {
+            const message = `
+                <div class="text-center px-2">
+                    <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-xl text-gray-800 mb-2 diary-font">Get a Crypto Wallet</h3>
+                    <p class="text-sm text-gray-600 mb-6 leading-relaxed">Choose a free wallet to start earning rewards for your journal entries</p>
+                    
+                    <div class="space-y-4 mb-6">
+                        <a href="https://metamask.io/download/" target="_blank" rel="noopener" class="flex items-center gap-4 p-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 group">
+                            <div class="text-3xl">🦊</div>
+                            <div class="text-left flex-1">
+                                <div class="font-semibold text-lg">MetaMask</div>
+                                <div class="text-sm opacity-90">Most popular • 100M+ users</div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-75 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </a>
+                        
+                        <a href="https://www.coinbase.com/wallet" target="_blank" rel="noopener" class="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 group">
+                            <div class="text-3xl">💼</div>
+                            <div class="text-left flex-1">
+                                <div class="font-semibold text-lg">Coinbase Wallet</div>
+                                <div class="text-sm opacity-90">Beginner friendly • Easy setup</div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-75 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </a>
+                        
+                        <a href="https://trustwallet.com/" target="_blank" rel="noopener" class="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 group">
+                            <div class="text-3xl">🛡️</div>
+                            <div class="text-left flex-1">
+                                <div class="font-semibold text-lg">Trust Wallet</div>
+                                <div class="text-sm opacity-90">Mobile first • 60M+ users</div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-75 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </a>
+                    </div>
+                    
+                    <div class="p-4 bg-primary-50 rounded-xl border border-primary-100 mb-6">
+                        <div class="flex items-center gap-2 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="text-sm font-medium text-primary-800">Why do I need a wallet?</span>
+                        </div>
+                        <p class="text-xs text-primary-700 leading-relaxed">Your wallet keeps your journal entries private and lets you earn cryptocurrency rewards for writing.</p>
+                    </div>
                 </div>
-                <p class="text-xs text-gray-500 mt-4">These are free and take just a few minutes to set up.</p>
+            `;
+
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[70] p-4';
+            modal.style.backdropFilter = 'blur(8px)';
+            modal.innerHTML = `
+                <div class="bg-white rounded-3xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-scale-in">
+                    ${message}
+                    <div class="flex gap-3">
+                        <button onclick="this.closest('.fixed').remove()" class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium min-h-[44px] flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Close
+                        </button>
+                        <button onclick="showWalletHelp()" class="flex-1 py-3 px-4 bg-primary-100 text-primary-700 rounded-xl hover:bg-primary-200 transition-colors font-medium min-h-[44px] flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Help
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            
+            // Add click outside to close
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+            // Add escape key to close
+            const handleEscape = (e) => {
+                if (e.key === 'Escape') {
+                    modal.remove();
+                    document.removeEventListener('keydown', handleEscape);
+                }
+            };
+            document.addEventListener('keydown', handleEscape);
+            
+        }, 300); // Wait for menu close animation
+    }
+
+    // Show wallet help/FAQ
+    function showWalletHelp() {
+        // Close current modal first
+        const currentModal = document.querySelector('.fixed.inset-0.z-\\[70\\]');
+        if (currentModal) {
+            currentModal.remove();
+        }
+        
+        const helpContent = `
+            <div class="text-center px-2">
+                <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h3 class="font-bold text-xl text-gray-800 mb-2 diary-font">Wallet Help</h3>
+                <p class="text-sm text-gray-600 mb-6">Everything you need to know about crypto wallets</p>
+                
+                <div class="space-y-4 mb-6 text-left">
+                    <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                        <h4 class="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                            <span class="text-lg">🔐</span>
+                            What is a crypto wallet?
+                        </h4>
+                        <p class="text-sm text-blue-700 leading-relaxed">A digital wallet that stores your cryptocurrency and keeps your data secure. Think of it like a digital bank account that only you control.</p>
+                    </div>
+                    
+                    <div class="p-4 bg-green-50 rounded-xl border border-green-100">
+                        <h4 class="font-semibold text-green-800 mb-2 flex items-center gap-2">
+                            <span class="text-lg">✅</span>
+                            Is it safe?
+                        </h4>
+                        <p class="text-sm text-green-700 leading-relaxed">Yes! Wallets use advanced encryption. Only you have access with your private key. Never share your seed phrase with anyone.</p>
+                    </div>
+                    
+                    <div class="p-4 bg-purple-50 rounded-xl border border-purple-100">
+                        <h4 class="font-semibold text-purple-800 mb-2 flex items-center gap-2">
+                            <span class="text-lg">💰</span>
+                            How do I earn rewards?
+                        </h4>
+                        <p class="text-sm text-purple-700 leading-relaxed">Write journal entries, and earn Base network tokens. Your thoughts become valuable digital assets you own forever.</p>
+                    </div>
+                    
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100">
+                        <h4 class="font-semibold text-orange-800 mb-2 flex items-center gap-2">
+                            <span class="text-lg">⚡</span>
+                            Which wallet should I choose?
+                        </h4>
+                        <p class="text-sm text-orange-700 leading-relaxed">MetaMask is most popular and works everywhere. Coinbase Wallet is easiest for beginners. Trust Wallet is great for mobile users.</p>
+                    </div>
+                </div>
             </div>
         `;
 
         const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+        modal.className = 'fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[70] p-4';
+        modal.style.backdropFilter = 'blur(8px)';
         modal.innerHTML = `
-            <div class="bg-white rounded-2xl p-6 max-w-sm w-full max-h-96 overflow-y-auto">
-                ${message}
-                <button onclick="this.closest('.fixed').remove()" class="mt-4 w-full p-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors min-h-[44px]">
-                    Close
-                </button>
+            <div class="bg-white rounded-3xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-scale-in">
+                ${helpContent}
+                <div class="flex gap-3">
+                    <button onclick="this.closest('.fixed').remove(); showWalletOptions();" class="flex-1 py-3 px-4 bg-primary-100 text-primary-700 rounded-xl hover:bg-primary-200 transition-colors font-medium min-h-[44px] flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back
+                    </button>
+                    <button onclick="this.closest('.fixed').remove()" class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium min-h-[44px] flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Close
+                    </button>
+                </div>
             </div>
         `;
 
         document.body.appendChild(modal);
+        
+        // Add click outside to close
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
     }
 
     // Get wallet info
