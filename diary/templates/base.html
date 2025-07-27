@@ -1695,7 +1695,7 @@
         <!-- Notifications will be inserted here -->
     </div>
 
-<!-- Web3 Configuration -->
+    <!-- Web3 Configuration -->
     <script>
         window.REOWN_PROJECT_ID = '9be88bc3efb4e4401afe7f28ed0fc59e';
         window.INFURA_ID = '76345518a13649768a7834fcd4bf7eba';
@@ -2043,10 +2043,10 @@
                         element.textContent = `Connected: ${address.slice(0, 6)}...${address.slice(-4)}`;
                     } else {
                         // Reset to original text based on button type
-                        if (element.id.includes('primary')) {
-                            element.textContent = 'MetaMask, Coinbase, and 300+ wallets';
+                        if (element.id.includes('any')) {
+                            element.textContent = 'MetaMask, Coinbase, Trust, Rainbow + 300 more';
                         } else if (element.id.includes('metamask')) {
-                            element.textContent = 'Direct connection';
+                            element.textContent = 'Skip the wallet selector';
                         }
                     }
                 }
@@ -2187,7 +2187,6 @@
             // Initialize wallet system
             initializeWallet();
 
-            // Rest of your existing initialization code...
             // CRITICAL: Simple horizontal scroll prevention only
             function preventHorizontalScroll() {
                 if (window.scrollX !== 0) {
@@ -2199,10 +2198,144 @@
             window.addEventListener('scroll', preventHorizontalScroll, { passive: true });
             window.addEventListener('resize', preventHorizontalScroll, { passive: true });
 
-            // [Keep all your existing menu, navigation, and other initialization code here]
-            // ... (rest of your existing DOMContentLoaded code)
+            // Mobile menu functionality with proper event handling
+            const menuToggleBtn = document.getElementById('menuToggleBtn');
+            const closeMenuBtn = document.getElementById('closeMenuBtn');
+            const menuOverlay = document.getElementById('menuOverlay');
+            const menuSheet = document.getElementById('menuSheet');
 
-            // Enhanced toast notification system
+            if (menuToggleBtn && closeMenuBtn && menuOverlay && menuSheet) {
+                function toggleMenu() {
+                    const isOpen = menuSheet.classList.contains('open');
+
+                    if (!isOpen) {
+                        // Show menu
+                        menuOverlay.classList.add('active');
+                        menuSheet.classList.add('open');
+                        document.body.style.overflow = 'hidden';
+                        
+                        // Add pulse effect to menu items on first open
+                        const menuItems = menuSheet.querySelectorAll('.menu-category, .menu-item');
+                        menuItems.forEach((item, index) => {
+                            setTimeout(() => {
+                                item.classList.add('pulse-on-load');
+                                setTimeout(() => item.classList.remove('pulse-on-load'), 2000);
+                            }, index * 50);
+                        });
+                    } else {
+                        // Hide menu
+                        menuSheet.classList.remove('open');
+                        menuOverlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                }
+
+                // Clean event listeners
+                menuToggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleMenu();
+                });
+
+                closeMenuBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleMenu();
+                });
+
+                menuOverlay.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleMenu();
+                });
+
+                // Keyboard support
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && menuSheet.classList.contains('open')) {
+                        toggleMenu();
+                    }
+                });
+
+                // Touch support for swipe down to close
+                let startY = 0;
+                let currentY = 0;
+                let isDragging = false;
+
+                menuSheet.addEventListener('touchstart', function(e) {
+                    startY = e.touches[0].clientY;
+                    isDragging = true;
+                }, { passive: true });
+
+                menuSheet.addEventListener('touchmove', function(e) {
+                    if (!isDragging) return;
+
+                    currentY = e.touches[0].clientY;
+                    const diff = currentY - startY;
+
+                    if (diff > 0 && menuSheet.scrollTop === 0) {
+                        const translateY = Math.min(diff * 0.5, 100);
+                        menuSheet.style.transform = `translateY(${translateY}px)`;
+                    }
+                }, { passive: true });
+
+                menuSheet.addEventListener('touchend', function() {
+                    if (!isDragging) return;
+                    isDragging = false;
+
+                    const diff = currentY - startY;
+                    menuSheet.style.transform = '';
+
+                    if (diff > 100) {
+                        toggleMenu();
+                    }
+                }, { passive: true });
+            }
+
+            // Enhanced navigation link handling
+            const allNavLinks = document.querySelectorAll('.reliable-nav-link, .footer-link');
+
+            allNavLinks.forEach((link, index) => {
+                link.addEventListener('click', function(e) {
+                    // Add visual feedback with enhanced animation
+                    this.style.opacity = '0.7';
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.opacity = '';
+                        this.style.transform = '';
+                    }, 150);
+
+                    // Close mobile menu if open and this is a navigation link
+                    if (menuSheet && menuSheet.classList.contains('open')) {
+                        setTimeout(() => {
+                            menuSheet.classList.remove('open');
+                            menuOverlay.classList.remove('active');
+                            document.body.style.overflow = '';
+                        }, 100);
+                    }
+                }, { capture: false, passive: false });
+
+                // Enhanced touch support for mobile
+                link.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.97)';
+                    this.style.transition = 'transform 0.1s ease';
+                }, { passive: true });
+
+                link.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                    setTimeout(() => {
+                        this.style.transition = '';
+                    }, 100);
+                }, { passive: true });
+
+                // Add haptic feedback on supported devices
+                link.addEventListener('touchstart', function() {
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(10);
+                    }
+                }, { passive: true });
+            });
+
+            // Enhanced toast notification system with improved animations
             window.showToast = function(message, type = 'info', duration = 4000) {
                 const toast = document.createElement('div');
                 toast.className = `notification ${type} p-4 max-w-md pointer-events-auto animate-scale-in`;
@@ -2234,7 +2367,7 @@
                 if (container) {
                     container.appendChild(toast);
 
-                    // Auto remove
+                    // Auto remove with improved animation
                     setTimeout(() => {
                         toast.style.opacity = '0';
                         toast.style.transform = 'translateY(-20px) scale(0.95)';
@@ -2242,6 +2375,89 @@
                     }, duration);
                 }
             };
+
+            // Enhanced keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Skip if user is typing
+                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+
+                // Navigation shortcuts for authenticated users
+                if ({{ user.is_authenticated|yesno:"true,false" }}) {
+                    const shortcuts = {
+                        'n': "{% url 'new_entry' %}",
+                        'd': "{% url 'dashboard' %}",
+                        'l': "{% url 'library' %}",
+                        'i': "{% url 'insights' %}",
+                        'p': "{% url 'privacy_policy' %}"
+                    };
+
+                    if ((e.ctrlKey || e.metaKey) && shortcuts[e.key]) {
+                        e.preventDefault();
+                        
+                        // Show toast for keyboard navigation
+                        const names = {
+                            'n': 'New Entry',
+                            'd': 'Dashboard',
+                            'l': 'Collections',
+                            'i': 'Insights',
+                            'p': 'Privacy Policy'
+                        };
+                        window.showToast(`Navigating to ${names[e.key]}`, 'info', 2000);
+                        
+                        setTimeout(() => {
+                            window.location.href = shortcuts[e.key];
+                        }, 200);
+                    }
+                }
+
+                // Menu toggle
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    if (menuToggleBtn) {
+                        menuToggleBtn.click();
+                    }
+                }
+
+                // Wallet shortcuts
+                if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
+                    e.preventDefault();
+                    if (window.walletState.isConnected) {
+                        disconnectWallet();
+                    } else {
+                        connectWallet();
+                    }
+                }
+
+                // Help shortcut
+                if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault();
+                    const shortcuts = {{ user.is_authenticated|yesno:"true,false" }} 
+                        ? 'Ctrl+N: New Entry, Ctrl+D: Dashboard, Ctrl+L: Collections, Ctrl+I: Insights, Ctrl+K: Menu, Ctrl+W: Wallet'
+                        : 'Ctrl+K: Menu, Ctrl+W: Wallet';
+                    window.showToast(shortcuts, 'info', 5000);
+                }
+            });
+
+            // Enhanced page visibility handling
+            document.addEventListener('visibilitychange', function() {
+                const isHidden = document.hidden;
+                
+                if (!isHidden) {
+                    // Page became visible - check for updates and layout
+                    preventHorizontalScroll();
+                }
+            });
+
+            // Enhanced resize handling
+            window.addEventListener('resize', function() {
+                preventHorizontalScroll();
+                
+                // Debounced resize handler
+                clearTimeout(window.resizeTimeout);
+                window.resizeTimeout = setTimeout(() => {
+                    preventHorizontalScroll();
+                }, 250);
+            }, { passive: true });
 
             // Initialize page with enhanced feedback
             document.body.style.opacity = '1';
@@ -2267,12 +2483,12 @@
                 window.location.href = "{% url 'privacy_policy' %}";
                 return false;
             },
-            version: '10.0-multi-wallet'
+            version: '11.0-multi-wallet'
         };
 
-        console.log('✅ DiaryVault Multi-Wallet system loaded (v10.0)');
+        console.log('✅ DiaryVault Multi-Wallet system loaded (v11.0)');
     </script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

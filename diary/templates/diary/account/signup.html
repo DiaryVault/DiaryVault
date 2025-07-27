@@ -874,16 +874,16 @@ function togglePassword(fieldId) {
   }
 }
 
-// Enhanced wallet connection handlers that use the simplified web3 system
+// Enhanced wallet connection handlers that use the multi-wallet system
 async function handleWalletConnection(walletType) {
-  const button = document.getElementById(`${walletType}-btn`) || 
-                document.getElementById(`${walletType}-primary-btn`);
+  const button = document.getElementById(`${walletType}-wallet-btn`) || 
+                document.getElementById(`${walletType}-btn`);
   
-  // Use the connectWallet function from base.html
+  // Use the connectWallet function from base.html multi-wallet system
   if (window.connectWallet) {
     await window.connectWallet(walletType, button);
   } else {
-    console.error('Wallet connection system not available');
+    console.error('Multi-wallet connection system not available');
     if (window.showToast) {
       window.showToast('Wallet system not ready. Please refresh the page.', 'error');
     }
@@ -904,11 +904,11 @@ document.addEventListener('keydown', function(e) {
   // Skip if user is typing
   if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
-  // Alt + C for Connect (primary button)
-  if (e.altKey && e.key === 'c') {
+  // Alt + A for Any Wallet (primary button)
+  if (e.altKey && e.key === 'a') {
     e.preventDefault();
-    const connectBtn = document.getElementById('metamask-primary-btn');
-    if (connectBtn) connectBtn.click();
+    const anyWalletBtn = document.getElementById('any-wallet-btn');
+    if (anyWalletBtn) anyWalletBtn.click();
   }
 
   // Alt + M for MetaMask
