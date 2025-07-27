@@ -20,21 +20,6 @@
     <meta name="csrf-token" content="{{ csrf_token }}">
     <meta name="theme-color" content="#6366f1" />
 
-    <!-- Web3 Configuration -->
-    <script>
-      window.REOWN_PROJECT_ID = '9be88bc3efb4e4401afe7f28ed0fc59e';
-      window.INFURA_ID = '76345518a13649768a7834fcd4bf7eba';
-      
-      // Base Network Configuration
-      window.BASE_NETWORK_CONFIG = {
-        chainId: 8453,
-        name: 'Base',
-        currency: 'ETH',
-        explorerUrl: 'https://basescan.org',
-        rpcUrl: `https://mainnet.base.org`
-      };
-    </script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.3/cdn.min.js" defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -668,42 +653,6 @@
 
       .quick-action-btn:active {
         transform: translateY(0) !important;
-      }
-
-      /* Ensure quick action buttons are never affected by nav-link styles */
-      .quick-action-btn.nav-link,
-      .quick-action-btn.reliable-nav-link {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05)) !important;
-        border: 1px solid rgba(99, 102, 241, 0.2) !important;
-        color: #4f46e5 !important;
-        transform: none !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-      }
-
-      .quick-action-btn.nav-link:hover,
-      .quick-action-btn.reliable-nav-link:hover {
-        background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
-        color: white !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3) !important;
-      }
-
-      /* Override any potential active state conflicts */
-      .quick-action-btn.active,
-      .quick-action-btn.nav-link.active,
-      .quick-action-btn.reliable-nav-link.active {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05)) !important;
-        border: 1px solid rgba(99, 102, 241, 0.2) !important;
-        color: #4f46e5 !important;
-        font-weight: 500 !important;
-        transform: none !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-      }
-
-      .quick-action-btn.active::after,
-      .quick-action-btn.nav-link.active::after,
-      .quick-action-btn.reliable-nav-link.active::after {
-        display: none !important;
       }
 
       /* Enhanced Brand Badge */
@@ -1695,7 +1644,7 @@
         <!-- Notifications will be inserted here -->
     </div>
 
-<!-- Minimal Web3 Configuration -->
+    <!-- Minimal Web3 Configuration -->
     <script>
         window.BASE_NETWORK_CONFIG = {
             chainId: 8453,
@@ -1706,9 +1655,7 @@
         };
     </script>
 
-    <!-- REMOVE ALL Web3Modal scripts - they're causing conflicts -->
-    <!-- Only use direct MetaMask integration -->
-
+    <!-- Simple Wallet JavaScript - NO Web3Modal -->
     <script>
     // Simple wallet state
     window.walletState = {
@@ -2078,6 +2025,42 @@
         };
     }
 
+    // Toast notification system
+    window.showToast = function(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `notification ${type} p-4 rounded-lg shadow-lg max-w-sm pointer-events-auto`;
+        
+        const colors = {
+            success: 'bg-green-50 text-green-800 border-green-200',
+            error: 'bg-red-50 text-red-800 border-red-200',
+            warning: 'bg-yellow-50 text-yellow-800 border-yellow-200',
+            info: 'bg-blue-50 text-blue-800 border-blue-200'
+        };
+        
+        toast.className += ` ${colors[type] || colors.info}`;
+        toast.innerHTML = `
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    ${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}
+                </div>
+                <div class="ml-3 text-sm font-medium">${message}</div>
+                <button onclick="this.closest('.notification').remove()" class="ml-auto text-gray-400 hover:text-gray-600">×</button>
+            </div>
+        `;
+
+        container.appendChild(toast);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 5000);
+    };
+
     // Make functions globally available
     window.connectWallet = connectWallet;
     window.openWalletModal = connectWallet;
@@ -2095,7 +2078,41 @@
         setTimeout(() => {
             initializeWallet();
         }, 1000);
+        
+        // Initialize menu system
+        initializeMenuSystem();
     });
+
+    // Menu system
+    function initializeMenuSystem() {
+        const menuToggle = document.getElementById('menuToggleBtn');
+        const menuOverlay = document.getElementById('menuOverlay');
+        const menuSheet = document.getElementById('menuSheet');
+        const closeBtn = document.getElementById('closeMenuBtn');
+
+        function openMenu() {
+            menuOverlay.classList.add('active');
+            menuSheet.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMenu() {
+            menuOverlay.classList.remove('active');
+            menuSheet.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        menuToggle?.addEventListener('click', openMenu);
+        closeBtn?.addEventListener('click', closeMenu);
+        menuOverlay?.addEventListener('click', closeMenu);
+
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && menuSheet.classList.contains('open')) {
+                closeMenu();
+            }
+        });
+    }
 
     console.log('✅ Simple DiaryVault Wallet System loaded');
     </script>
