@@ -504,7 +504,7 @@
       </div>
 
       <div class="p-8">
-        <!-- Connection status (dynamically updated by base.html) -->
+        <!-- Connection status (dynamically updated) -->
         <div id="connectionStatus" class="hidden">
           <div class="connection-status disconnected" id="statusIndicator">
             <span id="statusText">Wallet not connected</span>
@@ -554,14 +554,14 @@
         </div>
         {% endif %}
 
-        <!-- Updated Wallet Connection Options (Primary) -->
+        <!-- Updated Wallet Connection Options with fresh IDs -->
         <div class="space-y-4 mb-6 animate-fade-in animation-delay-300">
-          <!-- Primary: Connect & Get Rewarded -->
+          <!-- Primary: Universal Wallet Connection -->
           <button
-            onclick="handleWalletConnection('metamask')"
+            onclick="handleWalletConnection('any')"
             class="wallet-btn wallet-btn-primary animate-pulse-glow"
             aria-label="Start earning with any wallet"
-            id="metamask-primary-btn">
+            id="start-earning-wallet-btn">
 
             <div class="btn-content flex items-center w-full">
               <div class="flex items-center flex-1">
@@ -571,8 +571,8 @@
                   </svg>
                 </div>
                 <div class="text-left">
-                  <span class="font-semibold text-lg">Connect & Get Rewarded</span>
-                  <p class="text-sm text-white/80" id="metamask-primary-status">MetaMask, Coinbase, and 300+ wallets</p>
+                  <span class="font-semibold text-lg">Connect & Start Earning</span>
+                  <p class="text-sm text-white/80" id="start-earning-wallet-status">MetaMask, Coinbase, Trust + 300 more</p>
                 </div>
               </div>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -589,12 +589,12 @@
             </div>
           </button>
 
-          <!-- Secondary: MetaMask Direct -->
+          <!-- Secondary: Direct MetaMask -->
           <button
             onclick="handleWalletConnection('metamask')"
             class="wallet-btn wallet-btn-secondary"
-            aria-label="Connect with MetaMask"
-            id="metamask-btn">
+            aria-label="Connect with MetaMask directly"
+            id="signup-metamask-direct-btn">
 
             <div class="btn-content flex items-center w-full">
               <div class="flex items-center flex-1">
@@ -608,7 +608,7 @@
                 </div>
                 <div class="text-left">
                   <span class="font-semibold text-white">MetaMask Direct</span>
-                  <p class="text-sm text-white/80" id="metamask-status">Ready to connect</p>
+                  <p class="text-sm text-white/80" id="signup-metamask-direct-status">Skip the wallet selector</p>
                 </div>
               </div>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -630,7 +630,7 @@
             onclick="showWalletOptions()"
             class="wallet-btn"
             aria-label="Get a free wallet"
-            id="get-wallet-btn">
+            id="signup-get-wallet-btn">
 
             <div class="btn-content flex items-center w-full">
               <div class="flex items-center flex-1">
@@ -829,13 +829,256 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Signup page specific enhancements -->
+<!-- Enhanced signup page with improved wallet connection -->
 <script>
-// Initialize signup page enhancements
+// Initialize signup page with wallet system integration
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('🚀 Initializing signup page...');
+  
+  setupFormEnhancements();
   initializeSignupForm();
+  
+  // Wait for wallet system to be ready before enabling buttons
+  waitForWalletSystem();
 });
 
+// Wait for wallet system to initialize
+function waitForWalletSystem() {
+  let attempts = 0;
+  const maxAttempts = 20; // 10 seconds max wait
+  
+  const checkInterval = setInterval(() => {
+    attempts++;
+    
+    if (window.connectWallet && window.getWalletInfo) {
+      console.log('✅ Wallet system ready for signup');
+      clearInterval(checkInterval);
+      enableWalletButtons();
+      updateConnectionStatus();
+    } else if (attempts >= maxAttempts) {
+      console.warn('⚠️ Wallet system timeout - enabling buttons anyway');
+      clearInterval(checkInterval);
+      enableWalletButtons();
+    }
+  }, 500);
+}
+
+// Enable wallet buttons and add proper event listeners
+function enableWalletButtons() {
+  const buttons = [
+    { id: 'start-earning-wallet-btn', type: 'any' },
+    { id: 'signup-metamask-direct-btn', type: 'metamask' },
+    { id: 'signup-get-wallet-btn', type: 'guide' }
+  ];
+  
+  buttons.forEach(({ id, type }) => {
+    const button = document.getElementById(id);
+    if (button) {
+      button.disabled = false;
+      button.style.opacity = '1';
+      
+      // Remove any existing onclick handlers and add new ones
+      button.onclick = null;
+      
+      if (type === 'guide') {
+        button.addEventListener('click', () => {
+          if (window.showWalletOptions) {
+            window.showWalletOptions();
+          } else {
+            fallbackWalletGuide();
+          }
+        });
+      } else {
+        button.addEventListener('click', () => handleWalletConnection(type, button));
+      }
+    }
+  });
+}
+
+// Enhanced wallet connection handler for signup
+async function handleWalletConnection(walletType, button = null) {
+  console.log(`🔗 Attempting ${walletType} wallet connection for signup...`);
+  
+  try {
+    // Show loading state
+    if (button) {
+      button.classList.add('loading');
+      button.disabled = true;
+    }
+    
+    // Update status
+    updateConnectionStatus('connecting', 'Connecting wallet...');
+    
+    // Wait a bit more if wallet system isn't ready
+    if (!window.connectWallet) {
+      console.log('⏳ Waiting for wallet system...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+    
+    // Check if wallet system is available
+    if (!window.connectWallet) {
+      throw new Error('Wallet system not available. Please refresh the page.');
+    }
+    
+    // Attempt connection
+    await window.connectWallet(walletType, button);
+    
+    // Check connection status
+    const walletInfo = window.getWalletInfo();
+    if (walletInfo.isConnected) {
+      console.log('✅ Wallet connected successfully for signup');
+      updateConnectionStatus('connected', `Connected: ${walletInfo.address.slice(0, 6)}...${walletInfo.address.slice(-4)}`);
+      
+      // Show success message with earning focus
+      if (window.showToast) {
+        window.showToast('🎉 Wallet connected! You\'re ready to start earning rewards for your writing!', 'success');
+      }
+      
+      // Optional: Auto-redirect to dashboard after successful connection
+      // setTimeout(() => {
+      //   window.location.href = '/dashboard/';
+      // }, 2000);
+    } else {
+      throw new Error('Connection attempt failed');
+    }
+    
+  } catch (error) {
+    console.error('Signup connection error:', error);
+    
+    // Update status
+    updateConnectionStatus('disconnected', 'Connection failed');
+    
+    // Show user-friendly error messages
+    if (error.message.includes('User rejected') || error.message.includes('User denied')) {
+      if (window.showToast) {
+        window.showToast('Connection cancelled. Connect when you\'re ready to start earning!', 'info');
+      }
+    } else if (error.message.includes('No wallet found') || error.message.includes('not available')) {
+      if (window.showToast) {
+        window.showToast('No wallet found. Let\'s get you set up with a free one!', 'warning');
+      }
+      // Show wallet installation guide
+      setTimeout(() => {
+        if (window.showWalletOptions) {
+          window.showWalletOptions();
+        } else {
+          fallbackWalletGuide();
+        }
+      }, 1000);
+    } else {
+      if (window.showToast) {
+        window.showToast('Connection failed. Please refresh the page and try again.', 'error');
+      }
+    }
+  } finally {
+    // Remove loading state
+    if (button) {
+      button.classList.remove('loading');
+      button.disabled = false;
+    }
+  }
+}
+
+// Update connection status display
+function updateConnectionStatus(status = 'disconnected', text = 'Wallet not connected') {
+  const statusContainer = document.getElementById('connectionStatus');
+  const statusIndicator = document.getElementById('statusIndicator');
+  const statusText = document.getElementById('statusText');
+  
+  if (statusContainer && statusIndicator && statusText) {
+    // Show status container
+    statusContainer.classList.remove('hidden');
+    
+    // Update status class
+    statusIndicator.className = `connection-status ${status}`;
+    
+    // Update status text
+    statusText.textContent = text;
+    
+    // Update button status text
+    updateButtonStatusTexts(status);
+  }
+}
+
+// Update button status texts
+function updateButtonStatusTexts(status) {
+  const walletInfo = window.getWalletInfo ? window.getWalletInfo() : null;
+  
+  const startEarningStatus = document.getElementById('start-earning-wallet-status');
+  const metamaskDirectStatus = document.getElementById('signup-metamask-direct-status');
+  
+  if (status === 'connected' && walletInfo && walletInfo.address) {
+    const shortAddress = `${walletInfo.address.slice(0, 6)}...${walletInfo.address.slice(-4)}`;
+    
+    if (startEarningStatus) {
+      startEarningStatus.textContent = `Connected: ${shortAddress}`;
+    }
+    if (metamaskDirectStatus) {
+      metamaskDirectStatus.textContent = `Connected: ${shortAddress}`;
+    }
+  } else {
+    // Reset to default texts
+    if (startEarningStatus) {
+      startEarningStatus.textContent = 'MetaMask, Coinbase, Trust + 300 more';
+    }
+    if (metamaskDirectStatus) {
+      metamaskDirectStatus.textContent = 'Skip the wallet selector';
+    }
+  }
+}
+
+// Fallback wallet guide for when showWalletOptions isn't available
+function fallbackWalletGuide() {
+  const message = `
+    <div class="text-center">
+      <h3 class="font-semibold mb-3 text-lg">Get Your First Crypto Wallet</h3>
+      <p class="text-sm text-gray-600 mb-4">Choose a free wallet to start earning rewards for your writing!</p>
+      <div class="space-y-3">
+        <a href="https://metamask.io/download/" target="_blank" rel="noopener" class="block p-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+          🦊 MetaMask (Most Popular)
+        </a>
+        <a href="https://www.coinbase.com/wallet" target="_blank" rel="noopener" class="block p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+          💼 Coinbase Wallet
+        </a>
+        <a href="https://trustwallet.com/" target="_blank" rel="noopener" class="block p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          🛡️ Trust Wallet
+        </a>
+      </div>
+      <p class="text-xs text-gray-500 mt-4">Free setup • Takes 2 minutes • Start earning immediately!</p>
+    </div>
+  `;
+
+  // Create modal
+  const modal = document.createElement('div');
+  modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+  modal.innerHTML = `
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full max-h-96 overflow-y-auto">
+      ${message}
+      <button onclick="this.closest('.fixed').remove()" class="mt-4 w-full p-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
+        Close
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+// Enhanced form enhancements
+function setupFormEnhancements() {
+  const inputs = document.querySelectorAll('.form-input');
+  
+  inputs.forEach(input => {
+    input.addEventListener('focus', function() {
+      this.parentElement.classList.add('focused');
+    });
+
+    input.addEventListener('blur', function() {
+      this.parentElement.classList.remove('focused');
+    });
+  });
+}
+
+// Enhanced signup form initialization
 function initializeSignupForm() {
   const form = document.getElementById('signupForm');
   const submitButton = form?.querySelector('button[type="submit"]');
@@ -844,7 +1087,7 @@ function initializeSignupForm() {
     form.addEventListener('submit', function(e) {
       // Show that wallet connection gives enhanced features
       if (window.showToast) {
-        window.showToast('💡 Tip: Connect a wallet above for enhanced features and rewards!', 'info', 6000);
+        window.showToast('💡 Pro tip: Connect a wallet above for enhanced features and instant rewards!', 'info', 6000);
       }
       
       submitButton.disabled = true;
@@ -858,6 +1101,7 @@ function initializeSignupForm() {
   }
 }
 
+// Password toggle functionality
 function togglePassword(fieldId) {
   const passwordInput = document.getElementById(fieldId);
   const eyeClosed = document.getElementById('eye-closed-' + fieldId);
@@ -874,27 +1118,33 @@ function togglePassword(fieldId) {
   }
 }
 
-// Enhanced wallet connection handlers that use the multi-wallet system
-async function handleWalletConnection(walletType) {
-  const button = document.getElementById(`${walletType}-wallet-btn`) || 
-                document.getElementById(`${walletType}-btn`);
+// Listen for wallet connection changes from base.html
+window.addEventListener('walletConnectionChanged', function(event) {
+  const { isConnected, address } = event.detail;
   
-  // Use the connectWallet function from base.html multi-wallet system
-  if (window.connectWallet) {
-    await window.connectWallet(walletType, button);
-  } else {
-    console.error('Multi-wallet connection system not available');
+  if (isConnected && address) {
+    updateConnectionStatus('connected', `Connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
+    
+    // Show earning-focused success message
     if (window.showToast) {
-      window.showToast('Wallet system not ready. Please refresh the page.', 'error');
+      window.showToast('🎉 Great! Your wallet is connected and ready for earning rewards!', 'success');
     }
+  } else {
+    updateConnectionStatus('disconnected', 'Wallet not connected');
   }
-}
+});
 
-// Track user interest in features
-document.querySelectorAll('.earning-card').forEach(card => {
+// Track user interest in earning features
+document.querySelectorAll('.earning-card').forEach((card, index) => {
   card.addEventListener('click', function() {
+    const features = [
+      'Ready to earn daily writing rewards? Connect your wallet above! 🎯',
+      'Unlock achievement badges and special perks by connecting your wallet! 🏆',
+      'Create unique memory NFTs from your entries! Connect your wallet to start! 🎨'
+    ];
+    
     if (window.showToast) {
-      window.showToast('🎯 Ready to unlock these features? Connect your wallet above!', 'info', 3000);
+      window.showToast(features[index] || 'Connect your wallet to unlock all earning features!', 'info', 4000);
     }
   });
 });
@@ -904,30 +1154,33 @@ document.addEventListener('keydown', function(e) {
   // Skip if user is typing
   if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
-  // Alt + A for Any Wallet (primary button)
-  if (e.altKey && e.key === 'a') {
+  // Alt + E for Start Earning
+  if (e.altKey && e.key === 'e') {
     e.preventDefault();
-    const anyWalletBtn = document.getElementById('any-wallet-btn');
-    if (anyWalletBtn) anyWalletBtn.click();
+    const startEarningBtn = document.getElementById('start-earning-wallet-btn');
+    if (startEarningBtn && !startEarningBtn.disabled) startEarningBtn.click();
   }
 
   // Alt + M for MetaMask
   if (e.altKey && e.key === 'm') {
     e.preventDefault();
-    const metamaskBtn = document.getElementById('metamask-btn');
-    if (metamaskBtn) metamaskBtn.click();
+    const metamaskBtn = document.getElementById('signup-metamask-direct-btn');
+    if (metamaskBtn && !metamaskBtn.disabled) metamaskBtn.click();
   }
 
   // Alt + G for Get Wallet
   if (e.altKey && e.key === 'g') {
     e.preventDefault();
-    const getWalletBtn = document.getElementById('get-wallet-btn');
+    const getWalletBtn = document.getElementById('signup-get-wallet-btn');
     if (getWalletBtn) getWalletBtn.click();
   }
 });
 
-// Make functions globally available for onclick handlers
+// Make functions globally available
 window.handleWalletConnection = handleWalletConnection;
 window.togglePassword = togglePassword;
+window.updateConnectionStatus = updateConnectionStatus;
+
+console.log('✅ Signup page enhanced wallet integration loaded');
 </script>
 {% endblock %}
