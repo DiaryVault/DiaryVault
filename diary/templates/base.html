@@ -16,7 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover"/>
     <title>{% block title %}DiaryVault - Your thoughts. Encrypted. Rewarded.{% endblock %}</title>
 
-    <meta name="stripe-publishable-key" content="{{ STRIPE_PUBLISHABLE_KEY|default:'' }}">
+    <meta name="stripe-publishable-key" content="{{ STRIPE_PUBLISHABLE_KEY }}">
     <meta name="csrf-token" content="{{ csrf_token }}">
     <meta name="theme-color" content="#6366f1" />
 
@@ -1694,6 +1694,7 @@
     <div id="toastContainer" class="fixed top-6 right-6 z-50 space-y-3 pointer-events-none">
         <!-- Notifications will be inserted here -->
     </div>
+
 <!-- Web3 Configuration -->
     <script>
         window.REOWN_PROJECT_ID = '9be88bc3efb4e4401afe7f28ed0fc59e';
@@ -1709,20 +1710,14 @@
         };
     </script>
 
-    <!-- WalletConnect Web3Modal -->
-    <script src="https://unpkg.com/@web3modal/wagmi@4.1.11/dist/index.umd.js"></script>
-    <script src="https://unpkg.com/@wagmi/core@2.6.17/dist/index.umd.js"></script>
-    <script src="https://unpkg.com/viem@2.9.20/dist/index.umd.js"></script>
-
-    <!-- Enhanced Multi-Wallet Web3 Integration with Better Error Handling -->
+    <!-- Simplified Web3 Integration -->
     <script>
         // Global wallet state
         window.walletState = {
             isConnected: false,
             address: null,
             chainId: null,
-            modal: null,
-            wagmiConfig: null
+            provider: null
         };
 
         // Base network configuration
@@ -1738,375 +1733,25 @@
             blockExplorerUrls: ['https://basescan.org']
         };
 
-        // Initialize multi-wallet system with better error handling
-        async function initializeWallet() {
-            try {
-                console.log('🚀 Initializing multi-wallet system...');
-
-                // Check if libraries are loaded with timeout
-                let retries = 0;
-                const maxRetries = 5;
-                
-                while ((!window.Web3Modal || !window.WagmiCore || !window.viem) && retries < maxRetries) {
-                    console.warn(`⏳ Wallet libraries not ready, retrying... (${retries + 1}/${maxRetries})`);
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    retries++;
-                }
-
-                if (!window.Web3Modal || !window.WagmiCore || !window.viem) {
-                    console.warn('❌ Wallet libraries failed to load, falling back to MetaMask only');
-                    initializeMetaMaskFallback();
-                    return;
-                }
-
-                const { createWeb3Modal } = window.Web3Modal;
-                const { createConfig, http, reconnect } = window.WagmiCore;
-                const { base, mainnet } = window.viem.chains || {};
-
-                // Define Base chain if not available
-                const baseChain = base || {
-                    id: 8453,
-                    name: 'Base',
-                    nativeCurrency: {
-                        decimals: 18,
-                        name: 'Ether',
-                        symbol: 'ETH',
-                    },
-                    rpcUrls: {
-                        public: { http: ['https://mainnet.base.org'] },
-                        default: { http: ['https://mainnet.base.org'] },
-                    },
-                    blockExplorers: {
-                        etherscan: { name: 'BaseScan', url: 'https://basescan.org' },
-                        default: { name: 'BaseScan', url: 'https://basescan.org' },
-                    },
-                };
-
-                // Create wagmi config with error handling
-                try {
-                    const wagmiConfig = createConfig({
-                        chains: [baseChain],
-                        transports: {
-                            [baseChain.id]: http('https://mainnet.base.org'),
-                        },
-                    });
-
-                    window.walletState.wagmiConfig = wagmiConfig;
-
-                    // Create Web3Modal with WalletConnect
-                    const modal = createWeb3Modal({
-                        wagmiConfig,
-                        projectId: window.REOWN_PROJECT_ID,
-                        chains: [baseChain],
-                        defaultChain: baseChain,
-                        enableAnalytics: false, // Disable analytics to reduce errors
-                        enableOnramp: false,    // Disable onramp to reduce complexity
-                        enableSwaps: false,
-                        metadata: {
-                            name: 'DiaryVault',
-                            description: 'Your thoughts. Encrypted. Rewarded.',
-                            url: window.location.origin,
-                            icons: [`${window.location.origin}/static/favicon-32x32.png`]
-                        },
-                        featuredWalletIds: [
-                            'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
-                            'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase
-                            '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
-                            '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369', // Rainbow
-                        ],
-                        themeMode: 'light',
-                        themeVariables: {
-                            '--w3m-color-mix': '#6366f1',
-                            '--w3m-color-mix-strength': 20,
-                            '--w3m-font-family': 'Inter, system-ui, sans-serif',
-                            '--w3m-border-radius-master': '16px'
-                        }
-                    });
-
-                    window.walletState.modal = modal;
-
-                    // Subscribe to connection events with error handling
-                    try {
-                        modal.subscribeState((state) => {
-                            handleConnectionChange(state);
-                        });
-                    } catch (subscribeError) {
-                        console.warn('Failed to subscribe to modal state:', subscribeError);
-                    }
-
-                    // Try to reconnect previous session with timeout
-                    try {
-                        const reconnectPromise = reconnect(wagmiConfig);
-                        const timeoutPromise = new Promise((_, reject) => 
-                            setTimeout(() => reject(new Error('Reconnect timeout')), 5000)
-                        );
-                        
-                        await Promise.race([reconnectPromise, timeoutPromise]);
-                    } catch (reconnectError) {
-                        console.warn('Reconnection failed or timed out:', reconnectError);
-                    }
-
-                    console.log('✅ Multi-wallet system initialized successfully');
-
-                } catch (configError) {
-                    console.error('Failed to create wagmi config:', configError);
-                    throw configError;
-                }
-
-            } catch (error) {
-                console.error('❌ Error initializing multi-wallet system:', error);
-                // Always fallback to MetaMask
-                initializeMetaMaskFallback();
-            }
+        // Check if MetaMask is installed
+        function isMetaMaskInstalled() {
+            return typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask;
         }
 
-        // Fallback to MetaMask-only if Web3Modal fails
-        function initializeMetaMaskFallback() {
-            console.log('🔄 Falling back to MetaMask-only mode...');
-            
-            if (typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask) {
-                console.log('✅ MetaMask detected - using fallback mode');
+        // Initialize wallet detection
+        function initializeWallet() {
+            console.log('🚀 Initializing wallet detection...');
+
+            if (isMetaMaskInstalled()) {
+                console.log('✅ MetaMask detected');
                 setupMetaMaskListeners();
                 checkExistingConnection();
             } else {
-                console.log('⚠️ No wallet detected');
+                console.log('⚠️ MetaMask not detected');
             }
         }
 
-        // Handle connection state changes
-        function handleConnectionChange(state) {
-            const wasConnected = window.walletState.isConnected;
-            const isConnected = !!state.address;
-
-            window.walletState.isConnected = isConnected;
-            window.walletState.address = state.address;
-            window.walletState.chainId = state.chainId;
-
-            // Update UI
-            updateWalletUI(isConnected, state.address, state.chainId);
-
-            // Dispatch custom event
-            window.dispatchEvent(new CustomEvent('walletConnectionChanged', {
-                detail: { 
-                    isConnected, 
-                    address: state.address, 
-                    chainId: state.chainId, 
-                    wasConnected 
-                }
-            }));
-
-            // Show notifications
-            if (isConnected && !wasConnected && window.showToast) {
-                window.showToast(`Wallet connected: ${state.address.slice(0, 6)}...${state.address.slice(-4)}`, 'success');
-                
-                // Check if we're on the correct network
-                if (state.chainId !== 8453) {
-                    switchToBaseNetwork();
-                }
-            } else if (!isConnected && wasConnected && window.showToast) {
-                window.showToast('Wallet disconnected', 'info');
-            }
-        }
-
-        // Enhanced wallet connection function with better error handling
-        async function connectWallet(walletType = 'any', forceNew = false) {
-            try {
-                console.log(`🔄 Connecting wallet: ${walletType}`);
-                
-                // If user wants to switch wallets, disconnect first
-                if (forceNew && window.walletState.isConnected) {
-                    console.log('🔄 Disconnecting current wallet to switch...');
-                    await disconnectWallet(false); // Don't show success message
-                    // Wait a moment for cleanup
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-                
-                // Always try MetaMask first if it's the preferred choice or if Web3Modal fails
-                if (walletType === 'metamask' || !window.walletState.modal) {
-                    console.log('🦊 Using direct MetaMask connection');
-                    await connectMetaMaskDirect();
-                    return;
-                }
-                
-                // For any wallet, try Web3Modal with better error handling
-                if (walletType === 'any' || walletType === 'coinbase') {
-                    if (window.walletState.modal) {
-                        console.log('🌐 Opening Web3Modal for multi-wallet selection');
-                        try {
-                            // Check if modal is properly initialized
-                            const state = window.walletState.modal.getState();
-                            console.log('Modal state:', state);
-                            
-                            await window.walletState.modal.open();
-                        } catch (modalError) {
-                            console.warn('Web3Modal failed, falling back to MetaMask:', modalError);
-                            await connectMetaMaskDirect();
-                        }
-                    } else {
-                        console.warn('Web3Modal not initialized, using MetaMask fallback');
-                        await connectMetaMaskDirect();
-                    }
-                } else {
-                    // Fallback to MetaMask for any unknown wallet type
-                    await connectMetaMaskDirect();
-                }
-                
-            } catch (error) {
-                console.error('Error connecting wallet:', error);
-                
-                // Enhanced error handling with specific actions
-                if (error.code === 4001) {
-                    if (window.showToast) {
-                        window.showToast('Connection cancelled. Click "Connect Wallet" when ready to try again.', 'info');
-                    }
-                } else if (error.code === -32603) {
-                    if (window.showToast) {
-                        window.showToast('Wallet setup needed. Please unlock MetaMask or install a wallet.', 'warning');
-                    }
-                    // Show wallet options to help user
-                    setTimeout(() => {
-                        showWalletOptions();
-                    }, 2000);
-                } else if (error.code === -32002) {
-                    if (window.showToast) {
-                        window.showToast('Wallet request pending. Please check your wallet app.', 'warning');
-                    }
-                } else if (error.message && error.message.includes('locked')) {
-                    if (window.showToast) {
-                        window.showToast('Please unlock your wallet and try again.', 'warning');
-                    }
-                } else {
-                    if (window.showToast) {
-                        window.showToast('Connection failed. Please ensure your wallet is set up properly.', 'error');
-                    }
-                    // Try to help the user
-                    setTimeout(() => {
-                        showWalletOptions();
-                    }, 2000);
-                }
-            }
-        }
-
-        // Force wallet switching function
-        async function switchWallet(walletType = 'any') {
-            return await connectWallet(walletType, true);
-        }
-
-        // Enhanced Direct MetaMask connection with better error handling
-        async function connectMetaMaskDirect() {
-            try {
-                // Check if MetaMask is installed
-                if (!window.ethereum) {
-                    console.log('❌ No Ethereum provider found');
-                    showWalletOptions();
-                    return;
-                }
-
-                // Prefer MetaMask if multiple providers exist
-                let provider = window.ethereum;
-                if (window.ethereum.providers) {
-                    provider = window.ethereum.providers.find(p => p.isMetaMask) || window.ethereum.providers[0];
-                } else if (!window.ethereum.isMetaMask) {
-                    console.warn('⚠️ Non-MetaMask provider detected, trying anyway...');
-                }
-
-                console.log('🦊 Connecting to MetaMask...');
-
-                // First, check if MetaMask is unlocked and has accounts
-                let accounts;
-                try {
-                    // Try to get existing accounts first (won't prompt if locked)
-                    accounts = await provider.request({ method: 'eth_accounts' });
-                    
-                    if (accounts.length === 0) {
-                        console.log('🔓 No accounts found, requesting account access...');
-                        // Request account access (this will prompt unlock if needed)
-                        accounts = await provider.request({ method: 'eth_requestAccounts' });
-                    } else {
-                        console.log('✅ Found existing accounts, using first account');
-                    }
-                } catch (accountError) {
-                    console.log('🔓 Account access needed, requesting permission...');
-                    
-                    // Handle specific MetaMask errors
-                    if (accountError.code === -32603) {
-                        // MetaMask is likely locked or needs setup
-                        if (window.showToast) {
-                            window.showToast('Please unlock MetaMask and try again', 'warning');
-                        }
-                        // Try to prompt user to unlock
-                        try {
-                            accounts = await provider.request({ method: 'eth_requestAccounts' });
-                        } catch (unlockError) {
-                            if (unlockError.code === 4001) {
-                                throw new Error('User rejected the connection request');
-                            } else if (unlockError.code === -32603) {
-                                throw new Error('MetaMask is locked. Please unlock MetaMask and try again.');
-                            } else {
-                                throw unlockError;
-                            }
-                        }
-                    } else {
-                        throw accountError;
-                    }
-                }
-
-                if (accounts && accounts.length > 0) {
-                    console.log('✅ MetaMask connected:', accounts[0]);
-                    
-                    // Get current chain ID
-                    const chainId = await provider.request({ method: 'eth_chainId' });
-                    const chainIdNumber = parseInt(chainId, 16);
-                    
-                    // Update wallet state
-                    updateWalletState(true, accounts[0], chainIdNumber);
-
-                    // Switch to Base network if needed
-                    if (chainIdNumber !== 8453) {
-                        console.log('🔄 Switching to Base network...');
-                        await switchToBaseNetwork();
-                    }
-                    
-                    return true;
-                } else {
-                    throw new Error('No accounts returned from MetaMask');
-                }
-
-            } catch (error) {
-                console.error('❌ MetaMask connection failed:', error);
-                
-                // Enhanced error handling with user-friendly messages
-                if (error.code === 4001) {
-                    // User rejected the request
-                    if (window.showToast) {
-                        window.showToast('Connection cancelled. Please try again when ready.', 'info');
-                    }
-                } else if (error.code === -32002) {
-                    // Request already pending
-                    if (window.showToast) {
-                        window.showToast('MetaMask request pending. Please check your wallet.', 'warning');
-                    }
-                } else if (error.code === -32603) {
-                    // Internal error - usually means MetaMask is locked or needs setup
-                    if (window.showToast) {
-                        window.showToast('Please unlock MetaMask or complete setup, then try again.', 'warning');
-                    }
-                } else if (error.message && error.message.includes('locked')) {
-                    if (window.showToast) {
-                        window.showToast('MetaMask is locked. Please unlock it and try again.', 'warning');
-                    }
-                } else {
-                    // Other errors
-                    if (window.showToast) {
-                        window.showToast('Failed to connect to MetaMask. Please try again.', 'error');
-                    }
-                }
-                
-                throw error;
-            }
-        }
-
-        // MetaMask fallback listeners
+        // Setup MetaMask event listeners
         function setupMetaMaskListeners() {
             if (!window.ethereum) return;
 
@@ -2115,6 +1760,7 @@
             window.ethereum.on('disconnect', handleDisconnect);
         }
 
+        // Check for existing connection
         async function checkExistingConnection() {
             try {
                 if (!window.ethereum) return;
@@ -2130,6 +1776,7 @@
             }
         }
 
+        // Handle account changes
         function handleAccountsChanged(accounts) {
             if (accounts.length === 0) {
                 updateWalletState(false, null, null);
@@ -2138,15 +1785,18 @@
             }
         }
 
+        // Handle chain changes
         function handleChainChanged(chainId) {
             const chainIdNumber = parseInt(chainId, 16);
             updateWalletState(window.walletState.isConnected, window.walletState.address, chainIdNumber);
         }
 
+        // Handle disconnect
         function handleDisconnect() {
             updateWalletState(false, null, null);
         }
 
+        // Update wallet state
         function updateWalletState(isConnected, address, chainId) {
             const wasConnected = window.walletState.isConnected;
             
@@ -2154,12 +1804,15 @@
             window.walletState.address = address;
             window.walletState.chainId = chainId;
 
+            // Update UI
             updateWalletUI(isConnected, address, chainId);
 
+            // Dispatch events
             window.dispatchEvent(new CustomEvent('walletConnectionChanged', {
                 detail: { isConnected, address, chainId, wasConnected }
             }));
 
+            // Show notifications
             if (isConnected && !wasConnected && window.showToast) {
                 window.showToast(`Wallet connected: ${address.slice(0, 6)}...${address.slice(-4)}`, 'success');
                 
@@ -2171,7 +1824,7 @@
             }
         }
 
-        // Update UI elements with better button detection
+        // Update UI elements
         function updateWalletUI(isConnected, address, chainId) {
             const walletStatus = document.getElementById('wallet-status');
             const walletAddress = document.getElementById('wallet-address');
@@ -2190,72 +1843,71 @@
                 }
             }
 
-            // Update connection status indicators on login/signup pages
+            // Update connection status indicators on login page
             const statusElements = document.querySelectorAll('[id*="status"]');
             statusElements.forEach(element => {
-                if (element.id.includes('any') || element.id.includes('metamask') || element.id.includes('primary')) {
+                if (element.id.includes('reown') || element.id.includes('metamask')) {
                     if (isConnected) {
-                        element.textContent = `Connected: ${address.slice(0, 6)}...${address.slice(-4)} (Click to Switch)`;
-                        
-                        // Update the button's onclick to switch wallets when connected
-                        const button = element.closest('button');
-                        if (button) {
-                            const originalOnClick = button.getAttribute('onclick');
-                            if (originalOnClick && !originalOnClick.includes('switchWallet')) {
-                                // Extract wallet type from original onclick
-                                const walletTypeMatch = originalOnClick.match(/handleWalletConnection\('([^']+)'\)/);
-                                if (walletTypeMatch) {
-                                    const walletType = walletTypeMatch[1];
-                                    button.setAttribute('onclick', `switchWallet('${walletType}')`);
-                                }
-                            }
-                        }
+                        element.textContent = `Connected: ${address.slice(0, 6)}...${address.slice(-4)}`;
                     } else {
-                        // Reset to original text and onclick based on button type
-                        if (element.id.includes('any')) {
-                            element.textContent = 'MetaMask, Coinbase, Trust, Rainbow + 300 more';
-                        } else if (element.id.includes('metamask') && element.id.includes('primary')) {
-                            element.textContent = 'MetaMask, Coinbase, and 300+ wallets';
-                        } else if (element.id.includes('metamask')) {
-                            element.textContent = 'Skip the wallet selector';
-                        }
-                        
-                        // Reset button onclick to original connection function
-                        const button = element.closest('button');
-                        if (button) {
-                            const currentOnClick = button.getAttribute('onclick');
-                            if (currentOnClick && currentOnClick.includes('switchWallet')) {
-                                // Extract wallet type and reset to handleWalletConnection
-                                const walletTypeMatch = currentOnClick.match(/switchWallet\('([^']+)'\)/);
-                                if (walletTypeMatch) {
-                                    const walletType = walletTypeMatch[1];
-                                    button.setAttribute('onclick', `handleWalletConnection('${walletType}')`);
-                                }
-                            }
-                        }
+                        const originalText = element.id.includes('reown') 
+                            ? 'Email, Social, or 300+ wallets'
+                            : 'Direct connection';
+                        element.textContent = originalText;
                     }
                 }
             });
+        }
 
-            // Update connection status indicator if it exists
-            const connectionStatus = document.getElementById('connectionStatus');
-            const statusIndicator = document.getElementById('statusIndicator');
-            const statusText = document.getElementById('statusText');
+        // Connect wallet with button feedback
+        async function connectWallet(walletType = 'metamask', button = null) {
+            try {
+                if (button) {
+                    button.classList.add('loading');
+                    button.disabled = true;
+                }
 
-            if (connectionStatus && statusIndicator && statusText) {
-                connectionStatus.classList.remove('hidden');
+                if (!isMetaMaskInstalled()) {
+                    if (window.showToast) {
+                        window.showToast('Please install MetaMask to connect your wallet', 'warning');
+                    }
+                    showWalletOptions();
+                    return;
+                }
+
+                console.log(`🔗 Connecting ${walletType} wallet...`);
+
+                // Request account access
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                if (accounts.length > 0) {
+                    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                    updateWalletState(true, accounts[0], parseInt(chainId, 16));
+
+                    // Switch to Base network if needed
+                    if (parseInt(chainId, 16) !== 8453) {
+                        await switchToBaseNetwork();
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
                 
-                if (isConnected) {
-                    statusIndicator.className = 'connection-status connected';
-                    statusText.textContent = `Connected: ${address.slice(0, 6)}...${address.slice(-4)}`;
-                    
-                    if (chainId !== 8453) {
-                        statusIndicator.className = 'connection-status disconnected';
-                        statusText.textContent += ' (Wrong Network)';
+                if (error.code === 4001) {
+                    if (window.showToast) {
+                        window.showToast('Wallet connection rejected by user', 'info');
                     }
                 } else {
-                    statusIndicator.className = 'connection-status disconnected';
-                    statusText.textContent = 'Wallet not connected';
+                    if (window.showToast) {
+                        window.showToast('Failed to connect wallet', 'error');
+                    }
+                }
+            } finally {
+                if (button) {
+                    button.classList.remove('loading');
+                    button.disabled = false;
                 }
             }
         }
@@ -2263,106 +1915,78 @@
         // Switch to Base network
         async function switchToBaseNetwork() {
             try {
-                // Try Web3Modal first
-                if (window.walletState.modal) {
-                    await window.walletState.modal.switchNetwork(8453);
+                if (!window.ethereum) {
+                    throw new Error('No wallet provider found');
                 }
-                // Fallback to MetaMask
-                else if (window.ethereum) {
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: BASE_NETWORK.chainId }],
-                        });
-                    } catch (switchError) {
-                        // If the chain hasn't been added to MetaMask, add it
-                        if (switchError.code === 4902) {
-                            await window.ethereum.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [BASE_NETWORK],
-                            });
-                        }
-                    }
-                }
+
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: BASE_NETWORK.chainId }],
+                });
 
                 if (window.showToast) {
                     window.showToast('Switched to Base network', 'success');
                 }
 
             } catch (error) {
-                console.error('Error switching to Base network:', error);
-                if (window.showToast) {
-                    window.showToast('Please switch to Base network manually', 'warning');
+                // If the chain hasn't been added to MetaMask, add it
+                if (error.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [BASE_NETWORK],
+                        });
+                        
+                        if (window.showToast) {
+                            window.showToast('Base network added and switched', 'success');
+                        }
+                    } catch (addError) {
+                        console.error('Error adding Base network:', addError);
+                        if (window.showToast) {
+                            window.showToast('Failed to add Base network', 'error');
+                        }
+                    }
+                } else {
+                    console.error('Error switching to Base network:', error);
+                    if (window.showToast) {
+                        window.showToast('Please switch to Base network manually', 'warning');
+                    }
                 }
             }
         }
 
         // Disconnect wallet
-        async function disconnectWallet(showMessage = true) {
+        async function disconnectWallet() {
             try {
-                if (window.walletState.modal) {
-                    await window.walletState.modal.disconnect();
-                } else {
-                    // MetaMask doesn't have a disconnect method, so we just update our state
-                    updateWalletState(false, null, null);
-                }
+                // MetaMask doesn't have a disconnect method, so we just update our state
+                updateWalletState(false, null, null);
                 
-                if (showMessage && window.showToast) {
+                if (window.showToast) {
                     window.showToast('Wallet disconnected successfully', 'info');
                 }
             } catch (error) {
                 console.error('Error disconnecting wallet:', error);
-                if (showMessage && window.showToast) {
+                if (window.showToast) {
                     window.showToast('Failed to disconnect wallet', 'error');
                 }
             }
         }
 
-        // Enhanced wallet options modal with better guidance
+        // Show wallet options for users without wallets
         function showWalletOptions() {
             const message = `
                 <div class="text-center">
-                    <h3 class="font-semibold mb-3">Wallet Setup Required</h3>
-                    <p class="text-sm text-gray-600 mb-4">To use DiaryVault's Web3 features, you need a crypto wallet. Here are the best options:</p>
-                    
-                    <div class="space-y-3 mb-4">
-                        <div class="text-left p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                            <h4 class="font-medium text-orange-800 mb-1">Already have MetaMask?</h4>
-                            <p class="text-sm text-orange-700">Make sure it's unlocked and set up with at least one account.</p>
-                        </div>
-                        
-                        <div class="text-left p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                            <h4 class="font-medium text-blue-800 mb-1">New to crypto?</h4>
-                            <p class="text-sm text-blue-700">MetaMask is the most popular and user-friendly option.</p>
-                        </div>
-                    </div>
-                    
+                    <h3 class="font-semibold mb-3">Get a Crypto Wallet</h3>
+                    <p class="text-sm text-gray-600 mb-4">You'll need a crypto wallet to use DiaryVault's Web3 features.</p>
                     <div class="space-y-2">
                         <a href="https://metamask.io/download/" target="_blank" class="block p-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
-                            🦊 Install MetaMask (Recommended)
+                            📱 Install MetaMask (Recommended)
                         </a>
                         <a href="https://www.coinbase.com/wallet" target="_blank" class="block p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
                             💼 Get Coinbase Wallet
                         </a>
-                        <a href="https://trustwallet.com/" target="_blank" class="block p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            🛡️ Download Trust Wallet
-                        </a>
-                        <a href="https://rainbow.me/" target="_blank" class="block p-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors">
-                            🌈 Get Rainbow Wallet
-                        </a>
                     </div>
-                    
-                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
-                        <p class="text-xs text-gray-600 mb-2"><strong>Setup Steps:</strong></p>
-                        <ol class="text-xs text-gray-600 text-left space-y-1">
-                            <li>1. Install a wallet from above</li>
-                            <li>2. Create a new wallet or import existing</li>
-                            <li>3. Make sure it's unlocked</li>
-                            <li>4. Return here and click "Connect Wallet"</li>
-                        </ol>
-                    </div>
-                    
-                    <p class="text-xs text-gray-500 mt-3">These wallets are free and secure. Choose any one you prefer!</p>
+                    <p class="text-xs text-gray-500 mt-3">These are free and take just a few minutes to set up.</p>
                 </div>
             `;
 
@@ -2370,7 +1994,7 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-white rounded-2xl p-6 max-w-sm w-full max-h-96 overflow-y-auto">
+                <div class="bg-white rounded-2xl p-6 max-w-sm w-full">
                     ${message}
                     <button onclick="this.closest('.fixed').remove()" class="mt-4 w-full p-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
                         Close
@@ -2395,53 +2019,23 @@
                 address: window.walletState.address,
                 chainId: window.walletState.chainId,
                 isCorrectNetwork: window.walletState.chainId === 8453,
-                hasMultiWallet: !!window.walletState.modal,
-                hasMetaMask: typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask
+                isMetaMaskInstalled: isMetaMaskInstalled()
             };
         }
 
-        // Handle wallet connection with button feedback (for login/signup pages)
-        window.handleWalletConnection = async function(walletType) {
-            // Find the button that was clicked
-            const button = document.getElementById(`${walletType}-wallet-btn`) || 
-                          document.getElementById(`${walletType}-btn`) ||
-                          document.getElementById(`${walletType}-primary-btn`) ||
-                          document.getElementById(`metamask-primary-btn`) ||
-                          document.getElementById(`any-wallet-btn`);
-            
-            // Add loading state to button
-            if (button) {
-                button.classList.add('loading');
-                button.disabled = true;
-            }
-
-            try {
-                console.log(`🔗 Handling wallet connection for: ${walletType}`);
-
-                // If already connected, switch wallet instead
-                if (window.walletState.isConnected) {
-                    await switchWallet(walletType);
-                } else {
-                    await connectWallet(walletType);
-                }
-            } catch (error) {
-                console.error('Error in handleWalletConnection:', error);
-                if (window.showToast) {
-                    window.showToast('Failed to connect wallet. Please try again.', 'error');
-                }
-            } finally {
-                // Remove loading state from button
-                if (button) {
-                    button.classList.remove('loading');
-                    button.disabled = false;
-                }
-            }
+        // Handle wallet connection with button feedback (for login page)
+        window.handleWalletConnection = async function(walletType, button) {
+            await connectWallet(walletType, button);
         };
+
+        // Open wallet modal (same as connect for simplicity)
+        async function openWalletModal() {
+            return connectWallet();
+        }
 
         // Make functions globally available
         window.connectWallet = connectWallet;
-        window.switchWallet = switchWallet;
-        window.openWalletModal = connectWallet; // Same function for simplicity
+        window.openWalletModal = openWalletModal;
         window.disconnectWallet = disconnectWallet;
         window.getWalletInfo = getWalletInfo;
         window.switchToBaseNetwork = switchToBaseNetwork;
@@ -2641,92 +2235,67 @@
                 }
             };
 
-                // Enhanced keyboard shortcuts
-                document.addEventListener('keydown', function(e) {
-                    // Skip if user is typing
-                    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+            // Enhanced keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Skip if user is typing
+                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
-                    // Navigation shortcuts for authenticated users
-                    if ({{ user.is_authenticated|yesno:"true,false" }}) {
-                        const shortcuts = {
-                            'n': "{% url 'new_entry' %}",
-                            'd': "{% url 'dashboard' %}",
-                            'l': "{% url 'library' %}",
-                            'i': "{% url 'insights' %}",
-                            'p': "{% url 'privacy_policy' %}"
+                // Navigation shortcuts for authenticated users
+                if ({{ user.is_authenticated|yesno:"true,false" }}) {
+                    const shortcuts = {
+                        'n': "{% url 'new_entry' %}",
+                        'd': "{% url 'dashboard' %}",
+                        'l': "{% url 'library' %}",
+                        'i': "{% url 'insights' %}",
+                        'p': "{% url 'privacy_policy' %}"
+                    };
+
+                    if ((e.ctrlKey || e.metaKey) && shortcuts[e.key]) {
+                        e.preventDefault();
+                        
+                        // Show toast for keyboard navigation
+                        const names = {
+                            'n': 'New Entry',
+                            'd': 'Dashboard',
+                            'l': 'Collections',
+                            'i': 'Insights',
+                            'p': 'Privacy Policy'
                         };
-
-                        if ((e.ctrlKey || e.metaKey) && shortcuts[e.key]) {
-                            e.preventDefault();
-                            
-                            // Show toast for keyboard navigation
-                            const names = {
-                                'n': 'New Entry',
-                                'd': 'Dashboard',
-                                'l': 'Collections',
-                                'i': 'Insights',
-                                'p': 'Privacy Policy'
-                            };
-                            window.showToast(`Navigating to ${names[e.key]}`, 'info', 2000);
-                            
-                            setTimeout(() => {
-                                window.location.href = shortcuts[e.key];
-                            }, 200);
-                        }
+                        window.showToast(`Navigating to ${names[e.key]}`, 'info', 2000);
+                        
+                        setTimeout(() => {
+                            window.location.href = shortcuts[e.key];
+                        }, 200);
                     }
+                }
 
-                    // Menu toggle
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                        e.preventDefault();
-                        if (menuToggleBtn) {
-                            menuToggleBtn.click();
-                        }
+                // Menu toggle
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    if (menuToggleBtn) {
+                        menuToggleBtn.click();
                     }
+                }
 
-                    // Wallet shortcuts
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
-                        e.preventDefault();
-                        if (window.walletState.isConnected) {
-                            switchWallet(); // Switch instead of disconnect
-                        } else {
-                            connectWallet();
-                        }
+                // Wallet shortcuts
+                if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
+                    e.preventDefault();
+                    if (window.walletState.isConnected) {
+                        disconnectWallet();
+                    } else {
+                        connectWallet();
                     }
+                }
 
-                    // Login page specific shortcuts
-                    if (!{{ user.is_authenticated|yesno:"true,false" }}) {
-                        // Alt + A for Any Wallet (primary button)
-                        if (e.altKey && e.key === 'a') {
-                            e.preventDefault();
-                            const anyWalletBtn = document.getElementById('any-wallet-btn') || 
-                                               document.getElementById('metamask-primary-btn');
-                            if (anyWalletBtn) anyWalletBtn.click();
-                        }
-
-                        // Alt + M for MetaMask (secondary button)  
-                        if (e.altKey && e.key === 'm') {
-                            e.preventDefault();
-                            const metamaskBtn = document.getElementById('metamask-btn');
-                            if (metamaskBtn) metamaskBtn.click();
-                        }
-
-                        // Alt + G for Get Wallet
-                        if (e.altKey && e.key === 'g') {
-                            e.preventDefault();
-                            const getWalletBtn = document.getElementById('get-wallet-btn');
-                            if (getWalletBtn) getWalletBtn.click();
-                        }
-                    }
-
-                    // Help shortcut
-                    if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
-                        e.preventDefault();
-                        const shortcuts = {{ user.is_authenticated|yesno:"true,false" }} 
-                            ? 'Ctrl+N: New Entry, Ctrl+D: Dashboard, Ctrl+L: Collections, Ctrl+I: Insights, Ctrl+K: Menu, Ctrl+W: Switch Wallet'
-                            : 'Alt+A: Any Wallet, Alt+M: MetaMask, Alt+G: Get Wallet, Ctrl+K: Menu, Ctrl+W: Connect/Switch Wallet';
-                        window.showToast(shortcuts, 'info', 5000);
-                    }
-                });
+                // Help shortcut
+                if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault();
+                    const shortcuts = {{ user.is_authenticated|yesno:"true,false" }} 
+                        ? 'Ctrl+N: New Entry, Ctrl+D: Dashboard, Ctrl+L: Collections, Ctrl+I: Insights, Ctrl+K: Menu, Ctrl+W: Wallet'
+                        : 'Ctrl+K: Menu, Ctrl+W: Wallet';
+                    window.showToast(shortcuts, 'info', 5000);
+                }
+            });
 
             // Enhanced page visibility handling
             document.addEventListener('visibilitychange', function() {
@@ -2762,7 +2331,6 @@
         window.DiaryVault = {
             showToast: window.showToast,
             connectWallet: connectWallet,
-            switchWallet: switchWallet,
             disconnectWallet: disconnectWallet,
             getWalletInfo: getWalletInfo,
             switchToBaseNetwork: switchToBaseNetwork,
@@ -2774,12 +2342,29 @@
                 window.location.href = "{% url 'privacy_policy' %}";
                 return false;
             },
-            version: '13.0-enhanced-error-handling'
+            version: '9.0-simplified-metamask'
         };
 
-        console.log('✅ DiaryVault Multi-Wallet system with enhanced error handling loaded (v13.0)');
+        // Enhanced error handler
+        window.addEventListener('error', function(e) {
+            // Show user-friendly error message for critical errors only
+            if (e.error && e.error.message && !e.error.message.includes('Non-Error promise rejection')) {
+                if (window.showToast) {
+                    window.showToast('Something went wrong. Please refresh the page.', 'error', 5000);
+                }
+            }
+        });
+
+        // Periodic horizontal scroll check
+        setInterval(function() {
+            if (window.scrollX !== 0) {
+                window.scrollTo(0, window.scrollY);
+            }
+        }, 1000);
+
+        console.log('✅ DiaryVault Web3 system loaded (v9.0-simplified)');
     </script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>
