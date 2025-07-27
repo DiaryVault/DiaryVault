@@ -1715,7 +1715,7 @@
     <script src="https://unpkg.com/@wagmi/core@2.6.17/dist/index.umd.js"></script>
     <script src="https://unpkg.com/viem@2.9.20/dist/index.umd.js"></script>
 
-    <!-- Multi-Wallet Web3 Integration -->
+    <!-- Multi-Wallet Web3 Integration with Wallet Switching -->
     <script>
         // Global wallet state
         window.walletState = {
@@ -1882,33 +1882,46 @@
             }
         }
 
-        // Connect wallet - Multi-wallet or MetaMask fallback
-        async function connectWallet(walletType = 'any', button = null) {
+        // Enhanced wallet connection function with disconnect option
+        async function connectWallet(walletType = 'any', forceNew = false) {
             try {
-                if (button) {
-                    button.classList.add('loading');
-                    button.disabled = true;
+                console.log(`🔄 Connecting wallet: ${walletType}`);
+                
+                // If user wants to switch wallets, disconnect first
+                if (forceNew && window.walletState.isConnected) {
+                    console.log('🔄 Disconnecting current wallet to switch...');
+                    await disconnectWallet(false); // Don't show success message
+                    // Wait a moment for cleanup
+                    await new Promise(resolve => setTimeout(resolve, 500));
                 }
-
-                console.log(`🔗 Connecting ${walletType} wallet...`);
-
-                // Try Web3Modal first (supports 300+ wallets)
-                if (window.walletState.modal && walletType === 'any') {
-                    await window.walletState.modal.open();
-                }
-                // Direct MetaMask connection
-                else if (walletType === 'metamask' || !window.walletState.modal) {
+                
+                if (walletType === 'any') {
+                    // Use Web3Modal for any wallet
+                    if (window.walletState.modal) {
+                        await window.walletState.modal.open();
+                    } else {
+                        console.warn('Web3Modal not available, falling back to MetaMask');
+                        await connectMetaMaskDirect();
+                    }
+                } else if (walletType === 'metamask') {
+                    // Direct MetaMask connection
                     await connectMetaMaskDirect();
+                } else if (walletType === 'coinbase') {
+                    // Coinbase through Web3Modal
+                    if (window.walletState.modal) {
+                        await window.walletState.modal.open({ view: 'ConnectWallet' });
+                    } else {
+                        await connectMetaMaskDirect();
+                    }
+                } else {
+                    // Any other wallet through Web3Modal
+                    if (window.walletState.modal) {
+                        await window.walletState.modal.open();
+                    } else {
+                        await connectMetaMaskDirect();
+                    }
                 }
-                // Coinbase specific
-                else if (walletType === 'coinbase') {
-                    await window.walletState.modal.open({ view: 'Connect' });
-                }
-                // Default to modal
-                else {
-                    await window.walletState.modal.open();
-                }
-
+                
             } catch (error) {
                 console.error('Error connecting wallet:', error);
                 
@@ -1918,15 +1931,15 @@
                     }
                 } else {
                     if (window.showToast) {
-                        window.showToast('Failed to connect wallet', 'error');
+                        window.showToast('Failed to connect wallet. Please try again.', 'error');
                     }
                 }
-            } finally {
-                if (button) {
-                    button.classList.remove('loading');
-                    button.disabled = false;
-                }
             }
+        }
+
+        // Force wallet switching function
+        async function switchWallet(walletType = 'any') {
+            return await connectWallet(walletType, true);
         }
 
         // Direct MetaMask connection (fallback)
@@ -2041,6 +2054,12 @@
                 if (element.id.includes('any') || element.id.includes('metamask') || element.id.includes('primary')) {
                     if (isConnected) {
                         element.textContent = `Connected: ${address.slice(0, 6)}...${address.slice(-4)}`;
+                        // Add a "Switch Wallet" option
+                        if (element.parentElement && element.parentElement.tagName === 'BUTTON') {
+                            const button = element.parentElement;
+                            button.onclick = () => switchWallet(button.id.includes('metamask') ? 'metamask' : 'any');
+                            button.innerHTML = button.innerHTML.replace(element.textContent, `${element.textContent} (Click to Switch)`);
+                        }
                     } else {
                         // Reset to original text based on button type
                         if (element.id.includes('any')) {
@@ -2091,7 +2110,7 @@
         }
 
         // Disconnect wallet
-        async function disconnectWallet() {
+        async function disconnectWallet(showMessage = true) {
             try {
                 if (window.walletState.modal) {
                     await window.walletState.modal.disconnect();
@@ -2100,12 +2119,12 @@
                     updateWalletState(false, null, null);
                 }
                 
-                if (window.showToast) {
+                if (showMessage && window.showToast) {
                     window.showToast('Wallet disconnected successfully', 'info');
                 }
             } catch (error) {
                 console.error('Error disconnecting wallet:', error);
-                if (window.showToast) {
+                if (showMessage && window.showToast) {
                     window.showToast('Failed to disconnect wallet', 'error');
                 }
             }
@@ -2171,11 +2190,17 @@
 
         // Handle wallet connection with button feedback (for login/signup pages)
         window.handleWalletConnection = async function(walletType, button) {
-            await connectWallet(walletType, button);
+            // If already connected, switch wallet instead
+            if (window.walletState.isConnected) {
+                await switchWallet(walletType);
+            } else {
+                await connectWallet(walletType);
+            }
         };
 
         // Make functions globally available
         window.connectWallet = connectWallet;
+        window.switchWallet = switchWallet;
         window.openWalletModal = connectWallet; // Same function for simplicity
         window.disconnectWallet = disconnectWallet;
         window.getWalletInfo = getWalletInfo;
@@ -2422,7 +2447,7 @@
                 if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
                     e.preventDefault();
                     if (window.walletState.isConnected) {
-                        disconnectWallet();
+                        switchWallet(); // Switch instead of disconnect
                     } else {
                         connectWallet();
                     }
@@ -2432,8 +2457,8 @@
                 if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
                     e.preventDefault();
                     const shortcuts = {{ user.is_authenticated|yesno:"true,false" }} 
-                        ? 'Ctrl+N: New Entry, Ctrl+D: Dashboard, Ctrl+L: Collections, Ctrl+I: Insights, Ctrl+K: Menu, Ctrl+W: Wallet'
-                        : 'Ctrl+K: Menu, Ctrl+W: Wallet';
+                        ? 'Ctrl+N: New Entry, Ctrl+D: Dashboard, Ctrl+L: Collections, Ctrl+I: Insights, Ctrl+K: Menu, Ctrl+W: Switch Wallet'
+                        : 'Ctrl+K: Menu, Ctrl+W: Connect/Switch Wallet';
                     window.showToast(shortcuts, 'info', 5000);
                 }
             });
@@ -2472,6 +2497,7 @@
         window.DiaryVault = {
             showToast: window.showToast,
             connectWallet: connectWallet,
+            switchWallet: switchWallet,
             disconnectWallet: disconnectWallet,
             getWalletInfo: getWalletInfo,
             switchToBaseNetwork: switchToBaseNetwork,
@@ -2483,10 +2509,10 @@
                 window.location.href = "{% url 'privacy_policy' %}";
                 return false;
             },
-            version: '11.0-multi-wallet'
+            version: '12.0-multi-wallet-switching'
         };
 
-        console.log('✅ DiaryVault Multi-Wallet system loaded (v11.0)');
+        console.log('✅ DiaryVault Multi-Wallet system with switching loaded (v12.0)');
     </script>
 
     {% block extra_js %}{% endblock %}
