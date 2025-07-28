@@ -58,7 +58,7 @@
     line-height: 1.7;
   }
 
-  /* Enhanced animations */
+  /* Enhanced animations - OPTIMIZED with animation delays */
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -90,17 +90,16 @@
     will-change: transform;
   }
 
-  .animation-delay-300 {
-    animation-delay: 300ms;
-  }
-
-  .animation-delay-500 {
-    animation-delay: 500ms;
-  }
-
-  .animation-delay-700 {
-    animation-delay: 700ms;
-  }
+  /* OPTIMIZED: Animation delay classes instead of inline styles */
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+  .animation-delay-600 { animation-delay: 600ms; }
+  .animation-delay-700 { animation-delay: 700ms; }
+  .animation-delay-2000 { animation-delay: 2s; }
+  .animation-delay-4000 { animation-delay: 4s; }
 
   /* Enhanced shadows and hover effects */
   .btn-gradient {
@@ -595,11 +594,11 @@
             <span>Quick prompts to get started:</span>
           </div>
           <div class="flex flex-wrap gap-1 sm:gap-2">
-            <button type="button" onclick="addSuggestion('Today I\'m feeling')" class="suggestions-pill bg-primary-50 hover:bg-primary-100 text-primary-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-medium transition shadow-sm border border-primary-200/50 min-h-[32px] sm:min-h-[40px] mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 100ms;">Today I'm feeling</button>
-            <button type="button" onclick="addSuggestion('I accomplished')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-emerald-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 200ms;">I accomplished</button>
-            <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-indigo-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 300ms;">I learned that</button>
-            <button type="button" onclick="addSuggestion('I\'m grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 400ms;">I'm grateful for</button>
-            <button type="button" onclick="addSuggestion('A private thought:')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 500ms;">A private thought</button>
+            <button type="button" onclick="addSuggestion('Today I\'m feeling')" class="suggestions-pill bg-primary-50 hover:bg-primary-100 text-primary-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-medium transition shadow-sm border border-primary-200/50 min-h-[32px] sm:min-h-[40px] mb-1 hover:scale-105 hover:shadow animate-fade-in animation-delay-100">Today I'm feeling</button>
+            <button type="button" onclick="addSuggestion('I accomplished')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-emerald-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in animation-delay-200">I accomplished</button>
+            <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-indigo-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in animation-delay-300">I learned that</button>
+            <button type="button" onclick="addSuggestion('I\'m grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in animation-delay-400">I'm grateful for</button>
+            <button type="button" onclick="addSuggestion('A private thought:')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in animation-delay-500">A private thought</button>
           </div>
         </div>
 
@@ -787,6 +786,7 @@ document.addEventListener('DOMContentLoaded', function() {
   journalCache.init();
   initializeJournalForm();
   initializeAnimations();
+  setupOptimizedScrollHandling(); // OPTIMIZED: Add throttled scroll handling
   setupEnhancedUX();
   initializeWalletAwareHome();
 });
@@ -1273,6 +1273,7 @@ function getCsrfToken() {
 }
 
 function initializeAnimations() {
+  // OPTIMIZED: Use Intersection Observer for better performance
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -1281,12 +1282,31 @@ function initializeAnimations() {
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.1 });
+    }, { 
+      threshold: 0.1,
+      rootMargin: '50px' // Start animation 50px before element is visible
+    });
 
     document.querySelectorAll('.animate-fade-in, .animate-scale-in').forEach(el => {
       observer.observe(el);
     });
   }
+}
+
+// OPTIMIZED: Throttled scroll handler to prevent layout thrashing
+function setupOptimizedScrollHandling() {
+  let ticking = false;
+  
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        // Any scroll-based animations would go here
+        // Currently not needed but ready for future use
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true }); // Passive listener for better performance
 }
 
 function setupUnsavedChangesWarning() {
