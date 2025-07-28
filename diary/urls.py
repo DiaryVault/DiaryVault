@@ -82,30 +82,6 @@ urlpatterns = [
     path('insights/', views.insights, name='insights'),
 
     # ============================================================================
-    # Marketplace Feature
-    # ============================================================================
-    # Main marketplace
-    path('marketplace/', marketplace_view, name='marketplace'),
-
-    # Publishing functionality
-    path('marketplace/publish/', journal_compiler.smart_journal_compiler, name='publish_journal'),
-
-    # Journal detail and interactions
-    path('marketplace/journal/<int:journal_id>/', marketplace_journal_detail, name='marketplace_journal_detail'),
-    path('marketplace/like/<int:journal_id>/', like_journal, name='like_journal'),
-    path('marketplace/tip/<int:journal_id>/', tip_author, name='tip_author'),
-
-    # Author profiles and dashboards
-    path('marketplace/author/<str:username>/', marketplace_author_profile, name='marketplace_author_profile'),
-    path('dashboard/earnings/', earnings_dashboard, name='earnings_dashboard'),
-    path('dashboard/my-journals/', my_published_journals, name='my_published_journals'),
-
-    # Additional marketplace pages
-    path('marketplace/monetization/', marketplace_monetization, name='marketplace_monetization'),
-    path('marketplace/contest/', marketplace_contest, name='marketplace_contest'),
-    path('marketplace/faq/', marketplace_faq, name='marketplace_faq'),
-
-    # ============================================================================
     # SMART JOURNAL COMPILER - Main Pages
     # ============================================================================
     path('publish_journal/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler'),
