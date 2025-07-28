@@ -1861,3 +1861,56 @@ def update_profile(request):
         return Response(serializer.data)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def anonymous_entry_preview(request, entry_uuid):
+    """Preview page for anonymous entries stored in session"""
+    
+    # Convert UUID to string for comparison
+    entry_uuid_str = str(entry_uuid)
+    
+    # Get anonymous entries from session
+    anonymous_entries = request.session.get('anonymous_entries', [])
+    
+    # Find the specific entry
+    entry_data = None
+    for entry in anonymous_entries:
+        if entry.get('id') == entry_uuid_str:
+            entry_data = entry
+            break
+    
+    if not entry_data:
+        # Entry not found in session
+        messages.warning(request, "Entry not found. It may have expired or you may need to log in.")
+        return redirect('home')
+    
+    # Check if user is authenticated
+    if request.user.is_authenticated:
+        # User is now logged in - offer to save permanently
+        messages.info(request, "You're now logged in! You can save this entry permanently.")
+        
+        # Prepare context for authenticated user
+        context = {
+            'entry': entry_data,
+            'is_preview': True,
+            'is_authenticated': True,
+            'can_save_permanently': True,
+            'wallet_info': {
+                'address': entry_data.get('wallet_address'),
+                'is_connected': bool(entry_data.get('wallet_address'))
+            }
+        }
+    else:
+        # User is still anonymous
+        context = {
+            'entry': entry_data,
+            'is_preview': True,
+            'is_authenticated': False,
+            'can_save_permanently': False,
+            'wallet_info': {
+                'address': entry_data.get('wallet_address'),
+                'is_connected': bool(entry_data.get('wallet_address'))
+            }
+        }
+    
+    # Use a simplified template or modify dashboard
+    return render(request, 'diary/anonymous_entry_preview.html', context)
