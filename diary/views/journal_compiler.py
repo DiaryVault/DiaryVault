@@ -21,7 +21,6 @@ import os
 from ..models import Entry, Tag, Journal, JournalEntry
 from ..services.ai_service import AIService
 from ..utils.analytics import get_mood_emoji, get_tag_color
-from ..views.marketplace_service import MarketplaceService
 
 logger = logging.getLogger(__name__)
 
