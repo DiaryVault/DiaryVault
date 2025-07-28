@@ -4,26 +4,21 @@
 
 {% block extra_css %}
 <style>
-  /* CRITICAL SCROLLBAR FIX: Textarea-specific fixes */
-  
-  /* Fix the competing textarea scrollbar - CRITICAL */
+  /* FIXED: Textarea without competing scrollbars */
   #journalInput {
-    overflow: hidden !important; /* Remove textarea's internal scrollbar */
     resize: none !important;
     width: 100% !important;
     max-width: 100% !important;
     border: none !important;
     outline: none !important;
     min-height: 150px;
-    max-height: 400px; /* Set reasonable limit to prevent excessive growth */
+    max-height: 400px;
     box-sizing: border-box !important;
-    /* Let it expand naturally by adjusting height instead of scrolling */
-    field-sizing: content; /* Modern browsers */
     overflow-wrap: break-word;
+    /* Let base.html handle all scrolling */
   }
 
   #journalContainer {
-    overflow: visible !important; /* Let content expand naturally */
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
@@ -38,11 +33,10 @@
     background-color: white;
   }
 
-  /* Ensure main content doesn't create competing scrollbars */
+  /* Main content works with base.html scrolling */
   #main-content {
     width: 100%;
     max-width: 100%;
-    overflow: visible !important; /* No internal scrolling */
     box-sizing: border-box;
     padding-left: 1rem;
     padding-right: 1rem;
@@ -216,7 +210,7 @@
     animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
   }
 
-  /* Mobile optimizations */
+  /* Mobile optimizations - no scrollbar conflicts */
   @media (max-width: 640px) {
     #main-content {
       padding-left: 0.75rem;
@@ -224,7 +218,7 @@
       max-width: 100%;
     }
 
-    /* Ensure proper input sizing without scroll issues */
+    /* Ensure proper input sizing */
     input, textarea, select {
       font-size: 16px !important; /* Prevent zoom on iOS */
       padding-top: 0.75rem;
@@ -247,7 +241,7 @@
       margin-bottom: 1.5rem;
     }
 
-    /* Better mobile textarea handling */
+    /* Better mobile textarea handling - no scrollbars */
     #journalContainer {
       min-height: 120px;
       max-height: 300px;
@@ -358,7 +352,7 @@
     color: white;
   }
 
-  /* Performance optimizations for scrolling */
+  /* Performance optimizations - no scrollbar conflicts */
   .animate-fade-in,
   .animate-scale-in,
   .animate-float,
@@ -1212,7 +1206,7 @@ function generateDemo() {
 let currentPhotoFile = null;
 let currentPhotoDataUrl = null;
 
-// CRITICAL FIX: Optimized debounce function
+// FIXED: Optimized debounce function
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
@@ -1225,7 +1219,7 @@ function debounce(func, wait) {
   };
 }
 
-// CRITICAL FIX: Initialize journal form with FIXED textarea handling
+// FIXED: Initialize journal form - works with base.html scrolling
 function initializeJournalForm() {
   const personalizationToggle = document.getElementById('personalizationToggle');
   const personalizationOptions = document.getElementById('personalizationOptions');
@@ -1242,10 +1236,9 @@ function initializeJournalForm() {
 
   setupOptimizedDragAndDrop();
 
-  // CRITICAL FIX: Textarea auto-resize WITHOUT internal scrolling
+  // FIXED: Simple auto-resize that works with base.html scrolling
   const journalInput = document.getElementById('journalInput');
   if (journalInput) {
-    // FIXED: Simple auto-resize that expands height instead of creating scrollbars
     const autoResize = debounce(function() {
       // Reset height to auto to get the correct scrollHeight
       journalInput.style.height = 'auto';
@@ -1439,7 +1432,7 @@ function setupEnhancedValidation() {
   }
 }
 
-// CRITICAL FIX: Optimized drag and drop
+// FIXED: Optimized drag and drop - works with base.html scrolling
 function setupOptimizedDragAndDrop() {
   const dropArea = document.getElementById('journalContainer');
   const dropIndicator = document.getElementById('dropZoneIndicator');
@@ -1751,7 +1744,7 @@ function editJournalEntry() {
   }
 }
 
-// CRITICAL FIX: Cache initialization - simplified
+// FIXED: Cache initialization - works with base.html
 const journalCache = {
   init: function() {
     if (typeof localStorage !== 'undefined') {
