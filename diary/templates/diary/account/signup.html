@@ -1072,190 +1072,89 @@
 
 {% block extra_js %}
 <script>
-// Enhanced signup page with FIXED wallet connection handling
+// Enhanced signup page with FIXED SVG paths and simplified wallet connection
 document.addEventListener('DOMContentLoaded', function() {
   setupFormEnhancements();
   initializeSignupForm();
   setupEarningCards();
-  checkInitialWalletState(); // Add this
 });
 
-// Check wallet state on page load
-async function checkInitialWalletState() {
-  if (window.ethereum) {
-    try {
-      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-      if (accounts.length > 0) {
-        updateButtonsForConnectedState(accounts[0]);
-      }
-    } catch (error) {
-      console.log('Initial wallet check failed:', error);
-    }
-  }
-}
-
-// FIXED: Simple direct wallet connection function
-async function handleDirectWalletConnection() {
+// Simple direct wallet connection function
+function handleDirectWalletConnection() {
   const button = event.target.closest('button');
-  if (!button) return;
-  
-  // Prevent multiple clicks
-  if (button.classList.contains('loading')) return;
-  
-  // Check if wallet is already connected
-  if (window.ethereum) {
-    try {
-      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-      if (accounts.length > 0) {
-        // Already connected - redirect to dashboard
-        if (window.showToast) {
-          window.showToast('✅ Wallet already connected! Redirecting...', 'success');
-        }
-        setTimeout(() => {
-          window.location.href = '/dashboard/';
-        }, 1000);
-        return;
-      }
-    } catch (error) {
-      console.log('Account check failed:', error);
+  if (button) {
+    button.classList.add('loading');
+    button.disabled = true;
+    
+    // Update status text
+    const statusElement = button.querySelector('[id$="-status"]');
+    if (statusElement) {
+      statusElement.textContent = 'Connecting...';
     }
   }
   
-  // Set loading state
-  setButtonLoading(button, true);
-  
   if (window.ethereum) {
-    try {
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      
-      if (accounts.length > 0) {
-        // Success
-        if (window.showToast) {
-          window.showToast('🎉 Wallet connected! Redirecting to dashboard...', 'success');
+    window.ethereum.request({ method: 'eth_requestAccounts' })
+      .then(accounts => {
+        if (accounts.length > 0) {
+          // Show success toast
+          if (window.showToast) {
+          //  window.showToast('🎉 Wallet connected! Redirecting to dashboard...', 'success');
+          }
+          
+          // Update status
+          if (statusElement) {
+            const shortAddress = `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`;
+            statusElement.textContent = `Connected: ${shortAddress}`;
+          }
+          
+          // Redirect to dashboard
+          setTimeout(() => {
+            window.location.href = '/dashboard/';
+          }, 1500);
+        }
+      })
+      .catch(error => {
+        if (error.code === 4001) {
+          if (window.showToast) {
+            // window.showToast('Connection cancelled', 'info');
+          }
+        } else {
+          if (window.showToast) {
+            // window.showToast('Connection failed. Please try again.', 'error');
+          }
         }
         
-        updateButtonsForConnectedState(accounts[0]);
-        
-        // Redirect to dashboard
-        setTimeout(() => {
-          window.location.href = '/dashboard/';
-        }, 1500);
-      } else {
-        throw new Error('No accounts returned');
-      }
-    } catch (error) {
-      console.error('Wallet connection error:', error);
-      handleConnectionError(error, button);
-    }
+        // Reset button
+        if (button) {
+          button.classList.remove('loading');
+          button.disabled = false;
+          
+          if (statusElement) {
+            if (statusElement.id.includes('start-earning')) {
+              statusElement.textContent = 'MetaMask, Coinbase, Trust + 300 more';
+            } else if (statusElement.id.includes('metamask')) {
+              statusElement.textContent = 'Skip the wallet selector';
+            }
+          }
+        }
+      });
   } else {
-    // No wallet detected
     if (window.showToast) {
-      window.showToast('No wallet detected. Let\'s get you set up!', 'warning');
+      // window.showToast('No wallet detected. Let\'s get you set up!', 'warning');
     }
     
-    setButtonLoading(button, false);
+    // Reset button
+    if (button) {
+      button.classList.remove('loading');
+      button.disabled = false;
+    }
     
     // Show wallet guide
     setTimeout(() => {
       showWalletGuide();
     }, 1000);
   }
-}
-
-// FIXED: Set button loading state
-function setButtonLoading(button, isLoading) {
-  if (isLoading) {
-    button.classList.add('loading');
-    button.disabled = true;
-    
-    const statusElement = button.querySelector('[id$="-status"]');
-    if (statusElement) {
-      statusElement.dataset.originalText = statusElement.textContent;
-      statusElement.textContent = 'Connecting...';
-    }
-  } else {
-    button.classList.remove('loading');
-    button.disabled = false;
-    
-    const statusElement = button.querySelector('[id$="-status"]');
-    if (statusElement && statusElement.dataset.originalText) {
-      statusElement.textContent = statusElement.dataset.originalText;
-    }
-  }
-}
-
-// FIXED: Update all buttons for connected state
-function updateButtonsForConnectedState(address) {
-  const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
-  
-  // Update all wallet buttons
-  const buttons = [
-    'start-earning-wallet-btn',
-    'signup-metamask-direct-btn'
-  ];
-  
-  buttons.forEach(buttonId => {
-    const button = document.getElementById(buttonId);
-    if (button) {
-      const statusElement = button.querySelector('[id$="-status"]');
-      if (statusElement) {
-        statusElement.textContent = `Connected: ${shortAddress}`;
-      }
-      
-      // Change button text to indicate it will redirect
-      const textElement = button.querySelector('.wallet-text');
-      if (textElement) {
-        textElement.textContent = 'Go to Dashboard';
-      }
-      
-      // Remove loading state
-      setButtonLoading(button, false);
-    }
-  });
-}
-
-// FIXED: Handle connection errors
-function handleConnectionError(error, button) {
-  if (error.code === 4001) {
-    // User rejected
-    if (window.showToast) {
-      window.showToast('Connection cancelled', 'info');
-    }
-  } else {
-    // Other error
-    if (window.showToast) {
-      window.showToast('Connection failed. Please try again.', 'error');
-    }
-  }
-  
-  // Reset button state
-  setButtonLoading(button, false);
-}
-
-// FIXED: Reset button states when needed
-function resetButtonStates() {
-  const buttons = [
-    { id: 'start-earning-wallet-btn', text: 'Connect & Start Earning', status: 'MetaMask, Coinbase, Trust + 300 more' },
-    { id: 'signup-metamask-direct-btn', text: 'MetaMask Direct', status: 'Skip the wallet selector' }
-  ];
-  
-  buttons.forEach(({ id, text, status }) => {
-    const button = document.getElementById(id);
-    if (button) {
-      setButtonLoading(button, false);
-      
-      const textElement = button.querySelector('.wallet-text');
-      if (textElement) {
-        textElement.textContent = text;
-      }
-      
-      const statusElement = button.querySelector('[id$="-status"]');
-      if (statusElement) {
-        statusElement.textContent = status;
-        delete statusElement.dataset.originalText;
-      }
-    }
-  });
 }
 
 // Show wallet installation guide
@@ -1300,7 +1199,7 @@ function setupEarningCards() {
         ];
         
         if (window.showToast) {
-          window.showToast(features[index] || 'Connect your wallet to unlock all earning features!', 'info', 4000);
+        //  window.showToast(features[index] || 'Connect your wallet to unlock all earning features!', 'info', 4000);
         }
       });
     });
@@ -1331,7 +1230,7 @@ function initializeSignupForm() {
     form.addEventListener('submit', function(e) {
       // Show that wallet connection gives enhanced features
       if (window.showToast) {
-        window.showToast('💡 Pro tip: Connect a wallet above for enhanced features and instant rewards!', 'info', 6000);
+      //  window.showToast('💡 Pro tip: Connect a wallet above for enhanced features and instant rewards!', 'info', 6000);
       }
       
       submitButton.disabled = true;
@@ -1362,17 +1261,14 @@ function togglePassword(fieldId) {
   }
 }
 
-// IMPROVED: Listen for wallet connection changes from base.html
+// Listen for wallet connection changes from base.html
 window.addEventListener('walletConnectionChanged', function(event) {
   const { isConnected, address } = event.detail;
   
   if (isConnected && address) {
-    // Update button states
-    updateButtonsForConnectedState(address);
-    
     // Show earning-focused success message
     if (window.showToast) {
-      window.showToast('🎉 Great! Your wallet is connected and ready for earning rewards!', 'success');
+    //  window.showToast('🎉 Great! Your wallet is connected and ready for earning rewards!', 'success');
     }
     
     // Auto-redirect if still on signup page
@@ -1382,26 +1278,8 @@ window.addEventListener('walletConnectionChanged', function(event) {
         window.location.href = dashboardUrl;
       }
     }, 2000);
-  } else {
-    // Reset button states when disconnected
-    resetButtonStates();
   }
 });
-
-// FIXED: Listen for account changes
-if (window.ethereum) {
-  window.ethereum.on('accountsChanged', function(accounts) {
-    if (accounts.length > 0) {
-      updateButtonsForConnectedState(accounts[0]);
-    } else {
-      resetButtonStates();
-    }
-  });
-  
-  window.ethereum.on('disconnect', function() {
-    resetButtonStates();
-  });
-}
 
 // Keyboard shortcuts for accessibility
 document.addEventListener('keydown', function(e) {
@@ -1430,25 +1308,19 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// Debug function for troubleshooting
-async function debugWalletState() {
-  const accounts = window.ethereum ? await window.ethereum.request({ method: 'eth_accounts' }).catch(() => []) : [];
-  
+// Debug function for troubleshooting (silent mode)
+function debugWalletState() {
   return {
     hasEthereum: !!window.ethereum,
     hasConnectWallet: !!window.connectWallet,
     hasGetWalletInfo: !!window.getWalletInfo,
-    walletInfo: window.getWalletInfo ? window.getWalletInfo() : null,
-    connectedAccounts: accounts,
-    currentPage: window.location.pathname
+    walletInfo: window.getWalletInfo ? window.getWalletInfo() : null
   };
 }
 
-// Export functions to global scope
 window.handleDirectWalletConnection = handleDirectWalletConnection;
 window.showWalletGuide = showWalletGuide;
 window.togglePassword = togglePassword;
 window.debugWalletState = debugWalletState;
-window.resetButtonStates = resetButtonStates;
 </script>
 {% endblock %}
