@@ -13,7 +13,6 @@ from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
-@login_required
 def journal(request):
     """Create a new diary entry"""
     if request.method == 'POST':
