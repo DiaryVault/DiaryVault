@@ -1256,8 +1256,8 @@
                     {% else %}
                     <!-- Auth Buttons -->
                     <div class="hidden md:flex gap-2 items-center">
-                        <button onclick="connectWallet()" class="btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium">Connect Wallet</button>
-                        <button onclick="openWalletModal()" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium">Start Earning</button>
+                        <button onclick="connectWalletAndCloseMenu()" class="btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium">Connect Wallet</button>
+                        <button onclick="openWalletModalAndCloseMenu()" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium">Start Earning</button>
                     </div>
                     {% endif %}
 
@@ -1473,14 +1473,14 @@
 
             <!-- Enhanced Auth section -->
             <div class="space-y-4">
-                <button onclick="connectWallet()" class="flex items-center justify-center gap-3 py-4 px-4 glass-card hover:bg-white/80 rounded-2xl transition-all duration-300 font-semibold border border-gray-200/50 hover:shadow-lg menu-item w-full min-h-[44px]">
+                <button onclick="connectWalletAndCloseMenu()" class="flex items-center justify-center gap-3 py-4 px-4 glass-card hover:bg-white/80 rounded-2xl transition-all duration-300 font-semibold border border-gray-200/50 hover:shadow-lg menu-item w-full min-h-[44px]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                     <span>Connect Wallet</span>
                 </button>
 
-                <button onclick="openWalletModal()" class="flex items-center justify-center gap-3 py-4 px-4 btn-primary rounded-2xl transition-all duration-300 shadow-lg font-semibold hover:shadow-xl hover:-translate-y-1 active:translate-y-0 menu-item w-full min-h-[44px]">
+                <button onclick="openWalletModalAndCloseMenu()" class="flex items-center justify-center gap-3 py-4 px-4 btn-primary rounded-2xl transition-all duration-300 shadow-lg font-semibold hover:shadow-xl hover:-translate-y-1 active:translate-y-0 menu-item w-full min-h-[44px]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -2016,6 +2016,23 @@
             document.body.style.overflow = '';
         }
 
+        // Enhanced wallet connection functions that auto-close menu
+        window.connectWalletAndCloseMenu = function(walletType = 'metamask', button = null) {
+            closeMenu();
+            // Small delay to ensure menu closes smoothly before showing wallet modal
+            setTimeout(() => {
+                connectWallet(walletType, button);
+            }, 300);
+        };
+
+        window.openWalletModalAndCloseMenu = function() {
+            closeMenu();
+            // Small delay to ensure menu closes smoothly before showing wallet modal
+            setTimeout(() => {
+                connectWallet();
+            }, 300);
+        };
+
         menuToggle?.addEventListener('click', openMenu);
         closeBtn?.addEventListener('click', closeMenu);
         menuOverlay?.addEventListener('click', closeMenu);
@@ -2024,6 +2041,17 @@
             if (e.key === 'Escape' && menuSheet.classList.contains('open')) {
                 closeMenu();
             }
+        });
+
+        // Auto-close menu when clicking on navigation links
+        const menuLinks = document.querySelectorAll('.menu-item, .menu-category');
+        menuLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                // Only auto-close for actual navigation links, not buttons
+                if (link.tagName === 'A' && link.href && !link.href.includes('javascript:')) {
+                    closeMenu();
+                }
+            });
         });
     }
     </script>
