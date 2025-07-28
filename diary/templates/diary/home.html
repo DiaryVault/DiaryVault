@@ -981,38 +981,94 @@ function saveToBlockchain() {
       return response.json();
     })
     .then(data => {
-      if (data.success || data.entry_id) {
-        // Calculate mock rewards based on content length and wallet connection
-        const wordCount = journalContent.split(' ').length;
-        const baseReward = Math.floor(wordCount / 10); // 1 token per 10 words
-        const walletBonus = walletInfo.isConnected ? 5 : 0;
-        const mockRewards = baseReward + walletBonus;
+      if (data.success) {
+        // Calculate rewards (use server-provided rewards if available)
+        const rewards = data.rewards || (() => {
+          const wordCount = journalContent.split(' ').length;
+          const baseReward = Math.floor(wordCount / 10);
+          const walletBonus = walletInfo.isConnected ? 5 : 0;
+          return baseReward + walletBonus;
+        })();
 
-        saveButton.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-          Saved! Rewards earned: ${mockRewards} tokens
-        `;
-        
-        if (window.showToast) {
-          window.showToast(`Entry saved! Earned ${mockRewards} tokens`, 'success');
-        }
-
-        setTimeout(() => {
-          if (data.entry_id) {
-            window.location.href = `/entry/${data.entry_id}/`;
-          } else if (data.redirect_url) {
-            window.location.href = data.redirect_url;
-          } else {
-            window.location.href = '/dashboard/';
+        // Check if this is an anonymous save
+        if (data.is_anonymous) {
+          // Handle anonymous user response
+          saveButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Saved temporarily! Rewards: ${rewards} tokens
+          `;
+          
+          if (window.showToast) {
+            window.showToast(data.message || 'Entry saved temporarily. Sign up to save permanently!', 'info');
           }
-        }, 2000);
+          
+          // Show signup/login prompt after a delay
+          setTimeout(() => {
+            saveButton.innerHTML = originalText;
+            saveButton.disabled = false;
+            
+            // Create a custom modal or use confirm
+            const message = 'Your entry has been saved temporarily. Would you like to sign up to save it permanently and earn real rewards?';
+            
+            if (confirm(message)) {
+              // Redirect to signup with journal feature
+              window.location.href = data.signup_url || '/signup/?feature=journal';
+            } else {
+              // Optionally show login option
+              if (confirm('Would you like to log in to an existing account?')) {
+                window.location.href = data.login_url || '/login/?save_after_login=true';
+              }
+            }
+          }, 2000);
+          
+        } else {
+          // Handle authenticated user response
+          saveButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Saved! Rewards earned: ${rewards} tokens
+          `;
+          
+          if (window.showToast) {
+            window.showToast(`Entry saved! Earned ${rewards} tokens`, 'success');
+          }
+
+          // Only redirect for authenticated users with valid entry IDs
+          setTimeout(() => {
+            if (data.redirect_url) {
+              window.location.href = data.redirect_url;
+            } else if (data.entry_id && !isNaN(data.entry_id)) {
+              // Only redirect if entry_id is a number (not UUID)
+              window.location.href = `/entry/${data.entry_id}/`;
+            } else {
+              window.location.href = '/dashboard/';
+            }
+          }, 2000);
+        }
       } else {
+        // Handle error response
         saveButton.innerHTML = originalText;
         saveButton.disabled = false;
-        if (window.showToast) {
-          window.showToast(data.error || 'Failed to save entry', 'error');
+        
+        if (data.auth_required) {
+          // Handle authentication required error
+          if (window.showToast) {
+            window.showToast('Please sign in to save your entry', 'warning');
+          }
+          
+          setTimeout(() => {
+            if (confirm('You need to be logged in to save entries. Would you like to sign up?')) {
+              window.location.href = '/signup/?feature=journal';
+            }
+          }, 500);
+        } else {
+          // Handle other errors
+          if (window.showToast) {
+            window.showToast(data.error || 'Failed to save entry', 'error');
+          }
         }
       }
     })
