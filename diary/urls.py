@@ -99,17 +99,6 @@ urlpatterns = [
     # Entry Management API
     path('api/entry/<int:entry_id>/regenerate-summary/', views.regenerate_summary_ajax, name='regenerate_summary_ajax'),
 
-    # Marketplace API
-    path('api/track-view/<int:journal_id>/', core.track_journal_view, name='track_journal_view'),
-    path('api/wishlist/add/', core.add_to_wishlist, name='add_to_wishlist'),
-    path('api/wishlist/remove/', core.remove_from_wishlist, name='remove_from_wishlist'),
-    path('api/journal-preview/<int:journal_id>/', core.journal_preview, name='journal_preview'),
-    path('api/marketplace-stats/', core.marketplace_stats, name='marketplace_stats'),
-
-    # Enhanced marketplace APIs
-    path('api/purchase/<int:journal_id>/', purchase_journal_api, name='purchase_journal_api'),
-    path('api/tip/<int:journal_id>/', tip_author_api, name='tip_author_api'),
-
     # ============================================================================
     # SMART JOURNAL COMPILER - API Endpoints (FIXED)
     # ============================================================================
