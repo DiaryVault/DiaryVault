@@ -1074,19 +1074,13 @@
 <script>
 // Enhanced signup page with FIXED SVG paths and simplified wallet connection
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('🚀 Initializing signup page...');
-  
   setupFormEnhancements();
   initializeSignupForm();
-  
-  // Setup earning card interactions
   setupEarningCards();
 });
 
 // Simple direct wallet connection function
 function handleDirectWalletConnection() {
-  console.log('🔗 Direct wallet connection clicked');
-  
   const button = event.target.closest('button');
   if (button) {
     button.classList.add('loading');
@@ -1103,8 +1097,6 @@ function handleDirectWalletConnection() {
     window.ethereum.request({ method: 'eth_requestAccounts' })
       .then(accounts => {
         if (accounts.length > 0) {
-          console.log('✅ Connected:', accounts[0]);
-          
           // Show success toast
           if (window.showToast) {
             window.showToast('🎉 Wallet connected! Redirecting to dashboard...', 'success');
@@ -1123,8 +1115,6 @@ function handleDirectWalletConnection() {
         }
       })
       .catch(error => {
-        console.error('Connection failed:', error);
-        
         if (error.code === 4001) {
           if (window.showToast) {
             window.showToast('Connection cancelled', 'info');
@@ -1150,8 +1140,6 @@ function handleDirectWalletConnection() {
         }
       });
   } else {
-    console.log('No wallet detected');
-    
     if (window.showToast) {
       window.showToast('No wallet detected. Let\'s get you set up!', 'warning');
     }
@@ -1320,27 +1308,19 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// Debug function for troubleshooting
+// Debug function for troubleshooting (silent mode)
 function debugWalletState() {
-  console.log('=== Wallet Debug Info ===');
-  console.log('window.ethereum exists:', !!window.ethereum);
-  console.log('window.connectWallet exists:', !!window.connectWallet);
-  console.log('window.getWalletInfo exists:', !!window.getWalletInfo);
-  if (window.getWalletInfo) {
-    console.log('Wallet Info:', window.getWalletInfo());
-  }
-  if (window.ethereum) {
-    console.log('Ethereum provider:', window.ethereum);
-  }
-  console.log('========================');
+  return {
+    hasEthereum: !!window.ethereum,
+    hasConnectWallet: !!window.connectWallet,
+    hasGetWalletInfo: !!window.getWalletInfo,
+    walletInfo: window.getWalletInfo ? window.getWalletInfo() : null
+  };
 }
 
-// Make functions globally available
 window.handleDirectWalletConnection = handleDirectWalletConnection;
 window.showWalletGuide = showWalletGuide;
 window.togglePassword = togglePassword;
 window.debugWalletState = debugWalletState;
-
-console.log('✅ Signup page with fixed SVG paths loaded successfully');
 </script>
 {% endblock %}
