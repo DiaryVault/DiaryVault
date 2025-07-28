@@ -15,6 +15,9 @@ logger = logging.getLogger(__name__)
 
 def journal(request):
     """Create a new diary entry"""
+    # Initialize pending_entry_data at the beginning
+    pending_entry_data = None
+    
     if request.method == 'POST':
         form = EntryForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
@@ -72,7 +75,7 @@ def journal(request):
         
         # Check for pending entry from anonymous save (via query parameter)
         pending_entry_id = request.GET.get('pending_entry')
-        pending_entry_data = None
+        # pending_entry_data is already initialized at the top
         
         if pending_entry_id and 'anonymous_entries' in request.session:
             anonymous_entries = request.session.get('anonymous_entries', {})
