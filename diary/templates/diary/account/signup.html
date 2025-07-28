@@ -1072,8 +1072,9 @@
 
 {% block extra_js %}
 <!-- Enhanced signup page with improved wallet connection -->
+<!-- Fixed SVG Loading Spinners -->
 <script>
-// Initialize signup page with wallet system integration
+// Enhanced signup page with fixed SVG paths and improved wallet connection
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🚀 Initializing signup page...');
   
@@ -1123,7 +1124,9 @@ function enableWalletButtons() {
       button.onclick = null;
       
       if (type === 'guide') {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
           if (window.showWalletOptions) {
             window.showWalletOptions();
           } else {
@@ -1131,7 +1134,11 @@ function enableWalletButtons() {
           }
         });
       } else {
-        button.addEventListener('click', () => handleWalletConnection(type, button));
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleWalletConnection(type, button);
+        });
       }
     }
   });
@@ -1142,10 +1149,21 @@ async function handleWalletConnection(walletType, button = null) {
   console.log(`🔗 Attempting ${walletType} wallet connection for signup...`);
   
   try {
-    // Show loading state
+    // Show loading state with FIXED SVG
     if (button) {
       button.classList.add('loading');
       button.disabled = true;
+      
+      // Update the loading spinner with correct SVG
+      const loadingSpinner = button.querySelector('.loading-spinner');
+      if (loadingSpinner) {
+        loadingSpinner.innerHTML = `
+          <svg class="animate-spin h-5 w-5 sm:h-6 sm:w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        `;
+      }
     }
     
     // Update status
@@ -1173,13 +1191,17 @@ async function handleWalletConnection(walletType, button = null) {
       
       // Show success message with earning focus
       if (window.showToast) {
-        window.showToast('🎉 Wallet connected! You\'re ready to start earning rewards for your writing!', 'success');
+        window.showToast('🎉 Wallet connected! Ready to start earning!', 'success');
       }
       
       // Optional: Auto-redirect to dashboard after successful connection
-      // setTimeout(() => {
-      //   window.location.href = '/dashboard/';
-      // }, 2000);
+      setTimeout(() => {
+        if (window.location.pathname.includes('signup')) {
+          // Redirect to dashboard if user is on signup page
+          const dashboardUrl = window.location.origin + '/dashboard/';
+          window.location.href = dashboardUrl;
+        }
+      }, 1500);
     } else {
       throw new Error('Connection attempt failed');
     }
@@ -1336,7 +1358,7 @@ function initializeSignupForm() {
       submitButton.innerHTML = `
         <svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
       `;
     });
@@ -1371,24 +1393,37 @@ window.addEventListener('walletConnectionChanged', function(event) {
     if (window.showToast) {
       window.showToast('🎉 Great! Your wallet is connected and ready for earning rewards!', 'success');
     }
+    
+    // Auto-redirect if still on signup page
+    setTimeout(() => {
+      if (window.location.pathname.includes('signup')) {
+        const dashboardUrl = window.location.origin + '/dashboard/';
+        window.location.href = dashboardUrl;
+      }
+    }, 2000);
   } else {
     updateConnectionStatus('disconnected', 'Wallet not connected');
   }
 });
 
 // Track user interest in earning features
-document.querySelectorAll('.earning-card').forEach((card, index) => {
-  card.addEventListener('click', function() {
-    const features = [
-      'Ready to earn daily writing rewards? Connect your wallet above! 🎯',
-      'Unlock achievement badges and special perks by connecting your wallet! 🏆',
-      'Create unique memory NFTs from your entries! Connect your wallet to start! 🎨'
-    ];
-    
-    if (window.showToast) {
-      window.showToast(features[index] || 'Connect your wallet to unlock all earning features!', 'info', 4000);
-    }
-  });
+document.addEventListener('DOMContentLoaded', function() {
+  // Add click handlers to earning cards after DOM is loaded
+  setTimeout(() => {
+    document.querySelectorAll('.earning-card').forEach((card, index) => {
+      card.addEventListener('click', function() {
+        const features = [
+          'Ready to earn daily writing rewards? Connect your wallet above! 🎯',
+          'Unlock achievement badges and special perks by connecting your wallet! 🏆',
+          'Create unique memory NFTs from your entries! Connect your wallet to start! 🎨'
+        ];
+        
+        if (window.showToast) {
+          window.showToast(features[index] || 'Connect your wallet to unlock all earning features!', 'info', 4000);
+        }
+      });
+    });
+  }, 1000);
 });
 
 // Keyboard shortcuts for accessibility
@@ -1425,4 +1460,20 @@ window.updateConnectionStatus = updateConnectionStatus;
 
 console.log('✅ Signup page enhanced wallet integration loaded');
 </script>
+
+<!-- Updated HTML with Fixed SVG Paths -->
+<style>
+/* Fix for loading spinner container */
+.wallet-btn .loading-spinner svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .wallet-btn .loading-spinner svg {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+</style>
 {% endblock %}
