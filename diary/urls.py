@@ -6,13 +6,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from .views import core
 from .views.core import CustomLoginView, CustomSignupView
-from .views.marketplace import (
-    marketplace_view, publish_journal, marketplace_journal_detail,
-    like_journal, tip_author, marketplace_author_profile,
-    marketplace_monetization, marketplace_contest, marketplace_faq,
-    purchase_journal_api, tip_author_api, earnings_dashboard,
-    my_published_journals
-)
 from .views import journal_compiler
 from .views import api
 
