@@ -955,18 +955,16 @@ function saveToBlockchain() {
     const csrftoken = getCsrfToken();
     const formData = new FormData();
     
-    // FIXED: Use the correct field names that match your Django view
     formData.append('title', titleText);
     formData.append('content', journalContent);
     formData.append('wallet_address', walletInfo.address);
     formData.append('chain_id', walletInfo.chainId);
-    formData.append('encrypted', 'true'); // Indicate this is an encrypted save
+    formData.append('encrypted', 'true');
 
     if (currentPhotoFile) {
-      formData.append('journal_photo', currentPhotoFile); // Match your view's field name
+      formData.append('journal_photo', currentPhotoFile);
     }
 
-    // FIXED: Use the correct endpoint from your urls.py
     fetch('/save-generated-entry/', {
       method: 'POST',
       headers: {
@@ -981,34 +979,79 @@ function saveToBlockchain() {
       return response.json();
     })
     .then(data => {
-      if (data.success || data.entry_id) {
-        // Calculate mock rewards based on content length and wallet connection
-        const wordCount = journalContent.split(' ').length;
-        const baseReward = Math.floor(wordCount / 10); // 1 token per 10 words
-        const walletBonus = walletInfo.isConnected ? 5 : 0;
-        const mockRewards = baseReward + walletBonus;
+      if (data.success) {
+        const rewards = data.rewards || calculateRewards(journalContent, walletInfo.isConnected);
 
-        saveButton.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-          Saved! Rewards earned: ${mockRewards} tokens
-        `;
-        
-        if (window.showToast) {
-          window.showToast(`Entry saved! Earned ${mockRewards} tokens`, 'success');
-        }
-
-        setTimeout(() => {
-          if (data.entry_id) {
-            window.location.href = `/entry/${data.entry_id}/`;
-          } else if (data.redirect_url) {
-            window.location.href = data.redirect_url;
-          } else {
-            window.location.href = '/dashboard/';
+        // Check if this is an anonymous save
+        if (data.is_anonymous) {
+          // For anonymous users, redirect to journal form with pre-filled content
+          saveButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Saved! Transferring to journal form...
+          `;
+          
+          if (window.showToast) {
+            window.showToast('Taking you to create your journal entry...', 'info');
           }
-        }, 2000);
+
+          // Store the content in sessionStorage to transfer to journal form
+          sessionStorage.setItem('pendingJournalEntry', JSON.stringify({
+            title: titleText,
+            content: journalContent,
+            fromDemo: true,
+            hasWallet: true,
+            walletAddress: walletInfo.address,
+            rewards: rewards
+          }));
+
+          // If there's a photo, we need to handle it differently
+          if (currentPhotoFile) {
+            // Convert photo to base64 to transfer via sessionStorage
+            const reader = new FileReader();
+            reader.onloadend = function() {
+              const pendingEntry = JSON.parse(sessionStorage.getItem('pendingJournalEntry'));
+              pendingEntry.photoData = reader.result;
+              pendingEntry.photoName = currentPhotoFile.name;
+              sessionStorage.setItem('pendingJournalEntry', JSON.stringify(pendingEntry));
+              
+              // Redirect to journal form
+              window.location.href = '/journal/';
+            };
+            reader.readAsDataURL(currentPhotoFile);
+          } else {
+            // No photo, redirect immediately
+            setTimeout(() => {
+              window.location.href = '/journal/';
+            }, 1500);
+          }
+          
+        } else {
+          // Authenticated user - normal save success
+          saveButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Saved! Rewards earned: ${rewards} tokens
+          `;
+          
+          if (window.showToast) {
+            window.showToast(`Entry saved! Earned ${rewards} tokens`, 'success');
+          }
+
+          setTimeout(() => {
+            if (data.redirect_url) {
+              window.location.href = data.redirect_url;
+            } else if (data.entry_id) {
+              window.location.href = `/entry/${data.entry_id}/`;
+            } else {
+              window.location.href = '/dashboard/';
+            }
+          }, 2000);
+        }
       } else {
+        // Handle error
         saveButton.innerHTML = originalText;
         saveButton.disabled = false;
         if (window.showToast) {
@@ -1025,6 +1068,14 @@ function saveToBlockchain() {
       }
     });
   }
+}
+
+// Helper function to calculate rewards
+function calculateRewards(content, hasWallet) {
+  const wordCount = content.split(' ').length;
+  const baseReward = Math.floor(wordCount / 10);
+  const walletBonus = hasWallet ? 5 : 0;
+  return baseReward + walletBonus;
 }
 
 // Update the existing generateDemo function to be wallet-aware

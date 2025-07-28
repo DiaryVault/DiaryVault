@@ -70,11 +70,41 @@ def journal(request):
                     messages.error(request, f"{field}: {error}")
     else:
         form = EntryForm(user=request.user)
+        
+        # Check for pending entry from anonymous save (via query parameter)
+        pending_entry_id = request.GET.get('pending_entry')
+        pending_entry_data = None
+        
+        if pending_entry_id and 'anonymous_entries' in request.session:
+            anonymous_entries = request.session.get('anonymous_entries', {})
+            if pending_entry_id in anonymous_entries:
+                pending_entry_data = anonymous_entries[pending_entry_id]
+                # Pre-populate the form with anonymous data
+                initial_data = {
+                    'title': pending_entry_data.get('title', ''),
+                    'content': pending_entry_data.get('content', ''),
+                    'mood': pending_entry_data.get('mood', 'neutral'),
+                    'tags': pending_entry_data.get('tags', ''),
+                }
+                form = EntryForm(user=request.user, initial=initial_data)
+                
+                # Remove the anonymous entry from session after using it
+                del anonymous_entries[pending_entry_id]
+                request.session['anonymous_entries'] = anonymous_entries
+                request.session.modified = True
+                
+                # Add a message to inform the user
+                messages.info(
+                    request, 
+                    'Welcome! Your journal entry has been transferred. '
+                    'You can now save it permanently to your account.'
+                )
 
     return render(request, 'diary/journal.html', {
         'form': form,
         'today': timezone.now(),
-        'is_edit_mode': False
+        'is_edit_mode': False,
+        'pending_entry': pending_entry_data,  # Pass this to template for any special handling
     })
 
 @login_required

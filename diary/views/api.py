@@ -1863,54 +1863,28 @@ def update_profile(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 def anonymous_entry_preview(request, entry_uuid):
-    """Preview page for anonymous entries stored in session"""
+    """Redirect anonymous entries to journal form with pre-filled content"""
     
-    # Convert UUID to string for comparison
+    # Convert UUID to string
     entry_uuid_str = str(entry_uuid)
     
     # Get anonymous entries from session
-    anonymous_entries = request.session.get('anonymous_entries', [])
+    anonymous_entries = request.session.get('anonymous_entries', {})
     
-    # Find the specific entry
-    entry_data = None
-    for entry in anonymous_entries:
-        if entry.get('id') == entry_uuid_str:
-            entry_data = entry
-            break
+    if entry_uuid_str in anonymous_entries:
+        # User is logged in - redirect to journal with the entry data
+        if request.user.is_authenticated:
+            return redirect(f'/journal/?pending_entry={entry_uuid_str}')
+        else:
+            # User is not logged in - show a message and redirect to signup
+            messages.info(
+                request, 
+                'Please sign up or log in to save your journal entry permanently.'
+            )
+            # Store the entry ID in session for after login
+            request.session['pending_entry_after_login'] = entry_uuid_str
+            return redirect(f'/signup/?feature=journal&next=/journal/?pending_entry={entry_uuid_str}')
     
-    if not entry_data:
-        # Entry not found in session
-        messages.warning(request, "Entry not found. It may have expired or you may need to log in.")
-        return redirect('home')
-    
-    # Check if user is authenticated
-    if request.user.is_authenticated:
-        # User is now logged in - offer to save permanently
-        messages.info(request, "You're now logged in! You can save this entry permanently.")
-        
-        # Prepare context for authenticated user
-        context = {
-            'entry': entry_data,
-            'is_preview': True,
-            'is_authenticated': True,
-            'can_save_permanently': True,
-            'wallet_info': {
-                'address': entry_data.get('wallet_address'),
-                'is_connected': bool(entry_data.get('wallet_address'))
-            }
-        }
-    else:
-        # User is still anonymous
-        context = {
-            'entry': entry_data,
-            'is_preview': True,
-            'is_authenticated': False,
-            'can_save_permanently': False,
-            'wallet_info': {
-                'address': entry_data.get('wallet_address'),
-                'is_connected': bool(entry_data.get('wallet_address'))
-            }
-        }
-    
-    # Use a simplified template or modify dashboard
-    return render(request, 'diary/anonymous_entry_preview.html', context)
+    # Entry not found, redirect to journal
+    messages.warning(request, "Entry not found. Please create a new journal entry.")
+    return redirect('new_entry')
