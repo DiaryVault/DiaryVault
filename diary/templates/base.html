@@ -121,6 +121,7 @@
               'shimmer': 'shimmer 2s linear infinite',
               'pulse-ring': 'pulseRing 1.5s ease-out infinite',
               'slide-up': 'slideUp 0.3s ease-out',
+              'slide-down': 'slideDown 0.3s ease-out',
               'pulse-badge': 'pulseBadge 2s ease-in-out infinite',
               'glow-pulse': 'glowPulse 2s ease-in-out infinite',
               'shake': 'shake 0.5s ease-in-out',
@@ -138,6 +139,10 @@
               slideIn: {
                 '0%': { transform: 'translateX(-100%)' },
                 '100%': { transform: 'translateX(0)' },
+              },
+              slideDown: {
+                '0%': { transform: 'translateY(-100%)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
               },
               scaleIn: {
                 '0%': { opacity: '0', transform: 'scale(0.9)' },
@@ -415,41 +420,7 @@
         text-decoration: none;
       }
 
-      /* Wallet Status - Mobile Optimized */
-      .wallet-status {
-        background: rgba(34, 197, 94, 0.1);
-        border: 1px solid rgba(34, 197, 94, 0.2);
-        border-radius: 20px;
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #15803d;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        box-sizing: border-box;
-      }
-
-      .wallet-status.disconnected {
-        background: rgba(239, 68, 68, 0.1);
-        border-color: rgba(239, 68, 68, 0.2);
-        color: #dc2626;
-      }
-
-      .wallet-status::before {
-        content: '';
-        width: 0.5rem;
-        height: 0.5rem;
-        border-radius: 50%;
-        background: #22c55e;
-        animation: pulse 2s infinite;
-      }
-
-      .wallet-status.disconnected::before {
-        background: #ef4444;
-      }
-
-      /* Enhanced Navigation Links - Touch Friendly */
+      /* Navigation Links - Touch Friendly */
       .nav-link {
         position: relative;
         color: #64748b;
@@ -518,28 +489,82 @@
         transform: translateX(-50%);
       }
 
-      /* Enhanced User Profile Section */
-      .enhanced-user-profile {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.6);
-        border-radius: 20px;
-        padding: 0.5rem;
+      /* NEW MODERN DROPDOWN MENU STYLES */
+      .modern-dropdown {
+        position: fixed;
+        top: 70px;
+        right: 1rem;
+        width: calc(100vw - 2rem);
+        max-width: 400px;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(24px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        transform: translateY(-10px) scale(0.95);
+        opacity: 0;
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        position: relative;
+        pointer-events: none;
+        z-index: 1000;
         overflow: hidden;
-        text-decoration: none;
+        box-sizing: border-box;
+      }
+
+      .modern-dropdown.open {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+        pointer-events: auto;
+        animation: slide-down 0.3s ease-out;
+      }
+
+      .dropdown-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        z-index: 999;
+      }
+
+      .dropdown-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .dropdown-header {
+        padding: 1.5rem 1.5rem 1rem;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(79, 70, 229, 0.02));
+      }
+
+      .dropdown-section {
+        padding: 1rem 1.5rem;
+      }
+
+      .dropdown-section:not(:last-child) {
+        border-bottom: 1px solid rgba(226, 232, 240, 0.2);
+      }
+
+      .dropdown-item {
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        box-sizing: border-box;
-        max-width: 100%;
+        padding: 0.875rem 1rem;
+        border-radius: 16px;
+        transition: all 0.2s cubic-bezier(0.23, 1, 0.320, 1);
+        text-decoration: none;
+        color: #374151;
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
         min-height: 44px;
         touch-action: manipulation;
+        border: 1px solid transparent;
       }
 
-      .enhanced-user-profile::before {
+      .dropdown-item::before {
         content: '';
         position: absolute;
         top: 0;
@@ -547,31 +572,114 @@
         width: 100%;
         height: 100%;
         background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.08), transparent);
-        transition: left 0.5s ease;
+        transition: left 0.4s ease;
       }
 
-      .enhanced-user-profile:hover {
-        background: rgba(255, 255, 255, 0.95);
-        border-color: rgba(99, 102, 241, 0.2);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
+      .dropdown-item:hover {
+        background: rgba(99, 102, 241, 0.06);
+        color: #4f46e5;
+        transform: translateX(4px);
+        border-color: rgba(99, 102, 241, 0.1);
         text-decoration: none;
       }
 
-      .enhanced-user-profile:hover::before {
+      .dropdown-item:hover::before {
         left: 100%;
       }
 
-      .enhanced-user-avatar {
-        background: linear-gradient(135deg, #6366f1, #4f46e5);
+      .dropdown-item.active {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.06));
+        color: #4f46e5;
+        font-weight: 600;
+        border-color: rgba(99, 102, 241, 0.2);
+      }
+
+      .dropdown-item svg {
+        flex-shrink: 0;
+        width: 1.25rem;
+        height: 1.25rem;
+        color: currentColor;
+      }
+
+      .dropdown-quick-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+
+      .quick-action-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(226, 232, 240, 0.5);
         border-radius: 16px;
-        position: relative;
-        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+        text-decoration: none;
+        color: #374151;
+        text-align: center;
+        min-height: 80px;
+        touch-action: manipulation;
+      }
+
+      .quick-action-card:hover {
+        background: rgba(255, 255, 255, 0.9);
+        border-color: rgba(99, 102, 241, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.1);
+        text-decoration: none;
+        color: #4f46e5;
+      }
+
+      .quick-action-icon {
+        width: 2rem;
+        height: 2rem;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
         box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         transition: all 0.3s ease;
       }
 
-      .enhanced-user-avatar::before {
+      .quick-action-card:hover .quick-action-icon {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+      }
+
+      .quick-action-icon svg {
+        width: 1rem;
+        height: 1rem;
+        color: white;
+      }
+
+      .user-profile-section {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(79, 70, 229, 0.05));
+        border-radius: 20px;
+        padding: 1.25rem;
+        border: 1px solid rgba(99, 102, 241, 0.1);
+      }
+
+      .user-avatar {
+        width: 3rem;
+        height: 3rem;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.125rem;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .user-avatar::before {
         content: '';
         position: absolute;
         top: -50%;
@@ -583,26 +691,65 @@
         transform: rotate(-45deg) translate(-100%, -100%);
       }
 
-      .enhanced-user-profile:hover .enhanced-user-avatar::before {
+      .user-profile-section:hover .user-avatar::before {
         transform: rotate(-45deg) translate(100%, 100%);
       }
 
-      .enhanced-user-profile:hover .enhanced-user-avatar {
+      .menu-toggle-btn {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        z-index: 20;
+        position: relative;
+        pointer-events: auto;
+        box-sizing: border-box;
+        min-height: 44px;
+        min-width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        touch-action: manipulation;
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+      }
+
+      .menu-toggle-btn:hover {
+        background: rgba(255, 255, 255, 1);
+        border-color: rgba(99, 102, 241, 0.3);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
         transform: scale(1.05);
-        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+      }
+
+      .menu-toggle-btn.active {
+        background: rgba(99, 102, 241, 0.1);
+        border-color: rgba(99, 102, 241, 0.3);
+        transform: rotate(180deg);
+      }
+
+      .menu-toggle-btn svg {
+        color: #1f2937;
+        stroke-width: 2.5;
+        height: 1.25rem;
+        width: 1.25rem;
+        transition: all 0.3s ease;
+      }
+
+      .menu-toggle-btn:hover svg {
+        color: #4f46e5;
       }
 
       /* Enhanced Notification Badge */
-      .enhanced-notification-badge {
+      .notification-badge {
         background: linear-gradient(135deg, #ef4444, #dc2626);
         animation: glowPulse 2s ease-in-out infinite;
         box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
         border-radius: 50%;
         position: absolute;
-        top: -2px;
-        right: -2px;
-        min-width: 1rem;
-        height: 1rem;
+        top: -4px;
+        right: -4px;
+        min-width: 1.25rem;
+        height: 1.25rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -612,59 +759,7 @@
         border: 2px solid white;
       }
 
-      /* Quick Action Buttons - Touch Optimized */
-      .quick-action-btn {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.05)) !important;
-        border: 1px solid rgba(99, 102, 241, 0.2) !important;
-        border-radius: 14px !important;
-        padding: 0.5rem 1rem !important;
-        color: #4f46e5 !important;
-        font-weight: 500 !important;
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1) !important;
-        position: relative !important;
-        overflow: hidden !important;
-        backdrop-filter: blur(10px) !important;
-        text-decoration: none !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 0.375rem !important;
-        font-size: 0.875rem !important;
-        transform: none !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-        box-sizing: border-box !important;
-        max-width: 100% !important;
-        min-height: 44px !important;
-        touch-action: manipulation !important;
-      }
-
-      .quick-action-btn::before {
-        content: '' !important;
-        position: absolute !important;
-        top: 0 !important;
-        left: -100% !important;
-        width: 100% !important;
-        height: 100% !important;
-        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.15), transparent) !important;
-        transition: left 0.5s ease !important;
-      }
-
-      .quick-action-btn:hover {
-        background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
-        color: white !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3) !important;
-        text-decoration: none !important;
-      }
-
-      .quick-action-btn:hover::before {
-        left: 100% !important;
-      }
-
-      .quick-action-btn:active {
-        transform: translateY(0) !important;
-      }
-
-      /* Enhanced Brand Badge */
+      /* Brand Badge */
       .brand-badge {
         background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
         color: white;
@@ -679,202 +774,86 @@
         animation: bounceGentle 2s ease-in-out infinite;
       }
 
-      /* Mobile Header - Compact & Touch Friendly */
-      .mobile-header {
-        padding: 0.5rem 0;
-        width: 100%;
-        max-width: 100vw;
-        overflow-x: hidden;
-        box-sizing: border-box;
+      /* Section Titles */
+      .section-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        margin-bottom: 0.75rem;
+        padding: 0 0.5rem;
       }
 
-      /* Mobile Menu - Enhanced for Touch */
-      .mobile-menu {
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(30px);
-        border-top: 1px solid rgba(99, 102, 241, 0.1);
-        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.1);
-        transform: translateY(100%);
-        transition: transform 0.4s cubic-bezier(0.23, 1, 0.320, 1);
-        width: 100%;
-        max-width: 100vw !important;
-        overflow-x: hidden !important;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 60;
-        border-top-left-radius: 1.5rem;
-        border-top-right-radius: 1.5rem;
-        max-height: 85vh;
-        overflow-y: auto;
-        padding-bottom: env(safe-area-inset-bottom, 1rem);
-        box-sizing: border-box;
-      }
-
-      .mobile-menu.open {
-        transform: translateY(0);
-      }
-
-      /* Menu overlay */
-      .menu-overlay {
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(8px);
-        opacity: 0;
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
-        pointer-events: none;
-        width: 100%;
-        max-width: 100vw !important;
-        overflow: hidden;
-        position: fixed;
-        inset: 0;
-        z-index: 55;
-      }
-
-      .menu-overlay.active {
-        opacity: 1;
-        pointer-events: auto;
-      }
-
-      .menu-category {
-        position: relative;
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
-        border-radius: 16px;
-        overflow: hidden;
-        text-decoration: none;
-        display: block;
-        z-index: 10;
-        pointer-events: auto;
-        box-sizing: border-box;
-        max-width: 100%;
-        min-height: 44px;
-        touch-action: manipulation;
-      }
-
-      .menu-category::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
-        transition: left 0.5s;
-      }
-
-      .menu-category:hover::before {
-        left: 100%;
-      }
-
-      .menu-item {
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
-        text-decoration: none;
-        display: block;
-        box-sizing: border-box;
-        max-width: 100%;
-        min-height: 44px;
-        touch-action: manipulation;
-      }
-
-      .menu-item:hover {
-        transform: scale(1.02);
-        background: rgba(99, 102, 241, 0.08);
-        text-decoration: none;
-      }
-
-      .menu-item:active {
-        transform: scale(0.98);
-      }
-
-      /* Active menu indicator */
-      .active-pill {
-        position: absolute;
-        left: 6px;
-        top: 50%;
-        transform: translateY(-50%);
-        height: 70%;
-        width: 4px;
-        background: linear-gradient(135deg, #6366f1, #4f46e5);
-        border-radius: 6px;
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
-        box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
-      }
-
-      /* Enhanced Form Elements - Touch Optimized */
-      .form-input {
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(226, 232, 240, 1);
-        border-radius: 12px;
-        padding: 0.875rem 1rem;
+      /* Wallet Status */
+      .wallet-status {
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
         font-weight: 500;
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
-        backdrop-filter: blur(10px);
+        color: #15803d;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
         box-sizing: border-box;
-        max-width: 100%;
-        min-height: 44px;
-        font-size: 16px; /* Prevents zoom on iOS */
-        touch-action: manipulation;
       }
 
-      .form-input:focus {
-        outline: none;
-        border-color: #6366f1;
-        background: rgba(255, 255, 255, 1);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), 0 4px 15px rgba(99, 102, 241, 0.1);
-        transform: translateY(-1px);
+      .wallet-status.disconnected {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.2);
+        color: #dc2626;
       }
 
-      .form-input::placeholder {
-        color: #94a3b8;
-        font-weight: 400;
+      .wallet-status::before {
+        content: '';
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        background: #22c55e;
+        animation: pulse 2s infinite;
       }
 
-      /* Enhanced Notifications */
-      .notification {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-        animation: slideIn 0.4s cubic-bezier(0.23, 1, 0.320, 1);
-        box-sizing: border-box;
-        max-width: 100%;
+      .wallet-status.disconnected::before {
+        background: #ef4444;
       }
 
-      .notification.success { border-left: 4px solid #22c55e; }
-      .notification.error { border-left: 4px solid #ef4444; }
-      .notification.warning { border-left: 4px solid #f59e0b; }
-      .notification.info { border-left: 4px solid #6366f1; }
+      /* Mobile Responsive */
+      @media (max-width: 768px) {
+        .modern-dropdown {
+          right: 0.5rem;
+          left: 0.5rem;
+          width: calc(100vw - 1rem);
+          max-width: none;
+        }
 
-      /* Enhanced Patterns */
-      .pattern-dots {
-        background-image: radial-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px);
-        background-size: 20px 20px;
+        .dropdown-quick-actions {
+          grid-template-columns: 1fr;
+        }
+
+        .quick-action-card {
+          flex-direction: row;
+          justify-content: flex-start;
+          text-align: left;
+          min-height: auto;
+          padding: 0.875rem 1rem;
+        }
+
+        .quick-action-icon {
+          margin-bottom: 0;
+          margin-right: 0.75rem;
+          width: 2.5rem;
+          height: 2.5rem;
+        }
+
+        .quick-action-icon svg {
+          width: 1.25rem;
+          height: 1.25rem;
+        }
       }
 
-      .pattern-grid {
-        background-image:
-          linear-gradient(to right, rgba(99, 102, 241, 0.06) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(99, 102, 241, 0.06) 1px, transparent 1px);
-        background-size: 24px 24px;
-      }
-
-      /* Enhanced Loading States */
-      .loading-shimmer {
-        background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-        background-size: 200% 100%;
-        animation: shimmer 2s infinite;
-      }
-
-      /* Text Gradient */
-      .text-gradient {
-        background: linear-gradient(135deg, #6366f1, #4f46e5);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      /* Enhanced Scrollbar - Single Clean Scrollbar */
+      /* Scrollbar */
       ::-webkit-scrollbar {
         width: 6px;
       }
@@ -894,43 +873,7 @@
         background: linear-gradient(135deg, #4f46e5, #4338ca);
       }
 
-      /* Menu Toggle Button - Touch Optimized */
-      .menu-toggle-btn {
-        background: rgba(255, 255, 255, 0.95);
-        border: 1px solid rgba(99, 102, 241, 0.2);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        padding: 0.75rem;
-        border-radius: 0.75rem;
-        z-index: 20;
-        position: relative;
-        pointer-events: auto;
-        box-sizing: border-box;
-        min-height: 44px;
-        min-width: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        touch-action: manipulation;
-      }
-
-      .menu-toggle-btn:hover {
-        background: rgba(255, 255, 255, 1);
-        border-color: rgba(99, 102, 241, 0.3);
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
-      }
-
-      .menu-toggle-btn svg {
-        color: #1f2937;
-        stroke-width: 2.5;
-        height: 1.25rem;
-        width: 1.25rem;
-      }
-
-      .menu-toggle-btn:hover svg {
-        color: #111827;
-      }
-
-      /* Compact Footer Links - Touch Friendly */
+      /* Footer Styles */
       .compact-footer-link {
         position: relative;
         text-decoration: none;
@@ -966,164 +909,13 @@
         color: #4f46e5;
       }
 
-      /* MOBILE OPTIMIZATIONS */
-      @media (max-width: 768px) {
-        .mobile-logo {
-          padding: 0.5rem;
-        }
-
-        .mobile-logo svg {
-          height: 1.25rem;
-          width: 1.25rem;
-        }
-
-        .mobile-logo-text {
-          font-size: 1.125rem;
-          line-height: 1.375rem;
-        }
-
-        .mobile-brand-badge {
-          transform: scale(0.8) rotate(-2deg);
-          margin-left: -0.125rem;
-        }
-
-        .mobile-user-avatar {
-          height: 2rem;
-          width: 2rem;
-          font-size: 0.75rem;
-        }
-
-        .mobile-header .container {
-          padding-left: 1rem;
-          padding-right: 1rem;
-          max-width: 100%;
-          box-sizing: border-box;
-        }
-
-        .mobile-header .flex.items-center.gap-2 {
-          gap: 0.5rem;
-        }
-
-        .quick-action-btn {
-          display: none !important;
-        }
-
-        .nav-link {
-          display: none;
-        }
-
-        .compact-footer-link {
-          min-height: 44px;
-          padding: 0.75rem;
-          font-size: 0.875rem;
-        }
-      }
-
-      @media (max-width: 1280px) {
-        .quick-action-btn {
-          display: none !important;
-        }
-      }
-
-      @media (max-width: 1024px) {
-        .nav-link {
-          padding: 0.625rem 0.875rem;
-          font-size: 0.875rem;
-        }
-      }
-
-      /* Feature Cards - Mobile Optimized */
-      .feature-card {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 24px;
-        padding: 2rem;
-        transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
-        position: relative;
-        overflow: hidden;
-        box-sizing: border-box;
-        max-width: 100%;
-      }
-
-      .feature-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-
-      .feature-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        background: rgba(255, 255, 255, 0.95);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        border-color: rgba(99, 102, 241, 0.2);
-      }
-
-      .feature-card:hover::before {
-        opacity: 1;
-      }
-
-      /* Status Indicators */
-      .status-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.375rem 0.875rem;
-        border-radius: 9999px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        box-sizing: border-box;
-        min-height: 44px;
-      }
-
-      .status-indicator.online {
-        background: rgba(34, 197, 94, 0.1);
-        color: #15803d;
-        border: 1px solid rgba(34, 197, 94, 0.2);
-      }
-
-      .status-indicator.offline {
-        background: rgba(239, 68, 68, 0.1);
-        color: #dc2626;
-        border: 1px solid rgba(239, 68, 68, 0.2);
-      }
-
-      .status-indicator::before {
-        content: '';
-        width: 0.5rem;
-        height: 0.5rem;
-        border-radius: 50%;
-        animation: pulse 2s infinite;
-      }
-
-      .status-indicator.online::before {
-        background: #22c55e;
-      }
-
-      .status-indicator.offline::before {
-        background: #ef4444;
-      }
-
-      /* Accessibility */
-      :focus-visible {
-        outline: 2px solid #6366f1;
-        outline-offset: 2px;
-        border-radius: 8px;
-      }
-
       /* Dark Mode Support */
       @media (prefers-color-scheme: dark) {
         body {
           background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #1e293b 75%, #0f172a 100%);
         }
 
-        .glass-card {
+        .glass-card, .modern-dropdown {
           background: rgba(30, 41, 59, 0.8);
           border-color: rgba(148, 163, 184, 0.2);
         }
@@ -1133,14 +925,12 @@
           border-bottom-color: rgba(148, 163, 184, 0.2);
         }
 
-        .mobile-menu {
-          background: rgba(30, 41, 59, 0.95);
+        .dropdown-item {
+          color: #e2e8f0;
         }
 
-        .text-gradient {
-          background: linear-gradient(135deg, #818cf8, #a5b4fc);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+        .dropdown-item:hover {
+          color: #818cf8;
         }
 
         .compact-footer-link {
@@ -1152,6 +942,13 @@
         }
       }
 
+      /* Accessibility */
+      :focus-visible {
+        outline: 2px solid #6366f1;
+        outline-offset: 2px;
+        border-radius: 8px;
+      }
+
       /* Reduced Motion */
       @media (prefers-reduced-motion: reduce) {
         * {
@@ -1160,51 +957,34 @@
           transition-duration: 0.01ms !important;
           scroll-behavior: auto !important;
         }
-
-        .gradientShift {
-          animation: none !important;
-        }
-      }
-
-      /* Print Optimizations */
-      @media print {
-        * {
-          box-shadow: none !important;
-          background: white !important;
-          color: black !important;
-        }
-
-        .mobile-menu, .glass-nav {
-          display: none !important;
-        }
       }
     </style>
 
     {% block extra_css %}{% endblock %}
 </head>
 
-<body class="min-h-screen flex flex-col bg-gradient-to-br text-secondary-800 custom-scrollbar pattern-dots">
+<body class="min-h-screen flex flex-col bg-gradient-to-br text-secondary-800">
     <!-- Enhanced Header -->
-    <header class="sticky top-0 z-50 w-full glass-nav transition-all duration-300 mobile-header"
-             x-data="{ scrolled: false }"
-             x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 20 })"
-             :class="{ 'shadow-soft-lg': scrolled }">
-        <div class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+    <header class="sticky top-0 z-50 w-full glass-nav transition-all duration-300"
+            x-data="{ scrolled: false }"
+            x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 20 })"
+            :class="{ 'shadow-soft-lg': scrolled }">
+        <div class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div class="flex items-center justify-between">
                 <!-- Enhanced Logo -->
                 <div class="flex items-center">
-                    <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center gap-2 group nav-link">
+                    <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center gap-3 group">
                         <div class="relative">
                             <div class="absolute inset-0 bg-primary-500 rounded-xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                            <div class="relative mobile-logo p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-soft group-hover:shadow-glow transition-all duration-300 group-hover:scale-105">
+                            <div class="relative p-2.5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-soft group-hover:shadow-glow transition-all duration-300 group-hover:scale-105">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                 </svg>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            <h1 class="mobile-logo-text text-lg font-bold text-gradient diary-font">DiaryVault</h1>
-                            <span class="mobile-brand-badge brand-badge">Beta</span>
+                            <h1 class="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent diary-font">DiaryVault</h1>
+                            <span class="brand-badge">Beta</span>
                         </div>
                     </a>
                 </div>
@@ -1245,33 +1025,24 @@
                 </nav>
                 {% endif %}
 
-
-                <!-- Enhanced Right Navigation -->
+                <!-- Right Section -->
                 <div class="flex items-center gap-3">
                     {% if user.is_authenticated %}
-                    <!-- Wallet Status Indicator -->
+                    <!-- Wallet Status -->
                     <div id="wallet-status" class="hidden wallet-status">
                         <span id="wallet-address">Not connected</span>
                         <button onclick="disconnectWallet()" class="text-red-500 text-sm ml-2 hover:text-red-700 transition-colors">Disconnect</button>
                     </div>
-                    {% else %}
-                    <!-- Auth Buttons - REMOVED -->
-                    <!-- 
-                    <div class="hidden md:flex gap-2 items-center">
-                        <button onclick="connectWalletAndCloseMenu()" class="btn-ghost px-3 py-1.5 rounded-lg text-sm font-medium">Connect Wallet</button>
-                        <button onclick="openWalletModalAndCloseMenu()" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium">Start Earning</button>
-                    </div>
-                    -->
                     {% endif %}
 
-                    <!-- Enhanced Menu Button -->
-                    <button id="menuToggleBtn" class="menu-toggle-btn relative hover:scale-105 transition-all duration-300 flex items-center justify-center">
+                    <!-- Modern Menu Toggle Button -->
+                    <button id="menuToggleBtn" class="menu-toggle-btn relative">
                         {% if user.is_authenticated and unread_notifications > 0 %}
-                        <div class="enhanced-notification-badge">
+                        <div class="notification-badge">
                             <span>{{ unread_notifications }}</span>
                         </div>
                         {% endif %}
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
@@ -1280,233 +1051,223 @@
         </div>
     </header>
 
-    <!-- Enhanced Mobile Menu -->
-    <div id="menuOverlay" class="menu-overlay"></div>
-    <div id="menuSheet" class="mobile-menu">
-        <!-- Pull Indicator -->
-        <div class="w-10 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-2"></div>
+    <!-- Modern Dropdown Menu Overlay -->
+    <div id="dropdownOverlay" class="dropdown-overlay"></div>
 
-        <!-- Enhanced Menu Header -->
-        <div class="px-6 pt-2 pb-4 flex justify-between items-center border-b border-gray-100">
-            <div class="flex items-center gap-3">
-                <div class="p-1.5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                </div>
-                <h2 class="font-bold text-lg text-gradient diary-font">DiaryVault</h2>
-            </div>
-            <button id="closeMenuBtn" class="p-2 hover:bg-gray-100 rounded-xl transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-
+    <!-- Modern Dropdown Menu -->
+    <div id="modernDropdown" class="modern-dropdown">
         {% if user.is_authenticated %}
-        <!-- Enhanced User Profile Section -->
-        <div class="px-6 pb-4">
-            <a href="{% url 'account_settings' %}" class="block menu-item">
-                <div class="flex items-center p-4 glass-card rounded-2xl border border-primary-100/50">
-                    <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+        <!-- User Profile Header -->
+        <div class="dropdown-header">
+            <div class="user-profile-section">
+                <div class="flex items-center gap-3">
+                    <div class="user-avatar">
                         {{ user.username|first|upper }}
                     </div>
-                    <div class="ml-4">
-                        <div class="font-semibold text-gray-800">{{ user.username }}</div>
-                        <div class="text-xs text-gray-500">{{ total_entries|default:'0' }} journal entries</div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-800 text-lg">{{ user.username }}</h3>
+                        <p class="text-sm text-gray-600">{{ total_entries|default:'0' }} journal entries</p>
                     </div>
-                    <div class="ml-auto">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    <a href="{% url 'account_settings' %}" class="p-2 hover:bg-white/50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                    </div>
+                    </a>
                 </div>
-            </a>
+            </div>
         </div>
 
-        <!-- Enhanced Quick Actions -->
-        <div class="px-6 pb-6">
-            <div class="grid grid-cols-2 gap-3">
-                <a href="{% url 'new_entry' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
-                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- Quick Actions -->
+        <div class="dropdown-section">
+            <div class="section-title">Quick Actions</div>
+            <div class="dropdown-quick-actions">
+                <a href="{% url 'new_entry' %}" class="quick-action-card">
+                    <div class="quick-action-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
                     </div>
-                    <span class="text-xs font-medium">New Entry</span>
+                    <span class="text-sm font-medium">New Entry</span>
                 </a>
-                <a href="{% url 'insights' %}" class="flex flex-col items-center p-3 glass-card rounded-2xl menu-item">
-                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center mb-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="{% url 'insights' %}" class="quick-action-card">
+                    <div class="quick-action-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                     </div>
-                    <span class="text-xs font-medium">Insights</span>
+                    <span class="text-sm font-medium">Insights</span>
                 </a>
             </div>
         </div>
 
-        <!-- Enhanced Main Menu -->
-        <div class="px-6 pb-6">
-            <h3 class="text-xs uppercase text-gray-500 font-semibold mb-3 px-2">Navigation</h3>
-
-            <div class="space-y-2">
-                <a href="{% url 'dashboard' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'dashboard' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                    {% if request.resolver_match.url_name == 'dashboard' %}<div class="active-pill"></div>{% endif %}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- Main Navigation -->
+        <div class="dropdown-section">
+            <div class="section-title">Navigation</div>
+            <div class="space-y-1">
+                <a href="{% url 'dashboard' %}" class="dropdown-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
                     </svg>
-                    <span class="font-medium">Dashboard</span>
+                    <span>Dashboard</span>
                 </a>
-
-                <a href="{% url 'library' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'library' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                    {% if request.resolver_match.url_name == 'library' %}<div class="active-pill"></div>{% endif %}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="{% url 'library' %}" class="dropdown-item {% if request.resolver_match.url_name == 'library' %}active{% endif %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
-                    <span class="font-medium">Collections</span>
+                    <span>Collections</span>
                 </a>
-
-                <a href="{% url 'insights' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'insights' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                    {% if request.resolver_match.url_name == 'insights' %}<div class="active-pill"></div>{% endif %}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="{% url 'new_entry' %}" class="dropdown-item {% if request.resolver_match.url_name == 'new_entry' %}active{% endif %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                    <span>Write Entry</span>
+                </a>
+                <a href="{% url 'insights' %}" class="dropdown-item {% if request.resolver_match.url_name == 'insights' %}active{% endif %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
-                    <span class="font-medium">Insights</span>
+                    <span>Insights</span>
                 </a>
             </div>
+        </div>
 
-            <h3 class="text-xs uppercase text-gray-500 font-semibold mt-6 mb-3 px-2">Settings</h3>
-
-            <div class="space-y-2">
-                <a href="{% url 'account_settings' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'account_settings' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                    {% if request.resolver_match.url_name == 'account_settings' %}<div class="active-pill"></div>{% endif %}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- Settings -->
+        <div class="dropdown-section">
+            <div class="section-title">Settings</div>
+            <div class="space-y-1">
+                <a href="{% url 'account_settings' %}" class="dropdown-item {% if request.resolver_match.url_name == 'account_settings' %}active{% endif %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <span class="font-medium">Account Settings</span>
+                    <span>Account Settings</span>
                 </a>
-
-                <a href="{% url 'preferences' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'preferences' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                    {% if request.resolver_match.url_name == 'preferences' %}<div class="active-pill"></div>{% endif %}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="{% url 'preferences' %}" class="dropdown-item {% if request.resolver_match.url_name == 'preferences' %}active{% endif %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                     </svg>
-                    <span class="font-medium">Journal Preferences</span>
+                    <span>Preferences</span>
                 </a>
-
-                <a href="{% url 'privacy_policy' %}" class="menu-category relative flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'privacy_policy' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent">
-                    {% if request.resolver_match.url_name == 'privacy_policy' %}<div class="active-pill"></div>{% endif %}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="{% url 'privacy_policy' %}" class="dropdown-item {% if request.resolver_match.url_name == 'privacy_policy' %}active{% endif %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                    <span class="font-medium">Privacy Policy</span>
+                    <span>Privacy Policy</span>
                 </a>
             </div>
+        </div>
 
-            <!-- Enhanced Logout Button -->
-            <div class="mt-8">
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="w-full py-4 px-4 glass-card hover:bg-red-50 text-red-600 rounded-2xl flex items-center justify-center transition-all duration-300 font-medium border border-red-100 hover:border-red-200 min-h-[44px]">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        <span>Logout</span>
-                    </button>
-                </form>
+        <!-- Logout -->
+        <div class="dropdown-section">
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item w-full text-left text-red-600 hover:text-red-700 hover:bg-red-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Logout</span>
+                </button>
+            </form>
+        </div>
+
+        {% else %}
+        <!-- Non-authenticated user menu -->
+        <div class="dropdown-header">
+            <div class="text-center">
+                <h3 class="text-lg font-bold text-gray-800 mb-1">Welcome to DiaryVault</h3>
+                <p class="text-sm text-gray-600">Your thoughts. Encrypted. Rewarded.</p>
             </div>
         </div>
-        {% else %}
-        <!-- Enhanced Menu for non-logged in users -->
-        <div class="px-6 pb-6">
-            <h3 class="text-xs uppercase text-gray-500 font-semibold mb-4 px-2">Your thoughts. Encrypted. Rewarded.</h3>
 
-            <div class="space-y-3 mb-8">
-                <a href="{% url 'account_signup' %}?feature=journal" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group menu-item">
-                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- Feature Highlights -->
+        <div class="dropdown-section">
+            <div class="section-title">Features</div>
+            <div class="space-y-2">
+                <a href="{% url 'account_signup' %}?feature=journal" class="dropdown-item">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
                     </div>
-                    <div class="flex-1">
-                        <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Private Journal</span>
-                        <span class="text-xs text-primary-600 block">Write without being tracked</span>
+                    <div>
+                        <div class="font-medium">Private Journal</div>
+                        <div class="text-xs text-gray-500">Write without being tracked</div>
                     </div>
-                    <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Try it</span>
                 </a>
-
-                <a href="{% url 'account_signup' %}?feature=collections" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group menu-item">
-                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                
+                <a href="{% url 'account_signup' %}?feature=collections" class="dropdown-item">
+                    <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                     </div>
-                    <div class="flex-1">
-                        <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Encrypted Collections</span>
-                        <span class="text-xs text-primary-600 block">Own your memories</span>
+                    <div>
+                        <div class="font-medium">Encrypted Collections</div>
+                        <div class="text-xs text-gray-500">Own your memories</div>
                     </div>
-                    <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Explore</span>
                 </a>
-
-                <a href="{% url 'account_signup' %}?feature=insights" class="flex items-center gap-4 p-4 glass-card rounded-2xl transition-all duration-300 hover:scale-[1.02] group menu-item">
-                    <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                
+                <a href="{% url 'account_signup' %}?feature=insights" class="dropdown-item">
+                    <div class="w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <div class="flex-1">
-                        <span class="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">Earn Rewards</span>
-                        <span class="text-xs text-primary-600 block">Get rewarded for writing</span>
+                    <div>
+                        <div class="font-medium">Earn Rewards</div>
+                        <div class="text-xs text-gray-500">Get rewarded for writing</div>
                     </div>
-                    <span class="text-xs bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full font-semibold">Earn</span>
                 </a>
             </div>
+        </div>
 
-            <!-- Privacy Policy Link -->
-            <div class="space-y-2 mb-8">
-                <a href="{% url 'privacy_policy' %}" class="flex items-center py-4 px-4 {% if request.resolver_match.url_name == 'privacy_policy' %}glass-card text-primary-600 border-primary-200{% else %}hover:bg-gray-50{% endif %} rounded-2xl border border-transparent menu-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- Privacy Link -->
+        <div class="dropdown-section">
+            <div class="space-y-1">
+                <a href="{% url 'privacy_policy' %}" class="dropdown-item {% if request.resolver_match.url_name == 'privacy_policy' %}active{% endif %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                    <span class="font-medium">Privacy Policy</span>
+                    <span>Privacy Policy</span>
                 </a>
             </div>
+        </div>
 
-            <!-- Enhanced Auth section -->
-            <div class="space-y-4">
-                <button onclick="connectWalletAndCloseMenu()" class="flex items-center justify-center gap-3 py-4 px-4 glass-card hover:bg-white/80 rounded-2xl transition-all duration-300 font-semibold border border-gray-200/50 hover:shadow-lg menu-item w-full min-h-[44px]">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- Auth Actions -->
+        <div class="dropdown-section">
+            <div class="space-y-3">
+                <button onclick="connectWalletAndCloseMenu()" class="w-full dropdown-item justify-center border border-primary-200 bg-white/50 hover:bg-white hover:border-primary-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                     <span>Connect Wallet</span>
                 </button>
 
-                <button onclick="openWalletModalAndCloseMenu()" class="flex items-center justify-center gap-3 py-4 px-4 btn-primary rounded-2xl transition-all duration-300 shadow-lg font-semibold hover:shadow-xl hover:-translate-y-1 active:translate-y-0 menu-item w-full min-h-[44px]">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button onclick="openWalletModalAndCloseMenu()" class="w-full btn-primary rounded-xl py-3 px-4 font-semibold shadow-lg hover:shadow-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>Start Earning</span>
+                    Start Earning
                 </button>
             </div>
+        </div>
 
-            <div class="mt-8 p-6 glass-card rounded-2xl border border-primary-100/50 shadow-lg">
+        <!-- Value Proposition -->
+        <div class="dropdown-section">
+            <div class="bg-gradient-to-r from-primary-50 to-primary-100 rounded-2xl p-4 border border-primary-200">
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="w-12 h-12 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center mx-auto mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                     </div>
                     <h4 class="font-bold text-gray-800 mb-2">Your Vault, Your Rules</h4>
-                    <p class="text-sm text-secondary-600 leading-relaxed">No emails. No tracking. No ads. Just your encrypted thoughts, rewarded.</p>
+                    <p class="text-sm text-gray-600 leading-relaxed">No emails. No tracking. No ads. Just your encrypted thoughts, rewarded.</p>
                 </div>
             </div>
         </div>
         {% endif %}
-
-        <!-- Extra space at bottom for safe area -->
-        <div class="h-8"></div>
     </div>
 
     <!-- Main Content -->
@@ -1517,7 +1278,6 @@
     </main>
 
     <!-- Compact Modern Footer -->
-<!-- Compact Modern Footer -->
     <footer class="mt-4 glass-nav border-t border-primary-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <!-- Mobile Layout -->
@@ -1529,7 +1289,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                     </div>
-                    <h3 class="font-bold text-sm text-gradient diary-font">DiaryVault</h3>
+                    <h3 class="font-bold text-sm bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent diary-font">DiaryVault</h3>
                     <span class="brand-badge scale-50">Beta</span>
                 </div>
                 
@@ -1557,7 +1317,7 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h3 class="font-bold text-sm text-gradient diary-font">DiaryVault</h3>
+                            <h3 class="font-bold text-sm bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent diary-font">DiaryVault</h3>
                             <span class="brand-badge scale-75">Beta</span>
                         </div>
                         <p class="text-xs text-secondary-500">© 2025 DiaryVault, Inc.</p>
@@ -1591,7 +1351,7 @@
         <!-- Notifications will be inserted here -->
     </div>
 
-    <!-- Clean Wallet JavaScript - No Console Logs or Alerts -->
+    <!-- Wallet Configuration -->
     <script>
         window.BASE_NETWORK_CONFIG = {
             chainId: 8453,
@@ -1602,6 +1362,7 @@
         };
     </script>
 
+    <!-- Wallet and Menu JavaScript -->
     <script>
     // Clean wallet state management
     window.walletState = {
@@ -1712,11 +1473,10 @@
                 
                 if (window.showToast) {
                     const shortAddress = `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`;
-                    // window.showToast(`Connected: ${shortAddress}`, 'success');
                     
                     if (chainIdNumber !== 8453) {
                         setTimeout(() => {
-                            // window.showToast('Please switch to Base network', 'warning');
+                            // Could add network switch prompt here
                         }, 1000);
                     }
                 }
@@ -1953,13 +1713,13 @@
         if (!container) return;
 
         const toast = document.createElement('div');
-        toast.className = `notification ${type} p-4 rounded-lg shadow-lg max-w-sm pointer-events-auto`;
+        toast.className = `notification p-4 rounded-lg shadow-lg max-w-sm pointer-events-auto`;
         
         const colors = {
-            success: 'bg-green-50 text-green-800 border-green-200',
-            error: 'bg-red-50 text-red-800 border-red-200',
-            warning: 'bg-yellow-50 text-yellow-800 border-yellow-200',
-            info: 'bg-blue-50 text-blue-800 border-blue-200'
+            success: 'bg-green-50 text-green-800 border border-green-200',
+            error: 'bg-red-50 text-red-800 border border-red-200',
+            warning: 'bg-yellow-50 text-yellow-800 border border-yellow-200',
+            info: 'bg-blue-50 text-blue-800 border border-blue-200'
         };
         
         toast.className += ` ${colors[type] || colors.info}`;
@@ -1982,6 +1742,90 @@
         }, 5000);
     };
 
+    // Modern Dropdown Menu System
+    function initializeModernDropdown() {
+        const menuToggle = document.getElementById('menuToggleBtn');
+        const dropdown = document.getElementById('modernDropdown');
+        const overlay = document.getElementById('dropdownOverlay');
+
+        let isOpen = false;
+
+        function openDropdown() {
+            isOpen = true;
+            dropdown.classList.add('open');
+            overlay.classList.add('active');
+            menuToggle.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Focus management for accessibility
+            dropdown.focus();
+        }
+
+        function closeDropdown() {
+            isOpen = false;
+            dropdown.classList.remove('open');
+            overlay.classList.remove('active');
+            menuToggle.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function toggleDropdown() {
+            if (isOpen) {
+                closeDropdown();
+            } else {
+                openDropdown();
+            }
+        }
+
+        // Event listeners
+        menuToggle?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleDropdown();
+        });
+
+        overlay?.addEventListener('click', closeDropdown);
+
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isOpen) {
+                closeDropdown();
+            }
+        });
+
+        // Auto-close when clicking dropdown items that are navigation links
+        const dropdownItems = document.querySelectorAll('.dropdown-item');
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                // Only auto-close for actual navigation links, not buttons or forms
+                if (item.tagName === 'A' && item.href && !item.href.includes('javascript:')) {
+                    closeDropdown();
+                }
+            });
+        });
+
+        // Enhanced wallet connection functions that auto-close dropdown
+        window.connectWalletAndCloseMenu = function(walletType = 'metamask', button = null) {
+            closeDropdown();
+            setTimeout(() => {
+                connectWallet(walletType, button);
+            }, 300);
+        };
+
+        window.openWalletModalAndCloseMenu = function() {
+            closeDropdown();
+            setTimeout(() => {
+                connectWallet();
+            }, 300);
+        };
+
+        // Handle clicks outside dropdown
+        document.addEventListener('click', (e) => {
+            if (isOpen && !dropdown.contains(e.target) && !menuToggle.contains(e.target)) {
+                closeDropdown();
+            }
+        });
+    }
+
     // Make functions globally available
     window.connectWallet = connectWallet;
     window.openWalletModal = connectWallet;
@@ -1997,66 +1841,8 @@
             initializeWallet();
         }, 1000);
         
-        initializeMenuSystem();
+        initializeModernDropdown();
     });
-
-    // Menu system
-    function initializeMenuSystem() {
-        const menuToggle = document.getElementById('menuToggleBtn');
-        const menuOverlay = document.getElementById('menuOverlay');
-        const menuSheet = document.getElementById('menuSheet');
-        const closeBtn = document.getElementById('closeMenuBtn');
-
-        function openMenu() {
-            menuOverlay.classList.add('active');
-            menuSheet.classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeMenu() {
-            menuOverlay.classList.remove('active');
-            menuSheet.classList.remove('open');
-            document.body.style.overflow = '';
-        }
-
-        // Enhanced wallet connection functions that auto-close menu
-        window.connectWalletAndCloseMenu = function(walletType = 'metamask', button = null) {
-            closeMenu();
-            // Small delay to ensure menu closes smoothly before showing wallet modal
-            setTimeout(() => {
-                connectWallet(walletType, button);
-            }, 300);
-        };
-
-        window.openWalletModalAndCloseMenu = function() {
-            closeMenu();
-            // Small delay to ensure menu closes smoothly before showing wallet modal
-            setTimeout(() => {
-                connectWallet();
-            }, 300);
-        };
-
-        menuToggle?.addEventListener('click', openMenu);
-        closeBtn?.addEventListener('click', closeMenu);
-        menuOverlay?.addEventListener('click', closeMenu);
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && menuSheet.classList.contains('open')) {
-                closeMenu();
-            }
-        });
-
-        // Auto-close menu when clicking on navigation links
-        const menuLinks = document.querySelectorAll('.menu-item, .menu-category');
-        menuLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                // Only auto-close for actual navigation links, not buttons
-                if (link.tagName === 'A' && link.href && !link.href.includes('javascript:')) {
-                    closeMenu();
-                }
-            });
-        });
-    }
     </script>
 
     {% block extra_js %}{% endblock %}
