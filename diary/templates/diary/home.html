@@ -918,6 +918,7 @@ function updateActionButtons(isConnected) {
 }
 
 // Enhanced save function for blockchain storage
+// Enhanced save function for blockchain storage with Web3 auth
 function saveToBlockchain() {
   const walletInfo = getWalletInfo();
   
@@ -955,18 +956,16 @@ function saveToBlockchain() {
     const csrftoken = getCsrfToken();
     const formData = new FormData();
     
-    // FIXED: Use the correct field names that match your Django view
     formData.append('title', titleText);
     formData.append('content', journalContent);
     formData.append('wallet_address', walletInfo.address);
     formData.append('chain_id', walletInfo.chainId);
-    formData.append('encrypted', 'true'); // Indicate this is an encrypted save
+    formData.append('encrypted', 'true');
 
     if (currentPhotoFile) {
-      formData.append('journal_photo', currentPhotoFile); // Match your view's field name
+      formData.append('journal_photo', currentPhotoFile);
     }
 
-    // FIXED: Use the correct endpoint from your urls.py
     fetch('/save-generated-entry/', {
       method: 'POST',
       headers: {
@@ -980,51 +979,86 @@ function saveToBlockchain() {
       }
       return response.json();
     })
-    .then(data => {
+    .then(async data => {
       if (data.success) {
-        // Calculate rewards (use server-provided rewards if available)
-        const rewards = data.rewards || (() => {
-          const wordCount = journalContent.split(' ').length;
-          const baseReward = Math.floor(wordCount / 10);
-          const walletBonus = walletInfo.isConnected ? 5 : 0;
-          return baseReward + walletBonus;
-        })();
+        const rewards = data.rewards || calculateRewards(journalContent, walletInfo.isConnected);
 
-        // Check if this is an anonymous save
-        if (data.is_anonymous) {
-          // Handle anonymous user response
+        // Check if this is an anonymous save (user not authenticated in Django)
+        if (data.is_anonymous || data.auth_required) {
+          // User has wallet but isn't authenticated in Django - do Web3 auth
           saveButton.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            Saved temporarily! Rewards: ${rewards} tokens
+            Authenticating with wallet...
           `;
           
-          if (window.showToast) {
-            window.showToast(data.message || 'Entry saved temporarily. Sign up to save permanently!', 'info');
-          }
-          
-          // Show signup/login prompt after a delay
-          setTimeout(() => {
+          try {
+            // Perform Web3 authentication
+            const authResult = await authenticateWithWallet(walletInfo.address);
+            
+            if (authResult.success) {
+              // Now retry saving the entry as authenticated user
+              saveButton.innerHTML = `
+                <svg class="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Saving authenticated entry...
+              `;
+              
+              // Retry the save request now that we're authenticated
+              const retryResponse = await fetch('/save-generated-entry/', {
+                method: 'POST',
+                headers: {
+                  'X-CSRFToken': csrftoken
+                },
+                body: formData
+              });
+              
+              const retryData = await retryResponse.json();
+              
+              if (retryData.success && !retryData.is_anonymous) {
+                // Success! Entry saved as authenticated user
+                saveButton.innerHTML = `
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Saved! Rewards earned: ${retryData.rewards || rewards} tokens
+                `;
+                
+                if (window.showToast) {
+                  window.showToast(`Entry saved! Earned ${retryData.rewards || rewards} tokens`, 'success');
+                }
+                
+                // Redirect to the saved entry
+                setTimeout(() => {
+                  if (retryData.redirect_url) {
+                    window.location.href = retryData.redirect_url;
+                  } else if (retryData.entry_id) {
+                    window.location.href = `/entry/${retryData.entry_id}/`;
+                  } else {
+                    window.location.href = '/dashboard/';
+                  }
+                }, 2000);
+              } else {
+                throw new Error('Failed to save after authentication');
+              }
+            } else {
+              throw new Error('Web3 authentication failed');
+            }
+          } catch (authError) {
+            console.error('Web3 auth error:', authError);
             saveButton.innerHTML = originalText;
             saveButton.disabled = false;
             
-            // Create a custom modal or use confirm
-            const message = 'Your entry has been saved temporarily. Would you like to sign up to save it permanently and earn real rewards?';
-            
-            if (confirm(message)) {
-              // Redirect to signup with journal feature
-              window.location.href = data.signup_url || '/signup/?feature=journal';
-            } else {
-              // Optionally show login option
-              if (confirm('Would you like to log in to an existing account?')) {
-                window.location.href = data.login_url || '/login/?save_after_login=true';
-              }
+            if (window.showToast) {
+              window.showToast('Authentication failed. Please try again.', 'error');
             }
-          }, 2000);
+          }
           
         } else {
-          // Handle authenticated user response
+          // Already authenticated - normal save success
           saveButton.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -1036,12 +1070,10 @@ function saveToBlockchain() {
             window.showToast(`Entry saved! Earned ${rewards} tokens`, 'success');
           }
 
-          // Only redirect for authenticated users with valid entry IDs
           setTimeout(() => {
             if (data.redirect_url) {
               window.location.href = data.redirect_url;
-            } else if (data.entry_id && !isNaN(data.entry_id)) {
-              // Only redirect if entry_id is a number (not UUID)
+            } else if (data.entry_id) {
               window.location.href = `/entry/${data.entry_id}/`;
             } else {
               window.location.href = '/dashboard/';
@@ -1049,26 +1081,10 @@ function saveToBlockchain() {
           }, 2000);
         }
       } else {
-        // Handle error response
         saveButton.innerHTML = originalText;
         saveButton.disabled = false;
-        
-        if (data.auth_required) {
-          // Handle authentication required error
-          if (window.showToast) {
-            window.showToast('Please sign in to save your entry', 'warning');
-          }
-          
-          setTimeout(() => {
-            if (confirm('You need to be logged in to save entries. Would you like to sign up?')) {
-              window.location.href = '/signup/?feature=journal';
-            }
-          }, 500);
-        } else {
-          // Handle other errors
-          if (window.showToast) {
-            window.showToast(data.error || 'Failed to save entry', 'error');
-          }
+        if (window.showToast) {
+          window.showToast(data.error || 'Failed to save entry', 'error');
         }
       }
     })
@@ -1080,6 +1096,80 @@ function saveToBlockchain() {
         window.showToast('Failed to save entry. Please try again.', 'error');
       }
     });
+  }
+}
+
+// Helper function to calculate rewards
+function calculateRewards(content, hasWallet) {
+  const wordCount = content.split(' ').length;
+  const baseReward = Math.floor(wordCount / 10);
+  const walletBonus = hasWallet ? 5 : 0;
+  return baseReward + walletBonus;
+}
+
+// Web3 authentication function
+async function authenticateWithWallet(walletAddress) {
+  try {
+    // Step 1: Request a nonce from the server
+    const nonceResponse = await fetch('/api/web3/nonce/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify({ wallet_address: walletAddress })
+    });
+    
+    if (!nonceResponse.ok) {
+      throw new Error('Failed to get nonce');
+    }
+    
+    const nonceData = await nonceResponse.json();
+    
+    // Step 2: Sign the message with the wallet
+    const message = nonceData.message;
+    const signature = await window.ethereum.request({
+      method: 'personal_sign',
+      params: [message, walletAddress]
+    });
+    
+    // Step 3: Send signature to server for authentication
+    const authResponse = await fetch('/api/web3/login/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify({
+        wallet_address: walletAddress,
+        signature: signature,
+        nonce: nonceData.nonce,
+        wallet_type: 'metamask', // or detect the actual wallet type
+        chain_id: parseInt(window.ethereum.chainId, 16)
+      })
+    });
+    
+    if (!authResponse.ok) {
+      throw new Error('Authentication failed');
+    }
+    
+    const authData = await authResponse.json();
+    
+    // Store auth token if provided
+    if (authData.token) {
+      localStorage.setItem('authToken', authData.token);
+    }
+    
+    // Update UI to show authenticated state
+    if (window.updateWalletConnectionStatus) {
+      window.updateWalletConnectionStatus(true, walletAddress);
+    }
+    
+    return { success: true, data: authData };
+    
+  } catch (error) {
+    console.error('Web3 authentication error:', error);
+    return { success: false, error: error.message };
   }
 }
 
