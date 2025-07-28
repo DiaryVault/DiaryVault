@@ -145,7 +145,7 @@ def regenerate_summary_ajax(request, entry_id):
 
 @require_POST
 def save_generated_entry(request):
-    """Save a generated journal entry to the database"""
+    """Save a generated journal entry - supports both authenticated and anonymous users"""
     try:
         # Check content type to determine how to process the request
         if request.content_type and 'multipart/form-data' in request.content_type:
@@ -154,94 +154,135 @@ def save_generated_entry(request):
             content = request.POST.get('content')
             mood = request.POST.get('mood')
             tags_json = request.POST.get('tags', '[]')
-            photo = request.FILES.get('photo')
+            photo = request.FILES.get('journal_photo')  # Match the field name from your form
+            
+            # Web3 wallet data
+            wallet_address = request.POST.get('wallet_address')
+            chain_id = request.POST.get('chain_id')
+            encrypted = request.POST.get('encrypted', 'false') == 'true'
 
             # Parse tags from JSON string
             try:
                 tags = json.loads(tags_json)
             except json.JSONDecodeError:
                 tags = []
-
-            # Store in session
-            pending_entry = {
-                'title': title,
-                'content': content,
-                'mood': mood,
-                'tags': tags
-            }
-            # We can't store file objects in session, so just note if there was a photo
-            if photo:
-                pending_entry['had_photo'] = True
         else:
-            # Handle JSON data (old method)
+            # Handle JSON data
             data = json.loads(request.body)
             title = data.get('title')
             content = data.get('content')
             mood = data.get('mood')
             tags = data.get('tags', [])
             photo = None
+            
+            # Web3 wallet data
+            wallet_address = data.get('wallet_address')
+            chain_id = data.get('chain_id')
+            encrypted = data.get('encrypted', False)
 
-            # Store in session
-            pending_entry = {
-                'title': title,
-                'content': content,
-                'mood': mood,
-                'tags': tags
-            }
-
-        # Store in session regardless of authentication status
-        request.session['pending_entry'] = pending_entry
-
-        if not request.user.is_authenticated:
-            return JsonResponse({
-                'success': False,
-                'login_required': True,
-                'message': 'Please log in to save your entry'
-            }, status=401)
-
-        # User is authenticated, proceed with saving
+        # Validate required fields
         if not title or not content:
             return JsonResponse({'success': False, 'error': 'Missing title or content'}, status=400)
 
-        # Create the new entry
-        entry = Entry.objects.create(
-            user=request.user,
-            title=title,
-            content=content,
-            mood=mood
-        )
-
-        # Save the photo if provided
-        if photo:
-            from ..models import EntryPhoto
-            entry_photo = EntryPhoto.objects.create(
-                entry=entry,
-                photo=photo,
-                caption="Journal photo"
+        # Check if user is authenticated
+        if request.user.is_authenticated:
+            # Create entry for authenticated user
+            entry = Entry.objects.create(
+                user=request.user,
+                title=title,
+                content=content,
+                mood=mood
             )
 
-        # Add tags if provided
-        if not tags and content:
-            # Auto-generate tags if none were provided
-            tags = auto_generate_tags(content, mood)
+            # Save the photo if provided
+            if photo:
+                try:
+                    from ..models import EntryPhoto
+                    entry_photo = EntryPhoto.objects.create(
+                        entry=entry,
+                        photo=photo,
+                        caption="Journal photo"
+                    )
+                    logger.info(f"Photo saved for entry {entry.id}")
+                except Exception as e:
+                    logger.error(f"Failed to save photo: {e}")
 
-        if tags:
-            for tag_name in tags:
-                tag, created = Tag.objects.get_or_create(
-                    name=tag_name.lower().strip(),
-                    user=request.user
-                )
-                entry.tags.add(tag)
+            # Add tags if provided
+            if not tags and content:
+                # Auto-generate tags if none were provided
+                tags = auto_generate_tags(content, mood)
 
-        # Clear the pending entry from session
-        if 'pending_entry' in request.session:
-            del request.session['pending_entry']
+            if tags:
+                for tag_name in tags:
+                    tag, created = Tag.objects.get_or_create(
+                        name=tag_name.lower().strip(),
+                        user=request.user
+                    )
+                    entry.tags.add(tag)
 
-        return JsonResponse({
-            'success': True,
-            'entry_id': entry.id,
-            'message': 'Entry saved successfully'
-        })
+            # Calculate rewards for authenticated users with wallet
+            word_count = len(content.split())
+            base_reward = word_count // 10  # 1 token per 10 words
+            wallet_bonus = 5 if wallet_address else 0
+            total_rewards = base_reward + wallet_bonus
+
+            # Clear any pending entry from session
+            if 'pending_entry' in request.session:
+                del request.session['pending_entry']
+
+            return JsonResponse({
+                'success': True,
+                'entry_id': entry.id,
+                'rewards': total_rewards,
+                'redirect_url': f'/entry/{entry.id}/',
+                'message': 'Entry saved successfully!'
+            })
+        else:
+            # For anonymous users, save to session
+            import uuid
+            
+            # Generate a temporary ID
+            temp_id = str(uuid.uuid4())
+            
+            # Create session entry data
+            session_entry = {
+                'id': temp_id,
+                'title': title,
+                'content': content,
+                'mood': mood,
+                'tags': tags,
+                'wallet_address': wallet_address,
+                'chain_id': chain_id,
+                'created_at': timezone.now().isoformat(),
+                'is_encrypted': encrypted,
+                'had_photo': photo is not None
+            }
+            
+            # Store in session
+            if 'anonymous_entries' not in request.session:
+                request.session['anonymous_entries'] = []
+            
+            request.session['anonymous_entries'].append(session_entry)
+            request.session['pending_entry'] = session_entry  # Also store as pending for login
+            request.session.modified = True
+            
+            # Calculate mock rewards
+            word_count = len(content.split())
+            base_reward = word_count // 10
+            wallet_bonus = 5 if wallet_address else 0
+            total_rewards = base_reward + wallet_bonus
+            
+            return JsonResponse({
+                'success': True,
+                'entry_id': temp_id,
+                'rewards': total_rewards,
+                'is_anonymous': True,
+                'message': 'Entry saved temporarily. Sign up to save permanently and earn real rewards!',
+                'redirect_url': None,  # Don't redirect for anonymous users
+                'auth_required': True,
+                'login_url': '/login/?save_after_login=true',
+                'signup_url': '/signup/?feature=journal'
+            })
 
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
@@ -250,7 +291,7 @@ def save_generated_entry(request):
         return JsonResponse({
             'success': False,
             'error': 'Server error while saving entry',
-            'details': str(e)
+            'details': str(e) if settings.DEBUG else 'Please try again'
         }, status=500)
 
 @require_POST
