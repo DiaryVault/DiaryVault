@@ -1187,13 +1187,16 @@ function saveToBlockchain() {
       return response.json();
     })
     .then(data => {
-      console.log('Response data:', data);
+      console.log('Full response data:', data);
+      console.log('Is anonymous?', data.is_anonymous);
+      console.log('Redirect URL:', data.redirect_url);
+      console.log('Success?', data.success);
       
       if (data.success) {
         const rewards = data.rewards || calculateRewards(journalContent, walletInfo.isConnected);
 
         // Check if this is an anonymous save
-        if (data.is_anonymous) {
+        if (data.is_anonymous === true) {
           // For anonymous users, show message and prompt for signup
           saveButton.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1215,6 +1218,8 @@ function saveToBlockchain() {
           
         } else {
           // Authenticated user - normal save success
+          console.log('Authenticated save - preparing redirect');
+          
           saveButton.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -1223,20 +1228,20 @@ function saveToBlockchain() {
           `;
           
           if (window.showToast) {
-            window.showToast(`Entry saved! You earned ${rewards} tokens`, 'success');
+            window.showToast(`Entry saved! You earned ${rewards} tokens. Redirecting...`, 'success');
           }
 
           // Clear any pending entry data
           sessionStorage.removeItem('pending_entry');
 
-          // Redirect to dashboard after showing success message
+          // Determine redirect URL
+          const redirectUrl = data.redirect_url || '/dashboard/?entry_saved=true';
+          console.log('Will redirect to:', redirectUrl);
+
+          // Redirect after a short delay to show success message
           setTimeout(() => {
-            if (data.redirect_url) {
-              window.location.href = data.redirect_url;
-            } else {
-              // Fallback to dashboard
-              window.location.href = '/dashboard/?entry_saved=true';
-            }
+            console.log('Executing redirect now to:', redirectUrl);
+            window.location.href = redirectUrl;
           }, 1500);
         }
       } else {
