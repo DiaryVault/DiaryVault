@@ -274,11 +274,24 @@ def save_generated_entry(request):
                 'had_photo': photo is not None
             }
             
-            # Store in session
+            # FIX: Handle both list and dict formats for anonymous_entries
             if 'anonymous_entries' not in request.session:
-                request.session['anonymous_entries'] = []
+                request.session['anonymous_entries'] = {}  # Use dict format
             
-            request.session['anonymous_entries'].append(session_entry)
+            # Handle existing data that might be in list format
+            existing_entries = request.session.get('anonymous_entries', {})
+            
+            if isinstance(existing_entries, list):
+                # Convert list to dict
+                new_entries = {}
+                for idx, entry in enumerate(existing_entries):
+                    entry_id = entry.get('id', str(uuid.uuid4()))
+                    new_entries[entry_id] = entry
+                request.session['anonymous_entries'] = new_entries
+                existing_entries = new_entries
+            
+            # Now we can safely add to the dict
+            request.session['anonymous_entries'][temp_id] = session_entry
             request.session['pending_entry'] = session_entry  # Also store as pending for login
             request.session.modified = True
             
