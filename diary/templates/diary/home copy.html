@@ -1,0 +1,1848 @@
+{% extends "base.html" %}
+
+{% block title %}DiaryVault{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* CRITICAL: Remove all scrollbar conflicts and use base.html scrolling only */
+  
+  #journalInput {
+    resize: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+    outline: none !important;
+    min-height: 150px;
+    box-sizing: border-box !important;
+    overflow-wrap: break-word;
+    /* REMOVED: overflow and scrollbar styles - let base.html handle it */
+  }
+
+  #journalContainer {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease;
+    border-color: rgba(99, 102, 241, 0.3);
+    position: relative;
+    /* REMOVED: overflow styles */
+  }
+
+  #journalContainer:focus-within {
+    border-color: rgba(99, 102, 241, 0.8) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+    background-color: white;
+  }
+
+  /* CRITICAL: Main content works with base.html scrolling ONLY */
+  #main-content {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    /* REMOVED: overflow, max-width constraints that conflict with base.html */
+  }
+
+  /* Core branding elements */
+  .diary-font {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+  }
+
+  .handwritten {
+    font-family: 'Satisfy', cursive;
+    letter-spacing: 0.01em;
+    line-height: 1.7;
+  }
+
+  /* Enhanced animations - OPTIMIZED with animation delays */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px) translateZ(0); }
+    50% { transform: translateY(-8px) translateZ(0); }
+    100% { transform: translateY(0px) translateZ(0); }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease forwards;
+    will-change: transform, opacity;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.4s ease forwards;
+    will-change: transform, opacity;
+  }
+
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  /* OPTIMIZED: Animation delay classes instead of inline styles */
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+  .animation-delay-600 { animation-delay: 600ms; }
+  .animation-delay-700 { animation-delay: 700ms; }
+  .animation-delay-2000 { animation-delay: 2s; }
+  .animation-delay-4000 { animation-delay: 4s; }
+
+  /* Enhanced shadows and hover effects */
+  .btn-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateZ(0);
+  }
+
+  .btn-gradient:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    transform: translateY(-2px) translateZ(0);
+    box-shadow: 0 8px 20px -5px rgba(99, 102, 241, 0.4);
+  }
+
+  .card-hover {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: translateZ(0);
+  }
+
+  .card-hover:hover {
+    transform: translateY(-4px) translateZ(0);
+    box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Blob animation */
+  @keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1) translateZ(0); }
+    33% { transform: translate(15px, -8px) scale(1.05) translateZ(0); }
+    66% { transform: translate(-8px, 8px) scale(0.95) translateZ(0); }
+    100% { transform: translate(0px, 0px) scale(1) translateZ(0); }
+  }
+
+  .animate-blob {
+    animation: blob 8s infinite;
+    will-change: transform;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
+  /* Enhanced gradients */
+  .gradient-bg {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  }
+
+  /* Removed unused chat bubble styles */
+
+  /* Loading spinner improvements */
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1.3);
+      opacity: 0;
+    }
+  }
+
+  .loading-pulse-ring::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: rgba(99, 102, 241, 0.3);
+    animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+
+  /* MOBILE OPTIMIZATIONS - No scrollbar conflicts with base.html */
+  @media (max-width: 640px) {
+    #main-content {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+      /* REMOVED: max-width constraint */
+    }
+
+    /* Ensure proper input sizing - no scrollbar conflicts */
+    input, textarea, select {
+      font-size: 16px !important; /* Prevent zoom on iOS */
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+      max-width: 100%;
+      box-sizing: border-box;
+      /* REMOVED: overflow styles */
+    }
+
+    .card-hover {
+      margin-bottom: 1rem;
+    }
+
+    .suggestions-pill {
+      min-height: 36px;
+      padding: 0.4rem 0.8rem;
+    }
+
+    .testimonial-bubble {
+      margin-top: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Better mobile textarea handling - CRITICAL: No overflow/scrollbar styles */
+    #journalContainer {
+      min-height: 120px;
+      max-height: 300px;
+      width: 100%;
+      max-width: 100%;
+      /* REMOVED: overflow styles that conflict with base.html */
+    }
+
+    #journalInput {
+      max-height: 280px;
+      width: 100%;
+      max-width: 100%;
+      /* REMOVED: overflow styles */
+    }
+
+    button,
+    .suggestions-pill,
+    input[type="checkbox"] + label,
+    .card-hover,
+    .btn-gradient {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    .mobile-friendly-padding {
+      padding: 0.75rem !important;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+  }
+
+  /* Animation for loading dots */
+  .loading-dots:after {
+    content: '.';
+    animation: dots 1.5s steps(5, end) infinite;
+  }
+
+  @keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60% { content: '...'; }
+    80%, 100% { content: ''; }
+  }
+
+  /* Custom class for focused state */
+  #journalContainer.input-focused {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+  }
+
+  /* Force outline removal for all browsers */
+  #journalInput:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+  }
+
+  /* Ensure proper padding inside the container */
+  #journalContainer > * {
+    box-sizing: border-box;
+  }
+
+  /* Fix for the photo preview container to maintain proper border-radius */
+  #photoPreviewContainer {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+  }
+
+  /* Toast notification system */
+  .feedback-toast {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateX(100%) translateZ(0);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 18rem;
+    will-change: transform, opacity;
+  }
+
+  .feedback-toast.show {
+    transform: translateX(0) translateZ(0);
+    opacity: 1;
+  }
+
+  .feedback-toast.success {
+    background-color: #10b981;
+    color: white;
+  }
+
+  .feedback-toast.error {
+    background-color: #ef4444;
+    color: white;
+  }
+
+  .feedback-toast.info {
+    background-color: #6366f1;
+    color: white;
+  }
+
+  .feedback-toast.warning {
+    background-color: #f59e0b;
+    color: white;
+  }
+
+  /* CRITICAL: Remove any custom scrollbar styles - let base.html handle everything */
+  /* Performance optimizations - no scrollbar conflicts */
+  .animate-fade-in,
+  .animate-scale-in,
+  .animate-float,
+  .animate-blob {
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* Wallet connection status styling */
+  .wallet-connection-prompt {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .wallet-benefits {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), rgba(16, 185, 129, 0.05));
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 1rem;
+    padding: 1rem;
+  }
+
+  /* Connected wallet indicator */
+  .connected-wallet-badge {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1));
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #15803d;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .connected-wallet-badge::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Skip link for accessibility -->
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-secondary-600 focus:outline-offset-0">Skip to main content</a>
+
+<!-- CRITICAL: Simplified main container that works with base.html scrolling -->
+<div id="main-content" class="max-w-4xl w-full mx-auto relative">
+  <!-- Enhanced decorative elements - REDUCED for performance -->
+  <div class="hidden sm:block absolute -top-10 -left-16 h-48 w-48 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob"></div>
+  <div class="hidden sm:block absolute -bottom-32 -right-16 h-48 w-48 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob animation-delay-2000"></div>
+  <div class="absolute top-1/3 left-1/3 h-16 w-16 sm:h-20 sm:w-20 bg-amber-300 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-4000"></div>
+
+  <!-- UPDATED: Wallet-first hero section -->
+  <div class="text-center mb-6 relative z-10">
+    <div class="inline-block mb-3 animate-pulse">
+      <span class="px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-xs font-semibold text-primary-600 shadow-sm border border-primary-200/50 flex items-center gap-2 w-fit mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        {{ current_date|default:"Today" }} • Wallet-Secured
+      </span>
+    </div>
+    
+    <!-- Main value proposition -->
+    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 diary-font mb-4 animate-fade-in">
+      <!-- Mobile: Stacked -->
+      <span class="block lg:hidden">
+        <span class="block">Your thoughts.</span>
+        <span class="block text-primary-600">Encrypted.</span>
+        <span class="block text-gradient bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">Rewarded.</span>
+      </span>
+      
+      <!-- Laptop/Desktop: One line -->
+      <span class="hidden lg:block">
+        <span class="text-gray-900">Your thoughts. </span><span class="text-primary-600">Encrypted. </span><span class="text-gradient bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">Rewarded.</span>
+      </span>
+    </h1>
+    
+    <p class="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-3 animate-fade-in animation-delay-300 leading-relaxed">
+      Connect your wallet. Write privately. Earn rewards.
+    </p>
+    
+    <p class="text-sm text-gray-500 max-w-lg mx-auto animate-fade-in animation-delay-500 flex items-center justify-center gap-4">
+      <span class="flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        No emails
+      </span>
+      <span class="flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        No tracking
+      </span>
+      <span class="flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        Earn tokens
+      </span>
+    </p>
+  </div>
+
+  <!-- Wallet Connection Status Section -->
+  <div id="walletStatusSection" class="mb-6 animate-fade-in">
+    <!-- Not Connected State (Default) -->
+    <div id="walletNotConnected" class="wallet-connection-prompt">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex-1">
+          <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Connect Your Wallet to Get Started
+          </h3>
+          <p class="text-sm text-gray-600 mb-3">Connect your crypto wallet to enable full encryption and start earning rewards for journaling.</p>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full">✓ Full encryption</span>
+            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full">✓ Earn rewards</span>
+            <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full">✓ Own your data</span>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <button onclick="connectWallet()" class="btn-gradient text-white px-6 py-3 rounded-full font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Connect Wallet
+          </button>
+          <button onclick="showWalletOptions()" class="btn-secondary border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-3 rounded-full text-sm font-medium flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            What's a wallet?
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connected State (Initially Hidden) -->
+    <div id="walletConnected" class="wallet-benefits hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex-1">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="connected-wallet-badge">
+              Connected: <span id="connectedWalletAddress">0x1234...5678</span>
+            </span>
+            <span class="text-xs text-gray-500" id="networkStatus">Base Network</span>
+          </div>
+          <p class="text-sm text-gray-600">Your wallet is connected! Your journal entries are now fully encrypted and you'll earn rewards for writing.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="switchToBaseNetwork()" id="switchNetworkBtn" class="hidden btn-secondary border border-amber-200 text-amber-700 hover:bg-amber-50 px-4 py-2 rounded-full text-sm font-medium">
+            Switch to Base
+          </button>
+          <button onclick="disconnectWallet()" class="btn-ghost text-gray-600 hover:text-gray-800 px-4 py-2 rounded-full text-sm">
+            Disconnect
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Removed unused chat area section -->
+
+  <!-- CRITICAL: Main input form - uses base.html scrolling only -->
+  <form id="demoForm" class="w-full relative z-10 animate-scale-in" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl border border-white transition-all hover:shadow-2xl card-hover">
+      <div class="p-3 sm:p-6">
+        <!-- Header section with wallet-aware messaging -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+          <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            <span id="writeHeaderText">Write in peace</span>
+          </h3>
+          <div class="text-xs font-medium bg-gradient-to-r from-primary-50 to-purple-50 px-3 py-1 rounded-full text-primary-700 flex items-center gap-1 shadow-inner w-fit border border-primary-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span id="charCount">0</span>
+            <span id="encryptionStatus">chars • Connect wallet for full encryption</span>
+          </div>
+        </div>
+
+        <!-- CRITICAL FIX: Enhanced integrated input container - NO SCROLLBAR CONFLICTS -->
+        <div id="journalContainer" class="relative border border-gray-200 rounded-xl focus-within:border-secondary-400 transition bg-gray-50/50 min-h-[120px] sm:min-h-[140px] shadow-inner">
+          <!-- CRITICAL: Input textarea with NO overflow/scroll styles -->
+          <textarea
+            id="journalInput"
+            name="journal_content"
+            class="input-area w-full p-3 sm:p-4 border-0 focus:ring-0 focus:outline-none diary-font bg-transparent min-h-[120px] sm:min-h-[140px] resize-none"
+            placeholder="What's on your mind? Connect your wallet for full encryption and rewards, or write anonymously to try it out..."
+            oninput="countChars()"
+            data-dropzone="true"
+            aria-label="Journal content"
+            autocomplete="off"
+            spellcheck="true"></textarea>
+
+          <!-- Photo preview container -->
+          <div id="photoPreviewContainer" class="hidden p-3 border-t border-gray-200 bg-white/80">
+            <div class="flex items-center gap-3">
+              <div class="relative inline-block group">
+                <img id="photoPreview" class="h-20 w-20 sm:h-24 sm:w-24 object-cover rounded-lg border-2 border-secondary-200 shadow-sm" src="" alt="Your photo">
+                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-lg transition-colors flex items-center justify-center">
+                  <button type="button" id="removePhotoBtn" class="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md border border-gray-200 opacity-100 hover:bg-red-50 transition-colors"
+                    onclick="removePhoto()" title="Remove photo" aria-label="Remove photo">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="text-sm text-gray-600">
+                <div class="font-medium">Photo added</div>
+                <div class="text-xs" id="photoName">image.jpg</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enhanced tools container -->
+          <div class="absolute bottom-2 right-3 flex items-center gap-2">
+            <div class="relative group">
+              <input id="journalPhoto" name="journal_photo" type="file" accept="image/*" class="hidden" onchange="previewPhoto(event)" aria-label="Add a photo to your journal">
+              <label for="journalPhoto" class="cursor-pointer p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center" title="Add a photo">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 group-hover:text-secondary-500 transition-colors" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                </svg>
+              </label>
+            </div>
+          </div>
+
+          <!-- Enhanced drop zone indicator -->
+          <div id="dropZoneIndicator" class="hidden absolute inset-0 bg-secondary-50 border-2 border-dashed border-secondary-400 rounded-xl flex items-center justify-center pointer-events-none z-10 opacity-95">
+            <div class="text-center p-4 scale-in">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-secondary-400 mx-auto mb-2 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p class="text-secondary-600 font-medium">Drop your photo here</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enhanced privacy messaging for wallet users -->
+        <div class="mt-2 text-xs text-gray-500 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <span id="privacyMessage">Connect your wallet for full encryption and rewards. You can also drag & drop a photo directly.</span>
+        </div>
+
+        <!-- Enhanced suggestions section with wallet-aware prompts -->
+        <div class="mt-3 sm:mt-4">
+          <div class="text-xs font-medium text-gray-600 mb-2 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            <span>Quick prompts to get started:</span>
+          </div>
+          <div class="flex flex-wrap gap-1 sm:gap-2">
+            <button type="button" onclick="addSuggestion('Today I\'m feeling')" class="suggestions-pill bg-primary-50 hover:bg-primary-100 text-primary-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-medium transition shadow-sm border border-primary-200/50 min-h-[32px] sm:min-h-[40px] mb-1 hover:scale-105 hover:shadow animate-fade-in animation-delay-100">Today I'm feeling</button>
+            <button type="button" onclick="addSuggestion('I accomplished')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-emerald-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in animation-delay-200">I accomplished</button>
+            <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-indigo-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in animation-delay-300">I learned that</button>
+            <button type="button" onclick="addSuggestion('I\'m grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in animation-delay-400">I'm grateful for</button>
+            <button type="button" onclick="addSuggestion('A private thought:')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in animation-delay-500">A private thought</button>
+          </div>
+        </div>
+
+        <!-- Enhanced personalization toggle with wallet awareness -->
+        <div class="mt-3 sm:mt-4 border-t border-gray-200 pt-3 sm:pt-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+            <div class="flex items-center">
+              <input type="checkbox" id="personalizationToggle" class="h-4 w-4 text-secondary-600 focus:ring-secondary-400 border-gray-300 rounded">
+              <label for="personalizationToggle" class="ml-2 text-sm font-medium text-gray-700 flex flex-wrap items-center">
+                <span>Use AI for insights & enhancement</span>
+                <span class="ml-1 text-xs text-primary-600" id="aiPrivacyNote">(connect wallet for rewards)</span>
+              </label>
+            </div>
+
+            <button type="button" onclick="connectWallet()" id="connectWalletCTA" class="text-xs text-primary-600 hover:underline flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Connect wallet for rewards & encryption
+            </button>
+          </div>
+
+          <!-- Enhanced Personalization Options -->
+          <div id="personalizationOptions" class="hidden bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-100">
+            <div id="walletConnectedOptions" class="hidden">
+              <div class="text-sm text-gray-700 mb-2 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                Your preferences are encrypted and stored on-chain:
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-600">
+                <div class="flex items-center">
+                  <span class="font-medium">Writing Style:</span>
+                  <span class="capitalize ml-1 px-2 py-0.5 bg-primary-50 rounded text-primary-700">Personal</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="font-medium">Rewards:</span>
+                  <span class="capitalize ml-1 px-2 py-0.5 bg-green-50 rounded text-green-700">Enabled</span>
+                </div>
+              </div>
+            </div>
+            
+            <div id="walletNotConnectedOptions">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="text-sm text-gray-700">
+                  <p>Connect your wallet to unlock:</p>
+                  <ul class="mt-1 text-xs text-gray-600 space-y-1">
+                    <li>• Full end-to-end encryption</li>
+                    <li>• Personalized AI preferences</li>
+                    <li>• Token rewards for writing</li>
+                    <li>• Decentralized storage</li>
+                  </ul>
+                </div>
+                <div class="flex gap-2">
+                  <button type="button" onclick="connectWallet()" class="text-xs bg-primary-600 hover:bg-primary-700 text-white px-3 py-1 rounded-full flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Connect Now
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced bottom action area with wallet-aware messaging -->
+      <div class="bg-gradient-to-r from-primary-50 to-purple-50 px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-t border-white">
+        <div class="text-xs text-gray-600 flex items-center gap-2">
+          <span class="h-6 w-6 bg-white rounded-full flex items-center justify-center shadow-sm border border-primary-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </span>
+          <span id="bottomPrivacyMessage">Connect wallet for full encryption & rewards • Try it anonymously first</span>
+        </div>
+        <div class="action-container">
+          <button type="button" id="demoButton" onclick="generateDemo()" class="btn-gradient text-white px-5 py-3 rounded-full text-sm font-medium flex items-center justify-center gap-2 shadow-md w-full sm:w-auto hover:shadow-lg transition-all">
+            <span>Transform into Journal</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- Enhanced loading indicator -->
+  <div id="loadingIndicator" class="mt-6 sm:mt-12 hidden animate-fade-in">
+    <div class="flex flex-col items-center justify-center p-4 sm:p-8 bg-white/70 backdrop-blur-sm rounded-xl shadow-lg border border-white">
+      <div class="relative">
+        <div class="w-12 sm:w-16 h-12 sm:h-16 border-4 border-secondary-200 border-t-secondary-600 rounded-full animate-spin mb-4"></div>
+        <div class="absolute inset-0 bg-secondary-100 rounded-full scale-125 animate-ping opacity-30"></div>
+      </div>
+      <p class="text-center text-gray-600 handwritten text-lg sm:text-xl">Crafting your journal entry<span class="loading-dots"></span></p>
+      <p class="text-center text-gray-500 text-sm mt-2">This takes just a moment</p>
+    </div>
+  </div>
+
+  <!-- Enhanced results preview with wallet-aware save options -->
+  <div id="resultPreview" class="mt-6 sm:mt-12 bg-white rounded-xl sm:rounded-2xl shadow-xl border border-white card-hover hidden animate-scale-in">
+    <div class="p-4 sm:p-6 border-b border-gray-100 flex items-center justify-between">
+      <div>
+        <h3 class="font-bold text-gray-800 text-base sm:text-lg mb-1 diary-font">Your Journal Entry</h3>
+        <p class="text-gray-600 text-xs">Generated based on your day</p>
+      </div>
+      <div class="h-9 w-9 bg-gray-50 rounded-full flex items-center justify-center text-secondary-600 shadow-sm border border-gray-100 hover:bg-gray-100 transition-colors cursor-pointer" onclick="editJournalEntry()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        </svg>
+      </div>
+    </div>
+
+    <div class="p-4 sm:p-6 bg-gradient-to-br from-white to-gray-50">
+      <!-- Enhanced journal photo display -->
+      <div id="journalPhotoDisplay" class="hidden mb-4 sm:mb-6">
+        <div class="relative rounded-lg shadow-md border border-gray-100 bg-white group">
+          <img id="journalPhotoImage" class="w-full object-cover max-h-80" src="" alt="Journal photo">
+          <div class="absolute bottom-0 right-0 p-2">
+            <div class="bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-2 py-1 rounded-full shadow-sm">
+              {{ current_date|default:"Today" }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="journalEntry" class="handwritten text-lg sm:text-xl text-gray-800 leading-relaxed">
+        <!-- This will be populated with the demo AI-generated entry via JavaScript -->
+      </div>
+    </div>
+
+    <!-- Enhanced result preview section with wallet-aware actions -->
+    <div class="bg-gradient-to-r from-secondary-50 to-primary-50 p-4 sm:p-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-t border-white">
+      <div class="text-gray-600 text-sm diary-font">
+        <span class="text-secondary-600 font-medium">Title:</span>
+        <span id="entryTitle">My Day - {{ current_date|default:"Today" }}</span>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" onclick="editJournalEntry()" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm transition shadow-sm hover:shadow flex items-center gap-1 w-full sm:w-auto justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+          Edit
+        </button>
+        <button type="button" onclick="restartDemo()" class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm transition shadow-sm hover:shadow flex items-center gap-1 w-full sm:w-auto justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Try Again
+        </button>
+        
+        <!-- Wallet-aware save buttons -->
+        <div id="walletConnectedActions" class="hidden flex gap-2">
+          <button type="button" onclick="saveToBlockchain()" class="btn-gradient text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-1 w-full sm:w-auto justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Save & Earn Rewards
+          </button>
+        </div>
+        
+        <div id="walletNotConnectedActions" class="flex gap-2">
+          <button type="button" onclick="connectWallet()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-1 w-full sm:w-auto justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Connect to Save & Earn
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced JavaScript with wallet integration -->
+<script>
+// All the existing JavaScript from your original file...
+// [Previous JavaScript code remains the same until the wallet integration parts]
+
+// Enhanced wallet integration for home page
+document.addEventListener('DOMContentLoaded', function() {
+  journalCache.init();
+  initializeJournalForm();
+  initializeAnimations();
+  setupOptimizedScrollHandling(); // OPTIMIZED: Add throttled scroll handling
+  setupEnhancedUX();
+  initializeWalletAwareHome();
+});
+
+function initializeWalletAwareHome() {
+  // Listen for wallet connection changes
+  window.addEventListener('walletConnectionChanged', function(event) {
+    const { isConnected, address, chainId } = event.detail;
+    updateHomePageForWallet(isConnected, address, chainId);
+  });
+
+  // Check initial wallet state
+  setTimeout(() => {
+    const walletInfo = getWalletInfo();
+    if (walletInfo.isConnected) {
+      updateHomePageForWallet(true, walletInfo.address, walletInfo.chainId);
+    }
+  }, 1000);
+}
+
+function updateHomePageForWallet(isConnected, address, chainId) {
+  const walletNotConnected = document.getElementById('walletNotConnected');
+  const walletConnected = document.getElementById('walletConnected');
+  const connectedWalletAddress = document.getElementById('connectedWalletAddress');
+  const networkStatus = document.getElementById('networkStatus');
+  const switchNetworkBtn = document.getElementById('switchNetworkBtn');
+
+  // Update wallet status section
+  if (isConnected && address) {
+    walletNotConnected.classList.add('hidden');
+    walletConnected.classList.remove('hidden');
+    
+    if (connectedWalletAddress) {
+      connectedWalletAddress.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+    }
+    
+    // Check network
+    if (chainId && chainId !== 8453) {
+      networkStatus.textContent = 'Wrong Network';
+      networkStatus.className = 'text-xs text-red-500';
+      switchNetworkBtn.classList.remove('hidden');
+    } else {
+      networkStatus.textContent = 'Base Network';
+      networkStatus.className = 'text-xs text-green-500';
+      switchNetworkBtn.classList.add('hidden');
+    }
+  } else {
+    walletNotConnected.classList.remove('hidden');
+    walletConnected.classList.add('hidden');
+  }
+
+  // Update form messaging
+  updateFormMessaging(isConnected, chainId);
+  
+  // Update personalization options
+  updatePersonalizationOptions(isConnected);
+  
+  // Update action buttons
+  updateActionButtons(isConnected);
+}
+
+function updateFormMessaging(isConnected, chainId) {
+  const writeHeaderText = document.getElementById('writeHeaderText');
+  const encryptionStatus = document.getElementById('encryptionStatus');
+  const privacyMessage = document.getElementById('privacyMessage');
+  const bottomPrivacyMessage = document.getElementById('bottomPrivacyMessage');
+  const aiPrivacyNote = document.getElementById('aiPrivacyNote');
+  const connectWalletCTA = document.getElementById('connectWalletCTA');
+
+  if (isConnected) {
+    if (writeHeaderText) writeHeaderText.textContent = 'Write and earn rewards';
+    if (encryptionStatus) {
+      const isCorrectNetwork = chainId === 8453;
+      encryptionStatus.textContent = isCorrectNetwork ? 
+        'chars • Fully encrypted & earning rewards' : 
+        'chars • Switch to Base network for rewards';
+    }
+    if (privacyMessage) {
+      privacyMessage.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        <span>Your entry is fully encrypted and you'll earn rewards for writing. Drag & drop photos supported.</span>
+      `;
+    }
+    if (bottomPrivacyMessage) bottomPrivacyMessage.textContent = 'Wallet connected • Full encryption enabled • Earning rewards';
+    if (aiPrivacyNote) aiPrivacyNote.textContent = '(encrypted & rewarded)';
+    if (connectWalletCTA) connectWalletCTA.classList.add('hidden');
+  } else {
+    if (writeHeaderText) writeHeaderText.textContent = 'Write in peace';
+    if (encryptionStatus) encryptionStatus.textContent = 'chars • Connect wallet for full encryption';
+    if (privacyMessage) {
+      privacyMessage.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        <span>Connect your wallet for full encryption and rewards. You can also drag & drop a photo directly.</span>
+      `;
+    }
+    if (bottomPrivacyMessage) bottomPrivacyMessage.textContent = 'Connect wallet for full encryption & rewards • Try it anonymously first';
+    if (aiPrivacyNote) aiPrivacyNote.textContent = '(connect wallet for rewards)';
+    if (connectWalletCTA) connectWalletCTA.classList.remove('hidden');
+  }
+}
+
+function updatePersonalizationOptions(isConnected) {
+  const walletConnectedOptions = document.getElementById('walletConnectedOptions');
+  const walletNotConnectedOptions = document.getElementById('walletNotConnectedOptions');
+
+  if (isConnected) {
+    if (walletConnectedOptions) walletConnectedOptions.classList.remove('hidden');
+    if (walletNotConnectedOptions) walletNotConnectedOptions.classList.add('hidden');
+  } else {
+    if (walletConnectedOptions) walletConnectedOptions.classList.add('hidden');
+    if (walletNotConnectedOptions) walletNotConnectedOptions.classList.remove('hidden');
+  }
+}
+
+function updateActionButtons(isConnected) {
+  const walletConnectedActions = document.getElementById('walletConnectedActions');
+  const walletNotConnectedActions = document.getElementById('walletNotConnectedActions');
+
+  if (isConnected) {
+    if (walletConnectedActions) walletConnectedActions.classList.remove('hidden');
+    if (walletNotConnectedActions) walletNotConnectedActions.classList.add('hidden');
+  } else {
+    if (walletConnectedActions) walletConnectedActions.classList.add('hidden');
+    if (walletNotConnectedActions) walletNotConnectedActions.classList.remove('hidden');
+  }
+}
+
+// Enhanced save function for blockchain storage
+function saveToBlockchain() {
+  const walletInfo = getWalletInfo();
+  
+  if (!walletInfo.isConnected) {
+    connectWallet();
+    return;
+  }
+
+  if (walletInfo.chainId !== 8453) {
+    switchToBaseNetwork();
+    return;
+  }
+
+  const journalEntry = document.getElementById('journalEntry');
+  const entryTitle = document.getElementById('entryTitle');
+
+  if (!journalEntry || !entryTitle) return;
+
+  const journalContent = journalEntry.innerHTML.replace(/<[^>]*>/g, '');
+  const titleText = entryTitle.textContent;
+
+  // Show saving state
+  const saveButton = document.querySelector('#walletConnectedActions button');
+  if (saveButton) {
+    const originalText = saveButton.innerHTML;
+    saveButton.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Saving to blockchain...
+    `;
+    saveButton.disabled = true;
+
+    const csrftoken = getCsrfToken();
+    const formData = new FormData();
+    
+    formData.append('title', titleText);
+    formData.append('content', journalContent);
+    formData.append('wallet_address', walletInfo.address);
+    formData.append('chain_id', walletInfo.chainId);
+    formData.append('encrypted', 'true');
+
+    if (currentPhotoFile) {
+      formData.append('journal_photo', currentPhotoFile);
+    }
+
+    fetch('/save-generated-entry/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrftoken
+      },
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        const rewards = data.rewards || calculateRewards(journalContent, walletInfo.isConnected);
+
+        // Check if this is an anonymous save
+        if (data.is_anonymous) {
+          // For anonymous users, redirect to journal form with pre-filled content
+          saveButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Saved! Transferring to journal form...
+          `;
+          
+          if (window.showToast) {
+            window.showToast('Taking you to create your journal entry...', 'info');
+          }
+
+          // Store the content in sessionStorage to transfer to journal form
+          sessionStorage.setItem('pendingJournalEntry', JSON.stringify({
+            title: titleText,
+            content: journalContent,
+            fromDemo: true,
+            hasWallet: true,
+            walletAddress: walletInfo.address,
+            rewards: rewards
+          }));
+
+          // If there's a photo, we need to handle it differently
+          if (currentPhotoFile) {
+            // Convert photo to base64 to transfer via sessionStorage
+            const reader = new FileReader();
+            reader.onloadend = function() {
+              const pendingEntry = JSON.parse(sessionStorage.getItem('pendingJournalEntry'));
+              pendingEntry.photoData = reader.result;
+              pendingEntry.photoName = currentPhotoFile.name;
+              sessionStorage.setItem('pendingJournalEntry', JSON.stringify(pendingEntry));
+              
+              // Redirect to journal form
+              window.location.href = '/journal/';
+            };
+            reader.readAsDataURL(currentPhotoFile);
+          } else {
+            // No photo, redirect immediately
+            setTimeout(() => {
+              window.location.href = '/journal/';
+            }, 1500);
+          }
+          
+        } else {
+          // Authenticated user - normal save success
+          saveButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Saved! Rewards earned: ${rewards} tokens
+          `;
+          
+          if (window.showToast) {
+            window.showToast(`Entry saved! Earned ${rewards} tokens`, 'success');
+          }
+
+          setTimeout(() => {
+            if (data.redirect_url) {
+              window.location.href = data.redirect_url;
+            } else if (data.entry_id) {
+              window.location.href = `/entry/${data.entry_id}/`;
+            } else {
+              window.location.href = '/dashboard/';
+            }
+          }, 2000);
+        }
+      } else {
+        // Handle error
+        saveButton.innerHTML = originalText;
+        saveButton.disabled = false;
+        if (window.showToast) {
+          window.showToast(data.error || 'Failed to save entry', 'error');
+        }
+      }
+    })
+    .catch(error => {
+      console.error('Save error:', error);
+      saveButton.innerHTML = originalText;
+      saveButton.disabled = false;
+      if (window.showToast) {
+        window.showToast('Failed to save entry. Please try again.', 'error');
+      }
+    });
+  }
+}
+
+// Helper function to calculate rewards
+function calculateRewards(content, hasWallet) {
+  const wordCount = content.split(' ').length;
+  const baseReward = Math.floor(wordCount / 10);
+  const walletBonus = hasWallet ? 5 : 0;
+  return baseReward + walletBonus;
+}
+
+// Update the existing generateDemo function to be wallet-aware
+function generateDemo() {
+  resetFormState();
+
+  const journalInput = document.getElementById('journalInput');
+  if (!journalInput) return;
+
+  const journalContent = journalInput.value.trim();
+
+  if (journalContent.length < 10) {
+    if (window.showToast) {
+      window.showToast('Please write at least 10 characters', 'warning');
+    }
+    return;
+  }
+
+  const walletInfo = getWalletInfo();
+  const cacheKey = journalContent + (currentPhotoDataUrl ? '_withPhoto' : '') + (walletInfo.isConnected ? '_wallet' : '');
+
+  const cachedEntry = journalCache.get(cacheKey);
+  if (cachedEntry && !currentPhotoFile) {
+    displayJournalEntry(cachedEntry);
+    return;
+  }
+
+  const loadingIndicator = document.getElementById('loadingIndicator');
+  if (loadingIndicator) {
+    loadingIndicator.classList.remove('hidden');
+  }
+
+  const demoButton = document.getElementById('demoButton');
+  if (demoButton) {
+    demoButton.disabled = true;
+    demoButton.innerHTML = `
+      <svg class="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      ${walletInfo.isConnected ? 'Generating & encrypting...' : 'Generating...'}
+    `;
+  }
+
+  const csrftoken = getCsrfToken();
+  const formData = new FormData();
+  formData.append('journal_content', journalContent);
+
+  const personalizationToggle = document.getElementById('personalizationToggle');
+  if (personalizationToggle && personalizationToggle.checked) {
+    formData.append('personalize', 'true');
+  }
+
+  if (currentPhotoFile) {
+    formData.append('journal_photo', currentPhotoFile);
+  }
+
+  // Add wallet information if connected
+  if (walletInfo.isConnected) {
+    formData.append('wallet_address', walletInfo.address);
+    formData.append('chain_id', walletInfo.chainId);
+    formData.append('encrypted', 'true');
+  }
+
+  fetch('/api/demo-journal/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrftoken
+    },
+    body: formData
+  })
+  .then(response => {
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error('Rate limit exceeded. Please wait a moment before trying again.');
+      }
+      throw new Error('Server error: ' + response.status);
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (loadingIndicator) {
+      loadingIndicator.classList.add('hidden');
+    }
+
+    if (demoButton) {
+      demoButton.disabled = false;
+      demoButton.innerHTML = `
+        <span>Transform into Journal</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      `;
+    }
+
+    if (data.error) {
+      if (window.showToast) {
+        window.showToast(data.error, 'error');
+      }
+      return;
+    }
+
+    journalCache.set(cacheKey, data);
+    displayJournalEntry(data);
+
+    if (window.onSavedSuccessfully) {
+      window.onSavedSuccessfully();
+    }
+
+    // Show success message for wallet users
+    if (walletInfo.isConnected && window.showToast) {
+      window.showToast('Journal entry generated with full encryption!', 'success');
+    }
+  })
+  .catch(error => {
+    if (loadingIndicator) {
+      loadingIndicator.classList.add('hidden');
+    }
+
+    if (demoButton) {
+      demoButton.disabled = false;
+      demoButton.innerHTML = `
+        <span>Transform into Journal</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      `;
+    }
+
+    if (window.showToast) {
+      window.showToast(error.message || 'Failed to generate entry. Please try again.', 'error');
+    }
+  });
+}
+
+// Variables to store photo data
+let currentPhotoFile = null;
+let currentPhotoDataUrl = null;
+
+// CRITICAL: Optimized debounce function
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// CRITICAL: Initialize journal form - works with base.html scrolling ONLY
+function initializeJournalForm() {
+  const personalizationToggle = document.getElementById('personalizationToggle');
+  const personalizationOptions = document.getElementById('personalizationOptions');
+
+  if (personalizationToggle && personalizationOptions) {
+    personalizationToggle.addEventListener('change', function() {
+      if (this.checked) {
+        personalizationOptions.classList.remove('hidden');
+      } else {
+        personalizationOptions.classList.add('hidden');
+      }
+    });
+  }
+
+  setupOptimizedDragAndDrop();
+
+  // CRITICAL: Simple auto-resize that works with base.html scrolling ONLY
+  const journalInput = document.getElementById('journalInput');
+  if (journalInput) {
+    const autoResize = debounce(function() {
+      // Reset height to auto to get the correct scrollHeight
+      journalInput.style.height = 'auto';
+      // Set height to scrollHeight, but cap at reasonable maximum
+      const newHeight = Math.min(journalInput.scrollHeight, 800);
+      journalInput.style.height = newHeight + 'px';
+    }, 50);
+
+    journalInput.addEventListener('input', function() {
+      countChars();
+      autoResize();
+    });
+
+    // Focus/blur handling for container styling
+    const journalContainer = document.getElementById('journalContainer');
+    if (journalContainer) {
+      journalInput.addEventListener('focus', function() {
+        journalContainer.classList.add('input-focused');
+      });
+
+      journalInput.addEventListener('blur', function() {
+        journalContainer.classList.remove('input-focused');
+      });
+    }
+
+    // Initial sizing
+    setTimeout(() => {
+      autoResize();
+    }, 100);
+  }
+
+  countChars();
+}
+
+function setupEnhancedUX() {
+  setupUnsavedChangesWarning();
+  setupEnhancedValidation();
+  setupKeyboardShortcuts();
+  setupAccessibilityFeatures();
+}
+
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.fixed.inset-0').forEach(modal => {
+        if (modal.classList.contains('z-50')) {
+          modal.remove();
+        }
+      });
+    }
+
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      const searchInput = document.getElementById('journalInput');
+      if (searchInput) {
+        searchInput.focus();
+      }
+    }
+
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      const generateBtn = document.getElementById('demoButton');
+      if (generateBtn && !generateBtn.disabled) {
+        generateDemo();
+      }
+    }
+  });
+}
+
+function setupAccessibilityFeatures() {
+  document.querySelectorAll('button:not([aria-label])').forEach(btn => {
+    if (btn.title) {
+      btn.setAttribute('aria-label', btn.title);
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+      document.body.classList.add('keyboard-navigation');
+    }
+  });
+
+  document.addEventListener('mousedown', function() {
+    document.body.classList.remove('keyboard-navigation');
+  });
+}
+
+function getCsrfToken() {
+  const token = document.querySelector('[name=csrfmiddlewaretoken]');
+  return token ? token.value : '';
+}
+
+function initializeAnimations() {
+  // OPTIMIZED: Use Intersection Observer for better performance
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { 
+      threshold: 0.1,
+      rootMargin: '50px' // Start animation 50px before element is visible
+    });
+
+    document.querySelectorAll('.animate-fade-in, .animate-scale-in').forEach(el => {
+      observer.observe(el);
+    });
+  }
+}
+
+// OPTIMIZED: Throttled scroll handler to prevent layout thrashing
+function setupOptimizedScrollHandling() {
+  let ticking = false;
+  
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        // Any scroll-based animations would go here
+        // Currently not needed but ready for future use
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true }); // Passive listener for better performance
+}
+
+function setupUnsavedChangesWarning() {
+  const journalInput = document.getElementById('journalInput');
+  if (!journalInput) return;
+
+  let hasUnsavedChanges = false;
+
+  journalInput.addEventListener('input', function() {
+    hasUnsavedChanges = true;
+  });
+
+  window.onSavedSuccessfully = function() {
+    hasUnsavedChanges = false;
+  };
+
+  window.addEventListener('beforeunload', function(e) {
+    if (hasUnsavedChanges) {
+      e.preventDefault();
+      e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+      return e.returnValue;
+    }
+  });
+
+  const demoButton = document.getElementById('demoButton');
+  if (demoButton) {
+    demoButton.addEventListener('click', function() {
+      setTimeout(() => {
+        hasUnsavedChanges = false;
+      }, 1000);
+    });
+  }
+}
+
+function setupEnhancedValidation() {
+  const journalInput = document.getElementById('journalInput');
+  if (!journalInput) return;
+
+  const demoButton = document.getElementById('demoButton');
+  if (!demoButton) return;
+
+  updateValidationState();
+
+  journalInput.addEventListener('input', debounce(updateValidationState, 300));
+
+  function updateValidationState() {
+    const value = journalInput.value.trim();
+    const isValid = value.length >= 10;
+
+    if (value.length > 0) {
+      if (isValid) {
+        journalInput.classList.remove('border-red-300');
+        journalInput.classList.add('border-green-300');
+        const container = document.getElementById('journalContainer');
+        if (container) {
+          container.classList.remove('border-red-300');
+          container.classList.add('border-green-300');
+        }
+      } else {
+        journalInput.classList.add('border-red-300');
+        journalInput.classList.remove('border-green-300');
+        const container = document.getElementById('journalContainer');
+        if (container) {
+          container.classList.add('border-red-300');
+          container.classList.remove('border-green-300');
+        }
+      }
+    } else {
+      journalInput.classList.remove('border-red-300', 'border-green-300');
+      const container = document.getElementById('journalContainer');
+      if (container) {
+        container.classList.remove('border-red-300', 'border-green-300');
+      }
+    }
+
+    const charCount = document.getElementById('charCount');
+    if (charCount) {
+      charCount.className = value.length < 10 && value.length > 0 ? 'text-red-500' : 'text-gray-500';
+    }
+
+    demoButton.disabled = !isValid;
+    demoButton.classList.toggle('opacity-50', !isValid);
+    demoButton.classList.toggle('cursor-not-allowed', !isValid);
+  }
+}
+
+// CRITICAL: Optimized drag and drop - works with base.html scrolling ONLY
+function setupOptimizedDragAndDrop() {
+  const dropArea = document.getElementById('journalContainer');
+  const dropIndicator = document.getElementById('dropZoneIndicator');
+
+  if (!dropArea || !dropIndicator) {
+    return;
+  }
+
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, preventDefaults, { passive: false });
+  });
+
+  let isDraggingOver = false;
+
+  dropArea.addEventListener('dragenter', function() {
+    isDraggingOver = true;
+    requestAnimationFrame(() => {
+      if (isDraggingOver) {
+        dropIndicator.classList.remove('hidden');
+      }
+    });
+  }, { passive: true });
+
+  dropArea.addEventListener('dragleave', function(e) {
+    const rect = dropArea.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+
+    if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
+      isDraggingOver = false;
+      requestAnimationFrame(() => {
+        if (!isDraggingOver) {
+          dropIndicator.classList.add('hidden');
+        }
+      });
+    }
+  }, { passive: true });
+
+  dropArea.addEventListener('drop', function(e) {
+    isDraggingOver = false;
+    requestAnimationFrame(() => {
+      dropIndicator.classList.add('hidden');
+    });
+
+    const dt = e.dataTransfer;
+    if (!dt.files || dt.files.length === 0) return;
+
+    const file = dt.files[0];
+
+    if (file.type.match('image.*')) {
+      handleImageFile(file);
+    }
+  }, { passive: false });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+}
+
+function handleImageFile(file) {
+  if (file.size > 5 * 1024 * 1024) {
+    if (window.showToast) {
+      window.showToast('Image must be smaller than 5MB', 'error');
+    }
+    return;
+  }
+
+  currentPhotoFile = file;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    currentPhotoDataUrl = e.target.result;
+
+    const preview = document.getElementById('photoPreview');
+    if (preview) {
+      preview.src = currentPhotoDataUrl;
+    }
+
+    const previewContainer = document.getElementById('photoPreviewContainer');
+    if (previewContainer) {
+      previewContainer.classList.remove('hidden');
+    }
+
+    const photoName = document.getElementById('photoName');
+    if (photoName) {
+      photoName.textContent = file.name;
+    }
+  };
+
+  reader.readAsDataURL(file);
+
+  const fileInput = document.getElementById('journalPhoto');
+  if (fileInput) {
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    fileInput.files = dataTransfer.files;
+  }
+}
+
+function previewPhoto(event) {
+  const fileInput = event.target;
+  const file = fileInput.files[0];
+
+  if (file) {
+    if (file.size > 5 * 1024 * 1024) {
+      fileInput.value = '';
+      if (window.showToast) {
+        window.showToast('Image must be smaller than 5MB', 'error');
+      }
+      return;
+    }
+
+    if (!file.type.match('image.*')) {
+      fileInput.value = '';
+      if (window.showToast) {
+        window.showToast('Please select an image file', 'error');
+      }
+      return;
+    }
+
+    handleImageFile(file);
+  }
+}
+
+function removePhoto() {
+  const fileInput = document.getElementById('journalPhoto');
+  if (fileInput) {
+    fileInput.value = '';
+  }
+
+  const previewContainer = document.getElementById('photoPreviewContainer');
+  if (previewContainer) {
+    previewContainer.classList.add('hidden');
+  }
+
+  currentPhotoFile = null;
+  currentPhotoDataUrl = null;
+}
+
+function countChars() {
+  const textArea = document.getElementById('journalInput');
+  const charCount = document.getElementById('charCount');
+  if (textArea && charCount) {
+    const count = textArea.value.length;
+    charCount.textContent = count;
+  }
+}
+
+function addSuggestion(text) {
+  const textArea = document.getElementById('journalInput');
+  if (!textArea) return;
+
+  let currentText = textArea.value;
+
+  if (currentText && !currentText.endsWith('\n') && !currentText.endsWith(' ')) {
+    currentText += ' ';
+  }
+
+  textArea.value = currentText + text + ' ';
+  textArea.focus();
+
+  countChars();
+
+  const inputEvent = new Event('input');
+  textArea.dispatchEvent(inputEvent);
+
+  textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
+}
+
+function displayJournalEntry(data) {
+  const journalEntry = document.getElementById('journalEntry');
+  if (journalEntry) {
+    journalEntry.innerHTML = data.entry.replace(/\n/g, '<br>');
+  }
+
+  const title = data.title || "My Journal Entry";
+  const entryTitle = document.getElementById('entryTitle');
+  if (entryTitle) {
+    entryTitle.textContent = title;
+  }
+
+  const journalPhotoDisplay = document.getElementById('journalPhotoDisplay');
+  const journalPhotoImage = document.getElementById('journalPhotoImage');
+
+  if (currentPhotoDataUrl && journalPhotoDisplay && journalPhotoImage) {
+    journalPhotoDisplay.classList.remove('hidden');
+    journalPhotoImage.src = currentPhotoDataUrl;
+  } else if (journalPhotoDisplay) {
+    journalPhotoDisplay.classList.add('hidden');
+  }
+
+  const resultPreview = document.getElementById('resultPreview');
+  if (resultPreview) {
+    resultPreview.classList.remove('hidden');
+
+    // Smooth scroll to result using base.html scrolling
+    setTimeout(() => {
+      resultPreview.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 100);
+  }
+
+  if (window.onSavedSuccessfully) {
+    window.onSavedSuccessfully();
+  }
+}
+
+function restartDemo() {
+  const journalInput = document.getElementById('journalInput');
+  if (journalInput) {
+    journalInput.value = '';
+    journalInput.style.height = 'auto';
+  }
+
+  const resultPreview = document.getElementById('resultPreview');
+  if (resultPreview) {
+    resultPreview.classList.add('hidden');
+  }
+
+  countChars();
+  resetFormState();
+  removePhoto();
+
+  const demoButton = document.getElementById('demoButton');
+  if (demoButton) {
+    demoButton.disabled = false;
+  }
+
+  const demoForm = document.getElementById('demoForm');
+  if (demoForm) {
+    demoForm.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function resetFormState() {
+  const demoForm = document.getElementById('demoForm');
+  if (demoForm && demoForm.classList.contains('edit-mode')) {
+    const demoButton = document.getElementById('demoButton');
+    if (demoButton) {
+      demoButton.innerHTML = `
+        <span>Transform into Journal</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      `;
+    }
+
+    demoForm.classList.remove('edit-mode');
+  }
+}
+
+function editJournalEntry() {
+  const journalEntry = document.getElementById('journalEntry');
+  const entryTitle = document.getElementById('entryTitle');
+
+  if (!journalEntry || !entryTitle) return;
+
+  const generatedEntry = journalEntry.innerHTML;
+  const titleText = entryTitle.textContent;
+
+  const cleanedEntry = generatedEntry.replace(/<br\s*\/?>/gi, '\n');
+
+  const journalInput = document.getElementById('journalInput');
+  if (journalInput) {
+    journalInput.value = cleanedEntry;
+    journalInput.style.height = 'auto';
+    setTimeout(() => {
+      const newHeight = Math.min(journalInput.scrollHeight, 400);
+      journalInput.style.height = newHeight + 'px';
+    }, 0);
+  }
+
+  const resultPreview = document.getElementById('resultPreview');
+  if (resultPreview) {
+    resultPreview.classList.add('hidden');
+  }
+
+  const demoButton = document.getElementById('demoButton');
+  if (demoButton) {
+    demoButton.disabled = false;
+    demoButton.innerHTML = `
+      <span>Update Entry</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    `;
+  }
+
+  const demoForm = document.getElementById('demoForm');
+  if (demoForm) {
+    demoForm.classList.add('edit-mode');
+  }
+
+  countChars();
+
+  if (journalInput) {
+    const inputEvent = new Event('input');
+    journalInput.dispatchEvent(inputEvent);
+
+    const demoFormElement = document.getElementById('demoForm');
+    if (demoFormElement) {
+      demoFormElement.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    journalInput.focus();
+  }
+}
+
+// FIXED: Cache initialization - works with base.html
+const journalCache = {
+  init: function() {
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const storedCache = localStorage.getItem('diaryVaultCache');
+        if (storedCache) {
+          const parsedCache = JSON.parse(storedCache);
+          this.entries = parsedCache.entries || {};
+          this.cacheTime = parsedCache.cacheTime || Date.now();
+
+          const oneDayMs = 24 * 60 * 60 * 1000;
+          if (Date.now() - this.cacheTime > oneDayMs) {
+            this.clear();
+          }
+          return;
+        }
+      } catch (e) {
+        // Silent error handling
+      }
+    }
+    this.entries = {};
+    this.cacheTime = Date.now();
+  },
+
+  save: function() {
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const cacheData = {
+          entries: this.entries,
+          cacheTime: this.cacheTime
+        };
+        localStorage.setItem('diaryVaultCache', JSON.stringify(cacheData));
+      } catch (e) {
+        // Silent error handling
+      }
+    }
+  },
+
+  hashContent: function(content) {
+    let hash = 0;
+    for (let i = 0; i < content.length; i++) {
+      const char = content.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return hash.toString();
+  },
+
+  get: function(content) {
+    const key = this.hashContent(content);
+    return this.entries[key];
+  },
+
+  set: function(content, data) {
+    const key = this.hashContent(content);
+    this.entries[key] = {
+      ...data,
+      timestamp: Date.now()
+    };
+    this.save();
+  },
+
+  clear: function() {
+    this.entries = {};
+    this.cacheTime = Date.now();
+    this.save();
+  }
+};
+
+</script>
+
+{% endblock %}
