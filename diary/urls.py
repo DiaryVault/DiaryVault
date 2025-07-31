@@ -8,18 +8,20 @@ from .views import core
 from .views.core import CustomLoginView, CustomSignupView
 # from .views import journal_compiler  # REMOVED - no longer needed
 from .views import api
+from .views import web3_auth  # ADD THIS IMPORT
 
 from . import views
 
-# Web3 auth URLs - Updated to use existing api views
-# web3_patterns = [
-#     path('nonce/', api.request_nonce, name='web3_nonce'),
-#     path('login/', api.web3_login, name='web3_login'),
-#     path('disconnect/', api.disconnect_wallet, name='web3_disconnect'),
-#     path('profile/', api.user_profile, name='web3_profile'),
-#     path('profile/update/', api.update_profile, name='web3_update_profile'),
-#     path('health/', api.health_check, name='web3_health'),
-# ]
+# Web3 auth URLs - Now properly configured
+web3_patterns = [
+    path('nonce/', web3_auth.request_nonce, name='web3_nonce'),
+    path('login/', web3_auth.web3_login, name='web3_login'),
+    path('disconnect/', web3_auth.disconnect_wallet, name='web3_disconnect'),
+    path('profile/', web3_auth.user_profile, name='web3_profile'),
+    path('profile/update/', web3_auth.update_profile, name='web3_update_profile'),
+    path('status/', web3_auth.wallet_status, name='web3_wallet_status'),
+    path('verify/', web3_auth.verify_wallet_ownership, name='web3_verify'),
+]
 
 urlpatterns = [
     # ============================================================================
@@ -35,9 +37,8 @@ urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='login'),  # For mobile menu compatibility
     path('accounts/login/', CustomLoginView.as_view(), name='account_login'),
 
-    # Web3 Authentication URLs - Updated to use connect wallet view from core
-    # path('connect-wallet/', core.connect_wallet_view, name='connect_wallet'),
-    # path('api/web3/', include(web3_patterns)),
+    # Web3 Authentication URLs - PROPERLY CONFIGURED
+    path('api/web3/', include(web3_patterns)),
 
     # ============================================================================
     # Main Pages
@@ -123,7 +124,7 @@ urlpatterns = [
     # path('diary/compiler/publish/', journal_compiler.publish_compiled_journal, name='compiler_publish_compiled_journal'),
 
     # ============================================================================
-    # Web3 Authentication URLs (for anonymous user support)
+    # Anonymous User Support URLs (Need to add these functions to api.py)
     # ============================================================================
     path('connect-wallet-session/', api.connect_wallet_session, name='connect_wallet_session'),
     path('web3/complete-profile/', api.web3_complete_profile, name='web3_complete_profile'),

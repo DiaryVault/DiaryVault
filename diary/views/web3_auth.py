@@ -522,3 +522,137 @@ def require_correct_network(view_func):
         return view_func(request, *args, **kwargs)
     
     return _wrapped_view
+
+
+# Add these functions to your diary/views/api.py file:
+
+@csrf_exempt
+@require_POST
+def connect_wallet_session(request):
+    """Store wallet connection in session for anonymous users (before full auth)"""
+    try:
+        data = json.loads(request.body)
+        wallet_address = data.get('wallet_address')
+        chain_id = data.get('chain_id', 8453)  # Default to Base
+        
+        if wallet_address:
+            # Store in session for anonymous users
+            request.session['wallet_address'] = wallet_address
+            request.session['chain_id'] = chain_id
+            request.session['wallet_connected'] = True
+            request.session.modified = True
+            
+            # Check if user has pending entries
+            pending_entries_count = len(request.session.get('anonymous_entries', {}))
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Wallet connected to session',
+                'can_save_entries': True,
+                'pending_entries': pending_entries_count,
+                'next_step': 'web3_auth' if pending_entries_count > 0 else 'continue'
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'No wallet address provided'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error connecting wallet to session: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+def web3_complete_profile(request):
+    """Bridge between anonymous wallet connection and full Web3 auth"""
+    entry_id = request.GET.get('entry_id')
+    
+    if request.method == 'POST':
+        # This is now a bridge to the full Web3 auth flow
+        wallet_address = request.session.get('wallet_address')
+        if not wallet_address:
+            messages.error(request, 'No wallet connected. Please connect your wallet first.')
+            return redirect('journal')
+        
+        # Redirect to the Web3 auth flow with the wallet already connected
+        messages.info(request, 'Please complete authentication by signing with your wallet.')
+        return redirect(f"{reverse('web3_login')}?entry_id={entry_id}")
+    
+    # GET request - show profile completion/auth prompt
+    context = {
+        'wallet_address': request.session.get('wallet_address'),
+        'entry_id': entry_id,
+        'anonymous_entries_count': len(request.session.get('anonymous_entries', {}))
+    }
+    
+    # Try to render a simple template, or redirect if it doesn't exist
+    try:
+        return render(request, 'diary/web3_complete_profile.html', context)
+    except:
+        # If template doesn't exist, show a message and redirect
+        messages.info(request, 'Please sign with your wallet to save your entries.')
+        return redirect(f"/journal/?show_wallet_prompt=true&entry_id={entry_id}")
+
+def anonymous_entry_preview(request, entry_uuid):
+    """Handle preview of anonymous entries"""
+    
+    # Convert UUID to string
+    entry_uuid_str = str(entry_uuid)
+    
+    # Get anonymous entries from session
+    anonymous_entries = request.session.get('anonymous_entries', {})
+    
+    if entry_uuid_str in anonymous_entries:
+        # User is logged in - transfer the entry
+        if request.user.is_authenticated:
+            entry_data = anonymous_entries[entry_uuid_str]
+            
+            try:
+                # Create the entry for the logged-in user
+                entry = Entry.objects.create(
+                    user=request.user,
+                    title=entry_data.get('title', 'Untitled'),
+                    content=entry_data.get('content', ''),
+                    mood=entry_data.get('mood', 'neutral')
+                )
+                
+                # Add tags
+                tags = entry_data.get('tags', [])
+                for tag_name in tags:
+                    if tag_name:
+                        tag, created = Tag.objects.get_or_create(
+                            name=tag_name.lower().strip(),
+                            user=request.user
+                        )
+                        entry.tags.add(tag)
+                
+                # Remove from anonymous entries
+                del anonymous_entries[entry_uuid_str]
+                request.session['anonymous_entries'] = anonymous_entries
+                request.session.modified = True
+                
+                messages.success(request, 'Entry saved to your account!')
+                return redirect('entry_detail', entry_id=entry.id)
+                
+            except Exception as e:
+                logger.error(f"Error transferring anonymous entry: {e}")
+                messages.error(request, 'Error saving entry. Please try again.')
+                return redirect('journal')
+        else:
+            # User is not logged in - prompt to sign up/login
+            messages.info(
+                request, 
+                'Connect your wallet to save this entry permanently and earn rewards!'
+            )
+            # Store the entry ID for after login
+            request.session['pending_entry_uuid'] = entry_uuid_str
+            request.session.modified = True
+            
+            # Redirect to journal with wallet prompt
+            return redirect(f"/journal/?show_wallet_prompt=true&entry_id={entry_uuid_str}")
+    
+    # Entry not found
+    messages.warning(request, "Entry not found. Please create a new journal entry.")
+    return redirect('new_entry')
