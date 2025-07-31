@@ -28,7 +28,6 @@ from ..models import Entry, Journal, Tag, JournalEntry
 from ..utils.ai_helpers import generate_ai_content, generate_ai_content_personalized
 from ..utils.analytics import get_content_hash, auto_generate_tags
 from ..services.ai_service import AIService
-from .journal_compiler import JournalAnalysisService, JournalCompilerAI
 from diary.models import Web3Nonce, WalletSession
 from ..serializers import (
     NonceRequestSerializer, Web3LoginSerializer, UserProfileSerializer
