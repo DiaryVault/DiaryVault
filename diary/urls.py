@@ -102,7 +102,6 @@ urlpatterns = [
     path('diary/api/load-draft/', api.load_journal_draft, name='load_journal_draft'),
 
     # Marketing and analytics
-    path('diary/api/quick-analyze/', api.quick_analyze_for_publishing, name='quick_analyze_for_publishing'),
     path('diary/api/price-suggestion/', api.get_price_suggestion, name='get_price_suggestion'),
     path('diary/api/validate-journal/', api.validate_journal_data, name='validate_journal_data'),
     path('diary/api/templates/', api.get_journal_templates_api, name='get_journal_templates_api'),
