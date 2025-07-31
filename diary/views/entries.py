@@ -1,113 +1,212 @@
+import uuid
 import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
+from django.urls import reverse
+from django.db import models
+from django.db.models import Q
 
 from ..models import Entry, Tag, SummaryVersion, EntryPhoto
 from ..forms import EntryForm
 from ..services.ai_service import AIService
-from ..utils.analytics import get_mood_emoji, get_tag_color
-from django.db import models
-from django.db.models import Q
+from ..utils.analytics import get_mood_emoji, get_tag_color, auto_generate_tags
+
 
 logger = logging.getLogger(__name__)
 
 def journal(request):
-    """Create a new diary entry"""
+    """Create a new diary entry - supports both authenticated and anonymous users"""
     # Initialize pending_entry_data at the beginning
     pending_entry_data = None
     
     if request.method == 'POST':
-        form = EntryForm(request.POST, request.FILES, user=request.user)
+        # Create form without user for validation
+        form = EntryForm(request.POST, request.FILES, user=request.user if request.user.is_authenticated else None)
+        
         if form.is_valid():
-            # Create the entry object but don't save to the database yet
-            entry = form.save(commit=False)
-            # Set the user manually
-            entry.user = request.user
-            # Now save to database
-            entry.save()
-            # Save many-to-many relationships if any
-            form.save_m2m()
-
-            # Handle photo upload - Check for multiple possible field names
-            photo_file = None
-            for field_name in ['entry_photo', 'journal_photo', 'photo']:
-                if field_name in request.FILES:
-                    photo_file = request.FILES[field_name]
-                    break
-
-            if photo_file:
+            # Check if user is authenticated
+            if request.user.is_authenticated:
+                # Normal save for authenticated users
                 try:
-                    EntryPhoto.objects.create(entry=entry, photo=photo_file)
-                    logger.info(f"Photo saved for entry {entry.id}: {photo_file.name}")
+                    entry = form.save(commit=True, user=request.user)
+                    
+                    # Calculate rewards if wallet connected
+                    wallet_address = request.POST.get('wallet_address') or getattr(request.user, 'wallet_address', None)
+                    if wallet_address:
+                        word_count = len(entry.content.split())
+                        base_reward = word_count // 10
+                        wallet_bonus = 5
+                        total_rewards = base_reward + wallet_bonus
+                        messages.success(request, f'Entry saved! You earned {total_rewards} tokens!')
+                    else:
+                        messages.success(request, 'Entry saved successfully!')
+                    
+                    # Clear any pending anonymous entries
+                    if 'anonymous_entries' in request.session:
+                        del request.session['anonymous_entries']
+                    if 'pending_entry' in request.session:
+                        del request.session['pending_entry']
+                    
+                    return redirect('entry_detail', entry_id=entry.id)
+                    
                 except Exception as e:
-                    logger.error(f"Failed to save photo: {e}")
-                    messages.warning(request, 'Entry saved but photo could not be uploaded.')
-
-            # Generate AI summary (optional)
-            try:
-                if hasattr(entry, 'generate_summary'):  # Check if you have this method
-                    entry.generate_summary()
-            except Exception as e:
-                logger.warning(f"Could not generate AI summary: {e}")
-
-            messages.success(request, 'Entry saved successfully!')
-
-            # If there are enough entries, regenerate insights (optional)
-            try:
-                entry_count = Entry.objects.filter(user=request.user).count()
-                if entry_count % 5 == 0:  # Every 5 entries, update insights
-                    # AIService.generate_insights(request.user)  # Uncomment if you have this
-                    pass
-            except Exception as e:
-                logger.warning(f"Could not generate insights: {e}")
-
-            return redirect('entry_detail', entry_id=entry.id)
+                    logger.error(f"Error saving entry: {e}")
+                    messages.error(request, "Error saving entry. Please try again.")
+            
+            else:
+                # Anonymous user - save to session
+                try:
+                    # Get form data as dictionary
+                    entry_data = form.save_anonymous()
+                    
+                    # Generate unique ID for this entry
+                    temp_id = str(uuid.uuid4())
+                    
+                    # Add metadata
+                    entry_data['id'] = temp_id
+                    entry_data['created_at'] = timezone.now().isoformat()
+                    entry_data['is_anonymous'] = True
+                    
+                    # Check for wallet in session
+                    wallet_address = request.POST.get('wallet_address') or request.session.get('wallet_address')
+                    if wallet_address:
+                        entry_data['wallet_address'] = wallet_address
+                    
+                    # Store in session
+                    if 'anonymous_entries' not in request.session:
+                        request.session['anonymous_entries'] = {}
+                    
+                    request.session['anonymous_entries'][temp_id] = entry_data
+                    request.session['pending_entry'] = entry_data
+                    request.session.modified = True
+                    
+                    # Calculate potential rewards
+                    word_count = len(entry_data['content'].split())
+                    base_reward = word_count // 10
+                    wallet_bonus = 5 if wallet_address else 0
+                    potential_rewards = base_reward + wallet_bonus
+                    
+                    # Provide appropriate message based on wallet status
+                    if wallet_address:
+                        messages.success(
+                            request, 
+                            f'Entry saved temporarily! Complete your profile to earn {potential_rewards} tokens.'
+                        )
+                        # Redirect to profile completion
+                        return redirect(f"{reverse('web3_complete_profile')}?entry_id={temp_id}")
+                    else:
+                        messages.success(
+                            request, 
+                            f'Entry saved temporarily! Connect your wallet to save permanently and earn {potential_rewards} tokens.'
+                        )
+                        messages.info(
+                            request,
+                            'Your entry is saved in this browser session. Connect a wallet or create an account to save it permanently.'
+                        )
+                    
+                    # Show the entry preview with wallet prompt
+                    return redirect(f"{reverse('journal')}?show_wallet_prompt=true&entry_id={temp_id}")
+                    
+                except Exception as e:
+                    logger.error(f"Error saving anonymous entry: {e}")
+                    messages.error(request, "Error saving entry. Please try again.")
+        
         else:
-            # Log form errors for debugging
-            logger.error(f"Form errors: {form.errors}")
+            # Form is invalid - show errors
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"{field}: {error}")
+    
     else:
-        form = EntryForm(user=request.user)
+        # GET request - show form
+        form = EntryForm(user=request.user if request.user.is_authenticated else None)
         
-        # Check for pending entry from anonymous save (via query parameter)
-        pending_entry_id = request.GET.get('pending_entry')
-        # pending_entry_data is already initialized at the top
-        
-        if pending_entry_id and 'anonymous_entries' in request.session:
+        # Check for pending entry from session
+        entry_id = request.GET.get('entry_id')
+        if entry_id and 'anonymous_entries' in request.session:
             anonymous_entries = request.session.get('anonymous_entries', {})
-            if pending_entry_id in anonymous_entries:
-                pending_entry_data = anonymous_entries[pending_entry_id]
+            if entry_id in anonymous_entries:
+                pending_entry_data = anonymous_entries[entry_id]
+                
                 # Pre-populate the form with anonymous data
                 initial_data = {
                     'title': pending_entry_data.get('title', ''),
                     'content': pending_entry_data.get('content', ''),
                     'mood': pending_entry_data.get('mood', 'neutral'),
-                    'tags': pending_entry_data.get('tags', ''),
                 }
-                form = EntryForm(user=request.user, initial=initial_data)
                 
-                # Remove the anonymous entry from session after using it
-                del anonymous_entries[pending_entry_id]
-                request.session['anonymous_entries'] = anonymous_entries
-                request.session.modified = True
+                # Handle tags - convert list back to comma-separated string
+                tags = pending_entry_data.get('tags', [])
+                if isinstance(tags, list):
+                    initial_data['tags'] = ', '.join(tags)
+                else:
+                    initial_data['tags'] = tags
                 
-                # Add a message to inform the user
+                form = EntryForm(
+                    initial=initial_data,
+                    user=request.user if request.user.is_authenticated else None
+                )
+                
+                # Show message about the pending entry
+                if pending_entry_data.get('has_photo'):
+                    messages.info(request, 'Note: Photo uploads require an account. The photo was not saved.')
+        
+        # Check for pending entry after login
+        elif 'pending_entry' in request.session and request.user.is_authenticated:
+            pending_entry = request.session.get('pending_entry')
+            if pending_entry:
+                initial_data = {
+                    'title': pending_entry.get('title', ''),
+                    'content': pending_entry.get('content', ''),
+                    'mood': pending_entry.get('mood', 'neutral'),
+                }
+                
+                # Handle tags
+                tags = pending_entry.get('tags', [])
+                if isinstance(tags, list):
+                    initial_data['tags'] = ', '.join(tags)
+                else:
+                    initial_data['tags'] = tags
+                
+                form = EntryForm(initial=initial_data, user=request.user)
                 messages.info(
                     request, 
-                    'Welcome! Your journal entry has been transferred. '
-                    'You can now save it permanently to your account.'
+                    'Welcome back! Your draft entry has been loaded. Click save to store it permanently.'
                 )
 
-    return render(request, 'diary/journal.html', {
+    # Get anonymous entries count for display
+    anonymous_entries_count = 0
+    anonymous_entries_list = []
+    if 'anonymous_entries' in request.session:
+        anonymous_entries = request.session.get('anonymous_entries', {})
+        anonymous_entries_count = len(anonymous_entries)
+        # Convert to list for template display
+        anonymous_entries_list = [
+            {
+                'id': entry_id,
+                'title': entry_data.get('title', 'Untitled'),
+                'created_at': entry_data.get('created_at'),
+                'preview': entry_data.get('content', '')[:100] + '...' if len(entry_data.get('content', '')) > 100 else entry_data.get('content', '')
+            }
+            for entry_id, entry_data in anonymous_entries.items()
+        ]
+
+    context = {
         'form': form,
         'today': timezone.now(),
         'is_edit_mode': False,
-        'pending_entry': pending_entry_data,  # Pass this to template for any special handling
-    })
+        'pending_entry': pending_entry_data,
+        'is_authenticated': request.user.is_authenticated,
+        'show_wallet_prompt': request.GET.get('show_wallet_prompt', False),
+        'anonymous_entries_count': anonymous_entries_count,
+        'anonymous_entries': anonymous_entries_list,
+        'wallet_address': request.session.get('wallet_address'),
+        'has_metamask': True,  # You can detect this with JavaScript and pass via form
+    }
+
+    return render(request, 'diary/journal.html', context)
 
 @login_required
 def entry_detail(request, entry_id):

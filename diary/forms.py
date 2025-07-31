@@ -187,11 +187,47 @@ class EntryForm(forms.ModelForm):
         if self.instance and self.instance.pk:
             self.initial['tags'] = ', '.join([tag.name for tag in self.instance.tags.all()])
 
-    def save(self, commit=True, user=None):
-        user = user or self.user
-        if not user:
-            raise ValueError("User must be provided to save the form")
+    def clean(self):
+        """Override clean to allow validation without requiring a user"""
+        cleaned_data = super().clean()
+        return cleaned_data
 
+    def save(self, commit=True, user=None):
+        """
+        Save method that supports both authenticated and anonymous usage.
+        For anonymous users, this returns the form data without saving to database.
+        """
+        user = user or self.user
+        
+        # For anonymous users, return the entry data without saving
+        if not user:
+            # Create a non-persisted entry object with the form data
+            entry = super().save(commit=False)
+            
+            # Return a dictionary with the entry data for session storage
+            entry_data = {
+                'title': entry.title,
+                'content': entry.content,
+                'mood': entry.mood,
+                'tags': self.cleaned_data.get('tags', ''),
+                'has_photo': bool(self.files.get('entry_photo'))
+            }
+            
+            # Process tags for the session data
+            manual_tags = []
+            if self.cleaned_data.get('tags'):
+                manual_tags = [t.strip() for t in self.cleaned_data['tags'].split(',') if t.strip()]
+            
+            # Generate automatic tags
+            auto_tags = auto_generate_tags(entry.content, entry.mood)
+            
+            # Combine tags
+            all_tags = list(set(manual_tags + auto_tags))
+            entry_data['tags'] = all_tags
+            
+            return entry_data
+        
+        # For authenticated users, proceed with normal save
         entry = super().save(commit=False)
         entry.user = user
 
@@ -231,307 +267,13 @@ class EntryForm(forms.ModelForm):
 
         return entry
 
-# ============================================================================
-# Marketplace Forms
-# ============================================================================
-
-class PublishJournalForm(forms.ModelForm):
-    """Form for publishing a journal to the marketplace"""
-
-    tags = forms.CharField(
-        max_length=200,
-        required=False,
-        help_text="Enter tags separated by commas (e.g., travel, adventure, photography)",
-        widget=forms.TextInput(attrs={
-            'placeholder': 'travel, adventure, photography',
-            'class': 'w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500'
-        })
-    )
-
-    entries = forms.ModelMultipleChoiceField(
-        queryset=Entry.objects.none(),  # Will be set in __init__
-        widget=forms.CheckboxSelectMultiple,
-        required=True,
-        help_text="Select the entries you want to include in this journal"
-    )
-
-    cover_image = forms.ImageField(
-        required=False,
-        help_text="Upload a cover image for your journal (optional)",
-        widget=forms.FileInput(attrs={
-            'accept': 'image/*',
-            'class': 'w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500'
-        })
-    )
-
-    class Meta:
-        model = Journal
-        fields = ['title', 'description', 'price', 'cover_image']
-        widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500',
-                'placeholder': 'Give your journal a compelling title'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500',
-                'rows': 4,
-                'placeholder': 'Describe what readers can expect from your journal...'
-            }),
-            'price': forms.NumberInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500',
-                'min': '0',
-                'step': '0.01',
-                'placeholder': '0.00'
-            })
-        }
-
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-
-        if user:
-            # Only show entries that can be published
-            publishable_entries = Entry.objects.filter(
-                user=user
-            ).exclude(content='').order_by('-created_at')
-
-            # Try to filter by published_in_journal field if it exists
-            try:
-                publishable_entries = publishable_entries.filter(published_in_journal__isnull=True)
-            except:
-                pass  # Field might not exist yet
-
-            self.fields['entries'].queryset = publishable_entries
-
-    def clean_price(self):
-        price = self.cleaned_data.get('price')
-
-        if price and price < 0:
-            raise forms.ValidationError("Price cannot be negative")
-
-        return price or 0.00
-
-    def clean_entries(self):
-        entries = self.cleaned_data.get('entries')
-
-        if not entries:
-            raise forms.ValidationError("Please select at least one entry")
-
-        # Check if entries meet quality criteria
-        for entry in entries:
-            if len(entry.content.strip()) < 100:
-                raise forms.ValidationError(
-                    f"Entry '{entry.title}' is too short. Entries must be at least 100 characters."
-                )
-
-        return entries
-
-class JournalReviewForm(forms.ModelForm):
-    """Form for reviewing published journals"""
-
-    class Meta:
-        model = JournalReview
-        fields = ['rating', 'review_text']
-        widgets = {
-            'rating': forms.Select(
-                choices=[(i, f"{i} Star{'s' if i != 1 else ''}") for i in range(1, 6)],
-                attrs={
-                    'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500'
-                }
-            ),
-            'review_text': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500',
-                'rows': 4,
-                'placeholder': 'Share your thoughts about this journal...'
-            })
-        }
-
-class TipForm(forms.Form):
-    """Form for sending tips to authors"""
-
-    AMOUNT_CHOICES = [
-        ('1.00', '$1.00'),
-        ('3.00', '$3.00'),
-        ('5.00', '$5.00'),
-        ('10.00', '$10.00'),
-        ('custom', 'Custom amount'),
-    ]
-
-    amount_preset = forms.ChoiceField(
-        choices=AMOUNT_CHOICES,
-        required=False,
-        widget=forms.RadioSelect(attrs={
-            'class': 'mr-2'
-        })
-    )
-
-    custom_amount = forms.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        required=False,
-        validators=[MinValueValidator(0.50)],
-        widget=forms.NumberInput(attrs={
-            'min': '0.50',
-            'step': '0.01',
-            'placeholder': '0.00',
-            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500'
-        })
-    )
-
-    message = forms.CharField(
-        max_length=500,
-        required=False,
-        widget=forms.Textarea(attrs={
-            'rows': 3,
-            'placeholder': 'Optional message to the author...',
-            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500'
-        })
-    )
-
-    def clean(self):
-        cleaned_data = super().clean()
-        amount_preset = cleaned_data.get('amount_preset')
-        custom_amount = cleaned_data.get('custom_amount')
-
-        if amount_preset == 'custom':
-            if not custom_amount or custom_amount < 0.50:
-                raise forms.ValidationError("Custom amount must be at least $0.50")
-        elif not amount_preset:
-            raise forms.ValidationError("Please select a tip amount")
-
-        return cleaned_data
-
-    def get_amount(self):
-        """Get the actual tip amount"""
-        if self.cleaned_data.get('amount_preset') == 'custom':
-            return self.cleaned_data.get('custom_amount')
-        else:
-            return float(self.cleaned_data.get('amount_preset', 0))
-
-class JournalSearchForm(forms.Form):
-    """Form for searching and filtering journals"""
-
-    SORT_CHOICES = [
-        ('trending', 'Trending'),
-        ('newest', 'Newest'),
-        ('mostLiked', 'Most Liked'),
-        ('mostTipped', 'Highest Earning'),
-        ('staffPicks', 'Staff Picks'),
-    ]
-
-    PRICE_CHOICES = [
-        ('all', 'All Journals'),
-        ('free', 'Free Only'),
-        ('premium', 'Premium Only'),
-    ]
-
-    search = forms.CharField(
-        max_length=100,
-        required=False,
-        widget=forms.TextInput(attrs={
-            'placeholder': 'Search journals...',
-            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500'
-        })
-    )
-
-    category = forms.CharField(
-        max_length=50,
-        required=False,
-        widget=forms.Select(attrs={
-            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500'
-        })
-    )
-
-    sort = forms.ChoiceField(
-        choices=SORT_CHOICES,
-        required=False,
-        initial='trending',
-        widget=forms.Select(attrs={
-            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500'
-        })
-    )
-
-    price = forms.ChoiceField(
-        choices=PRICE_CHOICES,
-        required=False,
-        initial='all',
-        widget=forms.Select(attrs={
-            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500'
-        })
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Dynamically populate category choices
-        try:
-            categories = JournalTag.objects.annotate(
-                count=models.Count('journal')
-            ).filter(count__gt=0).order_by('name')
-
-            category_choices = [('all', 'All Categories')] + [
-                (tag.slug, f"{tag.name} ({tag.count})") for tag in categories
-            ]
-
-            self.fields['category'].widget.choices = category_choices
-        except:
-            # Fallback if JournalTag doesn't exist yet
-            self.fields['category'].widget.choices = [('all', 'All Categories')]
-
-# ============================================================================
-# Journal Compilation Forms
-# ============================================================================
-
-class JournalCompilationForm(forms.Form):
-    """Form for compiling journals using the Smart Journal Compiler"""
+    def save_anonymous(self):
+        """
+        Convenience method specifically for anonymous users.
+        Returns a dictionary of entry data suitable for session storage.
+        """
+        return self.save(commit=False, user=None)
     
-    COMPILATION_METHODS = [
-        ('ai', 'AI Smart Compilation'),
-        ('thematic', 'Thematic Collection'),
-        ('chronological', 'Timeline Journey'),
-    ]
-    
-    JOURNAL_TYPES = [
-        ('growth', 'Personal Growth'),
-        ('travel', 'Travel & Adventures'),
-        ('career', 'Career Development'),
-        ('relationships', 'Relationships & Love'),
-        ('creative', 'Creative Process'),
-        ('health', 'Health & Wellness'),
-        ('family', 'Family Life'),
-        ('learning', 'Learning & Education'),
-    ]
-    
-    compilation_method = forms.ChoiceField(
-        choices=COMPILATION_METHODS,
-        initial='ai',
-        widget=forms.RadioSelect()
-    )
-    
-    journal_type = forms.ChoiceField(
-        choices=JOURNAL_TYPES,
-        initial='growth',
-        widget=forms.Select(attrs={
-            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-400 focus:outline-none'
-        })
-    )
-    
-    selected_entries = forms.ModelMultipleChoiceField(
-        queryset=Entry.objects.none(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False,
-        help_text="Leave empty to include all your entries, or select specific ones"
-    )
-    
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-        
-        if user:
-            self.fields['selected_entries'].queryset = Entry.objects.filter(
-                user=user
-            ).order_by('-created_at')
-
 # ============================================================================
 # Enhanced Profile Forms (using UserProfile model)
 # ============================================================================
