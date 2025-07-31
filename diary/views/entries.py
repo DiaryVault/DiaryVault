@@ -9,9 +9,9 @@ from django.db import models
 from django.db.models import Q, Count
 
 from ..models import Entry, Tag, SummaryVersion, EntryPhoto
-from ..forms import EntryForm
+from ..forms import EntryForm, auto_generate_tags  # Import auto_generate_tags from forms
 from ..services.ai_service import AIService
-from ..utils.analytics import get_mood_emoji, get_tag_color, auto_generate_tags
+from ..utils.analytics import get_mood_emoji, get_tag_color  # Removed auto_generate_tags from here
 
 
 logger = logging.getLogger(__name__)
@@ -84,7 +84,7 @@ def journal(request):
                         old_entries = request.session['anonymous_entries']
                         request.session['anonymous_entries'] = {}
                         for idx, entry in enumerate(old_entries):
-                            entry_id = entry.get('id', str(idx))
+                            entry_id = entry.get('id', str(uuid.uuid4()))
                             request.session['anonymous_entries'][entry_id] = entry
                     
                     request.session['anonymous_entries'][temp_id] = entry_data
@@ -96,6 +96,10 @@ def journal(request):
                     base_reward = word_count // 10
                     wallet_bonus = 5 if wallet_address else 0
                     potential_rewards = base_reward + wallet_bonus
+                    
+                    # Clear any previous error messages to avoid confusion
+                    storage = messages.get_messages(request)
+                    storage.used = True
                     
                     # Provide appropriate message based on wallet status
                     if wallet_address:
@@ -116,11 +120,17 @@ def journal(request):
                         )
                     
                     # Show the entry preview with wallet prompt
-                    return redirect(f"{reverse('journal')}?show_wallet_prompt=true&entry_id={temp_id}")
+                    return redirect(f"{reverse('new_entry')}?show_wallet_prompt=true&entry_id={temp_id}")
                     
                 except Exception as e:
-                    logger.error(f"Error saving anonymous entry: {e}")
+                    logger.error(f"Error saving anonymous entry: {str(e)}", exc_info=True)
+                    # Clear any success messages that might have been added
+                    storage = messages.get_messages(request)
+                    for _ in storage:
+                        pass  # This consumes the messages
+                    # Add only the error message
                     messages.error(request, "Error saving entry. Please try again.")
+                    # Don't redirect, continue to render form with error
         
         else:
             # Form is invalid - show errors
@@ -159,7 +169,7 @@ def journal(request):
                 # Handle tags - convert list back to comma-separated string
                 tags = pending_entry_data.get('tags', [])
                 if isinstance(tags, list):
-                    initial_data['tags'] = ', '.join(tags)
+                    initial_data['tags'] = ', '.join(str(tag) for tag in tags if tag)
                 else:
                     initial_data['tags'] = tags
                 
@@ -185,7 +195,7 @@ def journal(request):
                 # Handle tags
                 tags = pending_entry.get('tags', [])
                 if isinstance(tags, list):
-                    initial_data['tags'] = ', '.join(tags)
+                    initial_data['tags'] = ', '.join(str(tag) for tag in tags if tag)
                 else:
                     initial_data['tags'] = tags
                 

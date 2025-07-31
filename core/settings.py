@@ -110,6 +110,7 @@ SITE_ID = 1
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
+    'diary.views.web3_auth.Web3AuthenticationBackend',  # 👈 ADD THIS - Web3 auth backend
 ]
 
 # Database
@@ -190,6 +191,9 @@ WEB3_SETTINGS = {
     'NONCE_EXPIRY': 300,  # 5 minutes
 }
 
+# Web3 Nonce expiry (for backward compatibility)
+WEB3_NONCE_EXPIRY = 300  # 5 minutes
+
 # CORS settings for Web3 frontend
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
@@ -223,7 +227,24 @@ REST_FRAMEWORK = {
 }
 
 # ===========================================
-# END WEB3 CONFIGURATION
+# SESSION CONFIGURATION FOR ANONYMOUS USERS
+# ===========================================
+
+# Session settings
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
+SESSION_COOKIE_AGE = 86400 * 7  # 7 days - allows anonymous users to come back
+SESSION_SAVE_EVERY_REQUEST = True  # Save session on every request to keep it alive
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_NAME = 'diaryvault_sessionid'
+
+# Anonymous user session limits
+ANONYMOUS_SESSION_MAX_ENTRIES = 10  # Maximum entries an anonymous user can create
+ANONYMOUS_SESSION_EXPIRY = 86400 * 7  # 7 days
+
+# ===========================================
+# END WEB3 & SESSION CONFIGURATION
 # ===========================================
 
 # FIXED: Django-allauth settings for email-only signup (username auto-generated)
@@ -442,6 +463,12 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'web3auth.tasks.cleanup_inactive_sessions',
         'schedule': crontab(hour=3, minute=0),  # Daily at 3 AM
     },
+    
+    # 👈 ADD ANONYMOUS SESSION CLEANUP
+    'cleanup-anonymous-sessions': {
+        'task': 'diary.tasks.cleanup_anonymous_sessions',
+        'schedule': crontab(hour=4, minute=0),  # Daily at 4 AM
+    },
 }
 
 # Create logs directory if it doesn't exist
@@ -544,6 +571,10 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+else:
+    # Development settings
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
 
 # Rate limiting settings
 RATELIMIT_ENABLE = True
@@ -562,3 +593,18 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@diaryvault.com')
+
+# Custom User Model fields (if using extended user model)
+AUTH_USER_MODEL = 'auth.User'  # Change to 'diary.User' if you have a custom user model
+
+# Token rewards configuration
+TOKEN_REWARDS = {
+    'BASE_RATE_PER_WORD': 0.1,  # 1 token per 10 words
+    'WALLET_BONUS': 5,  # Bonus for having wallet connected
+    'DAILY_ENTRY_BONUS': 10,  # Bonus for daily streak
+    'QUALITY_MULTIPLIER': {
+        'short': 0.5,  # < 50 words
+        'medium': 1.0,  # 50-200 words
+        'long': 1.5,  # 200+ words
+    }
+}
