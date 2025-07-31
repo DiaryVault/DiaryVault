@@ -231,11 +231,12 @@ def save_generated_entry(request):
             if 'pending_entry' in request.session:
                 del request.session['pending_entry']
 
+            # CHANGED: Redirect to dashboard instead of entry detail
             return JsonResponse({
                 'success': True,
                 'entry_id': entry.id,
                 'rewards': total_rewards,
-                'redirect_url': f'/entry/{entry.id}/',
+                'redirect_url': '/dashboard/?entry_saved=true',  # Changed from f'/entry/{entry.id}/'
                 'message': 'Entry saved successfully!'
             })
         else:
@@ -273,6 +274,7 @@ def save_generated_entry(request):
             wallet_bonus = 5 if wallet_address else 0
             total_rewards = base_reward + wallet_bonus
             
+            # CHANGED: Updated login and signup URLs to redirect to dashboard
             return JsonResponse({
                 'success': True,
                 'entry_id': temp_id,
@@ -281,8 +283,8 @@ def save_generated_entry(request):
                 'message': 'Entry saved temporarily. Sign up to save permanently and earn real rewards!',
                 'redirect_url': None,  # Don't redirect for anonymous users
                 'auth_required': True,
-                'login_url': '/login/?save_after_login=true',
-                'signup_url': '/signup/?feature=journal'
+                'login_url': '/login/?save_after_login=true&next=/dashboard/',  # Added next parameter
+                'signup_url': '/signup/?feature=journal&next=/dashboard/'  # Added next parameter
             })
 
     except json.JSONDecodeError:

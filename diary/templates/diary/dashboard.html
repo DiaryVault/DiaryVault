@@ -503,8 +503,9 @@
 
 {% block content %}
 <div class="container">
-  <!-- Success Message -->
-  <div id="entrySuccess" class="mb-mobile-4 hidden">
+  <!-- Success Message for Entry Creation -->
+  {% if request.GET.entry_saved == 'true' or messages %}
+  <div id="entrySuccess" class="mb-mobile-4">
     <div class="card-mobile" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d;">
       <div class="flex-mobile-between">
         <div class="flex-mobile-row" style="gap: 0.75rem;">
@@ -512,7 +513,7 @@
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
           </svg>
           <div>
-            <div class="font-semibold text-mobile-lg">Entry Saved!</div>
+            <div class="font-semibold text-mobile-lg">Entry Saved Successfully!</div>
             <div class="text-sm opacity-75">Your journal entry has been added to your collection.</div>
           </div>
         </div>
@@ -524,6 +525,57 @@
       </div>
     </div>
   </div>
+
+  <script>
+  // Auto-hide success message after 5 seconds
+  setTimeout(() => {
+    const successMsg = document.getElementById('entrySuccess');
+    if (successMsg) {
+      successMsg.style.transition = 'opacity 0.5s ease';
+      successMsg.style.opacity = '0';
+      setTimeout(() => {
+        successMsg.classList.add('hidden');
+      }, 500);
+    }
+  }, 5000);
+
+  // Remove the query parameter from URL
+  if (window.location.search.includes('entry_saved=true')) {
+    const url = new URL(window.location);
+    url.searchParams.delete('entry_saved');
+    window.history.replaceState({}, document.title, url.pathname);
+  }
+  </script>
+  {% endif %}
+
+  <!-- Django Messages (if any) -->
+  {% for message in messages %}
+  <div class="mb-mobile-4">
+    <div class="card-mobile" style="background: {% if message.tags == 'success' %}#f0fdf4{% elif message.tags == 'error' %}#fef2f2{% else %}#eff6ff{% endif %}; border: 1px solid {% if message.tags == 'success' %}#bbf7d0{% elif message.tags == 'error' %}#fecaca{% else %}#bfdbfe{% endif %}; color: {% if message.tags == 'success' %}#15803d{% elif message.tags == 'error' %}#991b1b{% else %}#1e40af{% endif %};">
+      <div class="flex-mobile-between">
+        <div class="flex-mobile-row" style="gap: 0.75rem;">
+          <svg class="w-5 h-5 {% if message.tags == 'success' %}text-green-500{% elif message.tags == 'error' %}text-red-500{% else %}text-blue-500{% endif %} flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            {% if message.tags == 'success' %}
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            {% elif message.tags == 'error' %}
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            {% else %}
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            {% endif %}
+          </svg>
+          <div>
+            <div class="text-sm">{{ message }}</div>
+          </div>
+        </div>
+        <button class="touch-target" onclick="this.closest('.mb-mobile-4').remove()">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
 
   <!-- Desktop grid layout -->
   <div class="dashboard-grid">
@@ -680,7 +732,7 @@
               <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestion-btn">I felt happy when</button>
               <button type="button" onclick="addSuggestion('I learned that')" class="suggestion-btn">I learned that</button>
               <button type="button" onclick="addSuggestion('I met with')" class="suggestion-btn">I met with</button>
-              <button type="button" onclick="addSuggestion('I\\'m grateful for')" class="suggestion-btn">I'm grateful for</button>
+              <button type="button" onclick="addSuggestion('I\'m grateful for')" class="suggestion-btn">I'm grateful for</button>
             </div>
           </div>
 
@@ -1056,7 +1108,7 @@
     const inputText = journalInput.value.trim();
 
     if (!inputText) {
-      alert('Please enter some notes about your day first.');
+      // No alert, just return silently
       return;
     }
 
@@ -1085,7 +1137,6 @@
     try {
       return generateSampleEntry(input, usePersonalizedStyle);
     } catch (error) {
-      console.error('Error generating journal entry:', error);
       return "There was an error generating your journal entry. Please try again.";
     }
   }
@@ -1154,5 +1205,38 @@
     countChars();
     document.getElementById('journalInput').focus();
   }
+
+  // Save the dashboard entry
+  document.getElementById('saveDashboardButton').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    const journalContent = document.getElementById('journalEntry').textContent;
+    const entryTitle = document.getElementById('entryTitle').textContent;
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    formData.append('title', entryTitle);
+    formData.append('content', journalContent);
+    formData.append('is_ai_generated', 'true');
+    
+    // Send the save request
+    fetch('/api/save-generated-entry/', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.redirect_url) {
+        window.location.href = data.redirect_url;
+      }
+    })
+    .catch(error => {
+      // Silently handle errors without alerts
+    });
+  });
 </script>
 {% endblock %}

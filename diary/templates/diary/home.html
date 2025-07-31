@@ -984,48 +984,24 @@ function saveToBlockchain() {
 
         // Check if this is an anonymous save
         if (data.is_anonymous) {
-          // For anonymous users, redirect to journal form with pre-filled content
+          // For anonymous users, show message and prompt for signup
           saveButton.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
-            Saved! Transferring to journal form...
+            Saved temporarily!
           `;
           
           if (window.showToast) {
-            window.showToast('Taking you to create your journal entry...', 'info');
+            window.showToast('Entry saved temporarily. Sign up to save permanently and earn rewards!', 'info');
           }
 
-          // Store the content in sessionStorage to transfer to journal form
-          sessionStorage.setItem('pendingJournalEntry', JSON.stringify({
-            title: titleText,
-            content: journalContent,
-            fromDemo: true,
-            hasWallet: true,
-            walletAddress: walletInfo.address,
-            rewards: rewards
-          }));
-
-          // If there's a photo, we need to handle it differently
-          if (currentPhotoFile) {
-            // Convert photo to base64 to transfer via sessionStorage
-            const reader = new FileReader();
-            reader.onloadend = function() {
-              const pendingEntry = JSON.parse(sessionStorage.getItem('pendingJournalEntry'));
-              pendingEntry.photoData = reader.result;
-              pendingEntry.photoName = currentPhotoFile.name;
-              sessionStorage.setItem('pendingJournalEntry', JSON.stringify(pendingEntry));
-              
-              // Redirect to journal form
-              window.location.href = '/journal/';
-            };
-            reader.readAsDataURL(currentPhotoFile);
-          } else {
-            // No photo, redirect immediately
-            setTimeout(() => {
-              window.location.href = '/journal/';
-            }, 1500);
-          }
+          // Show signup prompt after a delay
+          setTimeout(() => {
+            if (confirm('Would you like to create an account to save this entry permanently and earn rewards?')) {
+              window.location.href = data.signup_url || '/signup/?feature=journal&next=/dashboard/';
+            }
+          }, 1500);
           
         } else {
           // Authenticated user - normal save success
@@ -1033,22 +1009,22 @@ function saveToBlockchain() {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
-            Saved! Rewards earned: ${rewards} tokens
+            Saved! Earned ${rewards} tokens
           `;
           
           if (window.showToast) {
-            window.showToast(`Entry saved! Earned ${rewards} tokens`, 'success');
+            window.showToast(`Entry saved! You earned ${rewards} tokens`, 'success');
           }
 
+          // Redirect to dashboard after showing success message
           setTimeout(() => {
             if (data.redirect_url) {
               window.location.href = data.redirect_url;
-            } else if (data.entry_id) {
-              window.location.href = `/entry/${data.entry_id}/`;
             } else {
-              window.location.href = '/dashboard/';
+              // Fallback to dashboard
+              window.location.href = '/dashboard/?entry_saved=true';
             }
-          }, 2000);
+          }, 1500);
         }
       } else {
         // Handle error
