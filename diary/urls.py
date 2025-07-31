@@ -104,7 +104,6 @@ urlpatterns = [
     # ============================================================================
     # Main compilation endpoints - these match what your JavaScript calls
     path('diary/api/analyze-entries/', api.analyze_entries_ajax, name='analyze_entries_ajax'),
-    path('diary/api/generate-structure/', api.generate_journal_structure, name='generate_journal_structure'),
     path('diary/api/publish-journal/', api.publish_compiled_journal, name='publish_compiled_journal'),
 
     # Draft management
