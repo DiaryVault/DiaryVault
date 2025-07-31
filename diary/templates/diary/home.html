@@ -4,261 +4,244 @@
 
 {% block extra_css %}
 <style>
-  /* MOBILE-FIRST JOURNAL DESIGN */
+  /* MOBILE-OPTIMIZED JOURNAL DESIGN */
   :root {
     --safe-area-inset-top: env(safe-area-inset-top);
     --safe-area-inset-bottom: env(safe-area-inset-bottom);
-    --safe-area-inset-left: env(safe-area-inset-left);
-    --safe-area-inset-right: env(safe-area-inset-right);
   }
 
-  /* Reset and base styles */
-  * {
+  /* Core mobile styles */
+  #journalInput {
+    resize: none !important;
+    width: 100% !important;
+    border: none !important;
+    outline: none !important;
+    min-height: 250px;
+    box-sizing: border-box !important;
+    overflow-wrap: break-word;
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    line-height: 1.7;
+    -webkit-appearance: none;
+    border-radius: 0;
+    background: transparent;
+    padding: 1rem !important;
+  }
+
+  #journalContainer {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease;
+    position: relative;
     -webkit-tap-highlight-color: transparent;
+    background: white;
+    border-radius: 1rem;
+    border: 2px solid #e5e7eb;
+    overflow: hidden;
   }
 
-  /* Main content wrapper - full height */
+  #journalContainer:focus-within {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  /* Main content wrapper */
   #main-content {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    padding: 0;
-    min-height: calc(100vh - 200px); /* Account for header and footer */
-    display: flex;
-    flex-direction: column;
+    padding: 0.75rem;
+    padding-bottom: 2rem;
   }
 
-  /* Large journal input - the star of the show */
-  #journalInput {
-    width: 100% !important;
-    min-height: 40vh !important; /* Take up significant screen space */
-    max-height: 70vh !important;
-    padding: 1.5rem !important;
-    font-size: 18px !important; /* Larger text for better readability */
-    line-height: 1.8 !important;
-    border: none !important;
-    outline: none !important;
-    resize: none !important;
-    background: transparent;
-    font-family: 'Inter', system-ui, sans-serif;
-    color: #1f2937;
-    -webkit-appearance: none;
-    border-radius: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+  /* Typography */
+  .diary-font {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.01em;
+    line-height: 1.5;
   }
 
-  #journalInput::placeholder {
-    color: #9ca3af;
-    font-size: 16px;
-    line-height: 1.6;
+  .handwritten {
+    font-family: 'Caveat', cursive;
+    letter-spacing: 0.01em;
+    line-height: 1.7;
   }
 
-  /* Journal container - clean and minimal */
-  .journal-container {
-    flex: 1;
+  /* Mobile-optimized cards */
+  .mobile-card {
     background: white;
-    border-radius: 1.5rem 1.5rem 0 0;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
-    margin-top: 1rem;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* Minimal header */
-  .journal-header {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid #f3f4f6;
-    background: #fafafa;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-
-  /* Writing area takes up most space */
-  .writing-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: white;
-    position: relative;
-  }
-
-  /* Tools float at bottom of writing area */
-  .writing-tools {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    display: flex;
-    gap: 0.5rem;
-    z-index: 10;
-  }
-
-  .tool-button {
-    width: 2.5rem;
-    height: 2.5rem;
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
-    cursor: pointer;
-  }
-
-  .tool-button:active {
-    transform: scale(0.95);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  /* Bottom action bar */
-  .action-bar {
-    padding: 1rem;
-    background: linear-gradient(to top, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.95));
-    border-top: 1px solid #f3f4f6;
-    flex-shrink: 0;
-  }
-
-  /* Large primary button */
-  .transform-button {
-    width: 100%;
-    padding: 1.125rem;
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-    color: white;
-    font-weight: 600;
-    font-size: 1rem;
-    border: none;
     border-radius: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-    transition: all 0.3s ease;
-    cursor: pointer;
-    touch-action: manipulation;
-  }
-
-  .transform-button:active {
-    transform: translateY(1px);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
-  }
-
-  .transform-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  /* Wallet status - compact and minimal */
-  .wallet-status-mini {
-    background: rgba(99, 102, 241, 0.05);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    border-radius: 2rem;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f3f4f6;
     margin-bottom: 1rem;
   }
 
-  .wallet-status-mini.connected {
-    background: rgba(34, 197, 94, 0.05);
-    border-color: rgba(34, 197, 94, 0.2);
-    color: #15803d;
+  /* Enhanced photo handling */
+  .photo-attachment-area {
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    padding: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 
-  /* Quick prompts - horizontal scroll */
-  .prompts-container {
-    padding: 0.75rem 1rem;
-    background: #fafafa;
-    border-top: 1px solid #f3f4f6;
+  .photo-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .photo-thumbnail {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+  }
+
+  .photo-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .photo-remove {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border-radius: 50%;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+
+  /* Wallet connection card */
+  .wallet-card {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .wallet-connected {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), rgba(16, 185, 129, 0.05));
+    border-color: rgba(34, 197, 94, 0.2);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    padding: 0.875rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    border: none;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    touch-action: manipulation;
+    min-height: 48px;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+  }
+
+  .btn-primary:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 4px rgba(99, 102, 241, 0.2);
+  }
+
+  .btn-secondary {
+    background: white;
+    color: #4b5563;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    touch-action: manipulation;
+    min-height: 44px;
+  }
+
+  .btn-secondary:active {
+    background: #f9fafb;
+  }
+
+  /* AI features section */
+  .ai-features {
+    background: #f9fafb;
+    border-radius: 0.75rem;
+    padding: 0.875rem;
+    margin-top: 0.75rem;
+  }
+
+  .ai-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .ai-toggle input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+  }
+
+  /* Suggestions pills */
+  .suggestions-container {
+    display: flex;
+    gap: 0.5rem;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    padding: 0.75rem 0;
     scrollbar-width: none;
-    -ms-overflow-style: none;
   }
 
-  .prompts-container::-webkit-scrollbar {
+  .suggestions-container::-webkit-scrollbar {
     display: none;
   }
 
-  .prompts-list {
-    display: flex;
-    gap: 0.5rem;
-    white-space: nowrap;
-  }
-
-  .prompt-pill {
+  .suggestion-pill {
     padding: 0.5rem 1rem;
     background: white;
     border: 1px solid #e5e7eb;
     border-radius: 2rem;
     font-size: 0.875rem;
     color: #4b5563;
-    transition: all 0.2s ease;
+    white-space: nowrap;
     cursor: pointer;
+    transition: all 0.2s ease;
     flex-shrink: 0;
   }
 
-  .prompt-pill:active {
+  .suggestion-pill:active {
     background: #f3f4f6;
     transform: scale(0.98);
   }
 
-  /* Photo preview - overlaid */
-  .photo-preview-overlay {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    background: white;
-    border-radius: 0.75rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
-    z-index: 20;
-  }
-
-  .photo-preview-content {
-    position: relative;
-    width: 5rem;
-    height: 5rem;
-  }
-
-  .photo-preview-content img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .photo-remove-btn {
-    position: absolute;
-    top: -0.25rem;
-    right: -0.25rem;
-    width: 1.5rem;
-    height: 1.5rem;
-    background: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-  }
-
   /* Loading state */
-  .loading-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.95);
+  .loading-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 50;
+    padding: 3rem 1rem;
+    text-align: center;
   }
 
   .loading-spinner {
@@ -268,431 +251,665 @@
     border-top-color: #6366f1;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
+    margin-bottom: 1rem;
   }
 
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
 
-  /* Result preview - full screen modal on mobile */
-  .result-modal {
-    position: fixed;
-    inset: 0;
+  /* Result preview */
+  .result-container {
     background: white;
-    z-index: 40;
-    display: flex;
-    flex-direction: column;
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-  }
-
-  .result-modal.show {
-    transform: translateY(0);
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-top: 1.5rem;
   }
 
   .result-header {
+    background: linear-gradient(135deg, #f9fafb, #f3f4f6);
     padding: 1rem;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid #e5e7eb;
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    flex-shrink: 0;
+    align-items: center;
   }
 
   .result-content {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
+  }
+
+  .result-photo {
+    width: 100%;
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   .result-actions {
     padding: 1rem;
-    background: white;
-    border-top: 1px solid #f3f4f6;
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
     display: flex;
     gap: 0.5rem;
-    flex-shrink: 0;
   }
 
-  .result-actions button {
-    flex: 1;
-    padding: 0.875rem;
-    border-radius: 0.75rem;
-    font-weight: 500;
-    font-size: 0.875rem;
-    transition: all 0.2s ease;
-    cursor: pointer;
+  /* Character/word counter */
+  .input-counter {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    font-size: 0.75rem;
+    color: #6b7280;
   }
 
-  /* Typography */
-  .diary-font {
-    font-family: 'Playfair Display', serif;
-    letter-spacing: -0.01em;
-  }
-
-  .handwritten {
-    font-family: 'Caveat', cursive;
-    font-size: 1.25rem;
-    line-height: 1.6;
+  /* Privacy indicator */
+  .privacy-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(34, 197, 94, 0.05);
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    color: #15803d;
+    margin-bottom: 0.75rem;
   }
 
   /* Animations */
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(1rem); }
+    from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
   .animate-fade-in {
-    animation: fadeIn 0.3s ease forwards;
+    animation: fadeIn 0.4s ease forwards;
   }
 
   .animate-slide-up {
-    animation: slideUp 0.4s ease forwards;
+    animation: slideUp 0.5s ease forwards;
   }
 
-  /* Tablet and up adjustments */
+  /* Toast notifications */
+  .toast {
+    position: fixed;
+    bottom: calc(1rem + var(--safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(17, 24, 39, 0.95);
+    color: white;
+    padding: 0.875rem 1.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    z-index: 50;
+    transition: transform 0.3s ease;
+    max-width: calc(100vw - 2rem);
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Drag and drop */
+  .drag-active {
+    background: rgba(99, 102, 241, 0.05);
+    border-color: #6366f1;
+  }
+
+  .drag-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(99, 102, 241, 0.1);
+    border: 2px dashed #6366f1;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  /* Tablet and desktop */
   @media (min-width: 768px) {
     #main-content {
-      max-width: 48rem;
+      max-width: 42rem;
       margin: 0 auto;
-      padding: 0 1rem;
-    }
-
-    .journal-container {
-      border-radius: 2rem;
-      margin: 1rem 0;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+      padding: 1rem;
     }
 
     #journalInput {
-      padding: 2rem !important;
-      font-size: 20px !important;
-      min-height: 50vh !important;
+      min-height: 300px;
+      font-size: 18px !important;
+      padding: 1.5rem !important;
     }
 
-    .transform-button {
+    .mobile-card {
+      padding: 1.5rem;
+      border-radius: 1.25rem;
+    }
+
+    .btn-primary {
       max-width: 20rem;
       margin: 0 auto;
     }
 
-    .result-modal {
-      position: relative;
-      transform: none;
-      max-width: 48rem;
-      margin: 2rem auto;
-      border-radius: 1.5rem;
+    .suggestions-container {
+      flex-wrap: wrap;
+      overflow-x: visible;
+    }
+
+    .result-container {
+      border-radius: 1.25rem;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-      max-height: 80vh;
     }
   }
 
-  /* Focus visible for accessibility */
+  /* Focus states */
   *:focus-visible {
     outline: 2px solid #6366f1;
     outline-offset: 2px;
   }
 
-  /* Reduced motion */
-  @media (prefers-reduced-motion: reduce) {
-    * {
-      animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
+  /* Animation delays */
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Main content wrapper -->
+<!-- Main content -->
 <div id="main-content" class="animate-fade-in">
-  <!-- Minimal hero - just the essentials -->
-  <div class="text-center px-4 pt-2 pb-4">
-    <!-- Wallet status (compact) -->
-    <div id="walletStatusBadge" class="wallet-status-mini">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+  <!-- Header section -->
+  <div class="text-center mb-4">
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full text-xs font-medium text-primary-600 border border-primary-100 mb-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
       </svg>
-      <span id="walletStatusText">Connect wallet for rewards</span>
+      <span>{{ current_date|default:"Today" }} • Write & Earn</span>
     </div>
     
-    <h1 class="text-2xl font-bold text-gray-900 diary-font mb-1">
-      What's on your mind?
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 diary-font mb-2">
+      Your thoughts. Encrypted. Rewarded.
     </h1>
-    <p class="text-sm text-gray-600">
-      {{ current_date|default:"Today" }} • Write freely, earn rewards
+    
+    <p class="text-sm sm:text-base text-gray-600 max-w-lg mx-auto">
+      Write privately, earn rewards. AI enhances your entries.
     </p>
   </div>
 
-  <!-- Main journal form -->
-  <form id="demoForm" class="flex-1 flex flex-col" enctype="multipart/form-data">
-    {% csrf_token %}
-    
-    <!-- Large journal container -->
-    <div class="journal-container flex-1">
-      <!-- Minimal header -->
-      <div class="journal-header">
-        <div class="flex items-center gap-2">
+  <!-- Wallet Connection Status -->
+  <div id="walletStatusSection" class="animate-slide-up delay-100">
+    <!-- Not Connected -->
+    <div id="walletNotConnected" class="wallet-card">
+      <div class="flex items-start gap-3 mb-3">
+        <div class="p-2 bg-white rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
-          <span class="font-medium text-gray-700">Journal Entry</span>
         </div>
-        <div class="text-sm text-gray-500">
-          <span id="charCount">0</span> words
+        <div class="flex-1">
+          <h3 class="font-semibold text-gray-800 text-sm">Connect Wallet for Full Features</h3>
+          <p class="text-xs text-gray-600 mt-1">Enable encryption, save entries, and earn rewards for journaling.</p>
         </div>
       </div>
+      
+      <div class="flex gap-2">
+        <button onclick="connectWallet()" class="btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          Connect Wallet
+        </button>
+        <button onclick="showWalletOptions()" class="btn-secondary flex-1">
+          Get a Wallet
+        </button>
+      </div>
+    </div>
 
-      <!-- Large writing area -->
-      <div class="writing-area flex-1">
-        <!-- Photo preview (overlaid when added) -->
-        <div id="photoPreviewContainer" class="photo-preview-overlay hidden animate-slide-up">
-          <div class="photo-preview-content">
-            <img id="photoPreview" src="" alt="Your photo">
-            <button type="button" class="photo-remove-btn" onclick="removePhoto()">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
-            </button>
+    <!-- Connected -->
+    <div id="walletConnected" class="wallet-card wallet-connected hidden">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span class="text-sm font-medium text-gray-800">Connected</span>
+          <span id="connectedAddress" class="text-xs text-gray-600">0x1234...5678</span>
+        </div>
+        <button onclick="disconnectWallet()" class="text-xs text-gray-500">Disconnect</button>
+      </div>
+      <div class="flex items-center gap-4 mt-2 text-xs text-gray-600">
+        <span>✓ Full encryption</span>
+        <span>✓ Earning rewards</span>
+        <span id="networkIndicator">✓ Base network</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Journal Form -->
+  <form id="demoForm" class="animate-slide-up delay-200" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <div class="mobile-card">
+      <!-- Privacy indicator -->
+      <div class="privacy-indicator">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        <span id="privacyStatus">Your entry is private. Connect wallet for encryption.</span>
+      </div>
+
+      <!-- Main input container -->
+      <div id="journalContainer" class="relative">
+        <!-- Drag overlay -->
+        <div id="dragOverlay" class="drag-overlay hidden">
+          <div class="text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-primary-500 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p class="text-sm font-medium text-primary-600">Drop your photo here</p>
           </div>
         </div>
 
-        <!-- The main attraction - large text input -->
+        <!-- Textarea -->
         <textarea
           id="journalInput"
           name="journal_content"
-          placeholder="Start writing your thoughts here...
-
-You can write about your day, your feelings, what you're grateful for, or anything on your mind. 
-
-Your entry will be transformed into a beautiful journal entry with AI enhancement."
-          oninput="countWords()"
+          placeholder="What's on your mind today? Write about your thoughts, feelings, experiences, or anything you want to remember..."
+          oninput="updateCounter()"
           aria-label="Journal content"
           autocomplete="off"
           spellcheck="true"
         ></textarea>
 
-        <!-- Floating tools -->
-        <div class="writing-tools">
-          <input id="journalPhoto" name="journal_photo" type="file" accept="image/*" class="hidden" onchange="previewPhoto(event)">
-          <label for="journalPhoto" class="tool-button" title="Add photo">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
-            </svg>
+        <!-- Photo attachment area -->
+        <div id="photoAttachmentArea" class="photo-attachment-area hidden">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+          </svg>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-700">Photos attached</p>
+            <div id="photoPreviewGrid" class="photo-preview-grid"></div>
+          </div>
+        </div>
+
+        <!-- Character counter -->
+        <div class="input-counter">
+          <span><span id="charCount">0</span> characters</span>
+          <span><span id="wordCount">0</span> words</span>
+        </div>
+      </div>
+
+      <!-- Quick suggestions -->
+      <div class="mt-3">
+        <p class="text-xs text-gray-600 mb-2">Quick prompts:</p>
+        <div class="suggestions-container">
+          <button type="button" onclick="addSuggestion('Today I felt')" class="suggestion-pill">Today I felt</button>
+          <button type="button" onclick="addSuggestion('I\'m grateful for')" class="suggestion-pill">I'm grateful for</button>
+          <button type="button" onclick="addSuggestion('I accomplished')" class="suggestion-pill">I accomplished</button>
+          <button type="button" onclick="addSuggestion('Something I learned')" class="suggestion-pill">Something I learned</button>
+          <button type="button" onclick="addSuggestion('A moment to remember')" class="suggestion-pill">A moment to remember</button>
+          <button type="button" onclick="addSuggestion('My biggest challenge was')" class="suggestion-pill">My biggest challenge</button>
+        </div>
+      </div>
+
+      <!-- AI Features -->
+      <div class="ai-features">
+        <div class="ai-toggle">
+          <input type="checkbox" id="aiEnhancement" checked>
+          <label for="aiEnhancement" class="flex-1">
+            <div class="font-medium text-sm text-gray-700">AI Enhancement</div>
+            <div class="text-xs text-gray-500">Transform your thoughts into polished entries</div>
           </label>
         </div>
-      </div>
-
-      <!-- Quick prompts -->
-      <div class="prompts-container">
-        <div class="prompts-list">
-          <button type="button" onclick="addSuggestion('Today I felt')" class="prompt-pill">Today I felt</button>
-          <button type="button" onclick="addSuggestion('I\'m grateful for')" class="prompt-pill">I'm grateful for</button>
-          <button type="button" onclick="addSuggestion('I accomplished')" class="prompt-pill">I accomplished</button>
-          <button type="button" onclick="addSuggestion('I learned that')" class="prompt-pill">I learned that</button>
-          <button type="button" onclick="addSuggestion('A moment worth remembering:')" class="prompt-pill">Worth remembering</button>
+        
+        <div id="aiOptions" class="mt-2 pl-8 text-xs text-gray-600">
+          <div class="flex items-center gap-2">
+            <span>Style:</span>
+            <select id="writingStyle" class="text-xs border rounded px-2 py-1">
+              <option value="reflective">Reflective</option>
+              <option value="gratitude">Gratitude-focused</option>
+              <option value="narrative">Story-like</option>
+              <option value="concise">Brief & Clear</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <!-- Action bar -->
-      <div class="action-bar">
-        <button type="button" id="demoButton" onclick="generateDemo()" class="transform-button">
-          <span>Transform into Journal Entry</span>
+      <!-- Action buttons -->
+      <div class="mt-4 space-y-2">
+        <button type="button" id="transformBtn" onclick="generateDemo()" class="btn-primary">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
+          Transform into Journal Entry
         </button>
-        <p class="text-xs text-center text-gray-500 mt-2">
-          AI will enhance your writing while keeping your voice
-        </p>
+        
+        <div class="flex gap-2">
+          <input id="photoInput" name="journal_photo" type="file" accept="image/*" multiple class="hidden" onchange="handlePhotoSelect(event)">
+          <label for="photoInput" class="btn-secondary flex-1 flex items-center justify-center gap-2 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+            </svg>
+            Add Photos
+          </label>
+          <button type="button" onclick="resetForm()" class="btn-secondary flex-1">Clear</button>
+        </div>
       </div>
     </div>
   </form>
 
-  <!-- Loading overlay -->
-  <div id="loadingIndicator" class="loading-overlay hidden">
-    <div class="loading-spinner mb-4"></div>
-    <p class="text-gray-700 font-medium">Crafting your journal entry...</p>
-    <p class="text-sm text-gray-500 mt-1">This takes just a moment</p>
+  <!-- Loading State -->
+  <div id="loadingIndicator" class="mobile-card hidden">
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="text-gray-700 font-medium">Creating your journal entry...</p>
+      <p class="text-sm text-gray-500 mt-1">Using AI to enhance your writing</p>
+    </div>
   </div>
 
-  <!-- Result preview (full screen modal on mobile) -->
-  <div id="resultPreview" class="result-modal">
+  <!-- Result Preview -->
+  <div id="resultPreview" class="result-container hidden animate-slide-up">
     <div class="result-header">
-      <h3 class="font-semibold text-gray-900">Your Journal Entry</h3>
-      <button onclick="closeResult()" class="p-2 hover:bg-gray-100 rounded-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+      <h3 class="font-semibold text-gray-800">Your Journal Entry</h3>
+      <button onclick="editEntry()" class="p-2 hover:bg-gray-100 rounded-lg transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
         </svg>
       </button>
     </div>
 
     <div class="result-content">
-      <div id="journalPhotoDisplay" class="hidden mb-4">
-        <img id="journalPhotoImage" class="w-full rounded-lg" src="" alt="Journal photo">
+      <div id="resultPhotos" class="hidden">
+        <!-- Photos will be displayed here -->
       </div>
       
       <h2 id="entryTitle" class="text-xl font-bold text-gray-900 diary-font mb-3">
-        My Day - {{ current_date|default:"Today" }}
+        My Journal Entry
       </h2>
       
-      <div id="journalEntry" class="handwritten text-gray-700 leading-relaxed">
-        <!-- Generated content goes here -->
+      <div id="journalEntry" class="prose prose-gray max-w-none">
+        <!-- Generated content -->
       </div>
     </div>
 
     <div class="result-actions">
-      <button type="button" onclick="editJournalEntry()" class="bg-gray-100 text-gray-700 hover:bg-gray-200">
-        Edit
-      </button>
-      <button type="button" onclick="saveEntry()" class="bg-gradient-to-r from-primary-600 to-primary-700 text-white">
+      <button type="button" onclick="saveEntry()" id="saveBtn" class="btn-primary flex-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
         Save Entry
       </button>
+      <button type="button" onclick="tryAgain()" class="btn-secondary flex-1">Try Again</button>
     </div>
   </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer"></div>
 </div>
 
 <!-- JavaScript -->
 <script>
-// Variables
-let currentPhotoFile = null;
-let currentPhotoDataUrl = null;
+// Global variables
+let currentPhotos = [];
+let journalCache = {
+  entries: {},
+  init() {
+    try {
+      const stored = localStorage.getItem('diaryVaultCache');
+      if (stored) {
+        const data = JSON.parse(stored);
+        this.entries = data.entries || {};
+      }
+    } catch (e) {
+      console.error('Cache init error:', e);
+    }
+  },
+  get(key) {
+    return this.entries[key];
+  },
+  set(key, value) {
+    this.entries[key] = value;
+    try {
+      localStorage.setItem('diaryVaultCache', JSON.stringify({ entries: this.entries }));
+    } catch (e) {
+      console.error('Cache save error:', e);
+    }
+  }
+};
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
-  initializeJournal();
-  setupWalletListener();
-  
-  // Focus on the main input
-  setTimeout(() => {
-    document.getElementById('journalInput').focus();
-  }, 300);
+  journalCache.init();
+  initializeForm();
+  setupWalletIntegration();
+  setupDragAndDrop();
+  updateCounter();
 });
 
-function initializeJournal() {
-  const journalInput = document.getElementById('journalInput');
+function initializeForm() {
+  const input = document.getElementById('journalInput');
+  const aiToggle = document.getElementById('aiEnhancement');
+  const aiOptions = document.getElementById('aiOptions');
   
-  // Auto-resize textarea as user types
-  journalInput.addEventListener('input', function() {
+  // Auto-resize textarea
+  input.addEventListener('input', function() {
     this.style.height = 'auto';
-    this.style.height = this.scrollHeight + 'px';
+    this.style.height = Math.min(this.scrollHeight, 500) + 'px';
   });
   
-  // Initial count
-  countWords();
+  // AI toggle
+  aiToggle.addEventListener('change', function() {
+    aiOptions.style.display = this.checked ? 'block' : 'none';
+  });
+  
+  // Focus input on load
+  setTimeout(() => input.focus(), 300);
 }
 
-function setupWalletListener() {
+function setupWalletIntegration() {
   window.addEventListener('walletConnectionChanged', function(event) {
-    const { isConnected, address } = event.detail;
-    updateWalletStatus(isConnected, address);
+    const { isConnected, address, chainId } = event.detail;
+    updateWalletUI(isConnected, address, chainId);
   });
   
   // Check initial state
   setTimeout(() => {
-    const walletInfo = getWalletInfo();
-    updateWalletStatus(walletInfo.isConnected, walletInfo.address);
+    if (typeof getWalletInfo === 'function') {
+      const info = getWalletInfo();
+      updateWalletUI(info.isConnected, info.address, info.chainId);
+    }
   }, 1000);
 }
 
-function updateWalletStatus(isConnected, address) {
-  const badge = document.getElementById('walletStatusBadge');
-  const text = document.getElementById('walletStatusText');
+function updateWalletUI(isConnected, address, chainId) {
+  const notConnected = document.getElementById('walletNotConnected');
+  const connected = document.getElementById('walletConnected');
+  const addressSpan = document.getElementById('connectedAddress');
+  const privacyStatus = document.getElementById('privacyStatus');
+  const networkIndicator = document.getElementById('networkIndicator');
   
   if (isConnected && address) {
-    badge.classList.add('connected');
-    text.textContent = `Connected: ${address.slice(0, 6)}...${address.slice(-4)}`;
+    notConnected.classList.add('hidden');
+    connected.classList.remove('hidden');
+    addressSpan.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+    privacyStatus.textContent = 'Your entry is fully encrypted and earning rewards.';
+    
+    if (chainId !== 8453) {
+      networkIndicator.textContent = '⚠️ Switch to Base network';
+      networkIndicator.className = 'text-amber-600';
+    }
   } else {
-    badge.classList.remove('connected');
-    text.textContent = 'Connect wallet for rewards';
-    badge.style.cursor = 'pointer';
-    badge.onclick = () => connectWallet();
+    notConnected.classList.remove('hidden');
+    connected.classList.add('hidden');
+    privacyStatus.textContent = 'Your entry is private. Connect wallet for encryption.';
   }
 }
 
-function countWords() {
-  const input = document.getElementById('journalInput');
-  const count = document.getElementById('charCount');
-  const words = input.value.trim().split(/\s+/).filter(word => word.length > 0);
-  count.textContent = words.length;
+function setupDragAndDrop() {
+  const container = document.getElementById('journalContainer');
+  const overlay = document.getElementById('dragOverlay');
   
-  // Enable/disable button
-  const button = document.getElementById('demoButton');
-  button.disabled = words.length < 3;
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    container.addEventListener(eventName, preventDefaults, false);
+  });
+  
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  
+  container.addEventListener('dragenter', function() {
+    container.classList.add('drag-active');
+    overlay.classList.remove('hidden');
+  });
+  
+  container.addEventListener('dragleave', function(e) {
+    if (e.target === container) {
+      container.classList.remove('drag-active');
+      overlay.classList.add('hidden');
+    }
+  });
+  
+  container.addEventListener('drop', function(e) {
+    container.classList.remove('drag-active');
+    overlay.classList.add('hidden');
+    
+    const files = Array.from(e.dataTransfer.files);
+    handlePhotoFiles(files.filter(f => f.type.startsWith('image/')));
+  });
+}
+
+function updateCounter() {
+  const input = document.getElementById('journalInput');
+  const charCount = document.getElementById('charCount');
+  const wordCount = document.getElementById('wordCount');
+  const transformBtn = document.getElementById('transformBtn');
+  
+  const text = input.value.trim();
+  const chars = text.length;
+  const words = text ? text.split(/\s+/).length : 0;
+  
+  charCount.textContent = chars;
+  wordCount.textContent = words;
+  
+  // Enable/disable transform button
+  transformBtn.disabled = words < 5;
+  transformBtn.style.opacity = words < 5 ? '0.6' : '1';
 }
 
 function addSuggestion(text) {
   const input = document.getElementById('journalInput');
-  const currentText = input.value;
+  const current = input.value;
   
-  if (currentText && !currentText.endsWith(' ')) {
-    input.value = currentText + ' ' + text + ' ';
+  if (current && !current.endsWith(' ')) {
+    input.value = current + ' ' + text + ' ';
   } else {
-    input.value = currentText + text + ' ';
+    input.value = current + text + ' ';
   }
   
   input.focus();
-  countWords();
-  
-  // Trigger resize
+  updateCounter();
   input.dispatchEvent(new Event('input'));
 }
 
-function previewPhoto(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  if (file.size > 5 * 1024 * 1024) {
-    alert('Image must be smaller than 5MB');
-    event.target.value = '';
-    return;
-  }
-  
-  currentPhotoFile = file;
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    currentPhotoDataUrl = e.target.result;
-    document.getElementById('photoPreview').src = currentPhotoDataUrl;
-    document.getElementById('photoPreviewContainer').classList.remove('hidden');
-  };
-  reader.readAsDataURL(file);
+function handlePhotoSelect(event) {
+  const files = Array.from(event.target.files);
+  handlePhotoFiles(files);
 }
 
-function removePhoto() {
-  currentPhotoFile = null;
-  currentPhotoDataUrl = null;
-  document.getElementById('journalPhoto').value = '';
-  document.getElementById('photoPreviewContainer').classList.add('hidden');
+function handlePhotoFiles(files) {
+  const validFiles = files.filter(file => {
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Image must be smaller than 5MB', 'error');
+      return false;
+    }
+    return true;
+  });
+  
+  validFiles.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      currentPhotos.push({
+        file: file,
+        url: e.target.result,
+        name: file.name
+      });
+      updatePhotoDisplay();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function updatePhotoDisplay() {
+  const area = document.getElementById('photoAttachmentArea');
+  const grid = document.getElementById('photoPreviewGrid');
+  
+  if (currentPhotos.length > 0) {
+    area.classList.remove('hidden');
+    grid.innerHTML = currentPhotos.map((photo, index) => `
+      <div class="photo-thumbnail">
+        <img src="${photo.url}" alt="${photo.name}">
+        <button type="button" onclick="removePhoto(${index})" class="photo-remove">×</button>
+      </div>
+    `).join('');
+  } else {
+    area.classList.add('hidden');
+  }
+}
+
+function removePhoto(index) {
+  currentPhotos.splice(index, 1);
+  updatePhotoDisplay();
 }
 
 function generateDemo() {
   const input = document.getElementById('journalInput');
   const content = input.value.trim();
   
-  if (content.split(/\s+/).length < 3) {
+  if (content.split(/\s+/).length < 5) return;
+  
+  // Check cache
+  const cacheKey = content + (currentPhotos.length > 0 ? '_photos' : '');
+  const cached = journalCache.get(cacheKey);
+  if (cached && currentPhotos.length === 0) {
+    displayResult(cached);
     return;
   }
   
   // Show loading
   document.getElementById('loadingIndicator').classList.remove('hidden');
-  
-  // Disable button
-  const button = document.getElementById('demoButton');
-  button.disabled = true;
+  document.getElementById('demoForm').style.display = 'none';
   
   // Prepare form data
   const formData = new FormData();
   formData.append('journal_content', content);
   formData.append('csrfmiddlewaretoken', getCsrfToken());
   
-  if (currentPhotoFile) {
-    formData.append('journal_photo', currentPhotoFile);
+  if (document.getElementById('aiEnhancement').checked) {
+    formData.append('personalize', 'true');
+    formData.append('writing_style', document.getElementById('writingStyle').value);
+  }
+  
+  // Add photos
+  currentPhotos.forEach((photo, index) => {
+    formData.append(`photo_${index}`, photo.file);
+  });
+  
+  // Add wallet info if connected
+  if (typeof getWalletInfo === 'function') {
+    const wallet = getWalletInfo();
+    if (wallet.isConnected) {
+      formData.append('wallet_address', wallet.address);
+      formData.append('encrypted', 'true');
+    }
   }
   
   // Make request
@@ -702,80 +919,147 @@ function generateDemo() {
   })
   .then(response => response.json())
   .then(data => {
-    // Hide loading
     document.getElementById('loadingIndicator').classList.add('hidden');
-    button.disabled = false;
     
     if (data.error) {
-      alert(data.error);
+      showToast(data.error, 'error');
+      document.getElementById('demoForm').style.display = 'block';
       return;
     }
     
-    // Display result
+    // Cache result
+    journalCache.set(cacheKey, data);
     displayResult(data);
   })
   .catch(error => {
     document.getElementById('loadingIndicator').classList.add('hidden');
-    button.disabled = false;
-    alert('Failed to generate entry. Please try again.');
+    document.getElementById('demoForm').style.display = 'block';
+    showToast('Failed to generate entry. Please try again.', 'error');
   });
 }
 
 function displayResult(data) {
-  const journalEntry = document.getElementById('journalEntry');
-  journalEntry.innerHTML = data.entry.replace(/\n/g, '<br>');
+  document.getElementById('demoForm').style.display = 'none';
   
-  const title = document.getElementById('entryTitle');
-  title.textContent = data.title || 'My Journal Entry';
+  const preview = document.getElementById('resultPreview');
+  const entryDiv = document.getElementById('journalEntry');
+  const titleDiv = document.getElementById('entryTitle');
+  const photosDiv = document.getElementById('resultPhotos');
   
-  if (currentPhotoDataUrl) {
-    document.getElementById('journalPhotoDisplay').classList.remove('hidden');
-    document.getElementById('journalPhotoImage').src = currentPhotoDataUrl;
+  // Set content
+  entryDiv.innerHTML = data.entry.replace(/\n/g, '<br>');
+  titleDiv.textContent = data.title || 'My Journal Entry';
+  
+  // Display photos
+  if (currentPhotos.length > 0) {
+    photosDiv.innerHTML = currentPhotos.map(photo => 
+      `<img src="${photo.url}" alt="${photo.name}" class="result-photo">`
+    ).join('');
+    photosDiv.classList.remove('hidden');
+  } else {
+    photosDiv.classList.add('hidden');
   }
   
-  // Show result modal
-  const modal = document.getElementById('resultPreview');
-  modal.classList.add('show');
+  preview.classList.remove('hidden');
+  preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function closeResult() {
-  document.getElementById('resultPreview').classList.remove('show');
-}
-
-function editJournalEntry() {
+function editEntry() {
   const entry = document.getElementById('journalEntry');
   const input = document.getElementById('journalInput');
   
-  // Get text content
-  const text = entry.innerHTML.replace(/<br\s*\/?>/gi, '\n');
-  input.value = text;
+  input.value = entry.innerText;
   
-  // Close modal and focus input
-  closeResult();
+  document.getElementById('resultPreview').classList.add('hidden');
+  document.getElementById('demoForm').style.display = 'block';
+  
   input.focus();
-  countWords();
-  
-  // Trigger resize
+  updateCounter();
   input.dispatchEvent(new Event('input'));
 }
 
+function tryAgain() {
+  document.getElementById('resultPreview').classList.add('hidden');
+  document.getElementById('demoForm').style.display = 'block';
+  document.getElementById('journalInput').focus();
+}
+
 function saveEntry() {
-  const walletInfo = getWalletInfo();
-  if (!walletInfo.isConnected) {
-    if (confirm('Connect your wallet to save and earn rewards?')) {
+  const wallet = typeof getWalletInfo === 'function' ? getWalletInfo() : { isConnected: false };
+  
+  if (!wallet.isConnected) {
+    if (confirm('Connect your wallet to save and earn rewards. Continue?')) {
       connectWallet();
     }
     return;
   }
   
-  // Save logic here
-  alert('Entry saved! You earned rewards.');
-  closeResult();
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<svg class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Saving...';
   
-  // Reset form
-  document.getElementById('journalInput').value = '';
-  removePhoto();
-  countWords();
+  // Prepare save data
+  const formData = new FormData();
+  formData.append('title', document.getElementById('entryTitle').textContent);
+  formData.append('content', document.getElementById('journalEntry').innerText);
+  formData.append('wallet_address', wallet.address);
+  formData.append('csrfmiddlewaretoken', getCsrfToken());
+  
+  currentPhotos.forEach((photo, index) => {
+    formData.append(`photo_${index}`, photo.file);
+  });
+  
+  fetch('/save-generated-entry/', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showToast(`Entry saved! Earned ${data.rewards || 10} tokens`, 'success');
+      setTimeout(() => {
+        window.location.href = data.redirect_url || '/dashboard/';
+      }, 1500);
+    } else {
+      throw new Error(data.error || 'Save failed');
+    }
+  })
+  .catch(error => {
+    btn.disabled = false;
+    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Save Entry';
+    showToast(error.message || 'Failed to save. Please try again.', 'error');
+  });
+}
+
+function resetForm() {
+  if (confirm('Clear all content and start over?')) {
+    document.getElementById('journalInput').value = '';
+    currentPhotos = [];
+    updatePhotoDisplay();
+    updateCounter();
+    document.getElementById('journalInput').focus();
+  }
+}
+
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  
+  if (type === 'error') {
+    toast.style.background = 'rgba(239, 68, 68, 0.95)';
+  } else if (type === 'success') {
+    toast.style.background = 'rgba(34, 197, 94, 0.95)';
+  }
+  
+  container.appendChild(toast);
+  
+  setTimeout(() => toast.classList.add('show'), 10);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
 }
 
 function getCsrfToken() {
