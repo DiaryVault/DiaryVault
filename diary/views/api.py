@@ -211,15 +211,29 @@ def save_generated_entry(request):
             # Add tags if provided
             if not tags and content:
                 # Auto-generate tags if none were provided
-                tags = auto_generate_tags(content, mood)
+                # FIX: Import auto_generate_tags from the correct location
+                try:
+                    from ..utils.analytics import auto_generate_tags
+                except ImportError:
+                    try:
+                        from diary.utils.analytics import auto_generate_tags
+                    except ImportError:
+                        # If auto_generate_tags is not available, use empty tags
+                        logger.warning("auto_generate_tags not found, skipping tag generation")
+                        tags = []
+                    else:
+                        tags = auto_generate_tags(content, mood)
+                else:
+                    tags = auto_generate_tags(content, mood)
 
             if tags:
                 for tag_name in tags:
-                    tag, created = Tag.objects.get_or_create(
-                        name=tag_name.lower().strip(),
-                        user=request.user
-                    )
-                    entry.tags.add(tag)
+                    if tag_name:  # Make sure tag_name is not empty
+                        tag, created = Tag.objects.get_or_create(
+                            name=tag_name.lower().strip(),
+                            user=request.user
+                        )
+                        entry.tags.add(tag)
 
             # Calculate rewards for authenticated users with wallet
             word_count = len(content.split())

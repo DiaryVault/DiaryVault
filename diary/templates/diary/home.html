@@ -919,14 +919,19 @@ function updateActionButtons(isConnected) {
 
 // Enhanced save function for blockchain storage
 function saveToBlockchain() {
+  console.log('saveToBlockchain called');
+  
   const walletInfo = getWalletInfo();
+  console.log('Wallet info:', walletInfo);
   
   if (!walletInfo.isConnected) {
+    console.log('Wallet not connected, prompting connection');
     connectWallet();
     return;
   }
 
   if (walletInfo.chainId !== 8453) {
+    console.log('Wrong chain, prompting switch');
     switchToBaseNetwork();
     return;
   }
@@ -934,10 +939,19 @@ function saveToBlockchain() {
   const journalEntry = document.getElementById('journalEntry');
   const entryTitle = document.getElementById('entryTitle');
 
-  if (!journalEntry || !entryTitle) return;
+  if (!journalEntry || !entryTitle) {
+    console.error('Missing journal entry or title elements');
+    return;
+  }
 
   const journalContent = journalEntry.innerHTML.replace(/<[^>]*>/g, '');
   const titleText = entryTitle.textContent;
+
+  console.log('Preparing to save:', {
+    title: titleText,
+    contentLength: journalContent.length,
+    hasPhoto: !!currentPhotoFile
+  });
 
   // Show saving state
   const saveButton = document.querySelector('#walletConnectedActions button');
@@ -953,6 +967,8 @@ function saveToBlockchain() {
     saveButton.disabled = true;
 
     const csrftoken = getCsrfToken();
+    console.log('CSRF token:', csrftoken ? 'Found' : 'Missing');
+    
     const formData = new FormData();
     
     formData.append('title', titleText);
@@ -963,8 +979,11 @@ function saveToBlockchain() {
 
     if (currentPhotoFile) {
       formData.append('journal_photo', currentPhotoFile);
+      console.log('Photo included in form data');
     }
 
+    console.log('Sending request to /save-generated-entry/');
+    
     fetch('/save-generated-entry/', {
       method: 'POST',
       headers: {
@@ -973,12 +992,21 @@ function saveToBlockchain() {
       body: formData
     })
     .then(response => {
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // Try to get error details from response
+        return response.text().then(text => {
+          console.error('Response body:', text);
+          throw new Error(`HTTP ${response.status}: ${response.statusText} - ${text}`);
+        });
       }
       return response.json();
     })
     .then(data => {
+      console.log('Response data:', data);
+      
       if (data.success) {
         const rewards = data.rewards || calculateRewards(journalContent, walletInfo.isConnected);
 
@@ -1028,6 +1056,7 @@ function saveToBlockchain() {
         }
       } else {
         // Handle error
+        console.error('Server returned success: false', data);
         saveButton.innerHTML = originalText;
         saveButton.disabled = false;
         if (window.showToast) {
@@ -1036,22 +1065,44 @@ function saveToBlockchain() {
       }
     })
     .catch(error => {
-      console.error('Save error:', error);
+      console.error('Save error details:', error);
+      console.error('Error stack:', error.stack);
+      
       saveButton.innerHTML = originalText;
       saveButton.disabled = false;
+      
+      // More detailed error message
+      let errorMessage = 'Failed to save entry. ';
+      if (error.message.includes('404')) {
+        errorMessage += 'The save endpoint was not found.';
+      } else if (error.message.includes('403')) {
+        errorMessage += 'Permission denied. Please check your authentication.';
+      } else if (error.message.includes('500')) {
+        errorMessage += 'Server error occurred.';
+      } else {
+        errorMessage += 'Please try again.';
+      }
+      
       if (window.showToast) {
-        window.showToast('Failed to save entry. Please try again.', 'error');
+        window.showToast(errorMessage, 'error');
       }
     });
   }
 }
 
-// Helper function to calculate rewards
-function calculateRewards(content, hasWallet) {
-  const wordCount = content.split(' ').length;
-  const baseReward = Math.floor(wordCount / 10);
-  const walletBonus = hasWallet ? 5 : 0;
-  return baseReward + walletBonus;
+// Also check if getCsrfToken is working
+function getCsrfToken() {
+  const token = document.querySelector('[name=csrfmiddlewaretoken]');
+  if (!token) {
+    console.error('CSRF token not found in DOM');
+    // Try alternate methods
+    const cookieToken = document.cookie.split(';')
+      .find(c => c.trim().startsWith('csrftoken='));
+    if (cookieToken) {
+      return cookieToken.split('=')[1];
+    }
+  }
+  return token ? token.value : '';
 }
 
 // Update the existing generateDemo function to be wallet-aware
