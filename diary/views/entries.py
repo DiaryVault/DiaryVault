@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.urls import reverse
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from ..models import Entry, Tag, SummaryVersion, EntryPhoto
 from ..forms import EntryForm
@@ -74,9 +74,18 @@ def journal(request):
                     if wallet_address:
                         entry_data['wallet_address'] = wallet_address
                     
-                    # Store in session
+                    # Store in session as DICTIONARY
                     if 'anonymous_entries' not in request.session:
                         request.session['anonymous_entries'] = {}
+                    
+                    # Convert to dict if it's a list (for backwards compatibility)
+                    if isinstance(request.session['anonymous_entries'], list):
+                        # Convert list to dict
+                        old_entries = request.session['anonymous_entries']
+                        request.session['anonymous_entries'] = {}
+                        for idx, entry in enumerate(old_entries):
+                            entry_id = entry.get('id', str(idx))
+                            request.session['anonymous_entries'][entry_id] = entry
                     
                     request.session['anonymous_entries'][temp_id] = entry_data
                     request.session['pending_entry'] = entry_data
@@ -127,9 +136,19 @@ def journal(request):
         entry_id = request.GET.get('entry_id')
         if entry_id and 'anonymous_entries' in request.session:
             anonymous_entries = request.session.get('anonymous_entries', {})
-            if entry_id in anonymous_entries:
-                pending_entry_data = anonymous_entries[entry_id]
-                
+            
+            # Handle both dict and list formats for backward compatibility
+            if isinstance(anonymous_entries, dict):
+                if entry_id in anonymous_entries:
+                    pending_entry_data = anonymous_entries[entry_id]
+            elif isinstance(anonymous_entries, list):
+                # If it's a list, look for the entry with matching ID
+                for entry in anonymous_entries:
+                    if str(entry.get('id')) == str(entry_id):
+                        pending_entry_data = entry
+                        break
+            
+            if pending_entry_data:
                 # Pre-populate the form with anonymous data
                 initial_data = {
                     'title': pending_entry_data.get('title', ''),
@@ -179,19 +198,35 @@ def journal(request):
     # Get anonymous entries count for display
     anonymous_entries_count = 0
     anonymous_entries_list = []
+    
     if 'anonymous_entries' in request.session:
         anonymous_entries = request.session.get('anonymous_entries', {})
-        anonymous_entries_count = len(anonymous_entries)
-        # Convert to list for template display
-        anonymous_entries_list = [
-            {
-                'id': entry_id,
-                'title': entry_data.get('title', 'Untitled'),
-                'created_at': entry_data.get('created_at'),
-                'preview': entry_data.get('content', '')[:100] + '...' if len(entry_data.get('content', '')) > 100 else entry_data.get('content', '')
-            }
-            for entry_id, entry_data in anonymous_entries.items()
-        ]
+        
+        # Handle both dict and list formats
+        if isinstance(anonymous_entries, dict):
+            anonymous_entries_count = len(anonymous_entries)
+            # Convert dict to list for template display
+            anonymous_entries_list = [
+                {
+                    'id': entry_id,
+                    'title': entry_data.get('title', 'Untitled'),
+                    'created_at': entry_data.get('created_at'),
+                    'preview': entry_data.get('content', '')[:100] + '...' if len(entry_data.get('content', '')) > 100 else entry_data.get('content', '')
+                }
+                for entry_id, entry_data in anonymous_entries.items()
+            ]
+        elif isinstance(anonymous_entries, list):
+            anonymous_entries_count = len(anonymous_entries)
+            # If it's already a list, just format it for display
+            anonymous_entries_list = [
+                {
+                    'id': entry.get('id', str(i)),
+                    'title': entry.get('title', 'Untitled'),
+                    'created_at': entry.get('created_at'),
+                    'preview': entry.get('content', '')[:100] + '...' if len(entry.get('content', '')) > 100 else entry.get('content', '')
+                }
+                for i, entry in enumerate(anonymous_entries)
+            ]
 
     context = {
         'form': form,
@@ -216,8 +251,12 @@ def entry_detail(request, entry_id):
     if request.method == 'POST':
         if 'regenerate_summary' in request.POST:
             # Regenerate AI summary
-            AIService.generate_entry_summary(entry)
-            messages.success(request, 'Summary regenerated!')
+            try:
+                AIService.generate_entry_summary(entry)
+                messages.success(request, 'Summary regenerated!')
+            except Exception as e:
+                logger.error(f"Error regenerating summary: {e}")
+                messages.error(request, 'Could not regenerate summary. Please try again.')
             return redirect('entry_detail', entry_id=entry.id)
 
         elif 'restore_version' in request.POST:
@@ -264,7 +303,7 @@ def entry_detail(request, entry_id):
 
     context = {
         'entry': entry,
-        'summary_versions': entry.versions.all(),
+        'summary_versions': entry.versions.all() if hasattr(entry, 'versions') else [],
         'related_entries': related_entries,
         'debug_photo_count': photo_count,
         'debug_photo_info': photo_info
@@ -306,7 +345,14 @@ def edit_entry(request, entry_id):
 
 @login_required
 def delete_entry(request, entry_id):
+    """Delete an entry"""
     entry = get_object_or_404(Entry, id=entry_id, user=request.user)
+    
+    if request.method == 'POST':
+        entry.delete()
+        messages.success(request, 'Entry deleted successfully.')
+        return redirect('library')
+    
     return render(request, 'diary/delete_entry.html', {'entry': entry})
 
 @login_required
@@ -371,9 +417,6 @@ def library(request):
 
     # Sort time periods by most recent first
     sorted_periods = sorted(time_periods.values(), key=lambda x: x['period'], reverse=True)
-
-    # OPTIMIZED: Get tags with counts using a single query with annotation
-    from django.db.models import Count
 
     # Get tags with their usage counts in one query
     user_tags = Tag.objects.filter(user=request.user).annotate(
