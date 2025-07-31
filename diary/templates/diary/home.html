@@ -807,13 +807,91 @@ window.showToast = function(message, type = 'info') {
 };
 
 // Mock wallet functions (replace with actual Web3 implementation)
-window.connectWallet = function() {
+window.connectWallet = async function() {
   console.log('Connecting wallet...');
-  // Simulate wallet connection
-  setTimeout(() => {
-    updateHomePageForWallet(true, '0x1234567890abcdef1234567890abcdef12345678', 8453);
-    window.showToast('Wallet connected successfully!', 'success');
-  }, 1000);
+  
+  try {
+    // First, connect to the actual Web3 wallet (MetaMask, etc.)
+    if (typeof window.ethereum === 'undefined') {
+      window.showToast('Please install MetaMask or another Web3 wallet', 'error');
+      return;
+    }
+
+    // Request account access
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const walletAddress = accounts[0];
+    
+    // Get the chain ID
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    const chainIdDecimal = parseInt(chainId, 16);
+    
+    // Step 1: Request nonce from your backend
+    const nonceResponse = await fetch('/api/web3/request-nonce/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify({
+        wallet_address: walletAddress
+      })
+    });
+    
+    const nonceData = await nonceResponse.json();
+    
+    if (!nonceData.success) {
+      window.showToast('Failed to get authentication nonce', 'error');
+      return;
+    }
+    
+    // Step 2: Sign the message with the wallet
+    const message = nonceData.message;
+    const signature = await window.ethereum.request({
+      method: 'personal_sign',
+      params: [message, walletAddress]
+    });
+    
+    // Step 3: Send signature to backend for authentication
+    const authResponse = await fetch('/api/web3/login/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify({
+        wallet_address: walletAddress,
+        signature: signature,
+        nonce: nonceData.nonce,
+        wallet_type: 'metamask',
+        chain_id: chainIdDecimal
+      })
+    });
+    
+    const authData = await authResponse.json();
+    
+    if (authData.success) {
+      // Store the token if needed
+      if (authData.token) {
+        localStorage.setItem('web3_auth_token', authData.token);
+      }
+      
+      // Update UI
+      updateHomePageForWallet(true, walletAddress, chainIdDecimal);
+      window.showToast('Wallet connected and authenticated!', 'success');
+      
+      // If there was a pending entry, it should be saved now
+      if (authData.pending_entry_saved) {
+        window.showToast('Your entry has been saved!', 'success');
+      }
+      
+    } else {
+      window.showToast(authData.error || 'Authentication failed', 'error');
+    }
+    
+  } catch (error) {
+    console.error('Wallet connection error:', error);
+    window.showToast('Failed to connect wallet: ' + error.message, 'error');
+  }
 };
 
 window.disconnectWallet = function() {
@@ -1032,6 +1110,10 @@ function saveToBlockchain() {
     const csrftoken = getCsrfToken();
     console.log('CSRF token:', csrftoken ? 'Found' : 'Missing');
     
+    // Get the auth token from localStorage
+    const authToken = localStorage.getItem('web3_auth_token');
+    console.log('Auth token:', authToken ? 'Found' : 'Missing');
+    
     const formData = new FormData();
     
     formData.append('title', titleText);
@@ -1045,18 +1127,55 @@ function saveToBlockchain() {
       console.log('Photo included in form data');
     }
 
+    // Build headers with auth token if available
+    const headers = {
+      'X-CSRFToken': csrftoken
+    };
+    
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    }
+
     console.log('Sending request to /save-generated-entry/');
     
     fetch('/save-generated-entry/', {
       method: 'POST',
-      headers: {
-        'X-CSRFToken': csrftoken
-      },
+      headers: headers,
       body: formData
     })
     .then(response => {
       console.log('Response status:', response.status);
       console.log('Response headers:', response.headers);
+      
+      // Handle authentication errors specifically
+      if (response.status === 401 || response.status === 403) {
+        // User is not authenticated - need to do Web3 login
+        console.log('User not authenticated, triggering Web3 login');
+        
+        // Store the entry data for after authentication
+        const pendingEntry = {
+          title: titleText,
+          content: journalContent,
+          had_photo: !!currentPhotoFile
+        };
+        sessionStorage.setItem('pending_entry', JSON.stringify(pendingEntry));
+        
+        // Reset button
+        saveButton.innerHTML = originalText;
+        saveButton.disabled = false;
+        
+        // Show message and trigger Web3 authentication
+        if (window.showToast) {
+          window.showToast('Please authenticate with your wallet to save entries', 'info');
+        }
+        
+        // Trigger Web3 authentication flow
+        setTimeout(() => {
+          connectWallet(); // This should now do the full Web3 auth
+        }, 1000);
+        
+        return Promise.reject(new Error('Authentication required'));
+      }
       
       if (!response.ok) {
         // Try to get error details from response
@@ -1084,13 +1203,13 @@ function saveToBlockchain() {
           `;
           
           if (window.showToast) {
-            window.showToast('Entry saved temporarily. Sign up to save permanently and earn rewards!', 'info');
+            window.showToast('Entry saved temporarily. Authenticate with your wallet to save permanently!', 'info');
           }
 
-          // Show signup prompt after a delay
+          // Trigger Web3 auth after a delay
           setTimeout(() => {
-            if (confirm('Would you like to create an account to save this entry permanently and earn rewards?')) {
-              window.location.href = data.signup_url || '/signup/?feature=journal&next=/dashboard/';
+            if (confirm('Would you like to authenticate with your wallet to save this entry permanently and earn rewards?')) {
+              connectWallet(); // This should do the full Web3 auth
             }
           }, 1500);
           
@@ -1106,6 +1225,9 @@ function saveToBlockchain() {
           if (window.showToast) {
             window.showToast(`Entry saved! You earned ${rewards} tokens`, 'success');
           }
+
+          // Clear any pending entry data
+          sessionStorage.removeItem('pending_entry');
 
           // Redirect to dashboard after showing success message
           setTimeout(() => {
@@ -1131,23 +1253,24 @@ function saveToBlockchain() {
       console.error('Save error details:', error);
       console.error('Error stack:', error.stack);
       
-      saveButton.innerHTML = originalText;
-      saveButton.disabled = false;
-      
-      // More detailed error message
-      let errorMessage = 'Failed to save entry. ';
-      if (error.message.includes('404')) {
-        errorMessage += 'The save endpoint was not found.';
-      } else if (error.message.includes('403')) {
-        errorMessage += 'Permission denied. Please check your authentication.';
-      } else if (error.message.includes('500')) {
-        errorMessage += 'Server error occurred.';
-      } else {
-        errorMessage += 'Please try again.';
-      }
-      
-      if (window.showToast) {
-        window.showToast(errorMessage, 'error');
+      // Don't reset button if it's an auth error (already handled above)
+      if (error.message !== 'Authentication required') {
+        saveButton.innerHTML = originalText;
+        saveButton.disabled = false;
+        
+        // More detailed error message
+        let errorMessage = 'Failed to save entry. ';
+        if (error.message.includes('404')) {
+          errorMessage += 'The save endpoint was not found.';
+        } else if (error.message.includes('500')) {
+          errorMessage += 'Server error occurred.';
+        } else {
+          errorMessage += 'Please try again.';
+        }
+        
+        if (window.showToast) {
+          window.showToast(errorMessage, 'error');
+        }
       }
     });
   }
