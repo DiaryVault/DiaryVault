@@ -82,14 +82,6 @@ urlpatterns = [
     path('insights/', views.insights, name='insights'),
 
     # ============================================================================
-    # SMART JOURNAL COMPILER - Main Pages (COMMENTED OUT - no longer using journal_compiler)
-    # ============================================================================
-    # path('publish_journal/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler'),
-    # path('publish/smart-compiler/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler_alt'),
-    # path('smart-compiler/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler'),
-    # path('publish/preview-structure/', journal_compiler.preview_journal_structure, name='preview_journal_structure'),
-
-    # ============================================================================
     # API Endpoints - Core Functionality
     # ============================================================================
     # Journal Generation & Management
@@ -110,16 +102,10 @@ urlpatterns = [
     path('diary/api/load-draft/', api.load_journal_draft, name='load_journal_draft'),
 
     # Marketing and analytics
-    path('diary/api/marketing-copy/', api.generate_marketing_copy, name='generate_marketing_copy'),
     path('diary/api/quick-analyze/', api.quick_analyze_for_publishing, name='quick_analyze_for_publishing'),
     path('diary/api/price-suggestion/', api.get_price_suggestion, name='get_price_suggestion'),
     path('diary/api/validate-journal/', api.validate_journal_data, name='validate_journal_data'),
     path('diary/api/templates/', api.get_journal_templates_api, name='get_journal_templates_api'),
-
-    # Alternative endpoints that point to journal_compiler views (COMMENTED OUT - no longer using journal_compiler)
-    # path('diary/compiler/analyze-entries/', journal_compiler.analyze_entries_ajax, name='compiler_analyze_entries_ajax'),
-    # path('diary/compiler/generate-structure/', journal_compiler.generate_journal_structure, name='compiler_generate_journal_structure'),
-    # path('diary/compiler/publish/', journal_compiler.publish_compiled_journal, name='compiler_publish_compiled_journal'),
 
     # ============================================================================
     # Anonymous User Support URLs (Need to add these functions to api.py)
