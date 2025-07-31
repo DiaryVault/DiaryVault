@@ -136,20 +136,10 @@
     will-change: transform;
   }
 
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
-
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
-
   /* Enhanced gradients */
   .gradient-bg {
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   }
-
-  /* Removed unused chat bubble styles */
 
   /* Loading spinner improvements */
   @keyframes pulse-ring {
@@ -368,6 +358,16 @@
     border-radius: 50%;
     animation: pulse 2s infinite;
   }
+
+  /* Spinner animation fix */
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
 </style>
 {% endblock %}
 
@@ -493,8 +493,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Removed unused chat area section -->
 
   <!-- CRITICAL: Main input form - uses base.html scrolling only -->
   <form id="demoForm" class="w-full relative z-10 animate-scale-in" enctype="multipart/form-data">
@@ -775,17 +773,82 @@
   </div>
 </div>
 
-<!-- Enhanced JavaScript with wallet integration -->
+<!-- Toast notification container -->
+<div id="toastContainer" class="fixed bottom-5 right-5 z-50"></div>
+
 <script>
-// All the existing JavaScript from your original file...
-// [Previous JavaScript code remains the same until the wallet integration parts]
+// Toast notification system
+window.showToast = function(message, type = 'info') {
+  const toastContainer = document.getElementById('toastContainer');
+  if (!toastContainer) return;
+
+  const toast = document.createElement('div');
+  toast.className = `feedback-toast ${type}`;
+  toast.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      ${type === 'success' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />' : 
+        type === 'error' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />' :
+        type === 'warning' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />' :
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'}
+    </svg>
+    <span>${message}</span>
+  `;
+
+  toastContainer.appendChild(toast);
+
+  // Trigger show animation
+  setTimeout(() => toast.classList.add('show'), 10);
+
+  // Auto hide after 5 seconds
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 5000);
+};
+
+// Mock wallet functions (replace with actual Web3 implementation)
+window.connectWallet = function() {
+  console.log('Connecting wallet...');
+  // Simulate wallet connection
+  setTimeout(() => {
+    updateHomePageForWallet(true, '0x1234567890abcdef1234567890abcdef12345678', 8453);
+    window.showToast('Wallet connected successfully!', 'success');
+  }, 1000);
+};
+
+window.disconnectWallet = function() {
+  console.log('Disconnecting wallet...');
+  updateHomePageForWallet(false, null, null);
+  window.showToast('Wallet disconnected', 'info');
+};
+
+window.switchToBaseNetwork = function() {
+  console.log('Switching to Base network...');
+  window.showToast('Please switch to Base network in your wallet', 'warning');
+};
+
+window.showWalletOptions = function() {
+  window.showToast('Wallet options: MetaMask, Coinbase Wallet, WalletConnect', 'info');
+};
+
+window.getWalletInfo = function() {
+  // Mock wallet info - replace with actual implementation
+  const walletConnected = document.getElementById('walletConnected');
+  const isConnected = walletConnected && !walletConnected.classList.contains('hidden');
+  
+  return {
+    isConnected: isConnected,
+    address: isConnected ? '0x1234567890abcdef1234567890abcdef12345678' : null,
+    chainId: isConnected ? 8453 : null
+  };
+};
 
 // Enhanced wallet integration for home page
 document.addEventListener('DOMContentLoaded', function() {
   journalCache.init();
   initializeJournalForm();
   initializeAnimations();
-  setupOptimizedScrollHandling(); // OPTIMIZED: Add throttled scroll handling
+  setupOptimizedScrollHandling();
   setupEnhancedUX();
   initializeWalletAwareHome();
 });
@@ -1362,11 +1425,6 @@ function setupAccessibilityFeatures() {
   });
 }
 
-function getCsrfToken() {
-  const token = document.querySelector('[name=csrfmiddlewaretoken]');
-  return token ? token.value : '';
-}
-
 function initializeAnimations() {
   // OPTIMIZED: Use Intersection Observer for better performance
   if ('IntersectionObserver' in window) {
@@ -1800,6 +1858,14 @@ function editJournalEntry() {
   }
 }
 
+// Helper function to calculate rewards
+function calculateRewards(content, hasWallet) {
+  const wordCount = content.split(' ').length;
+  const baseReward = Math.floor(wordCount / 10);
+  const walletBonus = hasWallet ? 5 : 0;
+  return baseReward + walletBonus;
+}
+
 // FIXED: Cache initialization - works with base.html
 const journalCache = {
   init: function() {
@@ -1869,7 +1935,6 @@ const journalCache = {
     this.save();
   }
 };
-
 </script>
 
 {% endblock %}
