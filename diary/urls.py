@@ -6,7 +6,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from .views import core
 from .views.core import CustomLoginView, CustomSignupView
-from .views import journal_compiler
+# from .views import journal_compiler  # REMOVED - no longer needed
 from .views import api
 
 from . import views
@@ -81,12 +81,12 @@ urlpatterns = [
     path('insights/', views.insights, name='insights'),
 
     # ============================================================================
-    # SMART JOURNAL COMPILER - Main Pages
+    # SMART JOURNAL COMPILER - Main Pages (COMMENTED OUT - no longer using journal_compiler)
     # ============================================================================
-    path('publish_journal/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler'),
-    path('publish/smart-compiler/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler_alt'),
-    path('smart-compiler/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler'),  # Add this line
-    path('publish/preview-structure/', journal_compiler.preview_journal_structure, name='preview_journal_structure'),
+    # path('publish_journal/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler'),
+    # path('publish/smart-compiler/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler_alt'),
+    # path('smart-compiler/', journal_compiler.smart_journal_compiler, name='smart_journal_compiler'),
+    # path('publish/preview-structure/', journal_compiler.preview_journal_structure, name='preview_journal_structure'),
 
     # ============================================================================
     # API Endpoints - Core Functionality
@@ -99,7 +99,7 @@ urlpatterns = [
     path('api/entry/<int:entry_id>/regenerate-summary/', views.regenerate_summary_ajax, name='regenerate_summary_ajax'),
 
     # ============================================================================
-    # SMART JOURNAL COMPILER - API Endpoints (FIXED)
+    # SMART JOURNAL COMPILER - API Endpoints (KEPT for now - these use api views)
     # ============================================================================
     # Main compilation endpoints - these match what your JavaScript calls
     path('diary/api/analyze-entries/', api.analyze_entries_ajax, name='analyze_entries_ajax'),
@@ -117,10 +117,17 @@ urlpatterns = [
     path('diary/api/validate-journal/', api.validate_journal_data, name='validate_journal_data'),
     path('diary/api/templates/', api.get_journal_templates_api, name='get_journal_templates_api'),
 
-    # Alternative endpoints that point to journal_compiler views (for backend use)
-    path('diary/compiler/analyze-entries/', journal_compiler.analyze_entries_ajax, name='compiler_analyze_entries_ajax'),
-    path('diary/compiler/generate-structure/', journal_compiler.generate_journal_structure, name='compiler_generate_journal_structure'),
-    path('diary/compiler/publish/', journal_compiler.publish_compiled_journal, name='compiler_publish_compiled_journal'),
+    # Alternative endpoints that point to journal_compiler views (COMMENTED OUT - no longer using journal_compiler)
+    # path('diary/compiler/analyze-entries/', journal_compiler.analyze_entries_ajax, name='compiler_analyze_entries_ajax'),
+    # path('diary/compiler/generate-structure/', journal_compiler.generate_journal_structure, name='compiler_generate_journal_structure'),
+    # path('diary/compiler/publish/', journal_compiler.publish_compiled_journal, name='compiler_publish_compiled_journal'),
+
+    # ============================================================================
+    # Web3 Authentication URLs (for anonymous user support)
+    # ============================================================================
+    path('connect-wallet-session/', api.connect_wallet_session, name='connect_wallet_session'),
+    path('web3/complete-profile/', api.web3_complete_profile, name='web3_complete_profile'),
+    path('entry/preview/<uuid:entry_uuid>/', api.anonymous_entry_preview, name='anonymous_entry_preview'),
 
     # ============================================================================
     # Account Management
