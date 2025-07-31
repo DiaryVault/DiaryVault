@@ -101,11 +101,6 @@ urlpatterns = [
     path('diary/api/save-draft/', api.save_journal_draft, name='save_journal_draft'),
     path('diary/api/load-draft/', api.load_journal_draft, name='load_journal_draft'),
 
-    # Marketing and analytics
-    path('diary/api/price-suggestion/', api.get_price_suggestion, name='get_price_suggestion'),
-    path('diary/api/validate-journal/', api.validate_journal_data, name='validate_journal_data'),
-    path('diary/api/templates/', api.get_journal_templates_api, name='get_journal_templates_api'),
-
     # ============================================================================
     # Anonymous User Support URLs (Need to add these functions to api.py)
     # ============================================================================
