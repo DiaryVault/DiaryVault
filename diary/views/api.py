@@ -1768,3 +1768,60 @@ def save_entry_api(request):
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+    
+def user_stats(request):
+    """Get current user statistics"""
+    try:
+        from django.db.models import Sum
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        entries = Entry.objects.filter(user=request.user)
+        
+        # Total entries
+        total_entries = entries.count()
+        
+        # Total words
+        total_words = sum(len(entry.content.split()) for entry in entries)
+        
+        # Calculate streak
+        today = timezone.now().date()
+        entry_dates = list(entries.values_list('created_at__date', flat=True).distinct().order_by('-created_at__date'))
+        
+        streak = 0
+        if entry_dates:
+            if entry_dates[0] == today or entry_dates[0] == today - timedelta(days=1):
+                streak = 1
+                current_date = entry_dates[0]
+                
+                for entry_date in entry_dates[1:]:
+                    expected_date = current_date - timedelta(days=1)
+                    if entry_date == expected_date:
+                        streak += 1
+                        current_date = entry_date
+                    else:
+                        break
+        
+        # Get mood counts
+        mood_counts = {}
+        for entry in entries:
+            if entry.mood:
+                mood_counts[entry.mood] = mood_counts.get(entry.mood, 0) + 1
+        
+        # Get dominant mood
+        dominant_mood = max(mood_counts.items(), key=lambda x: x[1])[0] if mood_counts else None
+        
+        return JsonResponse({
+            'success': True,
+            'total_entries': total_entries,
+            'total_words': total_words,
+            'streak': streak,
+            'dominant_mood': dominant_mood,
+            'mood_counts': mood_counts
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
