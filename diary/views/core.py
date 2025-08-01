@@ -6,7 +6,7 @@ import random
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib import messages
 from django.utils import timezone
 from django.contrib.auth.views import LoginView
@@ -19,6 +19,7 @@ from django.core.cache import cache
 from django.conf import settings
 from django.urls import reverse_lazy, reverse
 from django.db.models import Count, Sum, Avg, Min, Max, F, Q
+from django.contrib.auth.backends import ModelBackend
 
 from ..models import (
     Entry, Tag, SummaryVersion, UserInsight, EntryTag, UserPreference, Journal, JournalTag
@@ -29,7 +30,7 @@ from ..services.ai_service import AIService
 from allauth.account.utils import get_next_redirect_url
 from allauth.account.views import LoginView as AllauthLoginView, SignupView as AllauthSignupView
 
-
+User = get_user_model()
 logger = logging.getLogger(__name__)
 
 def home(request):
@@ -347,6 +348,35 @@ def signup(request):
 
 def dashboard(request):
     """Main dashboard with time periods and recent entries"""
+    # Check if user is authenticated
+    if not request.user.is_authenticated:
+        # Check for wallet session
+        wallet_address = request.session.get('wallet_address')
+        
+        if wallet_address:
+            # Try to authenticate the user
+            try:
+                user = User.objects.filter(wallet_address=wallet_address).first()
+                if user:
+                    # Log the user in using Django's backend
+                    backend = ModelBackend()
+                    user.backend = f'{backend.__module__}.{backend.__class__.__name__}'
+                    login(request, user)
+                    logger.info(f"Auto-authenticated user {user.id} from wallet session")
+                    # Now request.user is authenticated, continue with the view
+                else:
+                    # Wallet address exists but no user found - redirect to complete registration
+                    messages.info(request, "Please complete your profile to access the dashboard.")
+                    return redirect('home')
+            except Exception as e:
+                logger.error(f"Error auto-authenticating wallet user: {e}")
+                return redirect(f'/login/?next={request.path}')
+        else:
+            # No wallet and not authenticated - redirect to login
+            return redirect(f'/login/?next={request.path}')
+    
+    # Now we know request.user is authenticated, safe to use in queries
+    
     # Check for save_after_login flag
     if request.session.pop('save_after_login', False):
         try:
@@ -845,5 +875,3 @@ class CustomSignupView(AllauthSignupView):
             messages.success(self.request, "Welcome to DiaryVault! Your account has been created successfully.")
 
         return response
-    
-
