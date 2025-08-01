@@ -1280,7 +1280,7 @@ function restartEntry() {
     document.getElementById('journalInput').focus();
 }
 
-// Save entry - FIXED TO USE YOUR API ENDPOINT
+// Save entry - FIXED WITH STATS UPDATE
 function saveEntry(event) {
     // Prevent any default behavior if this was triggered by a form
     if (event && event.preventDefault) {
@@ -1303,18 +1303,16 @@ function saveEntry(event) {
         return;
     }
 
-    // Create FormData (your endpoint expects POST data, not JSON)
     const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', getCsrfToken());
     formData.append('title', entryTitle);
     formData.append('content', journalContent);
-    formData.append('mood', 'content'); // You can make this dynamic based on content analysis
-    
-    // Add photo if exists
+
     if (currentPhotoFile) {
         formData.append('photo', currentPhotoFile);
     }
 
-    // Get the save button
+    // Get the save button - handle both click from button or function call
     const saveButton = event && event.target ? event.target : document.querySelector('[onclick*="saveEntry"]');
     const originalText = saveButton.innerHTML;
     saveButton.disabled = true;
@@ -1326,33 +1324,21 @@ function saveEntry(event) {
         Saving...
     `;
 
-    // Make the request to your save_entry_api endpoint
     fetch('/api/save-entry/', {
         method: 'POST',
         headers: {
-            'X-CSRFToken': getCsrfToken(),
-            // Don't set Content-Type for FormData - let browser set it with boundary
+            'X-CSRFToken': getCsrfToken()
         },
         credentials: 'include',
         body: formData
     })
     .then(response => {
-        console.log('Response status:', response.status);
-        
-        if (response.status === 401) {
-            throw new Error('Authentication required. Please log in.');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
         }
-        
-        return response.json().then(data => {
-            if (!response.ok) {
-                throw new Error(data.error || `Server error: ${response.status}`);
-            }
-            return data;
-        });
+        return response.json();
     })
     .then(data => {
-        console.log('Save response:', data);
-        
         if (data.success) {
             // Update save button to show success
             saveButton.innerHTML = `
@@ -1362,23 +1348,20 @@ function saveEntry(event) {
                 Saved!
             `;
 
-            // Update stats immediately
+            // Update stats immediately without page reload
             updateDashboardStats();
 
             // Show success message
-            showToast(data.message || 'Entry saved successfully!', 'success');
+            showToast('Entry saved successfully!', 'success');
 
-            // Reset the form and refresh UI after a short delay
+            // Reset the form after a short delay
             setTimeout(() => {
                 restartEntry();
                 saveButton.disabled = false;
                 saveButton.innerHTML = originalText;
                 
-                // Refresh recent memories
+                // Optionally refresh recent memories section
                 refreshRecentMemories();
-                
-                // Fetch real stats from server
-                fetchUpdatedStats();
             }, 2000);
         } else {
             throw new Error(data.error || 'Failed to save entry');
@@ -1388,31 +1371,23 @@ function saveEntry(event) {
         console.error('Save error:', error);
         saveButton.disabled = false;
         saveButton.innerHTML = originalText;
-        
-        // Show appropriate error message
-        if (error.message.includes('Authentication')) {
-            showToast('Please log in to save entries', 'error');
-        } else {
-            showToast(error.message || 'Failed to save entry. Please try again.', 'error');
-        }
+        showToast(error.message || 'Failed to save entry. Please try again.', 'error');
     });
 }
 
-// Enhanced updateDashboardStats function with animation
+// Function to update dashboard stats without page reload
 function updateDashboardStats() {
-    // First, do the optimistic update (immediate visual feedback)
+    // Get current stat values
     const totalEntriesEl = document.querySelector('[data-stat="total-entries"]');
     const totalWordsEl = document.querySelector('[data-stat="total-words"]');
     const streakEl = document.querySelector('[data-stat="streak"]');
     
-    // Optimistic updates
     if (totalEntriesEl) {
         const currentEntries = parseInt(totalEntriesEl.textContent) || 0;
         totalEntriesEl.textContent = currentEntries + 1;
-        animateStatUpdate(totalEntriesEl);
         
-        // Update helper text
-        const helperText = totalEntriesEl.parentElement.querySelector('.text-xs');
+        // Update the helper text
+        const helperText = totalEntriesEl.nextElementSibling;
         if (helperText && currentEntries === 0) {
             helperText.textContent = 'Great start!';
         }
@@ -1423,94 +1398,45 @@ function updateDashboardStats() {
         const wordCount = journalContent.split(/\s+/).filter(word => word.length > 0).length;
         const currentWords = parseInt(totalWordsEl.textContent) || 0;
         totalWordsEl.textContent = currentWords + wordCount;
-        animateStatUpdate(totalWordsEl);
     }
     
     if (streakEl) {
+        // If streak was 0, make it 1 (they just wrote today)
         const currentStreak = parseInt(streakEl.textContent) || 0;
         if (currentStreak === 0) {
             streakEl.textContent = 1;
-            const helperText = streakEl.parentElement.querySelector('.text-xs');
+            const helperText = streakEl.nextElementSibling;
             if (helperText) {
                 helperText.textContent = 'Keep going!';
             }
-            animateStatUpdate(streakEl);
         }
     }
-}
-
-// Helper function to animate stat updates
-function animateStatUpdate(element) {
-    if (!element) return;
     
-    element.style.transform = 'scale(1.2)';
-    element.style.transition = 'transform 0.3s ease';
-    element.style.color = '#10b981'; // Green color
-    
-    setTimeout(() => {
-        element.style.transform = 'scale(1)';
-        setTimeout(() => {
-            element.style.color = ''; // Reset color
-        }, 300);
-    }, 300);
-}
-
-// Function to fetch real stats from server (if you implement the endpoint)
-function fetchUpdatedStats() {
-    // Uncomment this when you add the /api/user-stats/ endpoint
-    /*
-    fetch('/api/user-stats/', {
-        method: 'GET',
-        headers: {
-            'X-CSRFToken': getCsrfToken(),
-        },
-        credentials: 'include'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Update with real data
-            const totalEntriesEl = document.querySelector('[data-stat="total-entries"]');
-            const totalWordsEl = document.querySelector('[data-stat="total-words"]');
-            const streakEl = document.querySelector('[data-stat="streak"]');
-            
-            if (totalEntriesEl && data.total_entries !== undefined) {
-                totalEntriesEl.textContent = data.total_entries;
-            }
-            if (totalWordsEl && data.total_words !== undefined) {
-                totalWordsEl.textContent = data.total_words;
-            }
-            if (streakEl && data.streak !== undefined) {
-                streakEl.textContent = data.streak;
-                const helperText = streakEl.parentElement.querySelector('.text-xs');
-                if (helperText) {
-                    helperText.textContent = data.streak > 0 ? 'Keep going!' : 'Start today';
-                }
-            }
+    // Add a subtle animation to the updated stats
+    [totalEntriesEl, totalWordsEl, streakEl].forEach(el => {
+        if (el) {
+            el.style.transform = 'scale(1.2)';
+            el.style.transition = 'transform 0.3s ease';
+            setTimeout(() => {
+                el.style.transform = 'scale(1)';
+            }, 300);
         }
-    })
-    .catch(error => {
-        console.error('Error fetching updated stats:', error);
     });
-    */
 }
 
-// Enhanced refresh recent memories function
+// Function to refresh recent memories section
 function refreshRecentMemories() {
-    // Add a visual indicator that memories are being refreshed
-    const memoriesSection = document.querySelector('.photo-grid')?.closest('.glass-card');
+    // This would typically make an AJAX call to get updated entries
+    // For now, we'll just show a message that it was updated
+    const memoriesSection = document.querySelector('.memory-card')?.closest('.glass-card');
     if (memoriesSection) {
         const heading = memoriesSection.querySelector('h2');
         if (heading) {
             const originalText = heading.textContent;
-            heading.innerHTML = originalText + ' <span class="text-green-600 text-sm animate-pulse">(Refreshing...)</span>';
-            
+            heading.innerHTML = originalText + ' <span class="text-green-600 text-sm">(Updated!)</span>';
             setTimeout(() => {
-                heading.innerHTML = originalText + ' <span class="text-green-600 text-sm">(Updated!)</span>';
-                setTimeout(() => {
-                    heading.textContent = originalText;
-                }, 2000);
-            }, 1000);
+                heading.textContent = originalText;
+            }, 3000);
         }
     }
 }
