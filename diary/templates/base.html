@@ -1600,10 +1600,19 @@
                 el.classList.add('hidden');
             });
 
-            // Update address displays
-            document.querySelectorAll('[data-wallet-address]').forEach(el => {
-                el.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
-            });
+            // Update address displays with shortened version
+            if (address) {
+                const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+                document.querySelectorAll('[data-wallet-address]').forEach(el => {
+                    el.textContent = shortAddress;
+                });
+                
+                // Also update any element with id="wallet-address"
+                const walletAddressEl = document.getElementById('wallet-address');
+                if (walletAddressEl) {
+                    walletAddressEl.textContent = shortAddress;
+                }
+            }
 
             // Update chain status
             const isBaseNetwork = chainId === 8453;
@@ -1632,6 +1641,11 @@
             window.dispatchEvent(new CustomEvent('walletConnected', {
                 detail: { address, chainId, isBaseNetwork }
             }));
+            
+            // Also update home page elements if they exist
+            if (typeof updateHomePageForWallet === 'function') {
+                updateHomePageForWallet(true, address, chainId);
+            }
         },
 
         // Update UI for disconnected state
