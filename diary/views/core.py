@@ -718,82 +718,23 @@ def marketplace_stats(request):
         })
 
 class CustomLoginView(LoginView):
-    """
-    Custom login view that handles pending entries and social authentication
-    """
-    template_name = 'diary/account/login.html'
-
-    def get_context_data(self, **kwargs):
-        print("=== CUSTOM LOGIN VIEW CALLED ===")
-        # Get the default context from allauth's LoginView
-        context = super().get_context_data(**kwargs)
-
-        # CRUCIAL: Ensure request is available for socialaccount template tags
-        context['request'] = self.request
-
-        # Add any additional context
-        context['page_title'] = 'Login - DiaryVault'
-
-        # Debug: Check if providers are working (remove this after testing)
-        from allauth.socialaccount.templatetags.socialaccount import get_providers
-        from django.template import Context
-        try:
-            template_context = Context({'request': self.request})
-            providers = get_providers(template_context)
-            print(f"DEBUG: Found {len(providers)} providers in view: {[p.id for p in providers]}")
-        except Exception as e:
-            print(f"DEBUG: Error getting providers in view: {e}")
-
-        return context
-
-    def get_success_url(self):
-        # Redirect to dashboard after successful login
-        url = get_next_redirect_url(self.request) or reverse('dashboard')
-        return url
-
-    def form_valid(self, form):
-        """Process the valid form and check for pending entries"""
-        # First do the standard login process
-        response = super().form_valid(form)
-
-        # Check for pending entry in session
-        pending_entry = self.request.session.get('pending_entry')
-        if pending_entry:
-            try:
-                # Create entry
-                entry = Entry.objects.create(
-                    user=self.request.user,
-                    title=pending_entry.get('title', 'Untitled Entry'),
-                    content=pending_entry.get('content', ''),
-                    mood=pending_entry.get('mood')
-                )
-
-                # Add tags
-                tags = pending_entry.get('tags', [])
-                if not tags and pending_entry.get('content'):
-                    from ..utils.analytics import auto_generate_tags
-                    tags = auto_generate_tags(pending_entry.get('content'), pending_entry.get('mood'))
-
-                if tags:
-                    for tag_name in tags:
-                        tag, created = Tag.objects.get_or_create(
-                            name=tag_name.lower().strip(),
-                            user=self.request.user
-                        )
-                        entry.tags.add(tag)
-
-                # Clear pending entry
-                del self.request.session['pending_entry']
-
-                # Indicate success
-                self.request.session['entry_saved'] = True
-                self.request.session['saved_entry_id'] = entry.id
-
-                logger.info(f"Successfully created entry after login with ID: {entry.id}")
-            except Exception as e:
-                logger.error(f"Error processing pending entry after login: {str(e)}", exc_info=True)
-
-        return response
+    def get(self, request, *args, **kwargs):
+        # Add a message to prompt wallet connection
+        messages.info(request, "Please connect your wallet to access your account.")
+        
+        # Get the 'next' parameter to preserve redirect after login
+        next_url = request.GET.get('next', '')
+        
+        # Redirect to home with wallet prompt
+        if next_url:
+            return redirect(f'/?show_wallet_prompt=true&next={next_url}')
+        else:
+            return redirect('/?show_wallet_prompt=true')
+    
+    def post(self, request, *args, **kwargs):
+        # If someone tries to POST to login, redirect them
+        messages.info(request, "Please use wallet authentication to log in.")
+        return redirect('/?show_wallet_prompt=true')
 
 class CustomSignupView(AllauthSignupView):
     """
