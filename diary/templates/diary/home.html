@@ -918,6 +918,7 @@ function updateActionButtons(isConnected) {
 }
 
 // Enhanced save function for blockchain storage
+// Enhanced save function for blockchain storage
 function saveToBlockchain() {
   const walletInfo = getWalletInfo();
   
@@ -965,7 +966,7 @@ function saveToBlockchain() {
       formData.append('journal_photo', currentPhotoFile);
     }
 
-    fetch('/save-generated-entry/', {
+    fetch('/api/save-generated-entry/', {
       method: 'POST',
       headers: {
         'X-CSRFToken': csrftoken
@@ -982,74 +983,28 @@ function saveToBlockchain() {
       if (data.success) {
         const rewards = data.rewards || calculateRewards(journalContent, walletInfo.isConnected);
 
-        // Check if this is an anonymous save
-        if (data.is_anonymous) {
-          // For anonymous users, redirect to journal form with pre-filled content
-          saveButton.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Saved! Transferring to journal form...
-          `;
-          
-          if (window.showToast) {
-            window.showToast('Taking you to create your journal entry...', 'info');
-          }
-
-          // Store the content in sessionStorage to transfer to journal form
-          sessionStorage.setItem('pendingJournalEntry', JSON.stringify({
-            title: titleText,
-            content: journalContent,
-            fromDemo: true,
-            hasWallet: true,
-            walletAddress: walletInfo.address,
-            rewards: rewards
-          }));
-
-          // If there's a photo, we need to handle it differently
-          if (currentPhotoFile) {
-            // Convert photo to base64 to transfer via sessionStorage
-            const reader = new FileReader();
-            reader.onloadend = function() {
-              const pendingEntry = JSON.parse(sessionStorage.getItem('pendingJournalEntry'));
-              pendingEntry.photoData = reader.result;
-              pendingEntry.photoName = currentPhotoFile.name;
-              sessionStorage.setItem('pendingJournalEntry', JSON.stringify(pendingEntry));
-              
-              // Redirect to journal form
-              window.location.href = '/journal/';
-            };
-            reader.readAsDataURL(currentPhotoFile);
-          } else {
-            // No photo, redirect immediately
-            setTimeout(() => {
-              window.location.href = '/journal/';
-            }, 1500);
-          }
-          
-        } else {
-          // Authenticated user - normal save success
-          saveButton.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Saved! Rewards earned: ${rewards} tokens
-          `;
-          
-          if (window.showToast) {
-            window.showToast(`Entry saved! Earned ${rewards} tokens`, 'success');
-          }
-
-          setTimeout(() => {
-            if (data.redirect_url) {
-              window.location.href = data.redirect_url;
-            } else if (data.entry_id) {
-              window.location.href = `/entry/${data.entry_id}/`;
-            } else {
-              window.location.href = '/dashboard/';
-            }
-          }, 2000);
+        // Show success message
+        saveButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          Saved! Earned ${rewards} tokens
+        `;
+        
+        if (window.showToast) {
+          window.showToast(`Entry saved! Earned ${rewards} tokens`, 'success');
         }
+
+        // Clear any stored data
+        sessionStorage.removeItem('pendingJournalEntry');
+        
+        // Always redirect to dashboard for wallet-connected users
+        setTimeout(() => {
+          // Use the redirect URL from the backend if provided, otherwise default to dashboard
+          const redirectUrl = data.redirect_url || '/dashboard/?entry_saved=true';
+          window.location.href = redirectUrl;
+        }, 1500);
+        
       } else {
         // Handle error
         saveButton.innerHTML = originalText;
