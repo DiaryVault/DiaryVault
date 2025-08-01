@@ -300,32 +300,6 @@
   .blob-2 { background: #8b5cf6; bottom: 0; right: 0; width: 250px; height: 250px; animation-delay: 2s; }
   .blob-3 { background: #ec4899; top: 50%; left: 50%; width: 150px; height: 150px; animation-delay: 4s; }
 
-  /* Welcome banner for anonymous users */
-  .welcome-banner {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
-    background-size: 200% 200%;
-    animation: gradient-shift 10s ease infinite;
-    color: white;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .welcome-banner::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-    animation: rotate 20s linear infinite;
-  }
-
-  @keyframes rotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
   /* Mobile optimizations */
   @media (max-width: 640px) {
     .container {
@@ -393,68 +367,8 @@
   </div>
 
   <div class="container mx-auto px-4 py-6 max-w-7xl relative z-10">
-    {% if is_anonymous %}
-    <!-- Anonymous User Welcome Banner -->
-    <div class="welcome-banner rounded-2xl p-8 mb-8 animate-fade-in">
-      <div class="relative z-10">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div class="flex-1">
-            <h1 class="text-3xl lg:text-4xl font-bold mb-3 diary-font">
-              Welcome to DiaryVault Dashboard
-            </h1>
-            <p class="text-lg text-white/90 mb-4">
-              {% if show_welcome_message %}
-                Great job on your first entry! Connect your wallet to save it permanently and unlock all features.
-              {% else %}
-                Experience the power of encrypted journaling. See what your personalized dashboard will look like.
-              {% endif %}
-            </p>
-            <div class="flex flex-wrap gap-3 text-sm">
-              <div class="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                <span>End-to-end encryption</span>
-              </div>
-              <div class="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Earn rewards</span>
-              </div>
-              <div class="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                <span>Track your growth</span>
-              </div>
-            </div>
-          </div>
-          <div class="flex flex-col sm:flex-row gap-3">
-            {% if wallet_address %}
-              <a href="{% url 'new_entry' %}" class="btn-gradient text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Start Writing
-              </a>
-            {% else %}
-              <button onclick="connectWallet()" class="bg-white text-gray-900 px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                Connect Wallet
-              </button>
-              <a href="{% url 'home' %}" class="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-white/30 transition-all">
-                Try Demo First
-              </a>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </div>
-    {% else %}
-    <!-- Authenticated User Welcome -->
+    {% if not is_anonymous %}
+    <!-- Authenticated User Welcome - Simple Version -->
     <div class="glass-card rounded-2xl p-6 mb-8 animate-fade-in">
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div>
@@ -567,7 +481,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600">Mood Insights</p>
-            <p class="text-3xl font-bold text-gray-900">—</p>
+            <p class="text-3xl font-bold text-gray-900" data-stat="dominant-mood">—</p>
             <p class="text-xs text-gray-500 mt-1">Track emotions</p>
           </div>
           <div class="w-14 h-14 bg-gradient-to-br from-green-400 to-teal-600 rounded-xl flex items-center justify-center text-white">
@@ -624,7 +538,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600">Dominant Mood</p>
-            <p class="text-3xl font-bold text-gray-900">{{ dominant_mood|default:"—" }}</p>
+            <p class="text-3xl font-bold text-gray-900" data-stat="dominant-mood">{{ dominant_mood|default:"—" }}</p>
             <p class="text-xs text-gray-500 mt-1">{% if dominant_mood %}This month{% else %}No data yet{% endif %}</p>
           </div>
           <div class="w-14 h-14 bg-gradient-to-br from-green-400 to-teal-600 rounded-xl flex items-center justify-center text-white">
@@ -966,28 +880,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeAnimations();
     checkWalletConnection();
     checkForPendingEntry();
-    initializeStatElements();
 });
-
-// Initialize stat elements with data attributes
-function initializeStatElements() {
-    // Find stat elements and add data attributes for easier updating
-    const statCards = document.querySelectorAll('.stat-card');
-    statCards.forEach(card => {
-        const label = card.querySelector('.text-sm.text-gray-600')?.textContent.toLowerCase();
-        const valueEl = card.querySelector('.text-3xl.font-bold');
-        
-        if (label && valueEl) {
-            if (label.includes('total entries')) {
-                valueEl.setAttribute('data-stat', 'total-entries');
-            } else if (label.includes('writing streak')) {
-                valueEl.setAttribute('data-stat', 'streak');
-            } else if (label.includes('total words')) {
-                valueEl.setAttribute('data-stat', 'total-words');
-            }
-        }
-    });
-}
 
 // Check for pending journal entry from home page
 function checkForPendingEntry() {
@@ -1284,7 +1177,16 @@ function restartEntry() {
 function updateDashboardStats() {
     console.log('Fetching updated stats...');
     
-    // Fetch updated stats from the server
+    // Check if user is anonymous
+    const isAnonymous = document.querySelector('[data-is-anonymous]')?.dataset.isAnonymous === 'true';
+    
+    if (isAnonymous) {
+        console.log('Anonymous user - updating local stats only');
+        updateAnonymousStats();
+        return;
+    }
+    
+    // Fetch updated stats from the server for authenticated users
     fetch('/api/user-stats/', {
         method: 'GET',
         headers: {
@@ -1340,7 +1242,7 @@ function updateDashboardStats() {
         }
         
         // Update dominant mood if provided
-        const moodEl = document.querySelector('.stat-card:last-child .text-3xl');
+        const moodEl = document.querySelector('[data-stat="dominant-mood"]');
         if (moodEl && data.dominant_mood) {
             moodEl.textContent = data.dominant_mood;
             
@@ -1365,6 +1267,98 @@ function updateDashboardStats() {
         // Fallback: do a simple increment based on what we know
         fallbackStatUpdate();
     });
+}
+
+// Update stats for anonymous users locally
+function updateAnonymousStats() {
+    console.log('Updating anonymous user stats locally');
+    
+    // Get current anonymous entries from session
+    const anonymousEntries = getAnonymousEntries();
+    const entryCount = Object.keys(anonymousEntries).length;
+    
+    // Update total entries
+    const totalEntriesEl = document.querySelector('[data-stat="total-entries"]');
+    if (totalEntriesEl) {
+        animateStatUpdate(totalEntriesEl, entryCount);
+        
+        // Update helper text
+        const helperText = totalEntriesEl.parentElement?.querySelector('.text-xs');
+        if (helperText) {
+            helperText.textContent = entryCount > 0 ? 
+                'Connect wallet to save permanently' : 
+                'Start writing to build your collection';
+        }
+        
+        // Remove opacity if user has entries
+        if (entryCount > 0) {
+            const statCard = totalEntriesEl.closest('.stat-card');
+            if (statCard) {
+                statCard.classList.remove('opacity-75');
+            }
+        }
+    }
+    
+    // Update total words from latest entry
+    const journalContent = document.getElementById('journalEntry');
+    if (journalContent) {
+        const wordCount = journalContent.textContent.split(/\s+/).filter(word => word.length > 0).length;
+        const totalWordsEl = document.querySelector('[data-stat="total-words"]');
+        if (totalWordsEl) {
+            const currentWords = parseInt(totalWordsEl.textContent) || 0;
+            animateStatUpdate(totalWordsEl, currentWords + wordCount);
+            
+            // Remove opacity
+            const statCard = totalWordsEl.closest('.stat-card');
+            if (statCard) {
+                statCard.classList.remove('opacity-75');
+            }
+        }
+    }
+    
+    // Set streak to 1 for first entry
+    if (entryCount === 1) {
+        const streakEl = document.querySelector('[data-stat="streak"]');
+        if (streakEl) {
+            animateStatUpdate(streakEl, 1);
+            
+            // Update helper text
+            const helperText = streakEl.parentElement?.querySelector('.text-xs');
+            if (helperText) {
+                helperText.textContent = 'Great start!';
+            }
+            
+            // Remove opacity
+            const statCard = streakEl.closest('.stat-card');
+            if (statCard) {
+                statCard.classList.remove('opacity-75');
+            }
+        }
+    }
+    
+    // Show success animation on stat cards
+    document.querySelectorAll('.stat-card').forEach(card => {
+        card.classList.add('animate-pulse-soft');
+        setTimeout(() => {
+            card.classList.remove('animate-pulse-soft');
+        }, 2000);
+    });
+}
+
+// Get anonymous entries from session storage or page data
+function getAnonymousEntries() {
+    // Try to get from session storage first
+    try {
+        const stored = sessionStorage.getItem('anonymousEntries');
+        if (stored) {
+            return JSON.parse(stored);
+        }
+    } catch (e) {
+        console.error('Error reading anonymous entries:', e);
+    }
+    
+    // Default
+    return {};
 }
 
 // Fallback function if API fails
@@ -1440,8 +1434,38 @@ function saveEntry(event) {
     const isAnonymous = document.querySelector('[data-is-anonymous]')?.dataset.isAnonymous === 'true';
     
     if (isAnonymous) {
-        showToast('Please connect your wallet or log in to save entries', 'warning');
-        connectWallet();
+        // For anonymous users, save locally and update stats
+        const journalContent = document.getElementById('journalEntry').innerHTML.replace(/<br\s*\/?>/gi, '\n');
+        const entryTitle = document.getElementById('entryTitle').textContent;
+        
+        // Store in session storage
+        const anonymousEntries = getAnonymousEntries();
+        const entryId = Date.now().toString();
+        anonymousEntries[entryId] = {
+            id: entryId,
+            title: entryTitle,
+            content: journalContent,
+            created_at: new Date().toISOString()
+        };
+        
+        try {
+            sessionStorage.setItem('anonymousEntries', JSON.stringify(anonymousEntries));
+        } catch (e) {
+            console.error('Error saving to session storage:', e);
+        }
+        
+        // Update stats immediately for anonymous users
+        updateAnonymousStats();
+        
+        showToast('Entry saved locally! Connect your wallet to save permanently and earn rewards.', 'warning');
+        
+        // Show wallet prompt after a delay
+        setTimeout(() => {
+            if (window.connectWallet) {
+                window.connectWallet();
+            }
+        }, 2000);
+        
         return;
     }
 
