@@ -1366,9 +1366,15 @@ function saveEntry() {
                 `;
             }
 
-            // Always redirect to library after delay
+            // Redirect after delay
             setTimeout(() => {
-                window.location.href = '/library/';
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else if (data.entry_id) {
+                    window.location.href = `/entry/${data.entry_id}/`;
+                } else {
+                    window.location.href = '/dashboard/?entry_saved=true';
+                }
             }, 1500);
         } else {
             throw new Error(data.error || 'Failed to save entry');
