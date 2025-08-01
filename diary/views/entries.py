@@ -380,7 +380,6 @@ def delete_entry(request, entry_id):
     
     return render(request, 'diary/delete_entry.html', {'entry': entry})
 
-@login_required
 def library(request):
     """Optimized library view with tabs for different ways to browse entries"""
 
