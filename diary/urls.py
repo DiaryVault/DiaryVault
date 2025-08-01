@@ -46,6 +46,7 @@ urlpatterns = [
     path('api/wallet-status/', web3_auth.wallet_status, name='wallet_status'),
     path('api/user-profile/', web3_auth.user_profile, name='user_profile'),
     path('api/update-profile/', web3_auth.update_profile, name='update_profile'),
+    path('api/save-generated-entry/', api.save_generated_entry, name='save_generated_entry'),
 
     # ============================================================================
     # Main Pages
