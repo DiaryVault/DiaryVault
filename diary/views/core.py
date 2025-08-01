@@ -345,7 +345,6 @@ def signup(request):
 
     return render(request, 'diary/signup.html', context)
 
-@login_required
 def dashboard(request):
     """Main dashboard with time periods and recent entries"""
     # Check for save_after_login flag

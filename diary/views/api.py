@@ -17,6 +17,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.contrib.auth.backends import ModelBackend
 
 # Django REST framework
 from rest_framework import status, permissions
