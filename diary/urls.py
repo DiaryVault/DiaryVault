@@ -6,6 +6,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from .views import core
 from .views.core import CustomLoginView, CustomSignupView
+from .views.api_views import save_entry_api 
 # from .views import journal_compiler  # REMOVED - no longer needed
 from .views import api
 from .views import web3_auth  # ADD THIS IMPORT
