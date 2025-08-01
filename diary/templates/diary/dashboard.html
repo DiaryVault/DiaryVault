@@ -1430,6 +1430,8 @@ function animateStatUpdate(element, newValue) {
 
 // Save entry - FIXED WITH STATS UPDATE
 function saveEntry(event) {
+    console.log('=== SAVE ENTRY STARTED ===');
+    
     // Prevent any default behavior if this was triggered by a form
     if (event && event.preventDefault) {
         event.preventDefault();
@@ -1472,6 +1474,8 @@ function saveEntry(event) {
         Saving...
     `;
 
+    console.log('Sending save request to /api/save-entry/');
+    
     fetch('/api/save-entry/', {
         method: 'POST',
         headers: {
@@ -1481,12 +1485,15 @@ function saveEntry(event) {
         body: formData
     })
     .then(response => {
+        console.log('Save response status:', response.status);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
+        console.log('Save response data:', data);
+        
         if (data.success) {
             // Update save button to show success
             saveButton.innerHTML = `
@@ -1496,11 +1503,13 @@ function saveEntry(event) {
                 Saved!
             `;
 
-            // Update stats immediately without page reload
-            updateDashboardStats();
-
             // Show success message
             showToast('Entry saved successfully!', 'success');
+            
+            console.log('Entry saved successfully, now updating stats...');
+            
+            // Update stats immediately without page reload
+            updateDashboardStats();
 
             // Reset the form after a short delay
             setTimeout(() => {

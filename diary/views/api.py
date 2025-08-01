@@ -1740,12 +1740,14 @@ def anonymous_entry_preview(request, entry_uuid):
     messages.warning(request, "Entry not found. Please create a new journal entry.")
     return redirect('new_entry')
 
-@require_POST
+@login_required
 def save_entry_api(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Authentication required'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
     
     try:
+        from .models import Entry
+        
         entry = Entry.objects.create(
             user=request.user,
             title=request.POST.get('title', 'Untitled Entry'),
@@ -1767,7 +1769,7 @@ def save_entry_api(request):
             'message': 'Entry saved successfully'
         })
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
     
 def user_stats(request):
     """Get current user statistics"""
