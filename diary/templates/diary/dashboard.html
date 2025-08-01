@@ -1280,6 +1280,154 @@ function restartEntry() {
     document.getElementById('journalInput').focus();
 }
 
+// Function to fetch and update dashboard stats from server
+function updateDashboardStats() {
+    console.log('Fetching updated stats...');
+    
+    // Fetch updated stats from the server
+    fetch('/api/user-stats/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCsrfToken(),
+            'Accept': 'application/json',
+        },
+        credentials: 'include'
+    })
+    .then(response => {
+        console.log('Stats response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Stats data received:', data);
+        
+        // Update total entries
+        const totalEntriesEl = document.querySelector('[data-stat="total-entries"]');
+        if (totalEntriesEl && data.total_entries !== undefined) {
+            animateStatUpdate(totalEntriesEl, data.total_entries);
+            
+            // Update helper text
+            const helperText = totalEntriesEl.parentElement?.querySelector('.text-xs');
+            if (helperText) {
+                helperText.textContent = data.total_entries > 0 ? 'Keep it up!' : 'Start writing to build your collection';
+            }
+        }
+        
+        // Update streak
+        const streakEl = document.querySelector('[data-stat="streak"]');
+        if (streakEl && data.streak !== undefined) {
+            animateStatUpdate(streakEl, data.streak);
+            
+            // Update helper text
+            const helperText = streakEl.parentElement?.querySelector('.text-xs');
+            if (helperText) {
+                helperText.textContent = data.streak > 0 ? 'Keep going!' : 'Start today';
+            }
+        }
+        
+        // Update total words
+        const totalWordsEl = document.querySelector('[data-stat="total-words"]');
+        if (totalWordsEl && data.total_words !== undefined) {
+            animateStatUpdate(totalWordsEl, data.total_words);
+            
+            // Update helper text
+            const helperText = totalWordsEl.parentElement?.querySelector('.text-xs');
+            if (helperText) {
+                helperText.textContent = 'Amazing progress!';
+            }
+        }
+        
+        // Update dominant mood if provided
+        const moodEl = document.querySelector('.stat-card:last-child .text-3xl');
+        if (moodEl && data.dominant_mood) {
+            moodEl.textContent = data.dominant_mood;
+            
+            // Update helper text
+            const helperText = moodEl.parentElement?.querySelector('.text-xs');
+            if (helperText) {
+                helperText.textContent = 'This month';
+            }
+        }
+        
+        // Show success animation on stat cards
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.classList.add('animate-pulse-soft');
+            setTimeout(() => {
+                card.classList.remove('animate-pulse-soft');
+            }, 2000);
+        });
+        
+    })
+    .catch(error => {
+        console.error('Error updating stats:', error);
+        // Fallback: do a simple increment based on what we know
+        fallbackStatUpdate();
+    });
+}
+
+// Fallback function if API fails
+function fallbackStatUpdate() {
+    console.log('Using fallback stat update');
+    
+    const totalEntriesEl = document.querySelector('[data-stat="total-entries"]');
+    if (totalEntriesEl) {
+        const currentEntries = parseInt(totalEntriesEl.textContent) || 0;
+        animateStatUpdate(totalEntriesEl, currentEntries + 1);
+    }
+    
+    const streakEl = document.querySelector('[data-stat="streak"]');
+    if (streakEl) {
+        const currentStreak = parseInt(streakEl.textContent) || 0;
+        if (currentStreak === 0) {
+            animateStatUpdate(streakEl, 1);
+        }
+    }
+    
+    // Estimate word count from the journal entry
+    const journalContent = document.getElementById('journalEntry');
+    if (journalContent) {
+        const wordCount = journalContent.textContent.split(/\s+/).filter(word => word.length > 0).length;
+        const totalWordsEl = document.querySelector('[data-stat="total-words"]');
+        if (totalWordsEl) {
+            const currentWords = parseInt(totalWordsEl.textContent) || 0;
+            animateStatUpdate(totalWordsEl, currentWords + wordCount);
+        }
+    }
+}
+
+// Animate stat value changes
+function animateStatUpdate(element, newValue) {
+    if (!element) return;
+    
+    const startValue = parseInt(element.textContent) || 0;
+    const endValue = parseInt(newValue) || 0;
+    const duration = 1000; // 1 second
+    const steps = 30;
+    const increment = (endValue - startValue) / steps;
+    let currentStep = 0;
+    
+    // Add scale animation
+    element.style.transform = 'scale(1.2)';
+    element.style.transition = 'transform 0.3s ease';
+    
+    const timer = setInterval(() => {
+        currentStep++;
+        if (currentStep <= steps) {
+            element.textContent = Math.round(startValue + (increment * currentStep));
+        } else {
+            element.textContent = endValue;
+            clearInterval(timer);
+            
+            // Reset scale
+            setTimeout(() => {
+                element.style.transform = 'scale(1)';
+            }, 300);
+        }
+    }, duration / steps);
+}
+
 // Save entry - FIXED WITH STATS UPDATE
 function saveEntry(event) {
     // Prevent any default behavior if this was triggered by a form
@@ -1375,67 +1523,20 @@ function saveEntry(event) {
     });
 }
 
-// Function to update dashboard stats without page reload
-function updateDashboardStats() {
-    // Get current stat values
-    const totalEntriesEl = document.querySelector('[data-stat="total-entries"]');
-    const totalWordsEl = document.querySelector('[data-stat="total-words"]');
-    const streakEl = document.querySelector('[data-stat="streak"]');
-    
-    if (totalEntriesEl) {
-        const currentEntries = parseInt(totalEntriesEl.textContent) || 0;
-        totalEntriesEl.textContent = currentEntries + 1;
-        
-        // Update the helper text
-        const helperText = totalEntriesEl.nextElementSibling;
-        if (helperText && currentEntries === 0) {
-            helperText.textContent = 'Great start!';
-        }
-    }
-    
-    if (totalWordsEl) {
-        const journalContent = document.getElementById('journalEntry').textContent;
-        const wordCount = journalContent.split(/\s+/).filter(word => word.length > 0).length;
-        const currentWords = parseInt(totalWordsEl.textContent) || 0;
-        totalWordsEl.textContent = currentWords + wordCount;
-    }
-    
-    if (streakEl) {
-        // If streak was 0, make it 1 (they just wrote today)
-        const currentStreak = parseInt(streakEl.textContent) || 0;
-        if (currentStreak === 0) {
-            streakEl.textContent = 1;
-            const helperText = streakEl.nextElementSibling;
-            if (helperText) {
-                helperText.textContent = 'Keep going!';
-            }
-        }
-    }
-    
-    // Add a subtle animation to the updated stats
-    [totalEntriesEl, totalWordsEl, streakEl].forEach(el => {
-        if (el) {
-            el.style.transform = 'scale(1.2)';
-            el.style.transition = 'transform 0.3s ease';
-            setTimeout(() => {
-                el.style.transform = 'scale(1)';
-            }, 300);
-        }
-    });
-}
-
 // Function to refresh recent memories section
 function refreshRecentMemories() {
-    // This would typically make an AJAX call to get updated entries
-    // For now, we'll just show a message that it was updated
-    const memoriesSection = document.querySelector('.memory-card')?.closest('.glass-card');
+    // Simply reload the page after a delay to show updated content
+    // This is simpler than creating another API endpoint
+    const memoriesSection = document.querySelector('.photo-grid')?.closest('.glass-card');
     if (memoriesSection) {
         const heading = memoriesSection.querySelector('h2');
         if (heading) {
             const originalText = heading.textContent;
-            heading.innerHTML = originalText + ' <span class="text-green-600 text-sm">(Updated!)</span>';
+            heading.innerHTML = originalText + ' <span class="text-green-600 text-sm ml-2">(New entry added!)</span>';
             setTimeout(() => {
                 heading.textContent = originalText;
+                // Optional: reload the page to show the new entry
+                // window.location.reload();
             }, 3000);
         }
     }
@@ -1664,5 +1765,7 @@ window.restartEntry = restartEntry;
 window.saveEntry = saveEntry;
 window.connectWallet = connectWallet;
 window.showToast = showToast;
+window.updateDashboardStats = updateDashboardStats;
+window.animateStatUpdate = animateStatUpdate;
 </script>
 {% endblock %}
