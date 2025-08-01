@@ -1296,24 +1296,14 @@ function saveEntry() {
         return;
     }
 
-    // Check wallet connection
-    const walletInfo = getWalletInfo();
-
     // Create form data
     const formData = new FormData();
     formData.append('csrfmiddlewaretoken', getCsrfToken());
     formData.append('title', entryTitle);
     formData.append('content', journalContent);
-    formData.append('is_ai_generated', 'true');
-
-    if (walletInfo.isConnected) {
-        formData.append('wallet_address', walletInfo.address);
-        formData.append('chain_id', walletInfo.chainId);
-        formData.append('encrypted', 'true');
-    }
 
     if (currentPhotoFile) {
-        formData.append('journal_photo', currentPhotoFile);
+        formData.append('photo', currentPhotoFile);
     }
 
     // Show saving state
@@ -1328,8 +1318,8 @@ function saveEntry() {
         Saving...
     `;
 
-    // Send save request
-    fetch('/api/entries/create/', { 
+    // Send save request to your new API endpoint
+    fetch('/api/save-entry/', { 
         method: 'POST',
         headers: {
             'X-CSRFToken': getCsrfToken()
@@ -1347,34 +1337,16 @@ function saveEntry() {
             // Show success message
             showToast('Entry saved successfully!', 'success');
 
-            // Calculate rewards if wallet connected
-            const rewards = data.rewards || (walletInfo.isConnected ? calculateRewards(journalContent) : 0);
+            saveButton.innerHTML = `
+                <svg class="w-4 h-4 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Saved!
+            `;
 
-            if (walletInfo.isConnected && rewards > 0) {
-                saveButton.innerHTML = `
-                    <svg class="w-4 h-4 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Saved! Earned ${rewards} tokens
-                `;
-            } else {
-                saveButton.innerHTML = `
-                    <svg class="w-4 h-4 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Saved!
-                `;
-            }
-
-            // Redirect after delay
+            // Always redirect to library after delay
             setTimeout(() => {
-                if (data.redirect_url) {
-                    window.location.href = data.redirect_url;
-                } else if (data.entry_id) {
-                    window.location.href = `/entry/${data.entry_id}/`;
-                } else {
-                    window.location.href = '/dashboard/?entry_saved=true';
-                }
+                window.location.href = '/library/';
             }, 1500);
         } else {
             throw new Error(data.error || 'Failed to save entry');
