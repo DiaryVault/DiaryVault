@@ -347,124 +347,172 @@ def signup(request):
     return render(request, 'diary/signup.html', context)
 
 def dashboard(request):
-    """Main dashboard with time periods and recent entries"""
+    """Main dashboard with time periods and recent entries - accessible to all users"""
+    
+    # Initialize default values for anonymous users
+    entries = Entry.objects.none()
+    time_periods = {}
+    recent_entries = []
+    insights = []
+    streak = 0
+    total_entries = 0
+    total_words = 0
+    dominant_mood = None
+    mood_counts = {}
+    is_anonymous = True
+    show_welcome_message = False
+    
     # Check if user is authenticated
-    if not request.user.is_authenticated:
-        # Check for wallet session
+    if request.user.is_authenticated:
+        is_anonymous = False
+        # Get all the authenticated user's data
+        entries = Entry.objects.filter(user=request.user)
+        
+    else:
+        # Handle anonymous users
         wallet_address = request.session.get('wallet_address')
         
         if wallet_address:
-            # Try to authenticate the user
+            # Try to authenticate the user with wallet
             try:
                 user = User.objects.filter(wallet_address=wallet_address).first()
                 if user:
                     # Log the user in using Django's backend
+                    from django.contrib.auth.backends import ModelBackend
                     backend = ModelBackend()
                     user.backend = f'{backend.__module__}.{backend.__class__.__name__}'
                     login(request, user)
                     logger.info(f"Auto-authenticated user {user.id} from wallet session")
-                    # Now request.user is authenticated, continue with the view
-                else:
-                    # Wallet address exists but no user found - redirect to complete registration
-                    messages.info(request, "Please complete your profile to access the dashboard.")
-                    return redirect('home')
+                    is_anonymous = False
+                    entries = Entry.objects.filter(user=user)
             except Exception as e:
                 logger.error(f"Error auto-authenticating wallet user: {e}")
-                return redirect(f'/login/?next={request.path}')
-        else:
-            # No wallet and not authenticated - redirect to login
-            return redirect(f'/login/?next={request.path}')
+        
+        # Check if anonymous user just saved an entry
+        if request.session.get('pending_entry_saved'):
+            show_welcome_message = True
+            request.session.pop('pending_entry_saved', None)
     
-    # Now we know request.user is authenticated, safe to use in queries
-    
-    # Check for save_after_login flag
-    if request.session.pop('save_after_login', False):
-        try:
-            # Your existing save logic...
-            pass
-        except Exception as e:
-            logger.error(f"Error creating entry after login: {str(e)}")
+    # Process entries if we have any (authenticated users)
+    if not is_anonymous and entries.exists():
+        # Check for save_after_login flag
+        if request.session.pop('save_after_login', False):
+            try:
+                # Your existing save logic...
+                pass
+            except Exception as e:
+                logger.error(f"Error creating entry after login: {str(e)}")
 
-    # Get time periods - FIXED for SQLite
-    entries = Entry.objects.filter(user=request.user)
-    time_periods = {}
+        # Get time periods - FIXED for SQLite
+        for entry in entries:
+            period = entry.get_time_period()  # This method should work fine
+            if period not in time_periods:
+                time_periods[period] = {
+                    'period': period,
+                    'count': 0,
+                    'entries': [],
+                    'first_entry': None,
+                    'color': 'sky-700'  # Default color
+                }
 
-    # FIXED: Instead of using QUARTER function, group manually in Python
-    for entry in entries:
-        period = entry.get_time_period()  # This method should work fine
-        if period not in time_periods:
-            time_periods[period] = {
-                'period': period,
-                'count': 0,
-                'entries': [],
-                'first_entry': None,
-                'color': 'sky-700'  # Default color
-            }
+            time_periods[period]['count'] += 1
+            time_periods[period]['entries'].append(entry)
 
-        time_periods[period]['count'] += 1
-        time_periods[period]['entries'].append(entry)
+            # Keep track of first entry for preview
+            if time_periods[period]['first_entry'] is None or entry.created_at < time_periods[period]['first_entry'].created_at:
+                time_periods[period]['first_entry'] = entry
 
-        # Keep track of first entry for preview
-        if time_periods[period]['first_entry'] is None or entry.created_at < time_periods[period]['first_entry'].created_at:
-            time_periods[period]['first_entry'] = entry
+        # Assign different colors to time periods
+        colors = ['sky-700', 'indigo-600', 'emerald-600', 'amber-600', 'rose-600']
+        for i, period_key in enumerate(time_periods.keys()):
+            time_periods[period_key]['color'] = colors[i % len(colors)]
 
-    # Assign different colors to time periods
-    colors = ['sky-700', 'indigo-600', 'emerald-600', 'amber-600', 'rose-600']
-    for i, period_key in enumerate(time_periods.keys()):
-        time_periods[period_key]['color'] = colors[i % len(colors)]
+        # Get recent entries
+        recent_entries = list(entries.order_by('-created_at')[:5])
+
+        # Get insights
+        insights = list(UserInsight.objects.filter(user=request.user))
+
+        # Calculate streak - FIXED for SQLite
+        today = timezone.now().date()
+        entry_dates = list(entries.values_list('created_at__date', flat=True).distinct().order_by('-created_at__date'))
+
+        if entry_dates:
+            # Check if today or yesterday has an entry
+            if entry_dates[0] == today or entry_dates[0] == today - timedelta(days=1):
+                streak = 1
+                current_date = entry_dates[0]
+
+                # Count consecutive days
+                for entry_date in entry_dates[1:]:
+                    expected_date = current_date - timedelta(days=1)
+                    if entry_date == expected_date:
+                        streak += 1
+                        current_date = entry_date
+                    else:
+                        break
+
+        # Calculate stats for dashboard cards
+        total_entries = entries.count()
+        total_words = sum(len(entry.content.split()) for entry in entries)
+        
+        # Get mood distribution for quick stats
+        for entry in entries:
+            if entry.mood:
+                mood_counts[entry.mood] = mood_counts.get(entry.mood, 0) + 1
+        
+        dominant_mood = max(mood_counts.items(), key=lambda x: x[1])[0] if mood_counts else None
 
     # Sort time periods by most recent first
-    sorted_periods = sorted(time_periods.values(), key=lambda x: x['period'], reverse=True)
+    sorted_periods = sorted(time_periods.values(), key=lambda x: x['period'], reverse=True) if time_periods else []
 
-    # Get recent entries
-    recent_entries = entries.order_by('-created_at')[:5]
-
-    # Get insights
-    insights = UserInsight.objects.filter(user=request.user)
-
-    # Calculate streak - FIXED for SQLite
-    streak = 0
-    today = timezone.now().date()
-
-    # Check entries for consecutive days - using Python instead of SQL
-    entry_dates = list(entries.values_list('created_at__date', flat=True).distinct().order_by('-created_at__date'))
-
-    if entry_dates:
-        # Check if today or yesterday has an entry
-        if entry_dates[0] == today or entry_dates[0] == today - timedelta(days=1):
-            streak = 1
-            current_date = entry_dates[0]
-
-            # Count consecutive days
-            for entry_date in entry_dates[1:]:
-                expected_date = current_date - timedelta(days=1)
-                if entry_date == expected_date:
-                    streak += 1
-                    current_date = entry_date
-                else:
-                    break
-
-    # Calculate stats for dashboard cards
-    total_entries = entries.count()
-    total_words = sum(len(entry.content.split()) for entry in entries) if entries.exists() else 0
-    
-    # Get mood distribution for quick stats
-    mood_counts = {}
-    for entry in entries:
-        if entry.mood:
-            mood_counts[entry.mood] = mood_counts.get(entry.mood, 0) + 1
-    
-    dominant_mood = max(mood_counts.items(), key=lambda x: x[1])[0] if mood_counts else None
+    # Sample data for anonymous users to see what the dashboard looks like
+    if is_anonymous:
+        # Create sample data to show dashboard structure
+        sample_periods = [
+            {
+                'period': 'Today',
+                'count': 3,
+                'color': 'sky-700',
+                'first_entry': None,
+                'is_sample': True
+            },
+            {
+                'period': 'This Week',
+                'count': 7,
+                'color': 'indigo-600',
+                'first_entry': None,
+                'is_sample': True
+            },
+            {
+                'period': 'This Month',
+                'count': 15,
+                'color': 'emerald-600',
+                'first_entry': None,
+                'is_sample': True
+            }
+        ]
+        
+        # Show sample mood distribution
+        sample_moods = {
+            'happy': 8,
+            'grateful': 6,
+            'thoughtful': 4,
+            'excited': 3
+        }
 
     context = {
-        'time_periods': sorted_periods[:5],  # Show top 5 most recent periods
+        'time_periods': sorted_periods[:5] if not is_anonymous else sample_periods,
         'recent_entries': recent_entries,
         'insights': insights,
         'streak': streak,
         'total_entries': total_entries,
         'total_words': total_words,
         'dominant_mood': dominant_mood,
-        'mood_counts': mood_counts,
+        'mood_counts': mood_counts if not is_anonymous else sample_moods,
+        'is_anonymous': is_anonymous,
+        'show_welcome_message': show_welcome_message,
+        'wallet_address': request.session.get('wallet_address'),
     }
 
     return render(request, 'diary/dashboard.html', context)
