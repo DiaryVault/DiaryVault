@@ -3,28 +3,78 @@ import logging
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 
 from ..models import Entry, Tag, UserInsight
 from ..utils.analytics import get_mood_emoji, get_tag_color, mood_to_numeric_value
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 def insights(request):
     """View for showing AI-generated insights about the user's journal entries."""
     
-    # This should never happen with @login_required, but let's be extra safe
-    if not request.user.is_authenticated:
-        messages.warning(request, "Please log in or connect your wallet to view insights.")
-        return redirect('login')
+    # Check for wallet connection first
+    wallet_address = request.session.get('wallet_address')
     
-    # Additional check to ensure user has valid ID
-    if not hasattr(request.user, 'id') or request.user.id is None:
+    # If not authenticated and no wallet, redirect
+    if not request.user.is_authenticated and not wallet_address:
+        messages.warning(request, "Please log in or connect your wallet to view insights.")
+        return redirect('home')
+    
+    # Handle wallet-connected but not authenticated users
+    if not request.user.is_authenticated and wallet_address:
+        # Try to find or create user based on wallet
+        try:
+            user = User.objects.filter(wallet_address=wallet_address).first()
+            
+            if user:
+                # Use existing user
+                request.user = user
+            else:
+                # Show insights based on local storage data
+                context = {
+                    'is_wallet_only': True,
+                    'wallet_address': wallet_address,
+                    'mood_analysis': None,
+                    'patterns': [],
+                    'suggestions': [],
+                    'mood_distribution': [],
+                    'tag_distribution': [],
+                    'mood_trends': [],
+                }
+                
+                # Try to get anonymous entries from session
+                anonymous_entries = request.session.get('anonymous_entries', {})
+                if anonymous_entries:
+                    # Generate basic insights from session data
+                    context.update(generate_session_insights(anonymous_entries))
+                else:
+                    # No entries yet - show welcome message
+                    context['mood_analysis'] = {
+                        'title': 'Welcome to Your Insights',
+                        'content': 'Start journaling to see personalized insights about your mood patterns, emotional trends, and writing themes.'
+                    }
+                    context['suggestions'] = [{
+                        'title': 'Get Started',
+                        'content': 'Write your first journal entry to begin tracking your emotional journey and discovering patterns in your thoughts.'
+                    }]
+                
+                return render(request, 'diary/insights.html', context)
+                
+        except Exception as e:
+            logger.error(f"Error handling wallet user: {e}")
+            messages.error(request, "Error loading insights. Please try again.")
+            return redirect('home')
+    
+    # For authenticated users, ensure they have a valid ID
+    if hasattr(request.user, 'id') and request.user.id is None:
         logger.error(f"Invalid user object in insights view: {request.user}")
         messages.error(request, "Authentication error. Please log in again.")
         return redirect('login')
 
-    # Handle regenerating insights
-    if request.method == 'POST' and 'regenerate_insights' in request.POST:
+    # Handle regenerating insights (only for authenticated users)
+    if request.method == 'POST' and 'regenerate_insights' in request.POST and request.user.is_authenticated:
         # Delete existing insights for this user
         UserInsight.objects.filter(user=request.user).delete()
 
@@ -104,10 +154,114 @@ def insights(request):
         'mood_distribution': mood_distribution,
         'tag_distribution': tag_distribution,
         'mood_trends': mood_trends,
+        'is_wallet_only': False,
     }
 
     return render(request, 'diary/insights.html', context)
 
+def generate_session_insights(anonymous_entries):
+    """Generate basic insights from session-stored entries for wallet-only users"""
+    insights = {
+        'mood_distribution': [],
+        'tag_distribution': [],
+        'patterns': [],
+        'suggestions': []
+    }
+    
+    if not anonymous_entries:
+        return insights
+    
+    # Extract moods and tags from anonymous entries
+    moods = []
+    all_tags = []
+    total_words = 0
+    
+    for entry_id, entry_data in anonymous_entries.items():
+        if 'mood' in entry_data and entry_data['mood']:
+            moods.append(entry_data['mood'])
+        
+        if 'tags' in entry_data:
+            tags = entry_data.get('tags', [])
+            if isinstance(tags, list):
+                all_tags.extend(tags)
+            elif isinstance(tags, str):
+                all_tags.extend([t.strip() for t in tags.split(',') if t.strip()])
+        
+        if 'content' in entry_data:
+            total_words += len(entry_data['content'].split())
+    
+    # Generate mood distribution
+    if moods:
+        mood_counts = Counter(moods)
+        total_moods = sum(mood_counts.values())
+        insights['mood_distribution'] = [
+            {
+                'name': mood,
+                'count': count,
+                'percentage': round((count / total_moods) * 100),
+                'emoji': get_mood_emoji(mood)
+            }
+            for mood, count in mood_counts.most_common()
+        ]
+    
+    # Generate tag distribution
+    if all_tags:
+        tag_counts = Counter(all_tags)
+        total_tags = sum(tag_counts.values())
+        insights['tag_distribution'] = [
+            {
+                'name': tag,
+                'count': count,
+                'percentage': round((count / total_tags) * 100),
+                'color': get_tag_color(tag)
+            }
+            for tag, count in tag_counts.most_common()[:10]
+        ]
+    
+    # Generate basic patterns
+    num_entries = len(anonymous_entries)
+    if num_entries >= 2:
+        insights['patterns'].append({
+            'title': 'Building Momentum',
+            'content': f'You have {num_entries} journal entries saved locally. Your commitment to journaling is growing!'
+        })
+    
+    if total_words > 100:
+        avg_words = total_words // num_entries
+        insights['patterns'].append({
+            'title': 'Writing Progress',
+            'content': f'You\'re averaging {avg_words} words per entry. Keep expressing yourself freely!'
+        })
+    
+    # Generate mood analysis
+    if moods:
+        mood_counter = Counter(moods)
+        most_common_mood = mood_counter.most_common(1)[0][0]
+        
+        mood_text = f"Your recent entries show you've been feeling mostly {most_common_mood}. "
+        if len(mood_counter) > 1:
+            mood_text += f"You've experienced {len(mood_counter)} different emotional states, showing emotional awareness and depth."
+        
+        insights['mood_analysis'] = {
+            'title': 'Your Emotional Journey',
+            'content': mood_text
+        }
+    
+    # Basic suggestions
+    insights['suggestions'].append({
+        'title': 'Create Your Account',
+        'content': 'Your entries are currently stored locally. Create an account to save them permanently, access them from any device, and unlock AI-powered insights.'
+    })
+    
+    if not moods:
+        insights['suggestions'].append({
+            'title': 'Track Your Moods',
+            'content': 'Add mood tags to your entries to see emotional patterns and trends over time.'
+        })
+    
+    return insights
+
+# Keep all your existing functions below
 def generate_fallback_insights(user):
     """
     Generate basic insights when AIService fails.
