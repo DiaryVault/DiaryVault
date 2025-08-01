@@ -1426,149 +1426,89 @@ function updateActionButtons(isConnected) {
 }
 
 // Enhanced save function for blockchain storage
-function saveToBlockchain() {
-  console.log('saveToBlockchain called');
-  
-  const walletInfo = getWalletInfo();
-  console.log('Wallet info:', walletInfo);
-  
-  if (!walletInfo.isConnected) {
-    console.log('Wallet not connected, prompting connection');
-    initWeb3Connection();
-    return;
-  }
-
-  if (walletInfo.chainId !== 8453) {
-    console.log('Wrong chain, prompting switch');
-    switchToBaseNetwork();
-    return;
-  }
-
-  const journalEntry = document.getElementById('journalEntry');
-  const entryTitle = document.getElementById('entryTitle');
-
-  if (!journalEntry || !entryTitle) {
-    console.error('Missing journal entry or title elements');
-    return;
-  }
-
-  const journalContent = journalEntry.innerHTML.replace(/<[^>]*>/g, '');
-  const titleText = entryTitle.textContent;
-
-  console.log('Preparing to save:', {
-    title: titleText,
-    contentLength: journalContent.length,
-    hasPhoto: !!currentPhotoFile
-  });
-
-  // Show saving state
-  const saveButton = document.querySelector('#walletConnectedActions button');
-  if (saveButton) {
-    const originalText = saveButton.innerHTML;
-    saveButton.innerHTML = `
-      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      Saving to blockchain...
-    `;
-    saveButton.disabled = true;
-
-    const csrftoken = getCsrfToken();
-    console.log('CSRF token:', csrftoken ? 'Found' : 'Missing');
-    
-    const formData = new FormData();
-    
-    formData.append('title', titleText);
-    formData.append('content', journalContent);
-    formData.append('wallet_address', walletInfo.address);
-    formData.append('chain_id', walletInfo.chainId);
-    formData.append('encrypted', 'true');
-
-    if (currentPhotoFile) {
-      formData.append('journal_photo', currentPhotoFile);
-      console.log('Photo included in form data');
-    }
-
-    console.log('Sending request to /save-generated-entry/');
-    
-    fetch('/save-generated-entry/', {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': csrftoken,
-        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
-      },
-      body: formData
-    })
-    .then(response => {
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        return response.text().then(text => {
-          console.error('Response body:', text);
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        });
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Response data:', data);
-      
-      if (data.success) {
-        const rewards = data.rewards || calculateRewards(journalContent, walletInfo.isConnected);
-
-        // Show success
-        saveButton.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-          Saved! Earned ${rewards} tokens
-        `;
+async function saveToBlockchain() {
+    try {
+        const title = document.getElementById('entry-title').value;
+        const content = document.getElementById('entry-content').value;
+        const mood = document.getElementById('entry-mood').value;
+        const tags = document.getElementById('entry-tags').value;
         
-        if (window.showToast) {
-          window.showToast(`Entry saved! You earned ${rewards} tokens`, 'success');
+        if (!title || !content) {
+            showToast('Please fill in both title and content', 'error');
+            return;
         }
-
-        // Redirect to dashboard after showing success message
-        setTimeout(() => {
-          if (data.redirect_url) {
-            window.location.href = data.redirect_url;
-          } else {
-            window.location.href = '/dashboard/?entry_saved=true';
-          }
-        }, 1500);
-      } else {
-        // Handle error
-        console.error('Server returned success: false', data);
-        saveButton.innerHTML = originalText;
-        saveButton.disabled = false;
-        if (window.showToast) {
-          window.showToast(data.error || 'Failed to save entry', 'error');
+        
+        showLoadingState('save-btn', 'Saving...');
+        
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('content', content);
+        formData.append('mood', mood);
+        formData.append('tags', tags);
+        
+        // Add wallet info if connected
+        if (currentWalletAddress) {
+            formData.append('wallet_address', currentWalletAddress);
+            formData.append('chain_id', currentChainId || 8453);
         }
-      }
-    })
-    .catch(error => {
-      console.error('Save error details:', error);
-      
-      saveButton.innerHTML = originalText;
-      saveButton.disabled = false;
-      
-      let errorMessage = 'Failed to save entry. ';
-      if (error.message.includes('404')) {
-        errorMessage += 'The save endpoint was not found.';
-      } else if (error.message.includes('403')) {
-        errorMessage += 'Permission denied. Please check your authentication.';
-      } else if (error.message.includes('500')) {
-        errorMessage += 'Server error occurred.';
-      } else {
-        errorMessage += 'Please try again.';
-      }
-      
-      if (window.showToast) {
-        window.showToast(errorMessage, 'error');
-      }
-    });
-  }
+        
+        // Add auth token if available
+        const authToken = localStorage.getItem('authToken');
+        const headers = {
+            'X-CSRFToken': getCookie('csrftoken')
+        };
+        
+        if (authToken) {
+            headers['Authorization'] = `Token ${authToken}`;
+        }
+        
+        const response = await fetch('/api/save-generated-entry/', {
+            method: 'POST',
+            headers: headers,
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast(data.message || 'Entry saved successfully!', 'success');
+            
+            // Handle redirect if provided
+            if (data.redirect_url) {
+                // Clear form
+                document.getElementById('journal-form').reset();
+                
+                // Redirect to dashboard or provided URL
+                setTimeout(() => {
+                    window.location.href = data.redirect_url;
+                }, 1000); // Small delay to show success message
+            } else if (data.is_anonymous) {
+                // Handle anonymous save
+                showToast('Entry saved temporarily. Connect wallet to save permanently!', 'info');
+                
+                // Show wallet prompt if not connected
+                if (data.wallet_connect_prompt && !currentWalletAddress) {
+                    setTimeout(() => {
+                        document.getElementById('web3Modal').classList.remove('hidden');
+                    }, 2000);
+                }
+            }
+            
+            // Update UI based on authentication status
+            if (data.is_authenticated) {
+                updateUIForConnectedWallet();
+            }
+            
+        } else {
+            showToast(data.error || 'Failed to save entry', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error saving entry:', error);
+        showToast('Network error. Please try again.', 'error');
+    } finally {
+        hideLoadingState('save-btn', 'Save to Blockchain');
+    }
 }
 
 // Get CSRF token

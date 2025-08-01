@@ -682,41 +682,6 @@ def journal_preview(request, journal_id):
             'error': str(e)
         })
 
-def marketplace_stats(request):
-    """Get real-time marketplace statistics"""
-    try:
-        # Import models with fallback
-        try:
-            from ..models import Journal
-        except ImportError:
-            try:
-                from ..models import Journal
-            except ImportError:
-                from diary.models import Journal
-
-        # Get updated stats
-        journals = Journal.objects.filter(is_published=True).select_related('author')
-
-        stats_data = {
-            'success': True,
-            'earnings': {},
-            'views': {},
-            'total_journals': journals.count(),
-        }
-
-        # Add individual journal stats
-        for journal in journals:
-            stats_data['earnings'][str(journal.id)] = calculate_journal_earnings(journal)
-            stats_data['views'][str(journal.id)] = journal.view_count or 0
-
-        return JsonResponse(stats_data)
-
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        })
-
 class CustomLoginView(LoginView):
     def get(self, request, *args, **kwargs):
         # Add a message to prompt wallet connection
