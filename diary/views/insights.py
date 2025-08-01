@@ -17,55 +17,37 @@ def insights(request):
     # Check for wallet connection first
     wallet_address = request.session.get('wallet_address')
     
-    # If not authenticated and no wallet, redirect
-    if not request.user.is_authenticated and not wallet_address:
-        messages.warning(request, "Please log in or connect your wallet to view insights.")
-        return redirect('home')
-    
-    # Handle wallet-connected but not authenticated users
-    if not request.user.is_authenticated and wallet_address:
-        # Try to find or create user based on wallet
-        try:
-            user = User.objects.filter(wallet_address=wallet_address).first()
-            
-            if user:
-                # Use existing user
-                request.user = user
-            else:
-                # Show insights based on local storage data
-                context = {
-                    'is_wallet_only': True,
-                    'wallet_address': wallet_address,
-                    'mood_analysis': None,
-                    'patterns': [],
-                    'suggestions': [],
-                    'mood_distribution': [],
-                    'tag_distribution': [],
-                    'mood_trends': [],
-                }
-                
-                # Try to get anonymous entries from session
-                anonymous_entries = request.session.get('anonymous_entries', {})
-                if anonymous_entries:
-                    # Generate basic insights from session data
-                    context.update(generate_session_insights(anonymous_entries))
-                else:
-                    # No entries yet - show welcome message
-                    context['mood_analysis'] = {
-                        'title': 'Welcome to Your Insights',
-                        'content': 'Start journaling to see personalized insights about your mood patterns, emotional trends, and writing themes.'
-                    }
-                    context['suggestions'] = [{
-                        'title': 'Get Started',
-                        'content': 'Write your first journal entry to begin tracking your emotional journey and discovering patterns in your thoughts.'
-                    }]
-                
-                return render(request, 'diary/insights.html', context)
-                
-        except Exception as e:
-            logger.error(f"Error handling wallet user: {e}")
-            messages.error(request, "Error loading insights. Please try again.")
-            return redirect('home')
+    # Allow anonymous users to view insights page with limited functionality
+    if not request.user.is_authenticated:
+        # Show insights based on local storage data
+        context = {
+            'is_wallet_only': True,
+            'wallet_address': wallet_address,
+            'mood_analysis': None,
+            'patterns': [],
+            'suggestions': [],
+            'mood_distribution': [],
+            'tag_distribution': [],
+            'mood_trends': [],
+        }
+        
+        # Try to get anonymous entries from session
+        anonymous_entries = request.session.get('anonymous_entries', {})
+        if anonymous_entries:
+            # Generate basic insights from session data
+            context.update(generate_session_insights(anonymous_entries))
+        else:
+            # No entries yet - show welcome message
+            context['mood_analysis'] = {
+                'title': 'Welcome to Your Insights',
+                'content': 'Start journaling to see personalized insights about your mood patterns, emotional trends, and writing themes.'
+            }
+            context['suggestions'] = [{
+                'title': 'Get Started',
+                'content': 'Write your first journal entry to begin tracking your emotional journey and discovering patterns in your thoughts.'
+            }]
+        
+        return render(request, 'diary/insights.html', context)
     
     # For authenticated users, ensure they have a valid ID
     if hasattr(request.user, 'id') and request.user.id is None:

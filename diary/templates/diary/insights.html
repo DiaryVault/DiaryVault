@@ -543,7 +543,8 @@
       Discover patterns, trends, and meaningful insights from your journaling journey
     </p>
 
-    <!-- Regenerate button -->
+    <!-- Regenerate button - only show for authenticated users -->
+    {% if user.is_authenticated %}
     <form method="post" class="inline-block">
       {% csrf_token %}
       <input type="hidden" name="regenerate_insights" value="true">
@@ -554,6 +555,15 @@
         <span>Regenerate Insights</span>
       </button>
     </form>
+    {% else %}
+    <div class="bg-blue-50 border border-blue-200 text-blue-800 px-6 py-4 rounded-xl max-w-2xl mx-auto">
+      <p class="text-sm">
+        <strong>Note:</strong> You're viewing sample insights. 
+        <a href="{% url 'signup' %}" class="underline font-semibold">Create an account</a> or 
+        <a href="{% url 'login' %}" class="underline font-semibold">log in</a> to save your entries and get personalized AI insights.
+      </p>
+    </div>
+    {% endif %}
   </div>
 
   <!-- REDESIGNED: Mood Analysis Section -->
@@ -795,12 +805,21 @@
         <p class="text-gray-600 text-lg leading-relaxed mb-8">The more you journal, the richer your insights become. Each entry adds depth to your personal story.</p>
 
         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          {% if user.is_authenticated %}
           <a href="{% url 'new_entry' %}" class="btn-primary text-white px-8 py-4 rounded-full inline-flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all text-lg font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
             <span>Write New Journal Entry</span>
           </a>
+          {% else %}
+          <a href="{% url 'signup' %}" class="btn-primary text-white px-8 py-4 rounded-full inline-flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all text-lg font-medium">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            <span>Create Account to Start</span>
+          </a>
+          {% endif %}
 
           <a href="{% url 'dashboard' %}" class="btn-secondary text-gray-700 hover:text-gray-800 px-6 py-4 rounded-full inline-flex items-center gap-2 transition-all text-lg font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
