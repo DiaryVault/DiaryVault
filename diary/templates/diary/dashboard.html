@@ -384,7 +384,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen relative overflow-hidden">
+<div class="min-h-screen relative overflow-hidden" data-is-anonymous="{{ is_anonymous|yesno:'true,false' }}">
   <!-- Background blobs -->
   <div class="absolute inset-0 overflow-hidden pointer-events-none">
     <div class="blob blob-1"></div>
@@ -908,11 +908,11 @@
         <div class="glass-card rounded-2xl p-6 animate-fade-in">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-bold text-gray-800">Time Periods</h3>
-            <a href="{% url 'library' %}" class="text-sm text-primary-600 hover:text-primary-700">View all</a>
+            <a href="{% url 'library' %}?tab=journals" class="text-sm text-primary-600 hover:text-primary-700">View all</a>
           </div>
           <div class="space-y-3">
             {% for period in time_periods|slice:":5" %}
-            <a href="{% url 'library' %}" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors">
+            <a href="{% url 'library' %}?tab=journals" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors">
               <div class="flex items-center justify-between">
                 <div>
                   <div class="font-medium text-gray-800">{{ period.period }}</div>
@@ -965,31 +965,26 @@ document.addEventListener('DOMContentLoaded', function() {
     initializePersonalization();
     initializeAnimations();
     checkWalletConnection();
-    checkForPendingEntry(); // Add this to check for transferred journal entry
+    checkForPendingEntry();
 });
 
 // Check for pending journal entry from home page
 function checkForPendingEntry() {
-    // Check if there's a pending entry from home page
     const pendingEntry = sessionStorage.getItem('pendingJournalEntry');
     
     if (pendingEntry) {
         try {
             const entryData = JSON.parse(pendingEntry);
             
-            // Show a notification that we found their entry
             showToast('We found your draft entry! Loading it now...', 'info');
             
-            // Fill in the form with the pending entry
             const journalInput = document.getElementById('journalInput');
             if (journalInput && entryData.content) {
                 journalInput.value = entryData.content;
                 countChars();
             }
             
-            // If there's photo data, restore it
             if (entryData.photoData && entryData.photoName) {
-                // Convert base64 back to file
                 fetch(entryData.photoData)
                     .then(res => res.blob())
                     .then(blob => {
@@ -997,28 +992,23 @@ function checkForPendingEntry() {
                         currentPhotoFile = file;
                         currentPhotoDataUrl = entryData.photoData;
                         
-                        // Show photo preview
                         document.getElementById('photoPreview').src = currentPhotoDataUrl;
                         document.getElementById('photoName').textContent = entryData.photoName;
                         document.getElementById('photoPreviewContainer').classList.remove('hidden');
                     });
             }
             
-            // If it's from the demo, show it in the result preview
             if (entryData.fromDemo && entryData.title) {
-                // Display as generated entry
                 displayGeneratedEntry({
                     entry: entryData.content,
                     title: entryData.title
                 });
                 
-                // Show rewards message if wallet connected
                 if (entryData.hasWallet && entryData.rewards) {
                     showToast(`Ready to save! You'll earn ${entryData.rewards} tokens`, 'success');
                 }
             }
             
-            // Clear the session storage
             sessionStorage.removeItem('pendingJournalEntry');
             
         } catch (error) {
@@ -1050,7 +1040,6 @@ function addSuggestion(text) {
     input.focus();
     countChars();
     
-    // Trigger input event for any listeners
     input.dispatchEvent(new Event('input'));
 }
 
@@ -1069,12 +1058,6 @@ function previewPhoto(event) {
         
         currentPhotoFile = file;
         const reader = new FileReader();
-        reader.onload = function(e) {
-            currentPhotoDataUrl = e.target.result;
-            document.getElementById('photoPreview').src = currentPhotoDataUrl;
-            document.getElementById('photoName').textContent = file.name;
-            document.getElementById('photoPreviewContainer').classList.remove('hidden');
-        };
         reader.readAsDataURL(file);
     }
 }
@@ -1134,7 +1117,6 @@ function setupDragAndDrop() {
 function initializePersonalization() {
     const toggle = document.getElementById('personalizationToggle');
     if (toggle) {
-        // Load saved preference
         const saved = localStorage.getItem('usePersonalization');
         if (saved !== null) {
             toggle.checked = saved === 'true';
@@ -1156,15 +1138,12 @@ function generateEntry() {
         return;
     }
 
-    // Show loading state
     document.getElementById('dashboardJournalForm').classList.add('hidden');
     document.getElementById('loadingIndicator').classList.remove('hidden');
 
-    // Disable button
     const generateButton = document.getElementById('generateButton');
     generateButton.disabled = true;
 
-    // Prepare form data
     const formData = new FormData();
     formData.append('journal_content', inputText);
     formData.append('csrfmiddlewaretoken', getCsrfToken());
@@ -1178,7 +1157,6 @@ function generateEntry() {
         formData.append('journal_photo', currentPhotoFile);
     }
 
-    // Check if wallet is connected
     const walletInfo = getWalletInfo();
     if (walletInfo.isConnected) {
         formData.append('wallet_address', walletInfo.address);
@@ -1186,7 +1164,6 @@ function generateEntry() {
         formData.append('encrypted', 'true');
     }
 
-    // Make API call
     fetch('/api/demo-journal/', {
         method: 'POST',
         headers: {
@@ -1204,7 +1181,6 @@ function generateEntry() {
         return response.json();
     })
     .then(data => {
-        // Hide loading
         document.getElementById('loadingIndicator').classList.add('hidden');
         generateButton.disabled = false;
 
@@ -1214,7 +1190,6 @@ function generateEntry() {
             return;
         }
 
-        // Display the result
         displayGeneratedEntry(data);
     })
     .catch(error => {
@@ -1239,10 +1214,8 @@ function displayGeneratedEntry(data) {
         entryTitle.textContent = data.title || `My Journal Entry - ${new Date().toLocaleDateString()}`;
     }
 
-    // Show result preview
     document.getElementById('resultPreview').classList.remove('hidden');
 
-    // Smooth scroll to result
     setTimeout(() => {
         document.getElementById('resultPreview').scrollIntoView({ 
             behavior: 'smooth', 
@@ -1258,42 +1231,34 @@ function editJournalEntry() {
 
     if (!journalEntry || !journalInput) return;
 
-    // Get the content and convert <br> back to newlines
     const content = journalEntry.innerHTML.replace(/<br\s*\/?>/gi, '\n');
     journalInput.value = content;
 
-    // Hide result and show form
     document.getElementById('resultPreview').classList.add('hidden');
     document.getElementById('dashboardJournalForm').classList.remove('hidden');
 
-    // Update character count and focus
     countChars();
     journalInput.focus();
 }
 
 // Restart entry
 function restartEntry() {
-    // Clear form
     document.getElementById('journalInput').value = '';
     removePhoto();
     countChars();
 
-    // Hide result and show form
     document.getElementById('resultPreview').classList.add('hidden');
     document.getElementById('dashboardJournalForm').classList.remove('hidden');
 
-    // Focus on input
     document.getElementById('journalInput').focus();
 }
 
-// Save entry
+// Save entry - FIXED TO REDIRECT TO LIBRARY
 function saveEntry() {
-    // Check if user is authenticated first
     const isAnonymous = document.querySelector('[data-is-anonymous]')?.dataset.isAnonymous === 'true';
     
     if (isAnonymous) {
         showToast('Please connect your wallet or log in to save entries', 'warning');
-        // Optionally, trigger wallet connection
         connectWallet();
         return;
     }
@@ -1306,17 +1271,15 @@ function saveEntry() {
         return;
     }
 
-    // Create form data
     const formData = new FormData();
     formData.append('csrfmiddlewaretoken', getCsrfToken());
     formData.append('title', entryTitle);
     formData.append('content', journalContent);
 
     if (currentPhotoFile) {
-        formData.append('photo', currentPhotoFile);  // Changed from 'journal_photo' to 'photo'
+        formData.append('photo', currentPhotoFile);
     }
 
-    // Show saving state
     const saveButton = event.target;
     const originalText = saveButton.innerHTML;
     saveButton.disabled = true;
@@ -1328,13 +1291,12 @@ function saveEntry() {
         Saving...
     `;
 
-    // Send save request to your new API endpoint
-    fetch('/api/save-entry/', {  // Changed from '/api/entries/create/' to '/api/save-entry/'
+    fetch('/api/save-entry/', {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCsrfToken()
         },
-        credentials: 'include',  // Include cookies for session authentication
+        credentials: 'include',
         body: formData
     })
     .then(response => {
@@ -1345,7 +1307,6 @@ function saveEntry() {
     })
     .then(data => {
         if (data.success) {
-            // Show success message
             showToast('Entry saved successfully!', 'success');
 
             saveButton.innerHTML = `
@@ -1355,9 +1316,9 @@ function saveEntry() {
                 Saved!
             `;
 
-            // Always redirect to library after delay
+            // REDIRECT TO LIBRARY
             setTimeout(() => {
-                window.location.href = '/library/';
+                window.location.href = "{% url 'library' %}";
             }, 1500);
         } else {
             throw new Error(data.error || 'Failed to save entry');
@@ -1373,22 +1334,18 @@ function saveEntry() {
 
 // Wallet connection functions
 function checkWalletConnection() {
-    // First check for wallet connection status from Django session/context
     const isAnonymous = document.querySelector('[data-is-anonymous]')?.dataset.isAnonymous === 'true';
     
     if (!isAnonymous) {
-        // User is authenticated, no need to show wallet connection prompts
         updateUIForAuthenticatedUser();
         return;
     }
     
-    // Listen for wallet connection changes
     window.addEventListener('walletConnectionChanged', function(event) {
         const { isConnected, address, chainId } = event.detail;
         updateUIForWalletStatus(isConnected, address, chainId);
     });
 
-    // Check initial state
     setTimeout(() => {
         const walletInfo = getWalletInfo();
         if (walletInfo.isConnected) {
@@ -1398,17 +1355,14 @@ function checkWalletConnection() {
 }
 
 function updateUIForAuthenticatedUser() {
-    // Hide any wallet connection prompts
     const walletPrompts = document.querySelectorAll('.wallet-connection-prompt');
     walletPrompts.forEach(el => el.style.display = 'none');
     
-    // Show authenticated user content
     const authContent = document.querySelectorAll('.authenticated-only');
     authContent.forEach(el => el.style.display = 'block');
 }
 
 function updateUIForWalletStatus(isConnected, address, chainId) {
-    // Update any wallet-specific UI elements
     const walletButtons = document.querySelectorAll('[data-wallet-action]');
     walletButtons.forEach(button => {
         if (isConnected) {
@@ -1418,9 +1372,6 @@ function updateUIForWalletStatus(isConnected, address, chainId) {
 }
 
 function getWalletInfo() {
-    // Check multiple sources for wallet connection
-    
-    // 1. Check if user is authenticated in Django
     const userElement = document.querySelector('[data-user-authenticated]');
     if (userElement && userElement.dataset.userAuthenticated === 'true') {
         return {
@@ -1430,7 +1381,6 @@ function getWalletInfo() {
         };
     }
     
-    // 2. Check window.ethereum
     if (window.ethereum && window.ethereum.selectedAddress) {
         return {
             isConnected: true,
@@ -1439,7 +1389,6 @@ function getWalletInfo() {
         };
     }
     
-    // 3. Check for wallet session in localStorage
     const walletSession = localStorage.getItem('walletSession');
     if (walletSession) {
         try {
@@ -1464,16 +1413,13 @@ function getWalletInfo() {
 }
 
 function connectWallet() {
-    // This should trigger your wallet connection flow
     if (window.connectWeb3Wallet) {
         window.connectWeb3Wallet();
     } else if (window.ethereum) {
-        // Fallback to direct ethereum request
         window.ethereum.request({ method: 'eth_requestAccounts' })
             .then(accounts => {
                 if (accounts.length > 0) {
                     showToast('Wallet connected successfully!', 'success');
-                    // Reload to update UI
                     window.location.reload();
                 }
             })
@@ -1499,11 +1445,9 @@ function calculateRewards(content) {
 }
 
 function showToast(message, type = 'info') {
-    // Create toast element
     const toast = document.createElement('div');
     toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 z-50 translate-x-full`;
     
-    // Set color based on type
     switch(type) {
         case 'success':
             toast.className += ' bg-green-500 text-white';
@@ -1529,15 +1473,12 @@ function showToast(message, type = 'info') {
         </div>
     `;
 
-    // Add to page
     document.body.appendChild(toast);
 
-    // Animate in
     setTimeout(() => {
         toast.style.transform = 'translateX(0)';
     }, 10);
 
-    // Auto remove after 5 seconds
     setTimeout(() => {
         toast.style.transform = 'translateX(100%)';
         setTimeout(() => toast.remove(), 300);
@@ -1546,7 +1487,6 @@ function showToast(message, type = 'info') {
 
 // Initialize animations
 function initializeAnimations() {
-    // Intersection Observer for fade-in animations
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -1559,7 +1499,6 @@ function initializeAnimations() {
         rootMargin: '50px'
     });
 
-    // Observe all elements with animation classes
     document.querySelectorAll('.animate-on-scroll').forEach(el => {
         observer.observe(el);
     });
@@ -1575,7 +1514,6 @@ document.addEventListener('input', function(e) {
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
-    // Ctrl/Cmd + Enter to submit
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         const journalInput = document.getElementById('journalInput');
         if (journalInput && journalInput === document.activeElement) {
@@ -1584,7 +1522,6 @@ document.addEventListener('keydown', function(e) {
         }
     }
 
-    // Escape to cancel/close
     if (e.key === 'Escape') {
         const resultPreview = document.getElementById('resultPreview');
         if (resultPreview && !resultPreview.classList.contains('hidden')) {
