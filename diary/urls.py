@@ -47,6 +47,7 @@ urlpatterns = [
     path('api/user-profile/', web3_auth.user_profile, name='user_profile'),
     path('api/update-profile/', web3_auth.update_profile, name='update_profile'),
     path('api/save-generated-entry/', api.save_generated_entry, name='save_generated_entry'),
+    path('api/save-entry/', views.save_entry_api, name='save_entry_api'),
 
     # ============================================================================
     # Main Pages

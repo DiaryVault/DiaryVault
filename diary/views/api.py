@@ -1739,3 +1739,32 @@ def anonymous_entry_preview(request, entry_uuid):
     # Entry not found
     messages.warning(request, "Entry not found. Please create a new journal entry.")
     return redirect('new_entry')
+
+@require_POST
+def save_entry_api(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    
+    try:
+        entry = Entry.objects.create(
+            user=request.user,
+            title=request.POST.get('title', 'Untitled Entry'),
+            content=request.POST.get('content', ''),
+            mood=request.POST.get('mood', ''),
+        )
+        
+        # Handle photo if provided
+        if 'photo' in request.FILES:
+            from .models import EntryPhoto
+            EntryPhoto.objects.create(
+                entry=entry,
+                photo=request.FILES['photo']
+            )
+        
+        return JsonResponse({
+            'success': True,
+            'entry_id': entry.id,
+            'message': 'Entry saved successfully'
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
