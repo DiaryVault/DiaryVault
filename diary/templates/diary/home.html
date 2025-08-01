@@ -918,7 +918,6 @@ function updateActionButtons(isConnected) {
 }
 
 // Enhanced save function for blockchain storage
-// Enhanced save function for blockchain storage
 function saveToBlockchain() {
   const walletInfo = getWalletInfo();
   
@@ -966,12 +965,21 @@ function saveToBlockchain() {
       formData.append('journal_photo', currentPhotoFile);
     }
 
-    fetch('/api/save-generated-entry/', {
+    // Add auth token if available
+    const authToken = localStorage.getItem('authToken');
+    const headers = {
+      'X-CSRFToken': csrftoken
+    };
+    
+    if (authToken) {
+      headers['Authorization'] = `Token ${authToken}`;
+    }
+
+    fetch('/save-generated-entry/', {
       method: 'POST',
-      headers: {
-        'X-CSRFToken': csrftoken
-      },
-      body: formData
+      headers: headers,
+      body: formData,
+      credentials: 'include'  // Important: include cookies for session
     })
     .then(response => {
       if (!response.ok) {
@@ -995,15 +1003,33 @@ function saveToBlockchain() {
           window.showToast(`Entry saved! Earned ${rewards} tokens`, 'success');
         }
 
-        // Clear any stored data
-        sessionStorage.removeItem('pendingJournalEntry');
-        
-        // Always redirect to dashboard for wallet-connected users
-        setTimeout(() => {
-          // Use the redirect URL from the backend if provided, otherwise default to dashboard
-          const redirectUrl = data.redirect_url || '/dashboard/?entry_saved=true';
-          window.location.href = redirectUrl;
-        }, 1500);
+        // Store auth token if provided
+        if (data.auth_token) {
+          localStorage.setItem('authToken', data.auth_token);
+        }
+
+        // For wallet users who might be seen as anonymous, we need to ensure they're logged in
+        if (data.is_anonymous && walletInfo.isConnected) {
+          // This shouldn't happen with a connected wallet, but if it does,
+          // we need to complete the auth flow
+          if (window.showToast) {
+            window.showToast('Completing authentication...', 'info');
+          }
+          
+          // Try to complete Web3 auth
+          completeWeb3Auth(walletInfo.address, walletInfo.chainId).then(() => {
+            window.location.href = '/dashboard/?entry_saved=true';
+          }).catch(() => {
+            // Fallback: just go to dashboard
+            window.location.href = '/dashboard/?entry_saved=true';
+          });
+        } else {
+          // Normal redirect for authenticated users
+          setTimeout(() => {
+            const redirectUrl = data.redirect_url || '/dashboard/?entry_saved=true';
+            window.location.href = redirectUrl;
+          }, 1500);
+        }
         
       } else {
         // Handle error
@@ -1022,6 +1048,56 @@ function saveToBlockchain() {
         window.showToast('Failed to save entry. Please try again.', 'error');
       }
     });
+  }
+}
+
+// Add this helper function to complete Web3 authentication
+async function completeWeb3Auth(walletAddress, chainId) {
+  try {
+    // Get nonce
+    const nonceResponse = await fetch('/api/request-nonce/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify({ wallet_address: walletAddress })
+    });
+
+    const nonceData = await nonceResponse.json();
+    
+    // Sign message
+    const message = nonceData.message;
+    const signature = await web3Provider.request({
+      method: 'personal_sign',
+      params: [message, walletAddress]
+    });
+
+    // Complete login
+    const loginResponse = await fetch('/api/web3-login/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify({
+        wallet_address: walletAddress,
+        signature: signature,
+        nonce: nonceData.nonce,
+        chain_id: chainId
+      })
+    });
+
+    const loginData = await loginResponse.json();
+    
+    if (loginData.token) {
+      localStorage.setItem('authToken', loginData.token);
+    }
+    
+    return loginData;
+  } catch (error) {
+    console.error('Web3 auth error:', error);
+    throw error;
   }
 }
 
