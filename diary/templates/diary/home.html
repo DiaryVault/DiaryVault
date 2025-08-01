@@ -368,6 +368,49 @@
   .animate-spin {
     animation: spin 1s linear infinite;
   }
+
+  /* Web3 Modal Styles */
+  .web3-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .web3-modal-content {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  .wallet-option {
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .wallet-option:hover {
+    border-color: #6366f1;
+    background-color: #f3f4f6;
+  }
+
+  .wallet-option img {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
 </style>
 {% endblock %}
 
@@ -454,13 +497,13 @@
           </div>
         </div>
         <div class="flex flex-col sm:flex-row gap-2">
-          <button onclick="connectWallet()" class="btn-gradient text-white px-6 py-3 rounded-full font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all">
+          <button onclick="initWeb3Connection()" class="btn-gradient text-white px-6 py-3 rounded-full font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
             Connect Wallet
           </button>
-          <button onclick="showWalletOptions()" class="btn-secondary border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-3 rounded-full text-sm font-medium flex items-center justify-center gap-2">
+          <button onclick="showWalletInfo()" class="btn-secondary border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-3 rounded-full text-sm font-medium flex items-center justify-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -490,6 +533,14 @@
             Disconnect
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Web3 Auth Loading State -->
+    <div id="walletConnecting" class="wallet-connection-prompt hidden">
+      <div class="flex items-center justify-center py-4">
+        <div class="animate-spin h-8 w-8 border-4 border-primary-200 border-t-primary-600 rounded-full mr-3"></div>
+        <span class="text-gray-600" id="walletConnectingMessage">Connecting to wallet...</span>
       </div>
     </div>
   </div>
@@ -610,7 +661,7 @@
               </label>
             </div>
 
-            <button type="button" onclick="connectWallet()" id="connectWalletCTA" class="text-xs text-primary-600 hover:underline flex items-center gap-1">
+            <button type="button" onclick="initWeb3Connection()" id="connectWalletCTA" class="text-xs text-primary-600 hover:underline flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
@@ -651,7 +702,7 @@
                   </ul>
                 </div>
                 <div class="flex gap-2">
-                  <button type="button" onclick="connectWallet()" class="text-xs bg-primary-600 hover:bg-primary-700 text-white px-3 py-1 rounded-full flex items-center gap-1">
+                  <button type="button" onclick="initWeb3Connection()" class="text-xs bg-primary-600 hover:bg-primary-700 text-white px-3 py-1 rounded-full flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
@@ -761,7 +812,7 @@
         </div>
         
         <div id="walletNotConnectedActions" class="flex gap-2">
-          <button type="button" onclick="connectWallet()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-1 w-full sm:w-auto justify-center">
+          <button type="button" onclick="initWeb3Connection()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-1 w-full sm:w-auto justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
@@ -776,7 +827,74 @@
 <!-- Toast notification container -->
 <div id="toastContainer" class="fixed bottom-5 right-5 z-50"></div>
 
+<!-- Web3 Connection Modal -->
+<div id="web3Modal" class="web3-modal hidden">
+  <div class="web3-modal-content">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-semibold text-gray-900">Connect Your Wallet</h3>
+      <button onclick="closeWeb3Modal()" class="text-gray-400 hover:text-gray-600">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    
+    <p class="text-sm text-gray-600 mb-4">Choose your preferred wallet to connect:</p>
+    
+    <div id="walletOptions">
+      <div onclick="connectWithMetaMask()" class="wallet-option">
+        <img src="/static/images/metamask.png" alt="MetaMask" onerror="this.style.display='none'">
+        <div>
+          <div class="font-medium">MetaMask</div>
+          <div class="text-sm text-gray-500">Connect using MetaMask</div>
+        </div>
+      </div>
+      
+      <div onclick="connectWithCoinbase()" class="wallet-option">
+        <img src="/static/images/coinbase.png" alt="Coinbase" onerror="this.style.display='none'">
+        <div>
+          <div class="font-medium">Coinbase Wallet</div>
+          <div class="text-sm text-gray-500">Connect using Coinbase</div>
+        </div>
+      </div>
+      
+      <div onclick="connectWithWalletConnect()" class="wallet-option">
+        <img src="/static/images/walletconnect.png" alt="WalletConnect" onerror="this.style.display='none'">
+        <div>
+          <div class="font-medium">WalletConnect</div>
+          <div class="text-sm text-gray-500">Scan with wallet app</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-4 pt-4 border-t border-gray-200">
+      <p class="text-xs text-gray-500 text-center">
+        New to crypto wallets? 
+        <a href="#" onclick="showWalletInfo()" class="text-primary-600 hover:underline">Learn more</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Web3 Signing Modal -->
+<div id="web3SigningModal" class="web3-modal hidden">
+  <div class="web3-modal-content">
+    <div class="text-center">
+      <div class="animate-spin h-12 w-12 border-4 border-primary-200 border-t-primary-600 rounded-full mx-auto mb-4"></div>
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">Sign Message</h3>
+      <p class="text-sm text-gray-600 mb-4">Please sign the message in your wallet to authenticate</p>
+      <p class="text-xs text-gray-500">This won't cost any gas fees</p>
+    </div>
+  </div>
+</div>
+
 <script>
+// Web3 State Management
+let web3Provider = null;
+let currentWalletAddress = null;
+let currentChainId = null;
+let isConnecting = false;
+
 // Toast notification system
 window.showToast = function(message, type = 'info') {
   const toastContainer = document.getElementById('toastContainer');
@@ -806,42 +924,352 @@ window.showToast = function(message, type = 'info') {
   }, 5000);
 };
 
-// Mock wallet functions (replace with actual Web3 implementation)
-window.connectWallet = function() {
-  console.log('Connecting wallet...');
-  // Simulate wallet connection
-  setTimeout(() => {
-    updateHomePageForWallet(true, '0x1234567890abcdef1234567890abcdef12345678', 8453);
-    window.showToast('Wallet connected successfully!', 'success');
-  }, 1000);
-};
-
-window.disconnectWallet = function() {
-  console.log('Disconnecting wallet...');
-  updateHomePageForWallet(false, null, null);
-  window.showToast('Wallet disconnected', 'info');
-};
-
-window.switchToBaseNetwork = function() {
-  console.log('Switching to Base network...');
-  window.showToast('Please switch to Base network in your wallet', 'warning');
-};
-
-window.showWalletOptions = function() {
-  window.showToast('Wallet options: MetaMask, Coinbase Wallet, WalletConnect', 'info');
-};
-
-window.getWalletInfo = function() {
-  // Mock wallet info - replace with actual implementation
-  const walletConnected = document.getElementById('walletConnected');
-  const isConnected = walletConnected && !walletConnected.classList.contains('hidden');
+// Web3 Connection Functions
+window.initWeb3Connection = async function() {
+  if (isConnecting) return;
   
+  // Show modal for wallet selection
+  document.getElementById('web3Modal').classList.remove('hidden');
+};
+
+window.closeWeb3Modal = function() {
+  document.getElementById('web3Modal').classList.add('hidden');
+};
+
+window.closeWeb3SigningModal = function() {
+  document.getElementById('web3SigningModal').classList.add('hidden');
+};
+
+// Connect with MetaMask
+window.connectWithMetaMask = async function() {
+  if (!window.ethereum || !window.ethereum.isMetaMask) {
+    window.showToast('MetaMask is not installed. Please install it to continue.', 'error');
+    return;
+  }
+  
+  closeWeb3Modal();
+  await connectWeb3Wallet('metamask');
+};
+
+// Connect with Coinbase Wallet
+window.connectWithCoinbase = async function() {
+  // Check if Coinbase Wallet is available
+  if (!window.ethereum || !window.ethereum.isCoinbaseWallet) {
+    window.showToast('Coinbase Wallet is not installed. Please install it to continue.', 'error');
+    return;
+  }
+  
+  closeWeb3Modal();
+  await connectWeb3Wallet('coinbase');
+};
+
+// Connect with WalletConnect (placeholder - needs WalletConnect library)
+window.connectWithWalletConnect = async function() {
+  window.showToast('WalletConnect integration coming soon!', 'info');
+  closeWeb3Modal();
+};
+
+// Main Web3 connection function
+async function connectWeb3Wallet(walletType) {
+  if (isConnecting) return;
+  isConnecting = true;
+
+  try {
+    // Show connecting state
+    showConnectingState('Connecting to wallet...');
+
+    // Request accounts
+    const accounts = await window.ethereum.request({ 
+      method: 'eth_requestAccounts' 
+    });
+
+    if (!accounts || accounts.length === 0) {
+      throw new Error('No accounts found');
+    }
+
+    currentWalletAddress = accounts[0].toLowerCase();
+    
+    // Get chain ID
+    const chainIdHex = await window.ethereum.request({ 
+      method: 'eth_chainId' 
+    });
+    currentChainId = parseInt(chainIdHex, 16);
+
+    console.log('Wallet connected:', {
+      address: currentWalletAddress,
+      chainId: currentChainId,
+      walletType: walletType
+    });
+
+    // Update connecting message
+    showConnectingState('Requesting authentication...');
+
+    // Request nonce from backend
+    const nonceResponse = await fetch('/api/request-nonce/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify({
+        wallet_address: currentWalletAddress
+      })
+    });
+
+    if (!nonceResponse.ok) {
+      const error = await nonceResponse.json();
+      throw new Error(error.error || 'Failed to get nonce');
+    }
+
+    const nonceData = await nonceResponse.json();
+    console.log('Nonce received:', nonceData);
+
+    // Show signing modal
+    closeConnectingState();
+    document.getElementById('web3SigningModal').classList.remove('hidden');
+
+    // Sign message
+    const signature = await window.ethereum.request({
+      method: 'personal_sign',
+      params: [nonceData.message, currentWalletAddress]
+    });
+
+    console.log('Message signed');
+
+    // Close signing modal
+    document.getElementById('web3SigningModal').classList.add('hidden');
+    showConnectingState('Authenticating...');
+
+    // Authenticate with backend
+    const authResponse = await fetch('/api/web3-login/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+      },
+      body: JSON.stringify({
+        wallet_address: currentWalletAddress,
+        signature: signature,
+        nonce: nonceData.nonce,
+        wallet_type: walletType,
+        chain_id: currentChainId
+      })
+    });
+
+    if (!authResponse.ok) {
+      const error = await authResponse.json();
+      throw new Error(error.error || 'Authentication failed');
+    }
+
+    const authData = await authResponse.json();
+    console.log('Authentication successful:', authData);
+
+    // Store auth token if provided
+    if (authData.token) {
+      localStorage.setItem('authToken', authData.token);
+    }
+
+    // Update UI
+    updateHomePageForWallet(true, currentWalletAddress, currentChainId);
+    
+    // Close connecting state
+    closeConnectingState();
+    
+    // Show success message
+    window.showToast('Wallet connected successfully!', 'success');
+
+    // Check if correct network
+    if (currentChainId !== 8453) {
+      setTimeout(() => {
+        window.showToast('Please switch to Base network for full functionality', 'warning');
+      }, 1000);
+    }
+
+    // Setup wallet event listeners
+    setupWalletEventListeners();
+
+  } catch (error) {
+    console.error('Web3 connection error:', error);
+    isConnecting = false;
+    closeConnectingState();
+    document.getElementById('web3SigningModal').classList.add('hidden');
+    
+    if (error.code === 4001) {
+      window.showToast('Connection cancelled by user', 'info');
+    } else {
+      window.showToast(error.message || 'Failed to connect wallet', 'error');
+    }
+  } finally {
+    isConnecting = false;
+  }
+}
+
+// Disconnect wallet
+window.disconnectWallet = async function() {
+  try {
+    // Call backend to invalidate session
+    const response = await fetch('/api/disconnect-wallet/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken(),
+        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+      }
+    });
+
+    // Clear local state
+    currentWalletAddress = null;
+    currentChainId = null;
+    localStorage.removeItem('authToken');
+    
+    // Update UI
+    updateHomePageForWallet(false, null, null);
+    
+    window.showToast('Wallet disconnected', 'info');
+  } catch (error) {
+    console.error('Error disconnecting wallet:', error);
+    window.showToast('Error disconnecting wallet', 'error');
+  }
+};
+
+// Switch to Base network
+window.switchToBaseNetwork = async function() {
+  if (!window.ethereum) {
+    window.showToast('No wallet detected', 'error');
+    return;
+  }
+
+  try {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: '0x2105' }] // 8453 in hex
+    });
+    
+    window.showToast('Switched to Base network!', 'success');
+  } catch (error) {
+    if (error.code === 4902) {
+      // Chain not added, try to add it
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: '0x2105',
+            chainName: 'Base',
+            nativeCurrency: {
+              name: 'Ethereum',
+              symbol: 'ETH',
+              decimals: 18
+            },
+            rpcUrls: ['https://mainnet.base.org'],
+            blockExplorerUrls: ['https://basescan.org']
+          }]
+        });
+        
+        window.showToast('Base network added successfully!', 'success');
+      } catch (addError) {
+        console.error('Error adding Base network:', addError);
+        window.showToast('Failed to add Base network', 'error');
+      }
+    } else {
+      console.error('Error switching network:', error);
+      window.showToast('Failed to switch network', 'error');
+    }
+  }
+};
+
+// Show wallet info
+window.showWalletInfo = function() {
+  window.showToast('A crypto wallet lets you own your data and earn rewards. Popular options: MetaMask, Coinbase Wallet', 'info');
+  // You could also open a modal with more detailed information
+};
+
+// Setup wallet event listeners
+function setupWalletEventListeners() {
+  if (!window.ethereum) return;
+
+  // Handle account changes
+  window.ethereum.on('accountsChanged', async (accounts) => {
+    if (accounts.length === 0) {
+      // User disconnected wallet
+      await disconnectWallet();
+    } else if (accounts[0].toLowerCase() !== currentWalletAddress) {
+      // User switched accounts
+      window.showToast('Account changed. Please reconnect.', 'info');
+      await disconnectWallet();
+    }
+  });
+
+  // Handle chain changes
+  window.ethereum.on('chainChanged', (chainIdHex) => {
+    const newChainId = parseInt(chainIdHex, 16);
+    currentChainId = newChainId;
+    
+    updateHomePageForWallet(true, currentWalletAddress, newChainId);
+    
+    if (newChainId !== 8453) {
+      window.showToast('Please switch to Base network for full functionality', 'warning');
+    } else {
+      window.showToast('Switched to Base network!', 'success');
+    }
+  });
+}
+
+// Helper functions
+function showConnectingState(message = 'Connecting...') {
+  const walletNotConnected = document.getElementById('walletNotConnected');
+  const walletConnected = document.getElementById('walletConnected');
+  const walletConnecting = document.getElementById('walletConnecting');
+  const connectingMessage = document.getElementById('walletConnectingMessage');
+  
+  walletNotConnected.classList.add('hidden');
+  walletConnected.classList.add('hidden');
+  walletConnecting.classList.remove('hidden');
+  
+  if (connectingMessage) {
+    connectingMessage.textContent = message;
+  }
+}
+
+function closeConnectingState() {
+  const walletConnecting = document.getElementById('walletConnecting');
+  if (walletConnecting) {
+    walletConnecting.classList.add('hidden');
+  }
+}
+
+// Get wallet info
+window.getWalletInfo = function() {
   return {
-    isConnected: isConnected,
-    address: isConnected ? '0x1234567890abcdef1234567890abcdef12345678' : null,
-    chainId: isConnected ? 8453 : null
+    isConnected: !!currentWalletAddress,
+    address: currentWalletAddress,
+    chainId: currentChainId
   };
 };
+
+// Check wallet status on load
+async function checkWalletStatus() {
+  try {
+    const response = await fetch('/api/wallet-status/', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.status && data.status.is_connected) {
+        currentWalletAddress = data.status.wallet_address;
+        currentChainId = data.status.chain_id;
+        updateHomePageForWallet(true, currentWalletAddress, currentChainId);
+        setupWalletEventListeners();
+      }
+    }
+  } catch (error) {
+    console.error('Error checking wallet status:', error);
+  }
+}
 
 // Enhanced wallet integration for home page
 document.addEventListener('DOMContentLoaded', function() {
@@ -851,6 +1279,9 @@ document.addEventListener('DOMContentLoaded', function() {
   setupOptimizedScrollHandling();
   setupEnhancedUX();
   initializeWalletAwareHome();
+  
+  // Check wallet status
+  checkWalletStatus();
 });
 
 function initializeWalletAwareHome() {
@@ -859,14 +1290,6 @@ function initializeWalletAwareHome() {
     const { isConnected, address, chainId } = event.detail;
     updateHomePageForWallet(isConnected, address, chainId);
   });
-
-  // Check initial wallet state
-  setTimeout(() => {
-    const walletInfo = getWalletInfo();
-    if (walletInfo.isConnected) {
-      updateHomePageForWallet(true, walletInfo.address, walletInfo.chainId);
-    }
-  }, 1000);
 }
 
 function updateHomePageForWallet(isConnected, address, chainId) {
@@ -989,7 +1412,7 @@ function saveToBlockchain() {
   
   if (!walletInfo.isConnected) {
     console.log('Wallet not connected, prompting connection');
-    connectWallet();
+    initWeb3Connection();
     return;
   }
 
@@ -1050,19 +1473,18 @@ function saveToBlockchain() {
     fetch('/save-generated-entry/', {
       method: 'POST',
       headers: {
-        'X-CSRFToken': csrftoken
+        'X-CSRFToken': csrftoken,
+        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
       },
       body: formData
     })
     .then(response => {
       console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
       
       if (!response.ok) {
-        // Try to get error details from response
         return response.text().then(text => {
           console.error('Response body:', text);
-          throw new Error(`HTTP ${response.status}: ${response.statusText} - ${text}`);
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         });
       }
       return response.json();
@@ -1073,50 +1495,26 @@ function saveToBlockchain() {
       if (data.success) {
         const rewards = data.rewards || calculateRewards(journalContent, walletInfo.isConnected);
 
-        // Check if this is an anonymous save
-        if (data.is_anonymous) {
-          // For anonymous users, show message and prompt for signup
-          saveButton.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Saved temporarily!
-          `;
-          
-          if (window.showToast) {
-            window.showToast('Entry saved temporarily. Sign up to save permanently and earn rewards!', 'info');
-          }
-
-          // Show signup prompt after a delay
-          setTimeout(() => {
-            if (confirm('Would you like to create an account to save this entry permanently and earn rewards?')) {
-              window.location.href = data.signup_url || '/signup/?feature=journal&next=/dashboard/';
-            }
-          }, 1500);
-          
-        } else {
-          // Authenticated user - normal save success
-          saveButton.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Saved! Earned ${rewards} tokens
-          `;
-          
-          if (window.showToast) {
-            window.showToast(`Entry saved! You earned ${rewards} tokens`, 'success');
-          }
-
-          // Redirect to dashboard after showing success message
-          setTimeout(() => {
-            if (data.redirect_url) {
-              window.location.href = data.redirect_url;
-            } else {
-              // Fallback to dashboard
-              window.location.href = '/dashboard/?entry_saved=true';
-            }
-          }, 1500);
+        // Show success
+        saveButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          Saved! Earned ${rewards} tokens
+        `;
+        
+        if (window.showToast) {
+          window.showToast(`Entry saved! You earned ${rewards} tokens`, 'success');
         }
+
+        // Redirect to dashboard after showing success message
+        setTimeout(() => {
+          if (data.redirect_url) {
+            window.location.href = data.redirect_url;
+          } else {
+            window.location.href = '/dashboard/?entry_saved=true';
+          }
+        }, 1500);
       } else {
         // Handle error
         console.error('Server returned success: false', data);
@@ -1129,12 +1527,10 @@ function saveToBlockchain() {
     })
     .catch(error => {
       console.error('Save error details:', error);
-      console.error('Error stack:', error.stack);
       
       saveButton.innerHTML = originalText;
       saveButton.disabled = false;
       
-      // More detailed error message
       let errorMessage = 'Failed to save entry. ';
       if (error.message.includes('404')) {
         errorMessage += 'The save endpoint was not found.';
@@ -1153,12 +1549,11 @@ function saveToBlockchain() {
   }
 }
 
-// Also check if getCsrfToken is working
+// Get CSRF token
 function getCsrfToken() {
   const token = document.querySelector('[name=csrfmiddlewaretoken]');
   if (!token) {
     console.error('CSRF token not found in DOM');
-    // Try alternate methods
     const cookieToken = document.cookie.split(';')
       .find(c => c.trim().startsWith('csrftoken='));
     if (cookieToken) {
@@ -1233,7 +1628,8 @@ function generateDemo() {
   fetch('/api/demo-journal/', {
     method: 'POST',
     headers: {
-      'X-CSRFToken': csrftoken
+      'X-CSRFToken': csrftoken,
+      'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
     },
     body: formData
   })
@@ -1382,11 +1778,9 @@ function setupEnhancedUX() {
 function setupKeyboardShortcuts() {
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-      document.querySelectorAll('.fixed.inset-0').forEach(modal => {
-        if (modal.classList.contains('z-50')) {
-          modal.remove();
-        }
-      });
+      // Close modals
+      document.getElementById('web3Modal').classList.add('hidden');
+      document.getElementById('web3SigningModal').classList.add('hidden');
     }
 
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {

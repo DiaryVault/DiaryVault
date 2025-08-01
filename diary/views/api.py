@@ -155,7 +155,7 @@ def save_generated_entry(request):
             content = request.POST.get('content')
             mood = request.POST.get('mood')
             tags_json = request.POST.get('tags', '[]')
-            photo = request.FILES.get('journal_photo')  # Match the field name from your form
+            photo = request.FILES.get('journal_photo')
             
             # Web3 wallet data
             wallet_address = request.POST.get('wallet_address')
@@ -185,7 +185,63 @@ def save_generated_entry(request):
         if not title or not content:
             return JsonResponse({'success': False, 'error': 'Missing title or content'}, status=400)
 
-        # Check if user is authenticated
+        # Format wallet address if provided
+        if wallet_address:
+            wallet_address = Web3Utils.format_wallet_address(wallet_address)
+
+        # Check if user has wallet but isn't authenticated
+        if not request.user.is_authenticated and wallet_address:
+            # Try to authenticate the user with their wallet address
+            try:
+                # Get user by wallet address
+                user = User.objects.filter(wallet_address=wallet_address).first()
+                
+                if user:
+                    # User exists, log them in
+                    login(request, user)
+                    logger.info(f"Auto-authenticated user {user.id} with wallet {wallet_address}")
+                else:
+                    # Create new user with wallet
+                    user = User.objects.create(
+                        wallet_address=wallet_address,
+                        username=f'user_{wallet_address[-8:]}',
+                        is_web3_verified=True,
+                        preferred_chain_id=int(chain_id) if chain_id else 8453,
+                        last_wallet_login=timezone.now(),
+                        is_active=True
+                    )
+                    
+                    # Create user preferences
+                    from ..models import UserPreference
+                    UserPreference.objects.get_or_create(user=user)
+                    
+                    # Create auth token
+                    Token.objects.get_or_create(user=user)
+                    
+                    # Create wallet session
+                    WalletSession.objects.create(
+                        user=user,
+                        wallet_address=wallet_address,
+                        chain_id=int(chain_id) if chain_id else 8453,
+                        ip_address=request.META.get('REMOTE_ADDR', ''),
+                        user_agent=request.META.get('HTTP_USER_AGENT', '')
+                    )
+                    
+                    # Log the user in
+                    login(request, user)
+                    logger.info(f"Created and authenticated new user {user.id} with wallet {wallet_address}")
+                
+                # Update session
+                request.session['wallet_address'] = wallet_address
+                request.session['chain_id'] = chain_id
+                request.session['wallet_connected'] = True
+                request.session.modified = True
+                
+            except Exception as e:
+                logger.error(f"Error auto-authenticating wallet user: {e}")
+                # Continue without authentication if there's an error
+
+        # Now check if user is authenticated (either was already or just got authenticated)
         if request.user.is_authenticated:
             # Create entry for authenticated user
             entry = Entry.objects.create(
@@ -211,24 +267,16 @@ def save_generated_entry(request):
             # Add tags if provided
             if not tags and content:
                 # Auto-generate tags if none were provided
-                # FIX: Import auto_generate_tags from the correct location
                 try:
                     from ..utils.analytics import auto_generate_tags
-                except ImportError:
-                    try:
-                        from diary.utils.analytics import auto_generate_tags
-                    except ImportError:
-                        # If auto_generate_tags is not available, use empty tags
-                        logger.warning("auto_generate_tags not found, skipping tag generation")
-                        tags = []
-                    else:
-                        tags = auto_generate_tags(content, mood)
-                else:
                     tags = auto_generate_tags(content, mood)
+                except ImportError:
+                    logger.warning("auto_generate_tags not found, skipping tag generation")
+                    tags = []
 
             if tags:
                 for tag_name in tags:
-                    if tag_name:  # Make sure tag_name is not empty
+                    if tag_name and isinstance(tag_name, str):
                         tag, created = Tag.objects.get_or_create(
                             name=tag_name.lower().strip(),
                             user=request.user
@@ -244,17 +292,27 @@ def save_generated_entry(request):
             # Clear any pending entry from session
             if 'pending_entry' in request.session:
                 del request.session['pending_entry']
+            
+            # Clear anonymous entries if user just got authenticated
+            if 'anonymous_entries' in request.session:
+                del request.session['anonymous_entries']
 
-            # CHANGED: Redirect to dashboard instead of entry detail
+            # Set entry_saved flag in session for dashboard
+            request.session['entry_saved'] = True
+            request.session.modified = True
+
+            # Redirect to dashboard
             return JsonResponse({
                 'success': True,
                 'entry_id': entry.id,
                 'rewards': total_rewards,
-                'redirect_url': '/dashboard/?entry_saved=true',  # Changed from f'/entry/{entry.id}/'
-                'message': 'Entry saved successfully!'
+                'redirect_url': '/dashboard/?entry_saved=true',
+                'message': 'Entry saved successfully!',
+                'is_authenticated': True,
+                'wallet_connected': bool(wallet_address)
             })
         else:
-            # For anonymous users, save to session
+            # For anonymous users (no wallet connected), save to session
             import uuid
             
             # Generate a temporary ID
@@ -274,9 +332,9 @@ def save_generated_entry(request):
                 'had_photo': photo is not None
             }
             
-            # FIX: Handle both list and dict formats for anonymous_entries
+            # Initialize anonymous_entries as dict if not exists
             if 'anonymous_entries' not in request.session:
-                request.session['anonymous_entries'] = {}  # Use dict format
+                request.session['anonymous_entries'] = {}
             
             # Handle existing data that might be in list format
             existing_entries = request.session.get('anonymous_entries', {})
@@ -290,9 +348,9 @@ def save_generated_entry(request):
                 request.session['anonymous_entries'] = new_entries
                 existing_entries = new_entries
             
-            # Now we can safely add to the dict
+            # Add the new entry
             request.session['anonymous_entries'][temp_id] = session_entry
-            request.session['pending_entry'] = session_entry  # Also store as pending for login
+            request.session['pending_entry'] = session_entry
             request.session.modified = True
             
             # Calculate mock rewards
@@ -301,17 +359,18 @@ def save_generated_entry(request):
             wallet_bonus = 5 if wallet_address else 0
             total_rewards = base_reward + wallet_bonus
             
-            # CHANGED: Updated login and signup URLs to redirect to dashboard
+            # Return response for anonymous users
             return JsonResponse({
                 'success': True,
                 'entry_id': temp_id,
                 'rewards': total_rewards,
                 'is_anonymous': True,
-                'message': 'Entry saved temporarily. Sign up to save permanently and earn real rewards!',
+                'message': 'Entry saved temporarily. Connect your wallet to save permanently and earn real rewards!',
                 'redirect_url': None,  # Don't redirect for anonymous users
                 'auth_required': True,
-                'login_url': '/login/?save_after_login=true&next=/dashboard/',  # Added next parameter
-                'signup_url': '/signup/?feature=journal&next=/dashboard/'  # Added next parameter
+                'login_url': '/login/?save_after_login=true&next=/dashboard/',
+                'signup_url': '/signup/?feature=journal&next=/dashboard/',
+                'wallet_connect_prompt': True
             })
 
     except json.JSONDecodeError:
@@ -323,7 +382,7 @@ def save_generated_entry(request):
             'error': 'Server error while saving entry',
             'details': str(e) if settings.DEBUG else 'Please try again'
         }, status=500)
-
+    
 @require_POST
 @login_required
 def chat_with_ai(request):
