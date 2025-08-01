@@ -880,6 +880,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeAnimations();
     checkWalletConnection();
     checkForPendingEntry();
+    
+    // Initialize anonymous stats on page load
+    initializeAnonymousStats();
 });
 
 // Check for pending journal entry from home page
@@ -1269,15 +1272,19 @@ function updateDashboardStats() {
     });
 }
 
-// Update stats for anonymous users locally
+// Update stats for anonymous users locally (FIXED to use localStorage)
 function updateAnonymousStats() {
     console.log('Updating anonymous user stats locally');
     
-    // Get current anonymous entries from session
+    // Get current stats
+    const stats = getAnonymousStats();
     const anonymousEntries = getAnonymousEntries();
     const entryCount = Object.keys(anonymousEntries).length;
     
-    // Update total entries
+    // Update stats
+    stats.totalEntries = entryCount;
+    
+    // Update total entries UI
     const totalEntriesEl = document.querySelector('[data-stat="total-entries"]');
     if (totalEntriesEl) {
         animateStatUpdate(totalEntriesEl, entryCount);
@@ -1303,10 +1310,11 @@ function updateAnonymousStats() {
     const journalContent = document.getElementById('journalEntry');
     if (journalContent) {
         const wordCount = journalContent.textContent.split(/\s+/).filter(word => word.length > 0).length;
+        stats.totalWords += wordCount;
+        
         const totalWordsEl = document.querySelector('[data-stat="total-words"]');
         if (totalWordsEl) {
-            const currentWords = parseInt(totalWordsEl.textContent) || 0;
-            animateStatUpdate(totalWordsEl, currentWords + wordCount);
+            animateStatUpdate(totalWordsEl, stats.totalWords);
             
             // Remove opacity
             const statCard = totalWordsEl.closest('.stat-card');
@@ -1316,25 +1324,48 @@ function updateAnonymousStats() {
         }
     }
     
-    // Set streak to 1 for first entry
-    if (entryCount === 1) {
-        const streakEl = document.querySelector('[data-stat="streak"]');
-        if (streakEl) {
-            animateStatUpdate(streakEl, 1);
-            
-            // Update helper text
-            const helperText = streakEl.parentElement?.querySelector('.text-xs');
-            if (helperText) {
-                helperText.textContent = 'Great start!';
+    // Update streak
+    const now = new Date();
+    if (stats.lastEntryDate) {
+        const lastEntry = new Date(stats.lastEntryDate);
+        const hoursSinceLastEntry = (now - lastEntry) / (1000 * 60 * 60);
+        
+        if (hoursSinceLastEntry <= 24) {
+            // Within 24 hours, continue streak
+            const isSameDay = lastEntry.toDateString() === now.toDateString();
+            if (!isSameDay) {
+                stats.streak += 1; // Increment only if it's a different day
             }
-            
-            // Remove opacity
-            const statCard = streakEl.closest('.stat-card');
-            if (statCard) {
-                statCard.classList.remove('opacity-75');
-            }
+        } else {
+            // More than 24 hours, reset streak
+            stats.streak = 1;
+        }
+    } else {
+        // First entry
+        stats.streak = 1;
+    }
+    
+    stats.lastEntryDate = now.toISOString();
+    
+    const streakEl = document.querySelector('[data-stat="streak"]');
+    if (streakEl) {
+        animateStatUpdate(streakEl, stats.streak);
+        
+        // Update helper text
+        const helperText = streakEl.parentElement?.querySelector('.text-xs');
+        if (helperText) {
+            helperText.textContent = stats.streak > 1 ? 'Keep going!' : 'Great start!';
+        }
+        
+        // Remove opacity
+        const statCard = streakEl.closest('.stat-card');
+        if (statCard) {
+            statCard.classList.remove('opacity-75');
         }
     }
+    
+    // Save updated stats to localStorage
+    saveAnonymousStats(stats);
     
     // Show success animation on stat cards
     document.querySelectorAll('.stat-card').forEach(card => {
@@ -1345,11 +1376,10 @@ function updateAnonymousStats() {
     });
 }
 
-// Get anonymous entries from session storage or page data
+// Get anonymous entries from localStorage (not sessionStorage!)
 function getAnonymousEntries() {
-    // Try to get from session storage first
     try {
-        const stored = sessionStorage.getItem('anonymousEntries');
+        const stored = localStorage.getItem('anonymousEntries');
         if (stored) {
             return JSON.parse(stored);
         }
@@ -1359,6 +1389,92 @@ function getAnonymousEntries() {
     
     // Default
     return {};
+}
+
+// Save anonymous entries to localStorage
+function saveAnonymousEntries(entries) {
+    try {
+        localStorage.setItem('anonymousEntries', JSON.stringify(entries));
+        console.log('Saved anonymous entries to localStorage:', entries);
+    } catch (e) {
+        console.error('Error saving anonymous entries:', e);
+    }
+}
+
+// Get anonymous stats from localStorage
+function getAnonymousStats() {
+    try {
+        const stored = localStorage.getItem('anonymousStats');
+        if (stored) {
+            return JSON.parse(stored);
+        }
+    } catch (e) {
+        console.error('Error reading anonymous stats:', e);
+    }
+    
+    // Default stats
+    return {
+        totalEntries: 0,
+        totalWords: 0,
+        streak: 0,
+        lastEntryDate: null
+    };
+}
+
+// Save anonymous stats to localStorage
+function saveAnonymousStats(stats) {
+    try {
+        localStorage.setItem('anonymousStats', JSON.stringify(stats));
+        console.log('Saved anonymous stats to localStorage:', stats);
+    } catch (e) {
+        console.error('Error saving anonymous stats:', e);
+    }
+}
+
+// Initialize stats on page load for anonymous users
+function initializeAnonymousStats() {
+    const isAnonymous = document.querySelector('[data-is-anonymous]')?.dataset.isAnonymous === 'true';
+    
+    if (isAnonymous) {
+        const stats = getAnonymousStats();
+        
+        // Update UI with stored stats
+        const totalEntriesEl = document.querySelector('[data-stat="total-entries"]');
+        if (totalEntriesEl) {
+            totalEntriesEl.textContent = stats.totalEntries;
+            if (stats.totalEntries > 0) {
+                totalEntriesEl.closest('.stat-card')?.classList.remove('opacity-75');
+            }
+        }
+        
+        const totalWordsEl = document.querySelector('[data-stat="total-words"]');
+        if (totalWordsEl) {
+            totalWordsEl.textContent = stats.totalWords;
+            if (stats.totalWords > 0) {
+                totalWordsEl.closest('.stat-card')?.classList.remove('opacity-75');
+            }
+        }
+        
+        const streakEl = document.querySelector('[data-stat="streak"]');
+        if (streakEl) {
+            // Check if streak is still valid (entry within last 24 hours)
+            if (stats.lastEntryDate) {
+                const lastEntry = new Date(stats.lastEntryDate);
+                const now = new Date();
+                const hoursSinceLastEntry = (now - lastEntry) / (1000 * 60 * 60);
+                
+                if (hoursSinceLastEntry > 24) {
+                    stats.streak = 0; // Reset streak if more than 24 hours
+                    saveAnonymousStats(stats);
+                }
+            }
+            
+            streakEl.textContent = stats.streak;
+            if (stats.streak > 0) {
+                streakEl.closest('.stat-card')?.classList.remove('opacity-75');
+            }
+        }
+    }
 }
 
 // Fallback function if API fails
@@ -1422,11 +1538,10 @@ function animateStatUpdate(element, newValue) {
     }, duration / steps);
 }
 
-// Save entry - FIXED WITH STATS UPDATE
+// Save entry - FIXED WITH STATS UPDATE AND LOCALSTORAGE
 function saveEntry(event) {
     console.log('=== SAVE ENTRY STARTED ===');
     
-    // Prevent any default behavior if this was triggered by a form
     if (event && event.preventDefault) {
         event.preventDefault();
     }
@@ -1434,37 +1549,37 @@ function saveEntry(event) {
     const isAnonymous = document.querySelector('[data-is-anonymous]')?.dataset.isAnonymous === 'true';
     
     if (isAnonymous) {
-        // For anonymous users, save locally and update stats
+        // For anonymous users, save to localStorage (not sessionStorage!)
         const journalContent = document.getElementById('journalEntry').innerHTML.replace(/<br\s*\/?>/gi, '\n');
         const entryTitle = document.getElementById('entryTitle').textContent;
         
-        // Store in session storage
+        // Get existing entries from localStorage
         const anonymousEntries = getAnonymousEntries();
         const entryId = Date.now().toString();
+        
+        // Add new entry
         anonymousEntries[entryId] = {
             id: entryId,
             title: entryTitle,
             content: journalContent,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            wordCount: journalContent.split(/\s+/).filter(word => word.length > 0).length
         };
         
-        try {
-            sessionStorage.setItem('anonymousEntries', JSON.stringify(anonymousEntries));
-        } catch (e) {
-            console.error('Error saving to session storage:', e);
-        }
+        // Save to localStorage
+        saveAnonymousEntries(anonymousEntries);
         
-        // Update stats immediately for anonymous users
+        // Update stats immediately
         updateAnonymousStats();
         
-        showToast('Entry saved locally! Connect your wallet to save permanently and earn rewards.', 'warning');
+        showToast('Entry saved locally! Your stats are updated. Connect wallet to sync to blockchain.', 'success');
         
         // Show wallet prompt after a delay
         setTimeout(() => {
             if (window.connectWallet) {
-                window.connectWallet();
+                showToast('Connect your wallet to save permanently and earn rewards!', 'info');
             }
-        }, 2000);
+        }, 3000);
         
         return;
     }
