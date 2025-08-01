@@ -381,17 +381,35 @@ def delete_entry(request, entry_id):
     return render(request, 'diary/delete_entry.html', {'entry': entry})
 
 def library(request):
-    """Optimized library view with tabs for different ways to browse entries"""
-
-    # OPTIMIZED: Use select_related and prefetch_related for better query performance
+    """Library view accessible to all users"""
+    
+    # Check authentication first
+    if not request.user.is_authenticated:
+        # Return early for anonymous users with empty context
+        context = {
+            'time_periods': [],
+            'tags': [],
+            'moods': [],
+            'entries': [],
+            'tagged_entries': [],
+            'mood_entries': [],
+            'total_entries': 0,
+            'filtered_count': 0,
+            'active_tab': 'time-periods',
+            'active_filter': None,
+            'is_anonymous': True,
+        }
+        return render(request, 'diary/library.html', context)
+    
+    # Rest of the code for authenticated users only
     all_entries = Entry.objects.filter(user=request.user).prefetch_related(
-        'tags',    # Prefetch tags to avoid N+1 queries
-        'photos'   # Prefetch photos if needed
+        'tags',
+        'photos'
     ).order_by('-created_at')
 
     # Default to showing all entries
     entries = all_entries
-    active_tab = 'time-periods'  # Default tab to match your existing HTML
+    active_tab = 'time-periods'
     active_filter = None
 
     # Check for filter parameters
@@ -400,23 +418,19 @@ def library(request):
 
     # Apply filters based on GET parameters
     if tag_filter:
-        # OPTIMIZED: Use the already prefetched queryset
         entries = all_entries.filter(tags__name=tag_filter)
         active_tab = 'tags'
         active_filter = tag_filter
-        # Get tagged entries specifically for the tag tab
         tagged_entries = entries
     elif mood_filter:
         entries = all_entries.filter(mood=mood_filter)
         active_tab = 'moods'
         active_filter = mood_filter
-        # Get mood entries specifically for the mood tab
         mood_entries = entries
 
-    # OPTIMIZED: Get time periods with minimal database queries
+    # Get time periods with minimal database queries
     time_periods = {}
-    # Group entries by quarter/year using the already fetched data
-    for entry in all_entries:  # Use all_entries to show all time periods
+    for entry in all_entries:
         period = entry.get_time_period()
         if period not in time_periods:
             time_periods[period] = {
@@ -424,13 +438,12 @@ def library(request):
                 'count': 0,
                 'entries': [],
                 'first_entry': None,
-                'color': 'sky-700'  # Default color
+                'color': 'sky-700'
             }
 
         time_periods[period]['count'] += 1
         time_periods[period]['entries'].append(entry)
 
-        # Keep track of first entry for preview
         if time_periods[period]['first_entry'] is None or entry.created_at < time_periods[period]['first_entry'].created_at:
             time_periods[period]['first_entry'] = entry
 
@@ -442,7 +455,7 @@ def library(request):
     # Sort time periods by most recent first
     sorted_periods = sorted(time_periods.values(), key=lambda x: x['period'], reverse=True)
 
-    # Get tags with their usage counts in one query
+    # Get tags with their usage counts
     user_tags = Tag.objects.filter(user=request.user).annotate(
         entry_count=Count('entries', filter=models.Q(entries__user=request.user))
     ).filter(entry_count__gt=0).order_by('-entry_count')
@@ -453,47 +466,48 @@ def library(request):
             'id': tag.id,
             'name': tag.name,
             'count': tag.entry_count,
-            'active': tag.name == tag_filter  # Mark as active if it's the current filter
+            'active': tag.name == tag_filter
         })
 
-    # OPTIMIZED: Get moods with counts using Python aggregation on already fetched data
+    # Get moods with counts using Python aggregation
     moods = []
     mood_counts = {}
-    for entry in all_entries:  # Use all_entries to show all moods
+    for entry in all_entries:
         if entry.mood:
             if entry.mood not in mood_counts:
                 mood_counts[entry.mood] = {
                     'name': entry.mood,
                     'count': 0,
-                    'emoji': get_mood_emoji(entry.mood),  # Use your emoji function
-                    'active': entry.mood == mood_filter  # Mark as active if it's the current filter
+                    'emoji': get_mood_emoji(entry.mood),
+                    'active': entry.mood == mood_filter
                 }
             mood_counts[entry.mood]['count'] += 1
 
     moods = list(mood_counts.values())
     moods.sort(key=lambda x: x['count'], reverse=True)
 
-    # If no specific entries are filtered, use all entries for the respective tabs
+    # If no specific entries are filtered, use all entries
     if not tag_filter:
         tagged_entries = all_entries
     if not mood_filter:
         mood_entries = all_entries
 
-    # OPTIMIZED: Calculate counts without additional queries
-    total_entries = len(all_entries)  # Use len() since we already have the queryset
+    # Calculate counts
+    total_entries = len(all_entries)
     filtered_count = len(entries) if entries != all_entries else total_entries
 
     context = {
         'time_periods': sorted_periods,
         'tags': tags,
         'moods': moods,
-        'entries': entries,  # These are the entries filtered by the active parameter
+        'entries': entries,
         'tagged_entries': tagged_entries if 'tagged_entries' in locals() else all_entries,
         'mood_entries': mood_entries if 'mood_entries' in locals() else all_entries,
         'total_entries': total_entries,
         'filtered_count': filtered_count,
         'active_tab': active_tab,
-        'active_filter': active_filter
+        'active_filter': active_filter,
+        'is_anonymous': False,
     }
 
     return render(request, 'diary/library.html', context)
