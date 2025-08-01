@@ -986,7 +986,68 @@ document.addEventListener('DOMContentLoaded', function() {
     initializePersonalization();
     initializeAnimations();
     checkWalletConnection();
+    checkForPendingEntry(); // Add this to check for transferred journal entry
 });
+
+// Check for pending journal entry from home page
+function checkForPendingEntry() {
+    // Check if there's a pending entry from home page
+    const pendingEntry = sessionStorage.getItem('pendingJournalEntry');
+    
+    if (pendingEntry) {
+        try {
+            const entryData = JSON.parse(pendingEntry);
+            
+            // Show a notification that we found their entry
+            showToast('We found your draft entry! Loading it now...', 'info');
+            
+            // Fill in the form with the pending entry
+            const journalInput = document.getElementById('journalInput');
+            if (journalInput && entryData.content) {
+                journalInput.value = entryData.content;
+                countChars();
+            }
+            
+            // If there's photo data, restore it
+            if (entryData.photoData && entryData.photoName) {
+                // Convert base64 back to file
+                fetch(entryData.photoData)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const file = new File([blob], entryData.photoName, { type: blob.type });
+                        currentPhotoFile = file;
+                        currentPhotoDataUrl = entryData.photoData;
+                        
+                        // Show photo preview
+                        document.getElementById('photoPreview').src = currentPhotoDataUrl;
+                        document.getElementById('photoName').textContent = entryData.photoName;
+                        document.getElementById('photoPreviewContainer').classList.remove('hidden');
+                    });
+            }
+            
+            // If it's from the demo, show it in the result preview
+            if (entryData.fromDemo && entryData.title) {
+                // Display as generated entry
+                displayGeneratedEntry({
+                    entry: entryData.content,
+                    title: entryData.title
+                });
+                
+                // Show rewards message if wallet connected
+                if (entryData.hasWallet && entryData.rewards) {
+                    showToast(`Ready to save! You'll earn ${entryData.rewards} tokens`, 'success');
+                }
+            }
+            
+            // Clear the session storage
+            sessionStorage.removeItem('pendingJournalEntry');
+            
+        } catch (error) {
+            console.error('Error loading pending entry:', error);
+            sessionStorage.removeItem('pendingJournalEntry');
+        }
+    }
+}
 
 // Character counting
 function countChars() {
@@ -1350,6 +1411,15 @@ function saveEntry() {
 
 // Wallet connection functions
 function checkWalletConnection() {
+    // First check for wallet connection status from Django session/context
+    const isAnonymous = document.querySelector('[data-is-anonymous]')?.dataset.isAnonymous === 'true';
+    
+    if (!isAnonymous) {
+        // User is authenticated, no need to show wallet connection prompts
+        updateUIForAuthenticatedUser();
+        return;
+    }
+    
     // Listen for wallet connection changes
     window.addEventListener('walletConnectionChanged', function(event) {
         const { isConnected, address, chainId } = event.detail;
@@ -1365,6 +1435,16 @@ function checkWalletConnection() {
     }, 500);
 }
 
+function updateUIForAuthenticatedUser() {
+    // Hide any wallet connection prompts
+    const walletPrompts = document.querySelectorAll('.wallet-connection-prompt');
+    walletPrompts.forEach(el => el.style.display = 'none');
+    
+    // Show authenticated user content
+    const authContent = document.querySelectorAll('.authenticated-only');
+    authContent.forEach(el => el.style.display = 'block');
+}
+
 function updateUIForWalletStatus(isConnected, address, chainId) {
     // Update any wallet-specific UI elements
     const walletButtons = document.querySelectorAll('[data-wallet-action]');
@@ -1376,11 +1456,48 @@ function updateUIForWalletStatus(isConnected, address, chainId) {
 }
 
 function getWalletInfo() {
-    // Check if wallet is connected (this should match your wallet integration)
+    // Check multiple sources for wallet connection
+    
+    // 1. Check if user is authenticated in Django
+    const userElement = document.querySelector('[data-user-authenticated]');
+    if (userElement && userElement.dataset.userAuthenticated === 'true') {
+        return {
+            isConnected: true,
+            address: userElement.dataset.walletAddress || null,
+            chainId: parseInt(userElement.dataset.chainId) || 8453
+        };
+    }
+    
+    // 2. Check window.ethereum
+    if (window.ethereum && window.ethereum.selectedAddress) {
+        return {
+            isConnected: true,
+            address: window.ethereum.selectedAddress,
+            chainId: window.ethereum.chainId ? parseInt(window.ethereum.chainId, 16) : null
+        };
+    }
+    
+    // 3. Check for wallet session in localStorage
+    const walletSession = localStorage.getItem('walletSession');
+    if (walletSession) {
+        try {
+            const session = JSON.parse(walletSession);
+            if (session.address) {
+                return {
+                    isConnected: true,
+                    address: session.address,
+                    chainId: session.chainId || null
+                };
+            }
+        } catch (e) {
+            // Invalid session data
+        }
+    }
+    
     return {
-        isConnected: window.ethereum && window.ethereum.selectedAddress,
-        address: window.ethereum?.selectedAddress || null,
-        chainId: window.ethereum?.chainId ? parseInt(window.ethereum.chainId, 16) : null
+        isConnected: false,
+        address: null,
+        chainId: null
     };
 }
 
@@ -1388,8 +1505,21 @@ function connectWallet() {
     // This should trigger your wallet connection flow
     if (window.connectWeb3Wallet) {
         window.connectWeb3Wallet();
+    } else if (window.ethereum) {
+        // Fallback to direct ethereum request
+        window.ethereum.request({ method: 'eth_requestAccounts' })
+            .then(accounts => {
+                if (accounts.length > 0) {
+                    showToast('Wallet connected successfully!', 'success');
+                    // Reload to update UI
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                showToast('Failed to connect wallet', 'error');
+            });
     } else {
-        showToast('Wallet connection not available', 'error');
+        showToast('No wallet detected. Please install MetaMask or another Web3 wallet.', 'error');
     }
 }
 
@@ -1409,7 +1539,7 @@ function calculateRewards(content) {
 function showToast(message, type = 'info') {
     // Create toast element
     const toast = document.createElement('div');
-    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 z-50`;
+    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 z-50 translate-x-full`;
     
     // Set color based on type
     switch(type) {
