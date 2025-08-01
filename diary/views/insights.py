@@ -11,6 +11,17 @@ logger = logging.getLogger(__name__)
 
 def insights(request):
     """View for showing AI-generated insights about the user's journal entries."""
+    
+    # This should never happen with @login_required, but let's be extra safe
+    if not request.user.is_authenticated:
+        messages.warning(request, "Please log in or connect your wallet to view insights.")
+        return redirect('login')
+    
+    # Additional check to ensure user has valid ID
+    if not hasattr(request.user, 'id') or request.user.id is None:
+        logger.error(f"Invalid user object in insights view: {request.user}")
+        messages.error(request, "Authentication error. Please log in again.")
+        return redirect('login')
 
     # Handle regenerating insights
     if request.method == 'POST' and 'regenerate_insights' in request.POST:
