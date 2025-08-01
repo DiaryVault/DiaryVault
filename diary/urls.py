@@ -115,6 +115,7 @@ urlpatterns = [
     path('connect-wallet-session/', api.connect_wallet_session, name='connect_wallet_session'),
     path('web3/complete-profile/', api.web3_complete_profile, name='web3_complete_profile'),
     path('entry/preview/<uuid:entry_uuid>/', api.anonymous_entry_preview, name='anonymous_entry_preview'),
+    path('entry/<uuid:entry_uuid>/', views.entry_detail_uuid, name='entry_detail_uuid'),
 
     # ============================================================================
     # Account Management
