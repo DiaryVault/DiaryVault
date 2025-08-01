@@ -1825,3 +1825,25 @@ def user_stats(request):
             'success': False,
             'error': str(e)
         }, status=500)
+    
+def recent_entries(request):
+    """Return recent entries for dashboard updates"""
+    entries = Entry.objects.filter(user=request.user).order_by('-created_at')[:6]
+    
+    entries_data = []
+    for entry in entries:
+        entry_data = {
+            'id': entry.id,
+            'title': entry.title or 'Untitled',
+            'created_at': entry.created_at.strftime('%b %d, %Y'),
+            'has_photo': bool(entry.photo or entry.photos.exists())
+        }
+        
+        if entry.photos.exists():
+            entry_data['photo_url'] = entry.photos.first().photo.url
+        elif entry.photo:
+            entry_data['photo_url'] = entry.photo.url
+            
+        entries_data.append(entry_data)
+    
+    return JsonResponse({'entries': entries_data})

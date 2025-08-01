@@ -53,7 +53,7 @@ urlpatterns = [
     path('api/save-entry/', views.save_entry_api, name='save_entry_api'),
     path('api/save-entry/', save_entry_api, name='save_entry_api'),
     path('api/user-stats/', user_stats, name='user_stats'),
-
+    path('api/recent-entries/', recent_entries, name='recent_entries'),
 
     # ============================================================================
     # Main Pages
