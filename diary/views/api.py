@@ -1849,3 +1849,37 @@ def recent_entries(request):
         entries_data.append(entry_data)
     
     return JsonResponse({'entries': entries_data})
+
+@csrf_exempt
+def connect_wallet_session(request):
+    """Save wallet connection to session for anonymous users"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            wallet_address = data.get('wallet_address')
+            chain_id = data.get('chain_id')
+            
+            if wallet_address:
+                # Save to session
+                request.session['wallet_address'] = wallet_address.lower()
+                request.session['chain_id'] = chain_id
+                request.session.save()
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Wallet connected to session'
+                })
+            
+            return JsonResponse({
+                'success': False,
+                'error': 'No wallet address provided'
+            }, status=400)
+            
+        except Exception as e:
+            logger.error(f"Error connecting wallet to session: {e}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+    
+    return JsonResponse({'error': 'Method not allowed'}, status=405)

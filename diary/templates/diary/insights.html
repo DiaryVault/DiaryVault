@@ -543,26 +543,43 @@
       Discover patterns, trends, and meaningful insights from your journaling journey
     </p>
 
-    <!-- Regenerate button - only show for authenticated users -->
+    <!-- Different messages based on authentication status -->
     {% if user.is_authenticated %}
-    <form method="post" class="inline-block">
-      {% csrf_token %}
-      <input type="hidden" name="regenerate_insights" value="true">
-      <button type="submit" class="btn-primary px-6 py-3 rounded-full hover:shadow-xl transition-all text-sm font-medium flex items-center gap-2 mx-auto">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        <span>Regenerate Insights</span>
-      </button>
-    </form>
+      <!-- Full authenticated user -->
+      <form method="post" class="inline-block">
+        {% csrf_token %}
+        <input type="hidden" name="regenerate_insights" value="true">
+        <button type="submit" class="btn-primary px-6 py-3 rounded-full hover:shadow-xl transition-all text-sm font-medium flex items-center gap-2 mx-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>Regenerate Insights</span>
+        </button>
+      </form>
+    {% elif is_wallet_connected %}
+      <!-- Wallet connected but no account -->
+      <div class="bg-purple-50 border border-purple-200 text-purple-800 px-6 py-4 rounded-xl max-w-2xl mx-auto">
+        <div class="flex items-center gap-2 mb-2">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+          </svg>
+          <strong>Wallet Connected:</strong> {{ wallet_address|truncatechars:10 }}...{{ wallet_address|slice:"-4:" }}
+        </div>
+        <p class="text-sm">
+          Your wallet is connected! <a href="{% url 'web3_complete_profile' %}" class="underline font-semibold">Complete your profile</a> 
+          to save entries permanently and unlock AI-powered insights.
+        </p>
+      </div>
     {% else %}
-    <div class="bg-blue-50 border border-blue-200 text-blue-800 px-6 py-4 rounded-xl max-w-2xl mx-auto">
-      <p class="text-sm">
-        <strong>Note:</strong> You're viewing sample insights. 
-        <a href="{% url 'signup' %}" class="underline font-semibold">Create an account</a> or 
-        <a href="{% url 'login' %}" class="underline font-semibold">log in</a> to save your entries and get personalized AI insights.
-      </p>
-    </div>
+      <!-- No wallet, no account -->
+      <div class="bg-blue-50 border border-blue-200 text-blue-800 px-6 py-4 rounded-xl max-w-2xl mx-auto">
+        <p class="text-sm">
+          <strong>Note:</strong> You're viewing sample insights. 
+          <button onclick="connectWallet()" class="underline font-semibold">Connect your wallet</button> or
+          <a href="{% url 'signup' %}" class="underline font-semibold">create an account</a> to save your entries and get personalized AI insights.
+        </p>
+      </div>
     {% endif %}
   </div>
 
@@ -1066,5 +1083,44 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// Add wallet connection function
+function connectWallet() {
+    if (typeof window.connectWeb3Wallet === 'function') {
+        window.connectWeb3Wallet();
+    } else if (window.ethereum) {
+        window.ethereum.request({ method: 'eth_requestAccounts' })
+            .then(accounts => {
+                if (accounts.length > 0) {
+                    // Save wallet info to session
+                    fetch('/api/web3/connect-wallet-session/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCsrfToken()
+                        },
+                        body: JSON.stringify({
+                            wallet_address: accounts[0],
+                            chain_id: window.ethereum.chainId
+                        })
+                    })
+                    .then(() => {
+                        window.location.reload();
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Failed to connect wallet:', error);
+                alert('Failed to connect wallet. Please try again.');
+            });
+    } else {
+        alert('Please install MetaMask or another Web3 wallet to continue.');
+    }
+}
+
+function getCsrfToken() {
+    const token = document.querySelector('[name=csrfmiddlewaretoken]');
+    return token ? token.value : '';
+}
 </script>
 {% endblock %}

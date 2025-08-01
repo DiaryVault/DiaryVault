@@ -51,6 +51,7 @@ urlpatterns = [
     path('api/save-entry/', save_entry_api, name='save_entry_api'),
     path('api/user-stats/', user_stats, name='user_stats'),
     path('api/recent-entries/', recent_entries, name='recent_entries'),
+    path('api/web3/connect-wallet-session/', api.connect_wallet_session, name='connect_wallet_session'),
 
     # ============================================================================
     # Main Pages

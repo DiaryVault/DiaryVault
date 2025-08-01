@@ -17,44 +17,87 @@ def insights(request):
     # Check for wallet connection first
     wallet_address = request.session.get('wallet_address')
     
-    # Allow anonymous users to view insights page with limited functionality
-    if not request.user.is_authenticated:
-        # Show insights based on local storage data
+    # For Web3: If wallet is connected, try to find/create user
+    if wallet_address and not request.user.is_authenticated:
+        try:
+            # Try to find user by wallet address
+            user = User.objects.filter(wallet_address__iexact=wallet_address).first()
+            
+            if user:
+                # Found existing user with this wallet
+                request.user = user
+                # Now treat them as authenticated for this request
+            else:
+                # Wallet connected but no user account yet
+                # Show personalized insights based on local data
+                context = {
+                    'is_wallet_only': True,
+                    'is_wallet_connected': True,
+                    'wallet_address': wallet_address,
+                    'mood_analysis': None,
+                    'patterns': [],
+                    'suggestions': [],
+                    'mood_distribution': [],
+                    'tag_distribution': [],
+                    'mood_trends': [],
+                }
+                
+                # Try to get anonymous entries from session or localStorage
+                anonymous_entries = request.session.get('anonymous_entries', {})
+                if anonymous_entries:
+                    # Generate basic insights from session data
+                    context.update(generate_session_insights(anonymous_entries))
+                    
+                    # Add Web3-specific suggestion
+                    context['suggestions'].insert(0, {
+                        'title': 'Complete Your Web3 Profile',
+                        'content': 'Your wallet is connected! Complete your profile to save entries permanently on-chain and unlock advanced AI insights.'
+                    })
+                else:
+                    # No entries yet but wallet is connected
+                    context['mood_analysis'] = {
+                        'title': 'Welcome, Web3 Journaler!',
+                        'content': 'Your wallet is connected. Start writing to build your decentralized journal and earn rewards for your entries.'
+                    }
+                    context['suggestions'] = [{
+                        'title': 'Get Started with Web3 Journaling',
+                        'content': 'Write your first entry to begin your decentralized journaling journey. Each entry can be minted as an NFT and stored permanently.'
+                    }]
+                
+                return render(request, 'diary/insights.html', context)
+                
+        except Exception as e:
+            logger.error(f"Error handling wallet user: {e}")
+            # Continue with normal flow
+    
+    # No wallet and not authenticated - true anonymous user
+    if not request.user.is_authenticated and not wallet_address:
         context = {
-            'is_wallet_only': True,
-            'wallet_address': wallet_address,
-            'mood_analysis': None,
+            'is_wallet_only': False,
+            'is_wallet_connected': False,
+            'wallet_address': None,
+            'mood_analysis': {
+                'title': 'Welcome to Your Insights',
+                'content': 'Start journaling to see personalized insights about your mood patterns, emotional trends, and writing themes.'
+            },
             'patterns': [],
-            'suggestions': [],
+            'suggestions': [{
+                'title': 'Get Started',
+                'content': 'Write your first journal entry to begin tracking your emotional journey and discovering patterns in your thoughts.'
+            }, {
+                'title': 'Connect Your Wallet',
+                'content': 'Connect a Web3 wallet to save your entries permanently and earn rewards for journaling.'
+            }],
             'mood_distribution': [],
             'tag_distribution': [],
             'mood_trends': [],
         }
         
-        # Try to get anonymous entries from session
-        anonymous_entries = request.session.get('anonymous_entries', {})
-        if anonymous_entries:
-            # Generate basic insights from session data
-            context.update(generate_session_insights(anonymous_entries))
-        else:
-            # No entries yet - show welcome message
-            context['mood_analysis'] = {
-                'title': 'Welcome to Your Insights',
-                'content': 'Start journaling to see personalized insights about your mood patterns, emotional trends, and writing themes.'
-            }
-            context['suggestions'] = [{
-                'title': 'Get Started',
-                'content': 'Write your first journal entry to begin tracking your emotional journey and discovering patterns in your thoughts.'
-            }]
-        
         return render(request, 'diary/insights.html', context)
     
-    # For authenticated users, ensure they have a valid ID
-    if hasattr(request.user, 'id') and request.user.id is None:
-        logger.error(f"Invalid user object in insights view: {request.user}")
-        messages.error(request, "Authentication error. Please log in again.")
-        return redirect('login')
-
+    # For authenticated users (either Django auth or wallet user with account)
+    # Rest of the function remains the same...
+    
     # Handle regenerating insights (only for authenticated users)
     if request.method == 'POST' and 'regenerate_insights' in request.POST and request.user.is_authenticated:
         # Delete existing insights for this user
@@ -137,6 +180,7 @@ def insights(request):
         'tag_distribution': tag_distribution,
         'mood_trends': mood_trends,
         'is_wallet_only': False,
+        'is_wallet_connected': bool(wallet_address),
     }
 
     return render(request, 'diary/insights.html', context)
