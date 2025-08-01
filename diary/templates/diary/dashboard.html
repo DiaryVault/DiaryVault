@@ -1288,6 +1288,16 @@ function restartEntry() {
 
 // Save entry
 function saveEntry() {
+    // Check if user is authenticated first
+    const isAnonymous = document.querySelector('[data-is-anonymous]')?.dataset.isAnonymous === 'true';
+    
+    if (isAnonymous) {
+        showToast('Please connect your wallet or log in to save entries', 'warning');
+        // Optionally, trigger wallet connection
+        connectWallet();
+        return;
+    }
+
     const journalContent = document.getElementById('journalEntry').innerHTML.replace(/<br\s*\/?>/gi, '\n');
     const entryTitle = document.getElementById('entryTitle').textContent;
 
@@ -1303,7 +1313,7 @@ function saveEntry() {
     formData.append('content', journalContent);
 
     if (currentPhotoFile) {
-        formData.append('photo', currentPhotoFile);
+        formData.append('photo', currentPhotoFile);  // Changed from 'journal_photo' to 'photo'
     }
 
     // Show saving state
@@ -1319,11 +1329,12 @@ function saveEntry() {
     `;
 
     // Send save request to your new API endpoint
-    fetch('/api/save-entry/', { 
+    fetch('/api/save-entry/', {  // Changed from '/api/entries/create/' to '/api/save-entry/'
         method: 'POST',
         headers: {
             'X-CSRFToken': getCsrfToken()
         },
+        credentials: 'include',  // Include cookies for session authentication
         body: formData
     })
     .then(response => {
