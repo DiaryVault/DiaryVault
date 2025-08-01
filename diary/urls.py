@@ -10,8 +10,6 @@ from .views.api import save_entry_api, user_stats, recent_entries
 # from .views import journal_compiler  # REMOVED - no longer needed
 from .views import api
 from .views import web3_auth  # ADD THIS IMPORT
-from diary.views import user_stats
-
 
 from . import views
 
@@ -50,7 +48,6 @@ urlpatterns = [
     path('api/user-profile/', web3_auth.user_profile, name='user_profile'),
     path('api/update-profile/', web3_auth.update_profile, name='update_profile'),
     path('api/save-generated-entry/', api.save_generated_entry, name='save_generated_entry'),
-    path('api/save-entry/', views.save_entry_api, name='save_entry_api'),
     path('api/save-entry/', save_entry_api, name='save_entry_api'),
     path('api/user-stats/', user_stats, name='user_stats'),
     path('api/recent-entries/', recent_entries, name='recent_entries'),
