@@ -19,6 +19,10 @@
     <meta name="stripe-publishable-key" content="{{ STRIPE_PUBLISHABLE_KEY }}">
     <meta name="csrf-token" content="{{ csrf_token }}">
     <meta name="theme-color" content="#6366f1" />
+    <!-- Add data attributes for wallet state -->
+    <meta name="is-anonymous" content="{{ is_anonymous|yesno:'true,false' }}">
+    <meta name="wallet-address" content="{{ wallet_address|default:'' }}">
+    <meta name="chain-id" content="{{ chain_id|default:'' }}">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.3/cdn.min.js" defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -930,7 +934,10 @@
     {% block extra_css %}{% endblock %}
 </head>
 
-<body class="min-h-screen flex flex-col bg-gradient-to-br text-secondary-800">
+<body class="min-h-screen flex flex-col bg-gradient-to-br text-secondary-800" 
+      data-is-anonymous="{{ is_anonymous|yesno:'true,false' }}" 
+      data-wallet-address="{{ wallet_address|default:'' }}"
+      data-chain-id="{{ chain_id|default:'' }}">
     <!-- Enhanced Header -->
     <header class="sticky top-0 z-50 w-full glass-nav transition-all duration-300"
             x-data="{ scrolled: false }"
@@ -960,8 +967,8 @@
                 <div class="flex items-center gap-3">
                     {% if user.is_authenticated %}
                     <!-- Wallet Status (optional - can be removed if you want it only in the menu) -->
-                    <div id="wallet-status" class="hidden lg:flex wallet-status">
-                        <span id="wallet-address">Not connected</span>
+                    <div id="wallet-status" class="hidden lg:flex wallet-status" data-wallet-connected style="display: none;">
+                        <span id="wallet-address" data-wallet-address></span>
                         <button onclick="disconnectWallet()" class="text-red-500 text-sm ml-2 hover:text-red-700 transition-colors">Disconnect</button>
                     </div>
                     {% endif %}
@@ -998,6 +1005,13 @@
                     <div class="flex-1">
                         <h3 class="font-semibold text-gray-800 text-lg">{{ user.username }}</h3>
                         <p class="text-sm text-gray-600">{{ total_entries|default:'0' }} journal entries</p>
+                        <!-- Wallet connection status for authenticated users -->
+                        <div id="auth-wallet-status" class="mt-1" data-wallet-status>
+                            <span class="text-xs text-gray-500" data-wallet-disconnected>Wallet not connected</span>
+                            <span class="text-xs text-green-600 font-medium hidden" data-wallet-connected>
+                                <span data-wallet-address></span>
+                            </span>
+                        </div>
                     </div>
                     <a href="{% url 'account_settings' %}" class="p-2 hover:bg-white/50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1005,6 +1019,42 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                     </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Connection Section for Authenticated Users -->
+        <div class="dropdown-section" data-wallet-section>
+            <div data-wallet-disconnected>
+                <button onclick="connectWalletAndCloseMenu()" class="w-full dropdown-item justify-center border border-primary-200 bg-gradient-to-r from-primary-50 to-purple-50 hover:from-primary-100 hover:to-purple-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span>Connect Wallet for Rewards</span>
+                </button>
+            </div>
+            <div data-wallet-connected class="hidden">
+                <div class="flex items-center justify-between p-3 bg-green-50 rounded-xl border border-green-200">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-sm font-medium text-green-800">Wallet Connected</div>
+                            <div class="text-xs text-green-600" data-wallet-address></div>
+                        </div>
+                    </div>
+                    <button onclick="disconnectWallet()" class="text-xs text-red-600 hover:text-red-700 font-medium">Disconnect</button>
+                </div>
+                <div data-wrong-network class="hidden mt-2">
+                    <button onclick="switchToBaseNetwork()" class="w-full dropdown-item justify-center bg-amber-50 text-amber-700 border border-amber-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Switch to Base Network
+                    </button>
                 </div>
             </div>
         </div>
@@ -1108,6 +1158,13 @@
             <div class="text-center">
                 <h3 class="text-lg font-bold text-gray-800 mb-1">Welcome to DiaryVault</h3>
                 <p class="text-sm text-gray-600">Your thoughts. Encrypted. Rewarded.</p>
+                <!-- Wallet status for anonymous users -->
+                <div id="anon-wallet-status" class="mt-2" data-wallet-status>
+                    <span class="text-xs text-gray-500" data-wallet-disconnected>No wallet connected</span>
+                    <span class="text-xs text-green-600 font-medium hidden" data-wallet-connected>
+                        Connected: <span data-wallet-address></span>
+                    </span>
+                </div>
             </div>
         </div>
 
@@ -1293,304 +1350,341 @@
         };
     </script>
 
-    <!-- Wallet and Menu JavaScript -->
+    <!-- Enhanced Wallet State Manager -->
     <script>
-    // Clean wallet state management
-    window.walletState = {
-        isConnected: false,
-        address: null,
-        chainId: null,
-        isInitializing: false
-    };
-
-    // Base network configuration
-    const BASE_NETWORK = {
-        chainId: '0x2105',
-        chainName: 'Base',
-        nativeCurrency: {
-            name: 'Ether',
-            symbol: 'ETH',
-            decimals: 18
+    // Global wallet state management
+    window.WalletStateManager = {
+        // Initialize wallet state
+        init: function() {
+            this.loadState();
+            this.setupListeners();
+            this.checkInitialConnection();
         },
-        rpcUrls: ['https://mainnet.base.org'],
-        blockExplorerUrls: ['https://basescan.org']
-    };
 
-    // Get ethereum provider
-    function getEthereum() {
-        if (typeof window.ethereum === 'undefined') {
-            return null;
-        }
-        
-        if (window.ethereum.providers && Array.isArray(window.ethereum.providers)) {
-            const metamask = window.ethereum.providers.find(provider => provider.isMetaMask);
-            if (metamask) return metamask;
-            return window.ethereum.providers[0];
-        }
-        
-        return window.ethereum;
-    }
-
-    // Initialize wallet system
-    function initializeWallet() {
-        if (window.walletState.isInitializing) {
-            return;
-        }
-        
-        window.walletState.isInitializing = true;
-        
-        const ethereum = getEthereum();
-        if (!ethereum) {
-            return;
-        }
-
-        if (!ethereum._diaryVaultListeners) {
-            setupEventListeners(ethereum);
-            ethereum._diaryVaultListeners = true;
-        }
-
-        checkExistingConnection(ethereum);
-        window.walletState.isInitializing = false;
-    }
-
-    // Setup event listeners
-    function setupEventListeners(ethereum) {
-        ethereum.on('accountsChanged', (accounts) => {
-            if (accounts.length === 0) {
-                updateWalletState(false, null, null);
-            } else {
-                updateWalletState(true, accounts[0], window.walletState.chainId);
-            }
-        });
-
-        ethereum.on('chainChanged', (chainId) => {
-            const chainIdNumber = parseInt(chainId, 16);
-            updateWalletState(window.walletState.isConnected, window.walletState.address, chainIdNumber);
-        });
-
-        ethereum.on('disconnect', () => {
-            updateWalletState(false, null, null);
-        });
-    }
-
-    // Connect wallet function
-    async function connectWallet(walletType = 'metamask', button = null) {
-        const ethereum = getEthereum();
-        if (!ethereum) {
-            showWalletOptions();
-            return;
-        }
-
-        try {
-            if (button) {
-                button.disabled = true;
-                button.style.opacity = '0.7';
-                
-                const statusElement = button.querySelector('[id$="-status"]');
-                if (statusElement) {
-                    statusElement.textContent = 'Connecting...';
-                }
-            }
-
-            const accounts = await ethereum.request({
-                method: 'eth_requestAccounts'
-            });
-
-            if (accounts && accounts.length > 0) {
-                const chainId = await ethereum.request({ method: 'eth_chainId' });
-                const chainIdNumber = parseInt(chainId, 16);
-                
-                updateWalletState(true, accounts[0], chainIdNumber);
-                
-                if (window.showToast) {
-                    const shortAddress = `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`;
-                    
-                    if (chainIdNumber !== 8453) {
-                        setTimeout(() => {
-                            // Could add network switch prompt here
-                        }, 1000);
-                    }
-                }
-            } else {
-                throw new Error('No accounts returned');
-            }
-
-        } catch (error) {
-            if (error.code === 4001) {
-                if (window.showToast) {
-                   // window.showToast('Connection cancelled', 'info');
-                }
-            } else {
-                if (window.showToast) {
-                   // window.showToast('Failed to connect wallet. Please try again.', 'error');
-                }
-            }
-        } finally {
-            if (button) {
-                button.disabled = false;
-                button.style.opacity = '1';
-                
-                const statusElement = button.querySelector('[id$="-status"]');
-                if (statusElement && !window.walletState.isConnected) {
-                    if (statusElement.id.includes('universal')) {
-                        statusElement.textContent = 'MetaMask, Coinbase, Trust + 300 more';
-                    } else if (statusElement.id.includes('metamask')) {
-                        statusElement.textContent = 'Skip the wallet selector';
-                    }
-                }
-            }
-        }
-    }
-
-    // Check existing connection
-    async function checkExistingConnection(ethereum) {
-        try {
-            const accounts = await ethereum.request({ method: 'eth_accounts' });
-            if (accounts && accounts.length > 0) {
-                const chainId = await ethereum.request({ method: 'eth_chainId' });
-                const chainIdNumber = parseInt(chainId, 16);
-                updateWalletState(true, accounts[0], chainIdNumber);
-            }
-        } catch (error) {
-            // Silent fail
-        }
-    }
-
-    // Update wallet state
-    function updateWalletState(isConnected, address, chainId) {
-        const wasConnected = window.walletState.isConnected;
-        
-        window.walletState.isConnected = isConnected;
-        window.walletState.address = address;
-        window.walletState.chainId = chainId;
-
-        updateWalletUI(isConnected, address, chainId);
-
-        try {
-            window.dispatchEvent(new CustomEvent('walletConnectionChanged', {
-                detail: { isConnected, address, chainId, wasConnected }
-            }));
-        } catch (error) {
-            // Silent fail
-        }
-    }
-
-    // Update UI
-    function updateWalletUI(isConnected, address, chainId) {
-        try {
-            const walletStatus = document.getElementById('wallet-status');
-            const walletAddress = document.getElementById('wallet-address');
-
-            if (walletStatus && walletAddress) {
-                if (isConnected && address) {
-                    walletStatus.classList.remove('hidden', 'disconnected');
-                    walletAddress.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
-                    
-                    if (chainId && chainId !== 8453) {
-                        walletStatus.classList.add('disconnected');
-                        walletAddress.textContent += ' (Wrong Network)';
-                    }
-                } else {
-                    walletStatus.classList.add('hidden');
-                }
-            }
-
-            const connectBtn = document.getElementById('connect-wallet-btn');
-            const disconnectBtn = document.getElementById('disconnect-wallet-btn');
-            
-            if (connectBtn && disconnectBtn) {
-                if (isConnected) {
-                    connectBtn.classList.add('hidden');
-                    disconnectBtn.classList.remove('hidden');
-                } else {
-                    connectBtn.classList.remove('hidden');
-                    disconnectBtn.classList.add('hidden');
-                }
-            }
-
-            updateLoginPageStatus(isConnected, address);
-
-        } catch (error) {
-            // Silent fail
-        }
-    }
-
-    // Update login page status
-    function updateLoginPageStatus(isConnected, address) {
-        if (typeof updateConnectionStatus === 'function') {
-            if (isConnected && address) {
-                updateConnectionStatus('connected', `Connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
-            } else {
-                updateConnectionStatus('disconnected', 'Wallet not connected');
-            }
-        }
-
-        const universalStatus = document.getElementById('universal-wallet-status');
-        const metamaskStatus = document.getElementById('direct-metamask-status');
-        
-        if (isConnected && address) {
-            const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
-            
-            if (universalStatus) {
-                universalStatus.textContent = `Connected: ${shortAddress}`;
-            }
-            if (metamaskStatus) {
-                metamaskStatus.textContent = `Connected: ${shortAddress}`;
-            }
-        }
-    }
-
-    // Switch to Base network
-    async function switchToBaseNetwork() {
-        const ethereum = getEthereum();
-        if (!ethereum) {
-            if (window.showToast) {
-              //  window.showToast('No wallet detected', 'error');
-            }
-            return;
-        }
-
-        try {
-            await ethereum.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: BASE_NETWORK.chainId }],
-            });
-            
-            if (window.showToast) {
-              //  window.showToast('Switched to Base network', 'success');
-            }
-        } catch (error) {
-            if (error.code === 4902) {
+        // Get current wallet state from all sources
+        getState: function() {
+            // 1. Check localStorage for persistent state
+            const savedState = localStorage.getItem('walletState');
+            if (savedState) {
                 try {
-                    await ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [BASE_NETWORK],
+                    const state = JSON.parse(savedState);
+                    if (state.address && state.timestamp) {
+                        // Check if state is less than 24 hours old
+                        if (Date.now() - state.timestamp < 24 * 60 * 60 * 1000) {
+                            return state;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Invalid wallet state:', e);
+                }
+            }
+
+            // 2. Check window.ethereum
+            if (window.ethereum && window.ethereum.selectedAddress) {
+                return {
+                    isConnected: true,
+                    address: window.ethereum.selectedAddress,
+                    chainId: window.ethereum.chainId ? parseInt(window.ethereum.chainId, 16) : null,
+                    timestamp: Date.now()
+                };
+            }
+
+            // 3. Check for MetaMask accounts
+            if (window.ethereum && window.ethereum._state && window.ethereum._state.accounts) {
+                const accounts = window.ethereum._state.accounts;
+                if (accounts.length > 0) {
+                    return {
+                        isConnected: true,
+                        address: accounts[0],
+                        chainId: window.ethereum.chainId ? parseInt(window.ethereum.chainId, 16) : null,
+                        timestamp: Date.now()
+                    };
+                }
+            }
+
+            return {
+                isConnected: false,
+                address: null,
+                chainId: null,
+                timestamp: Date.now()
+            };
+        },
+
+        // Save wallet state
+        saveState: function(state) {
+            localStorage.setItem('walletState', JSON.stringify({
+                ...state,
+                timestamp: Date.now()
+            }));
+            
+            // Dispatch event for other components
+            window.dispatchEvent(new CustomEvent('walletStateChanged', {
+                detail: state
+            }));
+        },
+
+        // Load saved state on init
+        loadState: function() {
+            const state = this.getState();
+            if (state.isConnected) {
+                this.updateConnectedState(state.address, state.chainId);
+            }
+        },
+
+        // Setup ethereum event listeners
+        setupListeners: function() {
+            if (!window.ethereum) return;
+
+            // Account changes
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length > 0) {
+                    const state = {
+                        isConnected: true,
+                        address: accounts[0],
+                        chainId: window.ethereum.chainId ? parseInt(window.ethereum.chainId, 16) : null
+                    };
+                    this.saveState(state);
+                    this.updateConnectedState(state.address, state.chainId);
+                } else {
+                    this.disconnectWallet();
+                }
+            });
+
+            // Chain changes
+            window.ethereum.on('chainChanged', (chainId) => {
+                const state = this.getState();
+                if (state.isConnected) {
+                    state.chainId = parseInt(chainId, 16);
+                    this.saveState(state);
+                    this.updateConnectedState(state.address, state.chainId);
+                }
+            });
+
+            // Disconnect event
+            window.ethereum.on('disconnect', () => {
+                this.disconnectWallet();
+            });
+        },
+
+        // Check initial connection
+        checkInitialConnection: async function() {
+            if (!window.ethereum) return;
+
+            try {
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_accounts' 
+                });
+                
+                if (accounts.length > 0) {
+                    const chainId = await window.ethereum.request({ 
+                        method: 'eth_chainId' 
                     });
                     
+                    const state = {
+                        isConnected: true,
+                        address: accounts[0],
+                        chainId: parseInt(chainId, 16)
+                    };
+                    
+                    this.saveState(state);
+                    this.updateConnectedState(state.address, state.chainId);
+                }
+            } catch (error) {
+                console.error('Error checking wallet connection:', error);
+            }
+        },
+
+        // Connect wallet
+        connectWallet: async function() {
+            if (!window.ethereum) {
+                showWalletOptions();
+                return;
+            }
+
+            try {
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                
+                if (accounts.length > 0) {
+                    const chainId = await window.ethereum.request({ 
+                        method: 'eth_chainId' 
+                    });
+                    
+                    const state = {
+                        isConnected: true,
+                        address: accounts[0],
+                        chainId: parseInt(chainId, 16)
+                    };
+                    
+                    this.saveState(state);
+                    this.updateConnectedState(state.address, state.chainId);
+                    
+                    // Show success message
                     if (window.showToast) {
-                    //    window.showToast('Base network added', 'success');
-                    }
-                } catch (addError) {
-                    if (window.showToast) {
-                    //    window.showToast('Failed to add Base network', 'error');
+                        window.showToast('Wallet connected successfully!', 'success');
                     }
                 }
-            } else {
+            } catch (error) {
+                console.error('Failed to connect wallet:', error);
                 if (window.showToast) {
-                  //  window.showToast('Failed to switch network', 'error');
+                    window.showToast('Failed to connect wallet', 'error');
                 }
             }
+        },
+
+        // Disconnect wallet
+        disconnectWallet: function() {
+            localStorage.removeItem('walletState');
+            
+            const state = {
+                isConnected: false,
+                address: null,
+                chainId: null
+            };
+            
+            this.saveState(state);
+            this.updateDisconnectedState();
+            
+            if (window.showToast) {
+                window.showToast('Wallet disconnected', 'info');
+            }
+        },
+
+        // Switch to Base network
+        switchToBaseNetwork: async function() {
+            if (!window.ethereum) return;
+
+            const baseChainId = '0x2105'; // 8453 in hex
+
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: baseChainId }],
+                });
+            } catch (switchError) {
+                // This error code indicates that the chain has not been added to MetaMask
+                if (switchError.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: baseChainId,
+                                chainName: 'Base',
+                                nativeCurrency: {
+                                    name: 'Ethereum',
+                                    symbol: 'ETH',
+                                    decimals: 18
+                                },
+                                rpcUrls: ['https://mainnet.base.org'],
+                                blockExplorerUrls: ['https://basescan.org']
+                            }],
+                        });
+                    } catch (addError) {
+                        console.error('Failed to add Base network:', addError);
+                    }
+                }
+            }
+        },
+
+        // Update UI for connected state
+        updateConnectedState: function(address, chainId) {
+            // Update all wallet-aware elements
+            document.querySelectorAll('[data-wallet-connected]').forEach(el => {
+                el.style.display = 'block';
+                el.classList.remove('hidden');
+            });
+            
+            document.querySelectorAll('[data-wallet-disconnected]').forEach(el => {
+                el.style.display = 'none';
+                el.classList.add('hidden');
+            });
+
+            // Update address displays with shortened version
+            if (address) {
+                const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+                document.querySelectorAll('[data-wallet-address]').forEach(el => {
+                    el.textContent = shortAddress;
+                });
+                
+                // Also update any element with id="wallet-address"
+                const walletAddressEl = document.getElementById('wallet-address');
+                if (walletAddressEl) {
+                    walletAddressEl.textContent = shortAddress;
+                }
+            }
+
+            // Update chain status
+            const isBaseNetwork = chainId === 8453;
+            document.querySelectorAll('[data-wallet-network]').forEach(el => {
+                el.textContent = isBaseNetwork ? 'Base Network' : 'Wrong Network';
+                el.className = isBaseNetwork ? 'text-green-500' : 'text-red-500';
+            });
+
+            // Show/hide network switch button
+            document.querySelectorAll('[data-wrong-network]').forEach(el => {
+                if (isBaseNetwork) {
+                    el.classList.add('hidden');
+                } else {
+                    el.classList.remove('hidden');
+                }
+            });
+
+            // Update wallet status elements
+            const walletStatus = document.getElementById('wallet-status');
+            if (walletStatus) {
+                walletStatus.classList.remove('hidden', 'disconnected');
+                walletStatus.style.display = 'flex';
+            }
+
+            // Dispatch event for page-specific updates
+            window.dispatchEvent(new CustomEvent('walletConnected', {
+                detail: { address, chainId, isBaseNetwork }
+            }));
+            
+            // Also update home page elements if they exist
+            if (typeof updateHomePageForWallet === 'function') {
+                updateHomePageForWallet(true, address, chainId);
+            }
+        },
+
+        // Update UI for disconnected state
+        updateDisconnectedState: function() {
+            document.querySelectorAll('[data-wallet-connected]').forEach(el => {
+                el.style.display = 'none';
+                el.classList.add('hidden');
+            });
+            
+            document.querySelectorAll('[data-wallet-disconnected]').forEach(el => {
+                el.style.display = 'block';
+                el.classList.remove('hidden');
+            });
+
+            // Hide wallet status
+            const walletStatus = document.getElementById('wallet-status');
+            if (walletStatus) {
+                walletStatus.style.display = 'none';
+            }
+
+            // Dispatch event for page-specific updates
+            window.dispatchEvent(new CustomEvent('walletDisconnected'));
         }
+    };
+
+    // Initialize on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.WalletStateManager.init();
+        });
+    } else {
+        window.WalletStateManager.init();
     }
 
-    // Disconnect wallet
-    async function disconnectWallet() {
-        updateWalletState(false, null, null);
-        
-        if (window.showToast) {
-          //  window.showToast('Wallet disconnected', 'info');
-        }
-    }
+    // Make functions globally available
+    window.connectWallet = () => window.WalletStateManager.connectWallet();
+    window.disconnectWallet = () => window.WalletStateManager.disconnectWallet();
+    window.switchToBaseNetwork = () => window.WalletStateManager.switchToBaseNetwork();
+    window.getWalletInfo = () => window.WalletStateManager.getState();
 
     // Show wallet options
     function showWalletOptions() {
@@ -1625,17 +1719,6 @@
         `;
 
         document.body.appendChild(modal);
-    }
-
-    // Get wallet info
-    function getWalletInfo() {
-        return {
-            isConnected: window.walletState.isConnected,
-            address: window.walletState.address,
-            chainId: window.walletState.chainId,
-            isCorrectNetwork: window.walletState.chainId === 8453,
-            hasMetaMask: !!getEthereum()
-        };
     }
 
     // Toast notification system
@@ -1757,23 +1840,70 @@
         });
     }
 
-    // Make functions globally available
-    window.connectWallet = connectWallet;
-    window.openWalletModal = connectWallet;
-    window.disconnectWallet = disconnectWallet;
-    window.getWalletInfo = getWalletInfo;
-    window.switchToBaseNetwork = switchToBaseNetwork;
-    window.showWalletOptions = showWalletOptions;
-    window.handleWalletConnection = connectWallet;
-
     // Initialize when page loads
     document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(() => {
-            initializeWallet();
-        }, 1000);
-        
         initializeModernDropdown();
     });
+
+    // Safe function to update home page wallet UI (if on home page)
+    function updateHomePageForWallet(isConnected, address, chainId) {
+        // Safely get elements and check existence before accessing properties
+        const walletNotConnected = document.getElementById('walletNotConnected');
+        const walletConnected = document.getElementById('walletConnected');
+        const connectedWalletAddress = document.getElementById('connectedWalletAddress');
+        const networkStatus = document.getElementById('networkStatus');
+        const switchNetworkBtn = document.getElementById('switchNetworkBtn');
+
+        // Update wallet status section only if elements exist
+        if (walletNotConnected && walletConnected) {
+            if (isConnected && address) {
+                walletNotConnected.classList.add('hidden');
+                walletConnected.classList.remove('hidden');
+                
+                if (connectedWalletAddress) {
+                    connectedWalletAddress.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+                }
+                
+                // Check network
+                if (networkStatus) {
+                    if (chainId && chainId !== 8453) {
+                        networkStatus.textContent = 'Wrong Network';
+                        networkStatus.className = 'text-xs text-red-500';
+                        if (switchNetworkBtn) {
+                            switchNetworkBtn.classList.remove('hidden');
+                        }
+                    } else {
+                        networkStatus.textContent = 'Base Network';
+                        networkStatus.className = 'text-xs text-green-500';
+                        if (switchNetworkBtn) {
+                            switchNetworkBtn.classList.add('hidden');
+                        }
+                    }
+                }
+            } else {
+                walletNotConnected.classList.remove('hidden');
+                walletConnected.classList.add('hidden');
+            }
+        }
+
+        // Update form messaging if the functions exist
+        if (typeof updateFormMessaging === 'function') {
+            updateFormMessaging(isConnected, chainId);
+        }
+        
+        // Update personalization options if the function exists
+        if (typeof updatePersonalizationOptions === 'function') {
+            updatePersonalizationOptions(isConnected);
+        }
+        
+        // Update action buttons if the function exists
+        if (typeof updateActionButtons === 'function') {
+            updateActionButtons(isConnected);
+        }
+    }
+
+    // Make it globally available if needed
+    window.updateHomePageForWallet = updateHomePageForWallet;
     </script>
 
     {% block extra_js %}{% endblock %}
