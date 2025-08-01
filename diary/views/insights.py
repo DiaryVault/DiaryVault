@@ -9,7 +9,6 @@ from ..utils.analytics import get_mood_emoji, get_tag_color, mood_to_numeric_val
 
 logger = logging.getLogger(__name__)
 
-@login_required
 def insights(request):
     """View for showing AI-generated insights about the user's journal entries."""
 
