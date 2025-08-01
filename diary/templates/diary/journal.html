@@ -1,1242 +1,1913 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}DiaryVault - Dashboard{% endblock %}
+{% block title %}{% if is_edit_mode %}Edit Entry{% else %}New Entry{% endif %} - DiaryVault{% endblock %}
 
 {% block extra_css %}
 <style>
-  /* Base mobile-first styles */
-  .container {
-    padding: 1rem;
-    max-width: 100%;
+  /* Remove conflicting scroll behaviors */
+  html, body {
+    overflow-x: visible !important;
+    scroll-behavior: smooth !important;
   }
 
-  /* Book styling - simplified for mobile */
-  .book {
-    transition: transform 0.2s ease;
+  #main-content {
+    min-height: auto;
+    overflow: visible;
+  }
+
+  /* Core branding elements */
+  .diary-font {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+  }
+
+  .handwritten {
+    font-family: 'Satisfy', cursive;
+    letter-spacing: 0.01em;
+    line-height: 1.7;
+  }
+
+  /* Hero photo display for journal entries */
+  .journal-photo-hero {
     position: relative;
-  }
-
-  .book-spine {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 20px;
-    background: linear-gradient(to right, rgba(0,0,0,0.15), rgba(0,0,0,0));
-    border-radius: 0.5rem 0 0 0.5rem;
-  }
-
-  /* Enhanced photo memory styles */
-  .memory-card {
-    background-color: white;
+    width: 100%;
+    height: 400px;
+    margin-bottom: 2rem;
     border-radius: 1rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     overflow: hidden;
-    transition: all 0.3s ease;
-    position: relative;
-    transform: translateY(0);
-    cursor: pointer;
+    background: #f3f4f6;
   }
 
-  .memory-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  }
-
-  .memory-image {
+  .journal-photo-hero img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
+    object-position: center;
   }
 
-  .memory-card:hover .memory-image {
-    transform: scale(1.05);
-  }
-
-  .memory-content {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 1rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
-    color: white;
-  }
-
-  .memory-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  }
-
-  .memory-date {
-    font-size: 0.75rem;
-    opacity: 0.9;
-  }
-
-  /* Mobile-first responsive text */
-  .text-mobile-lg { font-size: 1.125rem; line-height: 1.75rem; }
-  .text-mobile-xl { font-size: 1.25rem; line-height: 1.75rem; }
-  .text-mobile-2xl { font-size: 1.5rem; line-height: 2rem; }
-  .text-mobile-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-
-  /* Mobile spacing */
-  .space-mobile-y-3 > * + * { margin-top: 0.75rem; }
-  .space-mobile-y-4 > * + * { margin-top: 1rem; }
-  .space-mobile-y-6 > * + * { margin-top: 1.5rem; }
-
-  /* Mobile padding */
-  .p-mobile-3 { padding: 0.75rem; }
-  .p-mobile-4 { padding: 1rem; }
-  .p-mobile-5 { padding: 1.25rem; }
-
-  /* Mobile margins */
-  .mb-mobile-4 { margin-bottom: 1rem; }
-  .mb-mobile-6 { margin-bottom: 1.5rem; }
-  .mb-mobile-8 { margin-bottom: 2rem; }
-
-  /* Touch targets */
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-
-  /* Mobile button styles */
-  .btn-mobile {
-    padding: 0.875rem 1.5rem;
-    border-radius: 0.75rem;
-    font-size: 1rem;
-    font-weight: 600;
-    text-align: center;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
-  }
-
-  .btn-mobile-sm {
-    padding: 0.625rem 1rem;
-    font-size: 0.875rem;
-  }
-
-  /* Mobile card styles */
-  .card-mobile {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 1rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .card-mobile-lg {
-    padding: 1.25rem;
-    border-radius: 1.25rem;
-  }
-
-  /* Mobile form styles */
-  .form-mobile {
-    width: 100%;
-  }
-
-  .input-mobile {
-    width: 100%;
-    padding: 1rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.75rem;
-    font-size: 1rem; /* Prevents zoom on iOS */
-    background: #fafafa;
-    transition: all 0.2s ease;
-  }
-
-  .input-mobile:focus {
-    outline: none;
-    border-color: #6366f1;
-    background: white;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-  }
-
-  .textarea-mobile {
-    min-height: 120px;
-    resize: vertical;
-    font-family: inherit;
-    line-height: 1.6;
-  }
-
-  /* Mobile grid systems */
-  .grid-mobile-1 { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-  .grid-mobile-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
-  .grid-mobile-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
-
-  /* Photo memory grid for mobile */
-  .photo-memories-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
-
-  .photo-memory-large {
-    grid-column: span 2;
-    height: 200px;
-  }
-
-  .photo-memory-small {
-    height: 120px;
-  }
-
-  /* Mobile flexbox utilities */
-  .flex-mobile-col { display: flex; flex-direction: column; }
-  .flex-mobile-row { display: flex; flex-direction: row; align-items: center; }
-  .flex-mobile-between { display: flex; justify-content: space-between; align-items: center; }
-  .flex-mobile-center { display: flex; justify-content: center; align-items: center; }
-  .flex-mobile-wrap { flex-wrap: wrap; gap: 0.5rem; }
-
-  /* Mobile-specific animations */
-  .loading-dots::after {
+  .journal-photo-hero::after {
     content: '';
-    animation: loading-dots 1.5s infinite;
-  }
-
-  @keyframes loading-dots {
-    0%, 20% { content: ''; }
-    40% { content: '.'; }
-    60% { content: '..'; }
-    80%, 100% { content: '...'; }
-  }
-
-  .scale-in {
-    animation: scaleIn 0.3s ease-out;
-  }
-
-  @keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-  }
-
-  /* Mobile active states */
-  .active-mobile:active {
-    transform: scale(0.98);
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-
-  /* Tablet and up styles */
-  @media (min-width: 768px) {
-    .container {
-      padding: 1.5rem;
-      max-width: 768px;
-      margin: 0 auto;
-    }
-
-    .text-mobile-lg { font-size: 1.25rem; }
-    .text-mobile-xl { font-size: 1.5rem; }
-    .text-mobile-2xl { font-size: 1.875rem; }
-    .text-mobile-3xl { font-size: 2.25rem; }
-
-    .grid-mobile-2 { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-    .grid-mobile-3 { grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-
-    .btn-mobile {
-      width: auto;
-      padding: 0.75rem 1.5rem;
-    }
-
-    .card-mobile {
-      padding: 1.5rem;
-    }
-
-    .flex-mobile-col {
-      flex-direction: row;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .book:hover {
-      transform: rotateY(-10deg) translateY(-5px);
-    }
-
-    /* Tablet photo memories grid */
-    .photo-memories-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-    }
-
-    .photo-memory-large {
-      grid-column: span 2;
-      grid-row: span 2;
-      height: 250px;
-    }
-
-    .photo-memory-small {
-      height: 120px;
-    }
-  }
-
-  /* Desktop styles */
-  @media (min-width: 1024px) {
-    .container {
-      max-width: 1200px;
-      padding: 2rem;
-    }
-
-    .grid-mobile-2 { grid-template-columns: repeat(4, 1fr); }
-    .grid-mobile-3 { grid-template-columns: repeat(5, 1fr); }
-
-    .book:hover {
-      transform: rotateY(-15deg) translateY(-10px);
-      z-index: 10;
-    }
-
-    /* Desktop photo memories grid */
-    .photo-memories-grid {
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1.5rem;
-    }
-
-    .photo-memory-large {
-      grid-column: span 2;
-      grid-row: span 2;
-      height: 300px;
-    }
-
-    .photo-memory-small {
-      height: 140px;
-    }
-
-    /* Desktop layout improvements */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 2rem;
-    }
-
-    .main-content {
-      grid-column: 1;
-    }
-
-    .sidebar-content {
-      grid-column: 2;
-    }
-  }
-
-  /* Hide/show utilities */
-  .mobile-only { display: block; }
-  .desktop-only { display: none; }
-
-  @media (min-width: 768px) {
-    .mobile-only { display: none; }
-    .desktop-only { display: block; }
-  }
-
-  /* Specific component styles */
-  .quick-action {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 1rem;
-    border-radius: 1rem;
-    text-decoration: none;
-    color: inherit;
-    transition: all 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    min-height: 100px;
-  }
-
-  .quick-action:active {
-    transform: scale(0.98);
-    background: rgba(255, 255, 255, 1);
-  }
-
-  .suggestion-btn {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 0.75rem 1rem;
-    border-radius: 2rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #475569;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .suggestion-btn:active {
-    background: #e2e8f0;
-    transform: scale(0.98);
-  }
-
-  .entry-item {
-    background: white;
-    border-radius: 0.75rem;
-    padding: 1rem;
-    margin-bottom: 0.5rem;
-    border: 1px solid #f3f4f6;
-    transition: all 0.2s ease;
-  }
-
-  .entry-item:active {
-    background: #f9fafb;
-    transform: scale(0.99);
-  }
-
-  .book-item {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    border-radius: 1rem;
-    padding: 1rem;
-    color: white;
-    text-decoration: none;
-    height: 160px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .book-content {
-    background: rgba(255, 255, 255, 0.95);
-    color: #374151;
-    border-radius: 0.75rem;
-    padding: 0.75rem;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .add-book {
-    background: #f3f4f6;
-    border: 2px dashed #d1d5db;
-    border-radius: 1rem;
-    height: 160px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    color: #6b7280;
-    transition: all 0.2s ease;
-  }
-
-  .add-book:active {
-    background: #e5e7eb;
-    transform: scale(0.98);
-  }
-
-  /* Loading spinner */
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #f3f4f6;
-    border-top: 4px solid #6366f1;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  /* Progress bar */
-  .progress-bar {
-    width: 100%;
-    height: 8px;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6);
-    border-radius: 4px;
-    transition: width 0.5s ease;
-  }
-
-  /* Enhanced photo styles */
-  .gradient-bg-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-  .gradient-bg-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-  .gradient-bg-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-  .gradient-bg-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-  .gradient-bg-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-  .gradient-bg-6 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
-
-  /* Photo overlay improvements */
-  .photo-overlay {
     position: absolute;
-    top: 0;
+    bottom: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 150px;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    pointer-events: none;
+  }
+
+  .journal-photo-caption {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    color: white;
+    z-index: 1;
+  }
+
+  .journal-photo-caption h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+
+  .journal-photo-caption p {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+
+  /* Enhanced photo preview in the form */
+  #enhancedPhotoPreview {
+    position: relative;
+    width: 100%;
+    max-height: 400px;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    background: #f9fafb;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  #enhancedPhotoPreview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  #enhancedPhotoPreview .photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4));
     opacity: 0;
     transition: opacity 0.3s ease;
   }
 
-  .memory-card:hover .photo-overlay {
+  #enhancedPhotoPreview:hover .photo-overlay {
     opacity: 1;
   }
 
-  .overlay-icon {
-    color: white;
-    background: rgba(255, 255, 255, 0.2);
+  #enhancedPhotoPreview .photo-controls {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  #enhancedPhotoPreview:hover .photo-controls {
+    opacity: 1;
+  }
+
+  .photo-control-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .photo-control-btn:hover {
+    background: white;
+    transform: scale(1.05);
+  }
+
+  /* Photo mood overlay */
+  .photo-mood-overlay {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(10px);
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .photo-mood-overlay .mood-emoji {
+    font-size: 1.25rem;
+  }
+
+  .photo-mood-overlay .mood-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #4b5563;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px) translateZ(0); }
+    50% { transform: translateY(-8px) translateZ(0); }
+    100% { transform: translateY(0px) translateZ(0); }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease forwards;
+    will-change: transform, opacity;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.4s ease forwards;
+    will-change: transform, opacity;
+  }
+
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .animate-pulse {
+    animation: pulse 2s infinite;
+  }
+
+  /* Animation delays */
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+  .animation-delay-700 { animation-delay: 700ms; }
+
+  /* Button styles */
+  .btn-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateZ(0);
+  }
+
+  .btn-gradient:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    transform: translateY(-2px) translateZ(0);
+    box-shadow: 0 8px 20px -5px rgba(99, 102, 241, 0.4);
+  }
+
+  .btn-modern {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    transform: translateZ(0);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px) translateZ(0);
+  }
+
+  .btn-secondary {
+    background: white;
+    color: #374151;
+    border: 1px solid #d1d5db;
+  }
+
+  .btn-secondary:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+  }
+
+  /* Card styles */
+  .card-hover {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: translateZ(0);
+  }
+
+  .card-hover:hover {
+    transform: translateY(-4px) translateZ(0);
+    box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Input container improvements */
+  #journalContainer {
+    box-sizing: border-box;
+    overflow: visible;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+    border-color: rgba(99, 102, 241, 0.3);
+    max-height: none;
+  }
+
+  #journalContainer.input-focused {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+  }
+
+  #journalInput {
+    box-sizing: border-box;
+    outline: none !important;
+    border: none !important;
+    width: 100%;
+    overflow-y: auto;
+    resize: none;
+    max-height: 400px;
+  }
+
+  #journalInput:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+  }
+
+  /* Toast notification system */
+  .feedback-toast {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateX(100%) translateZ(0);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 18rem;
+    will-change: transform, opacity;
+  }
+
+  .feedback-toast.show {
+    transform: translateX(0) translateZ(0);
+    opacity: 1;
+  }
+
+  .feedback-toast.success {
+    background-color: #10b981;
+    color: white;
+  }
+
+  .feedback-toast.error {
+    background-color: #ef4444;
+    color: white;
+  }
+
+  .feedback-toast.info {
+    background-color: #6366f1;
+    color: white;
+  }
+
+  .feedback-toast.warning {
+    background-color: #f59e0b;
+    color: white;
+  }
+
+  /* Welcome banner for transferred entries */
+  .transfer-banner {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    animation: fadeIn 0.6s ease forwards;
+  }
+
+  /* Animation for auto-populated content */
+  @keyframes fadeHighlight {
+    0% { background-color: rgba(99, 102, 241, 0.2); }
+    100% { background-color: transparent; }
+  }
+
+  .auto-populated {
+    animation: fadeHighlight 2s ease;
+  }
+
+  /* Floating label styles */
+  .floating-label {
+    position: relative;
+    margin-bottom: 1.25rem;
+  }
+
+  .floating-label input,
+  .floating-label textarea {
+    width: 100%;
+    padding: 1rem 1rem 0.5rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background-color: #f9fafb;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .floating-label label {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    font-size: 1rem;
+    color: #6b7280;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    background-color: transparent;
+  }
+
+  .floating-label input:focus,
+  .floating-label textarea:focus,
+  .floating-label input:not(:placeholder-shown),
+  .floating-label textarea:not(:placeholder-shown) {
+    padding-top: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-color: #6366f1;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  .floating-label input:focus ~ label,
+  .floating-label textarea:focus ~ label,
+  .floating-label input:not(:placeholder-shown) ~ label,
+  .floating-label textarea:not(:placeholder-shown) ~ label {
+    top: 0.5rem;
+    left: 0.8rem;
+    font-size: 0.75rem;
+    color: #6366f1;
+    font-weight: 500;
+  }
+
+  /* Modern Mood Selector */
+  .mood-selector-container {
+    position: relative;
+    margin: 1.5rem 0;
+  }
+
+  .mood-slider {
+    position: relative;
+    height: 5rem;
+    background: linear-gradient(to right,
+      #4ade80 0%,
+      #a78bfa 50%,
+      #f87171 100%
+    );
+    border-radius: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .mood-slider-track {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    height: 0.5rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 999px;
+  }
+
+  .mood-slider-thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 3rem;
+    height: 3rem;
+    background: white;
     border-radius: 50%;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: transform 0.2s ease;
+    z-index: 10;
+  }
+
+  .mood-slider-thumb:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+
+  .mood-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+  }
+
+  .mood-labels span {
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+
+  /* Tags Input Modern */
+  .tags-container {
+    position: relative;
+    margin-top: 1rem;
+  }
+
+  .tags-input {
+    width: 100%;
     padding: 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    transition: all 0.3s ease;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .tags-input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    outline: none;
+  }
+
+  .tags-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .tag-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.75rem;
+    background: rgba(99, 102, 241, 0.1);
+    color: #4f46e5;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .tag-pill:hover {
+    background: #6366f1;
+    color: white;
+  }
+
+  .tag-pill .remove-tag {
+    margin-left: 0.25rem;
+    cursor: pointer;
+  }
+
+  .tag-suggestions {
+    margin-top: 0.75rem;
+  }
+
+  .tag-suggestion {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    background-color: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .tag-suggestion:hover {
+    background-color: rgba(99, 102, 241, 0.1);
+    border-color: #6366f1;
+    color: #4f46e5;
+  }
+
+  /* Loading dots animation */
+  .loading-dots:after {
+    content: '.';
+    animation: dots 1.5s steps(5, end) infinite;
+  }
+
+  @keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60% { content: '...'; }
+    80%, 100% { content: ''; }
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 640px) {
+    input, textarea, select {
+      font-size: 16px !important;
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+
+    .card-hover {
+      margin-bottom: 1rem;
+    }
+
+    .suggestions-pill {
+      min-height: 36px;
+      padding: 0.4rem 0.8rem;
+    }
+
+    #journalContainer {
+      min-height: 120px;
+      max-height: 300px;
+    }
+
+    #journalInput {
+      max-height: 280px;
+    }
+
+    button,
+    .suggestions-pill,
+    input[type="checkbox"] + label,
+    .card-hover,
+    .btn-gradient {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    .mobile-friendly-padding {
+      padding: 0.75rem !important;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    body {
+      overflow-x: visible !important;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .shortcuts-hint {
+      display: none !important;
+    }
+
+    .journal-photo-hero {
+      height: 250px;
+      border-radius: 0;
+      margin-left: -1rem;
+      margin-right: -1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    #enhancedPhotoPreview {
+      border-radius: 0.5rem;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-  <!-- Success Message for Entry Creation -->
-  {% if request.GET.entry_saved == 'true' or messages %}
-  <div id="entrySuccess" class="mb-mobile-4">
-    <div class="card-mobile" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d;">
-      <div class="flex-mobile-between">
-        <div class="flex-mobile-row" style="gap: 0.75rem;">
-          <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-          </svg>
-          <div>
-            <div class="font-semibold text-mobile-lg">Entry Saved Successfully!</div>
-            <div class="text-sm opacity-75">Your journal entry has been added to your collection.</div>
-          </div>
-        </div>
-        <button class="touch-target" onclick="document.getElementById('entrySuccess').classList.add('hidden')">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-          </svg>
-        </button>
-      </div>
-    </div>
+<!-- Skip link for accessibility -->
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-secondary-600 focus:outline-offset-0">Skip to main content</a>
+
+<div id="main-content" class="max-w-4xl w-full mx-auto relative">
+  <!-- Decorative elements -->
+  <div class="hidden sm:block absolute -top-10 -left-16 h-48 w-48 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob"></div>
+  <div class="hidden sm:block absolute -bottom-32 -right-16 h-48 w-48 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob animation-delay-500"></div>
+  <div class="absolute top-1/3 left-1/3 h-16 w-16 sm:h-20 sm:w-20 bg-amber-300 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-700"></div>
+
+  <!-- Enhanced feedback container -->
+  <div id="feedback-container" class="fixed bottom-4 right-4 flex flex-col gap-2 z-50">
+    <!-- Feedback toasts will be added here dynamically -->
   </div>
 
-  <script>
-  // Auto-hide success message after 5 seconds
-  setTimeout(() => {
-    const successMsg = document.getElementById('entrySuccess');
-    if (successMsg) {
-      successMsg.style.transition = 'opacity 0.5s ease';
-      successMsg.style.opacity = '0';
-      setTimeout(() => {
-        successMsg.classList.add('hidden');
-      }, 500);
-    }
-  }, 5000);
-
-  // Remove the query parameter from URL
-  if (window.location.search.includes('entry_saved=true')) {
-    const url = new URL(window.location);
-    url.searchParams.delete('entry_saved');
-    window.history.replaceState({}, document.title, url.pathname);
-  }
-  </script>
+  {% if messages %}
+    <div class="mb-6">
+      {% for message in messages %}
+        {% if message.tags != 'success' or "signed in" not in message.message %}
+          <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% elif message.tags == 'success' %}bg-green-100 border-green-400 text-green-700{% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} px-4 py-3 rounded-xl shadow-sm border mb-4 animate-scale-in">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
   {% endif %}
 
-  <!-- Django Messages (if any) -->
-  {% for message in messages %}
-  <div class="mb-mobile-4">
-    <div class="card-mobile" style="background: {% if message.tags == 'success' %}#f0fdf4{% elif message.tags == 'error' %}#fef2f2{% else %}#eff6ff{% endif %}; border: 1px solid {% if message.tags == 'success' %}#bbf7d0{% elif message.tags == 'error' %}#fecaca{% else %}#bfdbfe{% endif %}; color: {% if message.tags == 'success' %}#15803d{% elif message.tags == 'error' %}#991b1b{% else %}#1e40af{% endif %};">
-      <div class="flex-mobile-between">
-        <div class="flex-mobile-row" style="gap: 0.75rem;">
-          <svg class="w-5 h-5 {% if message.tags == 'success' %}text-green-500{% elif message.tags == 'error' %}text-red-500{% else %}text-blue-500{% endif %} flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            {% if message.tags == 'success' %}
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            {% elif message.tags == 'error' %}
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-            {% else %}
-            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-            {% endif %}
-          </svg>
-          <div>
-            <div class="text-sm">{{ message }}</div>
-          </div>
-        </div>
-        <button class="touch-target" onclick="this.closest('.mb-mobile-4').remove()">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-          </svg>
-        </button>
-      </div>
+  <!-- Header with date -->
+  <div class="text-center mb-10 relative z-10">
+    <div class="inline-block mb-3 animate-pulse">
+      <span class="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-gray-500 shadow-sm border border-white/50">
+        {{ today|date:"l, F j, Y" }}
+      </span>
     </div>
+    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-2 animate-fade-in">
+      {% if is_edit_mode %}Edit Your Journal Entry{% else %}Create Your Journal Entry{% endif %}
+    </h2>
+    <p class="text-gray-600 text-sm max-w-md mx-auto animate-fade-in animation-delay-300">
+      {% if is_edit_mode %}
+        Update your thoughts and feelings for this entry
+      {% else %}
+        Share your thoughts and experiences - write from the heart
+      {% endif %}
+    </p>
   </div>
-  {% endfor %}
 
-  <!-- Desktop grid layout -->
-  <div class="dashboard-grid">
-    <div class="main-content">
-      <!-- Welcome & Stats Section -->
-      <div class="card-mobile-lg mb-mobile-6">
-        <div class="space-mobile-y-4">
-          <div class="text-center lg:text-left">
-            <h1 class="text-mobile-3xl font-bold mb-2" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome back, {{ request.user.username }}</h1>
-            <p class="text-gray-600">Continue your journey or explore past memories</p>
-          </div>
+  <!-- Transfer banner for pending entries (will be added dynamically) -->
+  <div id="pendingEntryBanner"></div>
 
-          <div class="grid-mobile-3">
-            <div class="text-center bg-white p-mobile-3 rounded-xl border border-gray-100">
-              <div class="text-mobile-2xl font-bold text-blue-600">{{ total_entries }}</div>
-              <div class="text-sm text-gray-500">Entries</div>
-            </div>
-            <div class="text-center bg-white p-mobile-3 rounded-xl border border-gray-100">
-              <div class="text-mobile-2xl font-bold text-green-600">{{ streak }}</div>
-              <div class="text-sm text-gray-500">Streak</div>
-            </div>
-            <div class="text-center bg-white p-mobile-3 rounded-xl border border-gray-100">
-              <div class="text-mobile-2xl font-bold text-purple-600">{{ total_words|default:0 }}</div>
-              <div class="text-sm text-gray-500">Words</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="grid-mobile-3 mb-mobile-6">
-        <a href="{% url 'new_entry' %}" class="quick-action active-mobile">
-          <div class="w-12 h-12 bg-blue-100 rounded-xl flex-mobile-center mb-2">
-            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-          </div>
-          <div class="text-sm font-semibold text-gray-800">New Entry</div>
-          <div class="text-xs text-gray-500">Record today</div>
-        </a>
-
-        <a href="{% url 'library' %}" class="quick-action active-mobile">
-          <div class="w-12 h-12 bg-purple-100 rounded-xl flex-mobile-center mb-2">
-            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-          </div>
-          <div class="text-sm font-semibold text-gray-800">Collections</div>
-          <div class="text-xs text-gray-500">Browse all</div>
-        </a>
-
-        <a href="{% url 'insights' %}" class="quick-action active-mobile">
-          <div class="w-12 h-12 bg-green-100 rounded-xl flex-mobile-center mb-2">
-            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <div class="text-sm font-semibold text-gray-800">Insights</div>
-          <div class="text-xs text-gray-500">Analytics</div>
-        </a>
-      </div>
-
-      <!-- Photo Memories Section -->
-      <div class="card-mobile mb-mobile-6">
-        <div class="flex-mobile-between mb-4">
-          <h2 class="text-mobile-xl font-bold text-gray-800">Recent Memories</h2>
-          <a href="{% url 'library' %}" class="text-sm text-blue-600 hover:underline flex items-center gap-1">
-            <span>View all</span>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </a>
-        </div>
-
-        {% if recent_entries %}
-        <div class="photo-memories-grid">
-          {% for entry in recent_entries|slice:":6" %}
-          <a href="{% url 'entry_detail' entry.id %}" class="memory-card {% cycle 'photo-memory-large' 'photo-memory-small' 'photo-memory-small' 'photo-memory-small' 'photo-memory-small' 'photo-memory-large' %}">
-            {% if entry.photos.first %}
-              <img src="{{ entry.photos.first.photo.url }}" alt="Entry photo" class="memory-image" />
-            {% elif entry.photo.url|default:'' %}
-              <img src="{{ entry.photo.url }}" alt="Entry photo" class="memory-image" />
-            {% else %}
-              <div class="memory-image gradient-bg-{{ forloop.counter|add:1 }} flex items-center justify-center">
-                <div class="text-white text-center p-4">
-                  <div class="text-2xl mb-2">📝</div>
-                  <div class="font-medium text-sm opacity-90">{{ entry.title|default:"Untitled" }}</div>
-                </div>
-              </div>
-            {% endif %}
-            <div class="photo-overlay">
-              <div class="overlay-icon">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-            </div>
-            <div class="memory-content">
-              <div class="memory-title">{{ entry.title|default:"Untitled Memory" }}</div>
-              <div class="memory-date">{{ entry.created_at|date:"M j" }}</div>
-            </div>
-          </a>
-          {% endfor %}
-        </div>
-        {% else %}
-        <div class="text-center py-8">
-          <div class="w-16 h-16 bg-gray-100 rounded-2xl flex-mobile-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h3 class="text-mobile-lg font-semibold text-gray-800 mb-2">No memories yet</h3>
-          <p class="text-gray-600 mb-4">Start journaling to see your memories here.</p>
-          <a href="{% url 'new_entry' %}" class="btn-mobile" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">Create Your First Memory</a>
-        </div>
-        {% endif %}
-      </div>
-
-      <!-- Journal Entry Form -->
-      <div class="card-mobile mb-mobile-8">
-        <div class="mb-4 pb-4 border-b border-gray-100">
-          <h2 class="text-mobile-xl font-bold text-gray-800 flex items-center gap-2 mb-1">
-            <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+  <!-- Main entry form -->
+  <form method="post" enctype="multipart/form-data" id="journalForm" class="w-full relative z-10 animate-scale-in">
+    {% csrf_token %}
+    <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden border border-white transition-all hover:shadow-2xl card-hover">
+      <div class="p-3 sm:p-6">
+        <!-- Header section -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+          <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-500" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd" />
             </svg>
-            Quick Journal Entry
-          </h2>
-          <p class="text-sm text-gray-600">Share your thoughts directly from your dashboard</p>
+            Journal Entry Details
+          </h3>
+          <div class="text-xs font-medium bg-gray-100 px-3 py-1 rounded-full text-gray-500 flex items-center gap-1 shadow-inner w-fit">
+            <span id="charCount">{{ form.content.value|length|default:0 }}</span>
+            <span>characters</span>
+          </div>
         </div>
 
-        <form id="dashboardJournalForm" class="form-mobile">
-          {% csrf_token %}
-
-          <!-- Character counter -->
-          <div class="flex-mobile-between mb-3">
-            <div class="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-600">
-              <span id="charCount">0</span> characters
-            </div>
+        <!-- Title field with floating label -->
+        <div class="form-field mb-6">
+          <div class="floating-label">
+            <input type="text" id="id_title" name="title" placeholder=" "
+                  class="focus:ring-primary-color focus:border-primary-color"
+                  value="{{ form.title.value|default:'' }}">
+            <label for="id_title">Journal Title</label>
           </div>
+          {% if form.title.errors %}
+            <p class="text-red-600 text-xs mt-1">{{ form.title.errors.0 }}</p>
+          {% endif %}
+        </div>
 
-          <!-- Text area -->
-          <textarea
-            id="journalInput"
-            name="journal_content"
-            class="input-mobile textarea-mobile mb-4"
-            placeholder="I had breakfast at 8am, went for a run, had a meeting with my team at 11am..."
-            oninput="countChars()"></textarea>
-
-          <!-- Suggestions -->
-          <div class="mb-4">
-            <div class="text-sm font-medium text-gray-700 mb-3">Suggested topics:</div>
-            <div class="flex flex-wrap gap-2">
-              <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestion-btn">Today I accomplished</button>
-              <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestion-btn">I felt happy when</button>
-              <button type="button" onclick="addSuggestion('I learned that')" class="suggestion-btn">I learned that</button>
-              <button type="button" onclick="addSuggestion('I met with')" class="suggestion-btn">I met with</button>
-              <button type="button" onclick="addSuggestion('I\'m grateful for')" class="suggestion-btn">I'm grateful for</button>
-            </div>
-          </div>
-
-          <!-- Personalization -->
-          <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-            <label class="flex items-start gap-3">
-              <input type="checkbox" id="personalizationToggle" class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded">
-              <div class="text-sm">
-                <div class="font-medium text-gray-700">Use personalized style</div>
-                <div class="text-gray-500">Based on your preferences</div>
-                <a href="{% url 'preferences' %}" class="text-blue-600 hover:underline">Edit preferences</a>
-              </div>
-            </label>
-          </div>
-
-          <!-- Action buttons -->
-          <div class="space-mobile-y-3">
-            <div class="flex-mobile-row text-sm text-gray-600 justify-center gap-2">
-              <div class="w-6 h-6 bg-blue-100 rounded-full flex-mobile-center">
-                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+        <!-- Enhanced integrated input container -->
+        <div id="journalContainer" class="relative border border-gray-200 rounded-xl focus-within:border-secondary-400 transition bg-gray-50/50 min-h-[200px] sm:min-h-[300px] shadow-inner mb-6">
+          
+          <!-- Enhanced photo preview that appears ABOVE the text area when a photo is added -->
+          <div id="enhancedPhotoPreview" class="hidden">
+            <img id="photoPreviewImage" src="" alt="Journal photo">
+            <div class="photo-overlay"></div>
+            <div class="photo-controls">
+              <button type="button" class="photo-control-btn" onclick="viewPhotoFullscreen()" title="View fullscreen">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                 </svg>
-              </div>
-              <span>AI-powered journal generation</span>
-            </div>
-            <button type="button" id="generateButton" onclick="generateEntry()" class="btn-mobile" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">
-              <span>Generate Entry</span>
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </button>
-          </div>
-        </form>
-
-        <!-- Loading indicator -->
-        <div id="loadingIndicator" class="p-6 text-center hidden">
-          <div class="spinner mx-auto mb-4"></div>
-          <p class="text-gray-600 text-mobile-lg font-medium">Crafting your journal entry<span class="loading-dots"></span></p>
-          <p class="text-sm text-gray-500 mt-2">This takes just a moment</p>
-        </div>
-
-        <!-- Results preview -->
-        <div id="resultPreview" class="hidden scale-in">
-          <div class="border-t border-gray-100 pt-4 mt-4">
-            <div class="flex-mobile-between mb-4">
-              <div>
-                <h3 class="text-mobile-lg font-bold text-gray-800">Your Journal Entry</h3>
-                <p class="text-sm text-gray-600">Generated based on your day</p>
-              </div>
-              <button class="touch-target bg-gray-100 rounded-full" onclick="editJournalEntry()">
-                <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+              </button>
+              <button type="button" class="photo-control-btn" onclick="removePhoto()" title="Remove photo">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </button>
             </div>
-
-            <div class="bg-gray-50 p-4 rounded-lg mb-4">
-              <div id="journalEntry" class="text-gray-800 leading-relaxed" style="font-family: 'Georgia', serif;">
-                <!-- AI-generated entry will appear here -->
-              </div>
+            <!-- Mood overlay on photo -->
+            <div class="photo-mood-overlay hidden" id="photoMoodOverlay">
+              <span class="mood-emoji" id="photoMoodEmoji">😊</span>
+              <span class="mood-text" id="photoMoodText">Feeling Happy</span>
             </div>
+          </div>
 
-            <div class="mb-4 text-center">
-              <div class="text-sm text-gray-600">
-                <span class="font-medium">Title:</span>
-                <span id="entryTitle">My Day - {{ current_date|default:"Today" }}</span>
-              </div>
-            </div>
+          <textarea
+            id="journalInput"
+            name="content"
+            class="input-area w-full p-3 sm:p-4 border-0 focus:ring-0 focus:outline-none handwritten bg-transparent min-h-[200px] sm:min-h-[300px] resize-none text-lg"
+            placeholder="Tell me about your day... What did you do? How did you feel? What are you grateful for?"
+            oninput="countChars()"
+            data-dropzone="true"
+            aria-label="Journal content"
+            autocomplete="off"
+            spellcheck="true">{{ form.content.value|default:'' }}</textarea>
 
-            <div class="space-mobile-y-3">
-              <div class="grid-mobile-2" style="gap: 0.75rem;">
-                <button type="button" onclick="editJournalEntry()" class="btn-mobile-sm bg-white border border-gray-300 text-gray-700">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
-                  Edit
-                </button>
-                <button type="button" onclick="restartEntry()" class="btn-mobile-sm bg-white border border-gray-300 text-gray-700">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Try Again
-                </button>
-              </div>
-              <a href="{% url 'dashboard' %}?entry_saved=true" id="saveDashboardButton" class="btn-mobile" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          <!-- Enhanced tools container -->
+          <div class="absolute bottom-2 right-3 flex items-center gap-2">
+            <div class="relative group">
+              <input id="journalPhoto" name="entry_photo" type="file" accept="image/*" class="hidden" onchange="previewPhoto(event)" aria-label="Add a photo to your journal">
+              <label for="journalPhoto" class="cursor-pointer p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center" title="Add a photo">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 group-hover:text-secondary-500 transition-colors" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
                 </svg>
-                Save Entry
-              </a>
+              </label>
+              <div class="absolute bottom-full right-0 mb-2 w-max bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                Add a photo that captures your day
+              </div>
+            </div>
+          </div>
+
+          <!-- Drop zone indicator -->
+          <div id="dropZoneIndicator" class="hidden absolute inset-0 bg-secondary-50 border-2 border-dashed border-secondary-400 rounded-xl flex items-center justify-center pointer-events-none z-10 opacity-95">
+            <div class="text-center p-4 animate-scale-in">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-secondary-400 mx-auto mb-2 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p class="text-secondary-600 font-medium">Drop your photo here</p>
+              <p class="text-secondary-500 text-sm mt-1">Photos help tell your story visually</p>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Sidebar Content (Desktop only) -->
-    <div class="sidebar-content desktop-only">
-      <!-- AI Insights Preview -->
-      <div class="card-mobile mb-mobile-6" style="background: linear-gradient(135deg, #eff6ff, #dbeafe);">
-        <div class="flex-mobile-between mb-4">
-          <h2 class="text-mobile-lg font-bold text-gray-800 flex items-center gap-2">
-            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        {% if form.content.errors %}
+          <p class="text-red-600 text-xs mb-4">{{ form.content.errors.0 }}</p>
+        {% endif %}
+
+        <!-- Drag-and-drop hint message -->
+        <div class="mb-4 text-xs text-gray-500 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>You can drag & drop a photo directly into the input box</span>
+        </div>
+
+        <!-- Modern Mood Selector -->
+        <div class="form-field mb-6">
+          <h3 class="text-sm font-medium mb-2 text-gray-700 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            AI Insights
-          </h2>
-          <a href="{% url 'insights' %}" class="text-sm text-blue-600 hover:underline">View all</a>
-        </div>
+            How are you feeling today?
+          </h3>
 
-        <!-- Quick Mood Overview -->
-        <div class="bg-white p-3 rounded-lg mb-3">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-medium text-gray-700">Recent Mood</span>
-            <span class="text-xl">😊</span>
-          </div>
-          <div class="text-xs text-gray-500">Trending positive this week</div>
-        </div>
+          <div class="mood-selector-container">
+            <div class="flex justify-between items-center mb-3">
+              <span class="text-sm font-medium text-gray-700" id="moodValue">Select a mood</span>
+              <span class="text-2xl" id="moodEmoji">😐</span>
+            </div>
 
-        <!-- Top Topics Mini -->
-        <div class="bg-white p-3 rounded-lg mb-3">
-          <div class="text-sm font-medium text-gray-700 mb-2">Top Topics</div>
-          <div class="space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="text-xs text-gray-600">Work</span>
-              <div class="w-16 h-1 bg-gray-200 rounded">
-                <div class="w-3/4 h-full bg-blue-500 rounded"></div>
+            <div class="mood-slider" id="moodSlider">
+              <div class="mood-slider-track"></div>
+              <div class="mood-slider-thumb" id="moodThumb" style="left: 50%;">
+                <span id="moodThumbEmoji">😐</span>
               </div>
             </div>
-            <div class="flex items-center justify-between">
-              <span class="text-xs text-gray-600">Family</span>
-              <div class="w-16 h-1 bg-gray-200 rounded">
-                <div class="w-1/2 h-full bg-green-500 rounded"></div>
-              </div>
+
+            <div class="mood-labels mt-1">
+              <span>Happy</span>
+              <span>Content</span>
+              <span>Sad</span>
             </div>
           </div>
-        </div>
 
-        <!-- Writing Streak -->
-        <div class="bg-white p-3 rounded-lg">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-medium text-gray-700">Writing Streak</span>
-            <span class="text-lg">🔥</span>
-          </div>
-          <div class="text-xs text-gray-500">{{ streak }} days and counting!</div>
-        </div>
-      </div>
-
-      <!-- Time Periods -->
-      <div class="card-mobile">
-        <div class="flex-mobile-between mb-4">
-          <h2 class="text-mobile-lg font-bold text-gray-800">Time Periods</h2>
-          <a href="{% url 'library' %}" class="text-sm text-blue-600 hover:underline flex items-center gap-1">
-            <span>View all</span>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </a>
-        </div>
-
-        <div class="space-y-3">
-          {% for period in time_periods|slice:":3" %}
-          <a href="{% url 'library' %}" class="block p-3 bg-white rounded-lg border border-gray-200 hover:border-purple-300 transition-colors">
-            <div class="flex items-center justify-between">
-              <div>
-                <div class="font-semibold text-gray-800 text-sm">{{ period.period }}</div>
-                <div class="text-xs text-gray-500">{{ period.count }} entries</div>
-              </div>
-              <div class="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">
-                <svg class="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-              </div>
-            </div>
-          </a>
-          {% empty %}
-          <div class="text-center py-4">
-            <div class="text-gray-500 text-sm">No time periods yet</div>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Recent Entries Section (Mobile Only) -->
-  <div class="mobile-only mb-mobile-8">
-    <div class="flex-mobile-between mb-4">
-      <h2 class="text-mobile-xl font-bold text-gray-800">Recent Entries</h2>
-      <a href="{% url 'library' %}" class="text-sm text-blue-600 hover:underline flex items-center gap-1">
-        <span>View all</span>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </a>
-    </div>
-
-    <div class="card-mobile">
-      {% for entry in recent_entries|slice:":3" %}
-      <div class="entry-item active-mobile">
-        <div class="flex-mobile-between mb-2">
-          <h3 class="font-semibold text-gray-800 text-sm">{{ entry.title }}</h3>
-          <div class="text-xs text-gray-500">{{ entry.created_at|date:"M j" }}</div>
-        </div>
-
-        <p class="text-sm text-gray-600 mb-3 leading-relaxed">{{ entry.content|truncatechars:120 }}</p>
-
-        <div class="flex-mobile-between">
-          <div class="flex-mobile-wrap">
-            {% if entry.mood %}
-              <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">{{ entry.mood }}</span>
-            {% endif %}
-            {% for tag in entry.tags.all %}
-              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">{{ tag.name }}</span>
+          <!-- Hidden radio buttons -->
+          <div class="hidden">
+            {% for choice in form.mood %}
+              {{ choice.tag }}
             {% endfor %}
           </div>
-          <a href="{% url 'entry_detail' entry.id %}" class="text-sm text-blue-600 hover:underline">Read more</a>
         </div>
-      </div>
-      {% empty %}
-      <div class="text-center py-8">
-        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex-mobile-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-        </div>
-        <h3 class="text-mobile-lg font-semibold text-gray-800 mb-2">No entries yet</h3>
-        <p class="text-gray-600 mb-4">Start journaling to see your recent entries here.</p>
-        <a href="{% url 'new_entry' %}" class="btn-mobile" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">Create Your First Entry</a>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
 
-  <!-- Time Periods Collection (Mobile Only) -->
-  <div class="mobile-only mb-mobile-8">
-    <div class="flex-mobile-between mb-4">
-      <h2 class="text-mobile-xl font-bold text-gray-800">Time Periods</h2>
-      <a href="{% url 'library' %}" class="text-sm text-blue-600 hover:underline flex items-center gap-1">
-        <span>View all</span>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </a>
-    </div>
-
-    <div class="grid-mobile-2">
-      {% for period in time_periods %}
-      <a href="{% url 'library' %}" class="book-item active-mobile">
-        <div class="book-spine"></div>
-        <div class="book-content">
-          <div>
-            <div class="font-bold text-sm text-center mb-1">{{ period.period }}</div>
-            <div class="text-xs text-center text-gray-500 mb-2">
-              {% if 'Q1' in period.period %}Jan - Mar{% endif %}
-              {% if 'Q2' in period.period %}Apr - Jun{% endif %}
-              {% if 'Q3' in period.period %}Jul - Sep{% endif %}
-              {% if 'Q4' in period.period %}Oct - Dec{% endif %}
-            </div>
-            <div class="text-xs text-gray-600 leading-relaxed overflow-hidden" style="height: 60px;">
-              {% if period.first_entry %}
-                {{ period.first_entry.content|truncatechars:80 }}
-              {% else %}
-                Start adding entries to this time period...
-              {% endif %}
-            </div>
-          </div>
-          <div class="text-xs text-center font-medium">{{ period.count }} entries</div>
-        </div>
-      </a>
-      {% empty %}
-      <div class="col-span-full text-center py-8">
-        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex-mobile-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-        </div>
-        <h3 class="text-mobile-lg font-semibold text-gray-800 mb-2">No entries yet</h3>
-        <p class="text-gray-600 mb-4">Start journaling to build your library of memories.</p>
-        <a href="{% url 'new_entry' %}" class="btn-mobile" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">Create Your First Entry</a>
-      </div>
-      {% endfor %}
-
-      <!-- Add New -->
-      <a href="{% url 'new_entry' %}" class="add-book active-mobile">
-        <div class="text-center">
-          <div class="w-12 h-12 bg-white rounded-full flex-mobile-center mx-auto mb-2">
-            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        <!-- Tags field -->
+        <div class="form-field mb-6">
+          <h3 class="text-sm font-medium mb-2 text-gray-700 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
             </svg>
+            Tags
+          </h3>
+
+          <div class="tags-container">
+            <input type="text" id="id_tags" name="tags" class="tags-input" placeholder="Add tags separated by commas" value="{{ form.tags.value|default:'' }}">
+
+            <!-- Selected tags will appear here -->
+            <div class="tags-pills" id="selectedTags"></div>
+
+            <!-- Tag suggestions -->
+            <div class="tag-suggestions mt-3">
+              <p class="text-xs text-gray-500 mb-2">Suggested tags:</p>
+              <button type="button" class="tag-suggestion" onclick="addTag('work')">work</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('family')">family</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('health')">health</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('friends')">friends</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('reflection')">reflection</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('gratitude')">gratitude</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('travel')">travel</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('food')">food</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('learning')">learning</button>
+              <button type="button" class="tag-suggestion" onclick="addTag('goals')">goals</button>
+            </div>
           </div>
-          <div class="text-sm font-medium">Create New</div>
+
+          <p class="text-xs text-gray-500 mt-2 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Tags help organize your entries and are auto-suggested based on your content
+          </p>
         </div>
-      </a>
+
+        <!-- Enhanced suggestions section -->
+        <div class="mb-6">
+          <div class="text-xs font-medium text-gray-600 mb-2 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            <span>Start with a prompt:</span>
+          </div>
+          <div class="flex flex-wrap gap-1 sm:gap-2">
+            <button type="button" onclick="addSuggestion('Today I accomplished')" class="suggestions-pill bg-secondary-50 hover:bg-secondary-100 text-secondary-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-medium transition shadow-sm border border-secondary-200/50 min-h-[32px] sm:min-h-[40px] mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 100ms;">Today I accomplished</button>
+            <button type="button" onclick="addSuggestion('I felt happy when')" class="suggestions-pill bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-emerald-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 200ms;">I felt happy when</button>
+            <button type="button" onclick="addSuggestion('I learned that')" class="suggestions-pill bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-indigo-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 300ms;">I learned that</button>
+            <button type="button" onclick="addSuggestion('I met with')" class="suggestions-pill bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-purple-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 400ms;">I met with</button>
+            <button type="button" onclick="addSuggestion('I\'m grateful for')" class="suggestions-pill bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 sm:px-4 py-1.5 rounded-full text-xs font-medium transition shadow-sm border border-amber-200/50 mb-1 hover:scale-105 hover:shadow animate-fade-in" style="animation-delay: 500ms;">I'm grateful for</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom action area -->
+      <div class="bg-gradient-to-r from-secondary-50 to-primary-50 px-4 sm:px-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-t border-white">
+        <div class="text-xs text-gray-600 flex items-center gap-2">
+          <span class="h-6 w-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-secondary-600" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+            </svg>
+          </span>
+          <span>{% if is_edit_mode %}Update your journal entry{% else %}Create your journal entry{% endif %}</span>
+        </div>
+        <div class="action-container flex gap-3">
+          {% if is_edit_mode %}
+            <a href="{% url 'entry_detail' form.instance.id %}" class="btn-modern btn-secondary">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Cancel
+            </a>
+          {% else %}
+            <a href="{% url 'dashboard' %}" class="btn-modern btn-secondary">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Cancel
+            </a>
+          {% endif %}
+
+          <button type="submit" class="btn-gradient text-white px-5 py-3 rounded-full text-sm font-medium flex items-center justify-center gap-2 shadow-md w-full sm:w-auto hover:shadow-lg transition-all">
+            <span>{% if is_edit_mode %}Update Entry{% else %}Save Entry{% endif %}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
+  </form>
 </div>
 
-{% endblock %}
-
-{% block extra_js %}
+<!-- Enhanced JavaScript -->
 <script>
-  // Entry success notification check
-  document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('entry_saved') === 'true') {
-      document.getElementById('entrySuccess').classList.remove('hidden');
-      // Update URL without the parameter
-      history.replaceState(null, '', window.location.pathname);
+// Variables to store photo data
+let currentPhotoFile = null;
+let currentPhotoDataUrl = null;
+
+// Initialize on DOM load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeJournalForm();
+  initializeAnimations();
+  setupEnhancedUX();
+  setupScrollOptimizations();
+  enhanceFormSubmission();
+  
+  // Check for pending entry when page loads
+  checkAndLoadPendingEntry();
+});
+
+// Check for pending journal entry from demo/anonymous save
+function checkAndLoadPendingEntry() {
+  // First check if Django passed any pending entry data
+  {% if has_pending_entry and pending_entry_json %}
+  const djangoPendingEntry = {{ pending_entry_json|safe }};
+  if (djangoPendingEntry) {
+    loadPendingEntryData(djangoPendingEntry);
+    return;
+  }
+  {% endif %}
+  
+  // Then check sessionStorage for pending entry
+  const pendingEntryData = sessionStorage.getItem('pendingJournalEntry');
+  
+  if (pendingEntryData) {
+    try {
+      const pendingEntry = JSON.parse(pendingEntryData);
+      
+      // Clear the session storage
+      sessionStorage.removeItem('pendingJournalEntry');
+      
+      loadPendingEntryData(pendingEntry);
+    } catch (error) {
+      console.error('Error loading pending entry:', error);
     }
+  }
+}
 
-    // Initialize character counter
+// Function to actually load the pending entry data into the form
+function loadPendingEntryData(pendingEntry) {
+  // Show a welcome message for anonymous users with wallets
+  if (pendingEntry.fromDemo && pendingEntry.hasWallet) {
+    showFeedback('🎉 Welcome! Your content has been transferred. Now you can save it permanently!', 'success', 6000);
+    
+    // Add a special banner
+    const bannerContainer = document.getElementById('pendingEntryBanner');
+    if (bannerContainer) {
+      const banner = document.createElement('div');
+      banner.className = 'mb-6 transfer-banner p-4 rounded-xl border animate-fade-in';
+      banner.innerHTML = `
+        <div class="flex items-start gap-3">
+          <div class="flex-shrink-0">
+            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+          </div>
+          <div class="flex-1">
+            <h4 class="text-sm font-semibold text-purple-900 mb-1">Wallet Connected - ${pendingEntry.walletAddress.slice(0, 6)}...${pendingEntry.walletAddress.slice(-4)}</h4>
+            <p class="text-sm text-purple-700">Your demo content has been transferred! You can now save this entry permanently and earn ${pendingEntry.rewards || 25} tokens.</p>
+            <div class="mt-3 flex items-center gap-2 text-xs text-purple-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Your entry is pre-filled below. Review and click "Save Entry" when ready.</span>
+            </div>
+          </div>
+          <button onclick="this.parentElement.parentElement.remove()" class="text-purple-400 hover:text-purple-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      `;
+      bannerContainer.appendChild(banner);
+    }
+  }
+  
+  // Populate the form fields
+  const titleField = document.getElementById('id_title');
+  if (titleField && pendingEntry.title) {
+    titleField.value = pendingEntry.title;
+    titleField.classList.add('auto-populated');
+    
+    // Trigger events
+    titleField.dispatchEvent(new Event('input', { bubbles: true }));
+    titleField.dispatchEvent(new Event('change', { bubbles: true }));
+    
+    setTimeout(() => titleField.classList.remove('auto-populated'), 2000);
+  }
+  
+  const contentField = document.getElementById('journalInput');
+  if (contentField && pendingEntry.content) {
+    contentField.value = pendingEntry.content;
+    contentField.classList.add('auto-populated');
+    
+    // Update character count
     countChars();
-
-    // Initialize photo memory interactions
-    initPhotoMemories();
-  });
-
-  // Photo memory interactions
-  function initPhotoMemories() {
-    const memoryCards = document.querySelectorAll('.memory-card');
-
-    memoryCards.forEach(card => {
-      // Add click handler for mobile
-      card.addEventListener('click', function(e) {
-        // Prevent default link behavior temporarily
-        e.preventDefault();
-
-        // Add a slight scale effect
-        this.style.transform = 'scale(0.98)';
-
-        // Navigate after brief delay for visual feedback
+    
+    // Trigger resize
+    contentField.style.height = 'auto';
+    const newHeight = Math.min(contentField.scrollHeight, window.innerHeight * 0.4);
+    contentField.style.height = newHeight + 'px';
+    
+    // Trigger events
+    contentField.dispatchEvent(new Event('input', { bubbles: true }));
+    contentField.dispatchEvent(new Event('change', { bubbles: true }));
+    
+    setTimeout(() => contentField.classList.remove('auto-populated'), 2000);
+  }
+  
+  // Handle mood if present
+  if (pendingEntry.mood) {
+    const moodRadio = document.querySelector(`input[name="mood"][value="${pendingEntry.mood}"]`);
+    if (moodRadio) {
+      moodRadio.checked = true;
+      moodRadio.dispatchEvent(new Event('change', { bubbles: true }));
+      
+      // Update mood slider
+      if (typeof initModernMoodSlider === 'function') {
+        initModernMoodSlider();
+      }
+    }
+  }
+  
+  // Handle tags if present
+  if (pendingEntry.tags) {
+    const tagsField = document.getElementById('id_tags');
+    if (tagsField) {
+      tagsField.value = pendingEntry.tags;
+      tagsField.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      // Update tag pills
+      if (typeof updateTagPills === 'function') {
+        updateTagPills();
+      }
+    }
+  }
+  
+  // Handle photo if present
+  if (pendingEntry.photoData && pendingEntry.photoName) {
+    // Convert base64 back to file
+    fetch(pendingEntry.photoData)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], pendingEntry.photoName, { type: blob.type });
+        
+        // Store file for form submission
+        window.pendingPhotoFile = file;
+        currentPhotoFile = file;
+        currentPhotoDataUrl = pendingEntry.photoData;
+        
+        // Update enhanced photo preview
+        const enhancedPreview = document.getElementById('enhancedPhotoPreview');
+        const previewImage = document.getElementById('photoPreviewImage');
+        
+        if (enhancedPreview && previewImage) {
+          previewImage.src = pendingEntry.photoData;
+          enhancedPreview.classList.remove('hidden');
+          
+          // Adjust textarea padding
+          const journalInput = document.getElementById('journalInput');
+          if (journalInput) {
+            journalInput.style.paddingTop = '1rem';
+          }
+        }
+        
+        // Update mood overlay
+        updatePhotoMoodOverlay();
+        
+        showFeedback('📸 Photo transferred and displayed prominently!', 'info', 3000);
+      })
+      .catch(error => {
+        console.error('Error processing photo:', error);
+      });
+  }
+  
+  // Scroll to form smoothly
+  setTimeout(() => {
+    const journalForm = document.getElementById('journalForm');
+    if (journalForm) {
+      journalForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      
+      // Highlight the save button
+      const saveButton = journalForm.querySelector('button[type="submit"]');
+      if (saveButton) {
+        saveButton.classList.add('animate-pulse');
         setTimeout(() => {
-          this.style.transform = '';
-          window.location.href = this.href;
-        }, 150);
-      });
-
-      // Add touch feedback
-      card.addEventListener('touchstart', function() {
-        this.style.transform = 'scale(0.98)';
-      });
-
-      card.addEventListener('touchend', function() {
-        this.style.transform = '';
-      });
-    });
-  }
-
-  // Character counter for journal input
-  function countChars() {
-    const input = document.getElementById('journalInput');
-    const count = document.getElementById('charCount');
-    if (input && count) {
-      count.textContent = input.value.length;
+          saveButton.classList.remove('animate-pulse');
+        }, 3000);
+      }
     }
-  }
-
-  // Add suggestion to the journal input
-  function addSuggestion(text) {
-    const input = document.getElementById('journalInput');
-    if (input.value && !input.value.endsWith(' ')) {
-      input.value += ' ';
+  }, 500);
+  
+  // Focus on the content field
+  setTimeout(() => {
+    if (contentField) {
+      contentField.focus();
+      contentField.setSelectionRange(contentField.value.length, contentField.value.length);
     }
-    input.value += text + ' ';
-    input.focus();
-    countChars();
-  }
+  }, 1000);
+}
 
-  // Generate journal entry
-  function generateEntry() {
-    const journalInput = document.getElementById('journalInput');
-    const inputText = journalInput.value.trim();
+// Enhanced form submission to handle pending photo
+function enhanceFormSubmission() {
+  const form = document.getElementById('journalForm');
+  if (!form) return;
 
-    if (!inputText) {
-      // No alert, just return silently
+  form.addEventListener('submit', function(e) {
+    // If we have a pending photo file, add it to the form
+    if (window.pendingPhotoFile && !document.getElementById('journalPhoto').files.length) {
+      e.preventDefault();
+      
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(window.pendingPhotoFile);
+      
+      const fileInput = document.getElementById('journalPhoto');
+      if (fileInput) {
+        fileInput.files = dataTransfer.files;
+      }
+      
+      // Submit the form again
+      setTimeout(() => form.submit(), 100);
       return;
     }
 
-    // Show loading
-    document.getElementById('dashboardJournalForm').classList.add('hidden');
-    document.getElementById('loadingIndicator').classList.remove('hidden');
+    // Add loading state to submit button
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Saving...
+      `;
 
-    // Simulate API call
+      // Re-enable after 3 seconds in case of issues
+      setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }, 3000);
+    }
+
+    showFeedback('Saving your journal entry...', 'info', 2000);
+  });
+}
+
+// Initialize journal form
+function initializeJournalForm() {
+  setupOptimizedDragAndDrop();
+  initModernMoodSlider();
+  initModernTagsInput();
+
+  // Better textarea handling
+  const journalInput = document.getElementById('journalInput');
+  if (journalInput) {
+    const debouncedResize = debounce(function() {
+      const maxHeight = window.innerHeight * 0.4;
+      this.style.height = 'auto';
+      const newHeight = Math.min(this.scrollHeight, maxHeight);
+      this.style.height = newHeight + 'px';
+    }, 100);
+
+    journalInput.addEventListener('input', function() {
+      countChars();
+      debouncedResize.call(this);
+    });
+
+    // Initial sizing
     setTimeout(() => {
-      generateJournalContent(inputText).then(generatedText => {
-        document.getElementById('loadingIndicator').classList.add('hidden');
-        document.getElementById('resultPreview').classList.remove('hidden');
-        document.getElementById('journalEntry').textContent = generatedText;
+      const maxHeight = window.innerHeight * 0.4;
+      journalInput.style.height = 'auto';
+      const newHeight = Math.min(journalInput.scrollHeight, maxHeight);
+      journalInput.style.height = newHeight + 'px';
+    }, 100);
 
-        const today = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('entryTitle').textContent = "My Day - " + today.toLocaleDateString(undefined, options);
+    const journalContainer = document.getElementById('journalContainer');
+    if (journalContainer) {
+      journalInput.addEventListener('focus', function() {
+        journalContainer.classList.add('input-focused');
       });
-    }, 1500);
-  }
 
-  // Generate journal content
-  async function generateJournalContent(input) {
-    const usePersonalizedStyle = document.getElementById('personalizationToggle').checked;
-
-    try {
-      return generateSampleEntry(input, usePersonalizedStyle);
-    } catch (error) {
-      return "There was an error generating your journal entry. Please try again.";
+      journalInput.addEventListener('blur', function() {
+        journalContainer.classList.remove('input-focused');
+      });
     }
   }
 
-  // Generate sample entry
-  function generateSampleEntry(input, usePersonalizedStyle) {
-    const introductions = [
-      "Dear Diary,",
-      "Today was quite a day.",
-      "As I reflect on today,",
-      "Another day has passed, and I'm taking a moment to record my thoughts."
-    ];
+  countChars();
+}
 
-    const conclusions = [
-      "Looking forward to what tomorrow brings.",
-      "That's all for today.",
-      "Until tomorrow,",
-      "I'm grateful for the experiences of today."
-    ];
+// Setup enhanced UX features
+function setupEnhancedUX() {
+  initFeedbackSystem();
+  setupKeyboardShortcuts();
+  setupAccessibilityFeatures();
+}
 
-    const intro = introductions[Math.floor(Math.random() * introductions.length)];
-    const conclusion = conclusions[Math.floor(Math.random() * conclusions.length)];
+// Initialize feedback system
+function initFeedbackSystem() {
+  if (!document.getElementById('feedback-container')) {
+    const container = document.createElement('div');
+    container.id = 'feedback-container';
+    container.className = 'fixed bottom-4 right-4 flex flex-col gap-2 z-50';
+    document.body.appendChild(container);
+  }
+}
 
-    const points = input.split(/[.,;]/).filter(point => point.trim().length > 0);
+// Show feedback toast
+function showFeedback(message, type = 'info', duration = 3000) {
+  const container = document.getElementById('feedback-container');
+  if (!container) return;
 
-    const expandedPoints = points.map(point => {
-      const trimmed = point.trim();
-      if (trimmed.toLowerCase().includes('breakfast')) {
-        return `I started my day with ${trimmed.replace('breakfast', '').trim() || 'a nice breakfast'}.`;
-      } else if (trimmed.toLowerCase().includes('meeting')) {
-        return `I attended a meeting ${trimmed.includes('with') ? trimmed : 'about work matters'}. It was productive, and we covered several important topics.`;
-      } else if (trimmed.toLowerCase().includes('run') || trimmed.toLowerCase().includes('exercise')) {
-        return `I made time for physical activity today - ${trimmed}. It felt great to get moving.`;
-      } else if (trimmed.length > 0) {
-        return `${trimmed.charAt(0).toUpperCase() + trimmed.slice(1)}.`;
+  const toast = document.createElement('div');
+  toast.className = `feedback-toast ${type}`;
+
+  let icon = '';
+  switch (type) {
+    case 'success':
+      icon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>';
+  }
+
+  toast.innerHTML = `
+    ${icon}
+    <span>${message}</span>
+    <button class="ml-auto text-white opacity-80 hover:opacity-100" onclick="this.parentElement.remove()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+      </svg>
+    </button>
+  `;
+
+  container.appendChild(toast);
+  toast.offsetHeight;
+  toast.classList.add('show');
+
+  if (duration > 0) {
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+
+  return toast;
+}
+
+// Setup keyboard shortcuts
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.fixed.inset-0').forEach(modal => {
+        if (modal.classList.contains('z-50')) {
+          modal.remove();
+        }
+      });
+    }
+
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      const searchInput = document.getElementById('journalInput');
+      if (searchInput) {
+        searchInput.focus();
       }
-      return '';
-    }).filter(point => point.length > 0);
+    }
 
-    let style = usePersonalizedStyle ?
-      "I'm noticing patterns in my daily routine that bring me joy. " :
-      "";
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      const submitBtn = document.querySelector('button[type="submit"]');
+      if (submitBtn && !submitBtn.disabled) {
+        submitBtn.click();
+      }
+    }
+  });
+}
 
-    return `${intro}\n\n${expandedPoints.join(' ')}\n\n${style}${conclusion}`;
+// Setup accessibility features
+function setupAccessibilityFeatures() {
+  document.querySelectorAll('button:not([aria-label])').forEach(btn => {
+    if (btn.title) {
+      btn.setAttribute('aria-label', btn.title);
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+      document.body.classList.add('keyboard-navigation');
+    }
+  });
+
+  document.addEventListener('mousedown', function() {
+    document.body.classList.remove('keyboard-navigation');
+  });
+}
+
+// Setup scroll optimizations
+function setupScrollOptimizations() {
+  let isScrolling = false;
+  let scrollTimeout;
+  let ticking = false;
+
+  function handleScrollPerformance() {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        if (isScrolling) {
+          document.body.classList.add('is-scrolling');
+        } else {
+          document.body.classList.remove('is-scrolling');
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
   }
 
-  // Edit journal entry
-  function editJournalEntry() {
-    const journalEntry = document.getElementById('journalEntry').textContent;
-    const journalInput = document.getElementById('journalInput');
+  window.addEventListener('scroll', function() {
+    if (!isScrolling) {
+      isScrolling = true;
+    }
 
-    journalInput.value = journalEntry;
-    document.getElementById('dashboardJournalForm').classList.remove('hidden');
-    document.getElementById('resultPreview').classList.add('hidden');
+    handleScrollPerformance();
 
-    countChars();
-    journalInput.focus();
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      isScrolling = false;
+      handleScrollPerformance();
+    }, 150);
+  }, { passive: true });
+}
+
+// Initialize animations
+function initializeAnimations() {
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.animate-fade-in, .animate-scale-in').forEach(el => {
+      observer.observe(el);
+    });
+  }
+}
+
+// Debounce function
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// Character counter function
+function countChars() {
+  const textArea = document.getElementById('journalInput');
+  const charCount = document.getElementById('charCount');
+
+  if (!textArea || !charCount) {
+    return;
   }
 
-  // Restart entry
-  function restartEntry() {
-    document.getElementById('journalInput').value = '';
-    document.getElementById('dashboardJournalForm').classList.remove('hidden');
-    document.getElementById('resultPreview').classList.add('hidden');
+  charCount.textContent = textArea.value.length;
+}
 
-    countChars();
-    document.getElementById('journalInput').focus();
+// Optimized drag and drop
+function setupOptimizedDragAndDrop() {
+  const dropArea = document.getElementById('journalContainer');
+  const dropIndicator = document.getElementById('dropZoneIndicator');
+
+  if (!dropArea || !dropIndicator) {
+    return;
   }
 
-  // Save the dashboard entry
-  document.getElementById('saveDashboardButton').addEventListener('click', function(e) {
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, preventDefaults, { passive: false });
+  });
+
+  let isDraggingOver = false;
+
+  dropArea.addEventListener('dragenter', function() {
+    isDraggingOver = true;
+    requestAnimationFrame(() => {
+      if (isDraggingOver) {
+        dropIndicator.classList.remove('hidden');
+      }
+    });
+  }, { passive: true });
+
+  dropArea.addEventListener('dragleave', function(e) {
+    const rect = dropArea.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+
+    if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
+      isDraggingOver = false;
+      requestAnimationFrame(() => {
+        if (!isDraggingOver) {
+          dropIndicator.classList.add('hidden');
+        }
+      });
+    }
+  }, { passive: true });
+
+  dropArea.addEventListener('drop', function(e) {
+    isDraggingOver = false;
+    requestAnimationFrame(() => {
+      dropIndicator.classList.add('hidden');
+    });
+
+    const dt = e.dataTransfer;
+    if (!dt.files || dt.files.length === 0) return;
+
+    const file = dt.files[0];
+
+    if (file.type.match('image.*')) {
+      handleImageFile(file);
+    } else {
+      showFeedback('Only image files are allowed', 'error');
+    }
+  }, { passive: false });
+
+  function preventDefaults(e) {
     e.preventDefault();
+    e.stopPropagation();
+  }
+}
+
+// Enhanced photo handling functions
+function handleImageFile(file) {
+  if (file.size > 5 * 1024 * 1024) {
+    showFeedback('File is too large. Maximum size is 5MB.', 'error');
+    return;
+  }
+
+  currentPhotoFile = file;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    currentPhotoDataUrl = e.target.result;
+
+    // Update enhanced photo preview
+    const enhancedPreview = document.getElementById('enhancedPhotoPreview');
+    const previewImage = document.getElementById('photoPreviewImage');
     
-    const journalContent = document.getElementById('journalEntry').textContent;
-    const entryTitle = document.getElementById('entryTitle').textContent;
-    
-    // Create form data
-    const formData = new FormData();
-    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-    formData.append('title', entryTitle);
-    formData.append('content', journalContent);
-    formData.append('is_ai_generated', 'true');
-    
-    // Send the save request
-    fetch('/api/save-generated-entry/', {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+    if (enhancedPreview && previewImage) {
+      previewImage.src = currentPhotoDataUrl;
+      enhancedPreview.classList.remove('hidden');
+      
+      // Adjust textarea padding to accommodate photo
+      const journalInput = document.getElementById('journalInput');
+      if (journalInput) {
+        journalInput.style.paddingTop = '1rem';
       }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.redirect_url) {
-        window.location.href = data.redirect_url;
+    }
+
+    // Update mood overlay on photo
+    updatePhotoMoodOverlay();
+
+    showFeedback('Photo added! It will be displayed prominently with your journal entry.', 'success', 3000);
+  };
+
+  reader.readAsDataURL(file);
+
+  const fileInput = document.getElementById('journalPhoto');
+  if (fileInput) {
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    fileInput.files = dataTransfer.files;
+  }
+}
+
+function previewPhoto(event) {
+  const fileInput = event.target;
+  const file = fileInput.files[0];
+
+  if (file) {
+    if (file.size > 5 * 1024 * 1024) {
+      showFeedback('File is too large. Maximum size is 5MB.', 'error');
+      fileInput.value = '';
+      return;
+    }
+
+    if (!file.type.match('image.*')) {
+      showFeedback('Only image files are allowed.', 'error');
+      fileInput.value = '';
+      return;
+    }
+
+    handleImageFile(file);
+  }
+}
+
+function removePhoto() {
+  const fileInput = document.getElementById('journalPhoto');
+  if (fileInput) {
+    fileInput.value = '';
+  }
+
+  const enhancedPreview = document.getElementById('enhancedPhotoPreview');
+  if (enhancedPreview) {
+    enhancedPreview.classList.add('hidden');
+  }
+
+  // Reset textarea padding
+  const journalInput = document.getElementById('journalInput');
+  if (journalInput) {
+    journalInput.style.paddingTop = '';
+  }
+
+  currentPhotoFile = null;
+  currentPhotoDataUrl = null;
+
+  showFeedback('Photo removed', 'info', 2000);
+}
+
+function viewPhotoFullscreen() {
+  if (!currentPhotoDataUrl) return;
+
+  // Create fullscreen overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4';
+  overlay.onclick = function() { overlay.remove(); };
+  
+  const img = document.createElement('img');
+  img.src = currentPhotoDataUrl;
+  img.className = 'max-w-full max-h-full object-contain';
+  
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'absolute top-4 right-4 text-white hover:text-gray-300';
+  closeBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  `;
+  closeBtn.onclick = function() { overlay.remove(); };
+  
+  overlay.appendChild(img);
+  overlay.appendChild(closeBtn);
+  document.body.appendChild(overlay);
+}
+
+function updatePhotoMoodOverlay() {
+  const moodValue = document.getElementById('moodValue');
+  const moodEmoji = document.getElementById('moodEmoji');
+  const photoMoodOverlay = document.getElementById('photoMoodOverlay');
+  const photoMoodEmoji = document.getElementById('photoMoodEmoji');
+  const photoMoodText = document.getElementById('photoMoodText');
+  
+  if (moodValue && moodEmoji && photoMoodOverlay && photoMoodEmoji && photoMoodText) {
+    const currentMood = moodValue.textContent;
+    const currentEmoji = moodEmoji.textContent;
+    
+    if (currentMood !== 'Select a mood') {
+      photoMoodOverlay.classList.remove('hidden');
+      photoMoodEmoji.textContent = currentEmoji;
+      photoMoodText.textContent = `Feeling ${currentMood}`;
+    }
+  }
+}
+
+function addSuggestion(text) {
+  const textArea = document.getElementById('journalInput');
+  if (!textArea) return;
+
+  let currentText = textArea.value;
+
+  if (currentText && !currentText.endsWith('\n') && !currentText.endsWith(' ')) {
+    currentText += ' ';
+  }
+
+  textArea.value = currentText + text + ' ';
+  textArea.focus();
+
+  countChars();
+
+  const inputEvent = new Event('input');
+  textArea.dispatchEvent(inputEvent);
+
+  textArea.selectionStart = textArea.selectionEnd = textArea.value.length;
+
+  showFeedback(`Added "${text}" to your entry`, 'success', 1500);
+}
+
+// Modern Mood Slider
+function initModernMoodSlider() {
+  const moodSlider = document.getElementById('moodSlider');
+  const moodThumb = document.getElementById('moodThumb');
+  const moodValue = document.getElementById('moodValue');
+  const moodEmoji = document.getElementById('moodEmoji');
+  const moodThumbEmoji = document.getElementById('moodThumbEmoji');
+
+  if (!moodSlider || !moodThumb || !moodValue) {
+    return;
+  }
+
+  // Mood options mapping
+  const moods = [
+    { value: 'happy', emoji: '😊', position: '16.6%', color: '#4ade80' },
+    { value: 'excited', emoji: '🤩', position: '33.3%', color: '#34d399' },
+    { value: 'content', emoji: '😌', position: '50%', color: '#a78bfa' },
+    { value: 'neutral', emoji: '😐', position: '66.6%', color: '#c4b5fd' },
+    { value: 'anxious', emoji: '😰', position: '83.3%', color: '#fb923c' },
+    { value: 'sad', emoji: '😢', position: '100%', color: '#f87171' }
+  ];
+
+  // Set initial position based on selected mood radio
+  setMoodFromRadio();
+
+  // Make the thumb draggable
+  let isDragging = false;
+
+  moodThumb.addEventListener('mousedown', function(e) {
+    isDragging = true;
+    updateMoodPosition(e);
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    updateMoodPosition(e);
+  });
+
+  document.addEventListener('mouseup', function() {
+    isDragging = false;
+  });
+
+  // Touch support
+  moodThumb.addEventListener('touchstart', function(e) {
+    isDragging = true;
+    updateMoodPosition(e.touches[0]);
+  });
+
+  document.addEventListener('touchmove', function(e) {
+    if (!isDragging) return;
+    updateMoodPosition(e.touches[0]);
+  });
+
+  document.addEventListener('touchend', function() {
+    isDragging = false;
+  });
+
+  // Click anywhere on the track to set mood
+  moodSlider.addEventListener('click', updateMoodPosition);
+
+  function updateMoodPosition(e) {
+    try {
+      // Get position relative to the slider
+      const sliderRect = moodSlider.getBoundingClientRect();
+      const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+
+      if (!clientX) {
+        return;
       }
-    })
-    .catch(error => {
-      // Silently handle errors without alerts
+
+      const relativeX = clientX - sliderRect.left;
+      const percentage = Math.max(0, Math.min(100, (relativeX / sliderRect.width) * 100));
+
+      // Find the closest mood
+      const moodIndex = Math.min(
+        Math.floor((percentage / 100) * moods.length),
+        moods.length - 1
+      );
+
+      // Update the UI
+      const selectedMood = moods[moodIndex];
+      moodThumb.style.left = selectedMood.position;
+
+      if (moodThumbEmoji) {
+        moodThumbEmoji.textContent = selectedMood.emoji;
+      }
+      if (moodEmoji) {
+        moodEmoji.textContent = selectedMood.emoji;
+      }
+
+      moodValue.textContent = selectedMood.value.charAt(0).toUpperCase() + selectedMood.value.slice(1);
+
+      // Update the hidden radio button
+      const radioToCheck = document.querySelector(`input[name="mood"][value="${selectedMood.value}"]`);
+      if (radioToCheck) {
+        radioToCheck.checked = true;
+      }
+
+      // Update background color with a smooth transition
+      moodThumb.style.backgroundColor = 'white';
+      moodThumb.style.boxShadow = `0 0 0 2px ${selectedMood.color}, 0 4px 6px -1px rgba(0, 0, 0, 0.1)`;
+
+      // Update photo mood overlay
+      updatePhotoMoodOverlay();
+    } catch (error) {
+      console.error("Error updating mood position:", error);
+    }
+  }
+
+  function setMoodFromRadio() {
+    // Find checked radio
+    const checkedRadio = document.querySelector('input[name="mood"]:checked');
+    if (!checkedRadio) {
+      // Default to "content" if nothing is selected
+      const defaultRadio = document.querySelector('input[name="mood"][value="content"]');
+      if (defaultRadio) defaultRadio.checked = true;
+      const defaultMood = moods.find(mood => mood.value === "content");
+      if (defaultMood) {
+        setMoodUI(defaultMood);
+      }
+      return;
+    }
+
+    // Find corresponding mood
+    const selectedMood = moods.find(mood => mood.value === checkedRadio.value);
+    if (!selectedMood) return;
+
+    setMoodUI(selectedMood);
+  }
+
+  function setMoodUI(selectedMood) {
+    // Update UI
+    moodThumb.style.left = selectedMood.position;
+
+    if (moodThumbEmoji) {
+      moodThumbEmoji.textContent = selectedMood.emoji;
+    }
+    if (moodEmoji) {
+      moodEmoji.textContent = selectedMood.emoji;
+    }
+
+    moodValue.textContent = selectedMood.value.charAt(0).toUpperCase() + selectedMood.value.slice(1);
+    moodThumb.style.backgroundColor = 'white';
+    moodThumb.style.boxShadow = `0 0 0 2px ${selectedMood.color}, 0 4px 6px -1px rgba(0, 0, 0, 0.1)`;
+  }
+}
+
+// Modern Tags Input
+function initModernTagsInput() {
+  const tagsInput = document.getElementById('id_tags');
+  const tagsList = document.getElementById('selectedTags');
+
+  if (!tagsInput || !tagsList) {
+    return;
+  }
+
+  // Display existing tags as pills
+  updateTagPills();
+
+  // Handle input changes
+  tagsInput.addEventListener('input', function() {
+    updateTagPills();
+  });
+
+  tagsInput.addEventListener('keydown', function(e) {
+    // If Enter or comma is pressed, update pills
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      setTimeout(() => updateTagPills(), 10);
+    }
+  });
+}
+
+// Update visual tags pills
+function updateTagPills() {
+  const tagsInput = document.getElementById('id_tags');
+  const tagsList = document.getElementById('selectedTags');
+
+  if (!tagsInput || !tagsList) {
+    return;
+  }
+
+  // Clear existing pills
+  tagsList.innerHTML = '';
+
+  // Get current tags
+  const currentTags = tagsInput.value ? tagsInput.value.split(',').map(t => t.trim()).filter(t => t) : [];
+
+  // Create a pill for each tag
+  currentTags.forEach(tag => {
+    const pill = document.createElement('div');
+    pill.className = 'tag-pill';
+    pill.innerHTML = `
+      ${tag}
+      <span class="remove-tag ml-1" data-tag="${tag}">×</span>
+    `;
+    tagsList.appendChild(pill);
+  });
+
+  // Add event listeners to remove buttons
+  document.querySelectorAll('.remove-tag').forEach(button => {
+    button.addEventListener('click', function() {
+      removeTag(this.dataset.tag);
     });
   });
+}
+
+// Add tag
+function addTag(tag) {
+  const tagField = document.getElementById('id_tags');
+  if (!tagField) {
+    return;
+  }
+
+  let currentTags = tagField.value;
+
+  // Don't add if tag already exists
+  if (currentTags.split(',').map(t => t.trim()).includes(tag)) {
+    return;
+  }
+
+  // Add comma if needed
+  if (currentTags && !currentTags.endsWith(',') && currentTags.trim() !== '') {
+    currentTags += ', ';
+  }
+
+  tagField.value = currentTags + tag;
+
+  // Update visual pills
+  updateTagPills();
+
+  tagField.focus();
+
+  // Move cursor to end
+  tagField.selectionStart = tagField.selectionEnd = tagField.value.length;
+
+  showFeedback(`Added tag: ${tag}`, 'success', 1000);
+}
+
+// Remove tag
+function removeTag(tagToRemove) {
+  const tagsInput = document.getElementById('id_tags');
+  if (!tagsInput) return;
+
+  // Get current tags
+  let currentTags = tagsInput.value.split(',').map(t => t.trim()).filter(t => t);
+
+  // Remove the tag
+  currentTags = currentTags.filter(tag => tag !== tagToRemove);
+
+  // Update the input value
+  tagsInput.value = currentTags.join(', ');
+
+  // Update visual representation
+  updateTagPills();
+
+  showFeedback(`Removed tag: ${tagToRemove}`, 'info', 1000);
+}
+
+// Initialize existing photo for edit mode
+function initExistingPhoto() {
+  const photoPreview = document.getElementById('photoPreview');
+  const photoPreviewContainer = document.getElementById('photoPreviewContainer');
+
+  if (photoPreview && photoPreview.src && photoPreview.src !== window.location.href) {
+    if (photoPreviewContainer) {
+      photoPreviewContainer.classList.remove('hidden');
+    }
+  }
+}
+
+// Make functions available globally
+window.diaryFunctions = {
+  addSuggestion,
+  addTag,
+  removeTag,
+  updateTagPills,
+  initModernMoodSlider,
+  initModernTagsInput,
+  showFeedback,
+  countChars,
+  viewPhotoFullscreen,
+  updatePhotoMoodOverlay
+};
+
+// Initialize existing photo on load
+document.addEventListener('DOMContentLoaded', function() {
+  initExistingPhoto();
+});
+
 </script>
+
 {% endblock %}
