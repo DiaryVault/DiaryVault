@@ -981,19 +981,12 @@
 <script>
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize base functionality
     countChars();
     setupDragAndDrop();
     initializePersonalization();
     initializeAnimations();
-    
-    // Check wallet FIRST
     checkWalletConnection();
-    
-    // Then check for pending entry (with slight delay to ensure wallet is ready)
-    setTimeout(() => {
-        checkForPendingEntry();
-    }, 100);
+    checkForPendingEntry(); // Add this to check for transferred journal entry
 });
 
 // Check for pending journal entry from home page
@@ -1004,145 +997,56 @@ function checkForPendingEntry() {
     if (pendingEntry) {
         try {
             const entryData = JSON.parse(pendingEntry);
-            console.log('Found pending entry:', entryData);
             
             // Show a notification that we found their entry
-            showToast('Found your journal entry! Saving it now...', 'info');
+            showToast('We found your draft entry! Loading it now...', 'info');
             
-            // If it's from the demo and has content, auto-save it
-            if (entryData.fromDemo && entryData.content && entryData.title) {
-                // Set up the photo if it exists
-                if (entryData.photoData && entryData.photoName) {
-                    fetch(entryData.photoData)
-                        .then(res => res.blob())
-                        .then(blob => {
-                            const file = new File([blob], entryData.photoName, { type: blob.type });
-                            currentPhotoFile = file;
-                            currentPhotoDataUrl = entryData.photoData;
-                            
-                            // Auto-save with photo
-                            autoSaveTransferredEntry(entryData);
-                        })
-                        .catch(error => {
-                            console.error('Error loading photo:', error);
-                            // Save without photo
-                            autoSaveTransferredEntry(entryData);
-                        });
-                } else {
-                    // No photo, save immediately
-                    autoSaveTransferredEntry(entryData);
-                }
-            } else {
-                // Just fill the form if not from demo
-                fillFormWithPendingEntry(entryData);
+            // Fill in the form with the pending entry
+            const journalInput = document.getElementById('journalInput');
+            if (journalInput && entryData.content) {
+                journalInput.value = entryData.content;
+                countChars();
             }
+            
+            // If there's photo data, restore it
+            if (entryData.photoData && entryData.photoName) {
+                // Convert base64 back to file
+                fetch(entryData.photoData)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const file = new File([blob], entryData.photoName, { type: blob.type });
+                        currentPhotoFile = file;
+                        currentPhotoDataUrl = entryData.photoData;
+                        
+                        // Show photo preview
+                        document.getElementById('photoPreview').src = currentPhotoDataUrl;
+                        document.getElementById('photoName').textContent = entryData.photoName;
+                        document.getElementById('photoPreviewContainer').classList.remove('hidden');
+                    });
+            }
+            
+            // If it's from the demo, show it in the result preview
+            if (entryData.fromDemo && entryData.title) {
+                // Display as generated entry
+                displayGeneratedEntry({
+                    entry: entryData.content,
+                    title: entryData.title
+                });
+                
+                // Show rewards message if wallet connected
+                if (entryData.hasWallet && entryData.rewards) {
+                    showToast(`Ready to save! You'll earn ${entryData.rewards} tokens`, 'success');
+                }
+            }
+            
+            // Clear the session storage
+            sessionStorage.removeItem('pendingJournalEntry');
             
         } catch (error) {
             console.error('Error loading pending entry:', error);
             sessionStorage.removeItem('pendingJournalEntry');
         }
     }
-}
-
-// Auto-save transferred entry
-function autoSaveTransferredEntry(entryData) {
-    const walletInfo = getWalletInfo();
-    
-    // Create form data
-    const formData = new FormData();
-    formData.append('csrfmiddlewaretoken', getCsrfToken());
-    formData.append('title', entryData.title);
-    formData.append('content', entryData.content);
-    formData.append('is_ai_generated', 'true');
-    
-    // Add wallet info if connected
-    if (walletInfo.isConnected || entryData.walletAddress) {
-        formData.append('wallet_address', walletInfo.address || entryData.walletAddress);
-        formData.append('chain_id', walletInfo.chainId || entryData.chainId || '8453');
-        formData.append('encrypted', 'true');
-    }
-    
-    // Add photo if exists
-    if (currentPhotoFile) {
-        formData.append('journal_photo', currentPhotoFile);
-    }
-    
-    // Show saving indicator
-    showToast('Saving your journal entry...', 'info');
-    
-    // Send save request
-    fetch('/save-generated-entry/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCsrfToken()
-        },
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            // Clear the pending entry
-            sessionStorage.removeItem('pendingJournalEntry');
-            
-            // Calculate rewards
-            const rewards = data.rewards || entryData.rewards || 
-                           (walletInfo.isConnected ? calculateRewards(entryData.content) : 0);
-            
-            if (walletInfo.isConnected && rewards > 0) {
-                showToast(`Entry saved! You earned ${rewards} tokens!`, 'success');
-            } else {
-                showToast('Entry saved successfully!', 'success');
-            }
-            
-            // Reload the page to show updated stats
-            setTimeout(() => {
-                window.location.href = '/dashboard/?entry_saved=true';
-            }, 1500);
-            
-        } else {
-            throw new Error(data.error || 'Failed to save entry');
-        }
-    })
-    .catch(error => {
-        console.error('Auto-save error:', error);
-        showToast('Failed to auto-save. Please try saving manually.', 'error');
-        
-        // Fall back to showing the entry in the form
-        fillFormWithPendingEntry(entryData);
-    });
-}
-
-// Fill form with pending entry (fallback)
-function fillFormWithPendingEntry(entryData) {
-    // Fill in the form
-    const journalInput = document.getElementById('journalInput');
-    if (journalInput && entryData.content) {
-        journalInput.value = entryData.content;
-        countChars();
-    }
-    
-    // Restore photo if exists
-    if (entryData.photoData && entryData.photoName && currentPhotoDataUrl) {
-        document.getElementById('photoPreview').src = currentPhotoDataUrl;
-        document.getElementById('photoName').textContent = entryData.photoName;
-        document.getElementById('photoPreviewContainer').classList.remove('hidden');
-    }
-    
-    // If it's generated content, show in preview
-    if (entryData.fromDemo && entryData.title) {
-        displayGeneratedEntry({
-            entry: entryData.content,
-            title: entryData.title
-        });
-    }
-    
-    // Clear session storage
-    sessionStorage.removeItem('pendingJournalEntry');
 }
 
 // Character counting
@@ -1405,16 +1309,8 @@ function restartEntry() {
 
 // Save entry
 function saveEntry() {
-    const journalEntry = document.getElementById('journalEntry');
-    const entryTitle = document.getElementById('entryTitle');
-    
-    if (!journalEntry || !entryTitle) {
-        showToast('No content to save', 'error');
-        return;
-    }
-    
-    const journalContent = journalEntry.innerHTML.replace(/<br\s*\/?>/gi, '\n');
-    const titleText = entryTitle.textContent;
+    const journalContent = document.getElementById('journalEntry').innerHTML.replace(/<br\s*\/?>/gi, '\n');
+    const entryTitle = document.getElementById('entryTitle').textContent;
 
     if (!journalContent) {
         showToast('No content to save', 'error');
@@ -1427,7 +1323,7 @@ function saveEntry() {
     // Create form data
     const formData = new FormData();
     formData.append('csrfmiddlewaretoken', getCsrfToken());
-    formData.append('title', titleText);
+    formData.append('title', entryTitle);
     formData.append('content', journalContent);
     formData.append('is_ai_generated', 'true');
 
@@ -1441,10 +1337,8 @@ function saveEntry() {
         formData.append('journal_photo', currentPhotoFile);
     }
 
-    // Get the save button properly
-    const saveButton = document.querySelector('[onclick="saveEntry()"]');
-    if (!saveButton) return;
-    
+    // Show saving state
+    const saveButton = event.target;
     const originalText = saveButton.innerHTML;
     saveButton.disabled = true;
     saveButton.innerHTML = `
@@ -1495,7 +1389,13 @@ function saveEntry() {
 
             // Redirect after delay
             setTimeout(() => {
-                window.location.href = '/dashboard/?entry_saved=true';
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else if (data.entry_id) {
+                    window.location.href = `/entry/${data.entry_id}/`;
+                } else {
+                    window.location.href = '/dashboard/?entry_saved=true';
+                }
             }, 1500);
         } else {
             throw new Error(data.error || 'Failed to save entry');
@@ -1509,22 +1409,15 @@ function saveEntry() {
     });
 }
 
-// Enhanced wallet connection check
+// Wallet connection functions
 function checkWalletConnection() {
-    console.log('Checking wallet connection...');
+    // First check for wallet connection status from Django session/context
+    const isAnonymous = document.querySelector('[data-is-anonymous]')?.dataset.isAnonymous === 'true';
     
-    // Check Django session for wallet info
-    const walletAddress = document.querySelector('body').dataset.walletAddress || 
-                         sessionStorage.getItem('wallet_address');
-    
-    if (walletAddress) {
-        console.log('Found wallet in session:', walletAddress);
-        // Store in localStorage for persistence
-        localStorage.setItem('walletSession', JSON.stringify({
-            address: walletAddress,
-            chainId: 8453,
-            timestamp: Date.now()
-        }));
+    if (!isAnonymous) {
+        // User is authenticated, no need to show wallet connection prompts
+        updateUIForAuthenticatedUser();
+        return;
     }
     
     // Listen for wallet connection changes
@@ -1534,17 +1427,25 @@ function checkWalletConnection() {
     });
 
     // Check initial state
-    const walletInfo = getWalletInfo();
-    console.log('Wallet info:', walletInfo);
+    setTimeout(() => {
+        const walletInfo = getWalletInfo();
+        if (walletInfo.isConnected) {
+            updateUIForWalletStatus(true, walletInfo.address, walletInfo.chainId);
+        }
+    }, 500);
+}
+
+function updateUIForAuthenticatedUser() {
+    // Hide any wallet connection prompts
+    const walletPrompts = document.querySelectorAll('.wallet-connection-prompt');
+    walletPrompts.forEach(el => el.style.display = 'none');
     
-    if (walletInfo.isConnected) {
-        updateUIForWalletStatus(true, walletInfo.address, walletInfo.chainId);
-    }
+    // Show authenticated user content
+    const authContent = document.querySelectorAll('.authenticated-only');
+    authContent.forEach(el => el.style.display = 'block');
 }
 
 function updateUIForWalletStatus(isConnected, address, chainId) {
-    console.log('Updating UI for wallet:', { isConnected, address, chainId });
-    
     // Update any wallet-specific UI elements
     const walletButtons = document.querySelectorAll('[data-wallet-action]');
     walletButtons.forEach(button => {
@@ -1555,35 +1456,19 @@ function updateUIForWalletStatus(isConnected, address, chainId) {
 }
 
 function getWalletInfo() {
-    // 1. Check session storage (highest priority for fresh connections)
-    const sessionWallet = sessionStorage.getItem('wallet_address');
-    if (sessionWallet) {
+    // Check multiple sources for wallet connection
+    
+    // 1. Check if user is authenticated in Django
+    const userElement = document.querySelector('[data-user-authenticated]');
+    if (userElement && userElement.dataset.userAuthenticated === 'true') {
         return {
             isConnected: true,
-            address: sessionWallet,
-            chainId: parseInt(sessionStorage.getItem('chain_id')) || 8453
+            address: userElement.dataset.walletAddress || null,
+            chainId: parseInt(userElement.dataset.chainId) || 8453
         };
     }
     
-    // 2. Check localStorage for persistent session
-    const walletSession = localStorage.getItem('walletSession');
-    if (walletSession) {
-        try {
-            const session = JSON.parse(walletSession);
-            // Check if session is less than 24 hours old
-            if (session.address && (Date.now() - session.timestamp < 24 * 60 * 60 * 1000)) {
-                return {
-                    isConnected: true,
-                    address: session.address,
-                    chainId: session.chainId || 8453
-                };
-            }
-        } catch (e) {
-            console.error('Invalid wallet session:', e);
-        }
-    }
-    
-    // 3. Check window.ethereum
+    // 2. Check window.ethereum
     if (window.ethereum && window.ethereum.selectedAddress) {
         return {
             isConnected: true,
@@ -1592,14 +1477,21 @@ function getWalletInfo() {
         };
     }
     
-    // 4. Check for data attributes in DOM
-    const bodyData = document.querySelector('body').dataset;
-    if (bodyData.walletAddress) {
-        return {
-            isConnected: true,
-            address: bodyData.walletAddress,
-            chainId: parseInt(bodyData.chainId) || 8453
-        };
+    // 3. Check for wallet session in localStorage
+    const walletSession = localStorage.getItem('walletSession');
+    if (walletSession) {
+        try {
+            const session = JSON.parse(walletSession);
+            if (session.address) {
+                return {
+                    isConnected: true,
+                    address: session.address,
+                    chainId: session.chainId || null
+                };
+            }
+        } catch (e) {
+            // Invalid session data
+        }
     }
     
     return {
@@ -1618,23 +1510,9 @@ function connectWallet() {
         window.ethereum.request({ method: 'eth_requestAccounts' })
             .then(accounts => {
                 if (accounts.length > 0) {
-                    // Store in session
-                    sessionStorage.setItem('wallet_address', accounts[0]);
-                    sessionStorage.setItem('chain_id', '8453');
-                    
-                    // Store in localStorage for persistence
-                    localStorage.setItem('walletSession', JSON.stringify({
-                        address: accounts[0],
-                        chainId: 8453,
-                        timestamp: Date.now()
-                    }));
-                    
                     showToast('Wallet connected successfully!', 'success');
-                    
                     // Reload to update UI
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
+                    window.location.reload();
                 }
             })
             .catch(error => {
@@ -1659,12 +1537,9 @@ function calculateRewards(content) {
 }
 
 function showToast(message, type = 'info') {
-    // Remove any existing toasts
-    document.querySelectorAll('.toast-notification').forEach(el => el.remove());
-    
     // Create toast element
     const toast = document.createElement('div');
-    toast.className = `toast-notification fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 z-50 translate-x-full`;
+    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 z-50 translate-x-full`;
     
     // Set color based on type
     switch(type) {
