@@ -1830,6 +1830,66 @@
     document.addEventListener('DOMContentLoaded', function() {
         initializeModernDropdown();
     });
+
+    // Safe function to update home page wallet UI (if on home page)
+    function updateHomePageForWallet(isConnected, address, chainId) {
+        // Safely get elements and check existence before accessing properties
+        const walletNotConnected = document.getElementById('walletNotConnected');
+        const walletConnected = document.getElementById('walletConnected');
+        const connectedWalletAddress = document.getElementById('connectedWalletAddress');
+        const networkStatus = document.getElementById('networkStatus');
+        const switchNetworkBtn = document.getElementById('switchNetworkBtn');
+
+        // Update wallet status section only if elements exist
+        if (walletNotConnected && walletConnected) {
+            if (isConnected && address) {
+                walletNotConnected.classList.add('hidden');
+                walletConnected.classList.remove('hidden');
+                
+                if (connectedWalletAddress) {
+                    connectedWalletAddress.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+                }
+                
+                // Check network
+                if (networkStatus) {
+                    if (chainId && chainId !== 8453) {
+                        networkStatus.textContent = 'Wrong Network';
+                        networkStatus.className = 'text-xs text-red-500';
+                        if (switchNetworkBtn) {
+                            switchNetworkBtn.classList.remove('hidden');
+                        }
+                    } else {
+                        networkStatus.textContent = 'Base Network';
+                        networkStatus.className = 'text-xs text-green-500';
+                        if (switchNetworkBtn) {
+                            switchNetworkBtn.classList.add('hidden');
+                        }
+                    }
+                }
+            } else {
+                walletNotConnected.classList.remove('hidden');
+                walletConnected.classList.add('hidden');
+            }
+        }
+
+        // Update form messaging if the functions exist
+        if (typeof updateFormMessaging === 'function') {
+            updateFormMessaging(isConnected, chainId);
+        }
+        
+        // Update personalization options if the function exists
+        if (typeof updatePersonalizationOptions === 'function') {
+            updatePersonalizationOptions(isConnected);
+        }
+        
+        // Update action buttons if the function exists
+        if (typeof updateActionButtons === 'function') {
+            updateActionButtons(isConnected);
+        }
+    }
+
+    // Make it globally available if needed
+    window.updateHomePageForWallet = updateHomePageForWallet;
     </script>
 
     {% block extra_js %}{% endblock %}
