@@ -965,21 +965,12 @@ function saveToBlockchain() {
       formData.append('journal_photo', currentPhotoFile);
     }
 
-    // Add auth token if available
-    const authToken = localStorage.getItem('authToken');
-    const headers = {
-      'X-CSRFToken': csrftoken
-    };
-    
-    if (authToken) {
-      headers['Authorization'] = `Token ${authToken}`;
-    }
-
     fetch('/save-generated-entry/', {
       method: 'POST',
-      headers: headers,
-      body: formData,
-      credentials: 'include'  // Important: include cookies for session
+      headers: {
+        'X-CSRFToken': csrftoken
+      },
+      body: formData
     })
     .then(response => {
       if (!response.ok) {
@@ -991,46 +982,74 @@ function saveToBlockchain() {
       if (data.success) {
         const rewards = data.rewards || calculateRewards(journalContent, walletInfo.isConnected);
 
-        // Show success message
-        saveButton.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-          Saved! Earned ${rewards} tokens
-        `;
-        
-        if (window.showToast) {
-          window.showToast(`Entry saved! Earned ${rewards} tokens`, 'success');
-        }
-
-        // Store auth token if provided
-        if (data.auth_token) {
-          localStorage.setItem('authToken', data.auth_token);
-        }
-
-        // For wallet users who might be seen as anonymous, we need to ensure they're logged in
-        if (data.is_anonymous && walletInfo.isConnected) {
-          // This shouldn't happen with a connected wallet, but if it does,
-          // we need to complete the auth flow
+        // Check if this is an anonymous save
+        if (data.is_anonymous) {
+          // For anonymous users, redirect to journal form with pre-filled content
+          saveButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Saved! Transferring to journal form...
+          `;
+          
           if (window.showToast) {
-            window.showToast('Completing authentication...', 'info');
+            window.showToast('Taking you to create your journal entry...', 'info');
+          }
+
+          // Store the content in sessionStorage to transfer to journal form
+          sessionStorage.setItem('pendingJournalEntry', JSON.stringify({
+            title: titleText,
+            content: journalContent,
+            fromDemo: true,
+            hasWallet: true,
+            walletAddress: walletInfo.address,
+            rewards: rewards
+          }));
+
+          // If there's a photo, we need to handle it differently
+          if (currentPhotoFile) {
+            // Convert photo to base64 to transfer via sessionStorage
+            const reader = new FileReader();
+            reader.onloadend = function() {
+              const pendingEntry = JSON.parse(sessionStorage.getItem('pendingJournalEntry'));
+              pendingEntry.photoData = reader.result;
+              pendingEntry.photoName = currentPhotoFile.name;
+              sessionStorage.setItem('pendingJournalEntry', JSON.stringify(pendingEntry));
+              
+              // Redirect to journal form
+              window.location.href = '/journal/';
+            };
+            reader.readAsDataURL(currentPhotoFile);
+          } else {
+            // No photo, redirect immediately
+            setTimeout(() => {
+              window.location.href = '/journal/';
+            }, 1500);
           }
           
-          // Try to complete Web3 auth
-          completeWeb3Auth(walletInfo.address, walletInfo.chainId).then(() => {
-            window.location.href = '/dashboard/?entry_saved=true';
-          }).catch(() => {
-            // Fallback: just go to dashboard
-            window.location.href = '/dashboard/?entry_saved=true';
-          });
         } else {
-          // Normal redirect for authenticated users
+          // Authenticated user - normal save success
+          saveButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Saved! Rewards earned: ${rewards} tokens
+          `;
+          
+          if (window.showToast) {
+            window.showToast(`Entry saved! Earned ${rewards} tokens`, 'success');
+          }
+
           setTimeout(() => {
-            const redirectUrl = data.redirect_url || '/dashboard/?entry_saved=true';
-            window.location.href = redirectUrl;
-          }, 1500);
+            if (data.redirect_url) {
+              window.location.href = data.redirect_url;
+            } else if (data.entry_id) {
+              window.location.href = `/entry/${data.entry_id}/`;
+            } else {
+              window.location.href = '/dashboard/';
+            }
+          }, 2000);
         }
-        
       } else {
         // Handle error
         saveButton.innerHTML = originalText;
@@ -1048,56 +1067,6 @@ function saveToBlockchain() {
         window.showToast('Failed to save entry. Please try again.', 'error');
       }
     });
-  }
-}
-
-// Add this helper function to complete Web3 authentication
-async function completeWeb3Auth(walletAddress, chainId) {
-  try {
-    // Get nonce
-    const nonceResponse = await fetch('/api/request-nonce/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCsrfToken()
-      },
-      body: JSON.stringify({ wallet_address: walletAddress })
-    });
-
-    const nonceData = await nonceResponse.json();
-    
-    // Sign message
-    const message = nonceData.message;
-    const signature = await web3Provider.request({
-      method: 'personal_sign',
-      params: [message, walletAddress]
-    });
-
-    // Complete login
-    const loginResponse = await fetch('/api/web3-login/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCsrfToken()
-      },
-      body: JSON.stringify({
-        wallet_address: walletAddress,
-        signature: signature,
-        nonce: nonceData.nonce,
-        chain_id: chainId
-      })
-    });
-
-    const loginData = await loginResponse.json();
-    
-    if (loginData.token) {
-      localStorage.setItem('authToken', loginData.token);
-    }
-    
-    return loginData;
-  } catch (error) {
-    console.error('Web3 auth error:', error);
-    throw error;
   }
 }
 
