@@ -958,7 +958,6 @@
 
 {% block extra_js %}
 <script>
-<script>
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     countChars();
@@ -1306,7 +1305,6 @@ function saveEntry() {
     formData.append('title', entryTitle);
     formData.append('content', journalContent);
     formData.append('is_ai_generated', 'true');
-    formData.append('source_page', 'dashboard'); // Add this to identify source
 
     if (walletInfo.isConnected) {
         formData.append('wallet_address', walletInfo.address);
@@ -1368,9 +1366,15 @@ function saveEntry() {
                 `;
             }
 
-            // Redirect after delay - ALWAYS go to library
+            // Redirect after delay
             setTimeout(() => {
-                window.location.href = '/library/?entry_saved=true';
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else if (data.entry_id) {
+                    window.location.href = `/entry/${data.entry_id}/`;
+                } else {
+                    window.location.href = '/dashboard/?entry_saved=true';
+                }
             }, 1500);
         } else {
             throw new Error(data.error || 'Failed to save entry');
