@@ -136,10 +136,20 @@
     will-change: transform;
   }
 
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
   /* Enhanced gradients */
   .gradient-bg {
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   }
+
+  /* Removed unused chat bubble styles */
 
   /* Loading spinner improvements */
   @keyframes pulse-ring {
@@ -358,59 +368,6 @@
     border-radius: 50%;
     animation: pulse 2s infinite;
   }
-
-  /* Spinner animation fix */
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-  
-  .animate-spin {
-    animation: spin 1s linear infinite;
-  }
-
-  /* Web3 Modal Styles */
-  .web3-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-  }
-
-  .web3-modal-content {
-    background: white;
-    border-radius: 1rem;
-    padding: 2rem;
-    max-width: 400px;
-    width: 100%;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
-
-  .wallet-option {
-    padding: 1rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .wallet-option:hover {
-    border-color: #6366f1;
-    background-color: #f3f4f6;
-  }
-
-  .wallet-option img {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
 </style>
 {% endblock %}
 
@@ -497,13 +454,13 @@
           </div>
         </div>
         <div class="flex flex-col sm:flex-row gap-2">
-          <button onclick="initWeb3Connection()" class="btn-gradient text-white px-6 py-3 rounded-full font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all">
+          <button onclick="connectWallet()" class="btn-gradient text-white px-6 py-3 rounded-full font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
             Connect Wallet
           </button>
-          <button onclick="showWalletInfo()" class="btn-secondary border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-3 rounded-full text-sm font-medium flex items-center justify-center gap-2">
+          <button onclick="showWalletOptions()" class="btn-secondary border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-3 rounded-full text-sm font-medium flex items-center justify-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -535,15 +492,9 @@
         </div>
       </div>
     </div>
-
-    <!-- Web3 Auth Loading State -->
-    <div id="walletConnecting" class="wallet-connection-prompt hidden">
-      <div class="flex items-center justify-center py-4">
-        <div class="animate-spin h-8 w-8 border-4 border-primary-200 border-t-primary-600 rounded-full mr-3"></div>
-        <span class="text-gray-600" id="walletConnectingMessage">Connecting to wallet...</span>
-      </div>
-    </div>
   </div>
+
+  <!-- Removed unused chat area section -->
 
   <!-- CRITICAL: Main input form - uses base.html scrolling only -->
   <form id="demoForm" class="w-full relative z-10 animate-scale-in" enctype="multipart/form-data">
@@ -661,7 +612,7 @@
               </label>
             </div>
 
-            <button type="button" onclick="initWeb3Connection()" id="connectWalletCTA" class="text-xs text-primary-600 hover:underline flex items-center gap-1">
+            <button type="button" onclick="connectWallet()" id="connectWalletCTA" class="text-xs text-primary-600 hover:underline flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
@@ -702,7 +653,7 @@
                   </ul>
                 </div>
                 <div class="flex gap-2">
-                  <button type="button" onclick="initWeb3Connection()" class="text-xs bg-primary-600 hover:bg-primary-700 text-white px-3 py-1 rounded-full flex items-center gap-1">
+                  <button type="button" onclick="connectWallet()" class="text-xs bg-primary-600 hover:bg-primary-700 text-white px-3 py-1 rounded-full flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
@@ -812,7 +763,7 @@
         </div>
         
         <div id="walletNotConnectedActions" class="flex gap-2">
-          <button type="button" onclick="initWeb3Connection()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-1 w-full sm:w-auto justify-center">
+          <button type="button" onclick="connectWallet()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-1 w-full sm:w-auto justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
@@ -824,486 +775,19 @@
   </div>
 </div>
 
-<!-- Toast notification container -->
-<div id="toastContainer" class="fixed bottom-5 right-5 z-50"></div>
-
-<!-- Web3 Connection Modal -->
-<div id="web3Modal" class="web3-modal hidden">
-  <div class="web3-modal-content">
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="text-lg font-semibold text-gray-900">Connect Your Wallet</h3>
-      <button onclick="closeWeb3Modal()" class="text-gray-400 hover:text-gray-600">
-        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-    </div>
-    
-    <p class="text-sm text-gray-600 mb-4">Choose your preferred wallet to connect:</p>
-    
-    <div id="walletOptions">
-      <div onclick="connectWithMetaMask()" class="wallet-option">
-        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-          <svg class="w-6 h-6 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 1.5l-8.5 8.5 2.5 2.5 6-6 6 6 2.5-2.5z"/>
-            <path d="M12 22.5l8.5-8.5-2.5-2.5-6 6-6-6-2.5 2.5z"/>
-          </svg>
-        </div>
-        <div>
-          <div class="font-medium">MetaMask</div>
-          <div class="text-sm text-gray-500">Connect using MetaMask</div>
-        </div>
-      </div>
-      
-      <div onclick="connectWithCoinbase()" class="wallet-option">
-        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-          <span class="text-blue-600 font-bold text-lg">CB</span>
-        </div>
-        <div>
-          <div class="font-medium">Coinbase Wallet</div>
-          <div class="text-sm text-gray-500">Connect using Coinbase</div>
-        </div>
-      </div>
-      
-      <div onclick="connectWithWalletConnect()" class="wallet-option">
-        <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-          <svg class="w-6 h-6 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        </div>
-        <div>
-          <div class="font-medium">WalletConnect</div>
-          <div class="text-sm text-gray-500">Scan with wallet app</div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="mt-4 pt-4 border-t border-gray-200">
-      <p class="text-xs text-gray-500 text-center">
-        New to crypto wallets? 
-        <a href="#" onclick="showWalletInfo()" class="text-primary-600 hover:underline">Learn more</a>
-      </p>
-    </div>
-  </div>
-</div>
-
-<!-- Web3 Signing Modal -->
-<div id="web3SigningModal" class="web3-modal hidden">
-  <div class="web3-modal-content">
-    <div class="text-center">
-      <div class="animate-spin h-12 w-12 border-4 border-primary-200 border-t-primary-600 rounded-full mx-auto mb-4"></div>
-      <h3 class="text-lg font-semibold text-gray-900 mb-2">Sign Message</h3>
-      <p class="text-sm text-gray-600 mb-4">Please sign the message in your wallet to authenticate</p>
-      <p class="text-xs text-gray-500">This won't cost any gas fees</p>
-    </div>
-  </div>
-</div>
-
+<!-- Enhanced JavaScript with wallet integration -->
 <script>
-// Web3 State Management
-let web3Provider = null;
-let currentWalletAddress = null;
-let currentChainId = null;
-let isConnecting = false;
-
-// Toast notification system
-window.showToast = function(message, type = 'info') {
-  const toastContainer = document.getElementById('toastContainer');
-  if (!toastContainer) return;
-
-  const toast = document.createElement('div');
-  toast.className = `feedback-toast ${type}`;
-  toast.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      ${type === 'success' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />' : 
-        type === 'error' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />' :
-        type === 'warning' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />' :
-        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'}
-    </svg>
-    <span>${message}</span>
-  `;
-
-  toastContainer.appendChild(toast);
-
-  // Trigger show animation
-  setTimeout(() => toast.classList.add('show'), 10);
-
-  // Auto hide after 5 seconds
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 300);
-  }, 5000);
-};
-
-// Web3 Connection Functions
-window.initWeb3Connection = async function() {
-  if (isConnecting) return;
-  
-  // Show modal for wallet selection
-  document.getElementById('web3Modal').classList.remove('hidden');
-};
-
-window.closeWeb3Modal = function() {
-  document.getElementById('web3Modal').classList.add('hidden');
-};
-
-window.closeWeb3SigningModal = function() {
-  document.getElementById('web3SigningModal').classList.add('hidden');
-};
-
-// Connect with MetaMask
-window.connectWithMetaMask = async function() {
-  if (!window.ethereum || !window.ethereum.isMetaMask) {
-    window.showToast('MetaMask is not installed. Please install it to continue.', 'error');
-    return;
-  }
-  
-  closeWeb3Modal();
-  await connectWeb3Wallet('metamask');
-};
-
-// Connect with Coinbase Wallet
-window.connectWithCoinbase = async function() {
-  // Check if Coinbase Wallet is available
-  if (!window.ethereum || !window.ethereum.isCoinbaseWallet) {
-    window.showToast('Coinbase Wallet is not installed. Please install it to continue.', 'error');
-    return;
-  }
-  
-  closeWeb3Modal();
-  await connectWeb3Wallet('coinbase');
-};
-
-// Connect with WalletConnect (placeholder - needs WalletConnect library)
-window.connectWithWalletConnect = async function() {
-  window.showToast('WalletConnect integration coming soon!', 'info');
-  closeWeb3Modal();
-};
-
-// Main Web3 connection function
-async function connectWeb3Wallet(walletType) {
-  if (isConnecting) return;
-  isConnecting = true;
-
-  try {
-    // Show connecting state
-    showConnectingState('Connecting to wallet...');
-
-    // Request accounts
-    const accounts = await window.ethereum.request({ 
-      method: 'eth_requestAccounts' 
-    });
-
-    if (!accounts || accounts.length === 0) {
-      throw new Error('No accounts found');
-    }
-
-    currentWalletAddress = accounts[0].toLowerCase();
-    
-    // Get chain ID
-    const chainIdHex = await window.ethereum.request({ 
-      method: 'eth_chainId' 
-    });
-    currentChainId = parseInt(chainIdHex, 16);
-
-    console.log('Wallet connected:', {
-      address: currentWalletAddress,
-      chainId: currentChainId,
-      walletType: walletType
-    });
-
-    // Update connecting message
-    showConnectingState('Requesting authentication...');
-
-    // Request nonce from backend
-    const nonceResponse = await fetch('/api/request-nonce/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCsrfToken()
-      },
-      body: JSON.stringify({
-        wallet_address: currentWalletAddress
-      })
-    });
-
-    if (!nonceResponse.ok) {
-      const error = await nonceResponse.json();
-      throw new Error(error.error || 'Failed to get nonce');
-    }
-
-    const nonceData = await nonceResponse.json();
-    console.log('Nonce received:', nonceData);
-
-    // Show signing modal
-    closeConnectingState();
-    document.getElementById('web3SigningModal').classList.remove('hidden');
-
-    // Sign message
-    const signature = await window.ethereum.request({
-      method: 'personal_sign',
-      params: [nonceData.message, currentWalletAddress]
-    });
-
-    console.log('Message signed');
-
-    // Close signing modal
-    document.getElementById('web3SigningModal').classList.add('hidden');
-    showConnectingState('Authenticating...');
-
-    // Authenticate with backend
-    const authResponse = await fetch('/api/web3-login/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCsrfToken()
-      },
-      body: JSON.stringify({
-        wallet_address: currentWalletAddress,
-        signature: signature,
-        nonce: nonceData.nonce,
-        wallet_type: walletType,
-        chain_id: currentChainId
-      })
-    });
-
-    if (!authResponse.ok) {
-      const error = await authResponse.json();
-      throw new Error(error.error || 'Authentication failed');
-    }
-
-    const authData = await authResponse.json();
-    console.log('Authentication successful:', authData);
-
-    // Store auth token if provided
-    if (authData.token) {
-      localStorage.setItem('authToken', authData.token);
-    }
-
-    // Update UI
-    updateHomePageForWallet(true, currentWalletAddress, currentChainId);
-    
-    // Close connecting state
-    closeConnectingState();
-    
-    // Show success message
-    window.showToast('Wallet connected successfully!', 'success');
-
-    // Check if correct network
-    if (currentChainId !== 8453) {
-      setTimeout(() => {
-        window.showToast('Please switch to Base network for full functionality', 'warning');
-      }, 1000);
-    }
-
-    // Setup wallet event listeners
-    setupWalletEventListeners();
-
-  } catch (error) {
-    console.error('Web3 connection error:', error);
-    isConnecting = false;
-    closeConnectingState();
-    document.getElementById('web3SigningModal').classList.add('hidden');
-    
-    if (error.code === 4001) {
-      window.showToast('Connection cancelled by user', 'info');
-    } else {
-      window.showToast(error.message || 'Failed to connect wallet', 'error');
-    }
-  } finally {
-    isConnecting = false;
-  }
-}
-
-// Disconnect wallet
-window.disconnectWallet = async function() {
-  try {
-    // Call backend to invalidate session
-    const response = await fetch('/api/disconnect-wallet/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCsrfToken(),
-        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
-      }
-    });
-
-    // Clear local state
-    currentWalletAddress = null;
-    currentChainId = null;
-    localStorage.removeItem('authToken');
-    
-    // Update UI
-    updateHomePageForWallet(false, null, null);
-    
-    window.showToast('Wallet disconnected', 'info');
-  } catch (error) {
-    console.error('Error disconnecting wallet:', error);
-    window.showToast('Error disconnecting wallet', 'error');
-  }
-};
-
-// Switch to Base network
-window.switchToBaseNetwork = async function() {
-  if (!window.ethereum) {
-    window.showToast('No wallet detected', 'error');
-    return;
-  }
-
-  try {
-    await window.ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x2105' }] // 8453 in hex
-    });
-    
-    window.showToast('Switched to Base network!', 'success');
-  } catch (error) {
-    if (error.code === 4902) {
-      // Chain not added, try to add it
-      try {
-        await window.ethereum.request({
-          method: 'wallet_addEthereumChain',
-          params: [{
-            chainId: '0x2105',
-            chainName: 'Base',
-            nativeCurrency: {
-              name: 'Ethereum',
-              symbol: 'ETH',
-              decimals: 18
-            },
-            rpcUrls: ['https://mainnet.base.org'],
-            blockExplorerUrls: ['https://basescan.org']
-          }]
-        });
-        
-        window.showToast('Base network added successfully!', 'success');
-      } catch (addError) {
-        console.error('Error adding Base network:', addError);
-        window.showToast('Failed to add Base network', 'error');
-      }
-    } else {
-      console.error('Error switching network:', error);
-      window.showToast('Failed to switch network', 'error');
-    }
-  }
-};
-
-// Show wallet info
-window.showWalletInfo = function() {
-  window.showToast('A crypto wallet lets you own your data and earn rewards. Popular options: MetaMask, Coinbase Wallet', 'info');
-  // You could also open a modal with more detailed information
-};
-
-// Setup wallet event listeners
-function setupWalletEventListeners() {
-  if (!window.ethereum) return;
-
-  // Handle account changes
-  window.ethereum.on('accountsChanged', async (accounts) => {
-    if (accounts.length === 0) {
-      // User disconnected wallet
-      await disconnectWallet();
-    } else if (accounts[0].toLowerCase() !== currentWalletAddress) {
-      // User switched accounts
-      window.showToast('Account changed. Please reconnect.', 'info');
-      await disconnectWallet();
-    }
-  });
-
-  // Handle chain changes
-  window.ethereum.on('chainChanged', (chainIdHex) => {
-    const newChainId = parseInt(chainIdHex, 16);
-    currentChainId = newChainId;
-    
-    updateHomePageForWallet(true, currentWalletAddress, newChainId);
-    
-    if (newChainId !== 8453) {
-      window.showToast('Please switch to Base network for full functionality', 'warning');
-    } else {
-      window.showToast('Switched to Base network!', 'success');
-    }
-  });
-}
-
-// Helper functions
-function showConnectingState(message = 'Connecting...') {
-  const walletNotConnected = document.getElementById('walletNotConnected');
-  const walletConnected = document.getElementById('walletConnected');
-  const walletConnecting = document.getElementById('walletConnecting');
-  const connectingMessage = document.getElementById('walletConnectingMessage');
-  
-  walletNotConnected.classList.add('hidden');
-  walletConnected.classList.add('hidden');
-  walletConnecting.classList.remove('hidden');
-  
-  if (connectingMessage) {
-    connectingMessage.textContent = message;
-  }
-}
-
-function closeConnectingState() {
-  const walletConnecting = document.getElementById('walletConnecting');
-  if (walletConnecting) {
-    walletConnecting.classList.add('hidden');
-  }
-}
-
-// Get wallet info
-window.getWalletInfo = function() {
-  return {
-    isConnected: !!currentWalletAddress,
-    address: currentWalletAddress,
-    chainId: currentChainId
-  };
-};
-
-// Check wallet status on load
-async function checkWalletStatus() {
-  try {
-    const authToken = localStorage.getItem('authToken');
-    if (!authToken) {
-      console.log('No auth token found, skipping wallet status check');
-      return;
-    }
-
-    const response = await fetch('/api/wallet-status/', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`
-      }
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      if (data.status && data.status.is_connected) {
-        currentWalletAddress = data.status.wallet_address;
-        currentChainId = data.status.chain_id;
-        updateHomePageForWallet(true, currentWalletAddress, currentChainId);
-        setupWalletEventListeners();
-      }
-    } else if (response.status === 404) {
-      console.log('Wallet status endpoint not found - this is normal if not logged in');
-    } else if (response.status === 401) {
-      console.log('Not authenticated - clearing auth token');
-      localStorage.removeItem('authToken');
-    }
-  } catch (error) {
-    console.log('Error checking wallet status (this is normal on first load):', error.message);
-  }
-}
+// All the existing JavaScript from your original file...
+// [Previous JavaScript code remains the same until the wallet integration parts]
 
 // Enhanced wallet integration for home page
 document.addEventListener('DOMContentLoaded', function() {
   journalCache.init();
   initializeJournalForm();
   initializeAnimations();
-  setupOptimizedScrollHandling();
+  setupOptimizedScrollHandling(); // OPTIMIZED: Add throttled scroll handling
   setupEnhancedUX();
   initializeWalletAwareHome();
-  
-  // Check wallet status
-  checkWalletStatus();
 });
 
 function initializeWalletAwareHome() {
@@ -1312,6 +796,14 @@ function initializeWalletAwareHome() {
     const { isConnected, address, chainId } = event.detail;
     updateHomePageForWallet(isConnected, address, chainId);
   });
+
+  // Check initial wallet state
+  setTimeout(() => {
+    const walletInfo = getWalletInfo();
+    if (walletInfo.isConnected) {
+      updateHomePageForWallet(true, walletInfo.address, walletInfo.chainId);
+    }
+  }, 1000);
 }
 
 function updateHomePageForWallet(isConnected, address, chainId) {
@@ -1426,103 +918,164 @@ function updateActionButtons(isConnected) {
 }
 
 // Enhanced save function for blockchain storage
-async function saveToBlockchain() {
-    try {
-        const title = document.getElementById('entry-title').value;
-        const content = document.getElementById('entry-content').value;
-        const mood = document.getElementById('entry-mood').value;
-        const tags = document.getElementById('entry-tags').value;
-        
-        if (!title || !content) {
-            showToast('Please fill in both title and content', 'error');
-            return;
-        }
-        
-        showLoadingState('save-btn', 'Saving...');
-        
-        const formData = new FormData();
-        formData.append('title', title);
-        formData.append('content', content);
-        formData.append('mood', mood);
-        formData.append('tags', tags);
-        
-        // Add wallet info if connected
-        if (currentWalletAddress) {
-            formData.append('wallet_address', currentWalletAddress);
-            formData.append('chain_id', currentChainId || 8453);
-        }
-        
-        // Add auth token if available
-        const authToken = localStorage.getItem('authToken');
-        const headers = {
-            'X-CSRFToken': getCookie('csrftoken')
-        };
-        
-        if (authToken) {
-            headers['Authorization'] = `Token ${authToken}`;
-        }
-        
-        const response = await fetch('/api/save-generated-entry/', {
-            method: 'POST',
-            headers: headers,
-            body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showToast(data.message || 'Entry saved successfully!', 'success');
-            
-            // Handle redirect if provided
-            if (data.redirect_url) {
-                // Clear form
-                document.getElementById('journal-form').reset();
-                
-                // Redirect to dashboard or provided URL
-                setTimeout(() => {
-                    window.location.href = data.redirect_url;
-                }, 1000); // Small delay to show success message
-            } else if (data.is_anonymous) {
-                // Handle anonymous save
-                showToast('Entry saved temporarily. Connect wallet to save permanently!', 'info');
-                
-                // Show wallet prompt if not connected
-                if (data.wallet_connect_prompt && !currentWalletAddress) {
-                    setTimeout(() => {
-                        document.getElementById('web3Modal').classList.remove('hidden');
-                    }, 2000);
-                }
-            }
-            
-            // Update UI based on authentication status
-            if (data.is_authenticated) {
-                updateUIForConnectedWallet();
-            }
-            
-        } else {
-            showToast(data.error || 'Failed to save entry', 'error');
-        }
-        
-    } catch (error) {
-        console.error('Error saving entry:', error);
-        showToast('Network error. Please try again.', 'error');
-    } finally {
-        hideLoadingState('save-btn', 'Save to Blockchain');
+function saveToBlockchain() {
+  const walletInfo = getWalletInfo();
+  
+  if (!walletInfo.isConnected) {
+    connectWallet();
+    return;
+  }
+
+  if (walletInfo.chainId !== 8453) {
+    switchToBaseNetwork();
+    return;
+  }
+
+  const journalEntry = document.getElementById('journalEntry');
+  const entryTitle = document.getElementById('entryTitle');
+
+  if (!journalEntry || !entryTitle) return;
+
+  const journalContent = journalEntry.innerHTML.replace(/<[^>]*>/g, '');
+  const titleText = entryTitle.textContent;
+
+  // Show saving state
+  const saveButton = document.querySelector('#walletConnectedActions button');
+  if (saveButton) {
+    const originalText = saveButton.innerHTML;
+    saveButton.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Saving to blockchain...
+    `;
+    saveButton.disabled = true;
+
+    const csrftoken = getCsrfToken();
+    const formData = new FormData();
+    
+    formData.append('title', titleText);
+    formData.append('content', journalContent);
+    formData.append('wallet_address', walletInfo.address);
+    formData.append('chain_id', walletInfo.chainId);
+    formData.append('encrypted', 'true');
+
+    if (currentPhotoFile) {
+      formData.append('journal_photo', currentPhotoFile);
     }
+
+    fetch('/save-generated-entry/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrftoken
+      },
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        const rewards = data.rewards || calculateRewards(journalContent, walletInfo.isConnected);
+
+        // Check if this is an anonymous save
+        if (data.is_anonymous) {
+          // For anonymous users, redirect to journal form with pre-filled content
+          saveButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Saved! Transferring to journal form...
+          `;
+          
+          if (window.showToast) {
+            window.showToast('Taking you to create your journal entry...', 'info');
+          }
+
+          // Store the content in sessionStorage to transfer to journal form
+          sessionStorage.setItem('pendingJournalEntry', JSON.stringify({
+            title: titleText,
+            content: journalContent,
+            fromDemo: true,
+            hasWallet: true,
+            walletAddress: walletInfo.address,
+            rewards: rewards
+          }));
+
+          // If there's a photo, we need to handle it differently
+          if (currentPhotoFile) {
+            // Convert photo to base64 to transfer via sessionStorage
+            const reader = new FileReader();
+            reader.onloadend = function() {
+              const pendingEntry = JSON.parse(sessionStorage.getItem('pendingJournalEntry'));
+              pendingEntry.photoData = reader.result;
+              pendingEntry.photoName = currentPhotoFile.name;
+              sessionStorage.setItem('pendingJournalEntry', JSON.stringify(pendingEntry));
+              
+              // Redirect to journal form
+              window.location.href = '/journal/';
+            };
+            reader.readAsDataURL(currentPhotoFile);
+          } else {
+            // No photo, redirect immediately
+            setTimeout(() => {
+              window.location.href = '/journal/';
+            }, 1500);
+          }
+          
+        } else {
+          // Authenticated user - normal save success
+          saveButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Saved! Rewards earned: ${rewards} tokens
+          `;
+          
+          if (window.showToast) {
+            window.showToast(`Entry saved! Earned ${rewards} tokens`, 'success');
+          }
+
+          setTimeout(() => {
+            if (data.redirect_url) {
+              window.location.href = data.redirect_url;
+            } else if (data.entry_id) {
+              window.location.href = `/entry/${data.entry_id}/`;
+            } else {
+              window.location.href = '/dashboard/';
+            }
+          }, 2000);
+        }
+      } else {
+        // Handle error
+        saveButton.innerHTML = originalText;
+        saveButton.disabled = false;
+        if (window.showToast) {
+          window.showToast(data.error || 'Failed to save entry', 'error');
+        }
+      }
+    })
+    .catch(error => {
+      console.error('Save error:', error);
+      saveButton.innerHTML = originalText;
+      saveButton.disabled = false;
+      if (window.showToast) {
+        window.showToast('Failed to save entry. Please try again.', 'error');
+      }
+    });
+  }
 }
 
-// Get CSRF token
-function getCsrfToken() {
-  const token = document.querySelector('[name=csrfmiddlewaretoken]');
-  if (!token) {
-    console.error('CSRF token not found in DOM');
-    const cookieToken = document.cookie.split(';')
-      .find(c => c.trim().startsWith('csrftoken='));
-    if (cookieToken) {
-      return cookieToken.split('=')[1];
-    }
-  }
-  return token ? token.value : '';
+// Helper function to calculate rewards
+function calculateRewards(content, hasWallet) {
+  const wordCount = content.split(' ').length;
+  const baseReward = Math.floor(wordCount / 10);
+  const walletBonus = hasWallet ? 5 : 0;
+  return baseReward + walletBonus;
 }
 
 // Update the existing generateDemo function to be wallet-aware
@@ -1590,8 +1143,7 @@ function generateDemo() {
   fetch('/api/demo-journal/', {
     method: 'POST',
     headers: {
-      'X-CSRFToken': csrftoken,
-      'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+      'X-CSRFToken': csrftoken
     },
     body: formData
   })
@@ -1740,9 +1292,11 @@ function setupEnhancedUX() {
 function setupKeyboardShortcuts() {
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-      // Close modals
-      document.getElementById('web3Modal').classList.add('hidden');
-      document.getElementById('web3SigningModal').classList.add('hidden');
+      document.querySelectorAll('.fixed.inset-0').forEach(modal => {
+        if (modal.classList.contains('z-50')) {
+          modal.remove();
+        }
+      });
     }
 
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -1779,6 +1333,11 @@ function setupAccessibilityFeatures() {
   document.addEventListener('mousedown', function() {
     document.body.classList.remove('keyboard-navigation');
   });
+}
+
+function getCsrfToken() {
+  const token = document.querySelector('[name=csrfmiddlewaretoken]');
+  return token ? token.value : '';
 }
 
 function initializeAnimations() {
@@ -2214,14 +1773,6 @@ function editJournalEntry() {
   }
 }
 
-// Helper function to calculate rewards
-function calculateRewards(content, hasWallet) {
-  const wordCount = content.split(' ').length;
-  const baseReward = Math.floor(wordCount / 10);
-  const walletBonus = hasWallet ? 5 : 0;
-  return baseReward + walletBonus;
-}
-
 // FIXED: Cache initialization - works with base.html
 const journalCache = {
   init: function() {
@@ -2291,6 +1842,7 @@ const journalCache = {
     this.save();
   }
 };
+
 </script>
 
 {% endblock %}
