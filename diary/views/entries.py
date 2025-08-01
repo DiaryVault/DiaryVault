@@ -256,7 +256,22 @@ def journal(request):
 @login_required
 def entry_detail(request, entry_id):
     """View a single diary entry"""
-    entry = get_object_or_404(Entry, pk=entry_id, user=request.user)
+    # Try to determine if it's a UUID or integer
+    try:
+        # First try as integer
+        entry_id_int = int(entry_id)
+        entry = get_object_or_404(Entry, pk=entry_id_int, user=request.user)
+    except ValueError:
+        # If not an integer, try as UUID
+        try:
+            import uuid
+            uuid_obj = uuid.UUID(entry_id)
+            entry = get_object_or_404(Entry, uuid=uuid_obj, user=request.user)
+        except (ValueError, Entry.DoesNotExist):
+            raise Http404("Entry not found")
+        except AttributeError:
+            # If Entry model doesn't have a uuid field
+            raise Http404("Entry not found")
 
     if request.method == 'POST':
         if 'regenerate_summary' in request.POST:

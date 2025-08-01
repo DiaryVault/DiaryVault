@@ -73,7 +73,7 @@ urlpatterns = [
     path('journal/', views.journal, name='new_entry'),
     path('entry/new/', views.journal, name='new_entry'),  # Alternative URL
     path('new_entry/', views.journal, name='new_entry_alt'),
-    path('entry/<int:entry_id>/', views.entry_detail, name='entry_detail'),
+    path('entry/<str:entry_id>/', views.entry_detail, name='entry_detail'),
     path('entry/<int:entry_id>/edit/', views.edit_entry, name='edit_entry'),
     path('entry/<int:entry_id>/delete/', views.delete_entry, name='delete_entry'),
     path('api/chat/', views.chat_with_ai, name='chat_with_ai'),
@@ -116,6 +116,7 @@ urlpatterns = [
     path('web3/complete-profile/', api.web3_complete_profile, name='web3_complete_profile'),
     path('entry/preview/<uuid:entry_uuid>/', api.anonymous_entry_preview, name='anonymous_entry_preview'),
     path('entry/<uuid:entry_uuid>/', views.entry_detail_uuid, name='entry_detail_uuid'),
+
 
     # ============================================================================
     # Account Management
