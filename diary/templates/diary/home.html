@@ -1249,11 +1249,17 @@ window.getWalletInfo = function() {
 // Check wallet status on load
 async function checkWalletStatus() {
   try {
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
+      console.log('No auth token found, skipping wallet status check');
+      return;
+    }
+
     const response = await fetch('/api/wallet-status/', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
+        'Authorization': `Bearer ${authToken}`
       }
     });
 
@@ -1265,9 +1271,14 @@ async function checkWalletStatus() {
         updateHomePageForWallet(true, currentWalletAddress, currentChainId);
         setupWalletEventListeners();
       }
+    } else if (response.status === 404) {
+      console.log('Wallet status endpoint not found - this is normal if not logged in');
+    } else if (response.status === 401) {
+      console.log('Not authenticated - clearing auth token');
+      localStorage.removeItem('authToken');
     }
   } catch (error) {
-    console.error('Error checking wallet status:', error);
+    console.log('Error checking wallet status (this is normal on first load):', error.message);
   }
 }
 

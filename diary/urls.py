@@ -39,6 +39,13 @@ urlpatterns = [
 
     # Web3 Authentication URLs - PROPERLY CONFIGURED
     path('api/web3/', include(web3_patterns)),
+    # Web3 Auth endpoints
+    path('api/request-nonce/', web3_auth.request_nonce, name='request_nonce'),
+    path('api/web3-login/', web3_auth.web3_login, name='web3_login'),
+    path('api/disconnect-wallet/', web3_auth.disconnect_wallet, name='disconnect_wallet'),
+    path('api/wallet-status/', web3_auth.wallet_status, name='wallet_status'),
+    path('api/user-profile/', web3_auth.user_profile, name='user_profile'),
+    path('api/update-profile/', web3_auth.update_profile, name='update_profile'),
 
     # ============================================================================
     # Main Pages
