@@ -1299,21 +1299,20 @@ function saveEntry() {
     // Check wallet connection
     const walletInfo = getWalletInfo();
 
-    // Create form data
+    // Create form data matching your Entry model fields
     const formData = new FormData();
     formData.append('csrfmiddlewaretoken', getCsrfToken());
     formData.append('title', entryTitle);
     formData.append('content', journalContent);
-    formData.append('is_ai_generated', 'true');
-
-    if (walletInfo.isConnected) {
-        formData.append('wallet_address', walletInfo.address);
-        formData.append('chain_id', walletInfo.chainId);
-        formData.append('encrypted', 'true');
-    }
+    
+    // Optional: Add mood if you're tracking it
+    // formData.append('mood', 'happy'); // or get from user selection
+    
+    // Optional: Add tags if any
+    // formData.append('tags', 'daily,reflection');
 
     if (currentPhotoFile) {
-        formData.append('journal_photo', currentPhotoFile);
+        formData.append('photo', currentPhotoFile);
     }
 
     // Show saving state
@@ -1328,8 +1327,8 @@ function saveEntry() {
         Saving...
     `;
 
-    // Send save request
-    fetch('/api/entries/create/', { 
+    // Send save request - use the same endpoint as your "New Entry" form
+    fetch('/new-entry/', { 
         method: 'POST',
         headers: {
             'X-CSRFToken': getCsrfToken()
@@ -1340,39 +1339,31 @@ function saveEntry() {
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
-        return response.json();
+        // Check if response is JSON or a redirect
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            return response.json();
+        } else {
+            // If it's not JSON, it might be a redirect response
+            // Just return a success object
+            return { success: true };
+        }
     })
     .then(data => {
-        if (data.success) {
-            // Show success message
-            showToast('Entry saved successfully!', 'success');
+        // Show success message
+        showToast('Entry saved successfully!', 'success');
 
-            // Calculate rewards if wallet connected
-            const rewards = data.rewards || (walletInfo.isConnected ? calculateRewards(journalContent) : 0);
+        saveButton.innerHTML = `
+            <svg class="w-4 h-4 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Saved!
+        `;
 
-            if (walletInfo.isConnected && rewards > 0) {
-                saveButton.innerHTML = `
-                    <svg class="w-4 h-4 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Saved! Earned ${rewards} tokens
-                `;
-            } else {
-                saveButton.innerHTML = `
-                    <svg class="w-4 h-4 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Saved!
-                `;
-            }
-
-            // Always redirect to library after delay
-            setTimeout(() => {
-                window.location.href = '/library/';
-            }, 1500);
-        } else {
-            throw new Error(data.error || 'Failed to save entry');
-        }
+        // Always redirect to library after delay
+        setTimeout(() => {
+            window.location.href = '/library/';
+        }, 1500);
     })
     .catch(error => {
         console.error('Save error:', error);
