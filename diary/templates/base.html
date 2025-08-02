@@ -1166,12 +1166,16 @@ window.walletState = {
 
 // Wallet authentication system
 window.walletAuthSystem = {
-    requiredPages: ['dashboard', 'library', 'insights', 'new_entry', 'account_settings'],
+    requiredPages: ['dashboard', 'library', 'insights', 'new_entry', 'new-entry', 'write', 'account_settings'],
     publicPages: ['home', 'signup', 'login', 'privacy_policy'],
     
     checkPageAccess: function() {
-        const currentPath = window.location.pathname;
-        const isProtectedPage = this.requiredPages.some(page => currentPath.includes(page));
+        const currentPath = window.location.pathname.toLowerCase();
+        const isProtectedPage = this.requiredPages.some(page => 
+            currentPath.includes(page) || 
+            currentPath.includes(page.replace('_', '-')) || 
+            currentPath.includes(page.replace('-', '_'))
+        );
         
         if (isProtectedPage && !window.walletState.isConnected) {
             // Show wallet required modal
