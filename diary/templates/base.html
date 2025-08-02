@@ -449,13 +449,314 @@
         transform: translateY(50%) rotate(-45deg);
       }
 
-      /* Enhanced dropdown with wallet state */
-      .modern-dropdown.wallet-connected {
-        max-width: 500px;
+      /* Enhanced hamburger menu styles */
+      .hamburger-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        max-width: 400px;
+        height: 100vh;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1000;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
 
-      /* Other existing styles remain unchanged... */
-      /* (All the remaining CSS from your original base.html) */
+      .hamburger-menu.open {
+        right: 0;
+      }
+
+      .hamburger-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 999;
+      }
+
+      .hamburger-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .hamburger-header {
+        position: sticky;
+        top: 0;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        z-index: 10;
+      }
+
+      .hamburger-content {
+        padding: 1.5rem;
+      }
+
+      .hamburger-section {
+        margin-bottom: 2rem;
+      }
+
+      .hamburger-section-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6b7280;
+        margin-bottom: 0.75rem;
+      }
+
+      .hamburger-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.25rem;
+        border-radius: 0.75rem;
+        color: #374151;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        font-size: 0.9375rem;
+        position: relative;
+      }
+
+      .hamburger-nav-item:hover {
+        background: rgba(99, 102, 241, 0.05);
+        color: #4f46e5;
+        transform: translateX(4px);
+      }
+
+      .hamburger-nav-item.active {
+        background: rgba(99, 102, 241, 0.1);
+        color: #4f46e5;
+        font-weight: 500;
+      }
+
+      .hamburger-nav-item.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 60%;
+        background: #4f46e5;
+        border-radius: 0 2px 2px 0;
+      }
+
+      .hamburger-nav-item svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        flex-shrink: 0;
+      }
+
+      /* Wallet status card in hamburger */
+      .hamburger-wallet-card {
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hamburger-wallet-card.connected {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      }
+
+      .hamburger-wallet-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+        pointer-events: none;
+      }
+
+      /* Quick actions in hamburger */
+      .hamburger-quick-actions {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .hamburger-quick-action {
+        background: rgba(99, 102, 241, 0.05);
+        border: 1px solid rgba(99, 102, 241, 0.1);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        text-align: center;
+        color: #4f46e5;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .hamburger-quick-action:hover {
+        background: rgba(99, 102, 241, 0.1);
+        border-color: rgba(99, 102, 241, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+      }
+
+      /* Mobile optimizations for hamburger */
+      @media (max-width: 640px) {
+        .hamburger-menu {
+          max-width: 100%;
+        }
+        
+        .hamburger-quick-actions {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Wallet-first UI states */
+      .wallet-required-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 1rem;
+      }
+
+      .wallet-required-overlay.show {
+        display: flex;
+      }
+
+      .wallet-required-modal {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        max-width: 24rem;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      }
+
+      /* Enhanced menu toggle button */
+      .menu-toggle-wrapper {
+        position: relative;
+      }
+
+      .menu-notification-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background: #ef4444;
+        color: white;
+        font-size: 0.625rem;
+        font-weight: 700;
+        padding: 0.125rem 0.375rem;
+        border-radius: 9999px;
+        min-width: 1.25rem;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border: 2px solid white;
+      }
+
+      /* Other existing styles... */
+      @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      /* Glass morphism effects */
+      .glass-nav {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+      }
+
+      /* Button styles */
+      .btn-primary {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        display: inline-block;
+        text-align: center;
+        cursor: pointer;
+        border: none;
+        font-size: 0.875rem;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Notification badge */
+      .notification-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background: #ef4444;
+        color: white;
+        font-size: 0.625rem;
+        font-weight: 700;
+        padding: 0.125rem 0.375rem;
+        border-radius: 9999px;
+        min-width: 1.25rem;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border: 2px solid white;
+      }
+
+      /* Brand badge */
+      .brand-badge {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        font-size: 0.625rem;
+        font-weight: 700;
+        padding: 0.125rem 0.5rem;
+        border-radius: 9999px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+      }
+
+      /* Diary font */
+      .diary-font {
+        font-family: 'Playfair Display', serif;
+      }
+
+      /* Compact footer link */
+      .compact-footer-link {
+        color: #64748b;
+        text-decoration: none;
+        transition: color 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .compact-footer-link:hover {
+        color: #4f46e5;
+      }
+
+      /* Handle smooth scrolling for the no-scrollbar design */
+      .is-scrolling #main-content-wrapper {
+        scroll-behavior: smooth;
+      }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -477,7 +778,7 @@
             <div class="flex items-center justify-between">
                 <!-- Enhanced Logo -->
                 <div class="flex items-center">
-                    <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center gap-3 group">
+                    <a href="{% if user.is_authenticated or wallet_connected %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center gap-3 group">
                         <div class="relative">
                             <div class="absolute inset-0 bg-primary-500 rounded-xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
                             <div class="relative p-2.5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-soft group-hover:shadow-glow transition-all duration-300 group-hover:scale-105">
@@ -523,121 +824,167 @@
 
                 <!-- Right Section -->
                 <div class="flex items-center gap-3">
-                    <!-- Modern Menu Toggle Button -->
-                    <button id="menuToggleBtn" class="menu-toggle-modern">
-                        {% if user.is_authenticated and unread_notifications > 0 %}
-                        <div class="notification-badge">
-                            <span>{{ unread_notifications }}</span>
+                    <!-- Enhanced Menu Toggle -->
+                    <div class="menu-toggle-wrapper">
+                        {% if unread_notifications > 0 %}
+                        <div class="menu-notification-badge">
+                            {{ unread_notifications }}
                         </div>
                         {% endif %}
-                        <div class="menu-icon">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </div>
-                    </button>
+                        <button id="menuToggleBtn" class="menu-toggle-modern">
+                            <div class="menu-icon">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Modern Dropdown Menu Overlay -->
-    <div id="dropdownOverlay" class="dropdown-overlay"></div>
+    <!-- Enhanced Hamburger Menu -->
+    <div id="hamburgerOverlay" class="hamburger-overlay"></div>
+    <div id="hamburgerMenu" class="hamburger-menu">
+        <!-- Header with close button -->
+        <div class="hamburger-header">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">Menu</h2>
+                <button onclick="closeHamburgerMenu()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
 
-    <!-- Modern Dropdown Menu -->
-    <div id="modernDropdown" class="modern-dropdown">
-        {% if user.is_authenticated %}
-        <!-- User Profile Header with Wallet Integration -->
-        <div class="dropdown-header">
-            <div class="user-profile-section">
-                <div class="flex items-center gap-3">
-                    <div class="user-avatar">
-                        {{ user.username|first|upper }}
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-semibold text-gray-800 text-lg">{{ user.username }}</h3>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="text-sm text-gray-600">{{ total_entries|default:'0' }} entries</span>
-                            <span id="menuWalletStatus" class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                                <!-- Wallet status will be updated via JS -->
-                            </span>
-                        </div>
-                    </div>
-                    <a href="{% url 'account_settings' %}" class="p-2 hover:bg-white/50 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </a>
-                </div>
-                
-                <!-- Wallet Connection Status in Menu -->
-                <div id="menuWalletSection" class="mt-3 p-3 bg-gray-50 rounded-lg">
-                    <div id="walletNotConnectedMenu" class="text-center">
-                        <p class="text-xs text-gray-600 mb-2">Connect your wallet for full features</p>
-                        <button onclick="connectWallet()" class="btn-primary text-xs px-3 py-1.5 rounded-full w-full">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="hamburger-content">
+            <!-- Wallet Status Card -->
+            <div id="hamburgerWalletCard" class="hamburger-wallet-card">
+                <div id="walletNotConnectedHamburger" class="relative z-10">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-12 h-12 bg-white/50 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
-                            Connect Wallet
-                        </button>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">Connect Wallet</h3>
+                            <p class="text-sm text-gray-600">To access all features</p>
+                        </div>
                     </div>
-                    <div id="walletConnectedMenu" class="hidden">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                <span class="text-xs font-medium text-gray-700">Wallet Connected</span>
+                    <button onclick="connectWalletFromMenu()" class="w-full btn-primary rounded-xl">
+                        Connect Wallet
+                    </button>
+                </div>
+                
+                <div id="walletConnectedHamburger" class="hidden relative z-10">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-white/50 rounded-xl flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
                             </div>
-                            <button onclick="disconnectWallet()" class="text-xs text-red-600 hover:text-red-700">
-                                Disconnect
-                            </button>
+                            <div>
+                                <h3 class="font-semibold text-gray-800">Wallet Connected</h3>
+                                <p id="hamburgerWalletAddress" class="text-sm text-gray-600 font-mono"></p>
+                            </div>
                         </div>
-                        <div class="mt-1">
-                            <span id="menuWalletAddress" class="text-xs text-gray-600 font-mono"></span>
-                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="switchToBaseNetwork()" class="flex-1 text-sm py-2 px-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
+                            Switch Network
+                        </button>
+                        <button onclick="disconnectWalletFromMenu()" class="flex-1 text-sm py-2 px-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">
+                            Disconnect
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Navigation Links (Mobile) -->
-        <div class="dropdown-section lg:hidden">
-            <div class="section-title">Navigation</div>
-            <div class="space-y-1">
-                <a href="{% url 'dashboard' %}" class="dropdown-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0h6" />
+            <!-- Quick Actions (when wallet connected) -->
+            <div id="hamburgerQuickActions" class="hamburger-quick-actions hidden">
+                <a href="{% url 'new_entry' %}" class="hamburger-quick-action">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    <span>Dashboard</span>
+                    New Entry
                 </a>
-                <a href="{% url 'library' %}" class="dropdown-item {% if request.resolver_match.url_name == 'library' %}active{% endif %}">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                    <span>Library</span>
-                </a>
-                <a href="{% url 'new_entry' %}" class="dropdown-item {% if request.resolver_match.url_name == 'new_entry' %}active{% endif %}">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
-                    <span>Write Entry</span>
-                </a>
-                <a href="{% url 'insights' %}" class="dropdown-item {% if request.resolver_match.url_name == 'insights' %}active{% endif %}">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="{% url 'insights' %}" class="hamburger-quick-action">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
-                    <span>Insights</span>
+                    View Insights
                 </a>
             </div>
+
+            <!-- Navigation -->
+            <div class="hamburger-section">
+                <h3 class="hamburger-section-title">Navigation</h3>
+                <nav id="hamburgerNav">
+                    <!-- Dynamic navigation based on wallet connection -->
+                </nav>
+            </div>
+
+            <!-- Settings Section -->
+            <div class="hamburger-section">
+                <h3 class="hamburger-section-title">Settings</h3>
+                <a href="{% url 'account_settings' %}" class="hamburger-nav-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-1.756.426-1.756 2.924-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>Account Settings</span>
+                </a>
+                <a href="{% url 'privacy_policy' %}" class="hamburger-nav-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <span>Privacy Policy</span>
+                </a>
+            </div>
+
+            <!-- Help Section -->
+            <div class="hamburger-section">
+                <h3 class="hamburger-section-title">Help</h3>
+                <a href="mailto:diaryvaultinc@gmail.com" class="hamburger-nav-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span>Contact Support</span>
+                </a>
+            </div>
+
+            <!-- Logout/Login -->
+            <div class="hamburger-section border-t pt-4">
+                <div id="hamburgerAuthSection">
+                    <!-- Dynamic auth button based on wallet connection -->
+                </div>
+            </div>
         </div>
+    </div>
 
-        <!-- Quick Actions (existing code) -->
-        <!-- Settings (existing code) -->
-        <!-- Logout (existing code) -->
-
-        {% else %}
-        <!-- Non-authenticated user menu (existing code) -->
-        {% endif %}
+    <!-- Wallet Required Modal (for protected pages) -->
+    <div id="walletRequiredOverlay" class="wallet-required-overlay">
+        <div class="wallet-required-modal">
+            <div class="mb-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Wallet Connection Required</h3>
+                <p class="text-gray-600 mb-6">Connect your wallet to access DiaryVault's features and start earning rewards.</p>
+            </div>
+            <button onclick="connectWalletRequired()" class="w-full btn-primary rounded-xl mb-3">
+                Connect Wallet
+            </button>
+            <a href="{% url 'account_signup' %}" class="text-sm text-gray-500 hover:text-gray-700">
+                Get help setting up a wallet →
+            </a>
+        </div>
     </div>
 
     <!-- Main Content Wrapper -->
@@ -734,8 +1081,8 @@
           rpcUrl: 'https://mainnet.base.org'
       };
   </script>
+  
   <script>
-
 // Global wallet state management
 window.walletState = {
     isConnected: false,
@@ -743,6 +1090,28 @@ window.walletState = {
     chainId: null,
     isInitializing: false,
     provider: null
+};
+
+// Wallet authentication system
+window.walletAuthSystem = {
+    requiredPages: ['dashboard', 'library', 'insights', 'new_entry', 'account_settings'],
+    publicPages: ['home', 'signup', 'login', 'privacy_policy'],
+    
+    checkPageAccess: function() {
+        const currentPath = window.location.pathname;
+        const isProtectedPage = this.requiredPages.some(page => currentPath.includes(page));
+        
+        if (isProtectedPage && !window.walletState.isConnected) {
+            // Show wallet required modal
+            document.getElementById('walletRequiredOverlay').classList.add('show');
+            return false;
+        }
+        return true;
+    },
+    
+    redirectToSignup: function() {
+        window.location.href = '{% url "account_signup" %}';
+    }
 };
 
 // Base network configuration
@@ -771,6 +1140,22 @@ function getEthereum() {
     }
     
     return window.ethereum;
+}
+
+// Get CSRF token for Django
+function getCsrfToken() {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    if (csrfToken) return csrfToken;
+    
+    const metaToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (metaToken) return metaToken;
+    
+    const cookieToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1];
+    
+    return cookieToken || '';
 }
 
 // Initialize wallet system
@@ -819,7 +1204,7 @@ function setupEventListeners(ethereum) {
     });
 }
 
-// Connect wallet function
+// Enhanced connect wallet function with backend integration
 async function connectWallet(walletType = 'metamask', button = null) {
     const ethereum = getEthereum();
     if (!ethereum) {
@@ -850,21 +1235,46 @@ async function connectWallet(walletType = 'metamask', button = null) {
             const chainId = await ethereum.request({ method: 'eth_chainId' });
             const chainIdNumber = parseInt(chainId, 16);
             
-            updateWalletState(true, accounts[0], chainIdNumber);
-            
-            // Save to localStorage for persistence
-            localStorage.setItem('walletConnected', 'true');
-            localStorage.setItem('walletAddress', accounts[0]);
-            
-            if (window.showToast) {
-                const shortAddress = `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`;
-                window.showToast(`Wallet connected: ${shortAddress}`, 'success');
+            // Send wallet info to backend
+            const response = await fetch('/api/wallet/connect/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken(),
+                },
+                body: JSON.stringify({
+                    address: accounts[0],
+                    chainId: chainIdNumber,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                updateWalletState(true, accounts[0], chainIdNumber);
                 
-                if (chainIdNumber !== 8453) {
-                    setTimeout(() => {
-                        window.showToast('Please switch to Base network for full features', 'warning');
-                    }, 1000);
+                localStorage.setItem('walletConnected', 'true');
+                localStorage.setItem('walletAddress', accounts[0]);
+                
+                if (window.showToast) {
+                    const shortAddress = `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`;
+                    window.showToast(`Wallet connected: ${shortAddress}`, 'success');
+                    
+                    if (chainIdNumber !== 8453) {
+                        setTimeout(() => {
+                            window.showToast('Please switch to Base network for full features', 'warning');
+                        }, 1000);
+                    }
                 }
+
+                // Redirect if specified
+                if (data.redirect) {
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 1500);
+                }
+            } else {
+                throw new Error(data.error || 'Failed to connect wallet');
             }
         }
 
@@ -891,7 +1301,6 @@ async function connectWallet(walletType = 'metamask', button = null) {
 // Check existing connection
 async function checkExistingConnection(ethereum) {
     try {
-        // Check localStorage first
         const wasConnected = localStorage.getItem('walletConnected') === 'true';
         
         if (wasConnected) {
@@ -921,7 +1330,7 @@ function updateWalletState(isConnected, address, chainId) {
 
     updateGlobalWalletUI(isConnected, address, chainId);
 
-    // Dispatch custom event for other components
+    // Dispatch custom event
     try {
         window.dispatchEvent(new CustomEvent('walletConnectionChanged', {
             detail: { isConnected, address, chainId, wasConnected }
@@ -974,45 +1383,8 @@ function updateGlobalWalletUI(isConnected, address, chainId) {
         }
     }
 
-    // Update menu wallet section
-    updateMenuWalletSection(isConnected, address, chainId);
-}
-
-// Update menu wallet section
-function updateMenuWalletSection(isConnected, address, chainId) {
-    const walletNotConnectedMenu = document.getElementById('walletNotConnectedMenu');
-    const walletConnectedMenu = document.getElementById('walletConnectedMenu');
-    const menuWalletAddress = document.getElementById('menuWalletAddress');
-    const menuWalletStatus = document.getElementById('menuWalletStatus');
-
-    if (walletNotConnectedMenu && walletConnectedMenu) {
-        if (isConnected && address) {
-            walletNotConnectedMenu.classList.add('hidden');
-            walletConnectedMenu.classList.remove('hidden');
-            
-            if (menuWalletAddress) {
-                menuWalletAddress.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
-            }
-            
-            if (menuWalletStatus) {
-                if (chainId === 8453) {
-                    menuWalletStatus.textContent = 'Base Network';
-                    menuWalletStatus.className = 'text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700';
-                } else {
-                    menuWalletStatus.textContent = 'Wrong Network';
-                    menuWalletStatus.className = 'text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700';
-                }
-            }
-        } else {
-            walletNotConnectedMenu.classList.remove('hidden');
-            walletConnectedMenu.classList.add('hidden');
-            
-            if (menuWalletStatus) {
-                menuWalletStatus.textContent = 'Not Connected';
-                menuWalletStatus.className = 'text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600';
-            }
-        }
-    }
+    // Update hamburger menu
+    updateHamburgerMenuContent();
 }
 
 // Switch to Base network
@@ -1060,16 +1432,42 @@ async function switchToBaseNetwork() {
     }
 }
 
-// Disconnect wallet
+// Enhanced disconnect wallet with backend
 async function disconnectWallet() {
-    updateWalletState(false, null, null);
-    
-    if (window.showToast) {
-        window.showToast('Wallet disconnected', 'info');
+    try {
+        // Call backend to clear session
+        const response = await fetch('/api/wallet/disconnect/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
+            },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            updateWalletState(false, null, null);
+            
+            if (window.showToast) {
+                window.showToast('Wallet disconnected', 'info');
+            }
+            
+            // Close menus
+            closeHamburgerMenu();
+
+            // Redirect if specified
+            if (data.redirect) {
+                setTimeout(() => {
+                    window.location.href = data.redirect;
+                }, 500);
+            }
+        }
+    } catch (error) {
+        console.error('Disconnect error:', error);
+        // Still disconnect locally even if backend fails
+        updateWalletState(false, null, null);
     }
-    
-    // Close menu if open
-    closeDropdown();
 }
 
 // Show wallet options
@@ -1155,75 +1553,173 @@ window.showToast = function(message, type = 'info') {
     }, 5000);
 };
 
-// Modern Dropdown Menu System
-let isDropdownOpen = false;
+// Enhanced hamburger menu functions
+function openHamburgerMenu() {
+    const menu = document.getElementById('hamburgerMenu');
+    const overlay = document.getElementById('hamburgerOverlay');
+    const toggle = document.getElementById('menuToggleBtn');
+    
+    menu.classList.add('open');
+    overlay.classList.add('active');
+    toggle.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Update menu content based on wallet state
+    updateHamburgerMenuContent();
+}
 
-function initializeModernDropdown() {
-    const menuToggle = document.getElementById('menuToggleBtn');
-    const dropdown = document.getElementById('modernDropdown');
-    const overlay = document.getElementById('dropdownOverlay');
+function closeHamburgerMenu() {
+    const menu = document.getElementById('hamburgerMenu');
+    const overlay = document.getElementById('hamburgerOverlay');
+    const toggle = document.getElementById('menuToggleBtn');
+    
+    menu.classList.remove('open');
+    overlay.classList.remove('active');
+    toggle.classList.remove('active');
+    document.body.style.overflow = '';
+}
 
-    function openDropdown() {
-        isDropdownOpen = true;
-        dropdown.classList.add('open');
-        overlay.classList.add('active');
-        menuToggle.classList.add('active');
-        document.body.style.overflow = 'hidden';
+function updateHamburgerMenuContent() {
+    const isConnected = window.walletState.isConnected;
+    const address = window.walletState.address;
+    
+    // Update wallet card
+    const notConnected = document.getElementById('walletNotConnectedHamburger');
+    const connected = document.getElementById('walletConnectedHamburger');
+    const walletCard = document.getElementById('hamburgerWalletCard');
+    
+    if (isConnected && address) {
+        notConnected.classList.add('hidden');
+        connected.classList.remove('hidden');
+        walletCard.classList.add('connected');
         
-        // Update wallet status when opening
-        const walletInfo = getWalletInfo();
-        updateMenuWalletSection(walletInfo.isConnected, walletInfo.address, walletInfo.chainId);
+        const addressElement = document.getElementById('hamburgerWalletAddress');
+        if (addressElement) {
+            addressElement.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+        }
         
-        // Focus management for accessibility
-        dropdown.setAttribute('aria-hidden', 'false');
-        dropdown.focus();
+        // Show quick actions
+        document.getElementById('hamburgerQuickActions').classList.remove('hidden');
+    } else {
+        notConnected.classList.remove('hidden');
+        connected.classList.add('hidden');
+        walletCard.classList.remove('connected');
+        
+        // Hide quick actions
+        document.getElementById('hamburgerQuickActions').classList.add('hidden');
     }
+    
+    // Update navigation
+    updateHamburgerNavigation(isConnected);
+    
+    // Update auth section
+    updateHamburgerAuthSection(isConnected);
+}
 
-    function closeDropdown() {
-        isDropdownOpen = false;
-        dropdown.classList.remove('open');
-        overlay.classList.remove('active');
-        menuToggle.classList.remove('active');
-        document.body.style.overflow = '';
-        dropdown.setAttribute('aria-hidden', 'true');
+function updateHamburgerNavigation(isConnected) {
+    const nav = document.getElementById('hamburgerNav');
+    
+    if (isConnected) {
+        nav.innerHTML = `
+            <a href="{% url 'dashboard' %}" class="hamburger-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'library' %}" class="hamburger-nav-item {% if request.resolver_match.url_name == 'library' %}active{% endif %}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <span>Library</span>
+            </a>
+            <a href="{% url 'new_entry' %}" class="hamburger-nav-item {% if request.resolver_match.url_name == 'new_entry' %}active{% endif %}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                <span>Write Entry</span>
+            </a>
+            <a href="{% url 'insights' %}" class="hamburger-nav-item {% if request.resolver_match.url_name == 'insights' %}active{% endif %}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <span>Insights</span>
+            </a>
+        `;
+    } else {
+        nav.innerHTML = `
+            <a href="{% url 'home' %}" class="hamburger-nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span>Home</span>
+            </a>
+            <a href="{% url 'account_signup' %}" class="hamburger-nav-item {% if request.resolver_match.url_name == 'account_signup' %}active{% endif %}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Start Earning</span>
+            </a>
+            <a href="{% url 'account_login' %}" class="hamburger-nav-item {% if request.resolver_match.url_name == 'account_login' %}active{% endif %}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+                <span>Login</span>
+            </a>
+        `;
     }
+}
 
-    function toggleDropdown() {
-        if (isDropdownOpen) {
-            closeDropdown();
-        } else {
-            openDropdown();
-        }
+function updateHamburgerAuthSection(isConnected) {
+    const authSection = document.getElementById('hamburgerAuthSection');
+    
+    if (isConnected) {
+        authSection.innerHTML = `
+            <button onclick="handleLogout()" class="w-full hamburger-nav-item justify-center bg-red-50 text-red-600 hover:bg-red-100">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>Logout</span>
+            </button>
+        `;
+    } else {
+        authSection.innerHTML = `
+            <a href="{% url 'account_login' %}" class="w-full hamburger-nav-item justify-center bg-primary-50 text-primary-600 hover:bg-primary-100">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+                <span>Login</span>
+            </a>
+        `;
     }
+}
 
-    // Event listeners
-    menuToggle?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleDropdown();
-    });
+// Wallet connection functions for menu
+function connectWalletFromMenu() {
+    closeHamburgerMenu();
+    setTimeout(() => {
+        connectWallet();
+    }, 300);
+}
 
-    overlay?.addEventListener('click', closeDropdown);
+function disconnectWalletFromMenu() {
+    closeHamburgerMenu();
+    setTimeout(() => {
+        disconnectWallet();
+    }, 300);
+}
 
-    // Close on escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && isDropdownOpen) {
-            closeDropdown();
-        }
-    });
+function connectWalletRequired() {
+    document.getElementById('walletRequiredOverlay').classList.remove('show');
+    connectWallet();
+}
 
-    // Auto-close when clicking dropdown items that are navigation links
-    const dropdownItems = document.querySelectorAll('.dropdown-item');
-    dropdownItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            // Only auto-close for actual navigation links, not buttons or forms
-            if (item.tagName === 'A' && item.href && !item.href.includes('javascript:')) {
-                closeDropdown();
-            }
-        });
-    });
-
-    // Make closeDropdown available globally
-    window.closeDropdown = closeDropdown;
+function handleLogout() {
+    if (window.walletState.isConnected) {
+        disconnectWallet();
+    }
+    // Redirect to home or handle traditional logout
+    window.location.href = '{% url "home" %}';
 }
 
 // Handle smooth scrolling for the no-scrollbar design
@@ -1260,7 +1756,6 @@ function initSmoothScrolling() {
 
 // Initialize auto-connect for returning users
 function initAutoConnect() {
-    // Check if user had a wallet connected previously
     const wasConnected = localStorage.getItem('walletConnected') === 'true';
     const savedAddress = localStorage.getItem('walletAddress');
     
@@ -1277,41 +1772,37 @@ function initAutoConnect() {
     }
 }
 
-// Enhanced wallet connection functions that work with the dropdown
-window.connectWalletAndCloseMenu = function(walletType = 'metamask', button = null) {
-    if (window.closeDropdown) {
-        window.closeDropdown();
-    }
-    setTimeout(() => {
-        connectWallet(walletType, button);
-    }, 300);
-};
-
-window.openWalletModalAndCloseMenu = function() {
-    if (window.closeDropdown) {
-        window.closeDropdown();
-    }
-    setTimeout(() => {
-        connectWallet();
-    }, 300);
-};
-
 // Make functions globally available
 window.connectWallet = connectWallet;
-window.openWalletModal = connectWallet;
 window.disconnectWallet = disconnectWallet;
 window.getWalletInfo = getWalletInfo;
 window.switchToBaseNetwork = switchToBaseNetwork;
 window.showWalletOptions = showWalletOptions;
-window.handleWalletConnection = connectWallet;
+window.openHamburgerMenu = openHamburgerMenu;
+window.closeHamburgerMenu = closeHamburgerMenu;
+window.connectWalletFromMenu = connectWalletFromMenu;
+window.disconnectWalletFromMenu = disconnectWalletFromMenu;
+window.connectWalletRequired = connectWalletRequired;
+window.handleLogout = handleLogout;
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize smooth scrolling for no-scrollbar design
-    initSmoothScrolling();
+    // Initialize hamburger menu
+    const menuToggle = document.getElementById('menuToggleBtn');
+    const hamburgerOverlay = document.getElementById('hamburgerOverlay');
     
-    // Initialize dropdown menu
-    initializeModernDropdown();
+    menuToggle?.addEventListener('click', openHamburgerMenu);
+    hamburgerOverlay?.addEventListener('click', closeHamburgerMenu);
+    
+    // Close menu on escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeHamburgerMenu();
+        }
+    });
+    
+    // Initialize smooth scrolling
+    initSmoothScrolling();
     
     // Initialize auto-connect
     initAutoConnect();
@@ -1320,6 +1811,21 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         initializeWallet();
     }, 500);
+    
+    // Check page access after wallet initialization
+    setTimeout(() => {
+        window.walletAuthSystem.checkPageAccess();
+    }, 1000);
+    
+    // Listen for wallet connection changes
+    window.addEventListener('walletConnectionChanged', function(event) {
+        updateHamburgerMenuContent();
+        
+        // If wallet disconnected on protected page, show modal
+        if (!event.detail.isConnected && window.walletAuthSystem.checkPageAccess() === false) {
+            document.getElementById('walletRequiredOverlay').classList.add('show');
+        }
+    });
 });
 
 // Handle page visibility changes
@@ -1341,11 +1847,8 @@ window.addEventListener('beforeunload', function() {
         localStorage.setItem('walletAddress', window.walletState.address);
     }
 });
-
   </script>
 
-
-  <!-- JavaScript will be added later -->
   {% block extra_js %}{% endblock %}
 </body>
 </html>

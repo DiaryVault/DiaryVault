@@ -1,7 +1,8 @@
-import uuid
+# Core Python
 import json
 import logging
 import time
+import uuid
 from datetime import datetime
 
 # Django core
@@ -9,15 +10,15 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.backends import ModelBackend
 from django.core.cache import cache
-from django.urls import reverse
 from django.db.models import Count, Avg
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.contrib.auth.backends import ModelBackend
 
 # Django REST framework
 from rest_framework import status, permissions
@@ -25,16 +26,14 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 
-# Local imports
+# Local app imports
 from .. import models
 from ..models import Entry, Journal, Tag, JournalEntry
+from ..serializers import NonceRequestSerializer, Web3LoginSerializer, UserProfileSerializer
+from ..services.ai_service import AIService
 from ..utils.ai_helpers import generate_ai_content, generate_ai_content_personalized
 from ..utils.analytics import get_content_hash, auto_generate_tags
-from ..services.ai_service import AIService
 from diary.models import Web3Nonce, WalletSession
-from ..serializers import (
-    NonceRequestSerializer, Web3LoginSerializer, UserProfileSerializer
-)
 from diary.utils.Web3Utils import Web3Utils
 
 # Initialize
@@ -1881,5 +1880,70 @@ def connect_wallet_session(request):
                 'success': False,
                 'error': str(e)
             }, status=500)
+    
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+@csrf_exempt
+def wallet_connect_api(request):
+    """API endpoint to handle wallet connection"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            wallet_address = data.get('address')
+            chain_id = data.get('chainId')
+            
+            if wallet_address:
+                # Store wallet connection in session
+                request.session['wallet_connected'] = True
+                request.session['wallet_address'] = wallet_address
+                request.session['wallet_chain_id'] = chain_id
+                request.session['wallet_connected_at'] = timezone.now().isoformat()
+                
+                # Get or create user based on wallet
+                user, created = User.objects.get_or_create(
+                    username=f'wallet_{wallet_address[:8]}',
+                    defaults={
+                        'email': f'{wallet_address[:8]}@diaryvault.local',
+                        'is_wallet_user': True,
+                    }
+                )
+                
+                # Log the user in
+                from django.contrib.auth import login
+                login(request, user)
+                
+                return JsonResponse({
+                    'success': True,
+                    'wallet_address': wallet_address,
+                    'user_created': created,
+                    'redirect': reverse('dashboard')
+                })
+            
+            return JsonResponse({'error': 'Invalid wallet address'}, status=400)
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@csrf_exempt
+def wallet_disconnect_api(request):
+    """API endpoint to handle wallet disconnection"""
+    if request.method == 'POST':
+        # Clear wallet session data
+        request.session.pop('wallet_connected', None)
+        request.session.pop('wallet_address', None)
+        request.session.pop('wallet_chain_id', None)
+        request.session.pop('wallet_connected_at', None)
+        
+        # Log the user out
+        from django.contrib.auth import logout
+        logout(request)
+        
+        return JsonResponse({
+            'success': True,
+            'redirect': reverse('home')
+        })
     
     return JsonResponse({'error': 'Method not allowed'}, status=405)

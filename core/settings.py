@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'diary',
-    'web3auth',  # 👈 ADD THIS - Your new Web3 authentication app
+    'web3auth',  # Your Web3 authentication app
     'widget_tweaks',
     'django.contrib.sites',
 
@@ -56,13 +56,13 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.microsoft',
     
     # Web3 & API support
-    'corsheaders',  # 👈 ADD THIS - For Web3 API CORS
-    'rest_framework',  # 👈 ADD THIS - For Web3 API
-    'rest_framework.authtoken',  # 👈 ADD THIS - For Web3 token auth
+    'corsheaders',  # For Web3 API CORS
+    'rest_framework',  # For Web3 API
+    'rest_framework.authtoken',  # For Web3 token auth
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # 👈 ADD THIS - Must be at the top
+    'corsheaders.middleware.CorsMiddleware',  # Must be at the top
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -70,8 +70,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-     # 'diary.middleware.RateLimitMiddleware',  # Your existing rate limiting
+    # 'diary.middleware.RateLimitMiddleware',  # Your existing rate limiting (commented out)
     'diary.middleware.PendingEntryMiddleware',  # Your existing middleware
+    'diary.views.wallet_auth.WalletAuthenticationMiddleware',  # Web3 wallet auth middleware
     'allauth.account.middleware.AccountMiddleware',
 ]
 
@@ -110,7 +111,7 @@ SITE_ID = 1
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
-    'diary.views.web3_auth.Web3AuthenticationBackend',  # 👈 ADD THIS - Web3 auth backend
+    'diary.views.web3_auth.Web3AuthenticationBackend',  # Web3 auth backend
 ]
 
 # Database
@@ -247,7 +248,7 @@ ANONYMOUS_SESSION_EXPIRY = 86400 * 7  # 7 days
 # END WEB3 & SESSION CONFIGURATION
 # ===========================================
 
-# FIXED: Django-allauth settings for email-only signup (username auto-generated)
+# Django-allauth settings for email-only signup (username auto-generated)
 ACCOUNT_AUTHENTICATION_METHOD = 'email'  # Use email for login (cleaner UX)
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False  # Don't require username during signup - auto-generate it
@@ -270,7 +271,7 @@ ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
 ACCOUNT_UNIQUE_EMAIL = True  # Allow duplicate emails if needed
 ACCOUNT_PREVENT_ENUMERATION = False  # Don't block based on existing emails
 
-# FIXED: Social account settings (separate from regular signup)
+# Social account settings (separate from regular signup)
 SOCIALACCOUNT_AUTO_SIGNUP = True  # Skip signup form for social accounts
 SOCIALACCOUNT_SIGNUP_FORM_CLASS = None  # No additional signup form for social
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Don't require email verification for social
@@ -279,7 +280,7 @@ SOCIALACCOUNT_QUERY_EMAIL = True  # Always fetch email from provider
 SOCIALACCOUNT_LOGIN_ON_GET = True  # Allow social login via GET
 SOCIALACCOUNT_STORE_TOKENS = False
 
-# FIXED: Enhanced SOCIALACCOUNT_PROVIDERS with better configuration
+# Enhanced SOCIALACCOUNT_PROVIDERS with better configuration
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
@@ -454,7 +455,7 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute=15, hour='*/4'),  # Every 4 hours
     },
     
-    # 👈 ADD WEB3 CLEANUP TASKS
+    # WEB3 CLEANUP TASKS
     'cleanup-expired-nonces': {
         'task': 'web3auth.tasks.cleanup_expired_nonces',
         'schedule': crontab(minute='*/5'),  # Every 5 minutes
@@ -464,7 +465,7 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=3, minute=0),  # Daily at 3 AM
     },
     
-    # 👈 ADD ANONYMOUS SESSION CLEANUP
+    # ANONYMOUS SESSION CLEANUP
     'cleanup-anonymous-sessions': {
         'task': 'diary.tasks.cleanup_anonymous_sessions',
         'schedule': crontab(hour=4, minute=0),  # Daily at 4 AM
@@ -507,7 +508,7 @@ LOGGING = {
             'backupCount': 10,
             'formatter': 'verbose',
         },
-        'web3_file': {  # 👈 ADD WEB3 LOGGING
+        'web3_file': {  # WEB3 LOGGING
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(LOGS_DIR, 'web3.log'),
@@ -534,7 +535,7 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
-        'web3auth': {  # 👈 ADD WEB3 LOGGING
+        'web3auth': {  # WEB3 LOGGING
             'handlers': ['web3_file', 'console'],
             'level': 'INFO',
             'propagate': True,

@@ -30,6 +30,9 @@ from ..services.ai_service import AIService
 from allauth.account.utils import get_next_redirect_url
 from allauth.account.views import LoginView as AllauthLoginView, SignupView as AllauthSignupView
 
+from django.shortcuts import render
+from .wallet_auth import wallet_required, wallet_optional
+
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
@@ -829,3 +832,29 @@ class CustomSignupView(AllauthSignupView):
             messages.success(self.request, "Welcome to DiaryVault! Your account has been created successfully.")
 
         return response
+
+@wallet_required
+def dashboard_view(request):
+    """Dashboard view - requires wallet connection"""
+    context = {
+        'wallet_address': request.session.get('wallet_address'),
+        'entries': Entry.objects.filter(user=request.user).order_by('-created_at')[:10],
+    }
+    return render(request, 'dashboard.html', context)
+
+@wallet_required
+def library_view(request):
+    """Library view - requires wallet connection"""
+    context = {
+        'entries': Entry.objects.filter(user=request.user).order_by('-created_at'),
+    }
+    return render(request, 'library.html', context)
+
+@wallet_optional
+def home_view(request):
+    """Home view - wallet connection optional"""
+    context = {
+        'wallet_connected': request.wallet_connected,
+        'wallet_address': request.wallet_address,
+    }
+    return render(request, 'home.html', context)
