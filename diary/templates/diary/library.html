@@ -628,13 +628,8 @@
       color: #4f46e5;
     }
 
-    .page-content {
-      padding-bottom: 4.5rem;
-    }
-
-    .floating-action-button {
-      bottom: 5rem;
-    }
+    /* FIXED: Remove page-content padding-bottom that causes overflow */
+    /* The main-content-wrapper in base.html already handles scrolling */
   }
 
   /* Floating action button */
@@ -658,6 +653,12 @@
   .floating-action-button:hover {
     transform: scale(1.05);
     box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4);
+  }
+
+  @media (max-width: 768px) {
+    .floating-action-button {
+      bottom: 5rem;
+    }
   }
 
   /* Blob animations from base template */
@@ -708,7 +709,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-6 page-content relative">
+<!-- FIXED: Removed max-w-7xl and custom padding/margin that interferes with base layout -->
+<div class="w-full">
   <!-- Breadcrumb Navigation -->
   <nav class="mb-4 animate-fade-in" aria-label="Breadcrumb">
     <ol class="flex items-center space-x-2 text-sm">
@@ -1368,7 +1370,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function initMobileFeatures() {
   if (window.innerWidth <= 768) {
     document.querySelector('.mobile-bottom-nav')?.classList.remove('hidden');
-    document.querySelector('.page-content')?.classList.add('pb-16');
+    // NOTE: We don't add pb-16 to page-content anymore since the base template handles scrolling
   }
 
   // Touch-friendly journal card previews
@@ -1599,14 +1601,12 @@ document.querySelectorAll('.calendar-day').forEach(day => {
 // Handle window resize
 window.addEventListener('resize', function() {
   const mobileNav = document.querySelector('.mobile-bottom-nav');
-  const pageContent = document.querySelector('.page-content');
 
   if (window.innerWidth <= 768) {
     if (mobileNav) mobileNav.classList.remove('hidden');
-    if (pageContent) pageContent.classList.add('pb-16');
+    // NOTE: We don't add pb-16 anymore
   } else {
     if (mobileNav) mobileNav.classList.add('hidden');
-    if (pageContent) pageContent.classList.remove('pb-16');
   }
 });
 
