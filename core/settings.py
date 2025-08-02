@@ -608,3 +608,8 @@ TOKEN_REWARDS = {
         'long': 1.5,  # 200+ words
     }
 }
+
+
+# Blockchain settings
+BLOCKCHAIN_RPC_URL = 'ws://localhost:9944'
+BLOCKCHAIN_CONTRACT_ADDRESS = 'YOUR_DEPLOYED_CONTRACT_ADDRESS'
