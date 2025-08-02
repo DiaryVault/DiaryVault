@@ -85,18 +85,37 @@
     50% { transform: translateY(-10px) rotate(2deg); }
   }
 
-  /* Table of Contents Navigation - NOT STICKY */
+  /* Table of Contents Navigation - Enhanced Visual Design */
   .table-of-contents {
-    background: rgba(255, 255, 255, 0.95);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.95) 100%);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
     border-radius: 24px;
     padding: 2rem;
     margin-bottom: 3rem;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
     position: relative;
     overflow: hidden;
+  }
+
+  .table-of-contents::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #6366f1, #8b5cf6, #ec4899, #6366f1);
+    border-radius: 24px;
+    opacity: 0.1;
+    z-index: -1;
+    animation: gradient-rotate 10s linear infinite;
+  }
+
+  @keyframes gradient-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
   .table-of-contents::before {
@@ -231,16 +250,17 @@
     color: #6366f1;
   }
 
-  /* Enhanced Sections - use base.html glass-card system */
+  /* Enhanced Sections with gradient borders */
   .privacy-section {
-    background: rgba(255, 255, 255, 0.9);
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(249, 250, 251, 0.9));
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-radius: 24px;
     padding: 3rem;
     margin-bottom: 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03), 0 2px 10px rgba(0, 0, 0, 0.06);
     transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
     position: relative;
     overflow: hidden;
@@ -251,10 +271,15 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
-    opacity: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 24px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.5;
     transition: opacity 0.3s ease;
   }
 
@@ -263,12 +288,11 @@
   }
 
   .privacy-section:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-    background: rgba(255, 255, 255, 0.95);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 5px 20px rgba(0, 0, 0, 0.1);
   }
 
-  /* Section Titles - match base.html typography */
+  /* Section Titles with floating icon animation */
   .section-title {
     font-size: 2rem;
     font-weight: 800;
@@ -290,13 +314,30 @@
     align-items: center;
     justify-content: center;
     color: white;
-    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
-    animation: iconPulse 3s ease-in-out infinite;
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3), 0 0 0 4px rgba(99, 102, 241, 0.1);
+    animation: iconFloat 3s ease-in-out infinite;
+    position: relative;
+  }
+
+  .section-icon::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    opacity: 0.3;
+    z-index: -1;
+    animation: iconPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes iconFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
   }
 
   @keyframes iconPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.1); opacity: 0.1; }
   }
 
   /* Content styling - integrate with base.html */
@@ -866,15 +907,40 @@
 
   <div class="privacy-container">
   <div class="privacy-container">
-    <!-- Simplified Header Section -->
-    <div class="text-center mb-8">
-      <h1 class="text-3xl sm:text-4xl font-black mb-3 diary-font text-gray-900">Privacy Policy</h1>
-      <p class="text-lg text-gray-600 max-w-2xl mx-auto">Your wallet is your identity. Your thoughts are your property. No email, no tracking, no compromise.</p>
-      <div class="mt-4 inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-4 py-2 rounded-full text-sm font-medium">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span>Web3 Privacy First</span>
+    <!-- Stylish but Compact Header -->
+    <div class="relative mb-8 p-8 rounded-3xl bg-gradient-to-br from-primary-50 via-purple-50 to-pink-50 border border-white/50 shadow-xl overflow-hidden">
+      <!-- Decorative elements -->
+      <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary-200/20 to-purple-200/20 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-pink-200/20 to-primary-200/20 rounded-full blur-2xl"></div>
+      
+      <div class="relative text-center">
+        <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-primary-500 to-purple-600 rounded-2xl shadow-lg animate-float">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-black mb-3 diary-font bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">Privacy Policy</h1>
+        <p class="text-lg text-gray-700 max-w-2xl mx-auto font-medium">Your wallet is your identity. Your thoughts are your property.</p>
+        <div class="mt-4 flex flex-wrap items-center justify-center gap-3">
+          <span class="inline-flex items-center gap-2 bg-white/80 backdrop-blur text-primary-700 px-4 py-2 rounded-full text-sm font-semibold shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span>Web3 Privacy</span>
+          </span>
+          <span class="inline-flex items-center gap-2 bg-white/80 backdrop-blur text-green-700 px-4 py-2 rounded-full text-sm font-semibold shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V9a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <span>No Email Required</span>
+          </span>
+          <span class="inline-flex items-center gap-2 bg-white/80 backdrop-blur text-purple-700 px-4 py-2 rounded-full text-sm font-semibold shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Earn Rewards</span>
+          </span>
+        </div>
       </div>
     </div>
 
