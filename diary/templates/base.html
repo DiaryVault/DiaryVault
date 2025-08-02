@@ -265,6 +265,13 @@
         flex-direction: column;
         height: 100vh;
         overflow: hidden;
+        padding-top: 56px; /* Space for fixed header */
+      }
+
+      @media (min-width: 640px) {
+        #app-container {
+          padding-top: 64px; /* Larger header space on desktop */
+        }
       }
 
       /* Content area that can scroll */
@@ -273,6 +280,7 @@
         overflow-y: auto;
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
+        height: 100%;
       }
 
       /* Hide scrollbar but keep functionality */
@@ -283,6 +291,18 @@
       #main-content-wrapper {
         -ms-overflow-style: none;
         scrollbar-width: none;
+      }
+
+      /* Safe area padding for mobile notches */
+      .safe-top {
+        padding-top: env(safe-area-inset-top);
+      }
+
+      /* Mobile header height adjustment */
+      @media (max-width: 640px) {
+        header {
+          min-height: 56px;
+        }
       }
 
       /* Global wallet status indicator */
@@ -769,32 +789,29 @@
       <span id="globalWalletAddress"></span>
     </div>
 
-    <!-- Enhanced Header -->
-    <header class="sticky top-0 z-50 w-full glass-nav transition-all duration-300"
-            x-data="{ scrolled: false }"
-            x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 20 })"
-            :class="{ 'shadow-soft-lg': scrolled }">
-        <div class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+    <!-- Enhanced Header with Mobile Optimization -->
+    <header class="fixed top-0 left-0 right-0 z-50 w-full glass-nav transition-all duration-300 safe-top">
+        <div class="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3">
             <div class="flex items-center justify-between">
-                <!-- Enhanced Logo -->
+                <!-- Logo Section - Optimized for Mobile -->
                 <div class="flex items-center">
-                    <a href="{% if user.is_authenticated or wallet_connected %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center gap-3 group">
+                    <a href="{% if user.is_authenticated or wallet_connected %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center gap-2 sm:gap-3 group">
                         <div class="relative">
-                            <div class="absolute inset-0 bg-primary-500 rounded-xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                            <div class="relative p-2.5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-soft group-hover:shadow-glow transition-all duration-300 group-hover:scale-105">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <div class="absolute inset-0 bg-primary-500 rounded-lg sm:rounded-xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                            <div class="relative p-2 sm:p-2.5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg sm:rounded-xl shadow-soft group-hover:shadow-glow transition-all duration-300 group-hover:scale-105">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                 </svg>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            <h1 class="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent diary-font">DiaryVault</h1>
-                            <span class="brand-badge">Beta</span>
+                            <h1 class="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent diary-font">DiaryVault</h1>
+                            <span class="brand-badge scale-90 sm:scale-100">Beta</span>
                         </div>
                     </a>
                 </div>
 
-                <!-- Center Navigation Tabs (visible when wallet is connected) -->
+                <!-- Center Navigation Tabs - Hidden on Mobile -->
                 <nav id="walletNavTabs" class="wallet-nav-tabs hidden lg:flex">
                     <a href="{% url 'dashboard' %}" class="wallet-nav-tab {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -822,16 +839,24 @@
                     </a>
                 </nav>
 
-                <!-- Right Section -->
-                <div class="flex items-center gap-3">
-                    <!-- Enhanced Menu Toggle -->
+                <!-- Right Section - Menu Button -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Mobile Wallet Status Indicator -->
+                    <div id="mobileWalletIndicator" class="flex lg:hidden items-center gap-2">
+                        <div id="mobileWalletConnected" class="hidden px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                            <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                            <span id="mobileWalletAddressShort"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Menu Toggle Button -->
                     <div class="menu-toggle-wrapper">
                         {% if unread_notifications > 0 %}
                         <div class="menu-notification-badge">
                             {{ unread_notifications }}
                         </div>
                         {% endif %}
-                        <button id="menuToggleBtn" class="menu-toggle-modern">
+                        <button id="menuToggleBtn" class="menu-toggle-modern" aria-label="Open menu">
                             <div class="menu-icon">
                                 <span></span>
                                 <span></span>
@@ -1397,9 +1422,9 @@ function updateWalletState(isConnected, address, chainId) {
     }
 }
 
-// Update global wallet UI
+// Update global wallet UI with mobile support
 function updateGlobalWalletUI(isConnected, address, chainId) {
-    // Update global wallet indicator
+    // Update global wallet indicator (desktop)
     const globalIndicator = document.getElementById('globalWalletIndicator');
     const globalAddressSpan = document.getElementById('globalWalletAddress');
     
@@ -1421,6 +1446,26 @@ function updateGlobalWalletUI(isConnected, address, chainId) {
             }
         } else {
             globalIndicator.classList.remove('connected', 'disconnected');
+        }
+    }
+
+    // Update mobile wallet indicator
+    const mobileIndicator = document.getElementById('mobileWalletConnected');
+    const mobileAddressSpan = document.getElementById('mobileWalletAddressShort');
+    
+    if (mobileIndicator && mobileAddressSpan) {
+        if (isConnected && address) {
+            mobileIndicator.classList.remove('hidden');
+            mobileAddressSpan.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+            
+            // Update color based on network
+            if (chainId && chainId !== 8453) {
+                mobileIndicator.className = 'flex px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium';
+            } else {
+                mobileIndicator.className = 'flex px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium';
+            }
+        } else {
+            mobileIndicator.classList.add('hidden');
         }
     }
 
