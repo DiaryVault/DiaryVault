@@ -1385,16 +1385,29 @@
           <div class="text-xs font-medium text-gray-500 py-1">S</div>
         </div>
 
-        <!-- Calendar grid - Simplified example -->
+        <!-- Calendar grid -->
         <div class="calendar-view">
-          {% for day in calendar_days|default:"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30"|make_list %}
-            <div class="calendar-day {% if day in entries_dates %}has-entry{% endif %} {% if day|divisibleby:7 %}weekend{% endif %}">
-              <span class="calendar-day-number">{{ day }}</span>
-              {% if day in entries_dates %}
-                <div class="calendar-day-indicator"></div>
-              {% endif %}
-            </div>
-          {% endfor %}
+          <!-- Generate calendar days properly -->
+          {% if calendar_days %}
+            {% for day in calendar_days %}
+              <div class="calendar-day {% if day.has_entry %}has-entry{% endif %} {% if day.is_weekend %}weekend{% endif %}">
+                <span class="calendar-day-number">{{ day.number }}</span>
+                {% if day.has_entry %}
+                  <div class="calendar-day-indicator"></div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          {% else %}
+            <!-- Fallback calendar without divisibleby filter -->
+            {% for i in "123456789012345678901234567890"|make_list|slice:":30" %}
+              <div class="calendar-day {% if forloop.counter in entries_dates %}has-entry{% endif %} {% if forloop.counter0|add:1 == 1 or forloop.counter0|add:1 == 7 or forloop.counter0|add:1 == 8 or forloop.counter0|add:1 == 14 or forloop.counter0|add:1 == 15 or forloop.counter0|add:1 == 21 or forloop.counter0|add:1 == 22 or forloop.counter0|add:1 == 28 or forloop.counter0|add:1 == 29 %}weekend{% endif %}">
+                <span class="calendar-day-number">{{ forloop.counter }}</span>
+                {% if forloop.counter in entries_dates %}
+                  <div class="calendar-day-indicator"></div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          {% endif %}
         </div>
       </div>
 
