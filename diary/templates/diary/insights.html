@@ -4,41 +4,8 @@
 
 {% block extra_css %}
 <style>
-  /* SMOOTH SCROLLING - Conflict-free CSS */
-
-  /* MINIMAL SCROLLBAR STYLING */
-  :root {
-    --scrollbar-width: 6px;
-    --scrollbar-track: rgba(0, 0, 0, 0.05);
-    --scrollbar-thumb: rgba(0, 0, 0, 0.2);
-    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
-  }
-
-  /* Default minimal scrollbars for main content */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-  }
-
-  *::-webkit-scrollbar {
-    width: var(--scrollbar-width);
-    height: var(--scrollbar-width);
-  }
-
-  *::-webkit-scrollbar-track {
-    background: var(--scrollbar-track);
-    border-radius: 3px;
-  }
-
-  *::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb);
-    border-radius: 3px;
-    transition: background 0.2s ease;
-  }
-
-  *::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-thumb-hover);
-  }
+  /* FIXED: Removed custom scrollbar styling that conflicts with base template */
+  /* The base template already handles scrolling properly */
 
   /* Enhanced card styling */
   .insight-card {
@@ -109,6 +76,17 @@
     overflow-x: hidden;
     padding: 0.5rem;
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide scrollbar for mood items grid */
+  .mood-items-grid::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .mood-items-grid {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   .mood-item {
@@ -200,6 +178,17 @@
     overflow-x: hidden;
     padding: 0.5rem;
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide scrollbar for topic list */
+  .topic-list::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .topic-list {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   .topic-item {
@@ -301,6 +290,17 @@
     overflow-x: hidden;
     padding: 0.5rem;
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide scrollbar for content list */
+  .content-list::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .content-list {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   .pattern-card {
@@ -467,27 +467,17 @@
     }
   }
 
-  /* Smooth scrolling for the entire page */
-  html {
-    scroll-behavior: smooth;
-    /* Ensure main page scrollbar is always visible */
-    overflow-y: auto;
-    overflow-x: hidden;
+  /* FIXED: Decorative element constraints */
+  .decorative-blob {
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
   }
 
-  body {
-    /* Prevent horizontal scroll */
-    overflow-x: hidden;
-  }
-
-  /* Ensure no horizontal scroll on the main content */
-  .max-w-7xl {
-    overflow-x: hidden;
-  }
-
-  /* Improve overall scrolling performance */
-  * {
-    -webkit-overflow-scrolling: touch;
+  @media (max-width: 768px) {
+    .decorative-blob {
+      display: none !important;
+    }
   }
 </style>
 
@@ -496,10 +486,11 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto relative">
-  <!-- Simplified decorative elements -->
-  <div class="absolute -top-10 -left-16 h-48 w-48 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
-  <div class="absolute -bottom-32 -right-16 h-48 w-48 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
+<!-- FIXED: Removed max-w-7xl and mx-auto to let base template handle spacing -->
+<div class="w-full relative">
+  <!-- FIXED: Better constrained decorative elements -->
+  <div class="decorative-blob -top-10 -left-16 h-48 w-48 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 hidden sm:block"></div>
+  <div class="decorative-blob -bottom-32 -right-16 h-48 w-48 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 hidden sm:block"></div>
 
   <!-- Messages -->
   {% if messages %}
@@ -530,16 +521,16 @@
   {% endif %}
 
   <!-- Header Section -->
-  <div class="text-center mb-12">
+  <div class="text-center mb-8 sm:mb-12">
     <div class="inline-block mb-4">
       <span class="px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full text-sm font-medium text-gray-600 shadow-lg border border-white/50">
         🧠 Your Journal Insights
       </span>
     </div>
-    <h1 class="text-4xl sm:text-5xl font-bold text-gray-800 diary-font mb-4">
+    <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 diary-font mb-4">
       AI-Powered Insights
     </h1>
-    <p class="text-gray-600 text-lg max-w-2xl mx-auto mb-8">
+    <p class="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto mb-6 sm:mb-8 px-4">
       Discover patterns, trends, and meaningful insights from your journaling journey
     </p>
 
@@ -818,27 +809,27 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>
         </div>
-        <h2 class="text-3xl font-bold text-gray-800 diary-font mb-4">Ready to add a new entry?</h2>
-        <p class="text-gray-600 text-lg leading-relaxed mb-8">The more you journal, the richer your insights become. Each entry adds depth to your personal story.</p>
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 diary-font mb-4">Ready to add a new entry?</h2>
+        <p class="text-gray-600 text-base sm:text-lg leading-relaxed mb-8 px-4">The more you journal, the richer your insights become. Each entry adds depth to your personal story.</p>
 
         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
           {% if user.is_authenticated %}
-          <a href="{% url 'new_entry' %}" class="btn-primary text-white px-8 py-4 rounded-full inline-flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all text-lg font-medium">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <a href="{% url 'new_entry' %}" class="btn-primary text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full inline-flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all text-base sm:text-lg font-medium">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
             <span>Write New Journal Entry</span>
           </a>
           {% else %}
-          <a href="{% url 'signup' %}" class="btn-primary text-white px-8 py-4 rounded-full inline-flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all text-lg font-medium">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <a href="{% url 'signup' %}" class="btn-primary text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full inline-flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all text-base sm:text-lg font-medium">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
             <span>Create Account to Start</span>
           </a>
           {% endif %}
 
-          <a href="{% url 'dashboard' %}" class="btn-secondary text-gray-700 hover:text-gray-800 px-6 py-4 rounded-full inline-flex items-center gap-2 transition-all text-lg font-medium">
+          <a href="{% url 'dashboard' %}" class="btn-secondary text-gray-700 hover:text-gray-800 px-6 py-3 sm:py-4 rounded-full inline-flex items-center gap-2 transition-all text-base sm:text-lg font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
@@ -853,45 +844,22 @@
 
 {% block extra_js %}
 <script>
-// CONFLICT-FREE JavaScript - Smooth scrolling enabled with NO SCROLLBARS
+// Initialize charts and smooth scrolling
 document.addEventListener('DOMContentLoaded', function() {
-  // Store original scroll functions to restore later
-  const originalPreventHorizontalScrolling = window.preventHorizontalScrolling;
-
-  // Temporarily disable the base template's scroll interference
-  if (window.preventHorizontalScrolling) {
-    window.removeEventListener('scroll', window.preventHorizontalScrolling);
-  }
-
-  // Enable smooth scrolling for this page
-  document.documentElement.style.scrollBehavior = 'smooth';
-
-  // Initialize charts only - no scroll interference
+  // Initialize charts only
   if (typeof Chart !== 'undefined') {
     initializeCharts();
   }
 
-  // Add smooth scrolling behavior to all scrollable containers
+  // Add smooth scrolling behavior to scrollable containers
   const scrollableContainers = document.querySelectorAll('.mood-items-grid, .topic-list, .content-list');
   scrollableContainers.forEach(container => {
     container.style.scrollBehavior = 'smooth';
     container.style.overflowX = 'hidden';
-
-    // Enhance scroll performance
     container.style.webkitOverflowScrolling = 'touch';
   });
 
-  // Custom smooth scroll function for insights page
-  function smoothScrollTo(element, position) {
-    if (!element) return;
-
-    element.scrollTo({
-      top: position,
-      behavior: 'smooth'
-    });
-  }
-
-  // Add keyboard navigation only for remaining scrollable areas (mood grid)
+  // Add keyboard navigation for scrollable areas
   scrollableContainers.forEach(container => {
     container.addEventListener('keydown', function(e) {
       const scrollAmount = 50;
@@ -899,45 +867,30 @@ document.addEventListener('DOMContentLoaded', function() {
       switch(e.key) {
         case 'ArrowDown':
           e.preventDefault();
-          smoothScrollTo(this, this.scrollTop + scrollAmount);
+          this.scrollTop += scrollAmount;
           break;
         case 'ArrowUp':
           e.preventDefault();
-          smoothScrollTo(this, this.scrollTop - scrollAmount);
+          this.scrollTop -= scrollAmount;
           break;
         case 'PageDown':
           e.preventDefault();
-          smoothScrollTo(this, this.scrollTop + this.clientHeight);
+          this.scrollTop += this.clientHeight;
           break;
         case 'PageUp':
           e.preventDefault();
-          smoothScrollTo(this, this.scrollTop - this.clientHeight);
+          this.scrollTop -= this.clientHeight;
           break;
         case 'Home':
           e.preventDefault();
-          smoothScrollTo(this, 0);
+          this.scrollTop = 0;
           break;
         case 'End':
           e.preventDefault();
-          smoothScrollTo(this, this.scrollHeight);
+          this.scrollTop = this.scrollHeight;
           break;
       }
     });
-  });
-
-  // Restore base template scroll monitoring after page is fully loaded
-  window.addEventListener('load', function() {
-    setTimeout(() => {
-      // Re-enable horizontal scroll prevention but not vertical
-      if (originalPreventHorizontalScrolling) {
-        window.addEventListener('scroll', function() {
-          // Only prevent horizontal scrolling, allow vertical
-          if (window.scrollX !== 0) {
-            window.scrollTo(0, window.scrollY);
-          }
-        }, { passive: true });
-      }
-    }, 1000);
   });
 });
 
@@ -1054,7 +1007,7 @@ const animationObserver = new IntersectionObserver((entries) => {
   });
 }, observerOptions);
 
-// Observe cards for animation (now all content flows naturally)
+// Observe cards for animation
 document.querySelectorAll('.insight-card, .mood-item, .topic-item, .pattern-card, .suggestion-card').forEach(el => {
   el.style.opacity = '0';
   el.style.transform = 'translateY(20px)';
