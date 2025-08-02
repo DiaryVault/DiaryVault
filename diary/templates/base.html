@@ -938,16 +938,17 @@ function updateGlobalWalletUI(isConnected, address, chainId) {
         }
     }
 
-    // Update navigation tabs visibility - ONLY for authenticated AND wallet-connected users
+    // Update navigation tabs visibility - Show for ANY wallet-connected user
     const navTabs = document.getElementById('walletNavTabs');
     if (navTabs) {
-        // Check if user is authenticated (you can check for a user element or class)
-        const isAuthenticated = document.querySelector('.user-profile-section') !== null;
-        
-        if (isConnected && isAuthenticated) {
+        if (isConnected) {
             navTabs.classList.add('show');
+            // If wallet is connected, enable full features
+            enableWalletFeatures(address);
         } else {
             navTabs.classList.remove('show');
+            // Restrict to basic features only
+            restrictToBasicFeatures();
         }
     }
 
@@ -955,39 +956,167 @@ function updateGlobalWalletUI(isConnected, address, chainId) {
     updateMenuWalletSection(isConnected, address, chainId);
 }
 
+// Enable full features for wallet users
+function enableWalletFeatures(walletAddress) {
+    // Show all navigation items
+    document.querySelectorAll('.wallet-required').forEach(el => {
+        el.classList.remove('hidden');
+    });
+    
+    // Enable all form features
+    document.querySelectorAll('.wallet-only-feature').forEach(el => {
+        el.disabled = false;
+        el.classList.remove('opacity-50');
+    });
+    
+    // Store wallet identity for tracking
+    if (walletAddress) {
+        localStorage.setItem('primaryIdentifier', walletAddress);
+        
+        // Track wallet activity
+        trackWalletActivity(walletAddress, 'wallet_connected');
+    }
+}
+
+// Restrict to basic features only
+function restrictToBasicFeatures() {
+    // Hide wallet-only navigation items
+    document.querySelectorAll('.wallet-required').forEach(el => {
+        el.classList.add('hidden');
+    });
+    
+    // Disable wallet-only features
+    document.querySelectorAll('.wallet-only-feature').forEach(el => {
+        el.disabled = true;
+        el.classList.add('opacity-50');
+    });
+    
+    // Show limited feature notice
+    showLimitedFeatureNotice();
+}
+
+// Show limited feature notice for non-wallet users
+function showLimitedFeatureNotice() {
+    const notices = document.querySelectorAll('.limited-feature-notice');
+    notices.forEach(notice => {
+        notice.classList.remove('hidden');
+    });
+}
+
+// Track wallet activity
+function trackWalletActivity(walletAddress, action, data = {}) {
+    const activity = {
+        wallet: walletAddress,
+        action: action,
+        timestamp: new Date().toISOString(),
+        data: data
+    };
+    
+    // Store activity locally
+    const activities = JSON.parse(localStorage.getItem('walletActivities') || '[]');
+    activities.push(activity);
+    
+    // Keep last 100 activities
+    if (activities.length > 100) {
+        activities.shift();
+    }
+    
+    localStorage.setItem('walletActivities', JSON.stringify(activities));
+    
+    // Send to server if needed
+    if (window.location.pathname !== '/') {
+        sendActivityToServer(activity);
+    }
+}
+
+// Send activity to server
+async function sendActivityToServer(activity) {
+    try {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        if (!csrfToken) return;
+        
+        await fetch('/api/track-wallet-activity/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(activity)
+        });
+    } catch (error) {
+        console.error('Failed to track activity:', error);
+    }
+}
+
 // Update menu wallet section
 function updateMenuWalletSection(isConnected, address, chainId) {
-    const walletNotConnectedMenu = document.getElementById('walletNotConnectedMenu');
-    const walletConnectedMenu = document.getElementById('walletConnectedMenu');
+    const walletConnectedContent = document.getElementById('walletConnectedContent');
+    const walletNotConnectedContent = document.getElementById('walletNotConnectedContent');
     const menuWalletAddress = document.getElementById('menuWalletAddress');
     const menuWalletStatus = document.getElementById('menuWalletStatus');
+    const walletEntriesCount = document.getElementById('walletEntriesCount');
 
-    if (walletNotConnectedMenu && walletConnectedMenu) {
-        if (isConnected && address) {
-            walletNotConnectedMenu.classList.add('hidden');
-            walletConnectedMenu.classList.remove('hidden');
-            
-            if (menuWalletAddress) {
-                menuWalletAddress.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+    if (isConnected && address) {
+        // Show wallet-connected content
+        if (walletConnectedContent) walletConnectedContent.classList.remove('hidden');
+        if (walletNotConnectedContent) walletNotConnectedContent.classList.add('hidden');
+        
+        if (menuWalletAddress) {
+            menuWalletAddress.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+        }
+        
+        if (menuWalletStatus) {
+            if (chainId === 8453) {
+                menuWalletStatus.textContent = 'Base Network';
+                menuWalletStatus.className = 'text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700';
+            } else {
+                menuWalletStatus.textContent = 'Wrong Network';
+                menuWalletStatus.className = 'text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700';
             }
+        }
+        
+        // Load wallet-specific data
+        loadWalletData(address);
+    } else {
+        // Show non-wallet content
+        if (walletConnectedContent) walletConnectedContent.classList.add('hidden');
+        if (walletNotConnectedContent) walletNotConnectedContent.classList.remove('hidden');
+    }
+}
+
+// Load wallet-specific data (entries count, etc.)
+async function loadWalletData(walletAddress) {
+    const walletEntriesCount = document.getElementById('walletEntriesCount');
+    
+    try {
+        // Get stored activities
+        const activities = JSON.parse(localStorage.getItem('walletActivities') || '[]');
+        const entryCount = activities.filter(a => a.wallet === walletAddress && a.action === 'entry_created').length;
+        
+        if (walletEntriesCount) {
+            walletEntriesCount.textContent = `${entryCount} journal entries`;
+        }
+        
+        // Try to fetch from server if available
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        if (csrfToken) {
+            const response = await fetch(`/api/wallet-data/${walletAddress}/`, {
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            });
             
-            if (menuWalletStatus) {
-                if (chainId === 8453) {
-                    menuWalletStatus.textContent = 'Base Network';
-                    menuWalletStatus.className = 'text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700';
-                } else {
-                    menuWalletStatus.textContent = 'Wrong Network';
-                    menuWalletStatus.className = 'text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700';
+            if (response.ok) {
+                const data = await response.json();
+                if (walletEntriesCount && data.entry_count !== undefined) {
+                    walletEntriesCount.textContent = `${data.entry_count} journal entries`;
                 }
             }
-        } else {
-            walletNotConnectedMenu.classList.remove('hidden');
-            walletConnectedMenu.classList.add('hidden');
-            
-            if (menuWalletStatus) {
-                menuWalletStatus.textContent = 'Not Connected';
-                menuWalletStatus.className = 'text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600';
-            }
+        }
+    } catch (error) {
+        console.error('Failed to load wallet data:', error);
+        if (walletEntriesCount) {
+            walletEntriesCount.textContent = '0 journal entries';
         }
     }
 }
@@ -1140,12 +1269,16 @@ function initializeModernDropdown() {
     const dropdown = document.getElementById('modernDropdown');
     const overlay = document.getElementById('dropdownOverlay');
 
+    if (!menuToggle || !dropdown || !overlay) {
+        console.error('Dropdown elements not found');
+        return;
+    }
+
     function openDropdown() {
         isDropdownOpen = true;
         dropdown.classList.add('open');
         overlay.classList.add('active');
         menuToggle.classList.add('active');
-        document.body.style.overflow = 'hidden';
         
         // Update wallet status when opening
         const walletInfo = getWalletInfo();
@@ -1161,7 +1294,6 @@ function initializeModernDropdown() {
         dropdown.classList.remove('open');
         overlay.classList.remove('active');
         menuToggle.classList.remove('active');
-        document.body.style.overflow = '';
         dropdown.setAttribute('aria-hidden', 'true');
     }
 
@@ -1174,12 +1306,12 @@ function initializeModernDropdown() {
     }
 
     // Event listeners
-    menuToggle?.addEventListener('click', (e) => {
+    menuToggle.addEventListener('click', (e) => {
         e.stopPropagation();
         toggleDropdown();
     });
 
-    overlay?.addEventListener('click', closeDropdown);
+    overlay.addEventListener('click', closeDropdown);
 
     // Close on escape key
     document.addEventListener('keydown', (e) => {
