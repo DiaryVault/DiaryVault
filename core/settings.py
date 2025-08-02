@@ -29,7 +29,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'diaryvault.com', 'www.diaryvault.com', '52.64.254.25']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'diaryvault.com', 'www.diaryvault.com', '52.64.254.25', '3.27.209.68']
 
 # API Keys
 GROK_API_KEY = os.getenv('GROK_API_KEY')
