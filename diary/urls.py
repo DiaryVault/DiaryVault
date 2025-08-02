@@ -76,7 +76,7 @@ urlpatterns = [
     # Journal Entries
     # ============================================================================
     path('journal/', views.journal, name='new_entry'),
-    path('entry/new/', views.journal, name='new_entry'),  # Alternative URL
+    path('entry/new/', views.journal, name='new_entry'),
     path('new_entry/', views.journal, name='new_entry_alt'),
     
     # UPDATED: Now accepts both integer IDs and UUIDs
